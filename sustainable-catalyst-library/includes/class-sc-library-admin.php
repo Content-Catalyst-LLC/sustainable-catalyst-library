@@ -91,16 +91,26 @@ final class SC_Library_Admin {
             'sanitize_callback' => 'esc_url_raw',
             'default' => home_url('/workbench/'),
         ]);
+        register_setting('sc_library_settings', 'sc_library_enable_notebook', [
+            'type' => 'boolean',
+            'sanitize_callback' => static fn($value) => $value ? 1 : 0,
+            'default' => 1,
+        ]);
+        register_setting('sc_library_settings', 'sc_library_notebook_storage_mode', [
+            'type' => 'string',
+            'sanitize_callback' => static fn($value) => 'local',
+            'default' => 'local',
+        ]);
     }
 
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.1.0 activated.</strong> Rebuild the Library index, then assign Library Series, Library Concepts, and relationships from the publication editor.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.2.0 activated.</strong> Rebuild the Library index, then test saved collections, notes, external sources, citations, and JSON export in a private browser window.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.1.0.</strong> The release adds typed relationships, structured series and concepts, richer record panels, and relationship-aware REST endpoints. Rebuild the index once.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.2.0.</strong> The release adds a local Research Notebook, collections, personal notes, external and physical source records, citations, and portable JSON import/export. Rebuild the index once, then test the workspace in a private browser window.</p></div>';
         }
     }
 
@@ -181,6 +191,10 @@ final class SC_Library_Admin {
                         <td><input class="regular-text" id="sc_library_workbench_url" name="sc_library_workbench_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_workbench_url', home_url('/workbench/'))); ?>"><p class="description"><?php esc_html_e('Record panels pass the Library record ID and stable identifier to this URL.', 'sustainable-catalyst-library'); ?></p></td>
                     </tr>
                     <tr>
+                        <th scope="row"><?php esc_html_e('Research Notebook', 'sustainable-catalyst-library'); ?></th>
+                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, and JSON import/export.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.2 stores notebook data in each visitor’s browser. It does not write personal research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
+                    </tr>
+                    <tr>
                         <th scope="row"><label for="sc_library_default_mode"><?php esc_html_e('Default interface mode', 'sustainable-catalyst-library'); ?></label></th>
                         <td><select id="sc_library_default_mode" name="sc_library_default_mode">
                             <?php foreach (['compact' => 'Compact knowledge base', 'full' => 'Full knowledge base', 'search' => 'Search only', 'domains' => 'Topics only', 'pathways' => 'Pathways only'] as $value => $label) : ?>
@@ -229,10 +243,11 @@ final class SC_Library_Admin {
 
             <div class="card" style="max-width:980px">
                 <h2><?php esc_html_e('Recommended Research Library shortcode', 'sustainable-catalyst-library'); ?></h2>
-                <p><code>[sc_library mode="compact" initial_results="0" show_header="false"]</code></p>
+                <p><code>[sc_library mode="compact" initial_results="0" show_header="false" show_workspace="true"]</code></p>
+                <p><code>[sc_library_notebook]</code> — standalone Research Notebook workspace.</p>
                 <p><?php esc_html_e('Place this in a dedicated WordPress Shortcode block.', 'sustainable-catalyst-library'); ?></p>
                 <h3><?php esc_html_e('Relationship-aware REST endpoints', 'sustainable-catalyst-library'); ?></h3>
-                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related'] as $endpoint) : ?>
+                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template'] as $endpoint) : ?>
                     <p><code>/wp-json/sustainable-catalyst/v1/library/<?php echo esc_html($endpoint); ?></code></p>
                 <?php endforeach; ?>
             </div>

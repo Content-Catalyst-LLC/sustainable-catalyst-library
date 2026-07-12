@@ -27,6 +27,7 @@ final class SC_Library_Shortcodes {
             'initial_results' => (string) (int) get_option('sc_library_initial_results', 0),
             'mode' => $default_mode,
             'density' => (string) get_option('sc_library_result_density', 'compact'),
+            'show_workspace' => (string) (int) get_option('sc_library_enable_notebook', 1),
         ], $atts, 'sc_library');
 
         $allowed_modes = ['compact', 'full', 'search', 'domains', 'pathways'];
@@ -36,6 +37,7 @@ final class SC_Library_Shortcodes {
         $show_header = filter_var($atts['show_header'], FILTER_VALIDATE_BOOLEAN);
         $show_pathways = filter_var($atts['show_pathways'], FILTER_VALIDATE_BOOLEAN);
         $initial_results = filter_var($atts['initial_results'], FILTER_VALIDATE_BOOLEAN);
+        $show_workspace = filter_var($atts['show_workspace'], FILTER_VALIDATE_BOOLEAN) && SC_Library_Notebook::enabled();
         $title = sanitize_text_field($atts['title']);
         $intro = sanitize_text_field($atts['intro']);
         $initial_category = sanitize_title($atts['category']);
@@ -47,6 +49,9 @@ final class SC_Library_Shortcodes {
 
         wp_enqueue_style('sc-library', SC_LIBRARY_URL . 'assets/css/sc-library.css', [], SC_LIBRARY_VERSION);
         wp_enqueue_script('sc-library', SC_LIBRARY_URL . 'assets/js/sc-library.js', [], SC_LIBRARY_VERSION, true);
+        if ($show_workspace) {
+            SC_Library_Notebook::enqueue_assets();
+        }
         wp_localize_script('sc-library', 'SCLibraryShared', [
             'restBase' => esc_url_raw(rest_url('sustainable-catalyst/v1/library')),
             'strings' => [
@@ -58,6 +63,8 @@ final class SC_Library_Shortcodes {
                 'recordLoading' => __('Loading the knowledge record…', 'sustainable-catalyst-library'),
                 'copySuccess' => __('Record link copied.', 'sustainable-catalyst-library'),
                 'copyFailure' => __('Copy the address from your browser.', 'sustainable-catalyst-library'),
+                'saveRecord' => __('Save to Notebook', 'sustainable-catalyst-library'),
+                'writeNote' => __('Write note', 'sustainable-catalyst-library'),
                 'results' => __('results', 'sustainable-catalyst-library'),
                 'result' => __('result', 'sustainable-catalyst-library'),
             ],

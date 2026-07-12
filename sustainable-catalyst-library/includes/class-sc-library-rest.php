@@ -112,6 +112,11 @@ final class SC_Library_REST {
             'last_full_index' => get_option('sc_library_last_full_index', ''),
             'post_types' => $this->indexer->configured_post_types(),
             'interface' => 'relationship-aware-knowledge-base',
+            'notebook' => [
+                'enabled' => SC_Library_Notebook::enabled(),
+                'storage' => 'browser-local',
+                'schema' => SC_Library_Notebook::SCHEMA,
+            ],
         ]);
     }
 

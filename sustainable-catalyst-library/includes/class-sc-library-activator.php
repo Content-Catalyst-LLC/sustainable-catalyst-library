@@ -100,6 +100,8 @@ final class SC_Library_Activator {
         add_option('sc_library_show_pathways', 1);
         add_option('sc_library_search_placeholder', 'Search concepts, series, methods, and publications');
         add_option('sc_library_workbench_url', home_url('/workbench/'));
+        add_option('sc_library_enable_notebook', 1);
+        add_option('sc_library_notebook_storage_mode', 'local');
         add_option('sc_library_featured_pathways', implode("\n", [
             'Systems Thinking|/systems-thinking/|Feedback, resilience, leverage points, and complex change.',
             'Mathematical Thinking|/mathematical-thinking/|Symbols, models, uncertainty, and formal reasoning.',

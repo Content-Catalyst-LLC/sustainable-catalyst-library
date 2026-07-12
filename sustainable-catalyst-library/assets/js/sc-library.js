@@ -177,11 +177,15 @@
             <div class="sc-library-record__resources">${badges}</div>
             <div class="sc-library-record__actions">
               ${updated ? `<time datetime="${escapeHtml(item.modified_at)}">Updated ${escapeHtml(updated)}</time>` : ''}
+              <button type="button" data-save-record="${Number(item.id)}">${escapeHtml(strings.saveRecord || 'Save to Notebook')}</button>
               <button type="button" data-open-context="${Number(item.id)}">View knowledge record</button>
             </div>
           </div>`;
 
         article.querySelector('[data-record-link]')?.addEventListener('click', () => rememberRecord(item));
+        article.querySelector('[data-save-record]')?.addEventListener('click', () => {
+          root.dispatchEvent(new CustomEvent('sc-library-save-record', { bubbles: true, detail: { record: item } }));
+        });
         results.appendChild(article);
       });
     };
@@ -502,11 +506,20 @@
           <div class="sc-library-context__actions">
             <a class="sc-library-context__primary" href="${escapeHtml(item.url)}">Read publication</a>
             ${item.handoffs?.workbench?.available ? `<a class="sc-library-context__secondary" href="${escapeHtml(item.handoffs.workbench.url)}">${escapeHtml(item.handoffs.workbench.label)}</a>` : ''}
+            <button type="button" class="sc-library-context__secondary" data-save-record>${escapeHtml(strings.saveRecord || 'Save to Notebook')}</button>
+            <button type="button" class="sc-library-context__secondary" data-note-record>${escapeHtml(strings.writeNote || 'Write note')}</button>
             <button type="button" class="sc-library-context__secondary" data-copy-record>Copy record link</button>
           </div>
           ${relationGroups ? `<section class="sc-library-context__relationships"><h3>Knowledge relationships</h3>${relationGroups}</section>` : ''}
           ${relatedListHtml(item.suggested_related || [], 'Suggested related knowledge')}
         `;
+        contextContent.querySelector('[data-save-record]')?.addEventListener('click', () => {
+          root.dispatchEvent(new CustomEvent('sc-library-save-record', { bubbles: true, detail: { record: item } }));
+        });
+        contextContent.querySelector('[data-note-record]')?.addEventListener('click', () => {
+          root.dispatchEvent(new CustomEvent('sc-library-new-note-for-record', { bubbles: true, detail: { record: item } }));
+        });
+        root.dispatchEvent(new CustomEvent('sc-library-record-loaded', { bubbles: true, detail: { record: item } }));
         context.querySelector('.sc-library-context__close')?.focus();
       } catch (error) {
         contextContent.innerHTML = `<p class="sc-library__empty">${escapeHtml(strings.error || 'The knowledge record could not be loaded.')}</p>`;

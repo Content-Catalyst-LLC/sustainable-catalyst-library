@@ -70,6 +70,17 @@
         </section>
     <?php endif; ?>
 
+
+    <?php if ($show_workspace) : ?>
+        <?php
+        $workspace_title = __('Research Notebook', 'sustainable-catalyst-library');
+        $workspace_intro = __('Save Library records, write notes, and collect external links, physical books, reports, datasets, videos, and other source material.', 'sustainable-catalyst-library');
+        $workspace_standalone = false;
+        $workspace_open = false;
+        include SC_LIBRARY_DIR . 'templates/library-workspace.php';
+        ?>
+    <?php endif; ?>
+
     <?php if ($mode !== 'pathways') : ?>
         <section class="sc-library__recent" data-library-recent hidden>
             <div class="sc-library__section-line"><h3><?php esc_html_e('Recently opened', 'sustainable-catalyst-library'); ?></h3><button type="button" data-clear-recent><?php esc_html_e('Clear', 'sustainable-catalyst-library'); ?></button></div>
