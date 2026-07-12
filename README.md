@@ -1,17 +1,19 @@
-# Sustainable Catalyst Library v1.0.1
+# Sustainable Catalyst Library v1.1.0
 
-A compact native WordPress knowledge base for Sustainable Catalyst publications, topics, pathways, and related research records.
+A native WordPress knowledge base for structured publications, ordered series, concepts, typed relationships, technical resources, and contextual research navigation.
 
-## What changed in v1.0.1
+## What v1.1.0 adds
 
-- Replaced the archive-style featured-image grid with concise text-based knowledge records.
-- Results remain hidden until a visitor searches, selects a topic, or follows a preserved Library URL.
-- Added nested topic drawers and index-aware counts.
-- Broad domain selections include records from descendant categories.
-- Added a contextual record panel with related knowledge.
-- Added featured pathways and browser-local recently opened records.
-- Added shortcode modes and administration controls for density, initial results, pathways, excerpts, and search wording.
-- Added stale-index cleanup during full rebuilds.
+- A dedicated `wp_sc_library_relationships` table with typed directional relationships.
+- **Library Series** and **Library Concepts** taxonomies.
+- Stable record identifiers such as `sc:library:post:1842`.
+- Primary-domain, series-order, evidence-status, GitHub, dataset, video, and Workbench metadata.
+- A publication-editor **Library Relationships** panel.
+- Ordered previous/next navigation inside a series.
+- Rich knowledge record panels with hierarchy, concepts, resources, relationships, and suggested connections.
+- Workbench handoffs that preserve the Library record ID and stable identifier.
+- REST endpoints for records, related knowledge, series, concepts, and pathways.
+- Upgrade-safe migration from v1.0.1.
 
 ## Recommended shortcode
 
@@ -21,10 +23,16 @@ Use a dedicated WordPress Shortcode block:
 [sc_library mode="compact" initial_results="0" show_header="false"]
 ```
 
-Do not place the shortcode inside a Custom HTML block.
+## After installation
+
+1. Open **SC Library** and confirm the indexed post types.
+2. Save settings and run **Rebuild Library Index**.
+3. Edit publications and assign **Library Series** and **Library Concepts**.
+4. Use the **Library Relationships** panel to define explicit links and resources.
 
 ## Release contents
 
 - `sustainable-catalyst-library/` — plugin source
-- `sustainable-catalyst-library-v1.0.1.zip` — installable WordPress plugin
-- `push_library_v1_0_1_to_github.sh` — empty-repository-safe GitHub deployment script
+- `sustainable-catalyst-library-v1.1.0.zip` — installable WordPress plugin
+- `push_library_v1_1_0_to_github.sh` — empty-repository-safe GitHub deployment script
+- `install_and_push_library_v1_1_0.sh` — Downloads-folder extraction and push helper

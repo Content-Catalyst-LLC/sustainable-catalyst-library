@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 
 final class SC_Library_Activator {
     public static function activate(): void {
-        self::create_table();
+        self::create_tables();
         self::install_defaults();
         self::schedule_reconcile();
         update_option('sc_library_version', SC_LIBRARY_VERSION);
@@ -18,46 +18,74 @@ final class SC_Library_Activator {
             return;
         }
 
-        self::create_table();
+        self::create_tables();
         self::install_defaults();
         self::schedule_reconcile();
         update_option('sc_library_version', SC_LIBRARY_VERSION);
         set_transient('sc_library_upgrade_notice', 1, 90);
     }
 
-    private static function create_table(): void {
+    private static function create_tables(): void {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'sc_library_index';
+        $index_table = $wpdb->prefix . 'sc_library_index';
+        $relationships_table = $wpdb->prefix . 'sc_library_relationships';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-        $sql = "CREATE TABLE {$table} (
+        $index_sql = "CREATE TABLE {$index_table} (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             post_id BIGINT UNSIGNED NOT NULL,
+            record_identifier VARCHAR(191) NULL,
             post_type VARCHAR(64) NOT NULL,
             title TEXT NOT NULL,
             excerpt LONGTEXT NULL,
             searchable_text LONGTEXT NULL,
             permalink TEXT NOT NULL,
             primary_category_id BIGINT UNSIGNED NULL,
+            primary_domain_id BIGINT UNSIGNED NULL,
             category_ids LONGTEXT NULL,
             tag_ids LONGTEXT NULL,
+            series_term_id BIGINT UNSIGNED NULL,
+            series_order DECIMAL(12,3) NOT NULL DEFAULT 0,
+            concept_ids LONGTEXT NULL,
+            resource_flags LONGTEXT NULL,
             published_at DATETIME NULL,
             modified_at DATETIME NULL,
             indexed_at DATETIME NOT NULL,
             status VARCHAR(24) NOT NULL DEFAULT 'publish',
             PRIMARY KEY (id),
             UNIQUE KEY post_id (post_id),
+            KEY record_identifier (record_identifier),
             KEY post_type (post_type),
             KEY primary_category_id (primary_category_id),
+            KEY primary_domain_id (primary_domain_id),
+            KEY series_term_id (series_term_id),
+            KEY series_order (series_order),
             KEY published_at (published_at),
             KEY modified_at (modified_at),
             FULLTEXT KEY sc_library_search (title, excerpt, searchable_text)
         ) {$charset};";
 
-        dbDelta($sql);
+        $relationships_sql = "CREATE TABLE {$relationships_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            source_post_id BIGINT UNSIGNED NOT NULL,
+            target_post_id BIGINT UNSIGNED NOT NULL,
+            relationship_type VARCHAR(64) NOT NULL,
+            note TEXT NULL,
+            sort_order INT NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY source_target_type (source_post_id, target_post_id, relationship_type),
+            KEY source_post_id (source_post_id),
+            KEY target_post_id (target_post_id),
+            KEY relationship_type (relationship_type)
+        ) {$charset};";
+
+        dbDelta($index_sql);
+        dbDelta($relationships_sql);
     }
 
     private static function install_defaults(): void {
@@ -71,6 +99,7 @@ final class SC_Library_Activator {
         add_option('sc_library_excerpt_words', 28);
         add_option('sc_library_show_pathways', 1);
         add_option('sc_library_search_placeholder', 'Search concepts, series, methods, and publications');
+        add_option('sc_library_workbench_url', home_url('/workbench/'));
         add_option('sc_library_featured_pathways', implode("\n", [
             'Systems Thinking|/systems-thinking/|Feedback, resilience, leverage points, and complex change.',
             'Mathematical Thinking|/mathematical-thinking/|Symbols, models, uncertainty, and formal reasoning.',

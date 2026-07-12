@@ -19,7 +19,7 @@
   const api = async (path, params = {}) => {
     const url = new URL(`${restBase}/${path}`);
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== '' && value !== null && value !== undefined && value !== false) {
+      if (value !== '' && value !== null && value !== undefined && value !== false && value !== 0) {
         url.searchParams.set(key, String(value));
       }
     });
@@ -28,18 +28,18 @@
     return response.json();
   };
 
-  const recentKey = 'scLibraryRecentRecordsV101';
+  const recentKey = 'scLibraryRecentRecordsV110';
   const getRecent = () => {
     try {
       const parsed = JSON.parse(window.localStorage.getItem(recentKey) || '[]');
-      return Array.isArray(parsed) ? parsed.slice(0, 5) : [];
+      return Array.isArray(parsed) ? parsed.slice(0, 6) : [];
     } catch (error) {
       return [];
     }
   };
   const setRecent = (items) => {
     try {
-      window.localStorage.setItem(recentKey, JSON.stringify(items.slice(0, 5)));
+      window.localStorage.setItem(recentKey, JSON.stringify(items.slice(0, 6)));
     } catch (error) {
       // Local storage is optional.
     }
@@ -57,6 +57,8 @@
     const status = root.querySelector('[data-library-status]');
     const pagination = root.querySelector('[data-library-pagination]');
     const categoryList = root.querySelector('[data-category-list]');
+    const seriesList = root.querySelector('[data-series-list]');
+    const conceptList = root.querySelector('[data-concept-list]');
     const clearButton = root.querySelector('[data-clear-filters]');
     const activeFilter = root.querySelector('[data-active-filter]');
     const resultsTitle = root.querySelector('[data-results-title]');
@@ -71,6 +73,10 @@
       category: 0,
       categoryName: '',
       categorySlug: '',
+      series: '',
+      seriesName: '',
+      concept: '',
+      conceptName: '',
       sort: 'relevance',
       page: 1,
       per_page: Number(root.dataset.perPage || 10),
@@ -80,6 +86,7 @@
 
     let categoryItems = [];
     let lastFocusedElement = null;
+    let activeRecordId = 0;
 
     const showResultsRegion = () => {
       if (resultsRegion) resultsRegion.hidden = false;
@@ -87,9 +94,16 @@
 
     const updateUrl = () => {
       const url = new URL(window.location.href);
-      state.search ? url.searchParams.set('library_search', state.search) : url.searchParams.delete('library_search');
-      state.categorySlug ? url.searchParams.set('library_topic', state.categorySlug) : url.searchParams.delete('library_topic');
-      state.page > 1 ? url.searchParams.set('library_page', String(state.page)) : url.searchParams.delete('library_page');
+      const values = {
+        library_search: state.search,
+        library_topic: state.categorySlug,
+        library_series: state.series,
+        library_concept: state.concept,
+        library_page: state.page > 1 ? String(state.page) : '',
+      };
+      Object.entries(values).forEach(([key, value]) => value ? url.searchParams.set(key, value) : url.searchParams.delete(key));
+      if (activeRecordId) url.searchParams.set('library_record', String(activeRecordId));
+      else url.searchParams.delete('library_record');
       window.history.replaceState({}, '', url);
     };
 
@@ -97,13 +111,21 @@
       const labels = [];
       if (resources.code) labels.push('Code');
       if (resources.equations) labels.push('Equations');
+      if (resources.dataset) labels.push('Dataset');
       if (resources.video) labels.push('Video');
+      if (resources.workbench) labels.push('Workbench');
       return labels.map((label) => `<span>${escapeHtml(label)}</span>`).join('');
     };
 
     const rememberRecord = (item) => {
       const current = getRecent().filter((entry) => Number(entry.id) !== Number(item.id));
-      current.unshift({ id: item.id, title: item.title, url: item.url, type_label: item.type_label || 'Publication' });
+      current.unshift({
+        id: item.id,
+        title: item.title,
+        url: item.url,
+        type_label: item.type_label || 'Publication',
+        record_identifier: item.record_identifier || '',
+      });
       setRecent(current);
       renderRecent();
     };
@@ -113,10 +135,10 @@
       const recent = getRecent();
       recentSection.hidden = recent.length === 0;
       recentList.innerHTML = recent.map((item) => `
-        <a href="${escapeHtml(item.url)}" data-recent-id="${Number(item.id)}">
+        <button type="button" data-open-context="${Number(item.id)}">
           <span>${escapeHtml(item.type_label || 'Publication')}</span>
           <strong>${escapeHtml(item.title)}</strong>
-        </a>
+        </button>
       `).join('');
     };
 
@@ -132,24 +154,30 @@
         const article = document.createElement('article');
         article.className = 'sc-library-record';
         article.dataset.recordId = String(item.id);
-        const categories = (item.categories || []).slice(0, 3).map((term) => `<span>${escapeHtml(term.name)}</span>`).join('');
+        const categories = (item.categories || []).slice(0, 2).map((term) => `<span>${escapeHtml(term.name)}</span>`).join('');
+        const concepts = (item.concepts || []).slice(0, 3).map((term) => `<span>${escapeHtml(term.name)}</span>`).join('');
         const badges = resourceBadges(item.resources);
         const updated = formatDate(item.modified_at);
+        const placement = item.series?.name
+          ? `<span class="sc-library-record__series">Series: ${escapeHtml(item.series.name)}${Number(item.series.order) > 0 ? ` · ${escapeHtml(item.series.order)}` : ''}</span>`
+          : '';
 
         article.innerHTML = `
           <div class="sc-library-record__meta">
             <span class="sc-library-record__type">${escapeHtml(item.type_label || 'Publication')}</span>
+            ${placement}
             ${categories ? `<span class="sc-library-record__topics">${categories}</span>` : ''}
           </div>
           <div class="sc-library-record__body">
             <h4><a href="${escapeHtml(item.url)}" data-record-link>${escapeHtml(item.title)}</a></h4>
             <p>${escapeHtml(item.excerpt || '')}</p>
+            ${concepts ? `<div class="sc-library-record__concepts">${concepts}</div>` : ''}
           </div>
           <div class="sc-library-record__foot">
             <div class="sc-library-record__resources">${badges}</div>
             <div class="sc-library-record__actions">
               ${updated ? `<time datetime="${escapeHtml(item.modified_at)}">Updated ${escapeHtml(updated)}</time>` : ''}
-              <button type="button" data-open-context="${Number(item.id)}">View context</button>
+              <button type="button" data-open-context="${Number(item.id)}">View knowledge record</button>
             </div>
           </div>`;
 
@@ -187,12 +215,13 @@
     };
 
     const updateResultHeading = () => {
-      if (resultsTitle) {
-        resultsTitle.textContent = state.categoryName || (state.search ? `Results for “${state.search}”` : 'Knowledge records');
-      }
+      const selectedName = state.seriesName || state.conceptName || state.categoryName;
+      if (resultsTitle) resultsTitle.textContent = selectedName || (state.search ? `Results for “${state.search}”` : 'Knowledge records');
       if (activeFilter) {
         const parts = [];
         if (state.categoryName) parts.push(`<span>Topic: <strong>${escapeHtml(state.categoryName)}</strong></span>`);
+        if (state.seriesName) parts.push(`<span>Series: <strong>${escapeHtml(state.seriesName)}</strong></span>`);
+        if (state.conceptName) parts.push(`<span>Concept: <strong>${escapeHtml(state.conceptName)}</strong></span>`);
         if (state.search) parts.push(`<span>Search: <strong>${escapeHtml(state.search)}</strong></span>`);
         activeFilter.innerHTML = parts.join('');
         activeFilter.hidden = parts.length === 0;
@@ -222,6 +251,91 @@
       }
     };
 
+    const clearSelectedNodes = () => {
+      root.querySelectorAll('[data-category-node], [data-series-chip], [data-concept-chip]').forEach((node) => node.classList.remove('is-selected'));
+    };
+
+    const chooseFacet = (kind, item, node) => {
+      clearSelectedNodes();
+      node?.classList.add('is-selected');
+      state.category = 0;
+      state.categoryName = '';
+      state.categorySlug = '';
+      state.series = '';
+      state.seriesName = '';
+      state.concept = '';
+      state.conceptName = '';
+      if (kind === 'series') {
+        state.series = item.slug;
+        state.seriesName = item.name;
+        state.sort = 'series';
+        if (sortInput) sortInput.value = 'series';
+      } else {
+        state.concept = item.slug;
+        state.conceptName = item.name;
+        state.sort = 'updated';
+        if (sortInput) sortInput.value = 'updated';
+      }
+      state.search = searchInput ? searchInput.value.trim() : state.search;
+      state.page = 1;
+      state.hasInteracted = true;
+      loadItems();
+    };
+
+    const renderFacetList = (container, items, kind) => {
+      if (!container) return;
+      container.innerHTML = '';
+      if (!items.length) {
+        container.innerHTML = '<p class="sc-library__empty">No indexed records are assigned yet.</p>';
+        return;
+      }
+      items.slice(0, kind === 'concept' ? 80 : 40).forEach((item) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset[kind === 'series' ? 'seriesChip' : 'conceptChip'] = item.slug;
+        button.innerHTML = `<strong>${escapeHtml(item.name)}</strong><span>${Number(item.count).toLocaleString()}</span>`;
+        button.addEventListener('click', () => chooseFacet(kind, item, button));
+        container.appendChild(button);
+      });
+    };
+
+    const renderFacets = async () => {
+      if (!seriesList && !conceptList) return;
+      if (seriesList) seriesList.innerHTML = '<p class="sc-library__topic-loading">Loading series…</p>';
+      if (conceptList) conceptList.innerHTML = '<p class="sc-library__topic-loading">Loading concepts…</p>';
+      try {
+        const [seriesData, conceptsData] = await Promise.all([api('series'), api('concepts')]);
+        renderFacetList(seriesList, seriesData.items || [], 'series');
+        renderFacetList(conceptList, conceptsData.items || [], 'concept');
+
+        const url = new URL(window.location.href);
+        const wantedSeries = url.searchParams.get('library_series') || root.dataset.initialSeries || '';
+        const wantedConcept = url.searchParams.get('library_concept') || root.dataset.initialConcept || '';
+        if (wantedSeries) {
+          const item = (seriesData.items || []).find((entry) => entry.slug === wantedSeries);
+          if (item) {
+            state.series = item.slug;
+            state.seriesName = item.name;
+            state.sort = 'series';
+            state.hasInteracted = true;
+            seriesList?.querySelector(`[data-series-chip="${CSS.escape(item.slug)}"]`)?.classList.add('is-selected');
+          }
+        } else if (wantedConcept) {
+          const item = (conceptsData.items || []).find((entry) => entry.slug === wantedConcept);
+          if (item) {
+            state.concept = item.slug;
+            state.conceptName = item.name;
+            state.hasInteracted = true;
+            conceptList?.querySelector(`[data-concept-chip="${CSS.escape(item.slug)}"]`)?.classList.add('is-selected');
+          }
+        }
+      } catch (error) {
+        const message = `<p class="sc-library__empty">${escapeHtml(strings.facetsError || 'Series and concept navigation is temporarily unavailable.')}</p>`;
+        if (seriesList) seriesList.innerHTML = message;
+        if (conceptList) conceptList.innerHTML = message;
+      }
+    };
+
     const descendantsOf = (parentId) => categoryItems.filter((item) => Number(item.parent) === Number(parentId));
 
     const renderCategoryNode = (item, depth = 0) => {
@@ -233,20 +347,23 @@
       const control = document.createElement(children.length ? 'summary' : 'button');
       if (!children.length) control.type = 'button';
       control.className = 'sc-library-domain__control';
-      control.innerHTML = `
-        <span><strong>${escapeHtml(item.name)}</strong><small>${Number(item.count).toLocaleString()} records</small></span>
-        ${children.length ? '<span class="sc-library-domain__toggle" aria-hidden="true">+</span>' : '<span aria-hidden="true">→</span>'}
-      `;
+      control.innerHTML = `<span><strong>${escapeHtml(item.name)}</strong><small>${Number(item.count).toLocaleString()} records</small></span>${children.length ? '<span class="sc-library-domain__toggle" aria-hidden="true">+</span>' : '<span aria-hidden="true">→</span>'}`;
       wrapper.appendChild(control);
 
       const selectTopic = (event) => {
         if (event) event.preventDefault();
-        root.querySelectorAll('[data-category-node]').forEach((node) => node.classList.remove('is-selected'));
+        clearSelectedNodes();
         wrapper.classList.add('is-selected');
         state.category = Number(item.id);
         state.categoryName = item.name;
         state.categorySlug = item.slug;
+        state.series = '';
+        state.seriesName = '';
+        state.concept = '';
+        state.conceptName = '';
         state.search = searchInput ? searchInput.value.trim() : state.search;
+        state.sort = state.search ? 'relevance' : 'updated';
+        if (sortInput) sortInput.value = state.sort;
         state.page = 1;
         state.hasInteracted = true;
         loadItems();
@@ -266,7 +383,6 @@
       } else {
         control.addEventListener('click', selectTopic);
       }
-
       return wrapper;
     };
 
@@ -281,9 +397,8 @@
         roots.forEach((item) => categoryList.appendChild(renderCategoryNode(item)));
         if (!roots.length) categoryList.innerHTML = '<p class="sc-library__empty">No indexed topics are available yet.</p>';
 
-        const initialSlug = root.dataset.initialCategory || '';
         const urlSlug = new URL(window.location.href).searchParams.get('library_topic') || '';
-        const wantedSlug = urlSlug || initialSlug;
+        const wantedSlug = urlSlug || root.dataset.initialCategory || '';
         if (wantedSlug) {
           const initialItem = categoryItems.find((item) => item.slug === wantedSlug);
           if (initialItem) {
@@ -299,38 +414,98 @@
       }
     };
 
+    const relationGroupHtml = (group) => {
+      const items = (group.items || []).map((entry) => `
+        <li>
+          <button type="button" data-open-context="${Number(entry.record.id)}">${escapeHtml(entry.record.title)}</button>
+          ${entry.note ? `<p>${escapeHtml(entry.note)}</p>` : ''}
+        </li>`).join('');
+      return items ? `<section class="sc-library-context__relation-group"><h4>${escapeHtml(group.label)}</h4><ul>${items}</ul></section>` : '';
+    };
+
+    const relatedListHtml = (items, heading) => {
+      if (!items?.length) return '';
+      return `<section class="sc-library-context__related"><h4>${escapeHtml(heading)}</h4><ul>${items.map((record) => `<li><button type="button" data-open-context="${Number(record.id)}">${escapeHtml(record.title)}</button></li>`).join('')}</ul></section>`;
+    };
+
+    const externalLinksHtml = (urls, label) => {
+      if (!urls?.length) return '';
+      return `<div><dt>${escapeHtml(label)}</dt><dd>${urls.map((url, index) => `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(`${label} ${index + 1}`)}</a>`).join('')}</dd></div>`;
+    };
+
+    const seriesNavigationHtml = (series) => {
+      if (!series || !series.total) return '';
+      return `
+        <section class="sc-library-context__series">
+          <div><span>Series</span><strong>${escapeHtml(series.name)}</strong><small>${series.position ? `Record ${series.position} of ${series.total}` : `${series.total} records`}</small></div>
+          <nav aria-label="Series navigation">
+            ${series.previous ? `<button type="button" data-open-context="${Number(series.previous.id)}"><span>Previous</span><strong>${escapeHtml(series.previous.title)}</strong></button>` : '<span></span>'}
+            ${series.next ? `<button type="button" data-open-context="${Number(series.next.id)}"><span>Next</span><strong>${escapeHtml(series.next.title)}</strong></button>` : '<span></span>'}
+          </nav>
+        </section>`;
+    };
+
     const closeContext = () => {
       if (!context) return;
       context.hidden = true;
+      activeRecordId = 0;
+      updateUrl();
       document.documentElement.classList.remove('sc-library-context-open');
       if (lastFocusedElement instanceof HTMLElement) lastFocusedElement.focus();
     };
 
-    const openContext = async (recordId, trigger) => {
+    const openContext = async (recordId, trigger = null) => {
       if (!context || !contextContent) return;
+      const id = Number(recordId);
+      if (!id) return;
       lastFocusedElement = trigger || document.activeElement;
+      activeRecordId = id;
+      updateUrl();
       context.hidden = false;
       document.documentElement.classList.add('sc-library-context-open');
-      contextContent.innerHTML = '<p class="sc-library-context__loading">Loading record context…</p>';
+      contextContent.innerHTML = `<p class="sc-library-context__loading">${escapeHtml(strings.recordLoading || 'Loading the knowledge record…')}</p>`;
 
       try {
-        const item = await api(`items/${Number(recordId)}`);
+        const item = await api(`items/${id}`);
         rememberRecord(item);
+        const breadcrumbs = (item.breadcrumbs || []).map((term) => `<span>${escapeHtml(term.name)}</span>`).join('<i aria-hidden="true">/</i>');
         const categories = (item.categories || []).map((term) => `<span>${escapeHtml(term.name)}</span>`).join('');
-        const related = (item.related || []).map((record) => `<li><a href="${escapeHtml(record.url)}">${escapeHtml(record.title)}</a></li>`).join('');
+        const concepts = (item.concepts || []).map((term) => `<button type="button" data-filter-concept="${escapeHtml(term.slug)}" data-filter-name="${escapeHtml(term.name)}">${escapeHtml(term.name)}</button>`).join('');
         const badges = resourceBadges(item.resources);
+        const relationGroups = (item.related_groups || []).map(relationGroupHtml).join('');
+        const workbenchTools = item.resources?.workbench_tools || [];
+        const resourceParts = [
+          item.resources?.github_url ? `<div><dt>Code companion</dt><dd><a href="${escapeHtml(item.resources.github_url)}" target="_blank" rel="noopener">Open GitHub repository</a></dd></div>` : '',
+          externalLinksHtml(item.resources?.dataset_urls, 'Dataset'),
+          externalLinksHtml(item.resources?.video_urls, 'Video'),
+          workbenchTools.length ? `<div><dt>Workbench tools</dt><dd>${workbenchTools.map((tool) => `<code>${escapeHtml(tool)}</code>`).join('')}</dd></div>` : '',
+        ].filter(Boolean);
+        const resources = resourceParts.join('');
+
         contextContent.innerHTML = `
+          ${breadcrumbs ? `<nav class="sc-library-context__breadcrumbs" aria-label="Knowledge hierarchy">${breadcrumbs}</nav>` : ''}
           <p class="sc-library-context__eyebrow">${escapeHtml(item.type_label || 'Knowledge record')}</p>
           <h3 id="${escapeHtml(root.id)}-context-title">${escapeHtml(item.title)}</h3>
+          <p class="sc-library-context__identifier">${escapeHtml(item.record_identifier || '')}</p>
           ${categories ? `<div class="sc-library-context__topics">${categories}</div>` : ''}
           <p class="sc-library-context__summary">${escapeHtml(item.excerpt || '')}</p>
           ${badges ? `<div class="sc-library-context__resources">${badges}</div>` : ''}
-          <dl class="sc-library-context__dates">
+          ${concepts ? `<section class="sc-library-context__concepts"><h4>Connected concepts</h4><div>${concepts}</div></section>` : ''}
+          ${seriesNavigationHtml(item.series)}
+          <dl class="sc-library-context__facts">
+            ${item.primary_domain ? `<div><dt>Primary domain</dt><dd>${escapeHtml(item.primary_domain.name)}</dd></div>` : ''}
+            <div><dt>Evidence status</dt><dd>${escapeHtml(item.evidence?.label || 'Not specified')}</dd></div>
             ${item.published_at ? `<div><dt>Published</dt><dd>${escapeHtml(formatDate(item.published_at))}</dd></div>` : ''}
             ${item.modified_at ? `<div><dt>Updated</dt><dd>${escapeHtml(formatDate(item.modified_at))}</dd></div>` : ''}
           </dl>
-          <a class="sc-library-context__primary" href="${escapeHtml(item.url)}">Open publication</a>
-          ${related ? `<section class="sc-library-context__related"><h4>Related knowledge</h4><ul>${related}</ul></section>` : ''}
+          ${resources ? `<dl class="sc-library-context__resource-links">${resources}</dl>` : ''}
+          <div class="sc-library-context__actions">
+            <a class="sc-library-context__primary" href="${escapeHtml(item.url)}">Read publication</a>
+            ${item.handoffs?.workbench?.available ? `<a class="sc-library-context__secondary" href="${escapeHtml(item.handoffs.workbench.url)}">${escapeHtml(item.handoffs.workbench.label)}</a>` : ''}
+            <button type="button" class="sc-library-context__secondary" data-copy-record>Copy record link</button>
+          </div>
+          ${relationGroups ? `<section class="sc-library-context__relationships"><h3>Knowledge relationships</h3>${relationGroups}</section>` : ''}
+          ${relatedListHtml(item.suggested_related || [], 'Suggested related knowledge')}
         `;
         context.querySelector('.sc-library-context__close')?.focus();
       } catch (error) {
@@ -356,32 +531,58 @@
     });
 
     clearButton?.addEventListener('click', () => {
-      state.search = '';
-      state.category = 0;
-      state.categoryName = '';
-      state.categorySlug = '';
-      state.sort = 'relevance';
-      state.page = 1;
-      state.hasInteracted = false;
+      Object.assign(state, {
+        search: '', category: 0, categoryName: '', categorySlug: '',
+        series: '', seriesName: '', concept: '', conceptName: '',
+        sort: 'relevance', page: 1, hasInteracted: false,
+      });
       if (searchInput) searchInput.value = '';
       if (sortInput) sortInput.value = 'relevance';
-      root.querySelectorAll('[data-category-node]').forEach((node) => node.classList.remove('is-selected'));
+      clearSelectedNodes();
       if (resultsRegion) resultsRegion.hidden = true;
       if (results) results.innerHTML = '';
       if (pagination) pagination.innerHTML = '';
-      const url = new URL(window.location.href);
-      ['library_search', 'library_topic', 'library_page'].forEach((key) => url.searchParams.delete(key));
-      window.history.replaceState({}, '', url);
+      updateUrl();
     });
 
-    results?.addEventListener('click', (event) => {
-      const button = event.target.closest('[data-open-context]');
-      if (!button) return;
-      openContext(button.dataset.openContext, button);
+    root.addEventListener('click', (event) => {
+      const openButton = event.target.closest('[data-open-context]');
+      if (openButton) {
+        openContext(openButton.dataset.openContext, openButton);
+        return;
+      }
+      const conceptButton = event.target.closest('[data-filter-concept]');
+      if (conceptButton) {
+        closeContext();
+        state.category = 0;
+        state.categoryName = '';
+        state.categorySlug = '';
+        state.series = '';
+        state.seriesName = '';
+        state.concept = conceptButton.dataset.filterConcept || '';
+        state.conceptName = conceptButton.dataset.filterName || '';
+        state.page = 1;
+        state.sort = 'updated';
+        state.hasInteracted = true;
+        if (sortInput) sortInput.value = 'updated';
+        loadItems();
+      }
     });
 
-    context?.addEventListener('click', (event) => {
-      if (event.target.closest('[data-context-close]')) closeContext();
+    context?.addEventListener('click', async (event) => {
+      if (event.target.closest('[data-context-close]')) {
+        closeContext();
+        return;
+      }
+      const copyButton = event.target.closest('[data-copy-record]');
+      if (copyButton) {
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          copyButton.textContent = strings.copySuccess || 'Record link copied.';
+        } catch (error) {
+          copyButton.textContent = strings.copyFailure || 'Copy the address from your browser.';
+        }
+      }
     });
 
     document.addEventListener('keydown', (event) => {
@@ -404,8 +605,10 @@
     }
 
     renderRecent();
-    renderCategories().finally(() => {
+    Promise.allSettled([renderCategories(), renderFacets()]).then(() => {
       if (state.hasInteracted) loadItems();
+      const initialRecord = Number(url.searchParams.get('library_record') || root.dataset.initialRecord || 0);
+      if (initialRecord) openContext(initialRecord);
     });
   });
 })();

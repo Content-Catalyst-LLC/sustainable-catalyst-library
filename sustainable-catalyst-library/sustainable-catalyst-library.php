@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: A compact, native WordPress knowledge-base interface with structured indexing, nested topic navigation, search, filters, contextual record panels, and public REST endpoints.
- * Version: 1.0.1
+ * Description: A native WordPress knowledge base with structured indexing, nested navigation, typed knowledge relationships, series, concepts, record panels, search, filters, and public REST endpoints.
+ * Version: 1.1.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,13 +15,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '1.0.1');
+define('SC_LIBRARY_VERSION', '1.1.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
 
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-activator.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-taxonomies.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-relationships.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-indexer.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-editor.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-rest.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-admin.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-shortcodes.php';
@@ -47,12 +50,18 @@ final class SC_Library_Plugin {
         SC_Library_Activator::maybe_upgrade();
         load_plugin_textdomain('sustainable-catalyst-library', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
-        $indexer = new SC_Library_Indexer();
-        $rest = new SC_Library_REST($indexer);
-        $admin = new SC_Library_Admin($indexer);
+        $taxonomies = new SC_Library_Taxonomies();
+        $relationships = new SC_Library_Relationships();
+        $indexer = new SC_Library_Indexer($relationships);
+        $editor = new SC_Library_Editor($indexer, $relationships);
+        $rest = new SC_Library_REST($indexer, $relationships);
+        $admin = new SC_Library_Admin($indexer, $relationships);
         $shortcodes = new SC_Library_Shortcodes();
 
+        $taxonomies->register_hooks();
+        $relationships->register_hooks();
         $indexer->register_hooks();
+        $editor->register_hooks();
         $rest->register_hooks();
         $admin->register_hooks();
         $shortcodes->register_hooks();

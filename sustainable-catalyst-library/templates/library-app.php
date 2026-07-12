@@ -5,6 +5,9 @@
     data-sc-library
     data-mode="<?php echo esc_attr($mode); ?>"
     data-initial-category="<?php echo esc_attr($initial_category); ?>"
+    data-initial-series="<?php echo esc_attr($initial_series); ?>"
+    data-initial-concept="<?php echo esc_attr($initial_concept); ?>"
+    data-initial-record="<?php echo esc_attr((string) $initial_record); ?>"
     data-per-page="<?php echo esc_attr((string) $per_page); ?>"
     data-initial-results="<?php echo $initial_results ? '1' : '0'; ?>"
 >
@@ -21,43 +24,47 @@
             <label class="sc-library__search-field">
                 <span class="screen-reader-text"><?php esc_html_e('Search the Research Library', 'sustainable-catalyst-library'); ?></span>
                 <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg>
-                <input
-                    type="search"
-                    name="search"
-                    placeholder="<?php echo esc_attr((string) get_option('sc_library_search_placeholder', 'Search concepts, series, methods, and publications')); ?>"
-                    autocomplete="off"
-                    data-library-search
-                >
+                <input type="search" name="search" placeholder="<?php echo esc_attr((string) get_option('sc_library_search_placeholder', 'Search concepts, series, methods, and publications')); ?>" autocomplete="off" data-library-search>
             </label>
             <button type="submit" class="sc-library__search-button"><?php esc_html_e('Search', 'sustainable-catalyst-library'); ?></button>
         </form>
     <?php endif; ?>
 
     <?php if (in_array($mode, ['compact', 'full', 'domains'], true)) : ?>
-        <details class="sc-library__topics" data-topic-browser <?php echo in_array($mode, ['full', 'domains'], true) ? 'open' : ''; ?>>
-            <summary>
-                <span>
-                    <strong><?php esc_html_e('Browse the knowledge architecture', 'sustainable-catalyst-library'); ?></strong>
-                    <small><?php esc_html_e('Open a domain, then choose a topic or article map.', 'sustainable-catalyst-library'); ?></small>
-                </span>
-                <span class="sc-library__summary-action"><?php esc_html_e('Browse topics', 'sustainable-catalyst-library'); ?></span>
-            </summary>
-            <div class="sc-library__domain-grid" data-category-list aria-live="polite"></div>
-        </details>
+        <div class="sc-library__browse-stack">
+            <details class="sc-library__topics" data-topic-browser <?php echo in_array($mode, ['full', 'domains'], true) ? 'open' : ''; ?>>
+                <summary>
+                    <span><strong><?php esc_html_e('Browse the knowledge architecture', 'sustainable-catalyst-library'); ?></strong><small><?php esc_html_e('Open a domain, then choose a topic or article map.', 'sustainable-catalyst-library'); ?></small></span>
+                    <span class="sc-library__summary-action"><?php esc_html_e('Browse topics', 'sustainable-catalyst-library'); ?></span>
+                </summary>
+                <div class="sc-library__domain-grid" data-category-list aria-live="polite"></div>
+            </details>
+
+            <details class="sc-library__facets" data-relationship-browser>
+                <summary>
+                    <span><strong><?php esc_html_e('Browse series and concepts', 'sustainable-catalyst-library'); ?></strong><small><?php esc_html_e('Move through ordered publication sequences and shared ideas.', 'sustainable-catalyst-library'); ?></small></span>
+                    <span class="sc-library__summary-action"><?php esc_html_e('Open relationships', 'sustainable-catalyst-library'); ?></span>
+                </summary>
+                <div class="sc-library__facet-columns">
+                    <section>
+                        <h3><?php esc_html_e('Library Series', 'sustainable-catalyst-library'); ?></h3>
+                        <div class="sc-library__chip-list" data-series-list aria-live="polite"></div>
+                    </section>
+                    <section>
+                        <h3><?php esc_html_e('Library Concepts', 'sustainable-catalyst-library'); ?></h3>
+                        <div class="sc-library__chip-list" data-concept-list aria-live="polite"></div>
+                    </section>
+                </div>
+            </details>
+        </div>
     <?php endif; ?>
 
     <?php if ($show_pathways && $pathways && in_array($mode, ['compact', 'full', 'pathways'], true)) : ?>
         <section class="sc-library__pathways" aria-labelledby="<?php echo esc_attr($instance_id); ?>-pathways-title">
-            <div class="sc-library__section-line">
-                <h3 id="<?php echo esc_attr($instance_id); ?>-pathways-title"><?php esc_html_e('Featured pathways', 'sustainable-catalyst-library'); ?></h3>
-                <span><?php esc_html_e('Curated entry points', 'sustainable-catalyst-library'); ?></span>
-            </div>
+            <div class="sc-library__section-line"><h3 id="<?php echo esc_attr($instance_id); ?>-pathways-title"><?php esc_html_e('Featured pathways', 'sustainable-catalyst-library'); ?></h3><span><?php esc_html_e('Curated entry points', 'sustainable-catalyst-library'); ?></span></div>
             <div class="sc-library__pathway-list">
                 <?php foreach ($pathways as $pathway) : ?>
-                    <a href="<?php echo esc_url($pathway['url']); ?>">
-                        <strong><?php echo esc_html($pathway['title']); ?></strong>
-                        <?php if ($pathway['description'] !== '') : ?><span><?php echo esc_html($pathway['description']); ?></span><?php endif; ?>
-                    </a>
+                    <a href="<?php echo esc_url($pathway['url']); ?>"><strong><?php echo esc_html($pathway['title']); ?></strong><?php if ($pathway['description'] !== '') : ?><span><?php echo esc_html($pathway['description']); ?></span><?php endif; ?></a>
                 <?php endforeach; ?>
             </div>
         </section>
@@ -65,34 +72,25 @@
 
     <?php if ($mode !== 'pathways') : ?>
         <section class="sc-library__recent" data-library-recent hidden>
-            <div class="sc-library__section-line">
-                <h3><?php esc_html_e('Recently opened', 'sustainable-catalyst-library'); ?></h3>
-                <button type="button" data-clear-recent><?php esc_html_e('Clear', 'sustainable-catalyst-library'); ?></button>
-            </div>
+            <div class="sc-library__section-line"><h3><?php esc_html_e('Recently opened', 'sustainable-catalyst-library'); ?></h3><button type="button" data-clear-recent><?php esc_html_e('Clear', 'sustainable-catalyst-library'); ?></button></div>
             <div class="sc-library__recent-list" data-recent-list></div>
         </section>
 
         <section class="sc-library__results-region" data-results-region hidden aria-labelledby="<?php echo esc_attr($instance_id); ?>-results-title">
             <div class="sc-library__results-head">
-                <div>
-                    <p class="sc-library__results-kicker"><?php esc_html_e('Knowledge records', 'sustainable-catalyst-library'); ?></p>
-                    <h3 id="<?php echo esc_attr($instance_id); ?>-results-title" data-results-title><?php esc_html_e('Search results', 'sustainable-catalyst-library'); ?></h3>
-                </div>
+                <div><p class="sc-library__results-kicker"><?php esc_html_e('Knowledge records', 'sustainable-catalyst-library'); ?></p><h3 id="<?php echo esc_attr($instance_id); ?>-results-title" data-results-title><?php esc_html_e('Search results', 'sustainable-catalyst-library'); ?></h3></div>
                 <div class="sc-library__results-tools">
-                    <label>
-                        <span class="screen-reader-text"><?php esc_html_e('Sort knowledge records', 'sustainable-catalyst-library'); ?></span>
-                        <select name="sort" data-library-sort>
-                            <option value="relevance"><?php esc_html_e('Most relevant', 'sustainable-catalyst-library'); ?></option>
-                            <option value="updated"><?php esc_html_e('Recently updated', 'sustainable-catalyst-library'); ?></option>
-                            <option value="newest"><?php esc_html_e('Newest published', 'sustainable-catalyst-library'); ?></option>
-                            <option value="oldest"><?php esc_html_e('Oldest published', 'sustainable-catalyst-library'); ?></option>
-                            <option value="title"><?php esc_html_e('Title A–Z', 'sustainable-catalyst-library'); ?></option>
-                        </select>
-                    </label>
+                    <label><span class="screen-reader-text"><?php esc_html_e('Sort knowledge records', 'sustainable-catalyst-library'); ?></span><select name="sort" data-library-sort>
+                        <option value="relevance"><?php esc_html_e('Most relevant', 'sustainable-catalyst-library'); ?></option>
+                        <option value="updated"><?php esc_html_e('Recently updated', 'sustainable-catalyst-library'); ?></option>
+                        <option value="newest"><?php esc_html_e('Newest published', 'sustainable-catalyst-library'); ?></option>
+                        <option value="oldest"><?php esc_html_e('Oldest published', 'sustainable-catalyst-library'); ?></option>
+                        <option value="title"><?php esc_html_e('Title A–Z', 'sustainable-catalyst-library'); ?></option>
+                        <option value="series"><?php esc_html_e('Series order', 'sustainable-catalyst-library'); ?></option>
+                    </select></label>
                     <button type="button" class="sc-library__reset" data-clear-filters><?php esc_html_e('Reset', 'sustainable-catalyst-library'); ?></button>
                 </div>
             </div>
-
             <div class="sc-library__active-filter" data-active-filter hidden></div>
             <div class="sc-library__status" data-library-status aria-live="polite"></div>
             <div class="sc-library__results" data-library-results aria-live="polite"></div>

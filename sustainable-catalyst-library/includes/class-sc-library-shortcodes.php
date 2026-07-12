@@ -16,9 +16,12 @@ final class SC_Library_Shortcodes {
         $default_mode = (string) get_option('sc_library_default_mode', 'compact');
         $atts = shortcode_atts([
             'category' => '',
+            'series' => '',
+            'concept' => '',
+            'record' => '',
             'per_page' => (string) get_option('sc_library_items_per_page', 10),
             'title' => 'Explore the knowledge base',
-            'intro' => 'Search the Sustainable Catalyst knowledge architecture or open a domain to reveal its pathways and publications.',
+            'intro' => 'Search the Sustainable Catalyst knowledge architecture or open a domain, series, or concept to reveal connected publications.',
             'show_header' => 'true',
             'show_pathways' => (string) (int) get_option('sc_library_show_pathways', 1),
             'initial_results' => (string) (int) get_option('sc_library_initial_results', 0),
@@ -36,6 +39,9 @@ final class SC_Library_Shortcodes {
         $title = sanitize_text_field($atts['title']);
         $intro = sanitize_text_field($atts['intro']);
         $initial_category = sanitize_title($atts['category']);
+        $initial_series = sanitize_title($atts['series']);
+        $initial_concept = sanitize_title($atts['concept']);
+        $initial_record = absint($atts['record']);
         $instance_id = 'sc-library-' . self::$instance_count . '-' . wp_rand(1000, 9999);
         $pathways = $this->featured_pathways();
 
@@ -48,6 +54,10 @@ final class SC_Library_Shortcodes {
                 'empty' => __('No knowledge records match this request.', 'sustainable-catalyst-library'),
                 'error' => __('The knowledge base could not be loaded. Please try again.', 'sustainable-catalyst-library'),
                 'categoriesError' => __('Topic navigation is temporarily unavailable.', 'sustainable-catalyst-library'),
+                'facetsError' => __('Series and concept navigation is temporarily unavailable.', 'sustainable-catalyst-library'),
+                'recordLoading' => __('Loading the knowledge record…', 'sustainable-catalyst-library'),
+                'copySuccess' => __('Record link copied.', 'sustainable-catalyst-library'),
+                'copyFailure' => __('Copy the address from your browser.', 'sustainable-catalyst-library'),
                 'results' => __('results', 'sustainable-catalyst-library'),
                 'result' => __('result', 'sustainable-catalyst-library'),
             ],
@@ -61,7 +71,6 @@ final class SC_Library_Shortcodes {
     private function featured_pathways(): array {
         $raw = (string) get_option('sc_library_featured_pathways', '');
         $pathways = [];
-
         foreach (preg_split('/\R/', $raw) ?: [] as $line) {
             $line = trim($line);
             if ($line === '') {
@@ -77,7 +86,6 @@ final class SC_Library_Shortcodes {
                 'description' => isset($parts[2]) ? sanitize_text_field($parts[2]) : '',
             ];
         }
-
         return array_slice($pathways, 0, 8);
     }
 }
