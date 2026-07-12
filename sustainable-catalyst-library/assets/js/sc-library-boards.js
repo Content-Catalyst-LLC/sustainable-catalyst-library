@@ -3,9 +3,9 @@
 
   const shared = window.SCBoardShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const schema = shared.schema || 'sc-library-workspace/1.5';
+  const schema = shared.schema || 'sc-library-workspace/1.6';
   const legacySchemas = Array.isArray(shared.legacySchemas) ? shared.legacySchemas : ['sc-library-workspace/1.1', 'sc-library-workspace/1.0'];
-  const version = shared.version || '1.9.0';
+  const version = shared.version || '1.10.0';
   const templates = shared.templates || {};
   const nodeTypes = shared.nodeTypes || {};
   const edgeTypes = shared.edgeTypes || {};

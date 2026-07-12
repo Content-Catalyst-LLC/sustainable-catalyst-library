@@ -168,11 +168,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.9.0 activated.</strong> Rebuild the Library index, assign records to the Foundations collection, identify authoritative sources, and test the documentation shortcode in a private browser window.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.10.0 activated.</strong> Rebuild the Library index, then open SC Library → Portable Data Export to test a schema-only PostgreSQL export and a complete public-registry export.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.9.0.</strong> The release adds the Content Planner, article-map scanning, optional release windows, complete public registry, roadmap tracker, planned-to-draft workflows, public planning labels, and registry exports. Rebuild the index once, then classify and test current and archived records.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.10.0.</strong> The release adds normalized PostgreSQL SQL, CSV, JSONL, and JSON exports; schema-only and data-only modes; manifests and checksums; scoped server exports; and browser-local Notebook SQL and JSONL exports. Rebuild the index once, then test a schema export and a complete registry export.</p></div>';
         }
     }
 
@@ -221,6 +221,7 @@ final class SC_Library_Admin {
                 <?php $this->metric_card(__('Library Collections', 'sustainable-catalyst-library'), number_format_i18n($this->term_count(SC_Library_Taxonomies::COLLECTION))); ?>
                 <?php $this->metric_card(__('Documentation Categories', 'sustainable-catalyst-library'), number_format_i18n($this->term_count(SC_Library_Taxonomies::DOCUMENT_CATEGORY))); ?>
                 <?php $this->metric_card(__('Foundations records', 'sustainable-catalyst-library'), number_format_i18n(class_exists('SC_Library_Documentation') ? SC_Library_Documentation::foundation_count() : 0)); ?>
+                <?php $this->metric_card(__('Portable export schema', 'sustainable-catalyst-library'), '1.0'); ?>
             </div>
 
             <div class="card" style="max-width:980px">
@@ -298,7 +299,7 @@ final class SC_Library_Admin {
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Research Notebook', 'sustainable-catalyst-library'); ?></th>
-                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, matrices, visual boards, and portable exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.9 stores personal workspace data in each visitor’s browser. It does not write private research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
+                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, matrices, visual boards, and portable exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.10 stores personal workspace data in each visitor’s browser. It does not write private research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Technical Translation Matrix', 'sustainable-catalyst-library'); ?></th>
@@ -346,12 +347,20 @@ final class SC_Library_Admin {
                                     <option value="<?php echo esc_attr($size_id); ?>" <?php selected(get_option('sc_library_default_book_page_size', 'letter'), $size_id); ?>><?php echo esc_html($size['label']); ?></option>
                                 <?php endforeach; ?>
                             </select></p>
-                            <p class="description"><?php esc_html_e('Book projects remain editable in browser storage. v1.9 generates a browser preview and uses Print/Save as PDF; server-rendered archival PDF packages can be added in a later Render-backed release.', 'sustainable-catalyst-library'); ?></p>
+                            <p class="description"><?php esc_html_e('Book projects remain editable in browser storage. v1.10 generates a browser preview and uses Print/Save as PDF; server-rendered archival PDF packages can be added in a later Render-backed release.', 'sustainable-catalyst-library'); ?></p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Content Planner and public registry', 'sustainable-catalyst-library'); ?></th>
                         <td><label><input name="sc_library_enable_planner" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_planner', 1), 1); ?>> <?php esc_html_e('Enable planned-content records, Article Map Planner, complete public registry, roadmap tracker, release expectations, and registry exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('Only published planning records explicitly marked public appear in public Library and registry results.', 'sustainable-catalyst-library'); ?></p></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('PostgreSQL and portable data', 'sustainable-catalyst-library'); ?></th>
+                        <td>
+                            <label><input name="sc_library_enable_portability" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_portability', 1), 1); ?>> <?php esc_html_e('Enable normalized PostgreSQL SQL, CSV, JSONL, JSON, manifest, and browser-workspace export tools.', 'sustainable-catalyst-library'); ?></label>
+                            <p><label for="sc_library_export_schema_name"><?php esc_html_e('Default PostgreSQL schema:', 'sustainable-catalyst-library'); ?></label> <input class="regular-text code" id="sc_library_export_schema_name" name="sc_library_export_schema_name" type="text" value="<?php echo esc_attr((string) get_option('sc_library_export_schema_name', 'sustainable_catalyst_library')); ?>"></p>
+                            <p class="description"><?php esc_html_e('Server exports are available under SC Library → Portable Data Export. Private Notebook data remains browser-local and exports from the Notebook Import / Export tab.', 'sustainable-catalyst-library'); ?></p>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="row"><label for="sc_library_default_mode"><?php esc_html_e('Default interface mode', 'sustainable-catalyst-library'); ?></label></th>
@@ -416,11 +425,12 @@ final class SC_Library_Admin {
                 <p><code>[sc_library_integrations]</code> — standalone connected research-tool studio.</p>
                 <p><code>[sc_library_annotation_studio]</code> — standalone annotation and handwriting studio.</p>
                 <p><code>[sc_library_book_builder]</code> — standalone Custom Book Builder.</p>
+                <p><code>[sc_library_portability]</code> — standalone PostgreSQL and portable browser-workspace export studio.</p>
                 <p><code>[sc_library_notebook tab="books"]</code> — open the Notebook directly to saved books.</p>
                 <p><code>[sc_library_notebook tab="annotations"]</code> — open the Notebook directly to annotations.</p>
                 <p><?php esc_html_e('Place this in a dedicated WordPress Shortcode block.', 'sustainable-catalyst-library'); ?></p>
                 <h3><?php esc_html_e('Relationship-aware REST endpoints', 'sustainable-catalyst-library'); ?></h3>
-                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates', 'integrations', 'integrations/status', 'integration-schema', 'items/{id}/handoff?target=workbench', 'annotation-schema', 'book-schema', 'items/{id}/book', 'documentation', 'documentation/categories', 'documentation/statuses', 'documentation/{id}', 'collections/foundations', 'registry', 'registry/facets', 'roadmap/tracker', 'planner/statuses', 'plans/{id}'] as $endpoint) : ?>
+                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates', 'integrations', 'integrations/status', 'integration-schema', 'items/{id}/handoff?target=workbench', 'annotation-schema', 'book-schema', 'items/{id}/book', 'documentation', 'documentation/categories', 'documentation/statuses', 'documentation/{id}', 'collections/foundations', 'registry', 'registry/facets', 'roadmap/tracker', 'planner/statuses', 'plans/{id}', 'export/formats', 'export/postgresql-schema', 'export/manifest'] as $endpoint) : ?>
                     <p><code>/wp-json/sustainable-catalyst/v1/library/<?php echo esc_html($endpoint); ?></code></p>
                 <?php endforeach; ?>
             </div>

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.9.0"
+VERSION="1.10.0"
 REMOTE_SSH="git@github.com:Content-Catalyst-LLC/sustainable-catalyst-library.git"
 REMOTE_SLUG="Content-Catalyst-LLC/sustainable-catalyst-library"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -63,48 +63,54 @@ if ! grep -q "SC_LIBRARY_VERSION', '$VERSION'" sustainable-catalyst-library/sust
   echo "ERROR: Runtime version marker validation failed."
   exit 1
 fi
-if ! grep -q "Content Planner" sustainable-catalyst-library/readme.txt; then
-  echo "ERROR: Content Planner release marker is missing."
+if ! grep -q "PostgreSQL and Portable Research-Data Export" README.md; then
+  echo "ERROR: Portable export release marker is missing."
   exit 1
 fi
-if ! grep -q "sc_content_plan" sustainable-catalyst-library/includes/class-sc-library-planner.php; then
-  echo "ERROR: Planned-content post type marker is missing."
+if ! grep -q "sc-library-portable-export/1.0" sustainable-catalyst-library/includes/class-sc-library-portability.php; then
+  echo "ERROR: Portable export schema marker is missing."
   exit 1
 fi
-if ! grep -q "Article Map Planner" sustainable-catalyst-library/includes/class-sc-library-planner.php; then
-  echo "ERROR: Article Map Planner marker is missing."
+if ! grep -q "sc-library-workspace/1.6" sustainable-catalyst-library/includes/class-sc-library-notebook.php; then
+  echo "ERROR: Workspace migration marker is missing."
   exit 1
 fi
-if ! grep -q "roadmap/tracker" sustainable-catalyst-library/includes/class-sc-library-planner.php; then
-  echo "ERROR: Roadmap tracker REST marker is missing."
+if ! grep -q "CREATE TABLE IF NOT EXISTS records" sustainable-catalyst-library/includes/class-sc-library-portability.php; then
+  echo "ERROR: PostgreSQL records schema marker is missing."
   exit 1
 fi
-if ! grep -q "sc_library_registry" sustainable-catalyst-library/includes/class-sc-library-planner.php; then
-  echo "ERROR: Registry shortcode marker is missing."
+if ! grep -q "workspace_annotations" sustainable-catalyst-library/includes/class-sc-library-portability.php; then
+  echo "ERROR: Browser workspace table marker is missing."
   exit 1
 fi
-if ! grep -q "sc-library-workspace/1.5" sustainable-catalyst-library/includes/class-sc-library-notebook.php; then
-  echo "ERROR: Workspace compatibility marker is missing."
+if ! grep -q "export/postgresql-schema" sustainable-catalyst-library/includes/class-sc-library-portability.php; then
+  echo "ERROR: PostgreSQL schema REST route marker is missing."
   exit 1
 fi
 
 for required in \
-  sustainable-catalyst-library/includes/class-sc-library-planner.php \
-  sustainable-catalyst-library/assets/js/sc-library-planner.js \
-  sustainable-catalyst-library/assets/css/sc-library-planner.css \
-  sustainable-catalyst-library/templates/library-registry.php \
-  sustainable-catalyst-library/templates/library-roadmap-tracker.php \
-  sustainable-catalyst-library-v1.9.0.zip \
-  RELEASE_NOTES_1.9.0.md \
-  CONTENT_PLANNER_SETUP.md; do
+  sustainable-catalyst-library/includes/class-sc-library-portability.php \
+  sustainable-catalyst-library/assets/js/sc-library-portability.js \
+  sustainable-catalyst-library/assets/css/sc-library-portability.css \
+  sustainable-catalyst-library/templates/library-portability.php \
+  sustainable-catalyst-library-v1.10.0.zip \
+  RELEASE_NOTES_1.10.0.md \
+  PORTABLE_DATA_SETUP.md; do
   if [[ ! -f "$required" ]]; then
     echo "ERROR: Required release file is missing: $required"
     exit 1
   fi
 done
 
-if grep -RInE --exclude-dir=.git --exclude='push_library_v1_9_0_to_github.sh' --exclude='install_and_push_library_v1_9_0.sh' \
-  '((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|password[[:space:]]*=[[:space:]]*["'"'"'][^"'"'"']+)' .; then
+if command -v php >/dev/null 2>&1; then
+  while IFS= read -r -d '' file; do php -l "$file" >/dev/null; done < <(find sustainable-catalyst-library -name '*.php' -print0)
+fi
+if command -v node >/dev/null 2>&1; then
+  while IFS= read -r -d '' file; do node --check "$file" >/dev/null; done < <(find sustainable-catalyst-library/assets/js -name '*.js' -print0)
+fi
+
+if grep -RInE --exclude-dir=.git --exclude='push_library_v1_10_0_to_github.sh' --exclude='install_and_push_library_v1_10_0.sh' \
+  '((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|password[[:space:]]*=[[:space:]]*["'"''][^"'"'']+)' .; then
   echo "ERROR: Potential secret detected. Review the output above."
   exit 1
 fi
@@ -113,11 +119,11 @@ git add -A
 if git diff --cached --quiet; then
   echo "No changes to commit."
 else
-  git commit -m "Build Library v1.9.0 — Content Planner, Public Registry, and Roadmap Tracker"
+  git commit -m "Build Library v1.10.0 — PostgreSQL and Portable Research-Data Export"
 fi
 
 git push -u origin main
 
 echo
-echo "Sustainable Catalyst Library v1.9.0 pushed successfully."
+echo "Sustainable Catalyst Library v1.10.0 pushed successfully."
 echo "Repository: https://github.com/$REMOTE_SLUG"

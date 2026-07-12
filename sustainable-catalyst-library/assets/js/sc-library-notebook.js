@@ -3,10 +3,10 @@
 
   const shared = window.SCNotebookShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const schema = shared.schema || 'sc-library-workspace/1.5';
-  const legacySchema = shared.legacySchema || 'sc-library-workspace/1.4';
+  const schema = shared.schema || 'sc-library-workspace/1.6';
+  const legacySchema = shared.legacySchema || 'sc-library-workspace/1.6';
   const legacySchemas = Array.isArray(shared.legacySchemas) ? shared.legacySchemas : [legacySchema, 'sc-library-workspace/1.0'];
-  const version = shared.version || '1.9.0';
+  const version = shared.version || '1.10.0';
   const strings = shared.strings || {};
   const sourceTypes = shared.sourceTypes || {};
   const citationFormats = shared.citationFormats || {};
@@ -501,7 +501,10 @@
       <div class="sc-library-workspace__portability-grid">
         <article><h4>Export workspace</h4><p>Download collections, saved records, notes, sources, Technical Translation Matrices, Whiteboards, Chalkboards, annotations, custom books, application handoffs, relationships, citations, handwriting, and validation states as a versioned JSON manifest.</p><button type="button" data-export-workspace>Download JSON export</button></article>
         <article><h4>Import workspace</h4><p>Replace this browser’s current workspace with a compatible Sustainable Catalyst Library export.</p><label class="sc-library-workspace__file"><span>Select JSON export</span><input type="file" accept="application/json,.json" data-import-workspace></label></article>
+        <article><h4>PostgreSQL workspace</h4><p>Download normalized SQL for collections, saved records, notes, sources, matrices, boards, annotations, books, and application handoffs.</p><button type="button" data-export-workspace-postgresql>Download PostgreSQL SQL</button></article>
+        <article><h4>JSONL workspace</h4><p>Download line-delimited JSON for analytics, migration, and data engineering.</p><button type="button" data-export-workspace-jsonl>Download JSONL</button></article>
         <article><h4>Copy JSON</h4><p>Copy the complete workspace manifest for inspection or transfer into another system.</p><button type="button" data-copy-workspace>Copy workspace JSON</button></article>
+        <article><h4>Portable schema</h4><p>Download the normalized PostgreSQL schema without local data.</p><button type="button" data-export-workspace-schema>Download schema.sql</button></article>
         <article class="sc-library-workspace__danger"><h4>Clear local workspace</h4><p>Delete all locally stored collections, saved records, notes, sources, matrices, Whiteboards, Chalkboards, annotations, custom books, and connected-tool handoffs from this browser.</p><button type="button" data-clear-workspace>Clear all local data</button></article>
       </div>
       <details class="sc-library-workspace__manifest"><summary>Export manifest details</summary><pre>${escapeHtml(JSON.stringify({ schema: workspace.schema, version: workspace.version, updatedAt: workspace.updatedAt, counts: { collections: workspace.collections.length, savedRecords: workspace.savedRecords.length, notes: workspace.notes.length, sources: workspace.sources.length, matrices: workspace.matrices.length, boards: workspace.boards.length, handoffs: workspace.handoffs.length, annotations: workspace.annotations.length, books: workspace.books.length } }, null, 2))}</pre></details>

@@ -129,6 +129,12 @@ final class SC_Library_REST {
                 'collection' => class_exists('SC_Library_Documentation') ? SC_Library_Documentation::COLLECTION_SLUG : 'foundations',
                 'authority_model' => 'explicit-source-of-truth',
             ],
+            'portability' => [
+                'enabled' => class_exists('SC_Library_Portability') && SC_Library_Portability::enabled(),
+                'export_schema' => class_exists('SC_Library_Portability') ? SC_Library_Portability::EXPORT_SCHEMA : '',
+                'postgresql_schema' => (string) get_option('sc_library_export_schema_name', 'sustainable_catalyst_library'),
+                'formats' => class_exists('SC_Library_Portability') ? array_keys(SC_Library_Portability::formats()) : [],
+            ],
             'integrations' => [
                 'enabled' => class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled(),
                 'handoff_schema' => class_exists('SC_Library_Integrations') ? SC_Library_Integrations::HANDOFF_SCHEMA : '',

@@ -142,7 +142,7 @@ final class SC_Library_Documentation {
                         <?php endforeach; ?>
                     </select>
                 </label>
-                <label><span><?php esc_html_e('Version', 'sustainable-catalyst-library'); ?></span><input type="text" name="sc_library_doc_version" value="<?php echo esc_attr($meta['version']); ?>" placeholder="1.9.0 or July 2026"></label>
+                <label><span><?php esc_html_e('Version', 'sustainable-catalyst-library'); ?></span><input type="text" name="sc_library_doc_version" value="<?php echo esc_attr($meta['version']); ?>" placeholder="1.10.0 or July 2026"></label>
                 <label><span><?php esc_html_e('Responsible area', 'sustainable-catalyst-library'); ?></span><input type="text" name="sc_library_doc_responsible_area" value="<?php echo esc_attr($meta['responsible_area']); ?>" placeholder="Library, Lab, Platform, Institution"></label>
                 <label><span><?php esc_html_e('Authoritative source type', 'sustainable-catalyst-library'); ?></span>
                     <select name="sc_library_doc_authority_type">

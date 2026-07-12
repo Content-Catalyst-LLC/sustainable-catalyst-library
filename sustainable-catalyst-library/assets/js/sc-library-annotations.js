@@ -3,9 +3,9 @@
 
   const shared = window.SCAnnotationsShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.5';
+  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.6';
   const annotationSchema = shared.schema || 'sc-library-annotation/1.0';
-  const version = shared.version || '1.9.0';
+  const version = shared.version || '1.10.0';
   const strings = shared.strings || {};
   const tools = Array.isArray(shared.tools) ? shared.tools : [];
   const targetTypes = Array.isArray(shared.targetTypes) ? shared.targetTypes : [];

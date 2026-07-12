@@ -1,62 +1,71 @@
 === Sustainable Catalyst Library ===
 Contributors: contentcatalyst
-Tags: knowledge-base, content-planner, public-registry, roadmap, documentation, research
+Tags: knowledge-base, postgresql, data-export, content-planner, documentation, research
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.9.0
+Stable tag: 1.10.0
 License: GPLv2 or later
 
-A native WordPress knowledge base with a content planner, complete public registry, roadmap tracker, documentation authority, research workspaces, and custom books.
+A native WordPress knowledge base with PostgreSQL and portable research-data exports, a public registry, content planner, documentation authority, research workspaces, and custom books.
 
 == Description ==
 
-Sustainable Catalyst Library v1.9.0 adds the Content Planner, Complete Public Registry, and Roadmap Tracker.
+Sustainable Catalyst Library v1.10.0 adds normalized PostgreSQL and portable research-data export.
 
-The plugin can register planned articles and documentation, scan article maps, bulk-create missing planned entries, display planned records in Library results, track optional release expectations, convert plans into WordPress drafts, and reconcile them when the canonical post publishes.
+WordPress remains the canonical publishing source. The plugin converts Library records into a stable application schema rather than copying raw WordPress tables, revisions, serialized options, or theme metadata.
 
-The public registry combines enabled published articles, pages, living documentation, planned content, active development, scheduled records, PDF snapshots, superseded documents, and archives. Each state remains visibly distinct.
+= PostgreSQL Export =
 
-= Content Planner =
+* Portable plain SQL for restoration with psql.
+* Schema-and-data, schema-only, and data-only modes.
+* Complete Library, public-registry, planner, documentation, relationship, and schema scopes.
+* Normalized records, terms, record-term assignments, relationships, resources, documentation, plans, and export metadata.
+* Optional full article text in JSONB payloads.
+* Optional administrator export of private planning records and internal planning notes.
 
-* Native WordPress planned-content records with revisions and REST support.
-* Idea, Proposed, Planned, Researching, Drafting, In Review, Scheduled, Published, Deferred, Cancelled, and Superseded states.
-* Article, article map, documentation, product brief, methodology, dataset, calculator, code, video, pathway, PDF, release, policy, and custom types.
-* Optional expected release date, month, quarter, year, product release, or no date.
-* Area, product, responsibility, audience, research questions, sources, dependencies, and expected artifacts.
-* Public and private planning boundaries.
+= Portable Bundles =
 
-= Article Map Planner =
+* CSV ZIP bundles with one file per entity.
+* JSONL ZIP bundles for analytics and migration workflows.
+* Single-file JSON snapshots.
+* schema.sql, manifest.json, README, and SHA-256 checksums.
 
-* Scan headings and links from existing article maps.
-* Detect published, draft, planned, and missing entries.
-* Create selected missing entries in bulk.
-* Inherit compatible taxonomies and sequence information.
+= Browser Research Workspace =
 
-= Complete Public Registry =
+* Export local collections, saved records, notes, sources, Translation Matrices, Whiteboards, Chalkboards, annotations, custom books, and application handoffs.
+* PostgreSQL workspace SQL.
+* JSONL workspace export.
+* Versioned JSON workspace manifest.
+* Dedicated workspace tables in the same normalized PostgreSQL schema.
+* Private Notebook data remains in browser storage until the user exports it.
 
-* Search published posts, documentation, planned content, active development, and historical records.
-* Filter by state, type, area, product, collection, article map, archive visibility, and expected release.
-* Export registry results as CSV or JSON.
-* Use Foundations-filtered views without duplicating records.
+= Existing Knowledge-Base Capabilities =
 
-= Roadmap Tracker =
-
-* Count records by area, product, status, content type, and article map.
-* Show published/current, in-development, planned, historical, and total counts.
-* Warn about missing areas, overdue expectations, scheduled items without drafts, and published plans without canonical posts.
+* Search-first public knowledge base.
+* Knowledge relationships and record panels.
+* Research Notebook and source collection.
+* Technical Translation Matrix.
+* Whiteboards and Chalkboards.
+* Workbench, Decision Studio, and Site Intelligence handoffs.
+* Annotation Studio and handwriting.
+* Custom Book Builder and browser PDF generation.
+* Foundations Documentation Library and authority model.
+* Content Planner, public registry, and roadmap tracker.
 
 == Installation ==
 
 1. Upload and activate the plugin.
 2. Open SC Library.
-3. Enable Content Planner and public registry.
+3. Enable PostgreSQL and portable data.
 4. Save settings and rebuild the Library index.
-5. Create planned records or scan an article map.
-6. Add `[sc_library_registry]` or `[sc_library_planner_tracker]` to dedicated Shortcode blocks.
+5. Open SC Library → Portable Data Export.
+6. Test a schema-only PostgreSQL export before exporting complete data.
 
 == Shortcodes ==
 
+* `[sc_library_portability]`
+* `[sc_library_notebook tab="portability"]`
 * `[sc_library_registry mode="public"]`
 * `[sc_library_planner_tracker mode="public"]`
 * `[sc_library mode="registry"]`
@@ -72,19 +81,31 @@ The public registry combines enabled published articles, pages, living documenta
 * `[sc_library_integrations]`
 * `[sc_library_annotation_studio]`
 
+== REST API ==
+
+* `/wp-json/sustainable-catalyst/v1/library/export/formats`
+* `/wp-json/sustainable-catalyst/v1/library/export/postgresql-schema`
+* `/wp-json/sustainable-catalyst/v1/library/export/manifest` — administrator only
+
 == Changelog ==
+
+= 1.10.0 =
+
+* Added normalized PostgreSQL schema and plain SQL export.
+* Added schema-and-data, schema-only, and data-only modes.
+* Added complete, registry, planner, documentation, relationship, and schema scopes.
+* Added CSV ZIP and JSONL ZIP bundles.
+* Added JSON snapshots, manifests, restore notes, and SHA-256 checksums.
+* Added browser-local Notebook export to PostgreSQL SQL and JSONL.
+* Added workspace schema migration to sc-library-workspace/1.6.
+* Added standalone portability shortcode and administrator export studio.
+* Added public export format and PostgreSQL schema endpoints.
+* Added administrator-only export manifest endpoint.
+* Documented psql restore and pg_dump custom-archive workflow.
 
 = 1.9.0 =
 
-* Added native planned-content records and planning metadata.
-* Added optional expected release windows.
-* Added Article Map Planner scanning and bulk planned-entry creation.
-* Added planned-to-draft and planned-to-published workflows.
-* Added the complete public registry and public roadmap tracker.
-* Added counts by area, product, status, type, and article map.
-* Added registry search, filters, CSV export, and JSON export.
-* Added planned records to normal Library search when public.
-* Added public/private planning boundaries and historical-state labels.
+* Added Content Planner, Article Map Planner, public registry, and roadmap tracker.
 
 = 1.8.0 =
 

@@ -3,10 +3,10 @@
 
   const shared = window.SCBooksShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.5';
+  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.6';
   const legacySchemas = Array.isArray(shared.legacyWorkspaceSchemas) ? shared.legacyWorkspaceSchemas : [];
   const bookSchema = shared.schema || 'sc-library-book/1.0';
-  const version = shared.version || '1.9.0';
+  const version = shared.version || '1.10.0';
   const restBase = String(shared.restBase || '/wp-json/sustainable-catalyst/v1/library').replace(/\/$/, '');
   const themes = Object.fromEntries((shared.themes || []).map((item) => [item.id, item]));
   const pageSizes = Object.fromEntries((shared.pageSizes || []).map((item) => [item.id, item]));

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: A native WordPress knowledge base with structured indexing, relationships, research notebooks, sources, Technical Translation Matrices, Whiteboards, Chalkboards, Annotation Studio handwriting, custom books, a Foundations Documentation Library, content planner, complete public registry, roadmap tracker, authority and version controls, portable exports, search, filters, and public REST endpoints.
- * Version: 1.9.0
+ * Description: A native WordPress knowledge base with structured indexing, relationships, research notebooks, sources, Technical Translation Matrices, Whiteboards, Chalkboards, Annotation Studio handwriting, custom books, a Foundations Documentation Library, content planner, complete public registry, roadmap tracker, PostgreSQL and portable research-data exports, authority and version controls, search, filters, and public REST endpoints.
+ * Version: 1.10.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '1.9.0');
+define('SC_LIBRARY_VERSION', '1.10.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -34,6 +34,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-annotations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-books.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-documentation.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-planner.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-portability.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-shortcodes.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
@@ -70,6 +71,7 @@ final class SC_Library_Plugin {
         $books = new SC_Library_Books();
         $documentation = new SC_Library_Documentation($indexer, $relationships);
         $planner = new SC_Library_Planner($indexer, $relationships);
+        $portability = new SC_Library_Portability($indexer, $relationships, $planner);
         $shortcodes = new SC_Library_Shortcodes();
 
         $taxonomies->register_hooks();
@@ -85,6 +87,7 @@ final class SC_Library_Plugin {
         $books->register_hooks();
         $documentation->register_hooks();
         $planner->register_hooks();
+        $portability->register_hooks();
         $shortcodes->register_hooks();
     }
 }
