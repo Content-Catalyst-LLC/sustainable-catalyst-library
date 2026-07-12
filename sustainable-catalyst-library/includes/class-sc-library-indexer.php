@@ -20,7 +20,9 @@ final class SC_Library_Indexer {
 
     public function configured_post_types(): array {
         $types = get_option('sc_library_post_types', ['post']);
-        return is_array($types) && $types ? array_values(array_filter(array_map('sanitize_key', $types))) : ['post'];
+        return is_array($types) && $types
+            ? array_values(array_filter(array_map('sanitize_key', $types)))
+            : ['post'];
     }
 
     public function on_save_post(int $post_id, WP_Post $post, bool $update): void {
@@ -28,6 +30,7 @@ final class SC_Library_Indexer {
             return;
         }
         if (!in_array($post->post_type, $this->configured_post_types(), true)) {
+            $this->delete_record($post_id);
             return;
         }
         if ($post->post_status !== 'publish') {
@@ -46,6 +49,7 @@ final class SC_Library_Indexer {
     public function reindex_post(int $post_id): bool {
         $post = get_post($post_id);
         if (!$post || $post->post_status !== 'publish' || !in_array($post->post_type, $this->configured_post_types(), true)) {
+            $this->delete_record($post_id);
             return false;
         }
         return $this->index_post($post_id);
@@ -55,7 +59,7 @@ final class SC_Library_Indexer {
         global $wpdb;
 
         $post = get_post($post_id);
-        if (!$post || $post->post_status !== 'publish') {
+        if (!$post || $post->post_status !== 'publish' || !in_array($post->post_type, $this->configured_post_types(), true)) {
             return false;
         }
 
@@ -67,9 +71,10 @@ final class SC_Library_Indexer {
         $content = wp_strip_all_tags($content, true);
         $content = preg_replace('/\s+/', ' ', $content ?: '');
 
+        $excerpt_words = min(80, max(12, (int) get_option('sc_library_excerpt_words', 28)));
         $excerpt = has_excerpt($post_id)
             ? get_the_excerpt($post_id)
-            : wp_trim_words($content, 55, '…');
+            : wp_trim_words($content, $excerpt_words, '…');
 
         $data = [
             'post_id' => $post_id,
@@ -88,8 +93,8 @@ final class SC_Library_Indexer {
         ];
 
         $formats = ['%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s'];
-
         $existing_id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$this->table_name()} WHERE post_id = %d", $post_id));
+
         if ($existing_id) {
             $result = $wpdb->update($this->table_name(), $data, ['post_id' => $post_id], $formats, ['%d']);
         } else {
@@ -104,10 +109,29 @@ final class SC_Library_Indexer {
         $wpdb->delete($this->table_name(), ['post_id' => $post_id], ['%d']);
     }
 
+    public function purge_stale_records(): int {
+        global $wpdb;
+
+        $types = $this->configured_post_types();
+        if (!$types) {
+            return 0;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($types), '%s'));
+        $sql = "DELETE idx FROM {$this->table_name()} idx
+                LEFT JOIN {$wpdb->posts} posts ON posts.ID = idx.post_id
+                WHERE posts.ID IS NULL
+                   OR posts.post_status <> 'publish'
+                   OR posts.post_type NOT IN ({$placeholders})";
+
+        return (int) $wpdb->query($wpdb->prepare($sql, ...$types));
+    }
+
     public function rebuild_all(): array {
         $page = 1;
         $indexed = 0;
         $failed = 0;
+        $purged = $this->purge_stale_records();
 
         do {
             $query = new WP_Query([
@@ -119,6 +143,8 @@ final class SC_Library_Indexer {
                 'orderby' => 'ID',
                 'order' => 'ASC',
                 'no_found_rows' => false,
+                'update_post_meta_cache' => false,
+                'update_post_term_cache' => false,
             ]);
 
             foreach ($query->posts as $post_id) {
@@ -129,7 +155,11 @@ final class SC_Library_Indexer {
 
         update_option('sc_library_last_full_index', current_time('mysql', true));
 
-        return ['indexed' => $indexed, 'failed' => $failed];
+        return [
+            'indexed' => $indexed,
+            'failed' => $failed,
+            'purged' => $purged,
+        ];
     }
 
     public function count_indexed(): int {

@@ -5,6 +5,27 @@ if (!defined('ABSPATH')) {
 
 final class SC_Library_Activator {
     public static function activate(): void {
+        self::create_table();
+        self::install_defaults();
+        self::schedule_reconcile();
+        update_option('sc_library_version', SC_LIBRARY_VERSION);
+        set_transient('sc_library_activation_notice', 1, 90);
+    }
+
+    public static function maybe_upgrade(): void {
+        $installed = (string) get_option('sc_library_version', '0.0.0');
+        if (version_compare($installed, SC_LIBRARY_VERSION, '>=')) {
+            return;
+        }
+
+        self::create_table();
+        self::install_defaults();
+        self::schedule_reconcile();
+        update_option('sc_library_version', SC_LIBRARY_VERSION);
+        set_transient('sc_library_upgrade_notice', 1, 90);
+    }
+
+    private static function create_table(): void {
         global $wpdb;
 
         $table = $wpdb->prefix . 'sc_library_index';
@@ -37,18 +58,31 @@ final class SC_Library_Activator {
         ) {$charset};";
 
         dbDelta($sql);
+    }
 
-        add_option('sc_library_version', SC_LIBRARY_VERSION);
+    private static function install_defaults(): void {
         add_option('sc_library_post_types', ['post']);
-        add_option('sc_library_items_per_page', 12);
+        add_option('sc_library_items_per_page', 10);
         add_option('sc_library_enable_tags', 1);
         add_option('sc_library_last_full_index', '');
+        add_option('sc_library_default_mode', 'compact');
+        add_option('sc_library_initial_results', 0);
+        add_option('sc_library_result_density', 'compact');
+        add_option('sc_library_excerpt_words', 28);
+        add_option('sc_library_show_pathways', 1);
+        add_option('sc_library_search_placeholder', 'Search concepts, series, methods, and publications');
+        add_option('sc_library_featured_pathways', implode("\n", [
+            'Systems Thinking|/systems-thinking/|Feedback, resilience, leverage points, and complex change.',
+            'Mathematical Thinking|/mathematical-thinking/|Symbols, models, uncertainty, and formal reasoning.',
+            'Algorithms & Computational Reasoning|/algorithms-computational-reasoning/|Procedure, data structures, complexity, and responsible computation.',
+            'Sustainable Development|/sustainable-development/|Ecological limits, institutions, justice, and long-term wellbeing.',
+        ]));
+    }
 
+    private static function schedule_reconcile(): void {
         if (!wp_next_scheduled('sc_library_daily_reconcile')) {
             wp_schedule_event(time() + HOUR_IN_SECONDS, 'daily', 'sc_library_daily_reconcile');
         }
-
-        set_transient('sc_library_activation_notice', 1, 60);
     }
 
     public static function deactivate(): void {

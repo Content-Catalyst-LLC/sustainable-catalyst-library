@@ -1,17 +1,30 @@
-# Sustainable Catalyst Library v1.0.0
+# Sustainable Catalyst Library v1.0.1
 
-WordPress indexing, REST API, category navigation, search, and filters for the Sustainable Catalyst open knowledge lab.
+A compact native WordPress knowledge base for Sustainable Catalyst publications, topics, pathways, and related research records.
+
+## What changed in v1.0.1
+
+- Replaced the archive-style featured-image grid with concise text-based knowledge records.
+- Results remain hidden until a visitor searches, selects a topic, or follows a preserved Library URL.
+- Added nested topic drawers and index-aware counts.
+- Broad domain selections include records from descendant categories.
+- Added a contextual record panel with related knowledge.
+- Added featured pathways and browser-local recently opened records.
+- Added shortcode modes and administration controls for density, initial results, pathways, excerpts, and search wording.
+- Added stale-index cleanup during full rebuilds.
+
+## Recommended shortcode
+
+Use a dedicated WordPress Shortcode block:
+
+```text
+[sc_library mode="compact" initial_results="0" show_header="false"]
+```
+
+Do not place the shortcode inside a Custom HTML block.
 
 ## Release contents
 
 - `sustainable-catalyst-library/` — plugin source
-- `sustainable-catalyst-library-v1.0.0.zip` — installable WordPress plugin
-- `push_library_v1_0_0_to_github.sh` — repository replacement and push script
-
-## Install
-
-1. Upload `sustainable-catalyst-library-v1.0.0.zip` in WordPress.
-2. Activate **Sustainable Catalyst Library**.
-3. Open **SC Library** in the WordPress admin.
-4. Select indexed post types and rebuild the index.
-5. Add `[sc_library]` to the public Library page.
+- `sustainable-catalyst-library-v1.0.1.zip` — installable WordPress plugin
+- `push_library_v1_0_1_to_github.sh` — empty-repository-safe GitHub deployment script

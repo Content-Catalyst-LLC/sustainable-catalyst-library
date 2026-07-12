@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Structured WordPress indexing, REST API, category navigation, search, and filters for the Sustainable Catalyst Library.
- * Version: 1.0.0
+ * Description: A compact, native WordPress knowledge-base interface with structured indexing, nested topic navigation, search, filters, contextual record panels, and public REST endpoints.
+ * Version: 1.0.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '1.0.0');
+define('SC_LIBRARY_VERSION', '1.0.1');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -44,6 +44,7 @@ final class SC_Library_Plugin {
     }
 
     public function boot(): void {
+        SC_Library_Activator::maybe_upgrade();
         load_plugin_textdomain('sustainable-catalyst-library', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
         $indexer = new SC_Library_Indexer();
