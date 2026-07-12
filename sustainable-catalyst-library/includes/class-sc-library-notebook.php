@@ -4,15 +4,21 @@ if (!defined('ABSPATH')) {
 }
 
 final class SC_Library_Notebook {
-    public const SCHEMA = 'sc-library-workspace/1.0';
+    public const SCHEMA = 'sc-library-workspace/1.1';
+    public const LEGACY_SCHEMA = 'sc-library-workspace/1.0';
 
     public function register_hooks(): void {
         add_shortcode('sc_library_notebook', [$this, 'render_shortcode']);
+        add_shortcode('sc_library_translation_matrix', [$this, 'render_matrix_shortcode']);
         add_action('rest_api_init', [$this, 'register_routes']);
     }
 
     public static function enabled(): bool {
         return (bool) get_option('sc_library_enable_notebook', 1);
+    }
+
+    public static function matrix_enabled(): bool {
+        return self::enabled() && (bool) get_option('sc_library_enable_translation_matrix', 1);
     }
 
     public static function enqueue_assets(): void {
@@ -26,9 +32,15 @@ final class SC_Library_Notebook {
         wp_localize_script('sc-library-notebook', 'SCNotebookShared', [
             'version' => SC_LIBRARY_VERSION,
             'schema' => self::SCHEMA,
+            'legacySchema' => self::LEGACY_SCHEMA,
+            // Keep the v1.2 key so existing browser-local notebooks migrate in place.
             'storageKey' => 'scLibraryWorkspaceV120',
             'sourceTypes' => self::source_types(),
             'citationFormats' => self::citation_formats(),
+            'matrixTemplates' => self::matrix_templates(),
+            'matrixStatuses' => self::matrix_statuses(),
+            'defaultMatrixTemplate' => (string) get_option('sc_library_default_matrix_template', 'technical_translation'),
+            'matrixEnabled' => self::matrix_enabled(),
             'strings' => [
                 'saved' => __('Saved to the Research Notebook.', 'sustainable-catalyst-library'),
                 'alreadySaved' => __('This record is already saved.', 'sustainable-catalyst-library'),
@@ -37,7 +49,10 @@ final class SC_Library_Notebook {
                 'importSuccess' => __('Workspace imported successfully.', 'sustainable-catalyst-library'),
                 'copySuccess' => __('Copied to the clipboard.', 'sustainable-catalyst-library'),
                 'copyFailure' => __('Copying was blocked by the browser.', 'sustainable-catalyst-library'),
-                'confirmClear' => __('Delete all locally stored Library collections, notes, sources, and saved records on this browser?', 'sustainable-catalyst-library'),
+                'confirmClear' => __('Delete all locally stored Library collections, notes, sources, saved records, and translation matrices on this browser?', 'sustainable-catalyst-library'),
+                'matrixSaved' => __('Technical Translation Matrix saved.', 'sustainable-catalyst-library'),
+                'matrixDeleted' => __('Technical Translation Matrix deleted.', 'sustainable-catalyst-library'),
+                'matrixTemplateReset' => __('Changing templates resets the current unsaved matrix grid. Continue?', 'sustainable-catalyst-library'),
             ],
         ]);
     }
@@ -49,15 +64,42 @@ final class SC_Library_Notebook {
 
         $atts = shortcode_atts([
             'title' => 'Research Notebook',
-            'intro' => 'Combine Sustainable Catalyst records with personal notes, external links, books, reports, datasets, and media sources.',
+            'intro' => 'Combine Sustainable Catalyst records with personal notes, sources, and reusable Technical Translation Matrices.',
             'open' => 'true',
+            'tab' => 'overview',
         ], $atts, 'sc_library_notebook');
 
+        return $this->render_workspace($atts, true);
+    }
+
+    public function render_matrix_shortcode(array $atts = []): string {
+        if (!self::matrix_enabled()) {
+            return '<p>' . esc_html__('The Technical Translation Matrix is currently disabled.', 'sustainable-catalyst-library') . '</p>';
+        }
+
+        $atts = shortcode_atts([
+            'title' => 'Technical Translation Matrix',
+            'intro' => 'Translate concepts across plain language, formal notation, code, data logic, assumptions, validation, and systems interpretation.',
+            'open' => 'true',
+            'tab' => 'matrices',
+        ], $atts, 'sc_library_translation_matrix');
+
+        return $this->render_workspace($atts, true);
+    }
+
+    private function render_workspace(array $atts, bool $standalone): string {
         self::enqueue_assets();
-        $workspace_title = sanitize_text_field($atts['title']);
-        $workspace_intro = sanitize_text_field($atts['intro']);
-        $workspace_standalone = true;
-        $workspace_open = filter_var($atts['open'], FILTER_VALIDATE_BOOLEAN);
+        $workspace_title = sanitize_text_field($atts['title'] ?? 'Research Notebook');
+        $workspace_intro = sanitize_text_field($atts['intro'] ?? '');
+        $workspace_standalone = $standalone;
+        $workspace_open = filter_var($atts['open'] ?? 'true', FILTER_VALIDATE_BOOLEAN);
+        $workspace_initial_tab = sanitize_key((string) ($atts['tab'] ?? 'overview'));
+        if (!in_array($workspace_initial_tab, ['overview', 'collections', 'notes', 'sources', 'matrices', 'portability'], true)) {
+            $workspace_initial_tab = 'overview';
+        }
+        if ($workspace_initial_tab === 'matrices' && !self::matrix_enabled()) {
+            $workspace_initial_tab = 'overview';
+        }
 
         ob_start();
         include SC_LIBRARY_DIR . 'templates/library-workspace.php';
@@ -87,6 +129,16 @@ final class SC_Library_Notebook {
                 'type' => ['sanitize_callback' => 'sanitize_key', 'default' => 'website'],
                 'url' => ['sanitize_callback' => 'esc_url_raw', 'default' => ''],
             ],
+        ]);
+
+        register_rest_route($namespace, '/library/matrix-templates', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => static fn() => rest_ensure_response([
+                'schema' => self::SCHEMA,
+                'items' => array_values(self::matrix_templates()),
+                'statuses' => array_values(self::matrix_statuses()),
+            ]),
+            'permission_callback' => '__return_true',
         ]);
     }
 
@@ -154,6 +206,57 @@ final class SC_Library_Notebook {
             'bibtex' => ['id' => 'bibtex', 'label' => 'BibTeX'],
             'ris' => ['id' => 'ris', 'label' => 'RIS'],
             'csl_json' => ['id' => 'csl_json', 'label' => 'CSL JSON'],
+        ];
+    }
+
+    public static function matrix_statuses(): array {
+        return [
+            'draft' => ['id' => 'draft', 'label' => __('Draft', 'sustainable-catalyst-library')],
+            'translated' => ['id' => 'translated', 'label' => __('Translated', 'sustainable-catalyst-library')],
+            'reviewed' => ['id' => 'reviewed', 'label' => __('Reviewed', 'sustainable-catalyst-library')],
+            'validated' => ['id' => 'validated', 'label' => __('Validated', 'sustainable-catalyst-library')],
+            'warning' => ['id' => 'warning', 'label' => __('Warning / requires review', 'sustainable-catalyst-library')],
+            'unsupported' => ['id' => 'unsupported', 'label' => __('Unsupported', 'sustainable-catalyst-library')],
+        ];
+    }
+
+    public static function matrix_templates(): array {
+        return [
+            'technical_translation' => [
+                'id' => 'technical_translation',
+                'label' => __('Technical Translation', 'sustainable-catalyst-library'),
+                'description' => __('Translate one concept across meaning, notation, procedure, computation, and interpretation.', 'sustainable-catalyst-library'),
+                'columns' => ['Plain language', 'Formal or technical form', 'Computational or data form', 'Systems interpretation'],
+                'rows' => ['Core concept', 'Variables and units', 'Assumptions and boundaries', 'Procedure or algorithm', 'Validation and checks', 'Sources and provenance'],
+            ],
+            'equation_to_code' => [
+                'id' => 'equation_to_code',
+                'label' => __('Equation to Code', 'sustainable-catalyst-library'),
+                'description' => __('Connect a model to variables, executable implementations, tests, and domain meaning.', 'sustainable-catalyst-library'),
+                'columns' => ['Plain meaning', 'Mathematical notation', 'Python', 'R', 'Julia', 'Rust', 'Validation'],
+                'rows' => ['Expression', 'Variable definitions', 'Units and dimensions', 'Inputs and outputs', 'Assumptions', 'Edge cases', 'Interpretation'],
+            ],
+            'language_comparison' => [
+                'id' => 'language_comparison',
+                'label' => __('Programming Language Comparison', 'sustainable-catalyst-library'),
+                'description' => __('Compare equivalent logic across supported programming and data environments.', 'sustainable-catalyst-library'),
+                'columns' => ['Pseudocode', 'Python', 'R', 'Julia', 'Rust', 'JavaScript', 'SQL', 'Spreadsheet'],
+                'rows' => ['Inputs', 'Core operation', 'Iteration or vectorization', 'Output', 'Error handling', 'Validation test'],
+            ],
+            'source_comparison' => [
+                'id' => 'source_comparison',
+                'label' => __('Source Comparison', 'sustainable-catalyst-library'),
+                'description' => __('Compare how publications, books, videos, datasets, and personal notes frame the same question.', 'sustainable-catalyst-library'),
+                'columns' => ['Sustainable Catalyst record', 'Outside source', 'User interpretation', 'Evidence assessment'],
+                'rows' => ['Definition', 'Central claim', 'Method or evidence', 'Assumptions', 'Limitations', 'Agreement or disagreement', 'Further research'],
+            ],
+            'domain_translation' => [
+                'id' => 'domain_translation',
+                'label' => __('Cross-Domain Translation', 'sustainable-catalyst-library'),
+                'description' => __('Compare a shared structure across scientific, technical, institutional, and human systems.', 'sustainable-catalyst-library'),
+                'columns' => ['General structure', 'Natural science', 'Technology or engineering', 'Economics or policy', 'Human or institutional systems'],
+                'rows' => ['Concept', 'State variables', 'Drivers', 'Constraints', 'Feedback', 'Risk or uncertainty', 'Responsible interpretation'],
+            ],
         ];
     }
 }

@@ -101,16 +101,29 @@ final class SC_Library_Admin {
             'sanitize_callback' => static fn($value) => 'local',
             'default' => 'local',
         ]);
+        register_setting('sc_library_settings', 'sc_library_enable_translation_matrix', [
+            'type' => 'boolean',
+            'sanitize_callback' => static fn($value) => $value ? 1 : 0,
+            'default' => 1,
+        ]);
+        register_setting('sc_library_settings', 'sc_library_default_matrix_template', [
+            'type' => 'string',
+            'sanitize_callback' => static function ($value): string {
+                $value = sanitize_key($value);
+                return array_key_exists($value, SC_Library_Notebook::matrix_templates()) ? $value : 'technical_translation';
+            },
+            'default' => 'technical_translation',
+        ]);
     }
 
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.2.0 activated.</strong> Rebuild the Library index, then test saved collections, notes, external sources, citations, and JSON export in a private browser window.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.3.0 activated.</strong> Rebuild the Library index, then test the Technical Translation Matrix, Notebook integration, source-aware cells, and matrix exports in a private browser window.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.2.0.</strong> The release adds a local Research Notebook, collections, personal notes, external and physical source records, citations, and portable JSON import/export. Rebuild the index once, then test the workspace in a private browser window.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.3.0.</strong> The release adds configurable Technical Translation Matrices, source-aware cells, review states, Notebook links, and JSON, CSV, print, and PDF-ready exports. Rebuild the index once, then test the workspace in a private browser window.</p></div>';
         }
     }
 
@@ -138,7 +151,7 @@ final class SC_Library_Admin {
         ?>
         <div class="wrap">
             <h1><?php esc_html_e('Sustainable Catalyst Library', 'sustainable-catalyst-library'); ?></h1>
-            <p><?php esc_html_e('A relationship-aware knowledge base for publications, series, concepts, resources, and contextual research navigation.', 'sustainable-catalyst-library'); ?></p>
+            <p><?php esc_html_e('A relationship-aware knowledge base for publications, series, concepts, research notebooks, sources, and auditable Technical Translation Matrices.', 'sustainable-catalyst-library'); ?></p>
 
             <?php if (isset($_GET['indexed'])) : ?>
                 <div class="notice notice-success"><p><?php echo esc_html(sprintf(
@@ -192,7 +205,19 @@ final class SC_Library_Admin {
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Research Notebook', 'sustainable-catalyst-library'); ?></th>
-                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, and JSON import/export.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.2 stores notebook data in each visitor’s browser. It does not write personal research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
+                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, matrices, and portable exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.3 stores personal workspace data in each visitor’s browser. It does not write private research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Technical Translation Matrix', 'sustainable-catalyst-library'); ?></th>
+                        <td>
+                            <label><input name="sc_library_enable_translation_matrix" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_translation_matrix', 1), 1); ?>> <?php esc_html_e('Enable configurable matrices, cell validation states, source references, and export tools.', 'sustainable-catalyst-library'); ?></label>
+                            <p><label for="sc_library_default_matrix_template"><?php esc_html_e('Default template:', 'sustainable-catalyst-library'); ?></label> <select id="sc_library_default_matrix_template" name="sc_library_default_matrix_template">
+                                <?php foreach (SC_Library_Notebook::matrix_templates() as $template_id => $template) : ?>
+                                    <option value="<?php echo esc_attr($template_id); ?>" <?php selected(get_option('sc_library_default_matrix_template', 'technical_translation'), $template_id); ?>><?php echo esc_html($template['label']); ?></option>
+                                <?php endforeach; ?>
+                            </select></p>
+                            <p class="description"><?php esc_html_e('Matrices are reusable Notebook records and can be exported as JSON, CSV, or landscape print/PDF-ready documents.', 'sustainable-catalyst-library'); ?></p>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="row"><label for="sc_library_default_mode"><?php esc_html_e('Default interface mode', 'sustainable-catalyst-library'); ?></label></th>
@@ -245,9 +270,10 @@ final class SC_Library_Admin {
                 <h2><?php esc_html_e('Recommended Research Library shortcode', 'sustainable-catalyst-library'); ?></h2>
                 <p><code>[sc_library mode="compact" initial_results="0" show_header="false" show_workspace="true"]</code></p>
                 <p><code>[sc_library_notebook]</code> — standalone Research Notebook workspace.</p>
+                <p><code>[sc_library_translation_matrix]</code> — standalone Technical Translation Matrix studio.</p>
                 <p><?php esc_html_e('Place this in a dedicated WordPress Shortcode block.', 'sustainable-catalyst-library'); ?></p>
                 <h3><?php esc_html_e('Relationship-aware REST endpoints', 'sustainable-catalyst-library'); ?></h3>
-                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template'] as $endpoint) : ?>
+                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates'] as $endpoint) : ?>
                     <p><code>/wp-json/sustainable-catalyst/v1/library/<?php echo esc_html($endpoint); ?></code></p>
                 <?php endforeach; ?>
             </div>

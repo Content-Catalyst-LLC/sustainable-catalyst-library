@@ -74,9 +74,10 @@
     <?php if ($show_workspace) : ?>
         <?php
         $workspace_title = __('Research Notebook', 'sustainable-catalyst-library');
-        $workspace_intro = __('Save Library records, write notes, and collect external links, physical books, reports, datasets, videos, and other source material.', 'sustainable-catalyst-library');
+        $workspace_intro = __('Save Library records, write notes, collect outside sources, and translate concepts across notation, code, data logic, validation, and systems meaning.', 'sustainable-catalyst-library');
         $workspace_standalone = false;
         $workspace_open = false;
+        $workspace_initial_tab = 'overview';
         include SC_LIBRARY_DIR . 'templates/library-workspace.php';
         ?>
     <?php endif; ?>

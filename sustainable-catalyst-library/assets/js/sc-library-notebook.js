@@ -3,11 +3,16 @@
 
   const shared = window.SCNotebookShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const schema = shared.schema || 'sc-library-workspace/1.0';
-  const version = shared.version || '1.2.0';
+  const schema = shared.schema || 'sc-library-workspace/1.1';
+  const legacySchema = shared.legacySchema || 'sc-library-workspace/1.0';
+  const version = shared.version || '1.3.0';
   const strings = shared.strings || {};
   const sourceTypes = shared.sourceTypes || {};
   const citationFormats = shared.citationFormats || {};
+  const matrixTemplates = shared.matrixTemplates || {};
+  const matrixStatuses = shared.matrixStatuses || {};
+  const matrixEnabled = shared.matrixEnabled !== false;
+  const defaultMatrixTemplate = shared.defaultMatrixTemplate || 'technical_translation';
   const roots = Array.from(document.querySelectorAll('[data-sc-library-workspace-root]'));
   if (!roots.length) return;
 
@@ -44,11 +49,12 @@
       savedRecords: [],
       notes: [],
       sources: [],
+      matrices: [],
     };
   };
 
   const sanitizeImported = (data) => {
-    if (!data || typeof data !== 'object' || data.schema !== schema) throw new Error('Invalid schema');
+    if (!data || typeof data !== 'object' || ![schema, legacySchema].includes(data.schema)) throw new Error('Invalid schema');
     const cleanArray = (value) => Array.isArray(value) ? value.filter((item) => item && typeof item === 'object') : [];
     return {
       schema,
@@ -59,6 +65,7 @@
       savedRecords: cleanArray(data.savedRecords),
       notes: cleanArray(data.notes),
       sources: cleanArray(data.sources),
+      matrices: cleanArray(data.matrices),
     };
   };
 
@@ -91,8 +98,9 @@
   const collectionById = (id) => workspace.collections.find((item) => item.id === id);
   const recordById = (id) => workspace.savedRecords.find((item) => Number(item.recordId) === Number(id));
   const sourceById = (id) => workspace.sources.find((item) => item.id === id);
+  const matrixById = (id) => workspace.matrices.find((item) => item.id === id);
   const recordCollectionIds = (record) => Array.isArray(record.collectionIds) && record.collectionIds.length ? record.collectionIds : ['collection_inbox'];
-  const itemCount = () => workspace.savedRecords.length + workspace.notes.length + workspace.sources.length;
+  const itemCount = () => workspace.savedRecords.length + workspace.notes.length + workspace.sources.length + workspace.matrices.length;
   const scopedCollectionExport = (collectionId) => {
     const collection = collectionById(collectionId);
     if (!collection) return null;
@@ -103,6 +111,7 @@
       savedRecords: workspace.savedRecords.filter((item) => recordCollectionIds(item).includes(collectionId)),
       notes: workspace.notes.filter((item) => (item.collectionIds || []).includes(collectionId)),
       sources: workspace.sources.filter((item) => (item.collectionIds || []).includes(collectionId)),
+      matrices: workspace.matrices.filter((item) => (item.collectionIds || []).includes(collectionId)),
     };
   };
 
@@ -169,6 +178,7 @@
   const collectionOptions = (selected = []) => workspace.collections.map((item) => `<label class="sc-library-workspace__check"><input type="checkbox" name="collectionIds" value="${escapeHtml(item.id)}" ${selected.includes(item.id) ? 'checked' : ''}> <span>${escapeHtml(item.title)}</span></label>`).join('');
   const relatedRecordOptions = (selected = '') => `<option value="">No attached Library record</option>${workspace.savedRecords.map((item) => `<option value="${Number(item.recordId)}" ${String(item.recordId) === String(selected) ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}`;
   const relatedSourceOptions = (selected = '') => `<option value="">No attached source</option>${workspace.sources.map((item) => `<option value="${escapeHtml(item.id)}" ${item.id === selected ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}`;
+  const relatedMatrixOptions = (selected = '') => `<option value="">No attached matrix</option>${workspace.matrices.map((item) => `<option value="${escapeHtml(item.id)}" ${item.id === selected ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}`;
 
   const metric = (label, value) => `<div class="sc-library-workspace__metric"><strong>${Number(value).toLocaleString()}</strong><span>${escapeHtml(label)}</span></div>`;
   const collectionNames = (ids = []) => ids.map((id) => collectionById(id)?.title).filter(Boolean);
@@ -178,6 +188,7 @@
       ...workspace.savedRecords.map((item) => ({ kind: 'Saved record', title: item.title, date: item.updatedAt || item.createdAt })),
       ...workspace.notes.map((item) => ({ kind: 'Note', title: item.title, date: item.updatedAt || item.createdAt })),
       ...workspace.sources.map((item) => ({ kind: typeLabel(item.type), title: item.title, date: item.updatedAt || item.createdAt })),
+      ...workspace.matrices.map((item) => ({ kind: 'Translation Matrix', title: item.title, date: item.updatedAt || item.createdAt })),
     ].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 8);
     return `
       <section class="sc-library-workspace__overview">
@@ -186,16 +197,18 @@
           ${metric('Collections', workspace.collections.length)}
           ${metric('Notes', workspace.notes.length)}
           ${metric('Sources', workspace.sources.length)}
+          ${metric('Matrices', workspace.matrices.length)}
         </div>
         <div class="sc-library-workspace__quick-grid">
           <button type="button" data-workspace-quick="collection"><strong>Create collection</strong><span>Group publications, notes, and sources.</span></button>
           <button type="button" data-workspace-quick="note"><strong>Write a note</strong><span>Capture a question, quotation, claim, or synthesis.</span></button>
           <button type="button" data-workspace-quick="source"><strong>Add a source</strong><span>Store a link, book, report, dataset, or video timestamp.</span></button>
+          ${matrixEnabled ? '<button type="button" data-workspace-quick="matrix"><strong>Build a translation matrix</strong><span>Translate concepts across notation, code, data, validation, and systems meaning.</span></button>' : ''}
           <button type="button" data-workspace-tab="portability"><strong>Export workspace</strong><span>Create a portable JSON research manifest.</span></button>
         </div>
         <section class="sc-library-workspace__recent-work">
           <h3>Recent research activity</h3>
-          ${recent.length ? `<div>${recent.map((item) => `<article><span>${escapeHtml(item.kind)}</span><strong>${escapeHtml(item.title)}</strong><time>${escapeHtml(formatDate(item.date))}</time></article>`).join('')}</div>` : '<p>No saved research yet. Open a knowledge record and choose “Save to Notebook,” or add your own note or source.</p>'}
+          ${recent.length ? `<div>${recent.map((item) => `<article><span>${escapeHtml(item.kind)}</span><strong>${escapeHtml(item.title)}</strong><time>${escapeHtml(formatDate(item.date))}</time></article>`).join('')}</div>` : '<p>No saved research yet. Save a knowledge record, add a source, write a note, or build a Technical Translation Matrix.</p>'}
         </section>
       </section>`;
   };
@@ -213,13 +226,13 @@
         </form>
         <div class="sc-library-workspace__list">
           ${workspace.collections.map((item) => {
-            const count = workspace.savedRecords.filter((record) => recordCollectionIds(record).includes(item.id)).length + workspace.notes.filter((note) => (note.collectionIds || []).includes(item.id)).length + workspace.sources.filter((source) => (source.collectionIds || []).includes(item.id)).length;
+            const count = workspace.savedRecords.filter((record) => recordCollectionIds(record).includes(item.id)).length + workspace.notes.filter((note) => (note.collectionIds || []).includes(item.id)).length + workspace.sources.filter((source) => (source.collectionIds || []).includes(item.id)).length + workspace.matrices.filter((matrix) => (matrix.collectionIds || []).includes(item.id)).length;
             return `<article><div><span>Collection</span><h4>${escapeHtml(item.title)}</h4><p>${escapeHtml(item.description || 'No description')}</p><small>${count} linked items</small></div><div class="sc-library-workspace__row-actions"><button type="button" data-export-collection="${escapeHtml(item.id)}">Export</button><button type="button" data-edit-collection="${escapeHtml(item.id)}">Edit</button>${item.id !== 'collection_inbox' ? `<button type="button" data-delete-collection="${escapeHtml(item.id)}">Delete</button>` : ''}</div></article>`;
           }).join('')}
         </div>
         <section class="sc-library-workspace__saved-records">
           <h3>Saved Library records</h3>
-          ${workspace.savedRecords.length ? workspace.savedRecords.map((record) => `<article><div><span>${escapeHtml(record.typeLabel || 'Publication')}</span><h4><a href="${escapeHtml(record.url)}">${escapeHtml(record.title)}</a></h4><p>${escapeHtml(record.excerpt || '')}</p><div class="sc-library-workspace__checks">${workspace.collections.map((collection) => `<label class="sc-library-workspace__check"><input type="checkbox" data-record-collection="${Number(record.recordId)}" value="${escapeHtml(collection.id)}" ${recordCollectionIds(record).includes(collection.id) ? 'checked' : ''}> <span>${escapeHtml(collection.title)}</span></label>`).join('')}</div></div><div class="sc-library-workspace__row-actions"><button type="button" data-note-saved-record="${Number(record.recordId)}">Write note</button><button type="button" data-delete-saved-record="${Number(record.recordId)}">Remove</button></div></article>`).join('') : '<p class="sc-library-workspace__empty">No Library records have been saved yet.</p>'}
+          ${workspace.savedRecords.length ? workspace.savedRecords.map((record) => `<article><div><span>${escapeHtml(record.typeLabel || 'Publication')}</span><h4><a href="${escapeHtml(record.url)}">${escapeHtml(record.title)}</a></h4><p>${escapeHtml(record.excerpt || '')}</p><div class="sc-library-workspace__checks">${workspace.collections.map((collection) => `<label class="sc-library-workspace__check"><input type="checkbox" data-record-collection="${Number(record.recordId)}" value="${escapeHtml(collection.id)}" ${recordCollectionIds(record).includes(collection.id) ? 'checked' : ''}> <span>${escapeHtml(collection.title)}</span></label>`).join('')}</div></div><div class="sc-library-workspace__row-actions"><button type="button" data-note-saved-record="${Number(record.recordId)}">Write note</button>${matrixEnabled ? `<button type="button" data-matrix-saved-record="${Number(record.recordId)}">Translate</button>` : ''}<button type="button" data-delete-saved-record="${Number(record.recordId)}">Remove</button></div></article>`).join('') : '<p class="sc-library-workspace__empty">No Library records have been saved yet.</p>'}
         </section>
       </section>`;
   };
@@ -227,7 +240,7 @@
   const notesHtml = (editId = '', seed = {}) => {
     const found = workspace.notes.find((item) => item.id === editId);
     const editing = found || {
-      id: '', type: seed.type || 'note', title: seed.title || '', body: seed.body || '', recordId: seed.recordId || '', sourceId: seed.sourceId || '', tags: [], collectionIds: seed.collectionIds || ['collection_inbox']
+      id: '', type: seed.type || 'note', title: seed.title || '', body: seed.body || '', recordId: seed.recordId || '', sourceId: seed.sourceId || '', matrixId: seed.matrixId || '', tags: [], collectionIds: seed.collectionIds || ['collection_inbox']
     };
     const noteTypes = [
       { id: 'note', label: 'Research note' }, { id: 'question', label: 'Research question' }, { id: 'summary', label: 'Summary' },
@@ -244,9 +257,10 @@
             <label><span>Title</span><input required name="title" value="${escapeHtml(editing.title)}" placeholder="Key question or observation"></label>
           </div>
           <label><span>Note</span><textarea required name="body" rows="7" placeholder="Write your research note here">${escapeHtml(editing.body)}</textarea></label>
-          <div class="sc-library-workspace__form-grid">
+          <div class="sc-library-workspace__form-grid sc-library-workspace__form-grid--three">
             <label><span>Attached Library record</span><select name="recordId">${relatedRecordOptions(editing.recordId)}</select></label>
             <label><span>Attached outside source</span><select name="sourceId">${relatedSourceOptions(editing.sourceId)}</select></label>
+            <label><span>Attached translation matrix</span><select name="matrixId">${relatedMatrixOptions(editing.matrixId)}</select></label>
           </div>
           <label><span>Tags</span><input name="tags" value="${escapeHtml((editing.tags || []).join(', '))}" placeholder="feedback loops, evidence, review"></label>
           <fieldset><legend>Add to collections</legend><div class="sc-library-workspace__checks">${collectionOptions(editing.collectionIds || ['collection_inbox'])}</div></fieldset>
@@ -304,16 +318,143 @@
       </section>`;
   };
 
+
+  const clone = (value) => JSON.parse(JSON.stringify(value));
+  const matrixTemplate = (id) => matrixTemplates[id] || matrixTemplates[defaultMatrixTemplate] || Object.values(matrixTemplates)[0] || {
+    id: 'technical_translation', label: 'Technical Translation', description: '',
+    columns: ['Plain language', 'Formal form', 'Computational form', 'Systems interpretation'],
+    rows: ['Concept', 'Variables and units', 'Assumptions', 'Procedure', 'Validation', 'Sources'],
+  };
+  const statusLabel = (status) => matrixStatuses[status]?.label || status || 'Draft';
+  const matrixStatusOptions = (selected = 'draft') => Object.values(matrixStatuses).map((item) => `<option value="${escapeHtml(item.id)}" ${item.id === selected ? 'selected' : ''}>${escapeHtml(item.label)}</option>`).join('');
+  const matrixTemplateOptions = (selected = defaultMatrixTemplate) => Object.values(matrixTemplates).map((item) => `<option value="${escapeHtml(item.id)}" ${item.id === selected ? 'selected' : ''}>${escapeHtml(item.label)}</option>`).join('');
+  const makeMatrix = (templateId = defaultMatrixTemplate, seed = {}) => {
+    const template = matrixTemplate(templateId);
+    const createdAt = now();
+    const columns = (template.columns || []).map((label) => ({ id: uid('column'), label }));
+    const rows = (template.rows || []).map((label) => ({ id: uid('row'), label, cells: {} }));
+    rows.forEach((row) => columns.forEach((column) => { row.cells[column.id] = { value: '', status: 'draft', sourceRef: '' }; }));
+    return {
+      id: seed.id || '',
+      title: seed.title || '',
+      description: seed.description || template.description || '',
+      templateId: template.id,
+      status: seed.status || 'draft',
+      recordId: seed.recordId || '',
+      sourceId: seed.sourceId || '',
+      collectionIds: seed.collectionIds || ['collection_inbox'],
+      tags: seed.tags || [],
+      notes: seed.notes || '',
+      columns,
+      rows,
+      createdAt: seed.createdAt || createdAt,
+      updatedAt: createdAt,
+    };
+  };
+  const normalizeMatrix = (matrix) => {
+    const normalized = clone(matrix || makeMatrix());
+    normalized.columns = Array.isArray(normalized.columns) ? normalized.columns : [];
+    normalized.rows = Array.isArray(normalized.rows) ? normalized.rows : [];
+    normalized.collectionIds = Array.isArray(normalized.collectionIds) && normalized.collectionIds.length ? normalized.collectionIds : ['collection_inbox'];
+    normalized.tags = Array.isArray(normalized.tags) ? normalized.tags : [];
+    normalized.status = normalized.status || 'draft';
+    normalized.templateId = normalized.templateId || defaultMatrixTemplate;
+    normalized.columns.forEach((column) => { column.id = column.id || uid('column'); column.label = words(column.label) || 'Column'; });
+    normalized.rows.forEach((row) => {
+      row.id = row.id || uid('row'); row.label = words(row.label) || 'Row'; row.cells = row.cells && typeof row.cells === 'object' ? row.cells : {};
+      normalized.columns.forEach((column) => {
+        const cell = row.cells[column.id];
+        row.cells[column.id] = cell && typeof cell === 'object' ? { value: words(cell.value), status: cell.status || 'draft', sourceRef: words(cell.sourceRef) } : { value: '', status: 'draft', sourceRef: '' };
+      });
+    });
+    return normalized;
+  };
+  const matrixCell = (matrix, rowId, columnId) => matrix.rows.find((row) => row.id === rowId)?.cells?.[columnId];
+  const matrixValidationSummary = (matrix) => {
+    const counts = {};
+    (matrix.rows || []).forEach((row) => (matrix.columns || []).forEach((column) => {
+      const cell = row.cells?.[column.id] || {};
+      const key = cell.status || 'draft'; counts[key] = (counts[key] || 0) + 1;
+    }));
+    return counts;
+  };
+  const matrixCsv = (matrix) => {
+    const quote = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+    const headers = ['Knowledge layer', ...(matrix.columns || []).map((column) => column.label)];
+    const lines = [headers.map(quote).join(',')];
+    (matrix.rows || []).forEach((row) => lines.push([row.label, ...(matrix.columns || []).map((column) => row.cells?.[column.id]?.value || '')].map(quote).join(',')));
+    return lines.join('\n');
+  };
+  const matrixPrintableHtml = (matrix) => {
+    const record = recordById(matrix.recordId);
+    const source = sourceById(matrix.sourceId);
+    const tableHead = (matrix.columns || []).map((column) => `<th>${escapeHtml(column.label)}</th>`).join('');
+    const tableRows = (matrix.rows || []).map((row) => `<tr><th>${escapeHtml(row.label)}</th>${(matrix.columns || []).map((column) => {
+      const cell = row.cells?.[column.id] || {};
+      return `<td><div>${escapeHtml(cell.value || '')}</div><small>${escapeHtml(statusLabel(cell.status))}${cell.sourceRef ? ` · ${escapeHtml(cell.sourceRef)}` : ''}</small></td>`;
+    }).join('')}</tr>`).join('');
+    return `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(matrix.title || 'Technical Translation Matrix')}</title><style>@page{size:landscape;margin:14mm}body{font-family:Arial,sans-serif;color:#111}h1{font-size:22px;margin:0 0 8px}p{line-height:1.5}.meta{font-size:11px;color:#555;margin-bottom:14px}.status{display:inline-block;padding:3px 7px;border:1px solid #721019}.table-wrap{overflow:visible}table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10px}th,td{border:1px solid #777;padding:7px;vertical-align:top;overflow-wrap:anywhere}thead th{background:#111;color:#fff}tbody th{background:#f2eee5;text-align:left;width:15%}td small{display:block;margin-top:6px;color:#666;font-size:8px}.provenance{margin-top:15px;border-top:1px solid #777;padding-top:10px;font-size:10px}@media print{button{display:none}}</style></head><body><h1>${escapeHtml(matrix.title || 'Technical Translation Matrix')}</h1><p>${escapeHtml(matrix.description || '')}</p><div class="meta"><span class="status">${escapeHtml(statusLabel(matrix.status))}</span> · Generated ${escapeHtml(formatDate(now()))}</div><div class="table-wrap"><table><thead><tr><th>Knowledge layer</th>${tableHead}</tr></thead><tbody>${tableRows}</tbody></table></div><div class="provenance"><strong>Provenance</strong><br>${record ? `Library record: ${escapeHtml(record.title)} (${escapeHtml(record.recordIdentifier || String(record.recordId))})<br>` : ''}${source ? `Outside source: ${escapeHtml(source.title)}<br>` : ''}${matrix.notes ? `Notes: ${escapeHtml(matrix.notes)}<br>` : ''}Matrix ID: ${escapeHtml(matrix.id || 'unsaved')} · Workspace schema: ${escapeHtml(schema)}</div><script>window.addEventListener('load',()=>window.print())<\/script></body></html>`;
+  };
+  const downloadText = (content, filename, type = 'text/plain') => {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a'); link.href = url; link.download = filename;
+    document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+  };
+  const matrixEditorTable = (matrix) => `
+    <div class="sc-library-matrix-editor__toolbar">
+      <button type="button" data-matrix-add-row>Add row</button>
+      <button type="button" data-matrix-add-column>Add column</button>
+      <span>${matrix.rows.length} rows × ${matrix.columns.length} columns</span>
+    </div>
+    <div class="sc-library-matrix-editor__scroll">
+      <table class="sc-library-matrix-editor" data-matrix-grid>
+        <thead><tr><th class="sc-library-matrix-editor__corner">Knowledge layer</th>${matrix.columns.map((column) => `<th data-matrix-column="${escapeHtml(column.id)}"><input data-matrix-column-label="${escapeHtml(column.id)}" value="${escapeHtml(column.label)}" aria-label="Column label"><button type="button" data-matrix-remove-column="${escapeHtml(column.id)}" aria-label="Remove ${escapeHtml(column.label)}">×</button></th>`).join('')}</tr></thead>
+        <tbody>${matrix.rows.map((row) => `<tr data-matrix-row="${escapeHtml(row.id)}"><th><input data-matrix-row-label="${escapeHtml(row.id)}" value="${escapeHtml(row.label)}" aria-label="Row label"><button type="button" data-matrix-remove-row="${escapeHtml(row.id)}" aria-label="Remove ${escapeHtml(row.label)}">×</button></th>${matrix.columns.map((column) => { const cell = row.cells[column.id] || { value: '', status: 'draft', sourceRef: '' }; return `<td><textarea rows="5" data-matrix-cell="${escapeHtml(row.id)}|${escapeHtml(column.id)}" placeholder="Enter translation">${escapeHtml(cell.value)}</textarea><div class="sc-library-matrix-cell-meta"><select data-matrix-cell-status="${escapeHtml(row.id)}|${escapeHtml(column.id)}" aria-label="Cell validation status">${matrixStatusOptions(cell.status)}</select><input data-matrix-cell-source="${escapeHtml(row.id)}|${escapeHtml(column.id)}" value="${escapeHtml(cell.sourceRef)}" placeholder="Source, page, URL, or note ID" aria-label="Cell source reference"></div></td>`; }).join('')}</tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+  const matricesHtml = (draft) => {
+    if (!matrixEnabled) return '<p class="sc-library-workspace__empty">The Technical Translation Matrix is disabled.</p>';
+    const editing = normalizeMatrix(draft || makeMatrix(defaultMatrixTemplate));
+    const summary = matrixValidationSummary(editing);
+    return `
+      <section class="sc-library-workspace__section sc-library-matrix-studio">
+        <header><div><p class="sc-library__eyebrow">Technical translation</p><h3>Technical Translation Matrix</h3><p>Translate the same idea across language, notation, code, data structure, assumptions, validation, and systems meaning.</p></div></header>
+        <form class="sc-library-workspace__form sc-library-matrix-form" data-matrix-form>
+          <input type="hidden" name="id" value="${escapeHtml(editing.id)}">
+          <div class="sc-library-workspace__form-grid sc-library-workspace__form-grid--three">
+            <label><span>Template</span><select data-matrix-template name="templateId">${matrixTemplateOptions(editing.templateId)}</select></label>
+            <label><span>Matrix status</span><select data-matrix-field="status" name="status">${matrixStatusOptions(editing.status)}</select></label>
+            <label><span>Title</span><input required data-matrix-field="title" name="title" value="${escapeHtml(editing.title)}" placeholder="Discrete Population Growth"></label>
+          </div>
+          <label><span>Description or research question</span><textarea data-matrix-field="description" name="description" rows="3">${escapeHtml(editing.description)}</textarea></label>
+          <div class="sc-library-workspace__form-grid">
+            <label><span>Attached Library record</span><select data-matrix-field="recordId" name="recordId">${relatedRecordOptions(editing.recordId)}</select></label>
+            <label><span>Attached outside source</span><select data-matrix-field="sourceId" name="sourceId">${relatedSourceOptions(editing.sourceId)}</select></label>
+          </div>
+          <label><span>Tags</span><input data-matrix-field="tagsText" name="tags" value="${escapeHtml((editing.tags || []).join(', '))}" placeholder="growth model, validation, Python"></label>
+          <label><span>Matrix notes and boundaries</span><textarea data-matrix-field="notes" name="notes" rows="3" placeholder="Record uncertainties, exclusions, and review requirements.">${escapeHtml(editing.notes)}</textarea></label>
+          <fieldset><legend>Add to collections</legend><div class="sc-library-workspace__checks">${collectionOptions(editing.collectionIds)}</div></fieldset>
+          ${matrixEditorTable(editing)}
+          <div class="sc-library-matrix-validation"><strong>Cell states</strong>${Object.entries(summary).map(([key, value]) => `<span class="is-${escapeHtml(key)}">${escapeHtml(statusLabel(key))}: ${Number(value)}</span>`).join('')}</div>
+          <div class="sc-library-workspace__form-actions"><button type="submit">${editing.id ? 'Update matrix' : 'Save matrix'}</button>${editing.id ? '<button type="button" data-cancel-edit>Cancel</button>' : ''}</div>
+        </form>
+        <div class="sc-library-workspace__list sc-library-matrix-list">
+          ${workspace.matrices.length ? workspace.matrices.slice().sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))).map((item) => { const counts = matrixValidationSummary(item); return `<article><div><span>${escapeHtml(matrixTemplate(item.templateId).label || 'Translation Matrix')}</span><h4>${escapeHtml(item.title || 'Untitled matrix')}</h4><p>${escapeHtml(item.description || '')}</p><small>${escapeHtml(statusLabel(item.status))} · ${item.rows?.length || 0} rows × ${item.columns?.length || 0} columns · ${escapeHtml(collectionNames(item.collectionIds).join(' · ') || 'Unfiled')} · Updated ${escapeHtml(formatDate(item.updatedAt))}</small><div class="sc-library-matrix-list__states">${Object.entries(counts).map(([key, value]) => `<span class="is-${escapeHtml(key)}">${escapeHtml(statusLabel(key))}: ${Number(value)}</span>`).join('')}</div></div><div class="sc-library-workspace__row-actions"><button type="button" data-edit-matrix="${escapeHtml(item.id)}">Edit</button><button type="button" data-note-matrix="${escapeHtml(item.id)}">Write note</button><button type="button" data-export-matrix-json="${escapeHtml(item.id)}">JSON</button><button type="button" data-export-matrix-csv="${escapeHtml(item.id)}">CSV</button><button type="button" data-print-matrix="${escapeHtml(item.id)}">PDF / Print</button><button type="button" data-delete-matrix="${escapeHtml(item.id)}">Delete</button></div></article>`; }).join('') : '<p class="sc-library-workspace__empty">No Technical Translation Matrices have been saved.</p>'}
+        </div>
+      </section>`;
+  };
+
   const portabilityHtml = () => `
     <section class="sc-library-workspace__section">
       <header><div><p class="sc-library__eyebrow">Portable research data</p><h3>Import and export</h3></div></header>
       <div class="sc-library-workspace__portability-grid">
-        <article><h4>Export workspace</h4><p>Download collections, saved records, notes, sources, relationships, and citations as a versioned JSON manifest.</p><button type="button" data-export-workspace>Download JSON export</button></article>
+        <article><h4>Export workspace</h4><p>Download collections, saved records, notes, sources, Technical Translation Matrices, relationships, citations, and validation states as a versioned JSON manifest.</p><button type="button" data-export-workspace>Download JSON export</button></article>
         <article><h4>Import workspace</h4><p>Replace this browser’s current workspace with a compatible Sustainable Catalyst Library export.</p><label class="sc-library-workspace__file"><span>Select JSON export</span><input type="file" accept="application/json,.json" data-import-workspace></label></article>
         <article><h4>Copy JSON</h4><p>Copy the complete workspace manifest for inspection or transfer into another system.</p><button type="button" data-copy-workspace>Copy workspace JSON</button></article>
-        <article class="sc-library-workspace__danger"><h4>Clear local workspace</h4><p>Delete all locally stored collections, saved records, notes, and sources from this browser.</p><button type="button" data-clear-workspace>Clear all local data</button></article>
+        <article class="sc-library-workspace__danger"><h4>Clear local workspace</h4><p>Delete all locally stored collections, saved records, notes, sources, and matrices from this browser.</p><button type="button" data-clear-workspace>Clear all local data</button></article>
       </div>
-      <details class="sc-library-workspace__manifest"><summary>Export manifest details</summary><pre>${escapeHtml(JSON.stringify({ schema: workspace.schema, version: workspace.version, updatedAt: workspace.updatedAt, counts: { collections: workspace.collections.length, savedRecords: workspace.savedRecords.length, notes: workspace.notes.length, sources: workspace.sources.length } }, null, 2))}</pre></details>
+      <details class="sc-library-workspace__manifest"><summary>Export manifest details</summary><pre>${escapeHtml(JSON.stringify({ schema: workspace.schema, version: workspace.version, updatedAt: workspace.updatedAt, counts: { collections: workspace.collections.length, savedRecords: workspace.savedRecords.length, notes: workspace.notes.length, sources: workspace.sources.length, matrices: workspace.matrices.length } }, null, 2))}</pre></details>
     </section>`;
 
   const controllers = roots.map((root) => {
@@ -321,9 +462,10 @@
     const content = root.querySelector('[data-workspace-content]');
     const notice = root.querySelector('[data-workspace-notice]');
     const count = root.querySelector('[data-workspace-count]');
-    let activeTab = 'overview';
+    let activeTab = root.dataset.workspaceInitialTab || 'overview';
     let editId = '';
     let noteSeed = {};
+    let matrixDraft = makeMatrix(defaultMatrixTemplate);
 
     const showNotice = (message, type = 'success') => {
       if (!notice) return;
@@ -341,6 +483,7 @@
       if (activeTab === 'collections') content.innerHTML = collectionsHtml(editId);
       else if (activeTab === 'notes') content.innerHTML = notesHtml(editId, noteSeed);
       else if (activeTab === 'sources') content.innerHTML = sourcesHtml(editId);
+      else if (activeTab === 'matrices') content.innerHTML = matricesHtml(matrixDraft);
       else if (activeTab === 'portability') content.innerHTML = portabilityHtml();
       else content.innerHTML = overviewHtml();
     };
@@ -358,7 +501,7 @@
       if (panel) panel.hidden = true;
       document.documentElement.classList.remove('sc-library-workspace-open');
     };
-    const setTab = (tab) => { activeTab = tab; editId = ''; noteSeed = {}; render(); };
+    const setTab = (tab) => { activeTab = tab; editId = ''; noteSeed = {}; if (tab === 'matrices') matrixDraft = makeMatrix(defaultMatrixTemplate); render(); };
 
     root.addEventListener('click', async (event) => {
       const openButton = event.target.closest('[data-workspace-open]');
@@ -371,10 +514,11 @@
         const kind = quick.dataset.workspaceQuick;
         if (kind === 'collection') open('collections');
         else if (kind === 'source') open('sources');
+        else if (kind === 'matrix') { matrixDraft = makeMatrix(defaultMatrixTemplate); open('matrices'); }
         else open('notes');
         return;
       }
-      if (event.target.closest('[data-cancel-edit]')) { editId = ''; noteSeed = {}; render(); return; }
+      if (event.target.closest('[data-cancel-edit]')) { editId = ''; noteSeed = {}; matrixDraft = makeMatrix(defaultMatrixTemplate); render(); return; }
 
       const exportCollection = event.target.closest('[data-export-collection]');
       if (exportCollection) {
@@ -397,6 +541,7 @@
         workspace.savedRecords.forEach((item) => { item.collectionIds = recordCollectionIds(item).filter((value) => value !== id); if (!item.collectionIds.length) item.collectionIds = ['collection_inbox']; });
         workspace.notes.forEach((item) => { item.collectionIds = (item.collectionIds || []).filter((value) => value !== id); });
         workspace.sources.forEach((item) => { item.collectionIds = (item.collectionIds || []).filter((value) => value !== id); });
+        workspace.matrices.forEach((item) => { item.collectionIds = (item.collectionIds || []).filter((value) => value !== id); if (!item.collectionIds.length) item.collectionIds = ['collection_inbox']; });
         persist(); render(); return;
       }
       const noteSavedRecord = event.target.closest('[data-note-saved-record]');
@@ -405,11 +550,21 @@
         if (record) { noteSeed = { title: `Notes on ${record.title}`, recordId: String(record.recordId), collectionIds: recordCollectionIds(record) }; activeTab = 'notes'; editId = ''; render(); }
         return;
       }
+      const matrixSavedRecord = event.target.closest('[data-matrix-saved-record]');
+      if (matrixSavedRecord) {
+        const record = recordById(matrixSavedRecord.dataset.matrixSavedRecord);
+        if (record) {
+          matrixDraft = makeMatrix(defaultMatrixTemplate, { title: `Technical Translation: ${record.title}`, recordId: String(record.recordId), collectionIds: recordCollectionIds(record), description: record.excerpt || '' });
+          activeTab = 'matrices'; editId = ''; render();
+        }
+        return;
+      }
       const deleteSavedRecord = event.target.closest('[data-delete-saved-record]');
       if (deleteSavedRecord) {
         const recordId = Number(deleteSavedRecord.dataset.deleteSavedRecord);
         workspace.savedRecords = workspace.savedRecords.filter((item) => Number(item.recordId) !== recordId);
         workspace.notes.forEach((item) => { if (Number(item.recordId) === recordId) item.recordId = ''; });
+        workspace.matrices.forEach((item) => { if (Number(item.recordId) === recordId) item.recordId = ''; });
         persist(); render(); return;
       }
       const editNote = event.target.closest('[data-edit-note]');
@@ -423,8 +578,33 @@
         const id = deleteSource.dataset.deleteSource;
         workspace.sources = workspace.sources.filter((item) => item.id !== id);
         workspace.notes.forEach((item) => { if (item.sourceId === id) item.sourceId = ''; });
+        workspace.matrices.forEach((item) => { if (item.sourceId === id) item.sourceId = ''; });
         persist(); render(); return;
       }
+      const editMatrix = event.target.closest('[data-edit-matrix]');
+      if (editMatrix) { const found = matrixById(editMatrix.dataset.editMatrix); if (found) { matrixDraft = normalizeMatrix(found); editId = found.id; activeTab = 'matrices'; render(); } return; }
+      const noteMatrix = event.target.closest('[data-note-matrix]');
+      if (noteMatrix) { const found = matrixById(noteMatrix.dataset.noteMatrix); if (found) { noteSeed = { title: `Notes on ${found.title}`, matrixId: found.id, collectionIds: found.collectionIds || ['collection_inbox'] }; activeTab = 'notes'; editId = ''; render(); } return; }
+      const deleteMatrix = event.target.closest('[data-delete-matrix]');
+      if (deleteMatrix) {
+        const id = deleteMatrix.dataset.deleteMatrix;
+        if (!window.confirm('Delete this Technical Translation Matrix?')) return;
+        workspace.matrices = workspace.matrices.filter((item) => item.id !== id);
+        workspace.notes.forEach((item) => { if (item.matrixId === id) item.matrixId = ''; });
+        persist(); matrixDraft = makeMatrix(defaultMatrixTemplate); editId = ''; render(); showNotice(strings.matrixDeleted || 'Matrix deleted.'); return;
+      }
+      const exportMatrixJson = event.target.closest('[data-export-matrix-json]');
+      if (exportMatrixJson) { const found = matrixById(exportMatrixJson.dataset.exportMatrixJson); if (found) downloadText(JSON.stringify({ schema, version, exportScope: { type: 'translation-matrix', id: found.id, title: found.title }, matrix: found }, null, 2), `technical-translation-matrix-${slug(found.title)}-${today()}.json`, 'application/json'); return; }
+      const exportMatrixCsv = event.target.closest('[data-export-matrix-csv]');
+      if (exportMatrixCsv) { const found = matrixById(exportMatrixCsv.dataset.exportMatrixCsv); if (found) downloadText(matrixCsv(found), `technical-translation-matrix-${slug(found.title)}-${today()}.csv`, 'text/csv'); return; }
+      const printMatrix = event.target.closest('[data-print-matrix]');
+      if (printMatrix) { const found = matrixById(printMatrix.dataset.printMatrix); if (found) { const win = window.open('', '_blank'); if (win) { win.document.open(); win.document.write(matrixPrintableHtml(found)); win.document.close(); } else showNotice('The browser blocked the print window.', 'error'); } return; }
+      if (event.target.closest('[data-matrix-add-row]')) { const row = { id: uid('row'), label: 'New knowledge layer', cells: {} }; matrixDraft.columns.forEach((column) => { row.cells[column.id] = { value: '', status: 'draft', sourceRef: '' }; }); matrixDraft.rows.push(row); render(); return; }
+      if (event.target.closest('[data-matrix-add-column]')) { const column = { id: uid('column'), label: 'New translation' }; matrixDraft.columns.push(column); matrixDraft.rows.forEach((row) => { row.cells[column.id] = { value: '', status: 'draft', sourceRef: '' }; }); render(); return; }
+      const removeRow = event.target.closest('[data-matrix-remove-row]');
+      if (removeRow) { if (matrixDraft.rows.length <= 1) return; matrixDraft.rows = matrixDraft.rows.filter((row) => row.id !== removeRow.dataset.matrixRemoveRow); render(); return; }
+      const removeColumn = event.target.closest('[data-matrix-remove-column]');
+      if (removeColumn) { if (matrixDraft.columns.length <= 1) return; const id = removeColumn.dataset.matrixRemoveColumn; matrixDraft.columns = matrixDraft.columns.filter((column) => column.id !== id); matrixDraft.rows.forEach((row) => { delete row.cells[id]; }); render(); return; }
       const copyCitation = event.target.closest('[data-copy-citation]');
       if (copyCitation) {
         const source = sourceById(copyCitation.dataset.copyCitation);
@@ -470,12 +650,30 @@
         const existing = workspace.notes.find((item) => item.id === id);
         const item = {
           id: id || uid('note'), type: words(data.get('type')) || 'note', title: words(data.get('title')), body: words(data.get('body')),
-          recordId: words(data.get('recordId')), sourceId: words(data.get('sourceId')), tags: listFromText(data.get('tags')),
+          recordId: words(data.get('recordId')), sourceId: words(data.get('sourceId')), matrixId: words(data.get('matrixId')), tags: listFromText(data.get('tags')),
           collectionIds: data.getAll('collectionIds').map(String), createdAt: existing?.createdAt || now(), updatedAt: now(),
         };
         if (!item.collectionIds.length) item.collectionIds = ['collection_inbox'];
         if (existing) Object.assign(existing, item); else workspace.notes.push(item);
         persist(); editId = ''; noteSeed = {}; renderAll(); showNotice('Note saved.'); return;
+      }
+      if (form.matches('[data-matrix-form]')) {
+        const selectedCollections = data.getAll('collectionIds').map(String);
+        matrixDraft.id = words(data.get('id')) || matrixDraft.id || uid('matrix');
+        matrixDraft.title = words(data.get('title')) || 'Untitled Technical Translation Matrix';
+        matrixDraft.description = words(data.get('description'));
+        matrixDraft.templateId = words(data.get('templateId')) || matrixDraft.templateId || defaultMatrixTemplate;
+        matrixDraft.status = words(data.get('status')) || 'draft';
+        matrixDraft.recordId = words(data.get('recordId'));
+        matrixDraft.sourceId = words(data.get('sourceId'));
+        matrixDraft.tags = listFromText(data.get('tags'));
+        matrixDraft.notes = words(data.get('notes'));
+        matrixDraft.collectionIds = selectedCollections.length ? selectedCollections : ['collection_inbox'];
+        matrixDraft.updatedAt = now();
+        const existing = matrixById(matrixDraft.id);
+        const saved = normalizeMatrix(matrixDraft);
+        if (existing) Object.assign(existing, saved); else workspace.matrices.push(saved);
+        persist(); editId = ''; matrixDraft = makeMatrix(defaultMatrixTemplate); renderAll(); showNotice(strings.matrixSaved || 'Matrix saved.'); return;
       }
       if (form.matches('[data-source-form]')) {
         const id = words(data.get('id'));
@@ -496,7 +694,44 @@
       }
     });
 
+    root.addEventListener('input', (event) => {
+      if (activeTab !== 'matrices') return;
+      const field = event.target.closest('[data-matrix-field]');
+      if (field) {
+        const key = field.dataset.matrixField;
+        if (key === 'tagsText') matrixDraft.tags = listFromText(field.value);
+        else matrixDraft[key] = field.value;
+        return;
+      }
+      const columnLabel = event.target.closest('[data-matrix-column-label]');
+      if (columnLabel) { const column = matrixDraft.columns.find((item) => item.id === columnLabel.dataset.matrixColumnLabel); if (column) column.label = columnLabel.value; return; }
+      const rowLabel = event.target.closest('[data-matrix-row-label]');
+      if (rowLabel) { const row = matrixDraft.rows.find((item) => item.id === rowLabel.dataset.matrixRowLabel); if (row) row.label = rowLabel.value; return; }
+      const cellValue = event.target.closest('[data-matrix-cell]');
+      if (cellValue) { const [rowId, columnId] = cellValue.dataset.matrixCell.split('|'); const cell = matrixCell(matrixDraft, rowId, columnId); if (cell) cell.value = cellValue.value; return; }
+      const cellSource = event.target.closest('[data-matrix-cell-source]');
+      if (cellSource) { const [rowId, columnId] = cellSource.dataset.matrixCellSource.split('|'); const cell = matrixCell(matrixDraft, rowId, columnId); if (cell) cell.sourceRef = cellSource.value; }
+    });
+
     root.addEventListener('change', async (event) => {
+      const matrixTemplateSelect = event.target.closest('[data-matrix-template]');
+      if (matrixTemplateSelect) {
+        const next = matrixTemplateSelect.value;
+        if (next !== matrixDraft.templateId && window.confirm(strings.matrixTemplateReset || 'Changing templates resets the unsaved grid. Continue?')) {
+          const seed = { id: matrixDraft.id, title: matrixDraft.title, description: matrixTemplate(next).description || matrixDraft.description, status: matrixDraft.status, recordId: matrixDraft.recordId, sourceId: matrixDraft.sourceId, collectionIds: matrixDraft.collectionIds, tags: matrixDraft.tags, notes: matrixDraft.notes, createdAt: matrixDraft.createdAt };
+          matrixDraft = makeMatrix(next, seed); render();
+        } else if (next !== matrixDraft.templateId) {
+          matrixTemplateSelect.value = matrixDraft.templateId;
+        }
+        return;
+      }
+      const matrixCellStatus = event.target.closest('[data-matrix-cell-status]');
+      if (matrixCellStatus) { const [rowId, columnId] = matrixCellStatus.dataset.matrixCellStatus.split('|'); const cell = matrixCell(matrixDraft, rowId, columnId); if (cell) cell.status = matrixCellStatus.value; return; }
+      if (event.target.closest('[data-matrix-form] input[name="collectionIds"]')) {
+        matrixDraft.collectionIds = Array.from(root.querySelectorAll('[data-matrix-form] input[name="collectionIds"]:checked')).map((input) => input.value);
+        if (!matrixDraft.collectionIds.length) matrixDraft.collectionIds = ['collection_inbox'];
+        return;
+      }
       const recordCollection = event.target.closest('[data-record-collection]');
       if (recordCollection) {
         const record = recordById(recordCollection.dataset.recordCollection);
@@ -520,7 +755,11 @@
       } finally { input.value = ''; }
     });
 
-    return { root, open, close, render, setTab, seedNote(seed) { noteSeed = seed || {}; activeTab = 'notes'; editId = ''; open('notes'); } };
+    return {
+      root, open, close, render, setTab,
+      seedNote(seed) { noteSeed = seed || {}; activeTab = 'notes'; editId = ''; open('notes'); },
+      seedMatrix(seed) { matrixDraft = makeMatrix(seed?.templateId || defaultMatrixTemplate, seed || {}); activeTab = 'matrices'; editId = ''; open('matrices'); },
+    };
   });
 
   const renderAll = () => controllers.forEach((controller) => controller.render());
@@ -555,6 +794,18 @@
       persist();
     }
     controllerForEvent(event).seedNote({ title: `Notes on ${record.title}`, recordId: String(record.id), collectionIds: ['collection_inbox'] });
+  });
+
+  document.addEventListener('sc-library-new-matrix-for-record', (event) => {
+    if (!matrixEnabled) return;
+    const record = event.detail?.record;
+    if (!record?.id) return;
+    let existing = recordById(record.id);
+    if (!existing) {
+      existing = { recordId: Number(record.id), recordIdentifier: words(record.record_identifier), title: words(record.title), url: words(record.url), typeLabel: words(record.type_label || 'Publication'), excerpt: words(record.excerpt), resources: record.resources || {}, categories: record.categories || [], concepts: record.concepts || [], series: record.series || null, collectionIds: ['collection_inbox'], createdAt: now(), updatedAt: now() };
+      workspace.savedRecords.push(existing); persist();
+    }
+    controllerForEvent(event).seedMatrix({ title: `Technical Translation: ${record.title}`, recordId: String(record.id), collectionIds: recordCollectionIds(existing), description: words(record.excerpt) });
   });
 
   window.addEventListener('storage', (event) => { if (event.key === storageKey) { load(); renderAll(); } });
