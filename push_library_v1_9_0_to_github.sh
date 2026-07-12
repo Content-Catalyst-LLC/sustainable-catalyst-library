@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.8.0"
+VERSION="1.9.0"
 REMOTE_SSH="git@github.com:Content-Catalyst-LLC/sustainable-catalyst-library.git"
 REMOTE_SLUG="Content-Catalyst-LLC/sustainable-catalyst-library"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -63,36 +63,47 @@ if ! grep -q "SC_LIBRARY_VERSION', '$VERSION'" sustainable-catalyst-library/sust
   echo "ERROR: Runtime version marker validation failed."
   exit 1
 fi
-if ! grep -q "Foundations Documentation Library" sustainable-catalyst-library/readme.txt; then
-  echo "ERROR: Foundations Documentation Library release marker is missing."
+if ! grep -q "Content Planner" sustainable-catalyst-library/readme.txt; then
+  echo "ERROR: Content Planner release marker is missing."
   exit 1
 fi
-if ! grep -q "SC_Library_Taxonomies::COLLECTION" sustainable-catalyst-library/includes/class-sc-library-documentation.php; then
-  echo "ERROR: Documentation collection integration marker is missing."
+if ! grep -q "sc_content_plan" sustainable-catalyst-library/includes/class-sc-library-planner.php; then
+  echo "ERROR: Planned-content post type marker is missing."
   exit 1
 fi
-if ! grep -q "documentation/categories" sustainable-catalyst-library/includes/class-sc-library-documentation.php; then
-  echo "ERROR: Documentation REST endpoint marker is missing."
+if ! grep -q "Article Map Planner" sustainable-catalyst-library/includes/class-sc-library-planner.php; then
+  echo "ERROR: Article Map Planner marker is missing."
+  exit 1
+fi
+if ! grep -q "roadmap/tracker" sustainable-catalyst-library/includes/class-sc-library-planner.php; then
+  echo "ERROR: Roadmap tracker REST marker is missing."
+  exit 1
+fi
+if ! grep -q "sc_library_registry" sustainable-catalyst-library/includes/class-sc-library-planner.php; then
+  echo "ERROR: Registry shortcode marker is missing."
   exit 1
 fi
 if ! grep -q "sc-library-workspace/1.5" sustainable-catalyst-library/includes/class-sc-library-notebook.php; then
-  echo "ERROR: Workspace migration marker is missing."
+  echo "ERROR: Workspace compatibility marker is missing."
   exit 1
 fi
+
 for required in \
-  sustainable-catalyst-library/includes/class-sc-library-documentation.php \
-  sustainable-catalyst-library/assets/js/sc-library-documentation.js \
-  sustainable-catalyst-library/assets/css/sc-library-documentation.css \
-  sustainable-catalyst-library/templates/library-documentation.php \
-  sustainable-catalyst-library-v1.8.0.zip \
-  RELEASE_NOTES_1.8.0.md; do
+  sustainable-catalyst-library/includes/class-sc-library-planner.php \
+  sustainable-catalyst-library/assets/js/sc-library-planner.js \
+  sustainable-catalyst-library/assets/css/sc-library-planner.css \
+  sustainable-catalyst-library/templates/library-registry.php \
+  sustainable-catalyst-library/templates/library-roadmap-tracker.php \
+  sustainable-catalyst-library-v1.9.0.zip \
+  RELEASE_NOTES_1.9.0.md \
+  CONTENT_PLANNER_SETUP.md; do
   if [[ ! -f "$required" ]]; then
     echo "ERROR: Required release file is missing: $required"
     exit 1
   fi
 done
 
-if grep -RInE --exclude-dir=.git --exclude='push_library_v1_8_0_to_github.sh' --exclude='install_and_push_library_v1_8_0.sh' \
+if grep -RInE --exclude-dir=.git --exclude='push_library_v1_9_0_to_github.sh' --exclude='install_and_push_library_v1_9_0.sh' \
   '((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|password[[:space:]]*=[[:space:]]*["'"'"'][^"'"'"']+)' .; then
   echo "ERROR: Potential secret detected. Review the output above."
   exit 1
@@ -102,11 +113,11 @@ git add -A
 if git diff --cached --quiet; then
   echo "No changes to commit."
 else
-  git commit -m "Build Library v1.8.0 — Foundations and Documentation Library"
+  git commit -m "Build Library v1.9.0 — Content Planner, Public Registry, and Roadmap Tracker"
 fi
 
 git push -u origin main
 
 echo
-echo "Sustainable Catalyst Library v1.8.0 pushed successfully."
+echo "Sustainable Catalyst Library v1.9.0 pushed successfully."
 echo "Repository: https://github.com/$REMOTE_SLUG"

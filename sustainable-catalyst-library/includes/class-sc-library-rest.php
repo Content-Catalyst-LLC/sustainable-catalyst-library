@@ -445,6 +445,36 @@ final class SC_Library_REST {
             ], array_map('boolval', $flags)),
         ];
 
+
+        if (class_exists('SC_Library_Planner') && get_post_type($post_id) === SC_Library_Planner::POST_TYPE) {
+            $planner = new SC_Library_Planner($this->indexer, $this->relationships);
+            $plan = $planner->plan_payload($post_id);
+            $item['record_state'] = $plan['record_state'];
+            $item['record_state_label'] = $plan['record_state_label'];
+            $item['content_type'] = $plan['content_type'];
+            $item['content_type_label'] = $plan['content_type_label'];
+            $item['expected_release'] = $plan['expected_release'];
+            $item['area'] = $plan['area'];
+            $item['product'] = $plan['product'];
+            $item['article_map_id'] = $plan['article_map_id'];
+            $item['article_map_title'] = $plan['article_map_title'];
+            $item['article_map_url'] = $plan['article_map_url'];
+            $item['notice'] = $plan['notice'];
+            $item['type_label'] = __('Planned Content', 'sustainable-catalyst-library');
+        } else {
+            $item['record_state'] = 'published';
+            $item['record_state_label'] = __('Published', 'sustainable-catalyst-library');
+            $item['content_type'] = $row['post_type'] === 'post' ? 'article' : $row['post_type'];
+            $item['content_type_label'] = $item['type_label'];
+            $item['expected_release'] = ['type' => 'none', 'display' => '', 'sort' => '', 'note' => ''];
+            $item['area'] = $primary_domain['name'] ?? '';
+            $item['product'] = '';
+            $item['article_map_id'] = 0;
+            $item['article_map_title'] = '';
+            $item['article_map_url'] = '';
+            $item['notice'] = '';
+        }
+
         if (!$detail) {
             return $item;
         }

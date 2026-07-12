@@ -124,6 +124,13 @@
       return labels.map((label) => `<span>${escapeHtml(label)}</span>`).join('');
     };
 
+    const recordStateBadge = (item) => {
+      const state = String(item.record_state || 'published');
+      const label = String(item.record_state_label || 'Published');
+      const modifier = ['planned','proposed','idea','deferred'].includes(state) ? 'planned' : (['researching','drafting','review','scheduled'].includes(state) ? 'development' : 'published');
+      return `<span class="sc-library-record__state sc-library-record__state--${modifier}">${escapeHtml(label)}</span>`;
+    };
+
     const rememberRecord = (item) => {
       const current = getRecent().filter((entry) => Number(entry.id) !== Number(item.id));
       current.unshift({
@@ -171,6 +178,7 @@
 
         article.innerHTML = `
           <div class="sc-library-record__meta">
+            ${recordStateBadge(item)}
             <span class="sc-library-record__type">${escapeHtml(item.type_label || 'Publication')}</span>
             ${placement}
             ${categories ? `<span class="sc-library-record__topics">${categories}</span>` : ''}
@@ -178,6 +186,8 @@
           <div class="sc-library-record__body">
             <h4><a href="${escapeHtml(item.url)}" data-record-link>${escapeHtml(item.title)}</a></h4>
             <p>${escapeHtml(item.excerpt || '')}</p>
+            ${item.expected_release?.display ? `<p class="sc-library-record__release">${escapeHtml(item.expected_release.display)}</p>` : ''}
+            ${item.notice ? `<p class="sc-library-record__notice">${escapeHtml(item.notice)}</p>` : ''}
             ${concepts ? `<div class="sc-library-record__concepts">${concepts}</div>` : ''}
           </div>
           <div class="sc-library-record__foot">
@@ -516,11 +526,13 @@
 
         contextContent.innerHTML = `
           ${breadcrumbs ? `<nav class="sc-library-context__breadcrumbs" aria-label="Knowledge hierarchy">${breadcrumbs}</nav>` : ''}
-          <p class="sc-library-context__eyebrow">${escapeHtml(item.type_label || 'Knowledge record')}</p>
+          <p class="sc-library-context__eyebrow">${escapeHtml(item.record_state_label || item.type_label || 'Knowledge record')} · ${escapeHtml(item.content_type_label || item.type_label || '')}</p>
           <h3 id="${escapeHtml(root.id)}-context-title">${escapeHtml(item.title)}</h3>
           <p class="sc-library-context__identifier">${escapeHtml(item.record_identifier || '')}</p>
           ${categories ? `<div class="sc-library-context__topics">${categories}</div>` : ''}
           <p class="sc-library-context__summary">${escapeHtml(item.excerpt || '')}</p>
+          ${item.expected_release?.display ? `<p class="sc-library-record__release">${escapeHtml(item.expected_release.display)}</p>` : ''}
+          ${item.notice ? `<p class="sc-library-record__notice">${escapeHtml(item.notice)}</p>` : ''}
           ${badges ? `<div class="sc-library-context__resources">${badges}</div>` : ''}
           ${concepts ? `<section class="sc-library-context__concepts"><h4>Connected concepts</h4><div>${concepts}</div></section>` : ''}
           ${seriesNavigationHtml(item.series)}
@@ -533,7 +545,7 @@
           ${resources ? `<dl class="sc-library-context__resource-links">${resources}</dl>` : ''}
           ${integrationCards ? `<section class="sc-library-context__integrations"><h4>Connected research tools</h4><div class="sc-library-context__integration-grid">${integrationCards}</div></section>` : ''}
           <div class="sc-library-context__actions">
-            <a class="sc-library-context__primary" href="${escapeHtml(item.url)}">Read publication</a>
+            <a class="sc-library-context__primary" href="${escapeHtml(item.published_url || item.url)}">${item.record_state === 'published' ? 'Read publication' : 'View plan'}</a>
             <button type="button" class="sc-library-context__secondary" data-save-record>${escapeHtml(strings.saveRecord || 'Save to Notebook')}</button>
             <button type="button" class="sc-library-context__secondary" data-note-record>${escapeHtml(strings.writeNote || 'Write note')}</button>
             ${matrixEnabled ? `<button type="button" class="sc-library-context__secondary" data-translate-record>${escapeHtml(strings.translateRecord || 'Open Translation Matrix')}</button>` : ''}

@@ -13,8 +13,15 @@ final class SC_Library_Shortcodes {
     public function render(array $atts = []): string {
         $requested_mode = sanitize_key((string) ($atts['mode'] ?? ''));
         $requested_collection = sanitize_title((string) ($atts['collection'] ?? ''));
-        if (class_exists('SC_Library_Documentation') && ($requested_mode === 'documentation' || $requested_collection === SC_Library_Documentation::COLLECTION_SLUG)) {
+        if (class_exists('SC_Library_Documentation') && ($requested_mode === 'documentation' || ($requested_collection === SC_Library_Documentation::COLLECTION_SLUG && $requested_mode !== 'registry' && $requested_mode !== 'planner'))) {
             return SC_Library_Documentation::render_shortcode($atts);
+        }
+        if (class_exists('SC_Library_Planner') && in_array($requested_mode, ['registry', 'planner', 'roadmap'], true)) {
+            $planner = new SC_Library_Planner(new SC_Library_Indexer(new SC_Library_Relationships()), new SC_Library_Relationships());
+            if ($requested_mode === 'registry') {
+                return $planner->render_registry_shortcode($atts);
+            }
+            return $planner->render_tracker_shortcode($atts);
         }
 
         self::$instance_count++;

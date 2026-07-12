@@ -151,6 +151,11 @@ final class SC_Library_Admin {
             'default' => 'letter',
         ]);
         register_setting('sc_library_settings', 'sc_library_enable_documentation', ['type' => 'boolean', 'sanitize_callback' => static fn($value) => $value ? 1 : 0, 'default' => 1]);
+        register_setting('sc_library_settings', 'sc_library_enable_planner', [
+            'type' => 'boolean',
+            'sanitize_callback' => static fn($value) => $value ? 1 : 0,
+            'default' => 1,
+        ]);
         register_setting('sc_library_settings', 'sc_library_main_page_url', ['type' => 'string', 'sanitize_callback' => 'esc_url_raw', 'default' => home_url('/research-library/')]);
         register_setting('sc_library_settings', 'sc_library_documentation_search_placeholder', ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field', 'default' => 'Search titles, descriptions, keywords, and document text']);
         register_setting('sc_library_settings', 'sc_library_documentation_include_archived', ['type' => 'boolean', 'sanitize_callback' => static fn($value) => $value ? 1 : 0, 'default' => 0]);
@@ -163,11 +168,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.8.0 activated.</strong> Rebuild the Library index, assign records to the Foundations collection, identify authoritative sources, and test the documentation shortcode in a private browser window.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.9.0 activated.</strong> Rebuild the Library index, assign records to the Foundations collection, identify authoritative sources, and test the documentation shortcode in a private browser window.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.8.0.</strong> The release adds the Foundations Documentation Library, curated collections, document authority and status controls, expandable public panels, version and review metadata, source-of-truth warnings, and documentation REST endpoints. Rebuild the index once, then classify and test current and archived records.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.9.0.</strong> The release adds the Content Planner, article-map scanning, optional release windows, complete public registry, roadmap tracker, planned-to-draft workflows, public planning labels, and registry exports. Rebuild the index once, then classify and test current and archived records.</p></div>';
         }
     }
 
@@ -293,7 +298,7 @@ final class SC_Library_Admin {
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Research Notebook', 'sustainable-catalyst-library'); ?></th>
-                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, matrices, visual boards, and portable exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.8 stores personal workspace data in each visitor’s browser. It does not write private research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
+                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, matrices, visual boards, and portable exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.9 stores personal workspace data in each visitor’s browser. It does not write private research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Technical Translation Matrix', 'sustainable-catalyst-library'); ?></th>
@@ -341,8 +346,12 @@ final class SC_Library_Admin {
                                     <option value="<?php echo esc_attr($size_id); ?>" <?php selected(get_option('sc_library_default_book_page_size', 'letter'), $size_id); ?>><?php echo esc_html($size['label']); ?></option>
                                 <?php endforeach; ?>
                             </select></p>
-                            <p class="description"><?php esc_html_e('Book projects remain editable in browser storage. v1.8 generates a browser preview and uses Print/Save as PDF; server-rendered archival PDF packages can be added in a later Render-backed release.', 'sustainable-catalyst-library'); ?></p>
+                            <p class="description"><?php esc_html_e('Book projects remain editable in browser storage. v1.9 generates a browser preview and uses Print/Save as PDF; server-rendered archival PDF packages can be added in a later Render-backed release.', 'sustainable-catalyst-library'); ?></p>
                         </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Content Planner and public registry', 'sustainable-catalyst-library'); ?></th>
+                        <td><label><input name="sc_library_enable_planner" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_planner', 1), 1); ?>> <?php esc_html_e('Enable planned-content records, Article Map Planner, complete public registry, roadmap tracker, release expectations, and registry exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('Only published planning records explicitly marked public appear in public Library and registry results.', 'sustainable-catalyst-library'); ?></p></td>
                     </tr>
                     <tr>
                         <th scope="row"><label for="sc_library_default_mode"><?php esc_html_e('Default interface mode', 'sustainable-catalyst-library'); ?></label></th>
@@ -395,6 +404,9 @@ final class SC_Library_Admin {
                 <h2><?php esc_html_e('Recommended Research Library shortcode', 'sustainable-catalyst-library'); ?></h2>
                 <p><code>[sc_library mode="compact" initial_results="0" show_header="false" show_workspace="true"]</code></p>
                 <p><code>[sc_library collection="foundations" mode="documentation"]</code> — curated Foundations Documentation Library.</p>
+                <p><code>[sc_library_registry mode="public"]</code> — complete public registry of published, documented, planned, and historical records.</p>
+                <p><code>[sc_library_planner_tracker mode="public"]</code> — public roadmap totals and area/product tracker.</p>
+                <p><code>[sc_library mode="registry"]</code> — registry through the main Library shortcode.</p>
                 <p><code>[sc_foundations_library mode="public"]</code> — convenience alias for the same documentation collection.</p>
                 <p><code>[sc_library_notebook]</code> — standalone Research Notebook workspace.</p>
                 <p><code>[sc_library_translation_matrix]</code> — standalone Technical Translation Matrix studio.</p>
@@ -408,7 +420,7 @@ final class SC_Library_Admin {
                 <p><code>[sc_library_notebook tab="annotations"]</code> — open the Notebook directly to annotations.</p>
                 <p><?php esc_html_e('Place this in a dedicated WordPress Shortcode block.', 'sustainable-catalyst-library'); ?></p>
                 <h3><?php esc_html_e('Relationship-aware REST endpoints', 'sustainable-catalyst-library'); ?></h3>
-                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates', 'integrations', 'integrations/status', 'integration-schema', 'items/{id}/handoff?target=workbench', 'annotation-schema', 'book-schema', 'items/{id}/book', 'documentation', 'documentation/categories', 'documentation/statuses', 'documentation/{id}', 'collections/foundations'] as $endpoint) : ?>
+                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates', 'integrations', 'integrations/status', 'integration-schema', 'items/{id}/handoff?target=workbench', 'annotation-schema', 'book-schema', 'items/{id}/book', 'documentation', 'documentation/categories', 'documentation/statuses', 'documentation/{id}', 'collections/foundations', 'registry', 'registry/facets', 'roadmap/tracker', 'planner/statuses', 'plans/{id}'] as $endpoint) : ?>
                     <p><code>/wp-json/sustainable-catalyst/v1/library/<?php echo esc_html($endpoint); ?></code></p>
                 <?php endforeach; ?>
             </div>

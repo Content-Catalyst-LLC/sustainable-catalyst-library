@@ -24,18 +24,22 @@ final class SC_Library_Indexer {
         return $wpdb->prefix . 'sc_library_index';
     }
 
-    public function configured_post_types(): array {
+    public function configured_post_types(bool $include_planner = true): array {
         $types = get_option('sc_library_post_types', ['post']);
-        return is_array($types) && $types
+        $types = is_array($types) && $types
             ? array_values(array_filter(array_map('sanitize_key', $types)))
             : ['post'];
+        if ($include_planner && class_exists('SC_Library_Planner') && SC_Library_Planner::enabled()) {
+            $types[] = SC_Library_Planner::POST_TYPE;
+        }
+        return array_values(array_unique($types));
     }
 
     public function on_save_post(int $post_id, WP_Post $post, bool $update): void {
         if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) {
             return;
         }
-        if (!in_array($post->post_type, $this->configured_post_types(), true) || $post->post_status !== 'publish') {
+        if (!in_array($post->post_type, $this->configured_post_types(), true) || $post->post_status !== 'publish' || (class_exists('SC_Library_Planner') && !SC_Library_Planner::should_index($post_id))) {
             $this->delete_record($post_id);
             return;
         }
@@ -50,7 +54,7 @@ final class SC_Library_Indexer {
 
     public function reindex_post(int $post_id): bool {
         $post = get_post($post_id);
-        if (!$post || $post->post_status !== 'publish' || !in_array($post->post_type, $this->configured_post_types(), true)) {
+        if (!$post || $post->post_status !== 'publish' || !in_array($post->post_type, $this->configured_post_types(), true) || (class_exists('SC_Library_Planner') && !SC_Library_Planner::should_index($post_id))) {
             $this->delete_record($post_id);
             return false;
         }
@@ -61,7 +65,7 @@ final class SC_Library_Indexer {
         global $wpdb;
 
         $post = get_post($post_id);
-        if (!$post || $post->post_status !== 'publish' || !in_array($post->post_type, $this->configured_post_types(), true)) {
+        if (!$post || $post->post_status !== 'publish' || !in_array($post->post_type, $this->configured_post_types(), true) || (class_exists('SC_Library_Planner') && !SC_Library_Planner::should_index($post_id))) {
             return false;
         }
 
@@ -132,6 +136,13 @@ final class SC_Library_Indexer {
             (string) get_post_meta($post_id, '_sc_library_doc_repository_url', true),
             (string) get_post_meta($post_id, '_sc_library_doc_pdf_url', true),
             (string) get_post_meta($post_id, '_sc_library_doc_release_url', true),
+            (string) get_post_meta($post_id, '_sc_plan_status', true),
+            (string) get_post_meta($post_id, '_sc_plan_content_type', true),
+            (string) get_post_meta($post_id, '_sc_plan_area', true),
+            (string) get_post_meta($post_id, '_sc_plan_product', true),
+            (string) get_post_meta($post_id, '_sc_plan_expected_artifacts', true),
+            (string) get_post_meta($post_id, '_sc_plan_sources', true),
+            (string) get_post_meta($post_id, '_sc_plan_research_questions', true),
         ]));
 
         $relationship_text = implode(' ', array_map(static function (array $relation): string {

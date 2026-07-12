@@ -16,6 +16,10 @@ final class SC_Library_Taxonomies {
     public function register(): void {
         $post_types = get_option('sc_library_post_types', ['post']);
         $post_types = is_array($post_types) && $post_types ? array_values(array_map('sanitize_key', $post_types)) : ['post'];
+        if (class_exists('SC_Library_Planner')) {
+            $post_types[] = SC_Library_Planner::POST_TYPE;
+            $post_types = array_values(array_unique($post_types));
+        }
 
         register_taxonomy(self::SERIES, $post_types, [
             'labels' => [

@@ -9,6 +9,7 @@ final class SC_Library_Activator {
         self::install_defaults();
         self::schedule_reconcile();
         update_option('sc_library_version', SC_LIBRARY_VERSION);
+        update_option('sc_library_flush_rewrite', 1, false);
         set_transient('sc_library_activation_notice', 1, 90);
     }
 
@@ -22,6 +23,7 @@ final class SC_Library_Activator {
         self::install_defaults();
         self::schedule_reconcile();
         update_option('sc_library_version', SC_LIBRARY_VERSION);
+        update_option('sc_library_flush_rewrite', 1, false);
         set_transient('sc_library_upgrade_notice', 1, 90);
     }
 
@@ -113,6 +115,9 @@ final class SC_Library_Activator {
         add_option('sc_library_default_book_theme', 'institutional');
         add_option('sc_library_default_book_page_size', 'letter');
         add_option('sc_library_enable_documentation', 1);
+        add_option('sc_library_enable_planner', 1);
+        add_option('sc_library_registry_include_planned', 1);
+        add_option('sc_library_registry_include_archived', 1);
         add_option('sc_library_main_page_url', home_url('/research-library/'));
         add_option('sc_library_documentation_search_placeholder', 'Search titles, descriptions, keywords, and document text');
         add_option('sc_library_documentation_include_archived', 0);
