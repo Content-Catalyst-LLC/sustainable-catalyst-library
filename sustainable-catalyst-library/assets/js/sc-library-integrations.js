@@ -2,7 +2,7 @@
   'use strict';
   const shared = window.SCIntegrationShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.3';
+  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.4';
   const handoffSchema = shared.handoffSchema || 'sc-library-handoff/1.0';
   const restBase = String(shared.restBase || '').replace(/\/$/, '');
   const targets = Array.isArray(shared.targets) ? shared.targets : [];
@@ -23,6 +23,7 @@
     data.sources = Array.isArray(data.sources) ? data.sources : [];
     data.matrices = Array.isArray(data.matrices) ? data.matrices : [];
     data.boards = Array.isArray(data.boards) ? data.boards : [];
+    data.annotations = Array.isArray(data.annotations) ? data.annotations : [];
     data.collections = Array.isArray(data.collections) ? data.collections : [];
     if (!data.collections.length) data.collections.push({id:'collection_inbox',title:'Research Inbox',description:'Newly saved Library records and research material.',createdAt:now(),updatedAt:now()});
     data.createdAt = data.createdAt || now();
@@ -31,7 +32,7 @@
   };
   const saveWorkspace = (data) => {
     data.schema = workspaceSchema;
-    data.version = shared.version || data.version || '1.5.0';
+    data.version = shared.version || data.version || '1.6.0';
     data.updatedAt = now();
     window.localStorage.setItem(storageKey, JSON.stringify(data));
     window.dispatchEvent(new CustomEvent('sc-library-workspace-updated'));
@@ -44,6 +45,7 @@
     ...ws.sources.map((x) => ({type:'source', id:x.id, title:x.title, object:x})),
     ...ws.matrices.map((x) => ({type:'translation_matrix', id:x.id, title:x.title, object:x})),
     ...ws.boards.map((x) => ({type:x.type === 'chalkboard' ? 'chalkboard' : 'whiteboard', id:x.id, title:x.title, object:x})),
+    ...ws.annotations.map((x) => ({type:'annotation', id:x.id, title:x.title, object:x})),
   ];
   const compactObject = (entry, ws) => {
     const object = entry.object || {};
@@ -51,6 +53,7 @@
       return {id:entry.id,title:entry.title,description:object.description || '',linked_items:contextItems(ws).filter((x) => x.type !== 'collection' && (x.object.collectionIds || []).includes(entry.id)).slice(0,20).map((x) => ({type:x.type,id:x.id,title:x.title}))};
     }
     if (entry.type === 'translation_matrix') return {id:entry.id,title:entry.title,description:object.description || '',rows:(object.rows || []).length,columns:(object.columns || []).map((c) => c.label || c.title || c.id),recordId:object.recordId || ''};
+    if (entry.type === 'annotation') return {id:entry.id,title:entry.title,targetType:object.targetType || '',targetId:object.targetId || '',targetTitle:object.targetTitle || '',transcription:object.transcription || '',stroke_count:(object.strokes || []).length,note_count:(object.notes || []).length};
     if (entry.type === 'whiteboard' || entry.type === 'chalkboard') return {id:entry.id,title:entry.title,description:object.description || '',type:entry.type,nodes:(object.nodes || []).slice(0,20).map((n) => ({type:n.type,title:n.title,body:n.body})),edges:(object.edges || []).slice(0,20).map((e) => ({type:e.type,label:e.label}))};
     return {...object, id:entry.id, type:entry.type, title:entry.title};
   };
@@ -59,7 +62,7 @@
     id: uid('handoff'),
     target: targetId,
     created_at: now(),
-    source: {application:'sustainable-catalyst-library',version:shared.version || '1.5.0',url:window.location.href},
+    source: {application:'sustainable-catalyst-library',version:shared.version || '1.6.0',url:window.location.href},
     context: {type:entry.type,id:entry.id,title:entry.title,data:compactObject(entry, ws)},
     request: {purpose:purpose || '',question:question || ''},
     collectionIds: Array.isArray(entry.object?.collectionIds) && entry.object.collectionIds.length ? entry.object.collectionIds : ['collection_inbox'],

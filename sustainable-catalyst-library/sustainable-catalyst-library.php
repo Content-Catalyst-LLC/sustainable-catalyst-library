@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: A native WordPress knowledge base with structured indexing, knowledge relationships, research notebooks, sources, Technical Translation Matrices, visual Whiteboards and Chalkboards, Workbench, Decision Studio, and Site Intelligence handoffs, portable exports, search, filters, and public REST endpoints.
- * Version: 1.5.0
+ * Description: A native WordPress knowledge base with structured indexing, relationships, research notebooks, sources, Technical Translation Matrices, Whiteboards, Chalkboards, Annotation Studio handwriting, connected-tool handoffs, portable exports, search, filters, and public REST endpoints.
+ * Version: 1.6.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '1.5.0');
+define('SC_LIBRARY_VERSION', '1.6.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -30,6 +30,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-admin.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-notebook.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-boards.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-integrations.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-annotations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-shortcodes.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
@@ -62,6 +63,7 @@ final class SC_Library_Plugin {
         $notebook = new SC_Library_Notebook();
         $boards = new SC_Library_Boards();
         $integrations = new SC_Library_Integrations($indexer, $relationships);
+        $annotations = new SC_Library_Annotations();
         $shortcodes = new SC_Library_Shortcodes();
 
         $taxonomies->register_hooks();
@@ -73,6 +75,7 @@ final class SC_Library_Plugin {
         $notebook->register_hooks();
         $boards->register_hooks();
         $integrations->register_hooks();
+        $annotations->register_hooks();
         $shortcodes->register_hooks();
     }
 }

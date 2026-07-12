@@ -3,10 +3,10 @@
 
   const shared = window.SCNotebookShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const schema = shared.schema || 'sc-library-workspace/1.3';
+  const schema = shared.schema || 'sc-library-workspace/1.4';
   const legacySchema = shared.legacySchema || 'sc-library-workspace/1.1';
   const legacySchemas = Array.isArray(shared.legacySchemas) ? shared.legacySchemas : [legacySchema, 'sc-library-workspace/1.0'];
-  const version = shared.version || '1.5.0';
+  const version = shared.version || '1.6.0';
   const strings = shared.strings || {};
   const sourceTypes = shared.sourceTypes || {};
   const citationFormats = shared.citationFormats || {};
@@ -15,6 +15,7 @@
   const matrixEnabled = shared.matrixEnabled !== false;
   const boardsEnabled = shared.boardsEnabled !== false;
   const integrationsEnabled = shared.integrationsEnabled !== false;
+  const annotationsEnabled = shared.annotationsEnabled !== false;
   const defaultMatrixTemplate = shared.defaultMatrixTemplate || 'technical_translation';
   const roots = Array.from(document.querySelectorAll('[data-sc-library-workspace-root]'));
   if (!roots.length) return;
@@ -55,6 +56,7 @@
       matrices: [],
       boards: [],
       handoffs: [],
+      annotations: [],
     };
   };
 
@@ -73,6 +75,7 @@
       matrices: cleanArray(data.matrices),
       boards: cleanArray(data.boards),
       handoffs: cleanArray(data.handoffs),
+      annotations: cleanArray(data.annotations),
     };
   };
 
@@ -108,7 +111,7 @@
   const matrixById = (id) => workspace.matrices.find((item) => item.id === id);
   const boardById = (id) => workspace.boards.find((item) => item.id === id);
   const recordCollectionIds = (record) => Array.isArray(record.collectionIds) && record.collectionIds.length ? record.collectionIds : ['collection_inbox'];
-  const itemCount = () => workspace.savedRecords.length + workspace.notes.length + workspace.sources.length + workspace.matrices.length + workspace.boards.length + workspace.handoffs.length;
+  const itemCount = () => workspace.savedRecords.length + workspace.notes.length + workspace.sources.length + workspace.matrices.length + workspace.boards.length + workspace.annotations.length + workspace.handoffs.length;
   const scopedCollectionExport = (collectionId) => {
     const collection = collectionById(collectionId);
     if (!collection) return null;
@@ -122,6 +125,7 @@
       matrices: workspace.matrices.filter((item) => (item.collectionIds || []).includes(collectionId)),
       boards: workspace.boards.filter((item) => (item.collectionIds || []).includes(collectionId)),
       handoffs: workspace.handoffs.filter((item) => (item.collectionIds || []).includes(collectionId)),
+      annotations: workspace.annotations.filter((item) => (item.collectionIds || []).includes(collectionId)),
     };
   };
 
@@ -201,6 +205,7 @@
       ...workspace.sources.map((item) => ({ kind: typeLabel(item.type), title: item.title, date: item.updatedAt || item.createdAt })),
       ...workspace.matrices.map((item) => ({ kind: 'Translation Matrix', title: item.title, date: item.updatedAt || item.createdAt })),
       ...workspace.boards.map((item) => ({ kind: item.type === 'chalkboard' ? 'Chalkboard' : 'Whiteboard', title: item.title, date: item.updatedAt || item.createdAt })),
+      ...workspace.annotations.map((item) => ({ kind: 'Annotation', title: item.title, date: item.updatedAt || item.createdAt })),
       ...workspace.handoffs.map((item) => ({ kind: 'Connected tool handoff', title: item.context?.title || item.target || 'Application handoff', date: item.created_at || item.updatedAt || item.createdAt })),
     ].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 8);
     return `
@@ -212,6 +217,7 @@
           ${metric('Sources', workspace.sources.length)}
           ${metric('Matrices', workspace.matrices.length)}
           ${metric('Boards', workspace.boards.length)}
+          ${annotationsEnabled ? metric('Annotations', workspace.annotations.length) : ''}
           ${integrationsEnabled ? metric('Handoffs', workspace.handoffs.length) : ''}
         </div>
         <div class="sc-library-workspace__quick-grid">
@@ -220,12 +226,13 @@
           <button type="button" data-workspace-quick="source"><strong>Add a source</strong><span>Store a link, book, report, dataset, or video timestamp.</span></button>
           ${matrixEnabled ? '<button type="button" data-workspace-quick="matrix"><strong>Build a translation matrix</strong><span>Translate concepts across notation, code, data, validation, and systems meaning.</span></button>' : ''}
           ${boardsEnabled ? '<button type="button" data-workspace-quick="whiteboard"><strong>Open a Whiteboard</strong><span>Map concepts, sources, claims, evidence, and systems relationships.</span></button><button type="button" data-workspace-quick="chalkboard"><strong>Open a Chalkboard</strong><span>Work through equations, derivations, code, and handwritten technical reasoning.</span></button>' : ''}
+          ${annotationsEnabled ? '<button type="button" data-workspace-quick="annotation"><strong>Open Annotation Studio</strong><span>Add handwritten notes, highlights, shapes, and anchored comments to research material.</span></button>' : ''}
           ${integrationsEnabled ? '<button type="button" data-workspace-tab="integrations"><strong>Connect a research tool</strong><span>Prepare a source-aware Workbench, Decision Studio, or Site Intelligence handoff.</span></button>' : ''}
           <button type="button" data-workspace-tab="portability"><strong>Export workspace</strong><span>Create a portable JSON research manifest.</span></button>
         </div>
         <section class="sc-library-workspace__recent-work">
           <h3>Recent research activity</h3>
-          ${recent.length ? `<div>${recent.map((item) => `<article><span>${escapeHtml(item.kind)}</span><strong>${escapeHtml(item.title)}</strong><time>${escapeHtml(formatDate(item.date))}</time></article>`).join('')}</div>` : '<p>No saved research yet. Save a knowledge record, add a source, write a note, build a matrix, or open a visual board.</p>'}
+          ${recent.length ? `<div>${recent.map((item) => `<article><span>${escapeHtml(item.kind)}</span><strong>${escapeHtml(item.title)}</strong><time>${escapeHtml(formatDate(item.date))}</time></article>`).join('')}</div>` : '<p>No saved research yet. Save a knowledge record, add a source, write a note, build a matrix, open a visual board, or create an annotation.</p>'}
         </section>
       </section>`;
   };
@@ -243,13 +250,13 @@
         </form>
         <div class="sc-library-workspace__list">
           ${workspace.collections.map((item) => {
-            const count = workspace.savedRecords.filter((record) => recordCollectionIds(record).includes(item.id)).length + workspace.notes.filter((note) => (note.collectionIds || []).includes(item.id)).length + workspace.sources.filter((source) => (source.collectionIds || []).includes(item.id)).length + workspace.matrices.filter((matrix) => (matrix.collectionIds || []).includes(item.id)).length + workspace.boards.filter((board) => (board.collectionIds || []).includes(item.id)).length + workspace.handoffs.filter((handoff) => (handoff.collectionIds || []).includes(item.id)).length;
+            const count = workspace.savedRecords.filter((record) => recordCollectionIds(record).includes(item.id)).length + workspace.notes.filter((note) => (note.collectionIds || []).includes(item.id)).length + workspace.sources.filter((source) => (source.collectionIds || []).includes(item.id)).length + workspace.matrices.filter((matrix) => (matrix.collectionIds || []).includes(item.id)).length + workspace.boards.filter((board) => (board.collectionIds || []).includes(item.id)).length + workspace.annotations.filter((annotation) => (annotation.collectionIds || []).includes(item.id)).length + workspace.handoffs.filter((handoff) => (handoff.collectionIds || []).includes(item.id)).length;
             return `<article><div><span>Collection</span><h4>${escapeHtml(item.title)}</h4><p>${escapeHtml(item.description || 'No description')}</p><small>${count} linked items</small></div><div class="sc-library-workspace__row-actions"><button type="button" data-export-collection="${escapeHtml(item.id)}">Export</button><button type="button" data-edit-collection="${escapeHtml(item.id)}">Edit</button>${item.id !== 'collection_inbox' ? `<button type="button" data-delete-collection="${escapeHtml(item.id)}">Delete</button>` : ''}</div></article>`;
           }).join('')}
         </div>
         <section class="sc-library-workspace__saved-records">
           <h3>Saved Library records</h3>
-          ${workspace.savedRecords.length ? workspace.savedRecords.map((record) => `<article><div><span>${escapeHtml(record.typeLabel || 'Publication')}</span><h4><a href="${escapeHtml(record.url)}">${escapeHtml(record.title)}</a></h4><p>${escapeHtml(record.excerpt || '')}</p><div class="sc-library-workspace__checks">${workspace.collections.map((collection) => `<label class="sc-library-workspace__check"><input type="checkbox" data-record-collection="${Number(record.recordId)}" value="${escapeHtml(collection.id)}" ${recordCollectionIds(record).includes(collection.id) ? 'checked' : ''}> <span>${escapeHtml(collection.title)}</span></label>`).join('')}</div></div><div class="sc-library-workspace__row-actions"><button type="button" data-note-saved-record="${Number(record.recordId)}">Write note</button>${matrixEnabled ? `<button type="button" data-matrix-saved-record="${Number(record.recordId)}">Translate</button>` : ''}${boardsEnabled ? `<button type="button" data-board-saved-record="${Number(record.recordId)}" data-board-type="whiteboard">Whiteboard</button><button type="button" data-board-saved-record="${Number(record.recordId)}" data-board-type="chalkboard">Chalkboard</button>` : ''}<button type="button" data-delete-saved-record="${Number(record.recordId)}">Remove</button></div></article>`).join('') : '<p class="sc-library-workspace__empty">No Library records have been saved yet.</p>'}
+          ${workspace.savedRecords.length ? workspace.savedRecords.map((record) => `<article><div><span>${escapeHtml(record.typeLabel || 'Publication')}</span><h4><a href="${escapeHtml(record.url)}">${escapeHtml(record.title)}</a></h4><p>${escapeHtml(record.excerpt || '')}</p><div class="sc-library-workspace__checks">${workspace.collections.map((collection) => `<label class="sc-library-workspace__check"><input type="checkbox" data-record-collection="${Number(record.recordId)}" value="${escapeHtml(collection.id)}" ${recordCollectionIds(record).includes(collection.id) ? 'checked' : ''}> <span>${escapeHtml(collection.title)}</span></label>`).join('')}</div></div><div class="sc-library-workspace__row-actions"><button type="button" data-note-saved-record="${Number(record.recordId)}">Write note</button>${matrixEnabled ? `<button type="button" data-matrix-saved-record="${Number(record.recordId)}">Translate</button>` : ''}${boardsEnabled ? `<button type="button" data-board-saved-record="${Number(record.recordId)}" data-board-type="whiteboard">Whiteboard</button><button type="button" data-board-saved-record="${Number(record.recordId)}" data-board-type="chalkboard">Chalkboard</button>` : ''}${annotationsEnabled ? `<button type="button" data-annotation-saved-record="${Number(record.recordId)}">Annotate</button>` : ''}<button type="button" data-delete-saved-record="${Number(record.recordId)}">Remove</button></div></article>`).join('') : '<p class="sc-library-workspace__empty">No Library records have been saved yet.</p>'}
         </section>
       </section>`;
   };
@@ -257,7 +264,7 @@
   const notesHtml = (editId = '', seed = {}) => {
     const found = workspace.notes.find((item) => item.id === editId);
     const editing = found || {
-      id: '', type: seed.type || 'note', title: seed.title || '', body: seed.body || '', recordId: seed.recordId || '', sourceId: seed.sourceId || '', matrixId: seed.matrixId || '', boardId: seed.boardId || '', tags: [], collectionIds: seed.collectionIds || ['collection_inbox']
+      id: '', type: seed.type || 'note', title: seed.title || '', body: seed.body || '', recordId: seed.recordId || '', sourceId: seed.sourceId || '', matrixId: seed.matrixId || '', boardId: seed.boardId || '', annotationId: seed.annotationId || '', tags: [], collectionIds: seed.collectionIds || ['collection_inbox']
     };
     const noteTypes = [
       { id: 'note', label: 'Research note' }, { id: 'question', label: 'Research question' }, { id: 'summary', label: 'Summary' },
@@ -269,6 +276,7 @@
         <header><div><p class="sc-library__eyebrow">Personal research</p><h3>Notes</h3></div></header>
         <form class="sc-library-workspace__form" data-note-form>
           <input type="hidden" name="id" value="${escapeHtml(editing.id)}">
+          <input type="hidden" name="annotationId" value="${escapeHtml(editing.annotationId || '')}">
           <div class="sc-library-workspace__form-grid">
             <label><span>Note type</span><select name="type">${htmlOptions(noteTypes, editing.type)}</select></label>
             <label><span>Title</span><input required name="title" value="${escapeHtml(editing.title)}" placeholder="Key question or observation"></label>
@@ -285,7 +293,7 @@
           <div class="sc-library-workspace__form-actions"><button type="submit">${editing.id ? 'Update note' : 'Save note'}</button>${editing.id ? '<button type="button" data-cancel-edit>Cancel</button>' : ''}</div>
         </form>
         <div class="sc-library-workspace__list">
-          ${workspace.notes.length ? workspace.notes.slice().sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))).map((item) => `<article><div><span>${escapeHtml(item.type.replace(/_/g, ' '))}</span><h4>${escapeHtml(item.title)}</h4><p>${escapeHtml(item.body)}</p><small>${escapeHtml(collectionNames(item.collectionIds).join(' · ') || 'Unfiled')} · Updated ${escapeHtml(formatDate(item.updatedAt))}</small></div><div class="sc-library-workspace__row-actions"><button type="button" data-edit-note="${escapeHtml(item.id)}">Edit</button><button type="button" data-delete-note="${escapeHtml(item.id)}">Delete</button></div></article>`).join('') : '<p class="sc-library-workspace__empty">No notes have been saved.</p>'}
+          ${workspace.notes.length ? workspace.notes.slice().sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))).map((item) => `<article><div><span>${escapeHtml(item.type.replace(/_/g, ' '))}</span><h4>${escapeHtml(item.title)}</h4><p>${escapeHtml(item.body)}</p><small>${escapeHtml(collectionNames(item.collectionIds).join(' · ') || 'Unfiled')} · Updated ${escapeHtml(formatDate(item.updatedAt))}</small></div><div class="sc-library-workspace__row-actions">${annotationsEnabled ? `<button type="button" data-annotate-note="${escapeHtml(item.id)}">Annotate</button>` : ''}<button type="button" data-edit-note="${escapeHtml(item.id)}">Edit</button><button type="button" data-delete-note="${escapeHtml(item.id)}">Delete</button></div></article>`).join('') : '<p class="sc-library-workspace__empty">No notes have been saved.</p>'}
         </div>
       </section>`;
   };
@@ -331,7 +339,7 @@
           <div class="sc-library-workspace__form-actions"><button type="submit">${editing.id ? 'Update source' : 'Save source'}</button>${editing.id ? '<button type="button" data-cancel-edit>Cancel</button>' : ''}</div>
         </form>
         <div class="sc-library-workspace__list sc-library-workspace__source-list">
-          ${workspace.sources.length ? workspace.sources.slice().sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))).map((item) => `<article><div><span>${escapeHtml(typeLabel(item.type))}</span><h4>${escapeHtml(item.title)}</h4><p>${escapeHtml(item.description || item.notes || citation(item, 'plain'))}</p><small>${escapeHtml(collectionNames(item.collectionIds).join(' · ') || 'Unfiled')} · Updated ${escapeHtml(formatDate(item.updatedAt))}</small><div class="sc-library-workspace__citation"><select data-citation-format="${escapeHtml(item.id)}">${htmlOptions(Object.values(citationFormats), 'apa')}</select><button type="button" data-copy-citation="${escapeHtml(item.id)}">Copy citation</button></div></div><div class="sc-library-workspace__row-actions">${item.url ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Open</a>` : ''}<button type="button" data-edit-source="${escapeHtml(item.id)}">Edit</button><button type="button" data-delete-source="${escapeHtml(item.id)}">Delete</button></div></article>`).join('') : '<p class="sc-library-workspace__empty">No outside sources have been saved.</p>'}
+          ${workspace.sources.length ? workspace.sources.slice().sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))).map((item) => `<article><div><span>${escapeHtml(typeLabel(item.type))}</span><h4>${escapeHtml(item.title)}</h4><p>${escapeHtml(item.description || item.notes || citation(item, 'plain'))}</p><small>${escapeHtml(collectionNames(item.collectionIds).join(' · ') || 'Unfiled')} · Updated ${escapeHtml(formatDate(item.updatedAt))}</small><div class="sc-library-workspace__citation"><select data-citation-format="${escapeHtml(item.id)}">${htmlOptions(Object.values(citationFormats), 'apa')}</select><button type="button" data-copy-citation="${escapeHtml(item.id)}">Copy citation</button></div></div><div class="sc-library-workspace__row-actions">${item.url ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">Open</a>` : ''}${annotationsEnabled ? `<button type="button" data-annotate-source="${escapeHtml(item.id)}">Annotate</button>` : ''}<button type="button" data-edit-source="${escapeHtml(item.id)}">Edit</button><button type="button" data-delete-source="${escapeHtml(item.id)}">Delete</button></div></article>`).join('') : '<p class="sc-library-workspace__empty">No outside sources have been saved.</p>'}
         </div>
       </section>`;
   };
@@ -458,7 +466,7 @@
           <div class="sc-library-workspace__form-actions"><button type="submit">${editing.id ? 'Update matrix' : 'Save matrix'}</button>${editing.id ? '<button type="button" data-cancel-edit>Cancel</button>' : ''}</div>
         </form>
         <div class="sc-library-workspace__list sc-library-matrix-list">
-          ${workspace.matrices.length ? workspace.matrices.slice().sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))).map((item) => { const counts = matrixValidationSummary(item); return `<article><div><span>${escapeHtml(matrixTemplate(item.templateId).label || 'Translation Matrix')}</span><h4>${escapeHtml(item.title || 'Untitled matrix')}</h4><p>${escapeHtml(item.description || '')}</p><small>${escapeHtml(statusLabel(item.status))} · ${item.rows?.length || 0} rows × ${item.columns?.length || 0} columns · ${escapeHtml(collectionNames(item.collectionIds).join(' · ') || 'Unfiled')} · Updated ${escapeHtml(formatDate(item.updatedAt))}</small><div class="sc-library-matrix-list__states">${Object.entries(counts).map(([key, value]) => `<span class="is-${escapeHtml(key)}">${escapeHtml(statusLabel(key))}: ${Number(value)}</span>`).join('')}</div></div><div class="sc-library-workspace__row-actions"><button type="button" data-edit-matrix="${escapeHtml(item.id)}">Edit</button><button type="button" data-note-matrix="${escapeHtml(item.id)}">Write note</button>${boardsEnabled ? `<button type="button" data-board-matrix="${escapeHtml(item.id)}" data-board-type="whiteboard">Whiteboard</button><button type="button" data-board-matrix="${escapeHtml(item.id)}" data-board-type="chalkboard">Chalkboard</button>` : ''}<button type="button" data-export-matrix-json="${escapeHtml(item.id)}">JSON</button><button type="button" data-export-matrix-csv="${escapeHtml(item.id)}">CSV</button><button type="button" data-print-matrix="${escapeHtml(item.id)}">PDF / Print</button><button type="button" data-delete-matrix="${escapeHtml(item.id)}">Delete</button></div></article>`; }).join('') : '<p class="sc-library-workspace__empty">No Technical Translation Matrices have been saved.</p>'}
+          ${workspace.matrices.length ? workspace.matrices.slice().sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))).map((item) => { const counts = matrixValidationSummary(item); return `<article><div><span>${escapeHtml(matrixTemplate(item.templateId).label || 'Translation Matrix')}</span><h4>${escapeHtml(item.title || 'Untitled matrix')}</h4><p>${escapeHtml(item.description || '')}</p><small>${escapeHtml(statusLabel(item.status))} · ${item.rows?.length || 0} rows × ${item.columns?.length || 0} columns · ${escapeHtml(collectionNames(item.collectionIds).join(' · ') || 'Unfiled')} · Updated ${escapeHtml(formatDate(item.updatedAt))}</small><div class="sc-library-matrix-list__states">${Object.entries(counts).map(([key, value]) => `<span class="is-${escapeHtml(key)}">${escapeHtml(statusLabel(key))}: ${Number(value)}</span>`).join('')}</div></div><div class="sc-library-workspace__row-actions"><button type="button" data-edit-matrix="${escapeHtml(item.id)}">Edit</button><button type="button" data-note-matrix="${escapeHtml(item.id)}">Write note</button>${boardsEnabled ? `<button type="button" data-board-matrix="${escapeHtml(item.id)}" data-board-type="whiteboard">Whiteboard</button><button type="button" data-board-matrix="${escapeHtml(item.id)}" data-board-type="chalkboard">Chalkboard</button>` : ''}${annotationsEnabled ? `<button type="button" data-annotate-matrix="${escapeHtml(item.id)}">Annotate</button>` : ''}<button type="button" data-export-matrix-json="${escapeHtml(item.id)}">JSON</button><button type="button" data-export-matrix-csv="${escapeHtml(item.id)}">CSV</button><button type="button" data-print-matrix="${escapeHtml(item.id)}">PDF / Print</button><button type="button" data-delete-matrix="${escapeHtml(item.id)}">Delete</button></div></article>`; }).join('') : '<p class="sc-library-workspace__empty">No Technical Translation Matrices have been saved.</p>'}
         </div>
       </section>`;
   };
@@ -475,7 +483,7 @@
           <button type="button" data-open-board-library><strong>Board library</strong><span>Browse and open every locally saved visual research board.</span></button>
         </div>
         <div class="sc-library-workspace__list sc-library-board-notebook__list">
-          ${workspace.boards.length ? workspace.boards.slice().sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))).map((item) => `<article><div><span>${escapeHtml(item.type === 'chalkboard' ? 'Chalkboard' : 'Whiteboard')}</span><h4>${escapeHtml(item.title || 'Untitled board')}</h4><p>${escapeHtml(item.description || '')}</p><small>${item.nodes?.length || 0} cards · ${item.edges?.length || 0} relationships · ${item.strokes?.length || 0} ink strokes · ${escapeHtml(collectionNames(item.collectionIds).join(' · ') || 'Unfiled')} · Updated ${escapeHtml(formatDate(item.updatedAt))}</small><div class="sc-library-workspace__checks">${workspace.collections.map((collection) => `<label class="sc-library-workspace__check"><input type="checkbox" data-board-collection-id="${escapeHtml(item.id)}" value="${escapeHtml(collection.id)}" ${(item.collectionIds || ['collection_inbox']).includes(collection.id) ? 'checked' : ''}> <span>${escapeHtml(collection.title)}</span></label>`).join('')}</div></div><div class="sc-library-workspace__row-actions"><button type="button" data-open-board="${escapeHtml(item.id)}">Open</button><button type="button" data-note-board="${escapeHtml(item.id)}">Write note</button><button type="button" data-delete-board="${escapeHtml(item.id)}">Delete</button></div></article>`).join('') : '<p class="sc-library-workspace__empty">No Whiteboards or Chalkboards have been saved.</p>'}
+          ${workspace.boards.length ? workspace.boards.slice().sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))).map((item) => `<article><div><span>${escapeHtml(item.type === 'chalkboard' ? 'Chalkboard' : 'Whiteboard')}</span><h4>${escapeHtml(item.title || 'Untitled board')}</h4><p>${escapeHtml(item.description || '')}</p><small>${item.nodes?.length || 0} cards · ${item.edges?.length || 0} relationships · ${item.strokes?.length || 0} ink strokes · ${escapeHtml(collectionNames(item.collectionIds).join(' · ') || 'Unfiled')} · Updated ${escapeHtml(formatDate(item.updatedAt))}</small><div class="sc-library-workspace__checks">${workspace.collections.map((collection) => `<label class="sc-library-workspace__check"><input type="checkbox" data-board-collection-id="${escapeHtml(item.id)}" value="${escapeHtml(collection.id)}" ${(item.collectionIds || ['collection_inbox']).includes(collection.id) ? 'checked' : ''}> <span>${escapeHtml(collection.title)}</span></label>`).join('')}</div></div><div class="sc-library-workspace__row-actions"><button type="button" data-open-board="${escapeHtml(item.id)}">Open</button>${annotationsEnabled ? `<button type="button" data-annotate-board="${escapeHtml(item.id)}">Annotate</button>` : ''}<button type="button" data-note-board="${escapeHtml(item.id)}">Write note</button><button type="button" data-delete-board="${escapeHtml(item.id)}">Delete</button></div></article>`).join('') : '<p class="sc-library-workspace__empty">No Whiteboards or Chalkboards have been saved.</p>'}
         </div>
       </section>`;
   };
@@ -520,9 +528,11 @@
       else if (activeTab === 'sources') content.innerHTML = sourcesHtml(editId);
       else if (activeTab === 'matrices') content.innerHTML = matricesHtml(matrixDraft);
       else if (activeTab === 'boards') content.innerHTML = boardsHtml();
+      else if (activeTab === 'annotations') content.innerHTML = '<div data-sc-library-annotations-inline></div>';
       else if (activeTab === 'integrations') content.innerHTML = '<div data-sc-library-integrations-inline></div>';
       else if (activeTab === 'portability') content.innerHTML = portabilityHtml();
       else content.innerHTML = overviewHtml();
+      if (activeTab === 'annotations') document.dispatchEvent(new CustomEvent('sc-library-annotations-render'));
       if (activeTab === 'integrations') window.dispatchEvent(new CustomEvent('sc-library-integrations-render'));
     };
 
@@ -555,6 +565,7 @@
         else if (kind === 'integrations') open('integrations');
         else if (kind === 'matrix') { matrixDraft = makeMatrix(defaultMatrixTemplate); open('matrices'); }
         else if (kind === 'whiteboard' || kind === 'chalkboard') { document.dispatchEvent(new CustomEvent('sc-library-new-board', { detail: { type: kind } })); open('boards'); }
+        else if (kind === 'annotation') { document.dispatchEvent(new CustomEvent('sc-library-new-annotation', { detail: { targetType: 'custom', title: 'Research annotation' } })); open('annotations'); }
         else open('notes');
         return;
       }
@@ -583,6 +594,7 @@
         workspace.sources.forEach((item) => { item.collectionIds = (item.collectionIds || []).filter((value) => value !== id); });
         workspace.matrices.forEach((item) => { item.collectionIds = (item.collectionIds || []).filter((value) => value !== id); if (!item.collectionIds.length) item.collectionIds = ['collection_inbox']; });
         workspace.boards.forEach((item) => { item.collectionIds = (item.collectionIds || []).filter((value) => value !== id); if (!item.collectionIds.length) item.collectionIds = ['collection_inbox']; });
+        workspace.annotations.forEach((item) => { item.collectionIds = (item.collectionIds || []).filter((value) => value !== id); if (!item.collectionIds.length) item.collectionIds = ['collection_inbox']; });
         persist(); render(); return;
       }
       const noteSavedRecord = event.target.closest('[data-note-saved-record]');
@@ -609,6 +621,15 @@
         }
         return;
       }
+      const annotationSavedRecord = event.target.closest('[data-annotation-saved-record]');
+      if (annotationSavedRecord) {
+        const record = recordById(annotationSavedRecord.dataset.annotationSavedRecord);
+        if (record) {
+          document.dispatchEvent(new CustomEvent('sc-library-new-annotation-for-record', { detail: { record: { id: Number(record.recordId), record_identifier: record.recordIdentifier || '', title: record.title, url: record.url, type_label: record.typeLabel || 'Publication', excerpt: record.excerpt || '', resources: record.resources || {}, categories: record.categories || [], concepts: record.concepts || [], series: record.series || null } } }));
+          activeTab = 'annotations'; render();
+        }
+        return;
+      }
       const createBoard = event.target.closest('[data-create-board]');
       if (createBoard) { document.dispatchEvent(new CustomEvent('sc-library-new-board', { detail: { type: createBoard.dataset.createBoard || 'whiteboard' } })); return; }
       if (event.target.closest('[data-open-board-library]')) { document.dispatchEvent(new CustomEvent('sc-library-open-board-library')); return; }
@@ -631,8 +652,17 @@
         workspace.notes.forEach((item) => { if (Number(item.recordId) === recordId) item.recordId = ''; });
         workspace.matrices.forEach((item) => { if (Number(item.recordId) === recordId) item.recordId = ''; });
         workspace.boards.forEach((item) => { if (Number(item.recordId) === recordId) item.recordId = ''; });
+        workspace.annotations.forEach((item) => { if (item.targetType === 'library_record' && Number(item.targetId) === recordId) item.targetId = ''; });
         persist(); render(); return;
       }
+      const annotateNote = event.target.closest('[data-annotate-note]');
+      if (annotateNote) { const found = workspace.notes.find((item) => item.id === annotateNote.dataset.annotateNote); if (found) document.dispatchEvent(new CustomEvent('sc-library-new-annotation', { detail: { targetType: 'notebook_note', targetId: found.id, title: found.title, targetTitle: found.title, targetExcerpt: found.body, collectionIds: found.collectionIds || ['collection_inbox'] } })); return; }
+      const annotateSource = event.target.closest('[data-annotate-source]');
+      if (annotateSource) { const found = sourceById(annotateSource.dataset.annotateSource); if (found) document.dispatchEvent(new CustomEvent('sc-library-new-annotation', { detail: { targetType: 'external_source', targetId: found.id, title: found.title, targetTitle: found.title, targetUrl: found.url || '', targetExcerpt: found.description || found.notes || '', collectionIds: found.collectionIds || ['collection_inbox'] } })); return; }
+      const annotateMatrix = event.target.closest('[data-annotate-matrix]');
+      if (annotateMatrix) { const found = matrixById(annotateMatrix.dataset.annotateMatrix); if (found) document.dispatchEvent(new CustomEvent('sc-library-new-annotation', { detail: { targetType: 'translation_matrix', targetId: found.id, title: found.title, targetTitle: found.title, targetExcerpt: found.description || `${found.rows?.length || 0} rows × ${found.columns?.length || 0} columns`, collectionIds: found.collectionIds || ['collection_inbox'] } })); return; }
+      const annotateBoard = event.target.closest('[data-annotate-board]');
+      if (annotateBoard) { const found = boardById(annotateBoard.dataset.annotateBoard); if (found) document.dispatchEvent(new CustomEvent('sc-library-new-annotation', { detail: { targetType: found.type === 'chalkboard' ? 'chalkboard' : 'whiteboard', targetId: found.id, title: found.title, targetTitle: found.title, targetExcerpt: found.description || `${found.nodes?.length || 0} cards and ${found.edges?.length || 0} relationships`, collectionIds: found.collectionIds || ['collection_inbox'], pageStyle: found.type === 'chalkboard' ? 'dark' : 'reader' } })); return; }
       const editNote = event.target.closest('[data-edit-note]');
       if (editNote) { editId = editNote.dataset.editNote; activeTab = 'notes'; render(); return; }
       const deleteNote = event.target.closest('[data-delete-note]');
@@ -728,7 +758,7 @@
         const existing = workspace.notes.find((item) => item.id === id);
         const item = {
           id: id || uid('note'), type: words(data.get('type')) || 'note', title: words(data.get('title')), body: words(data.get('body')),
-          recordId: words(data.get('recordId')), sourceId: words(data.get('sourceId')), matrixId: words(data.get('matrixId')), boardId: words(data.get('boardId')), tags: listFromText(data.get('tags')),
+          recordId: words(data.get('recordId')), sourceId: words(data.get('sourceId')), matrixId: words(data.get('matrixId')), boardId: words(data.get('boardId')), annotationId: words(data.get('annotationId')), tags: listFromText(data.get('tags')),
           collectionIds: data.getAll('collectionIds').map(String), createdAt: existing?.createdAt || now(), updatedAt: now(),
         };
         if (!item.collectionIds.length) item.collectionIds = ['collection_inbox'];
@@ -894,6 +924,12 @@
       workspace.savedRecords.push(existing); persist();
     }
     controllerForEvent(event).seedMatrix({ title: `Technical Translation: ${record.title}`, recordId: String(record.id), collectionIds: recordCollectionIds(existing), description: words(record.excerpt) });
+  });
+
+  document.addEventListener('sc-library-new-note-for-annotation', (event) => {
+    const annotation = event.detail?.annotation;
+    if (!annotation?.id) return;
+    controllerForEvent(event).seedNote({ title: `Notes on ${annotation.title}`, annotationId: annotation.id, collectionIds: annotation.collectionIds || ['collection_inbox'] });
   });
 
   window.addEventListener('storage', (event) => { if (event.key === storageKey) { load(); renderAll(); } });
