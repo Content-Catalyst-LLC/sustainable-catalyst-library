@@ -4,8 +4,9 @@ if (!defined('ABSPATH')) {
 }
 
 final class SC_Library_Notebook {
-    public const SCHEMA = 'sc-library-workspace/1.1';
-    public const LEGACY_SCHEMA = 'sc-library-workspace/1.0';
+    public const SCHEMA = 'sc-library-workspace/1.2';
+    public const LEGACY_SCHEMA = 'sc-library-workspace/1.1';
+    public const ORIGINAL_SCHEMA = 'sc-library-workspace/1.0';
 
     public function register_hooks(): void {
         add_shortcode('sc_library_notebook', [$this, 'render_shortcode']);
@@ -21,6 +22,10 @@ final class SC_Library_Notebook {
         return self::enabled() && (bool) get_option('sc_library_enable_translation_matrix', 1);
     }
 
+    public static function legacy_schemas(): array {
+        return [self::LEGACY_SCHEMA, self::ORIGINAL_SCHEMA];
+    }
+
     public static function enqueue_assets(): void {
         if (!self::enabled()) {
             return;
@@ -33,6 +38,7 @@ final class SC_Library_Notebook {
             'version' => SC_LIBRARY_VERSION,
             'schema' => self::SCHEMA,
             'legacySchema' => self::LEGACY_SCHEMA,
+            'legacySchemas' => self::legacy_schemas(),
             // Keep the v1.2 key so existing browser-local notebooks migrate in place.
             'storageKey' => 'scLibraryWorkspaceV120',
             'sourceTypes' => self::source_types(),
@@ -41,6 +47,7 @@ final class SC_Library_Notebook {
             'matrixStatuses' => self::matrix_statuses(),
             'defaultMatrixTemplate' => (string) get_option('sc_library_default_matrix_template', 'technical_translation'),
             'matrixEnabled' => self::matrix_enabled(),
+            'boardsEnabled' => class_exists('SC_Library_Boards') && SC_Library_Boards::enabled(),
             'strings' => [
                 'saved' => __('Saved to the Research Notebook.', 'sustainable-catalyst-library'),
                 'alreadySaved' => __('This record is already saved.', 'sustainable-catalyst-library'),
@@ -49,12 +56,16 @@ final class SC_Library_Notebook {
                 'importSuccess' => __('Workspace imported successfully.', 'sustainable-catalyst-library'),
                 'copySuccess' => __('Copied to the clipboard.', 'sustainable-catalyst-library'),
                 'copyFailure' => __('Copying was blocked by the browser.', 'sustainable-catalyst-library'),
-                'confirmClear' => __('Delete all locally stored Library collections, notes, sources, saved records, and translation matrices on this browser?', 'sustainable-catalyst-library'),
+                'confirmClear' => __('Delete all locally stored Library collections, notes, sources, saved records, translation matrices, Whiteboards, and Chalkboards on this browser?', 'sustainable-catalyst-library'),
                 'matrixSaved' => __('Technical Translation Matrix saved.', 'sustainable-catalyst-library'),
                 'matrixDeleted' => __('Technical Translation Matrix deleted.', 'sustainable-catalyst-library'),
                 'matrixTemplateReset' => __('Changing templates resets the current unsaved matrix grid. Continue?', 'sustainable-catalyst-library'),
             ],
         ]);
+
+        if (class_exists('SC_Library_Boards') && SC_Library_Boards::enabled()) {
+            SC_Library_Boards::enqueue_assets();
+        }
     }
 
     public function render_shortcode(array $atts = []): string {
@@ -64,7 +75,7 @@ final class SC_Library_Notebook {
 
         $atts = shortcode_atts([
             'title' => 'Research Notebook',
-            'intro' => 'Combine Sustainable Catalyst records with personal notes, sources, and reusable Technical Translation Matrices.',
+            'intro' => 'Combine Sustainable Catalyst records with personal notes, sources, Technical Translation Matrices, Whiteboards, and Chalkboards.',
             'open' => 'true',
             'tab' => 'overview',
         ], $atts, 'sc_library_notebook');
@@ -94,10 +105,13 @@ final class SC_Library_Notebook {
         $workspace_standalone = $standalone;
         $workspace_open = filter_var($atts['open'] ?? 'true', FILTER_VALIDATE_BOOLEAN);
         $workspace_initial_tab = sanitize_key((string) ($atts['tab'] ?? 'overview'));
-        if (!in_array($workspace_initial_tab, ['overview', 'collections', 'notes', 'sources', 'matrices', 'portability'], true)) {
+        if (!in_array($workspace_initial_tab, ['overview', 'collections', 'notes', 'sources', 'matrices', 'boards', 'portability'], true)) {
             $workspace_initial_tab = 'overview';
         }
         if ($workspace_initial_tab === 'matrices' && !self::matrix_enabled()) {
+            $workspace_initial_tab = 'overview';
+        }
+        if ($workspace_initial_tab === 'boards' && (!class_exists('SC_Library_Boards') || !SC_Library_Boards::enabled())) {
             $workspace_initial_tab = 'overview';
         }
 

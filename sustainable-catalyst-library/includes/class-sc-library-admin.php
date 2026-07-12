@@ -114,16 +114,26 @@ final class SC_Library_Admin {
             },
             'default' => 'technical_translation',
         ]);
+        register_setting('sc_library_settings', 'sc_library_enable_boards', [
+            'type' => 'boolean',
+            'sanitize_callback' => static fn($value) => $value ? 1 : 0,
+            'default' => 1,
+        ]);
+        register_setting('sc_library_settings', 'sc_library_default_board_type', [
+            'type' => 'string',
+            'sanitize_callback' => static fn($value) => in_array($value, ['whiteboard', 'chalkboard'], true) ? $value : 'whiteboard',
+            'default' => 'whiteboard',
+        ]);
     }
 
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.3.0 activated.</strong> Rebuild the Library index, then test the Technical Translation Matrix, Notebook integration, source-aware cells, and matrix exports in a private browser window.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.4.0 activated.</strong> Rebuild the Library index, then test the Whiteboard, Chalkboard, handwriting, Notebook integration, and board exports in a private browser window.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.3.0.</strong> The release adds configurable Technical Translation Matrices, source-aware cells, review states, Notebook links, and JSON, CSV, print, and PDF-ready exports. Rebuild the index once, then test the workspace in a private browser window.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.4.0.</strong> The release adds visual Whiteboards and Chalkboards, draggable research cards, typed relationships, handwriting, Notebook and Matrix handoffs, and JSON, SVG, PNG, print, and PDF-ready exports. Rebuild the index once, then test the workspace in a private browser window.</p></div>';
         }
     }
 
@@ -205,7 +215,7 @@ final class SC_Library_Admin {
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Research Notebook', 'sustainable-catalyst-library'); ?></th>
-                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, matrices, and portable exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.3 stores personal workspace data in each visitor’s browser. It does not write private research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
+                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, matrices, visual boards, and portable exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.4 stores personal workspace data in each visitor’s browser. It does not write private research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Technical Translation Matrix', 'sustainable-catalyst-library'); ?></th>
@@ -217,6 +227,14 @@ final class SC_Library_Admin {
                                 <?php endforeach; ?>
                             </select></p>
                             <p class="description"><?php esc_html_e('Matrices are reusable Notebook records and can be exported as JSON, CSV, or landscape print/PDF-ready documents.', 'sustainable-catalyst-library'); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Whiteboards and Chalkboards', 'sustainable-catalyst-library'); ?></th>
+                        <td>
+                            <label><input name="sc_library_enable_boards" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_boards', 1), 1); ?>> <?php esc_html_e('Enable visual research boards, draggable cards, typed connectors, stylus or mouse handwriting, and export tools.', 'sustainable-catalyst-library'); ?></label>
+                            <p><label for="sc_library_default_board_type"><?php esc_html_e('Default board:', 'sustainable-catalyst-library'); ?></label> <select id="sc_library_default_board_type" name="sc_library_default_board_type"><option value="whiteboard" <?php selected(get_option('sc_library_default_board_type', 'whiteboard'), 'whiteboard'); ?>><?php esc_html_e('Whiteboard', 'sustainable-catalyst-library'); ?></option><option value="chalkboard" <?php selected(get_option('sc_library_default_board_type', 'whiteboard'), 'chalkboard'); ?>><?php esc_html_e('Chalkboard', 'sustainable-catalyst-library'); ?></option></select></p>
+                            <p class="description"><?php esc_html_e('Boards remain editable in browser storage and export as JSON, SVG, PNG, and print/PDF-ready visual research artifacts.', 'sustainable-catalyst-library'); ?></p>
                         </td>
                     </tr>
                     <tr>
@@ -271,9 +289,12 @@ final class SC_Library_Admin {
                 <p><code>[sc_library mode="compact" initial_results="0" show_header="false" show_workspace="true"]</code></p>
                 <p><code>[sc_library_notebook]</code> — standalone Research Notebook workspace.</p>
                 <p><code>[sc_library_translation_matrix]</code> — standalone Technical Translation Matrix studio.</p>
+                <p><code>[sc_library_whiteboard]</code> — standalone Whiteboard launcher.</p>
+                <p><code>[sc_library_chalkboard]</code> — standalone Chalkboard launcher.</p>
+                <p><code>[sc_library_boards]</code> — combined visual board launcher.</p>
                 <p><?php esc_html_e('Place this in a dedicated WordPress Shortcode block.', 'sustainable-catalyst-library'); ?></p>
                 <h3><?php esc_html_e('Relationship-aware REST endpoints', 'sustainable-catalyst-library'); ?></h3>
-                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates'] as $endpoint) : ?>
+                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates'] as $endpoint) : ?>
                     <p><code>/wp-json/sustainable-catalyst/v1/library/<?php echo esc_html($endpoint); ?></code></p>
                 <?php endforeach; ?>
             </div>

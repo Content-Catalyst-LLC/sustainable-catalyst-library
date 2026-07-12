@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.3.0"
+VERSION="1.4.0"
 REMOTE_SSH="git@github.com:Content-Catalyst-LLC/sustainable-catalyst-library.git"
 REMOTE_SLUG="Content-Catalyst-LLC/sustainable-catalyst-library"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -63,20 +63,23 @@ if ! grep -q "SC_LIBRARY_VERSION', '$VERSION'" sustainable-catalyst-library/sust
   echo "ERROR: Runtime version marker validation failed."
   exit 1
 fi
-if ! grep -q "Technical Translation Matrix" sustainable-catalyst-library/readme.txt; then
-  echo "ERROR: Translation Matrix release marker is missing."
+if ! grep -q "Whiteboards and Chalkboards" sustainable-catalyst-library/readme.txt; then
+  echo "ERROR: Whiteboard and Chalkboard release marker is missing."
   exit 1
 fi
-if [[ ! -f sustainable-catalyst-library/assets/js/sc-library-notebook.js ]]; then
-  echo "ERROR: Research Notebook JavaScript is missing."
-  exit 1
-fi
-if [[ ! -f sustainable-catalyst-library-v1.3.0.zip ]]; then
-  echo "ERROR: Installable plugin ZIP is missing."
-  exit 1
-fi
+for required in \
+  sustainable-catalyst-library/includes/class-sc-library-boards.php \
+  sustainable-catalyst-library/assets/js/sc-library-boards.js \
+  sustainable-catalyst-library/assets/css/sc-library-boards.css \
+  sustainable-catalyst-library/templates/library-board-studio.php \
+  sustainable-catalyst-library-v1.4.0.zip; do
+  if [[ ! -f "$required" ]]; then
+    echo "ERROR: Required release file is missing: $required"
+    exit 1
+  fi
+done
 
-if grep -RInE --exclude-dir=.git --exclude='push_library_v1_3_0_to_github.sh' --exclude='install_and_push_library_v1_3_0.sh' \
+if grep -RInE --exclude-dir=.git --exclude='push_library_v1_4_0_to_github.sh' --exclude='install_and_push_library_v1_4_0.sh' \
   '((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|password[[:space:]]*=[[:space:]]*["'\''][^"'\'']+)' .; then
   echo "ERROR: Potential secret detected. Review the output above."
   exit 1
@@ -86,11 +89,11 @@ git add -A
 if git diff --cached --quiet; then
   echo "No changes to commit."
 else
-  git commit -m "Build Library v1.3.0 — Technical Translation Matrix"
+  git commit -m "Build Library v1.4.0 — Whiteboards and Chalkboards"
 fi
 
 git push -u origin main
 
 echo
-echo "Sustainable Catalyst Library v1.3.0 pushed successfully."
+echo "Sustainable Catalyst Library v1.4.0 pushed successfully."
 echo "Repository: https://github.com/$REMOTE_SLUG"

@@ -5,6 +5,7 @@
   const restBase = String(shared.restBase || '').replace(/\/$/, '');
   const strings = shared.strings || {};
   const matrixEnabled = shared.matrixEnabled !== false;
+  const boardsEnabled = shared.boardsEnabled !== false;
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
@@ -180,6 +181,7 @@
               ${updated ? `<time datetime="${escapeHtml(item.modified_at)}">Updated ${escapeHtml(updated)}</time>` : ''}
               <button type="button" data-save-record="${Number(item.id)}">${escapeHtml(strings.saveRecord || 'Save to Notebook')}</button>
               ${matrixEnabled ? `<button type="button" data-translate-record="${Number(item.id)}">${escapeHtml(strings.translateRecord || 'Translate')}</button>` : ''}
+              ${boardsEnabled ? `<button type="button" data-board-record="${Number(item.id)}" data-board-type="whiteboard">${escapeHtml(strings.whiteboardRecord || 'Whiteboard')}</button><button type="button" data-board-record="${Number(item.id)}" data-board-type="chalkboard">${escapeHtml(strings.chalkboardRecord || 'Chalkboard')}</button>` : ''}
               <button type="button" data-open-context="${Number(item.id)}">View knowledge record</button>
             </div>
           </div>`;
@@ -191,6 +193,9 @@
         article.querySelector('[data-translate-record]')?.addEventListener('click', () => {
           root.dispatchEvent(new CustomEvent('sc-library-new-matrix-for-record', { bubbles: true, detail: { record: item } }));
         });
+        article.querySelectorAll('[data-board-record]').forEach((button) => button.addEventListener('click', () => {
+          root.dispatchEvent(new CustomEvent('sc-library-new-board-for-record', { bubbles: true, detail: { record: item, type: button.dataset.boardType || 'whiteboard' } }));
+        }));
         results.appendChild(article);
       });
     };
@@ -514,6 +519,7 @@
             <button type="button" class="sc-library-context__secondary" data-save-record>${escapeHtml(strings.saveRecord || 'Save to Notebook')}</button>
             <button type="button" class="sc-library-context__secondary" data-note-record>${escapeHtml(strings.writeNote || 'Write note')}</button>
             ${matrixEnabled ? `<button type="button" class="sc-library-context__secondary" data-translate-record>${escapeHtml(strings.translateRecord || 'Open Translation Matrix')}</button>` : ''}
+            ${boardsEnabled ? `<button type="button" class="sc-library-context__secondary" data-board-record data-board-type="whiteboard">${escapeHtml(strings.whiteboardRecord || 'Open Whiteboard')}</button><button type="button" class="sc-library-context__secondary" data-board-record data-board-type="chalkboard">${escapeHtml(strings.chalkboardRecord || 'Open Chalkboard')}</button>` : ''}
             <button type="button" class="sc-library-context__secondary" data-copy-record>Copy record link</button>
           </div>
           ${relationGroups ? `<section class="sc-library-context__relationships"><h3>Knowledge relationships</h3>${relationGroups}</section>` : ''}
@@ -528,6 +534,9 @@
         contextContent.querySelector('[data-translate-record]')?.addEventListener('click', () => {
           root.dispatchEvent(new CustomEvent('sc-library-new-matrix-for-record', { bubbles: true, detail: { record: item } }));
         });
+        contextContent.querySelectorAll('[data-board-record]').forEach((button) => button.addEventListener('click', () => {
+          root.dispatchEvent(new CustomEvent('sc-library-new-board-for-record', { bubbles: true, detail: { record: item, type: button.dataset.boardType || 'whiteboard' } }));
+        }));
         root.dispatchEvent(new CustomEvent('sc-library-record-loaded', { bubbles: true, detail: { record: item } }));
         context.querySelector('.sc-library-context__close')?.focus();
       } catch (error) {

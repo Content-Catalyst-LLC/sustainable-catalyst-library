@@ -55,6 +55,7 @@ final class SC_Library_Shortcodes {
         wp_localize_script('sc-library', 'SCLibraryShared', [
             'restBase' => esc_url_raw(rest_url('sustainable-catalyst/v1/library')),
             'matrixEnabled' => SC_Library_Notebook::matrix_enabled(),
+            'boardsEnabled' => class_exists('SC_Library_Boards') && SC_Library_Boards::enabled(),
             'strings' => [
                 'loading' => __('Searching the knowledge base…', 'sustainable-catalyst-library'),
                 'empty' => __('No knowledge records match this request.', 'sustainable-catalyst-library'),
@@ -67,6 +68,8 @@ final class SC_Library_Shortcodes {
                 'saveRecord' => __('Save to Notebook', 'sustainable-catalyst-library'),
                 'writeNote' => __('Write note', 'sustainable-catalyst-library'),
                 'translateRecord' => __('Open Translation Matrix', 'sustainable-catalyst-library'),
+                'whiteboardRecord' => __('Open Whiteboard', 'sustainable-catalyst-library'),
+                'chalkboardRecord' => __('Open Chalkboard', 'sustainable-catalyst-library'),
                 'results' => __('results', 'sustainable-catalyst-library'),
                 'result' => __('result', 'sustainable-catalyst-library'),
             ],

@@ -1,21 +1,23 @@
-# Sustainable Catalyst Library v1.3.0
+# Sustainable Catalyst Library v1.4.0
 
-Library v1.3.0 adds the **Technical Translation Matrix** to the relationship-aware WordPress knowledge base and local-first Research Notebook.
+Library v1.4.0 adds editable **Whiteboards and Chalkboards** to the relationship-aware WordPress knowledge base and local-first Research Notebook.
 
 ## Release highlights
 
-- Configurable translation matrices with editable rows and columns
-- Templates for technical translation, equation-to-code, language comparison, source comparison, and cross-domain translation
-- Cell-level validation and review states
-- Cell-level source and provenance references
-- Notebook, collection, Library-record, and outside-source integration
-- JSON, CSV, and landscape print/PDF-ready matrix exports
-- Standalone `[sc_library_translation_matrix]` shortcode
-- Upgrade-safe migration from the v1.2 browser-local workspace
+- Visual Whiteboards for concept maps, evidence maps, systems maps, and research synthesis
+- Technical Chalkboards for equations, derivations, code logic, validation, and interpretation
+- Draggable typed research cards and labeled directional relationships
+- Pen, highlighter, eraser, handwriting, and stylus-ready pointer input
+- Notebook handoffs from Library records, notes, sources, and Technical Translation Matrices
+- Concept Map, Evidence Map, Systems Map, Equation Workbench, and Technical Derivation templates
+- Local-first board storage with versioned workspace migration
+- JSON, SVG, PNG, and landscape print/PDF-ready exports
+- Standalone Whiteboard, Chalkboard, and combined Boards shortcodes
+- Public board-template REST discovery endpoint
 
 ## Install
 
-Upload `sustainable-catalyst-library-v1.3.0.zip` through WordPress, replace the existing plugin, activate it, and rebuild the Library index.
+Upload `sustainable-catalyst-library-v1.4.0.zip` through WordPress, replace the existing plugin, activate it, and rebuild the Library index.
 
 Recommended Library shortcode:
 
@@ -23,12 +25,14 @@ Recommended Library shortcode:
 [sc_library mode="compact" initial_results="0" show_header="false" show_workspace="true"]
 ```
 
-Standalone Matrix Studio:
+Standalone visual-board launchers:
 
 ```text
-[sc_library_translation_matrix]
+[sc_library_whiteboard]
+[sc_library_chalkboard]
+[sc_library_boards]
 ```
 
 ## Data boundary
 
-Canonical publications remain in WordPress. Personal notebook material and matrices remain in the visitor's browser in v1.3.0 unless explicitly exported.
+Canonical publications remain in WordPress. Personal notebook material, matrices, Whiteboards, Chalkboards, connectors, and handwriting remain in the visitor's browser in v1.4.0 unless explicitly exported.
