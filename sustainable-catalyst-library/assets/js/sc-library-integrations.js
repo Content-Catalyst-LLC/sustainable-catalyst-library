@@ -2,7 +2,7 @@
   'use strict';
   const shared = window.SCIntegrationShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.4';
+  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.5';
   const handoffSchema = shared.handoffSchema || 'sc-library-handoff/1.0';
   const restBase = String(shared.restBase || '').replace(/\/$/, '');
   const targets = Array.isArray(shared.targets) ? shared.targets : [];
@@ -24,6 +24,7 @@
     data.matrices = Array.isArray(data.matrices) ? data.matrices : [];
     data.boards = Array.isArray(data.boards) ? data.boards : [];
     data.annotations = Array.isArray(data.annotations) ? data.annotations : [];
+    data.books = Array.isArray(data.books) ? data.books : [];
     data.collections = Array.isArray(data.collections) ? data.collections : [];
     if (!data.collections.length) data.collections.push({id:'collection_inbox',title:'Research Inbox',description:'Newly saved Library records and research material.',createdAt:now(),updatedAt:now()});
     data.createdAt = data.createdAt || now();
@@ -32,7 +33,7 @@
   };
   const saveWorkspace = (data) => {
     data.schema = workspaceSchema;
-    data.version = shared.version || data.version || '1.6.0';
+    data.version = shared.version || data.version || '1.8.0';
     data.updatedAt = now();
     window.localStorage.setItem(storageKey, JSON.stringify(data));
     window.dispatchEvent(new CustomEvent('sc-library-workspace-updated'));
@@ -46,6 +47,7 @@
     ...ws.matrices.map((x) => ({type:'translation_matrix', id:x.id, title:x.title, object:x})),
     ...ws.boards.map((x) => ({type:x.type === 'chalkboard' ? 'chalkboard' : 'whiteboard', id:x.id, title:x.title, object:x})),
     ...ws.annotations.map((x) => ({type:'annotation', id:x.id, title:x.title, object:x})),
+    ...ws.books.map((x) => ({type:'book', id:x.id, title:x.title, object:x})),
   ];
   const compactObject = (entry, ws) => {
     const object = entry.object || {};
@@ -62,7 +64,7 @@
     id: uid('handoff'),
     target: targetId,
     created_at: now(),
-    source: {application:'sustainable-catalyst-library',version:shared.version || '1.6.0',url:window.location.href},
+    source: {application:'sustainable-catalyst-library',version:shared.version || '1.8.0',url:window.location.href},
     context: {type:entry.type,id:entry.id,title:entry.title,data:compactObject(entry, ws)},
     request: {purpose:purpose || '',question:question || ''},
     collectionIds: Array.isArray(entry.object?.collectionIds) && entry.object.collectionIds.length ? entry.object.collectionIds : ['collection_inbox'],

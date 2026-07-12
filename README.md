@@ -1,57 +1,85 @@
-# Sustainable Catalyst Library v1.6.0
+# Sustainable Catalyst Library v1.8.0
 
-Library v1.6.0 adds a local-first **Annotation Studio and handwriting layer** to the Sustainable Catalyst knowledge base.
+Library v1.8.0 adds the **Foundations and Documentation Library** to the Sustainable Catalyst knowledge base.
 
-Annotations are stored separately from canonical WordPress publications. A user can open a publication, Notebook note, outside source, Technical Translation Matrix, Whiteboard, Chalkboard, video reference, book page, or custom research item and create a reusable annotation record around it.
+The release keeps WordPress pages and repository records as canonical sources while presenting a compact institutional documentation interface on the Foundations page. PDFs become versioned snapshots inside a living documentation system rather than isolated cards or substitutes for current webpages.
 
 ## Included
 
-- Pressure-aware mouse, touch, and stylus handwriting
-- Pen, pencil, highlighter, and eraser tools
-- Rectangles, ellipses, arrows, and movable typed notes
-- Independent handwriting, highlight, shape, and note layers
-- Layer visibility controls and active-layer clearing
-- Undo and redo history
-- Reader, wide-margin, lined, dot-grid, graph-paper, Cornell, blank, and dark technical pages
-- Source-aware annotation records with stable target IDs and URLs
-- Anchored notes for passages, sections, pages, figures, equations, and timestamps
-- Accessible handwriting transcription
-- Private editorial notes and tags
-- Notebook collections and local-first storage
-- Annotation actions from Library records, Notebook notes, external sources, matrices, Whiteboards, and Chalkboards
-- JSON, SVG, PNG, and print/PDF-ready exports
-- `sc-library-annotation/1.0` annotation schema
-- `sc-library-workspace/1.4` browser workspace schema with migration from v1.2–v1.5 releases
-- Annotation context available to Workbench, Decision Studio, and Site Intelligence handoffs
+- Curated **Foundations Documentation Library** collection
+- Hierarchical Documentation Categories
+- Documentation statuses: Living, Current, PDF Snapshot, Draft, Superseded, and Archived
+- Explicit authoritative-source designation
+- Current webpage, repository, methodology, release, PDF, and archive authority types
+- Version, responsible area, last-reviewed date, and review interval fields
+- Supersedes, superseded-by, dependency, and related-document records
+- Featured living documentation
+- Expandable public document panels
+- Search across indexed titles, descriptions, metadata, keywords, and document text
+- Category, status, responsible-area, archive, and sort filters
+- Open webpage, full Library record, PDF, repository, release, history, and correction actions
+- Authority warnings for dated PDF snapshots, drafts, superseded documents, archives, and repository-governed technical behavior
+- Documentation authority diagnostics in WordPress administration
+- `documentation`, `documentation/categories`, `documentation/statuses`, `documentation/{id}`, and `collections/foundations` REST endpoints
+- Extended relationship types for documents, implementation, governance, dependencies, snapshots, methodology, policy, and releases
+
+## Source-of-truth model
+
+| Record purpose | Preferred authority |
+|---|---|
+| Institution and product descriptions | Current public webpage |
+| Technical behavior | Repository documentation |
+| Methodology and boundaries | Current methodology page |
+| Release state | Repository release record |
+| Brand or policy snapshot | Published PDF |
+| Historical brief | Archived PDF |
 
 ## WordPress installation
 
-Upload `sustainable-catalyst-library-v1.6.0.zip`, replace the existing plugin, activate it, open **SC Library**, enable Annotation Studio, choose a default page style, save settings, and rebuild the Library index.
+Upload `sustainable-catalyst-library-v1.8.0.zip`, replace the existing plugin, activate it, open **SC Library**, enable the Foundations Documentation Library, confirm the main Library URL, save settings, and rebuild the Library index.
 
-Recommended Library shortcode:
+For each documentation record:
+
+1. Assign **Foundations Documentation Library** under Library Collections.
+2. Assign one or more Documentation Categories.
+3. Complete the Documentation Authority panel.
+4. Identify the authoritative source, version, responsible area, and review date.
+5. Mark PDF files as snapshots when a living webpage or repository remains authoritative.
+
+## Shortcodes
+
+Recommended Foundations embed:
+
+```text
+[sc_library collection="foundations" mode="documentation"]
+```
+
+Convenience alias:
+
+```text
+[sc_foundations_library mode="public"]
+```
+
+Compact embed without a duplicate heading:
+
+```text
+[sc_library collection="foundations" mode="documentation" show_header="false"]
+```
+
+The main Research Library shortcode remains:
 
 ```text
 [sc_library mode="compact" initial_results="0" show_header="false" show_workspace="true"]
 ```
 
-Standalone Annotation Studio:
+## REST endpoints
 
-```text
-[sc_library_annotation_studio]
-```
+- `/wp-json/sustainable-catalyst/v1/library/documentation`
+- `/wp-json/sustainable-catalyst/v1/library/documentation/categories`
+- `/wp-json/sustainable-catalyst/v1/library/documentation/statuses`
+- `/wp-json/sustainable-catalyst/v1/library/documentation/{id}`
+- `/wp-json/sustainable-catalyst/v1/library/collections/foundations`
 
-Open the Notebook directly to annotations:
+## Architectural boundary
 
-```text
-[sc_library_notebook tab="annotations"]
-```
-
-## REST endpoint
-
-- `/wp-json/sustainable-catalyst/v1/library/annotation-schema`
-
-The endpoint describes the annotation schema, target types, tools, page styles, and layer types. Personal annotation data remains browser-local unless the user exports it.
-
-## Important storage boundary
-
-The v1.6.0 workspace is local-first. Export the workspace or individual annotations before clearing browser data, using another browser, or moving to another device. Annotation records do not alter the original publication or source.
+The Foundations embed is a curated view of canonical Library records. It does not create a second documentation database, duplicate the main Library, or embed an iframe. The full Library retains relationships, sources, annotations, Notebook use, Translation Matrices, Whiteboards, Chalkboards, connected tools, book inclusion, and history.

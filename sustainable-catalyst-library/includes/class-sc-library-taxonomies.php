@@ -6,6 +6,8 @@ if (!defined('ABSPATH')) {
 final class SC_Library_Taxonomies {
     public const SERIES = 'sc_library_series';
     public const CONCEPT = 'sc_library_concept';
+    public const COLLECTION = 'sc_library_collection';
+    public const DOCUMENT_CATEGORY = 'sc_library_document_category';
 
     public function register_hooks(): void {
         add_action('init', [$this, 'register'], 6);
@@ -54,6 +56,50 @@ final class SC_Library_Taxonomies {
             'show_admin_column' => true,
             'show_in_rest' => true,
             'hierarchical' => false,
+            'rewrite' => false,
+            'query_var' => false,
+        ]);
+
+
+        register_taxonomy(self::COLLECTION, $post_types, [
+            'labels' => [
+                'name' => __('Library Collections', 'sustainable-catalyst-library'),
+                'singular_name' => __('Library Collection', 'sustainable-catalyst-library'),
+                'search_items' => __('Search Library Collections', 'sustainable-catalyst-library'),
+                'all_items' => __('All Library Collections', 'sustainable-catalyst-library'),
+                'edit_item' => __('Edit Library Collection', 'sustainable-catalyst-library'),
+                'update_item' => __('Update Library Collection', 'sustainable-catalyst-library'),
+                'add_new_item' => __('Add Library Collection', 'sustainable-catalyst-library'),
+                'new_item_name' => __('New Library Collection', 'sustainable-catalyst-library'),
+                'menu_name' => __('Library Collections', 'sustainable-catalyst-library'),
+            ],
+            'public' => false,
+            'show_ui' => true,
+            'show_admin_column' => true,
+            'show_in_rest' => true,
+            'hierarchical' => false,
+            'rewrite' => false,
+            'query_var' => false,
+        ]);
+
+        register_taxonomy(self::DOCUMENT_CATEGORY, $post_types, [
+            'labels' => [
+                'name' => __('Documentation Categories', 'sustainable-catalyst-library'),
+                'singular_name' => __('Documentation Category', 'sustainable-catalyst-library'),
+                'search_items' => __('Search Documentation Categories', 'sustainable-catalyst-library'),
+                'all_items' => __('All Documentation Categories', 'sustainable-catalyst-library'),
+                'parent_item' => __('Parent Documentation Category', 'sustainable-catalyst-library'),
+                'edit_item' => __('Edit Documentation Category', 'sustainable-catalyst-library'),
+                'update_item' => __('Update Documentation Category', 'sustainable-catalyst-library'),
+                'add_new_item' => __('Add Documentation Category', 'sustainable-catalyst-library'),
+                'new_item_name' => __('New Documentation Category', 'sustainable-catalyst-library'),
+                'menu_name' => __('Documentation Categories', 'sustainable-catalyst-library'),
+            ],
+            'public' => false,
+            'show_ui' => true,
+            'show_admin_column' => true,
+            'show_in_rest' => true,
+            'hierarchical' => true,
             'rewrite' => false,
             'query_var' => false,
         ]);

@@ -11,6 +11,7 @@ $matrix_enabled = SC_Library_Notebook::matrix_enabled();
 $boards_enabled = class_exists('SC_Library_Boards') && SC_Library_Boards::enabled();
 $integrations_enabled = class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled();
 $annotations_enabled = class_exists('SC_Library_Annotations') && SC_Library_Annotations::enabled();
+$books_enabled = class_exists('SC_Library_Books') && SC_Library_Books::enabled();
 ?>
 <section class="sc-library-workspace-shell<?php echo $workspace_standalone ? ' sc-library-workspace-shell--standalone' : ''; ?>" data-sc-library-workspace-root data-workspace-standalone="<?php echo $workspace_standalone ? '1' : '0'; ?>" data-workspace-initial-tab="<?php echo esc_attr($workspace_initial_tab); ?>">
     <div class="sc-library-workspace-launcher">
@@ -26,6 +27,7 @@ $annotations_enabled = class_exists('SC_Library_Annotations') && SC_Library_Anno
             <?php if ($matrix_enabled) : ?><button type="button" class="sc-library-workspace-launcher__secondary" data-workspace-quick="matrix"><?php esc_html_e('New matrix', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
             <?php if ($boards_enabled) : ?><button type="button" class="sc-library-workspace-launcher__secondary" data-workspace-quick="whiteboard"><?php esc_html_e('New Whiteboard', 'sustainable-catalyst-library'); ?></button><button type="button" class="sc-library-workspace-launcher__secondary" data-workspace-quick="chalkboard"><?php esc_html_e('New Chalkboard', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
             <?php if ($annotations_enabled) : ?><button type="button" class="sc-library-workspace-launcher__secondary" data-workspace-quick="annotation"><?php esc_html_e('New annotation', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
+            <?php if ($books_enabled) : ?><button type="button" class="sc-library-workspace-launcher__secondary" data-workspace-quick="book"><?php esc_html_e('New book', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
             <button type="button" class="sc-library-workspace-launcher__secondary" data-workspace-quick="source"><?php esc_html_e('Add source', 'sustainable-catalyst-library'); ?></button>
         </div>
     </div>
@@ -37,7 +39,7 @@ $annotations_enabled = class_exists('SC_Library_Annotations') && SC_Library_Anno
                 <div><p class="sc-library__eyebrow"><?php esc_html_e('Local-first workspace', 'sustainable-catalyst-library'); ?></p><h2 id="sc-library-workspace-title"><?php echo esc_html($workspace_title); ?></h2></div>
                 <?php if (!$workspace_standalone) : ?><button type="button" class="sc-library-workspace__close" data-workspace-close aria-label="<?php esc_attr_e('Close Research Notebook', 'sustainable-catalyst-library'); ?>">×</button><?php endif; ?>
             </header>
-            <p class="sc-library-workspace__privacy"><?php esc_html_e('This v1.6 workspace is stored only in this browser unless you export it. It does not change the original publication. Matrices, boards, and annotations retain source links, handwriting, layers, accessibility transcriptions, and export metadata.', 'sustainable-catalyst-library'); ?></p>
+            <p class="sc-library-workspace__privacy"><?php esc_html_e('This v1.8 workspace is stored only in this browser unless you export it. It does not change the original publication. Matrices, boards, annotations, and book projects retain source links, handwriting, layers, accessibility transcriptions, edition manifests, and export metadata.', 'sustainable-catalyst-library'); ?></p>
             <nav class="sc-library-workspace__tabs" aria-label="<?php esc_attr_e('Research Notebook sections', 'sustainable-catalyst-library'); ?>">
                 <button type="button" data-workspace-tab="overview"><?php esc_html_e('Overview', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-workspace-tab="collections"><?php esc_html_e('Collections', 'sustainable-catalyst-library'); ?></button>
@@ -46,6 +48,7 @@ $annotations_enabled = class_exists('SC_Library_Annotations') && SC_Library_Anno
                 <?php if ($matrix_enabled) : ?><button type="button" data-workspace-tab="matrices"><?php esc_html_e('Translation Matrix', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
                 <?php if ($boards_enabled) : ?><button type="button" data-workspace-tab="boards"><?php esc_html_e('Boards', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
                 <?php if ($annotations_enabled) : ?><button type="button" data-workspace-tab="annotations"><?php esc_html_e('Annotations', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
+                <?php if ($books_enabled) : ?><button type="button" data-workspace-tab="books"><?php esc_html_e('Books', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
                 <?php if ($integrations_enabled) : ?><button type="button" data-workspace-tab="integrations"><?php esc_html_e('Connected Tools', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
                 <button type="button" data-workspace-tab="portability"><?php esc_html_e('Import / Export', 'sustainable-catalyst-library'); ?></button>
             </nav>

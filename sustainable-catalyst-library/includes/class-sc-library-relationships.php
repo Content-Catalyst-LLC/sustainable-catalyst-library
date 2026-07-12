@@ -32,6 +32,20 @@ final class SC_Library_Relationships {
             'provides_context_for' => __('Provides context for', 'sustainable-catalyst-library'),
             'extends' => __('Extends', 'sustainable-catalyst-library'),
             'contrasts_with' => __('Contrasts with', 'sustainable-catalyst-library'),
+            'documents' => __('Documents', 'sustainable-catalyst-library'),
+            'implements' => __('Implements', 'sustainable-catalyst-library'),
+            'governs' => __('Governs', 'sustainable-catalyst-library'),
+            'describes' => __('Describes', 'sustainable-catalyst-library'),
+            'defines' => __('Defines', 'sustainable-catalyst-library'),
+            'depends_on' => __('Depends on', 'sustainable-catalyst-library'),
+            'replaces' => __('Replaces', 'sustainable-catalyst-library'),
+            'supersedes' => __('Supersedes', 'sustainable-catalyst-library'),
+            'superseded_by' => __('Superseded by', 'sustainable-catalyst-library'),
+            'snapshot_of' => __('Snapshot of', 'sustainable-catalyst-library'),
+            'technical_source_for' => __('Technical source for', 'sustainable-catalyst-library'),
+            'methodology_for' => __('Methodology for', 'sustainable-catalyst-library'),
+            'policy_governing' => __('Policy governing', 'sustainable-catalyst-library'),
+            'release_record_for' => __('Release record for', 'sustainable-catalyst-library'),
         ];
     }
 

@@ -43,7 +43,7 @@ final class SC_Library_Indexer {
     }
 
     public function on_terms_changed(int $object_id, array $terms, array $tt_ids, string $taxonomy, bool $append, array $old_tt_ids): void {
-        if (in_array($taxonomy, ['category', 'post_tag', SC_Library_Taxonomies::SERIES, SC_Library_Taxonomies::CONCEPT], true)) {
+        if (in_array($taxonomy, ['category', 'post_tag', SC_Library_Taxonomies::SERIES, SC_Library_Taxonomies::CONCEPT, SC_Library_Taxonomies::COLLECTION, SC_Library_Taxonomies::DOCUMENT_CATEGORY], true)) {
             $this->reindex_post($object_id);
         }
     }
@@ -91,6 +91,14 @@ final class SC_Library_Indexer {
         $term_text = implode(' ', array_filter(array_merge(
             wp_list_pluck($series_terms, 'name'),
             wp_list_pluck($concept_terms, 'name'),
+            wp_list_pluck((function () use ($post_id) {
+                $terms = wp_get_post_terms($post_id, SC_Library_Taxonomies::COLLECTION, ['fields' => 'all']);
+                return is_wp_error($terms) ? [] : $terms;
+            })(), 'name'),
+            wp_list_pluck((function () use ($post_id) {
+                $terms = wp_get_post_terms($post_id, SC_Library_Taxonomies::DOCUMENT_CATEGORY, ['fields' => 'all']);
+                return is_wp_error($terms) ? [] : $terms;
+            })(), 'name'),
             array_map(static function ($term_id): string {
                 $term = get_term((int) $term_id, 'category');
                 return $term && !is_wp_error($term) ? $term->name : '';
@@ -113,6 +121,17 @@ final class SC_Library_Indexer {
             (string) get_post_meta($post_id, '_sc_library_site_indicators', true),
             (string) get_post_meta($post_id, '_sc_library_site_sources', true),
             (string) get_post_meta($post_id, '_sc_library_evidence_status', true),
+            (string) get_post_meta($post_id, '_sc_library_doc_status', true),
+            (string) get_post_meta($post_id, '_sc_library_doc_type', true),
+            (string) get_post_meta($post_id, '_sc_library_doc_version', true),
+            (string) get_post_meta($post_id, '_sc_library_doc_responsible_area', true),
+            (string) get_post_meta($post_id, '_sc_library_doc_authority_type', true),
+            (string) get_post_meta($post_id, '_sc_library_doc_authority_note', true),
+            (string) get_post_meta($post_id, '_sc_library_doc_authority_url', true),
+            (string) get_post_meta($post_id, '_sc_library_doc_webpage_url', true),
+            (string) get_post_meta($post_id, '_sc_library_doc_repository_url', true),
+            (string) get_post_meta($post_id, '_sc_library_doc_pdf_url', true),
+            (string) get_post_meta($post_id, '_sc_library_doc_release_url', true),
         ]));
 
         $relationship_text = implode(' ', array_map(static function (array $relation): string {

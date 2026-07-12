@@ -109,6 +109,13 @@ final class SC_Library_Activator {
         add_option('sc_library_enable_integrations', 1);
         add_option('sc_library_enable_annotations', 1);
         add_option('sc_library_default_annotation_page_style', 'reader');
+        add_option('sc_library_enable_books', 1);
+        add_option('sc_library_default_book_theme', 'institutional');
+        add_option('sc_library_default_book_page_size', 'letter');
+        add_option('sc_library_enable_documentation', 1);
+        add_option('sc_library_main_page_url', home_url('/research-library/'));
+        add_option('sc_library_documentation_search_placeholder', 'Search titles, descriptions, keywords, and document text');
+        add_option('sc_library_documentation_include_archived', 0);
         add_option('sc_library_workbench_health_url', '');
         add_option('sc_library_decision_studio_url', home_url('/decision-studio/'));
         add_option('sc_library_decision_studio_health_url', '');

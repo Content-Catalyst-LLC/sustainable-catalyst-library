@@ -109,6 +109,8 @@ final class SC_Library_REST {
             'relationships' => $this->relationships->count(),
             'series' => $this->safe_term_count(SC_Library_Taxonomies::SERIES),
             'concepts' => $this->safe_term_count(SC_Library_Taxonomies::CONCEPT),
+            'collections' => $this->safe_term_count(SC_Library_Taxonomies::COLLECTION),
+            'documentation_categories' => $this->safe_term_count(SC_Library_Taxonomies::DOCUMENT_CATEGORY),
             'last_full_index' => get_option('sc_library_last_full_index', ''),
             'post_types' => $this->indexer->configured_post_types(),
             'interface' => 'relationship-aware-knowledge-base',
@@ -116,6 +118,16 @@ final class SC_Library_REST {
                 'enabled' => SC_Library_Notebook::enabled(),
                 'storage' => 'browser-local',
                 'schema' => SC_Library_Notebook::SCHEMA,
+            ],
+            'books' => [
+                'enabled' => class_exists('SC_Library_Books') && SC_Library_Books::enabled(),
+                'schema' => class_exists('SC_Library_Books') ? SC_Library_Books::SCHEMA : '',
+                'pdf_mode' => 'browser-print',
+            ],
+            'documentation' => [
+                'enabled' => class_exists('SC_Library_Documentation') && SC_Library_Documentation::enabled(),
+                'collection' => class_exists('SC_Library_Documentation') ? SC_Library_Documentation::COLLECTION_SLUG : 'foundations',
+                'authority_model' => 'explicit-source-of-truth',
             ],
             'integrations' => [
                 'enabled' => class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled(),

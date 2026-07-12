@@ -3,9 +3,9 @@
 
   const shared = window.SCAnnotationsShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.4';
+  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.5';
   const annotationSchema = shared.schema || 'sc-library-annotation/1.0';
-  const version = shared.version || '1.6.0';
+  const version = shared.version || '1.8.0';
   const strings = shared.strings || {};
   const tools = Array.isArray(shared.tools) ? shared.tools : [];
   const targetTypes = Array.isArray(shared.targetTypes) ? shared.targetTypes : [];
@@ -46,7 +46,7 @@
     createdAt: now(),
     updatedAt: now(),
     collections: [{ id: 'collection_inbox', title: 'Research Inbox', description: 'Newly saved Library records and research material.', createdAt: now(), updatedAt: now() }],
-    savedRecords: [], notes: [], sources: [], matrices: [], boards: [], handoffs: [], annotations: [],
+    savedRecords: [], notes: [], sources: [], matrices: [], boards: [], handoffs: [], annotations: [], books: [],
   });
 
   const normalizeWorkspace = (input) => {
@@ -64,6 +64,7 @@
       boards: Array.isArray(data.boards) ? data.boards : [],
       handoffs: Array.isArray(data.handoffs) ? data.handoffs : [],
       annotations: Array.isArray(data.annotations) ? data.annotations.map(normalizeAnnotation) : [],
+      books: Array.isArray(data.books) ? data.books : [],
       updatedAt: now(),
     };
   };

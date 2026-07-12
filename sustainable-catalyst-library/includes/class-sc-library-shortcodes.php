@@ -11,11 +11,18 @@ final class SC_Library_Shortcodes {
     }
 
     public function render(array $atts = []): string {
+        $requested_mode = sanitize_key((string) ($atts['mode'] ?? ''));
+        $requested_collection = sanitize_title((string) ($atts['collection'] ?? ''));
+        if (class_exists('SC_Library_Documentation') && ($requested_mode === 'documentation' || $requested_collection === SC_Library_Documentation::COLLECTION_SLUG)) {
+            return SC_Library_Documentation::render_shortcode($atts);
+        }
+
         self::$instance_count++;
 
         $default_mode = (string) get_option('sc_library_default_mode', 'compact');
         $atts = shortcode_atts([
             'category' => '',
+            'collection' => '',
             'series' => '',
             'concept' => '',
             'record' => '',
@@ -58,12 +65,16 @@ final class SC_Library_Shortcodes {
         if (class_exists('SC_Library_Annotations') && SC_Library_Annotations::enabled()) {
             SC_Library_Annotations::enqueue_assets();
         }
+        if (class_exists('SC_Library_Books') && SC_Library_Books::enabled()) {
+            SC_Library_Books::enqueue_assets();
+        }
         wp_localize_script('sc-library', 'SCLibraryShared', [
             'restBase' => esc_url_raw(rest_url('sustainable-catalyst/v1/library')),
             'matrixEnabled' => SC_Library_Notebook::matrix_enabled(),
             'boardsEnabled' => class_exists('SC_Library_Boards') && SC_Library_Boards::enabled(),
             'integrationsEnabled' => class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled(),
             'annotationsEnabled' => class_exists('SC_Library_Annotations') && SC_Library_Annotations::enabled(),
+            'booksEnabled' => class_exists('SC_Library_Books') && SC_Library_Books::enabled(),
             'strings' => [
                 'loading' => __('Searching the knowledge base…', 'sustainable-catalyst-library'),
                 'empty' => __('No knowledge records match this request.', 'sustainable-catalyst-library'),
@@ -82,6 +93,7 @@ final class SC_Library_Shortcodes {
                 'decisionRecord' => __('Build Decision Canvas', 'sustainable-catalyst-library'),
                 'siteRecord' => __('Investigate Geographic Context', 'sustainable-catalyst-library'),
                 'annotateRecord' => __('Annotate and Handwrite', 'sustainable-catalyst-library'),
+                'bookRecord' => __('Add to Custom Book', 'sustainable-catalyst-library'),
                 'results' => __('results', 'sustainable-catalyst-library'),
                 'result' => __('result', 'sustainable-catalyst-library'),
             ],
