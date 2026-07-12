@@ -6,6 +6,7 @@
   const strings = shared.strings || {};
   const matrixEnabled = shared.matrixEnabled !== false;
   const boardsEnabled = shared.boardsEnabled !== false;
+  const integrationsEnabled = shared.integrationsEnabled !== false;
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
@@ -116,6 +117,8 @@
       if (resources.dataset) labels.push('Dataset');
       if (resources.video) labels.push('Video');
       if (resources.workbench) labels.push('Workbench');
+      if (resources.decision_studio) labels.push('Decision Studio');
+      if (resources.site_intelligence) labels.push('Site Intelligence');
       return labels.map((label) => `<span>${escapeHtml(label)}</span>`).join('');
     };
 
@@ -488,6 +491,11 @@
         const badges = resourceBadges(item.resources);
         const relationGroups = (item.related_groups || []).map(relationGroupHtml).join('');
         const workbenchTools = item.resources?.workbench_tools || [];
+        const integrationCards = integrationsEnabled ? ['workbench','decision_studio','site_intelligence'].map((target) => {
+          const handoff = item.handoffs?.[target];
+          if (!handoff?.available) return '';
+          return `<article class="sc-library-context__integration-card"><strong>${escapeHtml(handoff.label)}</strong><p>${escapeHtml(handoff.description || '')}</p><button type="button" data-integrate-record data-integration-target="${escapeHtml(target)}">${escapeHtml(handoff.label)}</button></article>`;
+        }).join('') : '';
         const resourceParts = [
           item.resources?.github_url ? `<div><dt>Code companion</dt><dd><a href="${escapeHtml(item.resources.github_url)}" target="_blank" rel="noopener">Open GitHub repository</a></dd></div>` : '',
           externalLinksHtml(item.resources?.dataset_urls, 'Dataset'),
@@ -513,9 +521,9 @@
             ${item.modified_at ? `<div><dt>Updated</dt><dd>${escapeHtml(formatDate(item.modified_at))}</dd></div>` : ''}
           </dl>
           ${resources ? `<dl class="sc-library-context__resource-links">${resources}</dl>` : ''}
+          ${integrationCards ? `<section class="sc-library-context__integrations"><h4>Connected research tools</h4><div class="sc-library-context__integration-grid">${integrationCards}</div></section>` : ''}
           <div class="sc-library-context__actions">
             <a class="sc-library-context__primary" href="${escapeHtml(item.url)}">Read publication</a>
-            ${item.handoffs?.workbench?.available ? `<a class="sc-library-context__secondary" href="${escapeHtml(item.handoffs.workbench.url)}">${escapeHtml(item.handoffs.workbench.label)}</a>` : ''}
             <button type="button" class="sc-library-context__secondary" data-save-record>${escapeHtml(strings.saveRecord || 'Save to Notebook')}</button>
             <button type="button" class="sc-library-context__secondary" data-note-record>${escapeHtml(strings.writeNote || 'Write note')}</button>
             ${matrixEnabled ? `<button type="button" class="sc-library-context__secondary" data-translate-record>${escapeHtml(strings.translateRecord || 'Open Translation Matrix')}</button>` : ''}
@@ -536,6 +544,9 @@
         });
         contextContent.querySelectorAll('[data-board-record]').forEach((button) => button.addEventListener('click', () => {
           root.dispatchEvent(new CustomEvent('sc-library-new-board-for-record', { bubbles: true, detail: { record: item, type: button.dataset.boardType || 'whiteboard' } }));
+        }));
+        contextContent.querySelectorAll('[data-integrate-record]').forEach((button) => button.addEventListener('click', () => {
+          root.dispatchEvent(new CustomEvent('sc-library-integrate-record', { bubbles: true, detail: { record: item, target: button.dataset.integrationTarget || 'workbench' } }));
         }));
         root.dispatchEvent(new CustomEvent('sc-library-record-loaded', { bubbles: true, detail: { record: item } }));
         context.querySelector('.sc-library-context__close')?.focus();

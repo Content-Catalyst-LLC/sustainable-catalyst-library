@@ -9,6 +9,7 @@ $workspace_open = $workspace_open ?? false;
 $workspace_initial_tab = $workspace_initial_tab ?? 'overview';
 $matrix_enabled = SC_Library_Notebook::matrix_enabled();
 $boards_enabled = class_exists('SC_Library_Boards') && SC_Library_Boards::enabled();
+$integrations_enabled = class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled();
 ?>
 <section class="sc-library-workspace-shell<?php echo $workspace_standalone ? ' sc-library-workspace-shell--standalone' : ''; ?>" data-sc-library-workspace-root data-workspace-standalone="<?php echo $workspace_standalone ? '1' : '0'; ?>" data-workspace-initial-tab="<?php echo esc_attr($workspace_initial_tab); ?>">
     <div class="sc-library-workspace-launcher">
@@ -34,7 +35,7 @@ $boards_enabled = class_exists('SC_Library_Boards') && SC_Library_Boards::enable
                 <div><p class="sc-library__eyebrow"><?php esc_html_e('Local-first workspace', 'sustainable-catalyst-library'); ?></p><h2 id="sc-library-workspace-title"><?php echo esc_html($workspace_title); ?></h2></div>
                 <?php if (!$workspace_standalone) : ?><button type="button" class="sc-library-workspace__close" data-workspace-close aria-label="<?php esc_attr_e('Close Research Notebook', 'sustainable-catalyst-library'); ?>">×</button><?php endif; ?>
             </header>
-            <p class="sc-library-workspace__privacy"><?php esc_html_e('This v1.4 workspace is stored only in this browser unless you export it. It does not change the original publication. Matrices and visual boards retain source links, relationships, handwriting, and export metadata.', 'sustainable-catalyst-library'); ?></p>
+            <p class="sc-library-workspace__privacy"><?php esc_html_e('This v1.5 workspace is stored only in this browser unless you export it. It does not change the original publication. Matrices and visual boards retain source links, relationships, handwriting, and export metadata.', 'sustainable-catalyst-library'); ?></p>
             <nav class="sc-library-workspace__tabs" aria-label="<?php esc_attr_e('Research Notebook sections', 'sustainable-catalyst-library'); ?>">
                 <button type="button" data-workspace-tab="overview"><?php esc_html_e('Overview', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-workspace-tab="collections"><?php esc_html_e('Collections', 'sustainable-catalyst-library'); ?></button>
@@ -42,6 +43,7 @@ $boards_enabled = class_exists('SC_Library_Boards') && SC_Library_Boards::enable
                 <button type="button" data-workspace-tab="sources"><?php esc_html_e('Sources', 'sustainable-catalyst-library'); ?></button>
                 <?php if ($matrix_enabled) : ?><button type="button" data-workspace-tab="matrices"><?php esc_html_e('Translation Matrix', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
                 <?php if ($boards_enabled) : ?><button type="button" data-workspace-tab="boards"><?php esc_html_e('Boards', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
+                <?php if ($integrations_enabled) : ?><button type="button" data-workspace-tab="integrations"><?php esc_html_e('Connected Tools', 'sustainable-catalyst-library'); ?></button><?php endif; ?>
                 <button type="button" data-workspace-tab="portability"><?php esc_html_e('Import / Export', 'sustainable-catalyst-library'); ?></button>
             </nav>
             <div class="sc-library-workspace__notice" data-workspace-notice hidden aria-live="polite"></div>

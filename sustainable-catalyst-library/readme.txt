@@ -1,126 +1,72 @@
 === Sustainable Catalyst Library ===
 Contributors: contentcatalyst
-Tags: knowledge-base, notebook, whiteboard, chalkboard, translation-matrix, research, sources, citations, relationships, collections, search, rest-api
+Tags: knowledge-base, research, notebook, workbench, decision-support, site-intelligence
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 
-A native relationship-aware WordPress knowledge base with a local-first Research Notebook, sources, Technical Translation Matrices, Whiteboards, and Chalkboards.
+A native WordPress knowledge base with relationships, notebooks, sources, matrices, visual boards, and cross-application research handoffs.
 
 == Description ==
 
-Sustainable Catalyst Library v1.4.0 adds visual Whiteboards and technical Chalkboards to the local-first research workspace.
+Sustainable Catalyst Library v1.5.0 connects Library records and local-first Notebook objects to Workbench, Decision Studio, and Site Intelligence through compact contextual panels and versioned handoff packets.
 
-Features:
-* Compact search-first public knowledge-base interface
-* Structured WordPress publication index
-* Library Series and Library Concepts taxonomies
-* Typed directional knowledge relationships
-* Rich record panels with hierarchy, sequence, resources, and Workbench handoffs
-* Browser-local Research Notebook
-* Named collections and Research Inbox
-* Notes attached to Library records, outside sources, translation matrices, or visual boards
-* External website, journal, report, dataset, video, podcast, interview, archive, and custom-source records
-* Physical books and book chapters with ISBN, edition, page, chapter, and location fields
-* APA, MLA, Chicago, Harvard, plain-text, BibTeX, RIS, and CSL JSON citations
-* Configurable Technical Translation Matrices with cell-level validation and provenance
-* Editable Whiteboards for concept maps, evidence maps, systems maps, and synthesis
-* Editable Chalkboards for equations, derivations, code logic, validation, and interpretation
-* Draggable Concept, Note, Question, Claim, Evidence, Source, Publication, Matrix, Equation, Code, and Result cards
-* Typed labeled connectors between board cards
-* Pen, highlighter, eraser, and stylus-ready handwriting
-* Board links to Library records, notes, outside sources, matrices, and collections
-* Record-panel and result-row Whiteboard and Chalkboard actions
-* Board JSON, SVG, PNG, and landscape print/PDF-ready exports
-* Versioned workspace JSON import and export with v1.2 and v1.3 migration
-* Standalone Notebook, Matrix, Whiteboard, Chalkboard, and combined Boards shortcodes
-* Public REST discovery endpoints for matrix and board templates
+The release intentionally avoids iframes and duplicate full application interfaces. The Library prepares context; the connected application performs deeper calculation, decision analysis, or geographic investigation.
+
+= Connected research tools =
+
+* Library Workbench: equations, methods, variables, datasets, technical questions, validation, graphs, and analytical reports.
+* Library Decision Studio: evidence synthesis, claims, assumptions, uncertainty, tradeoffs, research gaps, and decision canvases.
+* Library Site Intelligence: countries, places, indicators, maps, events, datasets, source registry records, and freshness context.
+
+= Handoff model =
+
+* Versioned `sc-library-handoff/1.0` packet.
+* Record-specific public context endpoint.
+* Portable Notebook handoff JSON.
+* Compact cross-origin URL-fragment payload.
+* Stable Library identifiers and provenance.
+* Service-specific launch URLs and health endpoints.
+
+= Privacy and storage =
+
+Personal Notebook data and saved handoffs remain in browser-local storage in v1.5.0. They are not written to public WordPress tables. Export a JSON backup before clearing browser data or changing devices.
 
 == Installation ==
 
 1. Upload and activate the plugin.
-2. Open SC Library in WordPress administration.
-3. Confirm the public post types to include.
-4. Keep Research Notebook, Technical Translation Matrix, and Whiteboards and Chalkboards enabled.
-5. Save settings and click Rebuild Library Index.
-6. Add the Library shortcode to a dedicated Shortcode block:
-   [sc_library mode="compact" initial_results="0" show_header="false" show_workspace="true"]
-7. Optionally add a standalone Notebook page with:
-   [sc_library_notebook]
-8. Optionally add a standalone Matrix Studio page with:
-   [sc_library_translation_matrix]
-9. Optionally add standalone visual board launchers with:
-   [sc_library_whiteboard]
-   [sc_library_chalkboard]
-   [sc_library_boards]
+2. Open SC Library.
+3. Configure Workbench, Decision Studio, and Site Intelligence URLs plus optional health endpoints.
+4. Select indexed post types and save settings.
+5. Rebuild the Library index.
+6. Add `[sc_library mode="compact" initial_results="0" show_header="false" show_workspace="true"]` in a Shortcode block.
 
-== Local Storage ==
+== Shortcodes ==
 
-Research Notebook, matrix, Whiteboard, and Chalkboard data are private to the current browser profile in v1.4.0. They are not stored in WordPress. The release keeps the v1.2 local-storage key and migrates compatible sc-library-workspace/1.0 and sc-library-workspace/1.1 exports into sc-library-workspace/1.2. Export a JSON backup before clearing browser data or changing devices.
-
-== Whiteboards and Chalkboards ==
-
-Whiteboards support concept maps, evidence maps, systems maps, source organization, claims, questions, and visual synthesis. Chalkboards provide a dark technical canvas for equations, derivations, code, algorithms, validation checks, and systems interpretation.
-
-Board capabilities:
-* Draggable and resizable typed cards
-* Labeled directional relationships
-* Pen, highlighter, and eraser tools
-* Mouse, touch, and stylus pointer input
-* Saved-record, outside-source, note, and matrix cards
-* Collection membership and provenance attachments
-* JSON export with complete editable board data
-* SVG export for vector reuse
-* PNG export for documents and presentations
-* Landscape print view suitable for Save as PDF
-
-== Technical Translation Matrix ==
-
-A matrix can translate a Library concept across plain language, mathematical notation, algorithms, programming languages, relational data logic, systems interpretation, assumptions, validation, and source provenance. Matrices can be moved into Whiteboards and Chalkboards as visual research cards.
-
-== REST API ==
-
-* /wp-json/sustainable-catalyst/v1/library/status
-* /wp-json/sustainable-catalyst/v1/library/categories
-* /wp-json/sustainable-catalyst/v1/library/series
-* /wp-json/sustainable-catalyst/v1/library/concepts
-* /wp-json/sustainable-catalyst/v1/library/pathways
-* /wp-json/sustainable-catalyst/v1/library/items
-* /wp-json/sustainable-catalyst/v1/library/items/{id}
-* /wp-json/sustainable-catalyst/v1/library/items/{id}/related
-* /wp-json/sustainable-catalyst/v1/library/source-types
-* /wp-json/sustainable-catalyst/v1/library/citation-formats
-* /wp-json/sustainable-catalyst/v1/library/source-template
-* /wp-json/sustainable-catalyst/v1/library/matrix-templates
-* /wp-json/sustainable-catalyst/v1/library/board-templates
+* `[sc_library]`
+* `[sc_library_notebook]`
+* `[sc_library_translation_matrix]`
+* `[sc_library_whiteboard]`
+* `[sc_library_chalkboard]`
+* `[sc_library_boards]`
+* `[sc_library_integrations]`
 
 == Changelog ==
 
+= 1.5.0 =
+
+* Added Workbench, Decision Studio, and Site Intelligence integration targets.
+* Added `sc-library-handoff/1.0` context packet schema.
+* Added record-level connected-tool panels and Notebook handoff builder.
+* Added service launch and optional health endpoint configuration.
+* Added cached independent connection status checks.
+* Added editor metadata for technical questions, decision questions and methods, places, indicators, and source IDs.
+* Added REST integration registry, status, schema, and record handoff endpoints.
+* Added standalone `[sc_library_integrations]` shortcode and Notebook Connected Tools tab.
+* Updated browser-local workspace schema to `sc-library-workspace/1.3` while preserving earlier exports.
+
 = 1.4.0 =
-* Added editable Whiteboards and Chalkboards as first-class Notebook records.
-* Added Concept Map, Evidence Map, Systems Map, Equation Workbench, and Technical Derivation templates.
-* Added draggable typed research cards and labeled directional relationships.
-* Added pen, highlighter, eraser, handwriting, and stylus-ready pointer input.
-* Added Library record, note, source, matrix, and collection handoffs.
-* Added Whiteboard and Chalkboard actions to Library results and record panels.
-* Added JSON, SVG, PNG, and landscape print/PDF-ready board exports.
-* Added [sc_library_whiteboard], [sc_library_chalkboard], and [sc_library_boards] shortcodes.
-* Added the board-templates REST endpoint.
-* Updated workspace schema to sc-library-workspace/1.2 with v1.2 and v1.3 import migration.
 
-= 1.3.0 =
-* Added the Technical Translation Matrix, reusable templates, cell review states, source references, and matrix exports.
-
-= 1.2.0 =
-* Added the local-first Research Notebook, collections, notes, outside sources, citations, and portable workspace export.
-
-= 1.1.0 =
-* Added typed relationships, Library Series, Library Concepts, record panels, and Workbench handoffs.
-
-= 1.0.1 =
-* Rebuilt the public interface as a compact knowledge-base navigator.
-
-= 1.0.0 =
-* Initial structured Library release.
+* Added editable Whiteboards and Chalkboards, typed cards and connectors, drawing tools, and visual exports.

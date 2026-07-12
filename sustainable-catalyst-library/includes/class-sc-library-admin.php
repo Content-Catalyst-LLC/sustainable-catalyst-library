@@ -124,16 +124,20 @@ final class SC_Library_Admin {
             'sanitize_callback' => static fn($value) => in_array($value, ['whiteboard', 'chalkboard'], true) ? $value : 'whiteboard',
             'default' => 'whiteboard',
         ]);
+        register_setting('sc_library_settings', 'sc_library_enable_integrations', ['type' => 'boolean', 'sanitize_callback' => static fn($value) => $value ? 1 : 0, 'default' => 1]);
+        foreach (['workbench_health_url', 'decision_studio_url', 'decision_studio_health_url', 'site_intelligence_url', 'site_intelligence_health_url'] as $option) {
+            register_setting('sc_library_settings', 'sc_library_' . $option, ['type' => 'string', 'sanitize_callback' => 'esc_url_raw', 'default' => '']);
+        }
     }
 
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.4.0 activated.</strong> Rebuild the Library index, then test the Whiteboard, Chalkboard, handwriting, Notebook integration, and board exports in a private browser window.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.5.0 activated.</strong> Rebuild the Library index, configure the three connected application URLs, then test record and Notebook handoffs in a private browser window.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.4.0.</strong> The release adds visual Whiteboards and Chalkboards, draggable research cards, typed relationships, handwriting, Notebook and Matrix handoffs, and JSON, SVG, PNG, print, and PDF-ready exports. Rebuild the index once, then test the workspace in a private browser window.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.5.0.</strong> The release adds source-aware Workbench, Decision Studio, and Site Intelligence context panels, health checks, record metadata, and portable handoff packets. Rebuild the index once, then test each configured connection.</p></div>';
         }
     }
 
@@ -214,8 +218,22 @@ final class SC_Library_Admin {
                         <td><input class="regular-text" id="sc_library_workbench_url" name="sc_library_workbench_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_workbench_url', home_url('/workbench/'))); ?>"><p class="description"><?php esc_html_e('Record panels pass the Library record ID and stable identifier to this URL.', 'sustainable-catalyst-library'); ?></p></td>
                     </tr>
                     <tr>
+                        <th scope="row"><?php esc_html_e('Connected applications', 'sustainable-catalyst-library'); ?></th>
+                        <td>
+                            <label><input name="sc_library_enable_integrations" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_integrations', 1), 1); ?>> <?php esc_html_e('Enable Library-specific Workbench, Decision Studio, and Site Intelligence handoffs.', 'sustainable-catalyst-library'); ?></label>
+                            <p class="description"><?php esc_html_e('The Library sends structured context packets and opens the full application only when deeper work is requested. No application is embedded as an iframe.', 'sustainable-catalyst-library'); ?></p>
+                            <table class="widefat striped" style="margin-top:12px;max-width:900px"><tbody>
+                                <tr><td><strong><?php esc_html_e('Workbench health URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_workbench_health_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_workbench_health_url', '')); ?>" placeholder="https://…/health"></td></tr>
+                                <tr><td><strong><?php esc_html_e('Decision Studio URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_decision_studio_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_decision_studio_url', home_url('/decision-studio/'))); ?>"></td></tr>
+                                <tr><td><strong><?php esc_html_e('Decision Studio health URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_decision_studio_health_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_decision_studio_health_url', '')); ?>" placeholder="https://…/health"></td></tr>
+                                <tr><td><strong><?php esc_html_e('Site Intelligence URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_site_intelligence_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_site_intelligence_url', home_url('/site-intelligence/'))); ?>"></td></tr>
+                                <tr><td><strong><?php esc_html_e('Site Intelligence health URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_site_intelligence_health_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_site_intelligence_health_url', '')); ?>" placeholder="https://…/health"></td></tr>
+                            </tbody></table>
+                        </td>
+                    </tr>
+                    <tr>
                         <th scope="row"><?php esc_html_e('Research Notebook', 'sustainable-catalyst-library'); ?></th>
-                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, matrices, visual boards, and portable exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.4 stores personal workspace data in each visitor’s browser. It does not write private research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
+                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, matrices, visual boards, and portable exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.5 stores personal workspace data in each visitor’s browser. It does not write private research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Technical Translation Matrix', 'sustainable-catalyst-library'); ?></th>
@@ -292,9 +310,10 @@ final class SC_Library_Admin {
                 <p><code>[sc_library_whiteboard]</code> — standalone Whiteboard launcher.</p>
                 <p><code>[sc_library_chalkboard]</code> — standalone Chalkboard launcher.</p>
                 <p><code>[sc_library_boards]</code> — combined visual board launcher.</p>
+                <p><code>[sc_library_integrations]</code> — standalone connected research-tool studio.</p>
                 <p><?php esc_html_e('Place this in a dedicated WordPress Shortcode block.', 'sustainable-catalyst-library'); ?></p>
                 <h3><?php esc_html_e('Relationship-aware REST endpoints', 'sustainable-catalyst-library'); ?></h3>
-                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates'] as $endpoint) : ?>
+                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates', 'integrations', 'integrations/status', 'integration-schema', 'items/{id}/handoff?target=workbench'] as $endpoint) : ?>
                     <p><code>/wp-json/sustainable-catalyst/v1/library/<?php echo esc_html($endpoint); ?></code></p>
                 <?php endforeach; ?>
             </div>

@@ -55,6 +55,12 @@ final class SC_Library_Editor {
         $dataset_urls = (string) get_post_meta($post->ID, '_sc_library_dataset_urls', true);
         $video_urls = (string) get_post_meta($post->ID, '_sc_library_video_urls', true);
         $workbench_tools = (string) get_post_meta($post->ID, '_sc_library_workbench_tools', true);
+        $workbench_questions = (string) get_post_meta($post->ID, '_sc_library_workbench_questions', true);
+        $decision_questions = (string) get_post_meta($post->ID, '_sc_library_decision_questions', true);
+        $decision_methods = (string) get_post_meta($post->ID, '_sc_library_decision_methods', true);
+        $site_places = (string) get_post_meta($post->ID, '_sc_library_site_places', true);
+        $site_indicators = (string) get_post_meta($post->ID, '_sc_library_site_indicators', true);
+        $site_sources = (string) get_post_meta($post->ID, '_sc_library_site_sources', true);
         $relations = $this->relationships->get_for_post($post->ID, false);
         $categories = get_categories(['hide_empty' => false, 'orderby' => 'name']);
         $candidate_posts = $this->candidate_posts($post->ID);
@@ -111,6 +117,16 @@ final class SC_Library_Editor {
                     <textarea name="sc_library_video_urls" rows="4" placeholder="https://youtube.com/…"><?php echo esc_textarea($video_urls); ?></textarea>
                     <small><?php esc_html_e('One video or timestamped clip URL per line.', 'sustainable-catalyst-library'); ?></small>
                 </label>
+            </div>
+
+            <h3><?php esc_html_e('Connected application context', 'sustainable-catalyst-library'); ?></h3>
+            <div class="sc-library-admin-grid sc-library-admin-grid--wide">
+                <label><span><?php esc_html_e('Workbench questions', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_workbench_questions" rows="4" placeholder="What should be calculated or validated?"><?php echo esc_textarea($workbench_questions); ?></textarea><small><?php esc_html_e('One technical question or analytical task per line.', 'sustainable-catalyst-library'); ?></small></label>
+                <label><span><?php esc_html_e('Decision Studio questions', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_decision_questions" rows="4" placeholder="What decision does this evidence inform?"><?php echo esc_textarea($decision_questions); ?></textarea><small><?php esc_html_e('One decision, claim, uncertainty, or tradeoff question per line.', 'sustainable-catalyst-library'); ?></small></label>
+                <label><span><?php esc_html_e('Decision methods', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_decision_methods" rows="4" placeholder="scenario comparison&#10;multi-criteria analysis"><?php echo esc_textarea($decision_methods); ?></textarea><small><?php esc_html_e('Methods or canvas types suited to this record.', 'sustainable-catalyst-library'); ?></small></label>
+                <label><span><?php esc_html_e('Site Intelligence places', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_site_places" rows="4" placeholder="KEN&#10;Chicago, Illinois"><?php echo esc_textarea($site_places); ?></textarea><small><?php esc_html_e('Countries, ISO codes, regions, cities, or named places.', 'sustainable-catalyst-library'); ?></small></label>
+                <label><span><?php esc_html_e('Site Intelligence indicators', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_site_indicators" rows="4" placeholder="population_total&#10;renewable_energy_share"><?php echo esc_textarea($site_indicators); ?></textarea><small><?php esc_html_e('Indicator IDs or research measures relevant to the publication.', 'sustainable-catalyst-library'); ?></small></label>
+                <label><span><?php esc_html_e('Site Intelligence source IDs', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_site_sources" rows="4" placeholder="world-bank&#10;nasa-eo"><?php echo esc_textarea($site_sources); ?></textarea><small><?php esc_html_e('Public source-registry identifiers used for geographic context.', 'sustainable-catalyst-library'); ?></small></label>
             </div>
 
             <section class="sc-library-admin-relations">
@@ -228,6 +244,12 @@ final class SC_Library_Editor {
         update_post_meta($post_id, '_sc_library_dataset_urls', $this->sanitize_lines((string) ($_POST['sc_library_dataset_urls'] ?? ''), true));
         update_post_meta($post_id, '_sc_library_video_urls', $this->sanitize_lines((string) ($_POST['sc_library_video_urls'] ?? ''), true));
         update_post_meta($post_id, '_sc_library_workbench_tools', $this->sanitize_lines((string) ($_POST['sc_library_workbench_tools'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_workbench_questions', $this->sanitize_lines((string) ($_POST['sc_library_workbench_questions'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_decision_questions', $this->sanitize_lines((string) ($_POST['sc_library_decision_questions'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_decision_methods', $this->sanitize_lines((string) ($_POST['sc_library_decision_methods'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_site_places', $this->sanitize_lines((string) ($_POST['sc_library_site_places'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_site_indicators', $this->sanitize_lines((string) ($_POST['sc_library_site_indicators'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_site_sources', $this->sanitize_lines((string) ($_POST['sc_library_site_sources'] ?? ''), false));
 
         $raw_relationships = isset($_POST['sc_library_relationships']) && is_array($_POST['sc_library_relationships'])
             ? wp_unslash($_POST['sc_library_relationships'])

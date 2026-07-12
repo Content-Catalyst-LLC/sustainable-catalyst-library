@@ -106,6 +106,12 @@ final class SC_Library_Activator {
         add_option('sc_library_default_matrix_template', 'technical_translation');
         add_option('sc_library_enable_boards', 1);
         add_option('sc_library_default_board_type', 'whiteboard');
+        add_option('sc_library_enable_integrations', 1);
+        add_option('sc_library_workbench_health_url', '');
+        add_option('sc_library_decision_studio_url', home_url('/decision-studio/'));
+        add_option('sc_library_decision_studio_health_url', '');
+        add_option('sc_library_site_intelligence_url', home_url('/site-intelligence/'));
+        add_option('sc_library_site_intelligence_health_url', '');
         add_option('sc_library_featured_pathways', implode("\n", [
             'Systems Thinking|/systems-thinking/|Feedback, resilience, leverage points, and complex change.',
             'Mathematical Thinking|/mathematical-thinking/|Symbols, models, uncertainty, and formal reasoning.',

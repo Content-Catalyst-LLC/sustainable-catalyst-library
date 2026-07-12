@@ -106,6 +106,12 @@ final class SC_Library_Indexer {
             (string) get_post_meta($post_id, '_sc_library_dataset_urls', true),
             (string) get_post_meta($post_id, '_sc_library_video_urls', true),
             (string) get_post_meta($post_id, '_sc_library_workbench_tools', true),
+            (string) get_post_meta($post_id, '_sc_library_workbench_questions', true),
+            (string) get_post_meta($post_id, '_sc_library_decision_questions', true),
+            (string) get_post_meta($post_id, '_sc_library_decision_methods', true),
+            (string) get_post_meta($post_id, '_sc_library_site_places', true),
+            (string) get_post_meta($post_id, '_sc_library_site_indicators', true),
+            (string) get_post_meta($post_id, '_sc_library_site_sources', true),
             (string) get_post_meta($post_id, '_sc_library_evidence_status', true),
         ]));
 
@@ -164,6 +170,8 @@ final class SC_Library_Indexer {
         $dataset_urls = $this->line_values((string) get_post_meta($post_id, '_sc_library_dataset_urls', true));
         $video_urls = $this->line_values((string) get_post_meta($post_id, '_sc_library_video_urls', true));
         $workbench_tools = $this->line_values((string) get_post_meta($post_id, '_sc_library_workbench_tools', true));
+        $decision_context = $this->line_values((string) get_post_meta($post_id, '_sc_library_decision_questions', true));
+        $site_context = array_merge($this->line_values((string) get_post_meta($post_id, '_sc_library_site_places', true)), $this->line_values((string) get_post_meta($post_id, '_sc_library_site_indicators', true)));
 
         return [
             'code' => $github !== '' || stripos($raw_content, 'github.com') !== false || preg_match('/<(pre|code)\b/i', $raw_content) === 1,
@@ -171,6 +179,8 @@ final class SC_Library_Indexer {
             'video' => !empty($video_urls) || preg_match('/(youtube\.com|youtu\.be|vimeo\.com|<video\b|wp:video)/i', $raw_content) === 1,
             'dataset' => !empty($dataset_urls),
             'workbench' => !empty($workbench_tools),
+            'decision_studio' => !empty($decision_context),
+            'site_intelligence' => !empty($site_context),
         ];
     }
 

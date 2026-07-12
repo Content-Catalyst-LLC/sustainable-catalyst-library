@@ -117,6 +117,11 @@ final class SC_Library_REST {
                 'storage' => 'browser-local',
                 'schema' => SC_Library_Notebook::SCHEMA,
             ],
+            'integrations' => [
+                'enabled' => class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled(),
+                'handoff_schema' => class_exists('SC_Library_Integrations') ? SC_Library_Integrations::HANDOFF_SCHEMA : '',
+                'targets' => class_exists('SC_Library_Integrations') ? array_keys(SC_Library_Integrations::targets()) : [],
+            ],
         ]);
     }
 
@@ -423,6 +428,8 @@ final class SC_Library_REST {
                 'video' => false,
                 'dataset' => false,
                 'workbench' => false,
+                'decision_studio' => false,
+                'site_intelligence' => false,
             ], array_map('boolval', $flags)),
         ];
 
@@ -611,27 +618,39 @@ final class SC_Library_REST {
             'dataset_urls' => $this->line_values((string) get_post_meta($post_id, '_sc_library_dataset_urls', true), true),
             'video_urls' => $this->line_values((string) get_post_meta($post_id, '_sc_library_video_urls', true), true),
             'workbench_tools' => $this->line_values((string) get_post_meta($post_id, '_sc_library_workbench_tools', true), false),
+            'workbench_questions' => $this->line_values((string) get_post_meta($post_id, '_sc_library_workbench_questions', true), false),
+            'decision_questions' => $this->line_values((string) get_post_meta($post_id, '_sc_library_decision_questions', true), false),
+            'decision_methods' => $this->line_values((string) get_post_meta($post_id, '_sc_library_decision_methods', true), false),
+            'site_places' => $this->line_values((string) get_post_meta($post_id, '_sc_library_site_places', true), false),
+            'site_indicators' => $this->line_values((string) get_post_meta($post_id, '_sc_library_site_indicators', true), false),
+            'site_sources' => $this->line_values((string) get_post_meta($post_id, '_sc_library_site_sources', true), false),
         ];
     }
 
     private function handoffs(array &$item): array {
-        $workbench_base = esc_url_raw((string) get_option('sc_library_workbench_url', home_url('/workbench/')));
-        $workbench_url = add_query_arg([
-            'library_record' => (int) $item['id'],
-            'library_identifier' => (string) $item['record_identifier'],
-        ], $workbench_base);
-
         if ($item['series']) {
             $item['series'] = array_merge($item['series'], $this->series_navigation((int) $item['id'], (int) $item['series']['id']));
         }
 
-        return [
-            'workbench' => [
-                'url' => $workbench_url,
-                'label' => __('Open in Workbench', 'sustainable-catalyst-library'),
-                'available' => true,
-            ],
-        ];
+        $targets = class_exists('SC_Library_Integrations') ? SC_Library_Integrations::targets() : [];
+        $handoffs = [];
+        foreach ($targets as $target_id => $target) {
+            $context_url = add_query_arg('target', $target_id, rest_url(sprintf('sustainable-catalyst/v1/library/items/%d/handoff', (int) $item['id'])));
+            $handoffs[$target_id] = [
+                'url' => add_query_arg([
+                    'library_record' => (int) $item['id'],
+                    'library_identifier' => (string) $item['record_identifier'],
+                    'library_context_url' => esc_url_raw($context_url),
+                    'library_handoff_schema' => class_exists('SC_Library_Integrations') ? SC_Library_Integrations::HANDOFF_SCHEMA : 'sc-library-handoff/1.0',
+                    'library_source' => 'research-library',
+                ], (string) ($target['url'] ?? '')),
+                'label' => (string) ($target['action_label'] ?? $target['label'] ?? ucfirst($target_id)),
+                'description' => (string) ($target['description'] ?? ''),
+                'available' => !empty($target['url']) && (!class_exists('SC_Library_Integrations') || SC_Library_Integrations::enabled()),
+                'context_url' => esc_url_raw($context_url),
+            ];
+        }
+        return $handoffs;
     }
 
     private function breadcrumbs(?array $primary_domain, array $categories): array {

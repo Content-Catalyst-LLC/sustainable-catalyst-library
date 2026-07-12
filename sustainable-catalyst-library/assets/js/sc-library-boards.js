@@ -3,9 +3,9 @@
 
   const shared = window.SCBoardShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const schema = shared.schema || 'sc-library-workspace/1.2';
+  const schema = shared.schema || 'sc-library-workspace/1.3';
   const legacySchemas = Array.isArray(shared.legacySchemas) ? shared.legacySchemas : ['sc-library-workspace/1.1', 'sc-library-workspace/1.0'];
-  const version = shared.version || '1.4.0';
+  const version = shared.version || '1.5.0';
   const templates = shared.templates || {};
   const nodeTypes = shared.nodeTypes || {};
   const edgeTypes = shared.edgeTypes || {};
@@ -33,7 +33,7 @@
       createdAt,
       updatedAt: createdAt,
       collections: [{ id: 'collection_inbox', title: 'Research Inbox', description: 'Newly saved Library records and research material.', createdAt, updatedAt: createdAt }],
-      savedRecords: [], notes: [], sources: [], matrices: [], boards: [],
+      savedRecords: [], notes: [], sources: [], matrices: [], boards: [], handoffs: [],
     };
   };
 
@@ -54,6 +54,7 @@
         sources: Array.isArray(data.sources) ? data.sources : [],
         matrices: Array.isArray(data.matrices) ? data.matrices : [],
         boards: Array.isArray(data.boards) ? data.boards : [],
+        handoffs: Array.isArray(data.handoffs) ? data.handoffs : [],
       };
     } catch (error) {
       return initialWorkspace();

@@ -74,7 +74,7 @@
     <?php if ($show_workspace) : ?>
         <?php
         $workspace_title = __('Research Notebook', 'sustainable-catalyst-library');
-        $workspace_intro = __('Save Library records, write notes, collect outside sources, translate concepts, and move research into editable Whiteboards and Chalkboards.', 'sustainable-catalyst-library');
+        $workspace_intro = __('Save Library records, write notes, collect sources, translate concepts, build visual boards, and prepare Workbench, Decision Studio, or Site Intelligence handoffs.', 'sustainable-catalyst-library');
         $workspace_standalone = false;
         $workspace_open = false;
         $workspace_initial_tab = 'overview';

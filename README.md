@@ -1,23 +1,27 @@
-# Sustainable Catalyst Library v1.4.0
+# Sustainable Catalyst Library v1.5.0
 
-Library v1.4.0 adds editable **Whiteboards and Chalkboards** to the relationship-aware WordPress knowledge base and local-first Research Notebook.
+Library v1.5.0 adds a **cross-application research layer** connecting the WordPress knowledge base and local-first Research Notebook to Sustainable Catalyst Workbench, Decision Studio, and Site Intelligence.
 
-## Release highlights
+The Library does not embed duplicate application interfaces or iframes. It creates compact Library-specific context panels and versioned `sc-library-handoff/1.0` packets, then opens the full application only when deeper analysis is requested.
 
-- Visual Whiteboards for concept maps, evidence maps, systems maps, and research synthesis
-- Technical Chalkboards for equations, derivations, code logic, validation, and interpretation
-- Draggable typed research cards and labeled directional relationships
-- Pen, highlighter, eraser, handwriting, and stylus-ready pointer input
-- Notebook handoffs from Library records, notes, sources, and Technical Translation Matrices
-- Concept Map, Evidence Map, Systems Map, Equation Workbench, and Technical Derivation templates
-- Local-first board storage with versioned workspace migration
-- JSON, SVG, PNG, and landscape print/PDF-ready exports
-- Standalone Whiteboard, Chalkboard, and combined Boards shortcodes
-- Public board-template REST discovery endpoint
+## Included
 
-## Install
+- Library Workbench handoffs for tools, equations, datasets, technical questions, matrices, and validation work
+- Library Decision Studio handoffs for research questions, claims, evidence, assumptions, uncertainties, tradeoffs, and knowledge gaps
+- Library Site Intelligence handoffs for countries, places, indicators, source registry IDs, datasets, maps, and event context
+- Record-level connected-tool panels
+- Notebook handoff builder for saved records, collections, notes, sources, matrices, Whiteboards, and Chalkboards
+- Cross-origin compact handoff payloads carried in the URL fragment
+- Downloadable and copyable handoff JSON
+- Server-generated record context endpoints
+- Configurable launch and health URLs
+- Cached service health checks with independent status states
+- New editor fields for target-specific context
+- `sc-library-workspace/1.3` local workspace schema with migration from earlier versions
 
-Upload `sustainable-catalyst-library-v1.4.0.zip` through WordPress, replace the existing plugin, activate it, and rebuild the Library index.
+## WordPress installation
+
+Upload `sustainable-catalyst-library-v1.5.0.zip`, replace the existing plugin, activate it, open **SC Library**, configure the three application URLs and optional health endpoints, save settings, and rebuild the Library index.
 
 Recommended Library shortcode:
 
@@ -25,14 +29,25 @@ Recommended Library shortcode:
 [sc_library mode="compact" initial_results="0" show_header="false" show_workspace="true"]
 ```
 
-Standalone visual-board launchers:
+Standalone connected-tools studio:
 
 ```text
-[sc_library_whiteboard]
-[sc_library_chalkboard]
-[sc_library_boards]
+[sc_library_integrations]
 ```
 
-## Data boundary
+Open the Notebook directly to connected tools:
 
-Canonical publications remain in WordPress. Personal notebook material, matrices, Whiteboards, Chalkboards, connectors, and handwriting remain in the visitor's browser in v1.4.0 unless explicitly exported.
+```text
+[sc_library_notebook tab="integrations"]
+```
+
+## REST endpoints
+
+- `/wp-json/sustainable-catalyst/v1/library/integrations`
+- `/wp-json/sustainable-catalyst/v1/library/integrations/status`
+- `/wp-json/sustainable-catalyst/v1/library/integration-schema`
+- `/wp-json/sustainable-catalyst/v1/library/items/{id}/handoff?target=workbench`
+- `/wp-json/sustainable-catalyst/v1/library/items/{id}/handoff?target=decision_studio`
+- `/wp-json/sustainable-catalyst/v1/library/items/{id}/handoff?target=site_intelligence`
+
+Canonical publications and public relationship metadata remain in WordPress. Personal Notebook objects and saved application handoffs remain in the visitor's browser unless exported.

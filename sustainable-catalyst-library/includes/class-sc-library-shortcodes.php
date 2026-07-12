@@ -52,10 +52,14 @@ final class SC_Library_Shortcodes {
         if ($show_workspace) {
             SC_Library_Notebook::enqueue_assets();
         }
+        if (class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled()) {
+            SC_Library_Integrations::enqueue_assets();
+        }
         wp_localize_script('sc-library', 'SCLibraryShared', [
             'restBase' => esc_url_raw(rest_url('sustainable-catalyst/v1/library')),
             'matrixEnabled' => SC_Library_Notebook::matrix_enabled(),
             'boardsEnabled' => class_exists('SC_Library_Boards') && SC_Library_Boards::enabled(),
+            'integrationsEnabled' => class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled(),
             'strings' => [
                 'loading' => __('Searching the knowledge base…', 'sustainable-catalyst-library'),
                 'empty' => __('No knowledge records match this request.', 'sustainable-catalyst-library'),
@@ -70,6 +74,9 @@ final class SC_Library_Shortcodes {
                 'translateRecord' => __('Open Translation Matrix', 'sustainable-catalyst-library'),
                 'whiteboardRecord' => __('Open Whiteboard', 'sustainable-catalyst-library'),
                 'chalkboardRecord' => __('Open Chalkboard', 'sustainable-catalyst-library'),
+                'workbenchRecord' => __('Analyze in Workbench', 'sustainable-catalyst-library'),
+                'decisionRecord' => __('Build Decision Canvas', 'sustainable-catalyst-library'),
+                'siteRecord' => __('Investigate Geographic Context', 'sustainable-catalyst-library'),
                 'results' => __('results', 'sustainable-catalyst-library'),
                 'result' => __('result', 'sustainable-catalyst-library'),
             ],
