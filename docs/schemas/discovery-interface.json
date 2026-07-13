@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/sc-library-discovery-1.0.json",
+  "title": "Sustainable Catalyst Library unified discovery interface",
+  "type": "object",
+  "required": [
+    "schema",
+    "plugin_version",
+    "interface_version",
+    "generated_at",
+    "topics",
+    "relationships",
+    "pathways"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-discovery/1.0"
+    },
+    "plugin_version": {
+      "type": "string"
+    },
+    "interface_version": {
+      "const": "2.0.1"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "topics": {
+      "type": "object",
+      "required": [
+        "items",
+        "root_count",
+        "total_count",
+        "record_count"
+      ],
+      "properties": {
+        "items": {
+          "type": "array"
+        },
+        "root_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "record_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "relationships": {
+      "type": "object",
+      "required": [
+        "series",
+        "concepts",
+        "series_count",
+        "concept_count"
+      ],
+      "properties": {
+        "series": {
+          "type": "array"
+        },
+        "concepts": {
+          "type": "array"
+        },
+        "series_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "concept_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "pathways": {
+      "type": "object",
+      "required": [
+        "items",
+        "count"
+      ],
+      "properties": {
+        "items": {
+          "type": "array"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

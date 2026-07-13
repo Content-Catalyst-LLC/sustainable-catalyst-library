@@ -62,6 +62,7 @@ final class SC_Library_Shortcodes {
         $pathways = $this->featured_pathways();
 
         wp_enqueue_style('sc-library', SC_LIBRARY_URL . 'assets/css/sc-library.css', [], SC_LIBRARY_VERSION);
+        wp_enqueue_style('sc-library-discovery', SC_LIBRARY_URL . 'assets/css/sc-library-discovery.css', ['sc-library'], SC_LIBRARY_VERSION);
         wp_enqueue_script('sc-library', SC_LIBRARY_URL . 'assets/js/sc-library.js', [], SC_LIBRARY_VERSION, true);
         if ($show_workspace) {
             SC_Library_Notebook::enqueue_assets();
@@ -77,6 +78,8 @@ final class SC_Library_Shortcodes {
         }
         wp_localize_script('sc-library', 'SCLibraryShared', [
             'restBase' => esc_url_raw(rest_url('sustainable-catalyst/v1/library')),
+            'discoverySchema' => 'sc-library-discovery/1.0',
+            'discoveryInterfaceVersion' => '2.0.1',
             'matrixEnabled' => SC_Library_Notebook::matrix_enabled(),
             'boardsEnabled' => class_exists('SC_Library_Boards') && SC_Library_Boards::enabled(),
             'integrationsEnabled' => class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled(),
@@ -92,6 +95,11 @@ final class SC_Library_Shortcodes {
                 'error' => __('The knowledge base could not be loaded. Please try again.', 'sustainable-catalyst-library'),
                 'categoriesError' => __('Topic navigation is temporarily unavailable.', 'sustainable-catalyst-library'),
                 'facetsError' => __('Series and concept navigation is temporarily unavailable.', 'sustainable-catalyst-library'),
+                'discoveryLoading' => __('Loading topics, relationships, and pathways…', 'sustainable-catalyst-library'),
+                'discoveryReady' => __('Discovery interface ready.', 'sustainable-catalyst-library'),
+                'discoveryError' => __('The discovery interface could not be loaded.', 'sustainable-catalyst-library'),
+                'retryDiscovery' => __('Retry discovery', 'sustainable-catalyst-library'),
+                'pathwaysEmpty' => __('No featured pathways are configured yet.', 'sustainable-catalyst-library'),
                 'recordLoading' => __('Loading the knowledge record…', 'sustainable-catalyst-library'),
                 'copySuccess' => __('Record link copied.', 'sustainable-catalyst-library'),
                 'copyFailure' => __('Copy the address from your browser.', 'sustainable-catalyst-library'),

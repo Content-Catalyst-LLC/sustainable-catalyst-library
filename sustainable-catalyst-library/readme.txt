@@ -4,14 +4,27 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.20.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 
-A native WordPress knowledge system with institutional preservation, integrity monitoring, historical editions, embedded Foundation Documents, a public API, Research Librarian orchestration, knowledge graphs, editorial workflows, and PostgreSQL portability.
+A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v1.20.0 is the final pre-2.0 hardening release. It adds a production-readiness center, consistent keyboard and focus behavior, reduced-motion support, touch-target enforcement, responsive table handling, mobile workflow repairs, bounded public REST caching, anonymous rate limiting, security headers, maintenance-schedule repair, and launch diagnostics across the complete Library platform.
+Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationships, and pathways discovery interface while v2.0.0 unifies the complete v1.x platform into three coordinated layers: Public Knowledge, Research Workspace, and Institutional Operations. It adds a unified public portal, a research-workspace gateway, checksummed system manifests, privacy-aware cross-module activity, public system-status APIs, developer schemas, and portable Living Knowledge System entities while preserving every specialist Library tool.
+
+
+= Unified Living Knowledge System =
+
+* Public portal shortcode `[sc_library_living_system]` with complete, public, research, and institutional modes.
+* Unified research gateway `[sc_library_unified_workspace]` for Notebook, Research Librarian, graph, books, editorial review, and portability.
+* Public aggregate component `[sc_library_system_status]`.
+* Living Knowledge System administration workspace under SC Library.
+* Checksummed `sc-library-system-manifest/1.0` records and privacy-aware `sc-library-system-event/1.0` activity.
+* Public system status, capabilities, activity, and manifest routes.
+* Developer API schema and `system.manifest.created` webhook event.
+* Portable export schema `sc-library-portable-export/3.0` with `system_manifests` and `system_events`.
+* WordPress remains canonical; no automatic publication, approval, or scheduling.
 
 = Accessibility, mobile, performance, and security hardening =
 
@@ -23,7 +36,7 @@ Sustainable Catalyst Library v1.20.0 is the final pre-2.0 hardening release. It 
 * Anonymous route-specific rate limiting, security response headers, and cache invalidation on content and taxonomy changes.
 * Runtime, index, cron, API-key storage, remote-media, preservation, PDF extraction, and backup-boundary diagnostics.
 * Daily readiness evaluation and one-click maintenance-schedule repair.
-* Portable export schema `sc-library-portable-export/2.1` with normalized `readiness_runs`.
+* Portable export schema `sc-library-portable-export/3.0` with normalized `readiness_runs`, `system_manifests`, and `system_events`.
 
 = Foundation Documents and full-text PDF indexing =
 
@@ -55,7 +68,7 @@ Sustainable Catalyst Library v1.20.0 is the final pre-2.0 hardening release. It 
 
 = Portable Data =
 
-* Portable export schema `sc-library-portable-export/2.1`.
+* Portable export schema `sc-library-portable-export/3.0`.
 * Preservation entities `preservation_snapshots`, `integrity_checks`, and `authority_history`.
 * Existing Foundation Document, API, webhook, workspace, graph, multimedia, editorial, planning, and orchestration entities remain portable.
 * API-key hashes, encrypted signing secrets, full webhook payloads, delivery signatures, and unrelated private workspace data remain excluded from public exports.
@@ -64,13 +77,18 @@ Sustainable Catalyst Library v1.20.0 is the final pre-2.0 hardening release. It 
 
 1. Upload and activate the plugin, choosing **Replace current with uploaded** during an upgrade.
 2. Clear WordPress, page-builder, Cloudflare, and browser caches.
-3. Open SC Library → Production Readiness.
-4. Run the complete readiness report.
-5. Repair maintenance schedules when any Library cron task is missing.
-6. Review warnings for index volume, accessibility metadata, debug display, file editing, preservation coverage, PDF extraction, and off-site backups.
-7. Create an optional public status page with `[sc_library_readiness_status]`.
+3. Open SC Library → Living Knowledge System.
+4. Create or locate the draft portal page, review it, and publish it manually.
+5. Create the first checksummed system manifest.
+6. Open SC Library → Production Readiness and run the complete readiness report.
+7. Confirm Index Tools, Knowledge Graph, Foundation Documents, archive, API, and workspace status.
+8. An index rebuild is not required solely for this upgrade.
 
 == Shortcodes ==
+
+* `[sc_library_living_system]`
+* `[sc_library_unified_workspace]`
+* `[sc_library_system_status]`
 
 * `[sc_library_readiness_status]`
 * `[sc_library_institutional_archive]`
@@ -86,6 +104,14 @@ Sustainable Catalyst Library v1.20.0 is the final pre-2.0 hardening release. It 
 * `[sc_library_portability]`
 
 == REST API ==
+
+* `/wp-json/sustainable-catalyst/v1/library/discovery`
+* `/wp-json/sustainable-catalyst-library/v1/discovery`
+* `/wp-json/sustainable-catalyst/v1/library/system/status`
+* `/wp-json/sustainable-catalyst/v1/library/system/capabilities`
+* `/wp-json/sustainable-catalyst/v1/library/system/activity`
+* `/wp-json/sustainable-catalyst/v1/library/system/manifest`
+* `/wp-json/sustainable-catalyst-library/v1/system`
 
 * `/wp-json/sustainable-catalyst/v1/library/readiness/status`
 * `/wp-json/sustainable-catalyst/v1/library/readiness/report`
@@ -105,6 +131,23 @@ Sustainable Catalyst Library v1.20.0 is the final pre-2.0 hardening release. It 
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 2.0.1 =
+* Repaired the native topics, relationships, and pathways discovery interface.
+* Added a unified `/library/discovery` endpoint with the `sc-library-discovery/1.0` contract.
+* Added plugin-owned responsive discovery CSS insulated from page-level layout overrides.
+* Added live counts, loading states, empty states, retry controls, and aggregate/fallback loading.
+* Preserved dynamic discovery above search results and the manual topic architecture below the Library page.
+* Preserved all v2.0.0 Living Knowledge System capabilities and v1.x compatibility.
+
+= 2.0.0 =
+* Unified Public Knowledge, Research Workspace, and Institutional Operations into a Living Knowledge System.
+* Added a public portal, unified workspace gateway, and system status shortcode.
+* Added checksummed system manifests and privacy-aware cross-module activity.
+* Added system REST routes, developer schema, and webhook event.
+* Added portable export schema 3.0 with system manifests and events.
+* Preserved all v1.20.0 features and specialist tools.
+
 
 = 1.20.0 =
 * Added the Production Readiness dashboard and public status summary.

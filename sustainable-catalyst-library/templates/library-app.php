@@ -10,6 +10,8 @@
     data-initial-record="<?php echo esc_attr((string) $initial_record); ?>"
     data-per-page="<?php echo esc_attr((string) $per_page); ?>"
     data-initial-results="<?php echo $initial_results ? '1' : '0'; ?>"
+    data-discovery-ui="2.0.1"
+    data-discovery-schema="sc-library-discovery/1.0"
 >
     <?php if ($show_header && $mode !== 'pathways') : ?>
         <header class="sc-library__masthead">
@@ -30,43 +32,53 @@
         </form>
     <?php endif; ?>
 
-    <?php if (in_array($mode, ['compact', 'full', 'domains'], true)) : ?>
-        <div class="sc-library__browse-stack">
-            <details class="sc-library__topics" data-topic-browser <?php echo in_array($mode, ['full', 'domains'], true) ? 'open' : ''; ?>>
-                <summary>
-                    <span><strong><?php esc_html_e('Browse the knowledge architecture', 'sustainable-catalyst-library'); ?></strong><small><?php esc_html_e('Open a domain, then choose a topic or article map.', 'sustainable-catalyst-library'); ?></small></span>
-                    <span class="sc-library__summary-action"><?php esc_html_e('Browse topics', 'sustainable-catalyst-library'); ?></span>
-                </summary>
-                <div class="sc-library__domain-grid" data-category-list aria-live="polite"></div>
-            </details>
+    <?php if (in_array($mode, ['compact', 'full', 'domains'], true) || ($show_pathways && in_array($mode, ['compact', 'full', 'pathways'], true))) : ?>
+        <section class="sc-library__discovery" data-discovery-interface aria-label="<?php esc_attr_e('Library discovery interface', 'sustainable-catalyst-library'); ?>">
+            <p class="sc-library__discovery-status" data-discovery-status aria-live="polite"><?php esc_html_e('Loading topics, relationships, and pathways…', 'sustainable-catalyst-library'); ?></p>
 
-            <details class="sc-library__facets" data-relationship-browser>
-                <summary>
-                    <span><strong><?php esc_html_e('Browse series and concepts', 'sustainable-catalyst-library'); ?></strong><small><?php esc_html_e('Move through ordered publication sequences and shared ideas.', 'sustainable-catalyst-library'); ?></small></span>
-                    <span class="sc-library__summary-action"><?php esc_html_e('Open relationships', 'sustainable-catalyst-library'); ?></span>
-                </summary>
-                <div class="sc-library__facet-columns">
-                    <section>
-                        <h3><?php esc_html_e('Library Series', 'sustainable-catalyst-library'); ?></h3>
-                        <div class="sc-library__chip-list" data-series-list aria-live="polite"></div>
-                    </section>
-                    <section>
-                        <h3><?php esc_html_e('Library Concepts', 'sustainable-catalyst-library'); ?></h3>
-                        <div class="sc-library__chip-list" data-concept-list aria-live="polite"></div>
-                    </section>
+            <?php if (in_array($mode, ['compact', 'full', 'domains'], true)) : ?>
+                <div class="sc-library__browse-stack">
+                    <details class="sc-library__topics" data-topic-browser <?php echo in_array($mode, ['full', 'domains'], true) ? 'open' : ''; ?>>
+                        <summary>
+                            <span><strong><?php esc_html_e('Browse the knowledge architecture', 'sustainable-catalyst-library'); ?></strong><small><?php esc_html_e('Open a domain, then choose a topic or article map.', 'sustainable-catalyst-library'); ?></small></span>
+                            <span class="sc-library__summary-meta" data-topic-summary><?php esc_html_e('Loading topics…', 'sustainable-catalyst-library'); ?></span>
+                        </summary>
+                        <div class="sc-library__domain-grid" data-category-list role="list" aria-live="polite" aria-busy="true"></div>
+                    </details>
+
+                    <details class="sc-library__facets" data-relationship-browser>
+                        <summary>
+                            <span><strong><?php esc_html_e('Browse series and concepts', 'sustainable-catalyst-library'); ?></strong><small><?php esc_html_e('Move through ordered publication sequences and shared ideas.', 'sustainable-catalyst-library'); ?></small></span>
+                            <span class="sc-library__summary-meta" data-relationship-summary><?php esc_html_e('Loading relationships…', 'sustainable-catalyst-library'); ?></span>
+                        </summary>
+                        <div class="sc-library__facet-columns">
+                            <section>
+                                <h3><?php esc_html_e('Library Series', 'sustainable-catalyst-library'); ?></h3>
+                                <div class="sc-library__chip-list" data-series-list role="list" aria-live="polite" aria-busy="true"></div>
+                            </section>
+                            <section>
+                                <h3><?php esc_html_e('Library Concepts', 'sustainable-catalyst-library'); ?></h3>
+                                <div class="sc-library__chip-list" data-concept-list role="list" aria-live="polite" aria-busy="true"></div>
+                            </section>
+                        </div>
+                    </details>
                 </div>
-            </details>
-        </div>
-    <?php endif; ?>
+            <?php endif; ?>
 
-    <?php if ($show_pathways && $pathways && in_array($mode, ['compact', 'full', 'pathways'], true)) : ?>
-        <section class="sc-library__pathways" aria-labelledby="<?php echo esc_attr($instance_id); ?>-pathways-title">
-            <div class="sc-library__section-line"><h3 id="<?php echo esc_attr($instance_id); ?>-pathways-title"><?php esc_html_e('Featured pathways', 'sustainable-catalyst-library'); ?></h3><span><?php esc_html_e('Curated entry points', 'sustainable-catalyst-library'); ?></span></div>
-            <div class="sc-library__pathway-list">
-                <?php foreach ($pathways as $pathway) : ?>
-                    <a href="<?php echo esc_url($pathway['url']); ?>"><strong><?php echo esc_html($pathway['title']); ?></strong><?php if ($pathway['description'] !== '') : ?><span><?php echo esc_html($pathway['description']); ?></span><?php endif; ?></a>
-                <?php endforeach; ?>
-            </div>
+            <?php if ($show_pathways && in_array($mode, ['compact', 'full', 'pathways'], true)) : ?>
+                <section class="sc-library__pathways" data-pathway-browser aria-labelledby="<?php echo esc_attr($instance_id); ?>-pathways-title">
+                    <div class="sc-library__section-line"><h3 id="<?php echo esc_attr($instance_id); ?>-pathways-title"><?php esc_html_e('Featured pathways', 'sustainable-catalyst-library'); ?></h3><span data-pathway-summary><?php esc_html_e('Curated entry points', 'sustainable-catalyst-library'); ?></span></div>
+                    <div class="sc-library__pathway-list" data-pathway-list role="list" aria-live="polite" aria-busy="true">
+                        <?php if ($pathways) : ?>
+                            <?php foreach ($pathways as $pathway) : ?>
+                                <a role="listitem" href="<?php echo esc_url($pathway['url']); ?>"><strong><?php echo esc_html($pathway['title']); ?></strong><?php if ($pathway['description'] !== '') : ?><span><?php echo esc_html($pathway['description']); ?></span><?php endif; ?><em><?php esc_html_e('Open pathway', 'sustainable-catalyst-library'); ?> →</em></a>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <p class="sc-library__empty"><?php esc_html_e('No featured pathways are configured yet.', 'sustainable-catalyst-library'); ?></p>
+                        <?php endif; ?>
+                    </div>
+                </section>
+            <?php endif; ?>
         </section>
     <?php endif; ?>
 

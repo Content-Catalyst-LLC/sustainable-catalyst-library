@@ -761,6 +761,38 @@ CREATE TABLE IF NOT EXISTS readiness_runs (
 CREATE INDEX IF NOT EXISTS readiness_runs_status_idx ON readiness_runs(overall_status, created_at DESC);
 CREATE INDEX IF NOT EXISTS readiness_runs_score_idx ON readiness_runs(score, created_at DESC);
 
+
+CREATE TABLE IF NOT EXISTS system_manifests (
+    system_manifest_id bigint PRIMARY KEY,
+    manifest_uuid uuid UNIQUE NOT NULL,
+    schema_version text NOT NULL,
+    plugin_version text NOT NULL,
+    status text NOT NULL,
+    content_hash text NOT NULL,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    manifest jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS system_manifests_status_idx ON system_manifests(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS system_manifests_hash_idx ON system_manifests(content_hash);
+
+CREATE TABLE IF NOT EXISTS system_events (
+    system_event_id bigint PRIMARY KEY,
+    event_uuid uuid UNIQUE NOT NULL,
+    event_type text NOT NULL,
+    object_type text NOT NULL,
+    object_id text NOT NULL DEFAULT '',
+    visibility text NOT NULL DEFAULT 'organization',
+    actor_user_id bigint NOT NULL DEFAULT 0,
+    title text NOT NULL,
+    summary text NOT NULL DEFAULT '',
+    created_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS system_events_type_idx ON system_events(event_type, created_at DESC);
+CREATE INDEX IF NOT EXISTS system_events_object_idx ON system_events(object_type, object_id);
+CREATE INDEX IF NOT EXISTS system_events_visibility_idx ON system_events(visibility, created_at DESC);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 

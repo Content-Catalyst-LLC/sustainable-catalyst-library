@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/wp-json/sustainable-catalyst-library/v1/schemas/system-manifest",
+  "title": "Sustainable Catalyst Living Knowledge System manifest",
+  "type": "object",
+  "required": ["schema", "system_schema", "plugin_version", "generated_at", "overall_status", "counts", "components", "journeys", "pages", "data_boundaries"],
+  "properties": {
+    "schema": {"const": "sc-library-system-manifest/1.0"},
+    "system_schema": {"const": "sc-library-living-system/1.0"},
+    "plugin_version": {"type": "string"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "overall_status": {"enum": ["ready", "review_recommended", "action_required"]},
+    "counts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+    "components": {"type": "array", "items": {"type": "object"}},
+    "journeys": {"type": "array", "items": {"type": "object"}},
+    "pages": {"type": "object"},
+    "data_boundaries": {"type": "object"}
+  },
+  "additionalProperties": true
+}

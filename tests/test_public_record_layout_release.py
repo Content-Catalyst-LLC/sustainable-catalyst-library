@@ -9,9 +9,9 @@ README = (PLUGIN / "readme.txt").read_text()
 
 
 def test_patch_release_markers():
-    assert "Version: 1.20.0" in MAIN
-    assert "SC_LIBRARY_VERSION', '1.20.0'" in MAIN
-    assert "Stable tag: 1.20.0" in README
+    assert "Version: 2.0.1" in MAIN
+    assert "SC_LIBRARY_VERSION', '2.0.1'" in MAIN
+    assert "Stable tag: 2.0.1" in README
 
 
 def test_record_card_no_longer_uses_expanding_auto_action_column():

@@ -85,6 +85,12 @@
     const recentSection = root.querySelector('[data-library-recent]');
     const recentList = root.querySelector('[data-recent-list]');
     const clearRecent = root.querySelector('[data-clear-recent]');
+    const discoveryInterface = root.querySelector('[data-discovery-interface]');
+    const discoveryStatus = root.querySelector('[data-discovery-status]');
+    const topicSummary = root.querySelector('[data-topic-summary]');
+    const relationshipSummary = root.querySelector('[data-relationship-summary]');
+    const pathwayList = root.querySelector('[data-pathway-list]');
+    const pathwaySummary = root.querySelector('[data-pathway-summary]');
 
     const state = {
       search: '',
@@ -311,12 +317,16 @@
     };
 
     const clearSelectedNodes = () => {
-      root.querySelectorAll('[data-category-node], [data-series-chip], [data-concept-chip]').forEach((node) => node.classList.remove('is-selected'));
+      root.querySelectorAll('[data-category-node], [data-series-chip], [data-concept-chip]').forEach((node) => {
+        node.classList.remove('is-selected');
+        if (node.matches('[aria-pressed]')) node.setAttribute('aria-pressed', 'false');
+      });
     };
 
     const chooseFacet = (kind, item, node) => {
       clearSelectedNodes();
       node?.classList.add('is-selected');
+      node?.setAttribute('aria-pressed', 'true');
       state.category = 0;
       state.categoryName = '';
       state.categorySlug = '';
@@ -341,6 +351,24 @@
       loadItems();
     };
 
+    const setDiscoveryBusy = (busy) => {
+      discoveryInterface?.classList.toggle('is-loading', busy);
+      [categoryList, seriesList, conceptList, pathwayList].forEach((container) => {
+        if (!container) return;
+        if (busy) container.setAttribute('aria-busy', 'true');
+        else container.removeAttribute('aria-busy');
+      });
+    };
+
+    const renderDiscoveryFailure = (container, message, section) => {
+      if (!container) return;
+      container.innerHTML = `
+        <div class="sc-library__discovery-error" role="alert">
+          <strong>${escapeHtml(message)}</strong>
+          <button type="button" data-discovery-retry="${escapeHtml(section)}">${escapeHtml(strings.retryDiscovery || 'Retry discovery')}</button>
+        </div>`;
+    };
+
     const renderFacetList = (container, items, kind) => {
       if (!container) return;
       container.innerHTML = '';
@@ -351,48 +379,13 @@
       items.slice(0, kind === 'concept' ? 80 : 40).forEach((item) => {
         const button = document.createElement('button');
         button.type = 'button';
+        button.setAttribute('role', 'listitem');
         button.dataset[kind === 'series' ? 'seriesChip' : 'conceptChip'] = item.slug;
-        button.innerHTML = `<strong>${escapeHtml(item.name)}</strong><span>${Number(item.count).toLocaleString()}</span>`;
+        button.setAttribute('aria-pressed', 'false');
+        button.innerHTML = `<strong>${escapeHtml(item.name)}</strong><span>${Number(item.count).toLocaleString()} records</span>`;
         button.addEventListener('click', () => chooseFacet(kind, item, button));
         container.appendChild(button);
       });
-    };
-
-    const renderFacets = async () => {
-      if (!seriesList && !conceptList) return;
-      if (seriesList) seriesList.innerHTML = '<p class="sc-library__topic-loading">Loading series…</p>';
-      if (conceptList) conceptList.innerHTML = '<p class="sc-library__topic-loading">Loading concepts…</p>';
-      try {
-        const [seriesData, conceptsData] = await Promise.all([api('series'), api('concepts')]);
-        renderFacetList(seriesList, seriesData.items || [], 'series');
-        renderFacetList(conceptList, conceptsData.items || [], 'concept');
-
-        const url = new URL(window.location.href);
-        const wantedSeries = url.searchParams.get('library_series') || root.dataset.initialSeries || '';
-        const wantedConcept = url.searchParams.get('library_concept') || root.dataset.initialConcept || '';
-        if (wantedSeries) {
-          const item = (seriesData.items || []).find((entry) => entry.slug === wantedSeries);
-          if (item) {
-            state.series = item.slug;
-            state.seriesName = item.name;
-            state.sort = 'series';
-            state.hasInteracted = true;
-            seriesList?.querySelector(`[data-series-chip="${CSS.escape(item.slug)}"]`)?.classList.add('is-selected');
-          }
-        } else if (wantedConcept) {
-          const item = (conceptsData.items || []).find((entry) => entry.slug === wantedConcept);
-          if (item) {
-            state.concept = item.slug;
-            state.conceptName = item.name;
-            state.hasInteracted = true;
-            conceptList?.querySelector(`[data-concept-chip="${CSS.escape(item.slug)}"]`)?.classList.add('is-selected');
-          }
-        }
-      } catch (error) {
-        const message = `<p class="sc-library__empty">${escapeHtml(strings.facetsError || 'Series and concept navigation is temporarily unavailable.')}</p>`;
-        if (seriesList) seriesList.innerHTML = message;
-        if (conceptList) conceptList.innerHTML = message;
-      }
     };
 
     const descendantsOf = (parentId) => categoryItems.filter((item) => Number(item.parent) === Number(parentId));
@@ -402,11 +395,12 @@
       const wrapper = document.createElement(children.length ? 'details' : 'div');
       wrapper.className = `sc-library-domain sc-library-domain--depth-${Math.min(depth, 3)}`;
       wrapper.dataset.categoryNode = String(item.id);
+      wrapper.setAttribute('role', 'listitem');
 
       const control = document.createElement(children.length ? 'summary' : 'button');
       if (!children.length) control.type = 'button';
       control.className = 'sc-library-domain__control';
-      control.innerHTML = `<span><strong>${escapeHtml(item.name)}</strong><small>${Number(item.count).toLocaleString()} records</small></span>${children.length ? '<span class="sc-library-domain__toggle" aria-hidden="true">+</span>' : '<span aria-hidden="true">→</span>'}`;
+      control.innerHTML = `<span><strong>${escapeHtml(item.name)}</strong><small>${Number(item.count).toLocaleString()} records${Number(item.direct_count || 0) !== Number(item.count || 0) ? ` · ${Number(item.direct_count || 0).toLocaleString()} direct` : ''}</small></span>${children.length ? '<span class="sc-library-domain__toggle" aria-hidden="true">+</span>' : '<span class="sc-library-domain__arrow" aria-hidden="true">→</span>'}`;
       wrapper.appendChild(control);
 
       const selectTopic = (event) => {
@@ -445,31 +439,145 @@
       return wrapper;
     };
 
-    const renderCategories = async () => {
+    const renderCategoriesData = (items) => {
       if (!categoryList) return;
-      categoryList.innerHTML = '<p class="sc-library__topic-loading">Loading topic map…</p>';
-      try {
-        const data = await api('categories');
-        categoryItems = Array.isArray(data.items) ? data.items : [];
-        categoryList.innerHTML = '';
-        const roots = categoryItems.filter((item) => Number(item.parent) === 0);
-        roots.forEach((item) => categoryList.appendChild(renderCategoryNode(item)));
-        if (!roots.length) categoryList.innerHTML = '<p class="sc-library__empty">No indexed topics are available yet.</p>';
+      categoryItems = Array.isArray(items) ? items : [];
+      categoryList.innerHTML = '';
+      const roots = categoryItems.filter((item) => Number(item.parent) === 0);
+      roots.forEach((item) => categoryList.appendChild(renderCategoryNode(item)));
+      if (!roots.length) categoryList.innerHTML = '<p class="sc-library__empty">No indexed topics are available yet.</p>';
+      if (topicSummary) topicSummary.textContent = `${roots.length.toLocaleString()} domains · ${categoryItems.length.toLocaleString()} topics`;
+    };
 
-        const urlSlug = new URL(window.location.href).searchParams.get('library_topic') || '';
-        const wantedSlug = urlSlug || root.dataset.initialCategory || '';
-        if (wantedSlug) {
-          const initialItem = categoryItems.find((item) => item.slug === wantedSlug);
-          if (initialItem) {
-            state.category = Number(initialItem.id);
-            state.categoryName = initialItem.name;
-            state.categorySlug = initialItem.slug;
-            state.hasInteracted = true;
-            categoryList.querySelector(`[data-category-node="${initialItem.id}"]`)?.classList.add('is-selected');
-          }
+    const renderPathwaysData = (items) => {
+      if (!pathwayList) return;
+      pathwayList.innerHTML = '';
+      const pathways = Array.isArray(items) ? items.slice(0, 12) : [];
+      if (!pathways.length) {
+        pathwayList.innerHTML = `<p class="sc-library__empty">${escapeHtml(strings.pathwaysEmpty || 'No featured pathways are configured yet.')}</p>`;
+        if (pathwaySummary) pathwaySummary.textContent = 'No pathways configured';
+        return;
+      }
+      pathways.forEach((item) => {
+        const link = document.createElement('a');
+        link.href = item.url;
+        link.setAttribute('role', 'listitem');
+        link.innerHTML = `<strong>${escapeHtml(item.title)}</strong>${item.description ? `<span>${escapeHtml(item.description)}</span>` : ''}<em>Open pathway →</em>`;
+        pathwayList.appendChild(link);
+      });
+      if (pathwaySummary) pathwaySummary.textContent = `${pathways.length.toLocaleString()} curated entry points`;
+    };
+
+    const revealSelectedCategory = (item) => {
+      const selected = categoryList?.querySelector(`[data-category-node="${Number(item.id)}"]`);
+      if (!selected) return;
+      selected.classList.add('is-selected');
+      let parent = selected.parentElement?.closest('details.sc-library-domain');
+      while (parent) {
+        parent.open = true;
+        parent = parent.parentElement?.closest('details.sc-library-domain');
+      }
+    };
+
+    const applyInitialDiscoveryState = (seriesItems, conceptItems) => {
+      const url = new URL(window.location.href);
+      const wantedCategory = url.searchParams.get('library_topic') || root.dataset.initialCategory || '';
+      const wantedSeries = url.searchParams.get('library_series') || root.dataset.initialSeries || '';
+      const wantedConcept = url.searchParams.get('library_concept') || root.dataset.initialConcept || '';
+
+      if (wantedCategory) {
+        const item = categoryItems.find((entry) => entry.slug === wantedCategory);
+        if (item) {
+          state.category = Number(item.id);
+          state.categoryName = item.name;
+          state.categorySlug = item.slug;
+          state.hasInteracted = true;
+          revealSelectedCategory(item);
+          return;
         }
+      }
+      if (wantedSeries) {
+        const item = seriesItems.find((entry) => entry.slug === wantedSeries);
+        if (item) {
+          state.series = item.slug;
+          state.seriesName = item.name;
+          state.sort = 'series';
+          state.hasInteracted = true;
+          const node = seriesList?.querySelector(`[data-series-chip="${CSS.escape(item.slug)}"]`);
+          node?.classList.add('is-selected');
+          node?.setAttribute('aria-pressed', 'true');
+          return;
+        }
+      }
+      if (wantedConcept) {
+        const item = conceptItems.find((entry) => entry.slug === wantedConcept);
+        if (item) {
+          state.concept = item.slug;
+          state.conceptName = item.name;
+          state.sort = 'updated';
+          state.hasInteracted = true;
+          const node = conceptList?.querySelector(`[data-concept-chip="${CSS.escape(item.slug)}"]`);
+          node?.classList.add('is-selected');
+          node?.setAttribute('aria-pressed', 'true');
+        }
+      }
+    };
+
+    let discoveryRequest = 0;
+    const renderDiscovery = async () => {
+      if (!discoveryInterface) return;
+      const requestId = ++discoveryRequest;
+      setDiscoveryBusy(true);
+      if (discoveryStatus) discoveryStatus.textContent = strings.discoveryLoading || 'Loading topics, relationships, and pathways…';
+      if (categoryList) categoryList.innerHTML = '<p class="sc-library__topic-loading">Loading topic map…</p>';
+      if (seriesList) seriesList.innerHTML = '<p class="sc-library__topic-loading">Loading series…</p>';
+      if (conceptList) conceptList.innerHTML = '<p class="sc-library__topic-loading">Loading concepts…</p>';
+
+      try {
+        let data;
+        try {
+          data = await api('discovery');
+        } catch (aggregateError) {
+          const [categoriesData, seriesData, conceptsData, pathwaysData] = await Promise.all([
+            api('categories'), api('series'), api('concepts'), api('pathways')
+          ]);
+          data = {
+            schema: 'sc-library-discovery/1.0',
+            topics: { items: categoriesData.items || [] },
+            relationships: { series: seriesData.items || [], concepts: conceptsData.items || [] },
+            pathways: { items: pathwaysData.items || [] },
+          };
+        }
+        if (requestId !== discoveryRequest) return;
+
+        const topicItems = data.topics?.items || [];
+        const seriesItems = data.relationships?.series || [];
+        const conceptItems = data.relationships?.concepts || [];
+        const pathwayItems = data.pathways?.items || [];
+
+        renderCategoriesData(topicItems);
+        renderFacetList(seriesList, seriesItems, 'series');
+        renderFacetList(conceptList, conceptItems, 'concept');
+        renderPathwaysData(pathwayItems);
+        if (relationshipSummary) relationshipSummary.textContent = `${seriesItems.length.toLocaleString()} series · ${conceptItems.length.toLocaleString()} concepts`;
+        applyInitialDiscoveryState(seriesItems, conceptItems);
+        discoveryInterface.classList.remove('has-error');
+        discoveryInterface.classList.add('is-ready');
+        if (discoveryStatus) discoveryStatus.textContent = strings.discoveryReady || 'Discovery interface ready.';
       } catch (error) {
-        categoryList.innerHTML = `<p class="sc-library__empty">${escapeHtml(strings.categoriesError || 'Topic navigation is temporarily unavailable.')}</p>`;
+        if (requestId !== discoveryRequest) return;
+        discoveryInterface.classList.add('has-error');
+        const categoryMessage = strings.categoriesError || 'Topic navigation is temporarily unavailable.';
+        const facetMessage = strings.facetsError || 'Series and concept navigation is temporarily unavailable.';
+        renderDiscoveryFailure(categoryList, categoryMessage, 'topics');
+        renderDiscoveryFailure(seriesList, facetMessage, 'relationships');
+        if (conceptList) conceptList.innerHTML = '';
+        if (pathwayList && !pathwayList.children.length) renderDiscoveryFailure(pathwayList, strings.discoveryError || 'Pathway navigation is temporarily unavailable.', 'pathways');
+        if (topicSummary) topicSummary.textContent = 'Unavailable · retry';
+        if (relationshipSummary) relationshipSummary.textContent = 'Unavailable · retry';
+        if (discoveryStatus) discoveryStatus.textContent = strings.discoveryError || 'The discovery interface could not be loaded.';
+      } finally {
+        if (requestId === discoveryRequest) setDiscoveryBusy(false);
       }
     };
 
@@ -650,6 +758,11 @@
     });
 
     root.addEventListener('click', (event) => {
+      const retryButton = event.target.closest('[data-discovery-retry]');
+      if (retryButton) {
+        renderDiscovery();
+        return;
+      }
       const openButton = event.target.closest('[data-open-context]');
       if (openButton) {
         openContext(openButton.dataset.openContext, openButton);
@@ -709,7 +822,7 @@
     }
 
     renderRecent();
-    Promise.allSettled([renderCategories(), renderFacets()]).then(() => {
+    renderDiscovery().then(() => {
       if (state.hasInteracted) loadItems();
       const initialRecord = Number(url.searchParams.get('library_record') || root.dataset.initialRecord || 0);
       if (initialRecord) openContext(initialRecord);

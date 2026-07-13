@@ -49,6 +49,12 @@ final class SC_Library_REST {
             'permission_callback' => '__return_true',
         ]);
 
+        register_rest_route($namespace, '/library/discovery', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$this, 'discovery'],
+            'permission_callback' => '__return_true',
+        ]);
+
         register_rest_route($namespace, '/library/items', [
             'methods' => WP_REST_Server::READABLE,
             'callback' => [$this, 'items'],
@@ -113,7 +119,16 @@ final class SC_Library_REST {
             'documentation_categories' => $this->safe_term_count(SC_Library_Taxonomies::DOCUMENT_CATEGORY),
             'last_full_index' => get_option('sc_library_last_full_index', ''),
             'post_types' => $this->indexer->configured_post_types(),
-            'interface' => 'relationship-aware-knowledge-base',
+            'interface' => 'unified-discovery-interface',
+            'discovery' => [
+                'schema' => 'sc-library-discovery/1.0',
+                'interface_version' => '2.0.1',
+                'endpoint' => rest_url('sustainable-catalyst/v1/library/discovery'),
+                'topics' => true,
+                'relationships' => true,
+                'pathways' => true,
+                'retryable' => true,
+            ],
             'notebook' => [
                 'enabled' => SC_Library_Notebook::enabled(),
                 'storage' => 'browser-local',
@@ -230,6 +245,44 @@ final class SC_Library_REST {
 
     public function pathways(WP_REST_Request $request): WP_REST_Response {
         return rest_ensure_response(['items' => $this->featured_pathways()]);
+    }
+
+
+    public function discovery(WP_REST_Request $request): WP_REST_Response {
+        $categories = $this->categories($request)->get_data();
+        $series_response = $this->series($request);
+        $concepts = $this->concepts($request)->get_data();
+        $pathways = $this->pathways($request)->get_data();
+        $series = $series_response->get_status() >= 400 ? ['items' => []] : $series_response->get_data();
+
+        $category_items = is_array($categories['items'] ?? null) ? $categories['items'] : [];
+        $series_items = is_array($series['items'] ?? null) ? $series['items'] : [];
+        $concept_items = is_array($concepts['items'] ?? null) ? $concepts['items'] : [];
+        $pathway_items = is_array($pathways['items'] ?? null) ? $pathways['items'] : [];
+        $root_domains = array_values(array_filter($category_items, static fn(array $item): bool => (int) ($item['parent'] ?? 0) === 0));
+
+        return rest_ensure_response([
+            'schema' => 'sc-library-discovery/1.0',
+            'plugin_version' => SC_LIBRARY_VERSION,
+            'interface_version' => '2.0.1',
+            'generated_at' => current_time('mysql', true),
+            'topics' => [
+                'items' => $category_items,
+                'root_count' => count($root_domains),
+                'total_count' => count($category_items),
+                'record_count' => (int) ($categories['total_records'] ?? $this->indexer->count_indexed()),
+            ],
+            'relationships' => [
+                'series' => $series_items,
+                'concepts' => $concept_items,
+                'series_count' => count($series_items),
+                'concept_count' => count($concept_items),
+            ],
+            'pathways' => [
+                'items' => $pathway_items,
+                'count' => count($pathway_items),
+            ],
+        ]);
     }
 
     private function taxonomy_counts(string $taxonomy, string $column, bool $with_ancestors): array {

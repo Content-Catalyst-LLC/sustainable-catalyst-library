@@ -67,6 +67,8 @@ final class SC_Library_Activator {
         $integrity_checks_table = $wpdb->prefix . 'sc_library_integrity_checks';
         $authority_history_table = $wpdb->prefix . 'sc_library_authority_history';
         $readiness_runs_table = $wpdb->prefix . 'sc_library_readiness_runs';
+        $system_manifests_table = $wpdb->prefix . 'sc_library_system_manifests';
+        $system_events_table = $wpdb->prefix . 'sc_library_system_events';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -831,6 +833,49 @@ final class SC_Library_Activator {
             KEY created_at (created_at)
         ) {$charset};";
 
+
+
+        $system_manifests_sql = "CREATE TABLE {$system_manifests_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            manifest_uuid CHAR(36) NOT NULL,
+            schema_version VARCHAR(64) NOT NULL,
+            plugin_version VARCHAR(32) NOT NULL,
+            status VARCHAR(32) NOT NULL,
+            manifest_json LONGTEXT NOT NULL,
+            content_hash CHAR(64) NOT NULL,
+            created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY manifest_uuid (manifest_uuid),
+            KEY schema_version (schema_version),
+            KEY plugin_version (plugin_version),
+            KEY status (status),
+            KEY content_hash (content_hash),
+            KEY created_at (created_at)
+        ) {$charset};";
+
+        $system_events_sql = "CREATE TABLE {$system_events_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            event_uuid CHAR(36) NOT NULL,
+            event_type VARCHAR(96) NOT NULL,
+            object_type VARCHAR(64) NOT NULL,
+            object_id VARCHAR(191) NOT NULL DEFAULT '',
+            visibility VARCHAR(20) NOT NULL DEFAULT 'organization',
+            actor_user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            title TEXT NOT NULL,
+            summary TEXT NULL,
+            payload_json LONGTEXT NOT NULL,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY event_uuid (event_uuid),
+            KEY event_type (event_type),
+            KEY object_type (object_type),
+            KEY object_id (object_id),
+            KEY visibility (visibility),
+            KEY actor_user_id (actor_user_id),
+            KEY created_at (created_at)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
         dbDelta($workspaces_sql);
@@ -862,6 +907,8 @@ final class SC_Library_Activator {
         dbDelta($integrity_checks_sql);
         dbDelta($authority_history_sql);
         dbDelta($readiness_runs_sql);
+        dbDelta($system_manifests_sql);
+        dbDelta($system_events_sql);
     }
 
     private static function install_defaults(): void {
@@ -985,6 +1032,11 @@ final class SC_Library_Activator {
         add_option('sc_library_touch_target_px', 44);
         add_option('sc_library_public_cache_generation', 1, '', false);
         add_option('sc_library_readiness_last_report', [], '', false);
+        add_option('sc_library_enable_unified_system', 1);
+        add_option('sc_library_living_system_page_url', home_url('/living-knowledge-system/'));
+        add_option('sc_library_living_system_title', 'Sustainable Catalyst Living Knowledge System');
+        add_option('sc_library_living_system_activity_limit', 8);
+        add_option('sc_library_living_system_embed_library', 1);
         add_option('sc_library_featured_pathways', implode("\n", [
             'Systems Thinking|/systems-thinking/|Feedback, resilience, leverage points, and complex change.',
             'Mathematical Thinking|/mathematical-thinking/|Symbols, models, uncertainty, and formal reasoning.',

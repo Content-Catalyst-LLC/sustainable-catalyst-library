@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: A native WordPress knowledge base with a database-inventory-aware large-library index scanner, structured indexing, relationships, research notebooks, sources, Technical Translation Matrices, Whiteboards, Chalkboards, Annotation Studio handwriting, custom books, a Foundations Documentation Library, content planner, complete public registry, roadmap tracker, PostgreSQL and portable research-data exports, planning analytics, dependency intelligence, release coordination, persistent account workspaces, Render synchronization, server-side book and PDF production, Multimedia Studio and video snippet production, evidence reels, collaboration, invited review participants, suggested edits, comments, approvals, record locks, attribution history, a provenance-aware knowledge graph, relationship confidence, orphan and duplicate-concept diagnostics, timeline and place views, Whiteboard graph promotion, Research Librarian workspace orchestration, transparent retrieval reasons, user-confirmed action packets, controlled tool routing, optional site-scoped synthesis, a versioned public API, scoped service keys, signed webhooks, OpenAPI and JSON Schema documentation, a developer portal, embedded Foundation Document records, bundled PDF.js viewing, page-aware full-text PDF extraction, citation exports, PDF migration diagnostics, institutional preservation snapshots, integrity audits, checksums, authority history, supersession chains, archival browsing, retention controls, accessibility and mobile hardening, bounded public-response caching, anonymous REST rate limiting, production-readiness diagnostics, security headers, public record-card layout repair, responsive rendering, frozen editions, authority and version controls, search, filters, and public REST endpoints.
- * Version: 1.20.0
+ * Description: Sustainable Catalyst Library v2.0.1 is a unified living knowledge system with a repaired plugin-owned discovery interface with a public discovery layer, authenticated research workspace, institutional operations, cross-system manifests and activity, a database-inventory-aware large-library index scanner, structured indexing, relationships, research notebooks, sources, Technical Translation Matrices, Whiteboards, Chalkboards, Annotation Studio handwriting, custom books, a Foundations Documentation Library, content planner, complete public registry, roadmap tracker, PostgreSQL and portable research-data exports, planning analytics, dependency intelligence, release coordination, persistent account workspaces, Render synchronization, server-side book and PDF production, Multimedia Studio and video snippet production, evidence reels, collaboration, invited review participants, suggested edits, comments, approvals, record locks, attribution history, a provenance-aware knowledge graph, relationship confidence, orphan and duplicate-concept diagnostics, timeline and place views, Whiteboard graph promotion, Research Librarian workspace orchestration, transparent retrieval reasons, user-confirmed action packets, controlled tool routing, optional site-scoped synthesis, a versioned public API, scoped service keys, signed webhooks, OpenAPI and JSON Schema documentation, a developer portal, embedded Foundation Document records, bundled PDF.js viewing, page-aware full-text PDF extraction, citation exports, PDF migration diagnostics, institutional preservation snapshots, integrity audits, checksums, authority history, supersession chains, archival browsing, retention controls, accessibility and mobile hardening, bounded public-response caching, anonymous REST rate limiting, production-readiness diagnostics, security headers, public record-card layout repair, responsive rendering, frozen editions, authority and version controls, search, filters, and public REST endpoints.
+ * Version: 2.0.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '1.20.0');
+define('SC_LIBRARY_VERSION', '2.0.1');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -47,6 +47,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-orchestrator.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-developer-api.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-preservation.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-hardening.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-unified-system.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-shortcodes.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
@@ -96,6 +97,7 @@ final class SC_Library_Plugin {
         $developer_api = new SC_Library_Developer_API($indexer, $relationships, $knowledge_graph, $planner);
         $preservation = new SC_Library_Preservation($indexer, $relationships);
         $hardening = new SC_Library_Hardening($indexer, $relationships);
+        $unified_system = new SC_Library_Unified_System($indexer, $relationships);
         $shortcodes = new SC_Library_Shortcodes();
 
         $taxonomies->register_hooks();
@@ -124,6 +126,7 @@ final class SC_Library_Plugin {
         $developer_api->register_hooks();
         $preservation->register_hooks();
         $hardening->register_hooks();
+        $unified_system->register_hooks();
         $shortcodes->register_hooks();
     }
 }

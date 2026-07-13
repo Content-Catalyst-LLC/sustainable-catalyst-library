@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/wp-json/sustainable-catalyst-library/v1/schemas/system-event",
+  "title": "Sustainable Catalyst Living Knowledge System event",
+  "type": "object",
+  "required": ["event_uuid", "event_type", "object_type", "object_id", "visibility", "title", "created_at"],
+  "properties": {
+    "event_uuid": {"type": "string", "format": "uuid"},
+    "event_type": {"type": "string"},
+    "object_type": {"type": "string"},
+    "object_id": {"type": "string"},
+    "visibility": {"enum": ["public", "organization", "private"]},
+    "title": {"type": "string"},
+    "summary": {"type": "string"},
+    "created_at": {"type": "string"},
+    "payload": {"type": "object"}
+  },
+  "additionalProperties": false
+}

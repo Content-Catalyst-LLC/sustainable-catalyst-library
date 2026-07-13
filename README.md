@@ -1,47 +1,46 @@
-# Sustainable Catalyst Library v1.20.0
+# Sustainable Catalyst Library v2.0.1
 
-Library v1.20.0 is the final pre-2.0 hardening release. It preserves every v1.19.0 feature and adds a production-readiness layer across accessibility, mobile behavior, large-library performance, security, preservation, and operational diagnostics.
+Sustainable Catalyst Library v2.0.1 repairs the unified discovery interface while v2.0.0 unifies the complete Library platform into a Living Knowledge System with three coordinated layers:
 
-## Production Readiness
+- **Public Knowledge:** discovery, canonical records, Foundation Documents, article maps, roadmaps, relationships, graph traversal, and preserved editions.
+- **Research Workspace:** Notebook collections, sources, matrices, Whiteboards, Chalkboards, annotations, books, Research Librarian orchestration, and connected-tool handoffs.
+- **Institutional Operations:** content planning, release coordination, editorial review, API and webhooks, portable exports, preservation, integrity, and production readiness.
 
-Open `SC Library → Production Readiness` to review:
+The specialist tools remain independent and upgrade-safe. The v2 coordination layer adds a public portal, unified workspace gateway, checksummed system manifests, cross-module activity events, public system-status APIs, and PostgreSQL-ready portability.
 
-- WordPress, PHP, HTTPS, and environment health
-- keyboard, focus, reduced-motion, media-description, and PDF fallback checks
-- mobile record cards, touch targets, responsive tables, and native interface checks
-- Library index volume, cursor reconciliation, public cache, object cache, and cron status
-- debug exposure, file editing, SSL administration, rate limits, API-key storage, and remote-media boundaries
-- preservation snapshots, integrity audits, PDF extraction failures, and off-site backup reminders
-
-Public summary:
+## Primary shortcodes
 
 ```text
-[sc_library_readiness_status]
+[sc_library_living_system]
+[sc_library_unified_workspace]
+[sc_library_system_status]
 ```
 
-REST endpoints:
+## Administration
 
-```text
-/wp-json/sustainable-catalyst/v1/library/readiness/status
-/wp-json/sustainable-catalyst/v1/library/readiness/report
-/wp-json/sustainable-catalyst/v1/library/readiness/run
-/wp-json/sustainable-catalyst-library/v1/readiness
-```
+Open **SC Library → Living Knowledge System** to:
+
+- configure or create the unified portal page;
+- inspect all component states and canonical page URLs;
+- review cross-system activity;
+- create checksummed system manifests;
+- confirm public, research, and institutional data boundaries.
 
 ## Portable data
 
 ```text
-sc-library-portable-export/2.1
+sc-library-portable-export/3.0
 ```
 
-New entity:
+New normalized entities:
 
 ```text
-readiness_runs
+system_manifests
+system_events
 ```
 
 ## Installation
 
-Upload `sustainable-catalyst-library-v1.20.0.zip`, choose **Replace current with uploaded**, open **SC Library → Production Readiness**, run the complete report, repair maintenance schedules when needed, and clear all site/CDN caches.
+Upload `sustainable-catalyst-library-v2.0.1.zip`, choose **Replace current with uploaded**, open **SC Library → Living Knowledge System**, create or locate the portal page, and create the first system manifest. An index rebuild is not required solely for this upgrade.
 
-See `ACCESSIBILITY_SECURITY_HARDENING_SETUP_v1.20.0.md` and `RELEASE_NOTES_1.20.0.md`.
+See `UNIFIED_DISCOVERY_INTERFACE_REPAIR_SETUP_v2.0.1.md` and `RELEASE_NOTES_2.0.1.md`; the v2.0.0 setup guide remains authoritative for the broader Living Knowledge System.

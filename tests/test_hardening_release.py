@@ -13,9 +13,9 @@ README = (PLUGIN / "readme.txt").read_text()
 
 
 def test_release_markers_and_wiring():
-    assert "Version: 1.20.0" in MAIN
-    assert "SC_LIBRARY_VERSION', '1.20.0'" in MAIN
-    assert "Stable tag: 1.20.0" in README
+    assert "Version: 2.0.1" in MAIN
+    assert "SC_LIBRARY_VERSION', '2.0.1'" in MAIN
+    assert "Stable tag: 2.0.1" in README
     assert "class-sc-library-hardening.php" in MAIN
     assert "new SC_Library_Hardening" in MAIN
     assert "$hardening->register_hooks();" in MAIN
@@ -111,20 +111,20 @@ def test_readiness_diagnostics_cover_launch_domains():
 
 
 def test_portability_and_static_schema():
-    assert "sc-library-portable-export/2.1" in PORTABILITY
+    assert "sc-library-portable-export/3.0" in PORTABILITY
     assert "readiness_runs" in PORTABILITY
     assert "export_readiness_runs" in PORTABILITY
     schema = (ROOT / "docs/postgresql-schema.sql").read_text()
     assert "CREATE TABLE IF NOT EXISTS readiness_runs" in schema
     manifest = json.loads((ROOT / "docs/portable-export-manifest.example.json").read_text())
-    assert manifest["schema"] == "sc-library-portable-export/2.1"
-    assert manifest["plugin_version"] == "1.20.0"
+    assert manifest["schema"] == "sc-library-portable-export/3.0"
+    assert manifest["plugin_version"] == "2.0.1"
     assert "readiness_runs" in manifest["entities"]
 
 
 def test_openapi_and_json_schema():
     openapi = json.loads((ROOT / "docs/openapi.json").read_text())
-    assert openapi["info"]["version"] == "1.3.0"
+    assert openapi["info"]["version"] == "2.0.1"
     assert "/readiness" in openapi["paths"]
     schema = json.loads((ROOT / "docs/schemas/readiness-report.json").read_text())
     assert schema["properties"]["schema"]["const"] == "sc-library-production-readiness/1.0"

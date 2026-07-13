@@ -118,7 +118,7 @@ final class SC_Library_Hardening {
             'sc-library-foundation-documents', 'sc-library-multimedia', 'sc-library-planner',
             'sc-library-planning-analytics', 'sc-library-workspace-sync', 'sc-library-collaboration',
             'sc-library-knowledge-graph', 'sc-library-orchestrator', 'sc-library-developer-api',
-            'sc-library-preservation',
+            'sc-library-preservation', 'sc-library-unified-system',
         ];
         $active = false;
         foreach ($handles as $handle) {
@@ -131,7 +131,7 @@ final class SC_Library_Hardening {
         if (!$active && is_singular()) {
             $post = get_post();
             $content = $post instanceof WP_Post ? (string) $post->post_content : '';
-            foreach (['sc_library', 'sc_library_notebook', 'sc_library_knowledge_graph', 'sc_library_orchestrator', 'sc_foundation_document', 'sc_library_institutional_archive', 'sc_library_developer_portal', 'sc_library_readiness_status'] as $shortcode) {
+            foreach (['sc_library', 'sc_library_notebook', 'sc_library_knowledge_graph', 'sc_library_orchestrator', 'sc_foundation_document', 'sc_library_institutional_archive', 'sc_library_developer_portal', 'sc_library_readiness_status', 'sc_library_living_system', 'sc_library_unified_workspace', 'sc_library_system_status'] as $shortcode) {
                 if ($content !== '' && has_shortcode($content, $shortcode)) {
                     $active = true;
                     break;

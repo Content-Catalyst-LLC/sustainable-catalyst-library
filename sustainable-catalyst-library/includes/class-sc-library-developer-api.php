@@ -61,6 +61,7 @@ final class SC_Library_Developer_API {
         add_action('sc_library_foundation_document_extracted', [$this, 'capture_foundation_document_extracted'], 10, 2);
         add_action('sc_library_preservation_snapshot_created', [$this, 'capture_preservation_snapshot'], 10, 1);
         add_action('sc_library_integrity_audit_completed', [$this, 'capture_integrity_audit'], 10, 1);
+        add_action('sc_library_system_manifest_created', [$this, 'capture_system_manifest'], 10, 1);
     }
 
     public static function enabled(): bool {
@@ -112,6 +113,7 @@ final class SC_Library_Developer_API {
             'foundation-document.extracted' => __('Foundation Document PDF extracted and indexed', 'sustainable-catalyst-library'),
             'preservation.snapshot.created' => __('Frozen preservation snapshot created', 'sustainable-catalyst-library'),
             'integrity.audit.completed' => __('Institutional integrity audit completed', 'sustainable-catalyst-library'),
+            'system.manifest.created' => __('Living Knowledge System manifest created', 'sustainable-catalyst-library'),
             'api.test' => __('Developer webhook test', 'sustainable-catalyst-library'),
         ];
     }
@@ -193,6 +195,11 @@ final class SC_Library_Developer_API {
         register_rest_route($ns, '/status', [
             'methods' => WP_REST_Server::READABLE,
             'callback' => [$this, 'rest_status'],
+            'permission_callback' => [$this, 'public_permission'],
+        ]);
+        register_rest_route($ns, '/discovery', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$this, 'rest_discovery'],
             'permission_callback' => [$this, 'public_permission'],
         ]);
         register_rest_route($ns, '/records', [
@@ -412,6 +419,11 @@ final class SC_Library_Developer_API {
         }
         set_transient($transient, $count + 1, HOUR_IN_SECONDS + 60);
         return true;
+    }
+
+    public function rest_discovery(WP_REST_Request $request): WP_REST_Response {
+        $rest = new SC_Library_REST($this->indexer, $this->relationships);
+        return $rest->discovery($request);
     }
 
     public function rest_status(WP_REST_Request $request): WP_REST_Response {
@@ -865,6 +877,7 @@ final class SC_Library_Developer_API {
         $paths = [];
         foreach ([
             '/status' => 'API service status',
+            '/discovery' => 'Read topics, relationships, pathways, and discovery counts',
             '/records' => 'Search and browse public Library records',
             '/records/{id}' => 'Read one public Library record',
             '/relationships' => 'Browse public record relationships',
@@ -880,6 +893,7 @@ final class SC_Library_Developer_API {
             '/archive/{uuid}' => 'Read one public frozen edition',
             '/archive/{uuid}/manifest' => 'Read one preservation manifest',
             '/readiness' => 'Read the aggregate public production-readiness status',
+            '/system' => 'Read the public Living Knowledge System manifest',
             '/schemas' => 'List published JSON Schemas',
             '/schemas/{name}' => 'Read one JSON Schema',
             '/openapi.json' => 'Read this OpenAPI document',
@@ -909,8 +923,8 @@ final class SC_Library_Developer_API {
             'openapi' => self::OPENAPI_VERSION,
             'info' => [
                 'title' => 'Sustainable Catalyst Library API',
-                'version' => '1.3.0',
-                'description' => 'Versioned public access to Sustainable Catalyst Library records, preserved historical editions, preservation manifests, production-readiness status, embedded Foundation Documents, page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations.',
+                'version' => '2.0.1',
+                'description' => 'Versioned public access to Sustainable Catalyst Library records, preserved historical editions, preservation manifests, production-readiness status, the Living Knowledge System manifest, embedded Foundation Documents, page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations.',
             ],
             'servers' => [['url' => untrailingslashit($base)]],
             'paths' => $paths,
@@ -934,6 +948,23 @@ final class SC_Library_Developer_API {
 
     public function schemas(): array {
         return [
+            'discovery-interface' => [
+                '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+                '$id' => rest_url(self::API_NAMESPACE . '/schemas/discovery-interface'),
+                'title' => 'Sustainable Catalyst Library unified discovery interface',
+                'type' => 'object',
+                'required' => ['schema', 'plugin_version', 'interface_version', 'generated_at', 'topics', 'relationships', 'pathways'],
+                'properties' => [
+                    'schema' => ['const' => 'sc-library-discovery/1.0'],
+                    'plugin_version' => ['type' => 'string'],
+                    'interface_version' => ['const' => '2.0.1'],
+                    'generated_at' => ['type' => 'string'],
+                    'topics' => ['type' => 'object'],
+                    'relationships' => ['type' => 'object'],
+                    'pathways' => ['type' => 'object'],
+                ],
+                'additionalProperties' => false,
+            ],
             'record' => [
                 '$schema' => 'https://json-schema.org/draft/2020-12/schema',
                 '$id' => rest_url(self::API_NAMESPACE . '/schemas/record'),
@@ -1019,6 +1050,45 @@ final class SC_Library_Developer_API {
                     'provenance_url' => ['type' => 'string'],
                 ],
                 'additionalProperties' => true,
+            ],
+            'system-manifest' => [
+                '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+                '$id' => rest_url(self::API_NAMESPACE . '/schemas/system-manifest'),
+                'title' => 'Sustainable Catalyst Living Knowledge System manifest',
+                'type' => 'object',
+                'required' => ['schema', 'system_schema', 'plugin_version', 'generated_at', 'overall_status', 'counts', 'components', 'journeys', 'pages', 'data_boundaries'],
+                'properties' => [
+                    'schema' => ['const' => 'sc-library-system-manifest/1.0'],
+                    'system_schema' => ['const' => 'sc-library-living-system/1.0'],
+                    'plugin_version' => ['type' => 'string'],
+                    'generated_at' => ['type' => 'string', 'format' => 'date-time'],
+                    'overall_status' => ['enum' => ['ready', 'review_recommended', 'action_required']],
+                    'counts' => ['type' => 'object'],
+                    'components' => ['type' => 'array'],
+                    'journeys' => ['type' => 'array'],
+                    'pages' => ['type' => 'object'],
+                    'data_boundaries' => ['type' => 'object'],
+                ],
+                'additionalProperties' => true,
+            ],
+            'system-event' => [
+                '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+                '$id' => rest_url(self::API_NAMESPACE . '/schemas/system-event'),
+                'title' => 'Sustainable Catalyst Living Knowledge System event',
+                'type' => 'object',
+                'required' => ['event_uuid', 'event_type', 'object_type', 'object_id', 'visibility', 'title', 'created_at'],
+                'properties' => [
+                    'event_uuid' => ['type' => 'string', 'format' => 'uuid'],
+                    'event_type' => ['type' => 'string'],
+                    'object_type' => ['type' => 'string'],
+                    'object_id' => ['type' => 'string'],
+                    'visibility' => ['enum' => ['public', 'organization', 'private']],
+                    'title' => ['type' => 'string'],
+                    'summary' => ['type' => 'string'],
+                    'created_at' => ['type' => 'string'],
+                    'payload' => ['type' => 'object'],
+                ],
+                'additionalProperties' => false,
             ],
             'webhook-event' => [
                 '$schema' => 'https://json-schema.org/draft/2020-12/schema',
@@ -1524,6 +1594,14 @@ final class SC_Library_Developer_API {
             'status' => (string) ($summary['status'] ?? ''),
             'counts' => (array) ($summary['counts'] ?? []),
             'completed_at' => (string) ($summary['completed_at'] ?? ''),
+        ]);
+    }
+
+    public function capture_system_manifest(array $manifest): void {
+        $this->emit_event('system.manifest.created', [
+            'manifest_uuid' => (string) ($manifest['manifest_uuid'] ?? ''),
+            'content_hash' => (string) ($manifest['content_hash'] ?? ''),
+            'status' => (string) ($manifest['status'] ?? ''),
         ]);
     }
 

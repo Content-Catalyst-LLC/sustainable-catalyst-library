@@ -17,12 +17,12 @@ README = (PLUGIN / "readme.txt").read_text()
 
 
 def test_release_markers_and_bootstrap():
-    assert "Version: 1.20.0" in MAIN
-    assert "SC_LIBRARY_VERSION', '1.20.0'" in MAIN
+    assert "Version: 2.0.1" in MAIN
+    assert "SC_LIBRARY_VERSION', '2.0.1'" in MAIN
     assert "class-sc-library-knowledge-graph.php" in MAIN
     assert "new SC_Library_Knowledge_Graph" in MAIN
     assert "$knowledge_graph->register_hooks()" in MAIN
-    assert "Stable tag: 1.20.0" in README
+    assert "Stable tag: 2.0.1" in README
 
 
 def test_graph_tables_and_relationship_fields_are_installed():
@@ -109,7 +109,7 @@ def test_native_accessible_responsive_graph_without_iframe():
 
 
 def test_portable_graph_entities_and_postgresql_schema():
-    assert "sc-library-portable-export/2.1" in PORTABILITY
+    assert "sc-library-portable-export/3.0" in PORTABILITY
     assert "'knowledge_graph'" in PORTABILITY
     for entity in ["graph_nodes", "graph_edges"]:
         assert entity in PORTABILITY

@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * tables or serialized plugin internals.
  */
 final class SC_Library_Portability {
-    public const EXPORT_SCHEMA = 'sc-library-portable-export/2.1';
+    public const EXPORT_SCHEMA = 'sc-library-portable-export/3.0';
     public const POSTGRES_SCHEMA = 'sustainable_catalyst_library';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 
@@ -84,6 +84,7 @@ final class SC_Library_Portability {
             'developer_api' => __('Developer API keys, webhook configuration, and delivery history without secrets', 'sustainable-catalyst-library'),
             'preservation' => __('Preservation snapshots, integrity checks, authority history, and archive manifests', 'sustainable-catalyst-library'),
             'readiness' => __('Production-readiness reports without credentials or private payloads', 'sustainable-catalyst-library'),
+            'unified_system' => __('Living Knowledge System manifests and cross-system activity without private payloads', 'sustainable-catalyst-library'),
             'account_workspaces' => __('Persistent account workspaces and revisions', 'sustainable-catalyst-library'),
             'document_editions' => __('Server document jobs and frozen editions', 'sustainable-catalyst-library'),
             'multimedia' => __('Multimedia assets, clips, reels, and processing jobs', 'sustainable-catalyst-library'),
@@ -442,6 +443,8 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         $integrity_checks = $this->export_integrity_checks();
         $authority_history = $this->export_authority_history();
         $readiness_runs = $this->export_readiness_runs();
+        $system_manifests = $this->export_system_manifests();
+        $system_events = $this->export_system_events();
 
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($r) => (int) $r['id'], $public_registry), true);
@@ -533,6 +536,12 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $readiness_runs = [];
         }
 
+        if ($scope === 'unified_system') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $foundation_documents = $pdf_pages = $foundation_versions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = $graph_nodes = $graph_edges = $orchestration_sessions = $orchestration_events = $api_keys = $webhooks = $webhook_deliveries = $preservation_snapshots = $integrity_checks = $authority_history = $readiness_runs = [];
+        } elseif ($scope !== 'complete') {
+            $system_manifests = $system_events = [];
+        }
+
         // Embedded Foundation Document data follows the canonical record scope.
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($row) => (int) $row['record_id'], $records), true);
@@ -588,6 +597,8 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'integrity_checks' => $integrity_checks,
             'authority_history' => $authority_history,
             'readiness_runs' => $readiness_runs,
+            'system_manifests' => $system_manifests,
+            'system_events' => $system_events,
         ];
 
         $counts = [];
@@ -616,6 +627,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
                 'Developer API exports omit API-key hashes, webhook signing secrets, and full webhook payload bodies.',
                 'Preservation exports include immutable snapshot payloads, checksums, manifests, integrity outcomes, authority changes, retention dates, and hold flags without deleting canonical WordPress records.',
                 'Production-readiness exports preserve status summaries and remediation findings without API secrets, private workspace content, or authentication material.',
+                'Living Knowledge System exports preserve checksummed component manifests and privacy-trimmed cross-system events without secrets or private research payloads.',
             ],
         ];
         return ['manifest' => $manifest, 'entities' => $entities];
@@ -779,6 +791,48 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'created_by' => (int) $row['created_by'],
             'created_at' => mysql_to_rfc3339((string) $row['created_at']),
             'report' => json_decode((string) $row['report_json'], true) ?: [],
+        ], $rows);
+    }
+
+    private function export_system_manifests(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Unified_System')) return [];
+        $table = SC_Library_Unified_System::manifests_table();
+        $exists = (string) $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table));
+        if ($exists !== $table) return [];
+        $rows = $wpdb->get_results("SELECT * FROM {$table} ORDER BY id ASC", ARRAY_A) ?: [];
+        return array_map(static fn(array $row): array => [
+            'system_manifest_id' => (int) $row['id'],
+            'manifest_uuid' => (string) $row['manifest_uuid'],
+            'schema_version' => (string) $row['schema_version'],
+            'plugin_version' => (string) $row['plugin_version'],
+            'status' => (string) $row['status'],
+            'content_hash' => (string) $row['content_hash'],
+            'created_by' => (int) $row['created_by'],
+            'created_at' => mysql_to_rfc3339((string) $row['created_at']),
+            'manifest' => json_decode((string) $row['manifest_json'], true) ?: [],
+        ], $rows);
+    }
+
+    private function export_system_events(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Unified_System')) return [];
+        $table = SC_Library_Unified_System::events_table();
+        $exists = (string) $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table));
+        if ($exists !== $table) return [];
+        $rows = $wpdb->get_results("SELECT * FROM {$table} ORDER BY id ASC", ARRAY_A) ?: [];
+        return array_map(static fn(array $row): array => [
+            'system_event_id' => (int) $row['id'],
+            'event_uuid' => (string) $row['event_uuid'],
+            'event_type' => (string) $row['event_type'],
+            'object_type' => (string) $row['object_type'],
+            'object_id' => (string) $row['object_id'],
+            'visibility' => (string) $row['visibility'],
+            'actor_user_id' => (int) $row['actor_user_id'],
+            'title' => (string) $row['title'],
+            'summary' => (string) $row['summary'],
+            'created_at' => mysql_to_rfc3339((string) $row['created_at']),
+            'payload' => json_decode((string) $row['payload_json'], true) ?: [],
         ], $rows);
     }
 
