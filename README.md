@@ -1,91 +1,61 @@
-# Sustainable Catalyst Library v1.18.0
+# Sustainable Catalyst Library v1.18.1
 
-Library v1.18.0 adds **Public API, Webhooks, and Developer Documentation** to the complete v1.17.0 Library platform.
+Library v1.18.1 adds **Embedded Document Records and Full-Text PDF Indexing** to the complete v1.18.0 platform.
 
-## Developer infrastructure
+## Foundation Document system
 
-The release provides a dedicated, versioned namespace:
+- Native `sc_foundation_doc` WordPress record type
+- WordPress Media Library PDF selection
+- Bundled PDF.js inline viewer without an iframe
+- Explicit Open PDF and Download PDF controls
+- Browser-local page-aware text extraction
+- Search snippets linked to exact PDF pages
+- Research Librarian synchronization
+- Metadata, version history, checksums, and related records
+- BibTeX, RIS, CSL JSON, and plain-text citations
+- Extraction status, retries, and failure diagnostics
+- Mobile fallback presentation
+- Migration of existing direct-download Foundation links
 
-```text
-/wp-json/sustainable-catalyst-library/v1
-```
+## Data boundaries
 
-Public routes expose only canonical public Library data. Protected operations require administrator-issued scoped keys whose plaintext is shown once and whose stored representation is a keyed hash.
+WordPress remains canonical. PDF binaries remain in the Media Library or at an explicitly recorded source URL. Extracted text is stored page by page in `sc_library_pdf_pages`; version manifests are stored in `sc_library_foundation_versions`. Browser extraction uses the bundled PDF.js library and does not upload the PDF to an external extraction provider.
 
-## Public endpoints
-
-```text
-GET /status
-GET /records
-GET /records/{id}
-GET /relationships
-GET /graph
-GET /roadmap
-GET /schemas
-GET /schemas/{name}
-GET /openapi.json
-```
-
-## Protected endpoints
+## Public interfaces
 
 ```text
-GET  /protected/export-manifest   scope: exports:read
-POST /protected/reindex           scope: index:write
-POST /protected/webhooks/test     scope: webhooks:write
+[sc_foundation_document id="123"]
 ```
-
-Keys can be supplied through `X-SC-Library-Key` or `Authorization: Bearer`.
-
-## Signed webhooks
-
-Webhook destinations must use safe HTTPS URLs. Delivery headers include:
 
 ```text
-X-SC-Event
-X-SC-Delivery
-X-SC-Timestamp
-X-SC-Signature: sha256=HMAC(secret, timestamp.payload)
+/wp-json/sustainable-catalyst/v1/library/foundation-documents
+/wp-json/sustainable-catalyst/v1/library/foundation-documents/{id}
+/wp-json/sustainable-catalyst/v1/library/foundation-documents/{id}/pages
+/wp-json/sustainable-catalyst/v1/library/foundation-documents/{id}/citation
 ```
 
-Retries are bounded and recorded. Webhook signing secrets are encrypted at rest and shown only once when created.
-
-## Developer portal
-
-Create a WordPress page and add:
-
-```text
-[sc_library_developer_portal]
-```
-
-The portal links to the OpenAPI 3.1 document, JSON Schema registry, endpoint catalog, event catalog, authentication guidance, and examples.
+The versioned developer namespace also exposes public Foundation Document routes under `/wp-json/sustainable-catalyst-library/v1`.
 
 ## Portable data
 
 Portable export schema:
 
 ```text
-sc-library-portable-export/1.8
+sc-library-portable-export/1.9
 ```
 
-New normalized entities:
+New entities:
 
-- `api_keys`
-- `webhooks`
-- `webhook_deliveries`
+```text
+foundation_documents
+pdf_pages
+foundation_versions
+```
 
-Exports omit key hashes, encrypted webhook secrets, full delivery payloads, and delivery signatures.
+PDF binaries are referenced rather than embedded.
 
-## Retained systems
+## Installation
 
-- Research Librarian Workspace Orchestration
-- Knowledge Graph and relationship intelligence
-- Editorial collaboration and review
-- Multimedia Studio and evidence reels
-- Large-Library Index Tools
-- Persistent account workspaces and optional Render synchronization
-- Server-side book and PDF production
-- Content Planner, release coordination, and public registry
-- Research Notebook, matrices, boards, annotations, and books
-- PostgreSQL, CSV, JSONL, and JSON portability
+Upload `sustainable-catalyst-library-v1.18.1.zip` through WordPress and choose **Replace current with uploaded**. Existing Library records and indexes are preserved. Create or migrate Foundation Document records, extract each PDF, and then verify page-aware search.
 
-See `DEVELOPER_API_SETUP.md` and `RELEASE_NOTES_1.18.0.md`.
+See `EMBEDDED_DOCUMENT_RECORDS_SETUP_v1.18.1.md` and `RELEASE_NOTES_1.18.1.md`.

@@ -4,14 +4,25 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.18.0
+Stable tag: 1.18.1
 License: GPLv2 or later
 
-A native WordPress knowledge system with a versioned public API, signed webhooks, developer documentation, Research Librarian orchestration, a provenance-aware graph, editorial collaboration, multimedia, workspaces, planning, and PostgreSQL portability.
+A native WordPress knowledge system with embedded Foundation Document records, page-aware PDF indexing, a public API, Research Librarian orchestration, knowledge graphs, editorial workflows, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v1.18.0 adds a versioned public API, scoped service keys, signed webhooks, OpenAPI 3.1, JSON Schemas, and a public developer portal while retaining the complete v1.17.0 Library platform.
+Sustainable Catalyst Library v1.18.1 adds first-class Foundation Document records, Media Library PDF selection, an inline PDF.js reader, full-text page-aware extraction, citations, diagnostics, version history, related records, Research Librarian synchronization, and migration of legacy Foundation download links while retaining the complete v1.18.0 platform.
+
+= Foundation Documents and full-text PDF indexing =
+
+* Native `sc_foundation_doc` record type under SC Library.
+* Media Library PDF attachment selection with explicit Open PDF and Download PDF controls.
+* Bundled PDF.js inline viewer with mobile fallback.
+* Browser-local page extraction into normalized WordPress tables; PDFs are not sent to a third-party service.
+* Page-aware Library search results and Research Librarian recommendations.
+* Extraction status, retry, failure diagnostics, version history, related records, and BibTeX/RIS/CSL/plain citations.
+* Migration tool for existing direct-download Foundation PDF links.
+* Public shortcode `[sc_foundation_document id="123"]`.
 
 = Public API and developer portal =
 
@@ -32,7 +43,7 @@ Sustainable Catalyst Library v1.18.0 adds a versioned public API, scoped service
 
 = Portable Data =
 
-* Portable export schema `sc-library-portable-export/1.8`.
+* Portable export schema `sc-library-portable-export/1.9`.
 * New normalized entities `api_keys`, `webhooks`, and `webhook_deliveries`.
 * Secret hashes, encrypted signing secrets, full delivery payloads, and delivery signatures are excluded from portable exports.
 
@@ -48,6 +59,7 @@ Sustainable Catalyst Library v1.18.0 adds a versioned public API, scoped service
 
 == Shortcodes ==
 
+* `[sc_foundation_document id="123"]`
 * `[sc_library_developer_portal]`
 * `[sc_research_librarian_orchestrator]`
 * `[sc_library_knowledge_graph]`
@@ -69,6 +81,16 @@ Sustainable Catalyst Library v1.18.0 adds a versioned public API, scoped service
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 1.18.1 =
+* Added the Foundation Document record type and Media Library PDF selector.
+* Added bundled PDF.js inline reading with explicit open/download controls and mobile fallback.
+* Added page-aware full-text PDF extraction, indexing, search snippets, and diagnostics.
+* Added Research Librarian synchronization and exact-page recommendation evidence.
+* Added document metadata, version history, related records, and citation exports.
+* Added Foundation PDF Migration for existing direct-download links.
+* Added public Foundation Document API routes and portable schema 1.9.
+
 
 = 1.18.0 =
 * Added a dedicated versioned public API namespace.

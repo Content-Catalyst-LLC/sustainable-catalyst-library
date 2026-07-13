@@ -61,6 +61,8 @@ final class SC_Library_Activator {
         $api_keys_table = $wpdb->prefix . 'sc_library_api_keys';
         $webhooks_table = $wpdb->prefix . 'sc_library_webhooks';
         $webhook_deliveries_table = $wpdb->prefix . 'sc_library_webhook_deliveries';
+        $pdf_pages_table = $wpdb->prefix . 'sc_library_pdf_pages';
+        $foundation_versions_table = $wpdb->prefix . 'sc_library_foundation_versions';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -688,6 +690,41 @@ final class SC_Library_Activator {
             KEY created_at (created_at)
         ) {$charset};";
 
+        $pdf_pages_sql = "CREATE TABLE {$pdf_pages_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            post_id BIGINT UNSIGNED NOT NULL,
+            page_number INT UNSIGNED NOT NULL,
+            page_text LONGTEXT NOT NULL,
+            character_count BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            content_hash CHAR(64) NOT NULL DEFAULT '',
+            extracted_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY post_page (post_id, page_number),
+            KEY post_id (post_id),
+            KEY page_number (page_number),
+            FULLTEXT KEY sc_library_pdf_page_search (page_text)
+        ) {$charset};";
+
+        $foundation_versions_sql = "CREATE TABLE {$foundation_versions_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            post_id BIGINT UNSIGNED NOT NULL,
+            attachment_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            version_label VARCHAR(191) NOT NULL DEFAULT '',
+            filename VARCHAR(255) NOT NULL DEFAULT '',
+            pdf_url LONGTEXT NOT NULL,
+            sha256 CHAR(64) NOT NULL DEFAULT '',
+            page_count INT UNSIGNED NOT NULL DEFAULT 0,
+            metadata_json LONGTEXT NOT NULL,
+            created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            KEY post_id (post_id),
+            KEY attachment_id (attachment_id),
+            KEY version_label (version_label),
+            KEY sha256 (sha256),
+            KEY created_at (created_at)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
         dbDelta($workspaces_sql);
@@ -713,6 +750,8 @@ final class SC_Library_Activator {
         dbDelta($api_keys_sql);
         dbDelta($webhooks_sql);
         dbDelta($webhook_deliveries_sql);
+        dbDelta($pdf_pages_sql);
+        dbDelta($foundation_versions_sql);
     }
 
     private static function install_defaults(): void {
@@ -759,6 +798,9 @@ final class SC_Library_Activator {
         add_option('sc_library_document_max_attempts', 3);
         add_option('sc_library_document_retention_days', 30);
         add_option('sc_library_enable_documentation', 1);
+        add_option('sc_library_enable_foundation_documents', 1);
+        add_option('sc_library_pdf_extraction_batch_pages', 10);
+        add_option('sc_library_pdf_viewer_default', 1);
         add_option('sc_library_enable_multimedia', 1);
         add_option('sc_library_enable_collaboration', 1);
         add_option('sc_library_enable_knowledge_graph', 1);
@@ -810,6 +852,12 @@ final class SC_Library_Activator {
         add_option('sc_library_site_intelligence_health_url', '');
         add_option('sc_library_lab_url', home_url('/lab/'));
         add_option('sc_library_lab_health_url', '');
+        $configured_post_types = get_option('sc_library_post_types', ['post']);
+        if (!is_array($configured_post_types)) $configured_post_types = ['post'];
+        if (!in_array('sc_foundation_doc', $configured_post_types, true)) {
+            $configured_post_types[] = 'sc_foundation_doc';
+            update_option('sc_library_post_types', array_values(array_unique($configured_post_types)));
+        }
         add_option('sc_library_featured_pathways', implode("\n", [
             'Systems Thinking|/systems-thinking/|Feedback, resilience, leverage points, and complex change.',
             'Mathematical Thinking|/mathematical-thinking/|Symbols, models, uncertainty, and formal reasoning.',

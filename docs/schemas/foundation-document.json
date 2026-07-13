@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/foundation-document.json",
+  "title": "Sustainable Catalyst Foundation Document",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "title",
+    "url",
+    "pdf_url",
+    "metadata",
+    "extraction"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-foundation-document/1.0"
+    },
+    "id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "title": {
+      "type": "string"
+    },
+    "excerpt": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "pdf_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "open_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "download_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "viewer_enabled": {
+      "type": "boolean"
+    },
+    "download_enabled": {
+      "type": "boolean"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "publication_date": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "doi": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "related_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "extraction": {
+      "type": "object",
+      "required": [
+        "status",
+        "page_count",
+        "character_count"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "page_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "character_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "extracted_at": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "versions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "citations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

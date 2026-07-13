@@ -69,6 +69,7 @@
     const form = root.querySelector('[data-library-form]');
     const searchInput = root.querySelector('[data-library-search]');
     const sortInput = root.querySelector('[data-library-sort]');
+    const typeInput = root.querySelector('[data-library-type]');
     const resultsRegion = root.querySelector('[data-results-region]');
     const results = root.querySelector('[data-library-results]');
     const status = root.querySelector('[data-library-status]');
@@ -94,6 +95,7 @@
       seriesName: '',
       concept: '',
       conceptName: '',
+      post_type: '',
       sort: 'relevance',
       page: 1,
       per_page: Number(root.dataset.perPage || 10),
@@ -116,6 +118,7 @@
         library_topic: state.categorySlug,
         library_series: state.series,
         library_concept: state.concept,
+        library_type: state.post_type,
         library_page: state.page > 1 ? String(state.page) : '',
       };
       Object.entries(values).forEach(([key, value]) => value ? url.searchParams.set(key, value) : url.searchParams.delete(key));
@@ -133,6 +136,7 @@
       if (resources.workbench) labels.push('Workbench');
       if (resources.decision_studio) labels.push('Decision Studio');
       if (resources.site_intelligence) labels.push('Site Intelligence');
+      if (resources.pdf) labels.push('Full-text PDF');
       return labels.map((label) => `<span>${escapeHtml(label)}</span>`).join('');
     };
 
@@ -202,11 +206,13 @@
             ${item.expected_release?.display ? `<p class="sc-library-record__release">${escapeHtml(item.expected_release.display)}</p>` : ''}
             ${item.notice ? `<p class="sc-library-record__notice">${escapeHtml(item.notice)}</p>` : ''}
             ${concepts ? `<div class="sc-library-record__concepts">${concepts}</div>` : ''}
+            ${(item.page_hits || []).length ? `<div class="sc-library-record__page-hits"><strong>Matching PDF pages</strong>${item.page_hits.map((hit) => `<a href="${escapeHtml(item.url)}#page=${Number(hit.page)}">Page ${Number(hit.page)}: ${escapeHtml(hit.snippet || '')}</a>`).join('')}</div>` : ''}
           </div>
           <div class="sc-library-record__foot">
             <div class="sc-library-record__resources">${badges}</div>
             <div class="sc-library-record__actions">
               ${updated ? `<time datetime="${escapeHtml(item.modified_at)}">Updated ${escapeHtml(updated)}</time>` : ''}
+              ${item.foundation_document?.pdf_url ? `<a href="${escapeHtml(item.foundation_document.pdf_url)}" target="_blank" rel="noopener">Open PDF</a>` : ''}
               <button type="button" data-save-record="${Number(item.id)}">${escapeHtml(strings.saveRecord || 'Save to Notebook')}</button>
               ${matrixEnabled ? `<button type="button" data-translate-record="${Number(item.id)}">${escapeHtml(strings.translateRecord || 'Translate')}</button>` : ''}
               ${boardsEnabled ? `<button type="button" data-board-record="${Number(item.id)}" data-board-type="whiteboard">${escapeHtml(strings.whiteboardRecord || 'Whiteboard')}</button><button type="button" data-board-record="${Number(item.id)}" data-board-type="chalkboard">${escapeHtml(strings.chalkboardRecord || 'Chalkboard')}</button>` : ''}
@@ -275,6 +281,7 @@
         if (state.seriesName) parts.push(`<span>Series: <strong>${escapeHtml(state.seriesName)}</strong></span>`);
         if (state.conceptName) parts.push(`<span>Concept: <strong>${escapeHtml(state.conceptName)}</strong></span>`);
         if (state.search) parts.push(`<span>Search: <strong>${escapeHtml(state.search)}</strong></span>`);
+        if (state.post_type) parts.push(`<span>Type: <strong>${escapeHtml(typeInput?.selectedOptions?.[0]?.textContent || state.post_type)}</strong></span>`);
         activeFilter.innerHTML = parts.join('');
         activeFilter.hidden = parts.length === 0;
       }
@@ -619,14 +626,22 @@
       loadItems();
     });
 
+    typeInput?.addEventListener('change', () => {
+      state.post_type = typeInput.value;
+      state.page = 1;
+      state.hasInteracted = true;
+      loadItems();
+    });
+
     clearButton?.addEventListener('click', () => {
       Object.assign(state, {
         search: '', category: 0, categoryName: '', categorySlug: '',
-        series: '', seriesName: '', concept: '', conceptName: '',
+        series: '', seriesName: '', concept: '', conceptName: '', post_type: '',
         sort: 'relevance', page: 1, hasInteracted: false,
       });
       if (searchInput) searchInput.value = '';
       if (sortInput) sortInput.value = 'relevance';
+      if (typeInput) typeInput.value = '';
       clearSelectedNodes();
       if (resultsRegion) resultsRegion.hidden = true;
       if (results) results.innerHTML = '';

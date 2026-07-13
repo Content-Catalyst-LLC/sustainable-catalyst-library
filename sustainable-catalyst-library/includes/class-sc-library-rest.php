@@ -129,6 +129,14 @@ final class SC_Library_REST {
                 'collection' => class_exists('SC_Library_Documentation') ? SC_Library_Documentation::COLLECTION_SLUG : 'foundations',
                 'authority_model' => 'explicit-source-of-truth',
             ],
+            'foundation_documents' => [
+                'enabled' => class_exists('SC_Library_Foundation_Documents') && SC_Library_Foundation_Documents::enabled(),
+                'schema' => class_exists('SC_Library_Foundation_Documents') ? SC_Library_Foundation_Documents::SCHEMA : '',
+                'post_type' => class_exists('SC_Library_Foundation_Documents') ? SC_Library_Foundation_Documents::POST_TYPE : 'sc_foundation_doc',
+                'page_aware_indexing' => true,
+                'pdfjs_bundled' => true,
+                'research_librarian_synchronized' => true,
+            ],
             'portability' => [
                 'enabled' => class_exists('SC_Library_Portability') && SC_Library_Portability::enabled(),
                 'export_schema' => class_exists('SC_Library_Portability') ? SC_Library_Portability::EXPORT_SCHEMA : '',
@@ -370,7 +378,7 @@ final class SC_Library_REST {
         );
 
         return rest_ensure_response([
-            'items' => array_map(fn(array $row) => $this->hydrate_row($row, false), $rows ?: []),
+            'items' => array_map(fn(array $row) => $this->hydrate_row($row, false, $search), $rows ?: []),
             'pagination' => [
                 'page' => $page,
                 'per_page' => $per_page,
@@ -436,7 +444,7 @@ final class SC_Library_REST {
         return $row ?: null;
     }
 
-    private function hydrate_row(array $row, bool $detail): array {
+    private function hydrate_row(array $row, bool $detail, string $search = ''): array {
         $post_id = (int) $row['post_id'];
         $categories = $this->term_objects(json_decode((string) $row['category_ids'], true) ?: [], 'category');
         $tags = $this->term_objects(json_decode((string) $row['tag_ids'], true) ?: [], 'post_tag');
@@ -469,11 +477,27 @@ final class SC_Library_REST {
                 'workbench' => false,
                 'decision_studio' => false,
                 'site_intelligence' => false,
+                'pdf' => false,
             ], array_map('boolval', $flags)),
         ];
 
 
-        if (class_exists('SC_Library_Planner') && get_post_type($post_id) === SC_Library_Planner::POST_TYPE) {
+        if (class_exists('SC_Library_Foundation_Documents') && get_post_type($post_id) === SC_Library_Foundation_Documents::POST_TYPE) {
+            $item['foundation_document'] = SC_Library_Foundation_Documents::public_payload($post_id, $detail);
+            $item['page_hits'] = SC_Library_Foundation_Documents::page_hits($post_id, $search, 5);
+            $item['type_label'] = __('Foundation Document', 'sustainable-catalyst-library');
+            $item['record_state'] = 'published';
+            $item['record_state_label'] = __('Current document', 'sustainable-catalyst-library');
+            $item['content_type'] = 'foundation_document';
+            $item['content_type_label'] = __('Foundation Document', 'sustainable-catalyst-library');
+            $item['expected_release'] = ['type' => 'none', 'display' => '', 'sort' => '', 'note' => ''];
+            $item['area'] = $primary_domain['name'] ?? __('Foundations', 'sustainable-catalyst-library');
+            $item['product'] = 'Foundation Documents';
+            $item['article_map_id'] = 0;
+            $item['article_map_title'] = '';
+            $item['article_map_url'] = '';
+            $item['notice'] = '';
+        } elseif (class_exists('SC_Library_Planner') && get_post_type($post_id) === SC_Library_Planner::POST_TYPE) {
             $planner = new SC_Library_Planner($this->indexer, $this->relationships);
             $plan = $planner->plan_payload($post_id);
             $item['record_state'] = $plan['record_state'];

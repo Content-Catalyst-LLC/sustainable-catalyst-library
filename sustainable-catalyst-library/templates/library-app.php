@@ -92,6 +92,13 @@
             <div class="sc-library__results-head">
                 <div><p class="sc-library__results-kicker"><?php esc_html_e('Knowledge records', 'sustainable-catalyst-library'); ?></p><h3 id="<?php echo esc_attr($instance_id); ?>-results-title" data-results-title><?php esc_html_e('Search results', 'sustainable-catalyst-library'); ?></h3></div>
                 <div class="sc-library__results-tools">
+                    <label><span class="screen-reader-text"><?php esc_html_e('Filter by record type', 'sustainable-catalyst-library'); ?></span><select name="post_type" data-library-type>
+                        <option value=""><?php esc_html_e('All record types', 'sustainable-catalyst-library'); ?></option>
+                        <option value="post"><?php esc_html_e('Articles', 'sustainable-catalyst-library'); ?></option>
+                        <option value="page"><?php esc_html_e('Pages', 'sustainable-catalyst-library'); ?></option>
+                        <option value="sc_foundation_doc"><?php esc_html_e('Foundation Documents', 'sustainable-catalyst-library'); ?></option>
+                        <option value="sc_content_plan"><?php esc_html_e('Planned content', 'sustainable-catalyst-library'); ?></option>
+                    </select></label>
                     <label><span class="screen-reader-text"><?php esc_html_e('Sort knowledge records', 'sustainable-catalyst-library'); ?></span><select name="sort" data-library-sort>
                         <option value="relevance"><?php esc_html_e('Most relevant', 'sustainable-catalyst-library'); ?></option>
                         <option value="updated"><?php esc_html_e('Recently updated', 'sustainable-catalyst-library'); ?></option>

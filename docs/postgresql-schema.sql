@@ -369,6 +369,57 @@ CREATE TABLE IF NOT EXISTS document_editions (
 );
 CREATE INDEX IF NOT EXISTS document_editions_book_idx ON document_editions(book_id, frozen_at DESC);
 
+CREATE TABLE IF NOT EXISTS foundation_documents (
+    record_id bigint PRIMARY KEY REFERENCES records(record_id) ON DELETE CASCADE,
+    attachment_id bigint,
+    pdf_url text NOT NULL DEFAULT '',
+    version_label text NOT NULL DEFAULT '',
+    publication_date date,
+    author_name text NOT NULL DEFAULT '',
+    publisher_name text NOT NULL DEFAULT '',
+    doi text NOT NULL DEFAULT '',
+    language_code text NOT NULL DEFAULT 'en',
+    download_enabled boolean NOT NULL DEFAULT false,
+    viewer_enabled boolean NOT NULL DEFAULT true,
+    extraction_status text NOT NULL DEFAULT 'not_started',
+    page_count integer NOT NULL DEFAULT 0,
+    character_count bigint NOT NULL DEFAULT 0,
+    extracted_at timestamptz,
+    extraction_error text NOT NULL DEFAULT '',
+    related_record_ids bigint[] NOT NULL DEFAULT '{}',
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS foundation_documents_status_idx ON foundation_documents(extraction_status);
+CREATE INDEX IF NOT EXISTS foundation_documents_doi_idx ON foundation_documents(doi);
+
+CREATE TABLE IF NOT EXISTS pdf_pages (
+    pdf_page_id bigint PRIMARY KEY,
+    record_id bigint NOT NULL REFERENCES foundation_documents(record_id) ON DELETE CASCADE,
+    page_number integer NOT NULL,
+    page_text text NOT NULL,
+    character_count bigint NOT NULL DEFAULT 0,
+    content_hash text NOT NULL DEFAULT '',
+    extracted_at timestamptz,
+    UNIQUE (record_id, page_number)
+);
+CREATE INDEX IF NOT EXISTS pdf_pages_record_idx ON pdf_pages(record_id, page_number);
+CREATE INDEX IF NOT EXISTS pdf_pages_search_idx ON pdf_pages USING gin(to_tsvector('simple', page_text));
+
+CREATE TABLE IF NOT EXISTS foundation_versions (
+    foundation_version_id bigint PRIMARY KEY,
+    record_id bigint NOT NULL REFERENCES foundation_documents(record_id) ON DELETE CASCADE,
+    attachment_id bigint,
+    version_label text NOT NULL DEFAULT '',
+    filename text NOT NULL DEFAULT '',
+    pdf_url text NOT NULL DEFAULT '',
+    sha256 text NOT NULL DEFAULT '',
+    page_count integer NOT NULL DEFAULT 0,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS foundation_versions_record_idx ON foundation_versions(record_id, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS media_assets (
     media_asset_id bigint PRIMARY KEY,
     asset_uuid uuid UNIQUE NOT NULL,

@@ -61,3 +61,8 @@ Use the **Knowledge graph, relationship provenance, and diagnostics data** scope
 ## v1.17.0 Research Librarian orchestration entities
 
 Portable export schema `sc-library-portable-export/1.7` adds `orchestration_sessions` and `orchestration_events`. These administrator-only exports may contain private research questions, routes, and attributed action history.
+
+
+## Foundation Document entities (v1.18.1)
+
+`foundation_documents`, `pdf_pages`, and `foundation_versions` preserve document metadata, page-aware text, extraction diagnostics, citations, and version manifests. PDF binaries remain referenced Media Library resources and are not embedded.

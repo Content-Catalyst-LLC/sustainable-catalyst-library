@@ -77,4 +77,9 @@ Public API and webhooks do not expose private workspaces, editorial comments, pa
 
 ## Portable export
 
-Schema `sc-library-portable-export/1.8` adds developer API metadata. Secrets and hashes remain excluded.
+Schema `sc-library-portable-export/1.9` adds developer API metadata. Secrets and hashes remain excluded.
+
+
+## Foundation Document routes (v1.18.1)
+
+Public API clients can list Foundation Documents, retrieve a record, inspect extracted page text, and request citation formats. Public routes expose only published records.

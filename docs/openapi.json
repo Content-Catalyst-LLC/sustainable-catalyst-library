@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sustainable Catalyst Library API",
-    "version": "1.0.0",
-    "description": "Versioned public access to Sustainable Catalyst Library records, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations."
+    "version": "1.1.0",
+    "description": "Versioned public access to Sustainable Catalyst Library records, embedded Foundation Documents and page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations."
   },
   "servers": [
     {
@@ -192,6 +192,158 @@
           }
         }
       }
+    },
+    "/foundation-documents": {
+      "get": {
+        "summary": "List published Foundation Documents",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Foundation Document collection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/foundation-document"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/foundation-documents/{id}": {
+      "get": {
+        "summary": "Read one published Foundation Document",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Foundation Document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/foundation-document"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/foundation-documents/{id}/pages": {
+      "get": {
+        "summary": "Read page-aware extracted PDF text",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Extracted PDF pages"
+          }
+        }
+      }
+    },
+    "/foundation-documents/{id}/citation": {
+      "get": {
+        "summary": "Export a Foundation Document citation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "plain",
+                "bibtex",
+                "ris",
+                "csl"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Citation export"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -359,6 +511,9 @@
             "type": "object"
           }
         }
+      },
+      "foundation-document": {
+        "$ref": "./schemas/foundation-document.json"
       }
     }
   },

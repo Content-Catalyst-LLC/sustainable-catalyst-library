@@ -58,6 +58,7 @@ final class SC_Library_Developer_API {
         add_action('sc_library_review_transitioned', [$this, 'capture_review_transitioned'], 10, 1);
         add_action('sc_library_document_rendered', [$this, 'capture_document_rendered'], 10, 1);
         add_action('sc_library_media_clip_completed', [$this, 'capture_media_completed'], 10, 1);
+        add_action('sc_library_foundation_document_extracted', [$this, 'capture_foundation_document_extracted'], 10, 2);
     }
 
     public static function enabled(): bool {
@@ -106,6 +107,7 @@ final class SC_Library_Developer_API {
             'review.approved' => __('Editorial review approved', 'sustainable-catalyst-library'),
             'book.rendered' => __('Server document rendered', 'sustainable-catalyst-library'),
             'media.clip.completed' => __('Media clip processing completed', 'sustainable-catalyst-library'),
+            'foundation-document.extracted' => __('Foundation Document PDF extracted and indexed', 'sustainable-catalyst-library'),
             'api.test' => __('Developer webhook test', 'sustainable-catalyst-library'),
         ];
     }
@@ -246,6 +248,38 @@ final class SC_Library_Developer_API {
             'callback' => [$this, 'rest_media_reel'],
             'permission_callback' => [$this, 'public_permission'],
             'args' => ['uuid' => ['sanitize_callback' => 'sanitize_text_field']],
+        ]);
+        register_rest_route($ns, '/foundation-documents', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$this, 'rest_foundation_documents'],
+            'permission_callback' => [$this, 'public_permission'],
+            'args' => [
+                'search' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+                'page' => ['sanitize_callback' => 'absint', 'default' => 1],
+                'per_page' => ['sanitize_callback' => 'absint', 'default' => 20],
+            ],
+        ]);
+        register_rest_route($ns, '/foundation-documents/(?P<id>\d+)', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$this, 'rest_foundation_document'],
+            'permission_callback' => [$this, 'public_permission'],
+        ]);
+        register_rest_route($ns, '/foundation-documents/(?P<id>\d+)/pages', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$this, 'rest_foundation_pages'],
+            'permission_callback' => [$this, 'public_permission'],
+            'args' => [
+                'search' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+                'pdf_page' => ['sanitize_callback' => 'absint', 'default' => 0],
+                'page' => ['sanitize_callback' => 'absint', 'default' => 1],
+                'per_page' => ['sanitize_callback' => 'absint', 'default' => 50],
+            ],
+        ]);
+        register_rest_route($ns, '/foundation-documents/(?P<id>\d+)/citation', [
+            'methods' => WP_REST_Server::READABLE,
+            'callback' => [$this, 'rest_foundation_citation'],
+            'permission_callback' => [$this, 'public_permission'],
+            'args' => ['format' => ['sanitize_callback' => 'sanitize_key', 'default' => 'csl-json']],
         ]);
         register_rest_route($ns, '/openapi.json', [
             'methods' => WP_REST_Server::READABLE,
@@ -516,6 +550,9 @@ final class SC_Library_Developer_API {
             'collections' => $terms(SC_Library_Taxonomies::COLLECTION),
             'resources' => json_decode((string) ($row['resource_flags'] ?? '[]'), true) ?: [],
         ];
+        if (class_exists('SC_Library_Foundation_Documents') && $post->post_type === SC_Library_Foundation_Documents::POST_TYPE) {
+            $record['foundation_document'] = SC_Library_Foundation_Documents::public_payload($post, $include_content);
+        }
         if ($include_content) {
             $record['content_html'] = apply_filters('the_content', $post->post_content);
             $record['content_text'] = wp_strip_all_tags(strip_shortcodes($post->post_content));
@@ -690,6 +727,58 @@ final class SC_Library_Developer_API {
         ];
     }
 
+    public function rest_foundation_documents(WP_REST_Request $request): WP_REST_Response {
+        if (!class_exists('SC_Library_Foundation_Documents')) return rest_ensure_response(['schema' => 'sc-library-foundation-document-collection/1.0', 'items' => [], 'pagination' => ['page' => 1, 'per_page' => 0, 'total' => 0, 'total_pages' => 0]]);
+        $page = max(1, absint($request['page']));
+        $per_page = min(100, max(1, absint($request['per_page'])));
+        $search = sanitize_text_field((string) $request['search']);
+        $args = ['post_type' => SC_Library_Foundation_Documents::POST_TYPE, 'post_status' => 'publish', 'posts_per_page' => $per_page, 'paged' => $page];
+        if ($search !== '') $args['post__in'] = SC_Library_Foundation_Documents::matching_ids($search, 10000) ?: [0];
+        $query = new WP_Query($args);
+        $response = rest_ensure_response(['schema' => 'sc-library-foundation-document-collection/1.0', 'items' => array_map([SC_Library_Foundation_Documents::class, 'public_payload'], $query->posts), 'pagination' => ['page' => $page, 'per_page' => $per_page, 'total' => (int) $query->found_posts, 'total_pages' => (int) $query->max_num_pages]]);
+        $response->header('X-WP-Total', (string) $query->found_posts);
+        $response->header('X-WP-TotalPages', (string) $query->max_num_pages);
+        return $response;
+    }
+
+    public function rest_foundation_document(WP_REST_Request $request): WP_REST_Response|WP_Error {
+        if (!class_exists('SC_Library_Foundation_Documents')) return new WP_Error('sc_library_foundation_unavailable', __('Foundation Documents are unavailable.', 'sustainable-catalyst-library'), ['status' => 404]);
+        $post = get_post(absint($request['id']));
+        if (!$post || $post->post_type !== SC_Library_Foundation_Documents::POST_TYPE || $post->post_status !== 'publish') return new WP_Error('sc_library_foundation_not_found', __('Foundation Document not found.', 'sustainable-catalyst-library'), ['status' => 404]);
+        return rest_ensure_response(SC_Library_Foundation_Documents::public_payload($post, true));
+    }
+
+    public function rest_foundation_pages(WP_REST_Request $request): WP_REST_Response|WP_Error {
+        if (!class_exists('SC_Library_Foundation_Documents')) return new WP_Error('sc_library_foundation_unavailable', __('Foundation Documents are unavailable.', 'sustainable-catalyst-library'), ['status' => 404]);
+        $id = absint($request['id']);
+        $post = get_post($id);
+        if (!$post || $post->post_type !== SC_Library_Foundation_Documents::POST_TYPE || $post->post_status !== 'publish') return new WP_Error('sc_library_foundation_not_found', __('Foundation Document not found.', 'sustainable-catalyst-library'), ['status' => 404]);
+        global $wpdb;
+        $search = trim(sanitize_text_field((string) $request['search']));
+        $pdf_page = absint($request['pdf_page']);
+        $page = max(1, absint($request['page'] ?: 1));
+        $per_page = min(100, max(1, absint($request['per_page'] ?: 50)));
+        $where = 'post_id = %d'; $values = [$id];
+        if ($search !== '') { $where .= ' AND page_text LIKE %s'; $values[] = '%' . $wpdb->esc_like($search) . '%'; }
+        if ($pdf_page > 0) { $where .= ' AND page_number = %d'; $values[] = $pdf_page; }
+        $total = (int) $wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM ' . SC_Library_Foundation_Documents::pages_table() . " WHERE {$where}", ...$values));
+        $query_values = array_merge($values, [$per_page, ($page - 1) * $per_page]);
+        $rows = $wpdb->get_results($wpdb->prepare('SELECT page_number, page_text, character_count, content_hash, extracted_at FROM ' . SC_Library_Foundation_Documents::pages_table() . " WHERE {$where} ORDER BY page_number ASC LIMIT %d OFFSET %d", ...$query_values), ARRAY_A) ?: [];
+        return rest_ensure_response(['schema' => SC_Library_Foundation_Documents::EXTRACTION_SCHEMA, 'document_id' => $id, 'items' => $rows, 'pagination' => ['page' => $page, 'per_page' => $per_page, 'total' => $total, 'total_pages' => (int) ceil($total / $per_page)]]);
+    }
+
+    public function rest_foundation_citation(WP_REST_Request $request): WP_REST_Response|WP_Error {
+        if (!class_exists('SC_Library_Foundation_Documents')) return new WP_Error('sc_library_foundation_unavailable', __('Foundation Documents are unavailable.', 'sustainable-catalyst-library'), ['status' => 404]);
+        $id = absint($request['id']);
+        $post = get_post($id);
+        if (!$post || $post->post_type !== SC_Library_Foundation_Documents::POST_TYPE || $post->post_status !== 'publish') return new WP_Error('sc_library_foundation_not_found', __('Foundation Document not found.', 'sustainable-catalyst-library'), ['status' => 404]);
+        $format = sanitize_key((string) $request['format']);
+        if ($format === 'plain') $format = 'text';
+        if ($format === 'csl') $format = 'csl-json';
+        $citation = SC_Library_Foundation_Documents::citation($id, $format);
+        return rest_ensure_response(['schema' => 'sc-library-citation-export/1.0', 'format' => $format, 'filename' => $citation['filename'], 'content_type' => $citation['content_type'], 'content' => $citation['body']]);
+    }
+
     public function rest_openapi(WP_REST_Request $request): WP_REST_Response {
         return rest_ensure_response($this->openapi_document());
     }
@@ -715,7 +804,7 @@ final class SC_Library_Developer_API {
 
     public function rest_export_manifest(WP_REST_Request $request): WP_REST_Response {
         return rest_ensure_response([
-            'schema' => class_exists('SC_Library_Portability') ? SC_Library_Portability::EXPORT_SCHEMA : 'sc-library-portable-export/1.8',
+            'schema' => class_exists('SC_Library_Portability') ? SC_Library_Portability::EXPORT_SCHEMA : 'sc-library-portable-export/1.9',
             'generated_at' => gmdate('c'),
             'site' => home_url('/'),
             'plugin_version' => SC_LIBRARY_VERSION,
@@ -779,6 +868,10 @@ final class SC_Library_Developer_API {
             '/roadmap' => 'Read the public registry and roadmap',
             '/media/reels' => 'Browse public multimedia evidence reels',
             '/media/reels/{uuid}' => 'Read one public multimedia evidence reel',
+            '/foundation-documents' => 'Browse embedded Foundation Document records',
+            '/foundation-documents/{id}' => 'Read one embedded Foundation Document record',
+            '/foundation-documents/{id}/pages' => 'Read page-aware extracted PDF text',
+            '/foundation-documents/{id}/citation' => 'Export a Foundation Document citation',
             '/schemas' => 'List published JSON Schemas',
             '/schemas/{name}' => 'Read one JSON Schema',
             '/openapi.json' => 'Read this OpenAPI document',
@@ -808,8 +901,8 @@ final class SC_Library_Developer_API {
             'openapi' => self::OPENAPI_VERSION,
             'info' => [
                 'title' => 'Sustainable Catalyst Library API',
-                'version' => '1.0.0',
-                'description' => 'Versioned public access to Sustainable Catalyst Library records, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations.',
+                'version' => '1.1.0',
+                'description' => 'Versioned public access to Sustainable Catalyst Library records, embedded Foundation Documents, page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations.',
             ],
             'servers' => [['url' => untrailingslashit($base)]],
             'paths' => $paths,
@@ -851,6 +944,23 @@ final class SC_Library_Developer_API {
                     'modified_at' => ['type' => ['string', 'null'], 'format' => 'date-time'],
                 ],
                 'additionalProperties' => true,
+            ],
+            'foundation-document' => [
+                '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+                '$id' => rest_url(self::API_NAMESPACE . '/schemas/foundation-document'),
+                'title' => 'Sustainable Catalyst Foundation Document',
+                'type' => 'object',
+                'required' => ['schema','id','title','url','pdf_url','metadata','extraction'],
+                'properties' => [
+                    'schema' => ['const' => 'sc-library-foundation-document/1.0'],
+                    'id' => ['type' => 'integer'],
+                    'title' => ['type' => 'string'],
+                    'url' => ['type' => 'string', 'format' => 'uri'],
+                    'pdf_url' => ['type' => 'string'],
+                    'metadata' => ['type' => 'object'],
+                    'extraction' => ['type' => 'object'],
+                    'versions' => ['type' => 'array'],
+                ],
             ],
             'relationship' => [
                 '$schema' => 'https://json-schema.org/draft/2020-12/schema',
@@ -1345,4 +1455,13 @@ final class SC_Library_Developer_API {
     public function capture_media_completed(array $payload): void {
         $this->emit_event('media.clip.completed', $payload);
     }
+    public function capture_foundation_document_extracted(int $post_id, array $summary): void {
+        $this->emit_event('foundation-document.extracted', [
+            'record_id' => $post_id,
+            'record_url' => get_permalink($post_id),
+            'page_count' => (int) ($summary['pages'] ?? 0),
+            'character_count' => (int) ($summary['chars'] ?? 0),
+        ]);
+    }
+
 }

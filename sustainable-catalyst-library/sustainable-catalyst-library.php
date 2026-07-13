@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: A native WordPress knowledge base with a database-inventory-aware large-library index scanner, structured indexing, relationships, research notebooks, sources, Technical Translation Matrices, Whiteboards, Chalkboards, Annotation Studio handwriting, custom books, a Foundations Documentation Library, content planner, complete public registry, roadmap tracker, PostgreSQL and portable research-data exports, planning analytics, dependency intelligence, release coordination, persistent account workspaces, Render synchronization, server-side book and PDF production, Multimedia Studio and video snippet production, evidence reels, collaboration, invited review participants, suggested edits, comments, approvals, record locks, attribution history, a provenance-aware knowledge graph, relationship confidence, orphan and duplicate-concept diagnostics, timeline and place views, Whiteboard graph promotion, Research Librarian workspace orchestration, transparent retrieval reasons, user-confirmed action packets, controlled tool routing, optional site-scoped synthesis, a versioned public API, scoped service keys, signed webhooks, OpenAPI and JSON Schema documentation, a developer portal, public record-card layout repair, responsive rendering, frozen editions, authority and version controls, search, filters, and public REST endpoints.
- * Version: 1.18.0
+ * Description: A native WordPress knowledge base with a database-inventory-aware large-library index scanner, structured indexing, relationships, research notebooks, sources, Technical Translation Matrices, Whiteboards, Chalkboards, Annotation Studio handwriting, custom books, a Foundations Documentation Library, content planner, complete public registry, roadmap tracker, PostgreSQL and portable research-data exports, planning analytics, dependency intelligence, release coordination, persistent account workspaces, Render synchronization, server-side book and PDF production, Multimedia Studio and video snippet production, evidence reels, collaboration, invited review participants, suggested edits, comments, approvals, record locks, attribution history, a provenance-aware knowledge graph, relationship confidence, orphan and duplicate-concept diagnostics, timeline and place views, Whiteboard graph promotion, Research Librarian workspace orchestration, transparent retrieval reasons, user-confirmed action packets, controlled tool routing, optional site-scoped synthesis, a versioned public API, scoped service keys, signed webhooks, OpenAPI and JSON Schema documentation, a developer portal, embedded Foundation Document records, bundled PDF.js viewing, page-aware full-text PDF extraction, citation exports, PDF migration diagnostics, public record-card layout repair, responsive rendering, frozen editions, authority and version controls, search, filters, and public REST endpoints.
+ * Version: 1.18.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '1.18.0');
+define('SC_LIBRARY_VERSION', '1.18.1');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -35,6 +35,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-annotations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-books.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-document-production.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-documentation.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-foundation-documents.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-multimedia.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-planner.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-portability.php';
@@ -81,6 +82,7 @@ final class SC_Library_Plugin {
         $books = new SC_Library_Books();
         $document_production = new SC_Library_Document_Production();
         $documentation = new SC_Library_Documentation($indexer, $relationships);
+        $foundation_documents = new SC_Library_Foundation_Documents($indexer, $relationships);
         $multimedia = new SC_Library_Multimedia();
         $planner = new SC_Library_Planner($indexer, $relationships);
         $portability = new SC_Library_Portability($indexer, $relationships, $planner);
@@ -106,6 +108,7 @@ final class SC_Library_Plugin {
         $books->register_hooks();
         $document_production->register_hooks();
         $documentation->register_hooks();
+        $foundation_documents->register_hooks();
         $multimedia->register_hooks();
         $planner->register_hooks();
         $portability->register_hooks();

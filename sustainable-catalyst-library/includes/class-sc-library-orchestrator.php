@@ -559,6 +559,14 @@ final class SC_Library_Orchestrator {
         elseif ($matched) $reasons[] = sprintf(__('It matches the request through: %s.', 'sustainable-catalyst-library'), implode(', ', array_slice($matched, 0, 5)));
         if ($series_name !== '') $reasons[] = sprintf(__('It belongs to the “%s” sequence.', 'sustainable-catalyst-library'), $series_name);
         if ($concepts) $reasons[] = sprintf(__('Connected concepts include %s.', 'sustainable-catalyst-library'), implode(', ', array_slice($concepts, 0, 4)));
+        $page_hits = [];
+        if (class_exists('SC_Library_Foundation_Documents') && (string) $row['post_type'] === SC_Library_Foundation_Documents::POST_TYPE) {
+            $page_hits = SC_Library_Foundation_Documents::page_hits($post_id, $prompt, 4);
+            if ($page_hits) {
+                $pages = implode(', ', array_map(static fn(array $hit): string => (string) $hit['page'], $page_hits));
+                $reasons[] = sprintf(__('The extracted PDF text matches on page(s) %s.', 'sustainable-catalyst-library'), $pages);
+            }
+        }
         if (!$reasons) $reasons[] = __('It is one of the strongest indexed matches.', 'sustainable-catalyst-library');
         return [
             'id' => $post_id,
@@ -575,6 +583,7 @@ final class SC_Library_Orchestrator {
             'score' => (float) ($row['orchestration_score'] ?? ($selected ? 500 : 0)),
             'why' => $reasons,
             'graph_related' => false,
+            'pdf_page_hits' => $page_hits,
         ];
     }
 

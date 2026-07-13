@@ -211,11 +211,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.18.0 activated.</strong> Open SC Library → Developer API to configure the public API, scoped keys, signed webhooks, and developer portal. Existing orchestration, graph, editorial, multimedia, workspace, document, and scanner systems remain available.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.18.1 activated.</strong> Foundation Document records, embedded PDF.js reading, page-aware extraction, citation exports, and Foundation PDF migration are now available. Existing API, orchestration, graph, editorial, multimedia, workspace, and scanner systems remain available.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.18.0.</strong> Public API, signed webhooks, OpenAPI, JSON Schemas, and developer documentation are now available under SC Library → Developer API. Public and private data boundaries remain enforced.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.18.1.</strong> Open Foundation Documents to attach and extract PDFs, or use SC Library → PDF Migration to convert existing Foundation download links. PDF binaries remain in the Media Library and extracted text remains page-aware.</p></div>';
         }
     }
 

@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * tables or serialized plugin internals.
  */
 final class SC_Library_Portability {
-    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.8';
+    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.9';
     public const POSTGRES_SCHEMA = 'sustainable_catalyst_library';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 
@@ -77,6 +77,7 @@ final class SC_Library_Portability {
             'registry' => __('Complete public registry', 'sustainable-catalyst-library'),
             'planner' => __('Content Planner and roadmap', 'sustainable-catalyst-library'),
             'documentation' => __('Foundations and documentation records', 'sustainable-catalyst-library'),
+            'foundation_documents' => __('Foundation Documents, page text, and version history', 'sustainable-catalyst-library'),
             'relationships' => __('Relationships, terms, and resources', 'sustainable-catalyst-library'),
             'knowledge_graph' => __('Knowledge graph, relationship provenance, and diagnostics data', 'sustainable-catalyst-library'),
             'orchestration' => __('Research Librarian sessions, routes, and attributed action events', 'sustainable-catalyst-library'),
@@ -327,6 +328,8 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             __('Typed relationships', 'sustainable-catalyst-library') => $this->relationships->count(),
             __('Planning records', 'sustainable-catalyst-library') => $plan_count,
             __('Documentation records', 'sustainable-catalyst-library') => (int) $wpdb->get_var("SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = '_sc_library_doc_status'"),
+            __('Foundation Documents', 'sustainable-catalyst-library') => class_exists('SC_Library_Foundation_Documents') ? (int) wp_count_posts(SC_Library_Foundation_Documents::POST_TYPE)->publish : 0,
+            __('Extracted PDF pages', 'sustainable-catalyst-library') => class_exists('SC_Library_Foundation_Documents') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Foundation_Documents::pages_table()) : 0,
             __('Account workspaces', 'sustainable-catalyst-library') => class_exists('SC_Library_Workspaces') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Workspaces::table()) : 0,
             __('Multimedia assets', 'sustainable-catalyst-library') => class_exists('SC_Library_Multimedia') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Multimedia::assets_table()) : 0,
             __('Multimedia clips', 'sustainable-catalyst-library') => class_exists('SC_Library_Multimedia') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Multimedia::clips_table()) : 0,
@@ -414,6 +417,9 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         $account_workspace_sync_log = $this->export_account_workspace_sync_log();
         $document_jobs = $this->export_document_jobs();
         $document_editions = $this->export_document_editions();
+        $foundation_documents = $this->export_foundation_documents();
+        $pdf_pages = $this->export_pdf_pages();
+        $foundation_versions = $this->export_foundation_versions();
         $media_assets = $this->export_media_assets();
         $media_clips = $this->export_media_clips();
         $media_reels = $this->export_media_reels();
@@ -459,6 +465,14 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $plans = [];
             $plan_dependencies = [];
             $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
+        } elseif ($scope === 'foundation_documents') {
+            $foundation_record_ids = array_map(static fn($row) => (int) $row['record_id'], $foundation_documents);
+            $records = $this->filter_rows_by_ids($records, 'record_id', $foundation_record_ids);
+            $record_terms = $this->filter_rows_by_ids($record_terms, 'record_id', $foundation_record_ids);
+            $resources = $this->filter_rows_by_ids($resources, 'record_id', $foundation_record_ids);
+            $documentation = $this->filter_rows_by_ids($documentation, 'record_id', $foundation_record_ids);
+            $relationships = array_values(array_filter($relationships, static fn($row) => in_array((int) $row['source_post_id'], $foundation_record_ids, true) || in_array((int) $row['target_post_id'], $foundation_record_ids, true)));
+            $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
         } elseif ($scope === 'relationships') {
             $records = [];
             $documentation = [];
@@ -500,6 +514,23 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $api_keys = $webhooks = $webhook_deliveries = [];
         }
 
+        // Embedded Foundation Document data follows the canonical record scope.
+        if ($scope === 'registry') {
+            $public_ids = array_fill_keys(array_map(static fn($row) => (int) $row['record_id'], $records), true);
+            $foundation_documents = array_values(array_filter($foundation_documents, static fn($row) => isset($public_ids[(int) $row['record_id']])));
+            $foundation_ids = array_fill_keys(array_map(static fn($row) => (int) $row['record_id'], $foundation_documents), true);
+            $pdf_pages = array_values(array_filter($pdf_pages, static fn($row) => isset($foundation_ids[(int) $row['record_id']])));
+            $foundation_versions = array_values(array_filter($foundation_versions, static fn($row) => isset($foundation_ids[(int) $row['record_id']])));
+        } elseif (in_array($scope, ['documentation', 'foundation_documents'], true)) {
+            $foundation_ids = array_fill_keys(array_map(static fn($row) => (int) $row['record_id'], $foundation_documents), true);
+            $pdf_pages = array_values(array_filter($pdf_pages, static fn($row) => isset($foundation_ids[(int) $row['record_id']])));
+            $foundation_versions = array_values(array_filter($foundation_versions, static fn($row) => isset($foundation_ids[(int) $row['record_id']])));
+        } elseif ($scope === 'schema') {
+            $foundation_documents = $pdf_pages = $foundation_versions = [];
+        } elseif (!in_array($scope, ['complete'], true)) {
+            $foundation_documents = $pdf_pages = $foundation_versions = [];
+        }
+
         $entities = [
             'records' => $records,
             'terms' => $terms,
@@ -517,6 +548,9 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'account_workspace_sync_log' => $account_workspace_sync_log,
             'document_jobs' => $document_jobs,
             'document_editions' => $document_editions,
+            'foundation_documents' => $foundation_documents,
+            'pdf_pages' => $pdf_pages,
+            'foundation_versions' => $foundation_versions,
             'media_assets' => $media_assets,
             'media_clips' => $media_clips,
             'media_reels' => $media_reels,
@@ -552,6 +586,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
                 'Private planning data is excluded unless an administrator explicitly enables it.',
                 'PDFs and repository records remain references; binary media is not embedded in data exports.',
                 'Server document job records and frozen edition manifests are exported without embedding PDF binaries.',
+                'Foundation Document exports include citation metadata, extraction diagnostics, page-aware text, and version manifests; PDF binaries remain Media Library references.',
                 'Multimedia exports preserve asset, clip, reel, rights, transcript, and processing metadata without embedding video or audio binaries.',
                 'Knowledge graph exports preserve normalized entities, relationship confidence, provenance, visibility, verification state, and board-promotion lineage.',
                 'Research Librarian orchestration exports are administrator-only and may contain user research questions, recommended routes, and attributed action history.',
@@ -559,6 +594,74 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             ],
         ];
         return ['manifest' => $manifest, 'entities' => $entities];
+    }
+
+    private function export_foundation_documents(): array {
+        if (!class_exists('SC_Library_Foundation_Documents')) return [];
+        $posts = get_posts([
+            'post_type' => SC_Library_Foundation_Documents::POST_TYPE,
+            'post_status' => ['publish','draft','private'],
+            'posts_per_page' => -1,
+            'orderby' => 'ID',
+            'order' => 'ASC',
+        ]);
+        return array_map(static function (WP_Post $post): array {
+            $payload = SC_Library_Foundation_Documents::public_payload($post, true);
+            return [
+                'record_id' => (int) $post->ID,
+                'attachment_id' => absint(get_post_meta($post->ID, '_sc_foundation_pdf_attachment_id', true)),
+                'pdf_url' => (string) ($payload['pdf_url'] ?? ''),
+                'version_label' => (string) ($payload['metadata']['version'] ?? ''),
+                'publication_date' => (string) ($payload['metadata']['publication_date'] ?? ''),
+                'author_name' => (string) ($payload['metadata']['author'] ?? ''),
+                'publisher_name' => (string) ($payload['metadata']['publisher'] ?? ''),
+                'doi' => (string) ($payload['metadata']['doi'] ?? ''),
+                'language_code' => (string) ($payload['metadata']['language'] ?? 'en'),
+                'download_enabled' => !empty($payload['download_enabled']),
+                'viewer_enabled' => !empty($payload['viewer_enabled']),
+                'extraction_status' => (string) ($payload['extraction']['status'] ?? 'not_started'),
+                'page_count' => (int) ($payload['extraction']['page_count'] ?? 0),
+                'character_count' => (int) ($payload['extraction']['character_count'] ?? 0),
+                'extracted_at' => ($payload['extraction']['extracted_at'] ?? '') ?: null,
+                'extraction_error' => (string) ($payload['extraction']['error'] ?? ''),
+                'related_record_ids' => (array) ($payload['metadata']['related_ids'] ?? []),
+                'payload' => $payload,
+            ];
+        }, $posts ?: []);
+    }
+
+    private function export_pdf_pages(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Foundation_Documents')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Foundation_Documents::pages_table() . ' ORDER BY post_id ASC, page_number ASC', ARRAY_A) ?: [];
+        return array_map(static fn(array $row): array => [
+            'pdf_page_id' => (int) $row['id'],
+            'record_id' => (int) $row['post_id'],
+            'page_number' => (int) $row['page_number'],
+            'page_text' => (string) $row['page_text'],
+            'character_count' => (int) $row['character_count'],
+            'content_hash' => (string) $row['content_hash'],
+            'extracted_at' => mysql_to_rfc3339((string) $row['extracted_at']),
+        ], $rows);
+    }
+
+    private function export_foundation_versions(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Foundation_Documents')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Foundation_Documents::versions_table() . ' ORDER BY post_id ASC, id ASC', ARRAY_A) ?: [];
+        return array_map(static fn(array $row): array => [
+            'foundation_version_id' => (int) $row['id'],
+            'record_id' => (int) $row['post_id'],
+            'attachment_id' => (int) $row['attachment_id'],
+            'version_label' => (string) $row['version_label'],
+            'filename' => (string) $row['filename'],
+            'pdf_url' => (string) $row['pdf_url'],
+            'sha256' => (string) $row['sha256'],
+            'page_count' => (int) $row['page_count'],
+            'created_by' => (int) $row['created_by'],
+            'created_at' => mysql_to_rfc3339((string) $row['created_at']),
+            'payload' => json_decode((string) $row['metadata_json'], true) ?: [],
+        ], $rows);
     }
 
     private function export_api_keys(): array {
@@ -1671,6 +1774,57 @@ CREATE TABLE IF NOT EXISTS document_editions (
 );
 CREATE INDEX IF NOT EXISTS document_editions_book_idx ON document_editions(book_id, frozen_at DESC);
 
+CREATE TABLE IF NOT EXISTS foundation_documents (
+    record_id bigint PRIMARY KEY REFERENCES records(record_id) ON DELETE CASCADE,
+    attachment_id bigint,
+    pdf_url text NOT NULL DEFAULT '',
+    version_label text NOT NULL DEFAULT '',
+    publication_date date,
+    author_name text NOT NULL DEFAULT '',
+    publisher_name text NOT NULL DEFAULT '',
+    doi text NOT NULL DEFAULT '',
+    language_code text NOT NULL DEFAULT 'en',
+    download_enabled boolean NOT NULL DEFAULT false,
+    viewer_enabled boolean NOT NULL DEFAULT true,
+    extraction_status text NOT NULL DEFAULT 'not_started',
+    page_count integer NOT NULL DEFAULT 0,
+    character_count bigint NOT NULL DEFAULT 0,
+    extracted_at timestamptz,
+    extraction_error text NOT NULL DEFAULT '',
+    related_record_ids bigint[] NOT NULL DEFAULT '{}',
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS foundation_documents_status_idx ON foundation_documents(extraction_status);
+CREATE INDEX IF NOT EXISTS foundation_documents_doi_idx ON foundation_documents(doi);
+
+CREATE TABLE IF NOT EXISTS pdf_pages (
+    pdf_page_id bigint PRIMARY KEY,
+    record_id bigint NOT NULL REFERENCES foundation_documents(record_id) ON DELETE CASCADE,
+    page_number integer NOT NULL,
+    page_text text NOT NULL,
+    character_count bigint NOT NULL DEFAULT 0,
+    content_hash text NOT NULL DEFAULT '',
+    extracted_at timestamptz,
+    UNIQUE (record_id, page_number)
+);
+CREATE INDEX IF NOT EXISTS pdf_pages_record_idx ON pdf_pages(record_id, page_number);
+CREATE INDEX IF NOT EXISTS pdf_pages_search_idx ON pdf_pages USING gin(to_tsvector('simple', page_text));
+
+CREATE TABLE IF NOT EXISTS foundation_versions (
+    foundation_version_id bigint PRIMARY KEY,
+    record_id bigint NOT NULL REFERENCES foundation_documents(record_id) ON DELETE CASCADE,
+    attachment_id bigint,
+    version_label text NOT NULL DEFAULT '',
+    filename text NOT NULL DEFAULT '',
+    pdf_url text NOT NULL DEFAULT '',
+    sha256 text NOT NULL DEFAULT '',
+    page_count integer NOT NULL DEFAULT 0,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS foundation_versions_record_idx ON foundation_versions(record_id, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS media_assets (
     media_asset_id bigint PRIMARY KEY,
     asset_uuid uuid UNIQUE NOT NULL,
@@ -1982,6 +2136,9 @@ SQL;
             'account_workspace_collaborators' => ['collaboration_id','workspace_id','user_id','role','invited_by','created_at','accepted_at'],
             'account_workspace_sync_log' => ['sync_log_id','workspace_id','workspace_uuid','direction','status','response_code','message','content_hash','created_at'],
             'document_jobs' => ['document_job_id','job_uuid','owner_user_id','workspace_uuid','book_id','title','document_type','status','progress','attempt','max_attempts','content_hash','renderer_version','output_attachment_id','output_sha256','output_bytes','error_message','created_at','updated_at','completed_at','manifest','diagnostics','payload'],
+            'foundation_documents' => ['record_id','attachment_id','pdf_url','version_label','publication_date','author_name','publisher_name','doi','language_code','download_enabled','viewer_enabled','extraction_status','page_count','character_count','extracted_at','extraction_error','related_record_ids','payload'],
+            'pdf_pages' => ['pdf_page_id','record_id','page_number','page_text','character_count','content_hash','extracted_at'],
+            'foundation_versions' => ['foundation_version_id','record_id','attachment_id','version_label','filename','pdf_url','sha256','page_count','created_by','created_at','payload'],
             'document_editions' => ['document_edition_id','edition_uuid','job_uuid','owner_user_id','workspace_uuid','book_id','title','edition_label','content_hash','output_sha256','output_attachment_id','output_url','frozen_at','created_at','manifest'],
             'media_assets' => ['media_asset_id','asset_uuid','owner_user_id','title','description','media_type','source_kind','attachment_id','source_url','duration_ms','rights_status','rights_holder','license_name','license_url','rights_note','source_citation','transcript_text','transcript_vtt','captions_url','poster_attachment_id','poster_time_ms','accessibility_text','visibility','created_at','updated_at','payload'],
             'media_clips' => ['media_clip_id','clip_uuid','asset_uuid','owner_user_id','title','description','start_ms','end_ms','poster_time_ms','transcript_excerpt','caption_text','status','visibility','output_attachment_id','poster_attachment_id','remote_job_uuid','created_at','updated_at','payload'],
@@ -2006,11 +2163,11 @@ SQL;
             foreach ($columns as $column) {
                 $value = $row[$column] ?? null;
                 if (in_array($column, ['payload', 'expected_release', 'manifest', 'diagnostics', 'clip_uuids', 'anchor', 'scopes', 'events'], true)) $literals[] = $this->sql_json($value ?: []);
-                elseif (in_array($column, ['dependency_ids'], true)) $literals[] = $this->sql_bigint_array(is_array($value) ? $value : []);
+                elseif (in_array($column, ['dependency_ids','related_record_ids'], true)) $literals[] = $this->sql_bigint_array(is_array($value) ? $value : []);
                 elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at','completed_at','frozen_at','due_at','locked_at','lock_expires_at','expires_at','resolved_at','decided_at','verified_at','last_used_at','last_delivery_at','next_attempt_at','delivered_at'], true)) $literals[] = $this->sql_timestamp($value);
                 elseif (in_array($column, ['last_reviewed','planned_start','actual_start','actual_publication_date'], true)) $literals[] = $value ? $this->sql_text((string) $value) . '::date' : 'NULL';
-                elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override','secret_exported','payload_exported','signature_exported'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
-                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by','api_key_id','rate_limit_per_hour','last_status_code','failure_count','webhook_id','webhook_delivery_id'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by','api_key_id','rate_limit_per_hour','last_status_code','failure_count','webhook_id','webhook_delivery_id'], true)) ? (string) (int) $value : 'NULL';
+                elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override','secret_exported','payload_exported','signature_exported','download_enabled','viewer_enabled'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
+                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by','api_key_id','rate_limit_per_hour','last_status_code','failure_count','webhook_id','webhook_delivery_id','pdf_page_id','foundation_version_id','page_number','character_count','page_count'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by','api_key_id','rate_limit_per_hour','last_status_code','failure_count','webhook_id','webhook_delivery_id','pdf_page_id','foundation_version_id','page_number','character_count','page_count'], true)) ? (string) (int) $value : 'NULL';
                 elseif (in_array($column, ['series_order','estimated_effort','actual_effort','confidence'], true)) $literals[] = (string) (float) $value;
                 else $literals[] = $this->sql_text((string) ($value ?? ''));
             }
@@ -2032,6 +2189,9 @@ SQL;
             'account_workspace_collaborators' => 'collaboration_id',
             'account_workspace_sync_log' => 'sync_log_id',
             'document_jobs' => 'document_job_id',
+            'foundation_documents' => 'record_id',
+            'pdf_pages' => 'pdf_page_id',
+            'foundation_versions' => 'foundation_version_id',
             'document_editions' => 'document_edition_id',
             'media_assets' => 'media_asset_id',
             'media_clips' => 'media_clip_id',

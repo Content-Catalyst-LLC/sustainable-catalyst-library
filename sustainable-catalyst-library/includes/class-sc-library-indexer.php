@@ -28,6 +28,9 @@ final class SC_Library_Indexer {
         $types = get_option('sc_library_post_types', ['post']);
         $types = is_array($types) && $types ? $types : ['post'];
         $types = $this->normalize_post_types($types);
+        if (class_exists('SC_Library_Foundation_Documents') && SC_Library_Foundation_Documents::enabled()) {
+            $types[] = SC_Library_Foundation_Documents::POST_TYPE;
+        }
         if ($include_planner && class_exists('SC_Library_Planner') && SC_Library_Planner::enabled()) {
             $types[] = SC_Library_Planner::POST_TYPE;
         }
@@ -251,6 +254,11 @@ final class SC_Library_Indexer {
             }, $tags)
         )));
 
+        $pdf_text = '';
+        if (class_exists('SC_Library_Foundation_Documents') && $post->post_type === SC_Library_Foundation_Documents::POST_TYPE) {
+            $pdf_text = SC_Library_Foundation_Documents::extracted_text($post_id);
+        }
+
         $resource_text = implode(' ', array_filter([
             (string) get_post_meta($post_id, '_sc_library_github_url', true),
             (string) get_post_meta($post_id, '_sc_library_dataset_urls', true),
@@ -291,7 +299,7 @@ final class SC_Library_Indexer {
             ]);
         }, $this->relationships->get_for_post($post_id, false)));
 
-        $searchable_text = trim(implode(' ', [$content, $term_text, $resource_text, $relationship_text]));
+        $searchable_text = trim(implode(' ', [$content, $term_text, $resource_text, $relationship_text, $pdf_text]));
         $excerpt_words = min(80, max(12, (int) get_option('sc_library_excerpt_words', 28)));
         $excerpt = has_excerpt($post_id)
             ? get_the_excerpt($post_id)
@@ -349,6 +357,7 @@ final class SC_Library_Indexer {
             'workbench' => !empty($workbench_tools),
             'decision_studio' => !empty($decision_context),
             'site_intelligence' => !empty($site_context),
+            'pdf' => class_exists('SC_Library_Foundation_Documents') && get_post_type($post_id) === SC_Library_Foundation_Documents::POST_TYPE && absint(get_post_meta($post_id, '_sc_foundation_pdf_attachment_id', true)) > 0,
         ];
     }
 
