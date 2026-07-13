@@ -17,6 +17,7 @@ def test_signature_changes_with_request_context() -> None:
 
 
 def test_supported_workspace_schema() -> None:
+    assert valid_workspace_schema("sc-library-workspace/1.8")
     assert valid_workspace_schema("sc-library-workspace/1.7")
     assert valid_workspace_schema("sc-library-workspace/1.0")
     assert not valid_workspace_schema("sc-library-workspace/2.0")

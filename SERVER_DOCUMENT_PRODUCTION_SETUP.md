@@ -84,3 +84,7 @@ The Document Production dashboard supports:
 - deletion of stale job records without deleting imported PDF editions.
 
 An unavailable Render service does not take the Library, Notebook, Book Builder, or browser PDF workflow offline.
+
+## v1.14.0 media fallback addendum
+
+Server PDFs now represent connected media with clickable links, selected timestamps, transcript excerpts, and QR access. Interactive playback is not claimed inside frozen PDF output. The document renderer version is `1.14.0`.

@@ -1,17 +1,31 @@
 === Sustainable Catalyst Library ===
 Contributors: contentcatalyst
-Tags: knowledge-base, pdf, document-production, render, research-workspace, postgresql
+Tags: knowledge-base, multimedia, video, audio, evidence-reels, pdf, render, research-workspace, postgresql
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.13.4
+Stable tag: 1.14.0
 License: GPLv2 or later
 
-A native WordPress knowledge base with persistent workspaces, server-rendered books and PDFs, planning, documentation, notebooks, PostgreSQL portability, and optional Render services.
+A native WordPress knowledge system with multimedia clips and evidence reels, persistent workspaces, server-rendered books and PDFs, planning, notebooks, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v1.13.4 adds raw database inventory, automatic legacy-scope expansion, stable Index Tools routing, and a server-side reconciliation fallback so large Libraries cannot remain trapped in an old configured subset.
+Sustainable Catalyst Library v1.14.0 adds a native Multimedia Studio for authorized video and audio assets, non-destructive clip definitions, transcript-linked snippets, captions, poster frames, annotations, evidence reels, and optional Render processing. WordPress remains the source of truth, and all earlier large-library indexing, workspace, planning, book, PDF, and portable-export features remain available.
+
+= Multimedia Studio =
+
+* Register WordPress Media Library video and audio attachments.
+* Optionally register controlled public HTTPS source references.
+* Record rights, license, permission, provenance, source citation, and accessibility metadata.
+* Preserve transcripts, WebVTT, caption URLs, and poster timing.
+* Create non-destructive clips using start, end, and poster timestamps.
+* Add transcript excerpts, captions, and annotations to clips.
+* Build private or deliberately public evidence reels.
+* Optionally process authorized direct media through the signed Render service.
+* Import completed clips and poster frames into the WordPress Media Library.
+* Export media assets, clips, reels, and jobs through PostgreSQL, CSV, JSONL, or JSON.
+* Preserve media in PDFs through durable links, timestamps, transcript excerpts, and QR access.
 
 
 = Large-Library Index Scanner =
@@ -46,21 +60,24 @@ Sustainable Catalyst Library v1.13.4 adds raw database inventory, automatic lega
 
 = Portable Data =
 
-* Workspace schema `sc-library-workspace/1.7`.
-* Portable export schema `sc-library-portable-export/1.3`.
-* PostgreSQL-ready document-job and frozen-edition tables without embedded PDF binaries.
+* Workspace schema `sc-library-workspace/1.8`.
+* Portable export schema `sc-library-portable-export/1.4`.
+* PostgreSQL-ready document, workspace, media-asset, clip, reel, and job tables without embedded PDF/video/audio binaries.
 
 == Installation ==
 
 1. Upload and activate the plugin.
 2. Open SC Library and rebuild the index.
-3. Browser PDF generation works immediately from the Book Builder.
-4. Optionally deploy or upgrade the included Render service.
-5. Configure the service URL and key under Server-side document production.
-6. Create a short test book and verify Media Library import.
+3. Open SC Library → Multimedia Studio and register one authorized test asset.
+4. Create a linked clip and private evidence reel; Render is not required.
+5. Optionally deploy or upgrade the included Render service.
+6. Configure the media service URL and key under SC Library settings.
+7. Process a short clip and verify WordPress Media Library import.
 
 == Shortcodes ==
 
+* `[sc_library_multimedia_studio]`
+* `[sc_library_evidence_reel id="REEL-UUID"]`
 * `[sc_library_book_builder]`
 * `[sc_library_document_production]`
 * `[sc_library_account_workspaces]`
@@ -77,6 +94,16 @@ Sustainable Catalyst Library v1.13.4 adds raw database inventory, automatic lega
 
 == REST API ==
 
+* `/wp-json/sustainable-catalyst/v1/library/media/status`
+* `/wp-json/sustainable-catalyst/v1/library/media/assets`
+* `/wp-json/sustainable-catalyst/v1/library/media/clips`
+* `/wp-json/sustainable-catalyst/v1/library/media/clips/{uuid}/process`
+* `/wp-json/sustainable-catalyst/v1/library/media/reels`
+* `/wp-json/sustainable-catalyst/v1/library/media/reels/public/{uuid}`
+* `/wp-json/sustainable-catalyst/v1/library/media/jobs`
+* `/wp-json/sustainable-catalyst/v1/library/media/jobs/{uuid}/refresh`
+* `/wp-json/sustainable-catalyst/v1/library/media/jobs/{uuid}/retry`
+
 * `/wp-json/sustainable-catalyst/v1/library/documents/status`
 * `/wp-json/sustainable-catalyst/v1/library/documents/jobs`
 * `/wp-json/sustainable-catalyst/v1/library/documents/jobs/{uuid}`
@@ -87,6 +114,18 @@ Sustainable Catalyst Library v1.13.4 adds raw database inventory, automatic lega
 * `/wp-json/sustainable-catalyst/v1/library/workspaces/{uuid}`
 
 == Changelog ==
+
+= 1.14.0 =
+* Added the native Multimedia Studio.
+* Added video/audio asset, clip, evidence-reel, and processing-job schemas and database tables.
+* Added rights, license, provenance, citation, transcript, caption, poster, annotation, and accessibility fields.
+* Added non-destructive timestamp-based clip definitions.
+* Added public evidence-reel shortcode and REST representation.
+* Added optional signed Render media processing with bounded FFmpeg clip and poster generation.
+* Added automatic WordPress Media Library import, diagnostics, retries, and SHA-256 checksums.
+* Added portable PostgreSQL, CSV, JSONL, and JSON media entities.
+* Added PDF media links, selected segments, transcript excerpts, and QR fallbacks.
+* Updated workspace schema to 1.8 and portable export schema to 1.4.
 
 = 1.13.4 =
 * Added raw published inventory independent of saved Library post-type settings.

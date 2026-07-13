@@ -1,11 +1,12 @@
-# Sustainable Catalyst Library Render Service v1.13.0
+# Sustainable Catalyst Library Render Service v1.14.0
 
-This optional FastAPI/PostgreSQL service supports two bounded Library workloads:
+This optional FastAPI/PostgreSQL service supports three bounded Library workloads:
 
-1. persistent account-workspace synchronization; and
-2. queued server-side book and PDF production.
+1. persistent account-workspace synchronization;
+2. queued server-side book and PDF production; and
+3. authorized media clip and poster production.
 
-WordPress remains responsible for user identity, permissions, canonical publications, job history, and final Media Library files. The service never receives a WordPress database password.
+WordPress remains responsible for identity, permissions, canonical media metadata, rights records, public evidence reels, job history, and final Media Library files.
 
 ## Endpoints
 
@@ -24,24 +25,37 @@ WordPress remains responsible for user identity, permissions, canonical publicat
 - `POST /api/v1/documents/jobs/{uuid}/retry`
 - `DELETE /api/v1/documents/jobs/{uuid}`
 
-Document jobs use the `sc-library-document-job/1.0` schema. Completed PDFs return an `sc-library-edition/1.0` manifest, SHA-256 checksum, diagnostics, source list, accessibility notes, and renderer version.
+### Media production
 
-## Security
+- `POST /api/v1/media/jobs`
+- `GET /api/v1/media/jobs/{uuid}`
+- `GET /api/v1/media/jobs/{uuid}/video`
+- `GET /api/v1/media/jobs/{uuid}/poster`
+- `POST /api/v1/media/jobs/{uuid}/retry`
+- `DELETE /api/v1/media/jobs/{uuid}`
 
-Requests from WordPress require:
+Media jobs use `sc-library-media-job/1.0` and require a verified rights status.
+
+## Request security
+
+WordPress requests require:
 
 - bearer authentication;
 - a timestamp within five minutes;
 - an HMAC-SHA256 signature over method, path, timestamp, and body; and
 - an external owner identifier.
 
-Use the same generated `SC_LIBRARY_SYNC_API_KEY` in the WordPress Library settings. A separate document-service key may be configured in WordPress when desired.
+The browser never receives the service key or PostgreSQL connection string.
 
-## Rendering boundaries
+## Media boundaries
 
-The renderer uses ReportLab for deterministic PDF generation. It supports headings, paragraphs, lists, code blocks, tables, source notes, remote images with size limits, transcriptions, basic indexes, metadata, page numbers, and frozen edition manifests.
+The media processor accepts direct public HTTPS media files. It validates the initial host and every redirect destination, rejects private/reserved addresses, limits source and output sizes, limits clip duration, and invokes FFmpeg without a shell.
 
-It includes accessibility metadata and transcriptions but does **not** claim full PDF/UA conformance. Video is represented by durable links, timestamps, citations, and descriptive text rather than executable embedded media.
+It does not bypass authentication, DRM, paywalls, expiring platform controls, or download restrictions. Source files are never overwritten.
+
+## PDF behavior
+
+The ReportLab renderer supports structured matrices, boards, vector annotations, links, media timestamps, transcript excerpts, and QR access fallbacks. It does not claim complete PDF/UA conformance or interactive embedded video playback.
 
 ## Development
 

@@ -203,7 +203,6 @@ CREATE TABLE IF NOT EXISTS workspace_annotations (annotation_id text PRIMARY KEY
 CREATE TABLE IF NOT EXISTS workspace_books (book_id text PRIMARY KEY, title text NOT NULL, edition text NOT NULL DEFAULT '', collection_ids text[] NOT NULL DEFAULT '{}'::text[], payload jsonb NOT NULL DEFAULT '{}'::jsonb);
 CREATE TABLE IF NOT EXISTS workspace_handoffs (handoff_id text PRIMARY KEY, target text NOT NULL DEFAULT '', collection_ids text[] NOT NULL DEFAULT '{}'::text[], payload jsonb NOT NULL DEFAULT '{}'::jsonb);
 
-
 CREATE TABLE IF NOT EXISTS account_workspaces (
     workspace_id bigint PRIMARY KEY,
     workspace_uuid uuid UNIQUE NOT NULL,
@@ -222,7 +221,6 @@ CREATE TABLE IF NOT EXISTS account_workspaces (
     payload jsonb NOT NULL DEFAULT '{}'::jsonb
 );
 CREATE INDEX IF NOT EXISTS account_workspaces_owner_idx ON account_workspaces(owner_user_id);
-
 CREATE TABLE IF NOT EXISTS account_workspace_revisions (
     revision_id bigint PRIMARY KEY,
     workspace_id bigint NOT NULL REFERENCES account_workspaces(workspace_id) ON DELETE CASCADE,
@@ -234,7 +232,6 @@ CREATE TABLE IF NOT EXISTS account_workspace_revisions (
     payload jsonb NOT NULL DEFAULT '{}'::jsonb,
     UNIQUE(workspace_id, revision)
 );
-
 CREATE TABLE IF NOT EXISTS account_workspace_collaborators (
     collaboration_id bigint PRIMARY KEY,
     workspace_id bigint NOT NULL REFERENCES account_workspaces(workspace_id) ON DELETE CASCADE,
@@ -245,7 +242,6 @@ CREATE TABLE IF NOT EXISTS account_workspace_collaborators (
     accepted_at timestamptz,
     UNIQUE(workspace_id, user_id)
 );
-
 CREATE TABLE IF NOT EXISTS account_workspace_sync_log (
     sync_log_id bigint PRIMARY KEY,
     workspace_id bigint NOT NULL REFERENCES account_workspaces(workspace_id) ON DELETE CASCADE,
@@ -285,7 +281,6 @@ CREATE TABLE IF NOT EXISTS document_jobs (
 );
 CREATE INDEX IF NOT EXISTS document_jobs_owner_idx ON document_jobs(owner_user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS document_jobs_status_idx ON document_jobs(status, updated_at DESC);
-
 CREATE TABLE IF NOT EXISTS document_editions (
     document_edition_id bigint PRIMARY KEY,
     edition_uuid uuid UNIQUE NOT NULL,
@@ -305,6 +300,99 @@ CREATE TABLE IF NOT EXISTS document_editions (
 );
 CREATE INDEX IF NOT EXISTS document_editions_book_idx ON document_editions(book_id, frozen_at DESC);
 
+CREATE TABLE IF NOT EXISTS media_assets (
+    media_asset_id bigint PRIMARY KEY,
+    asset_uuid uuid UNIQUE NOT NULL,
+    owner_user_id bigint NOT NULL DEFAULT 0,
+    title text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    media_type text NOT NULL,
+    source_kind text NOT NULL,
+    attachment_id bigint NOT NULL DEFAULT 0,
+    source_url text NOT NULL DEFAULT '',
+    duration_ms bigint NOT NULL DEFAULT 0,
+    rights_status text NOT NULL,
+    rights_holder text NOT NULL DEFAULT '',
+    license_name text NOT NULL DEFAULT '',
+    license_url text NOT NULL DEFAULT '',
+    rights_note text NOT NULL DEFAULT '',
+    source_citation text NOT NULL DEFAULT '',
+    transcript_text text NOT NULL DEFAULT '',
+    transcript_vtt text NOT NULL DEFAULT '',
+    captions_url text NOT NULL DEFAULT '',
+    poster_attachment_id bigint NOT NULL DEFAULT 0,
+    poster_time_ms bigint NOT NULL DEFAULT 0,
+    accessibility_text text NOT NULL DEFAULT '',
+    visibility text NOT NULL DEFAULT 'private',
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS media_assets_rights_idx ON media_assets(rights_status);
+CREATE INDEX IF NOT EXISTS media_assets_visibility_idx ON media_assets(visibility);
+
+CREATE TABLE IF NOT EXISTS media_clips (
+    media_clip_id bigint PRIMARY KEY,
+    clip_uuid uuid UNIQUE NOT NULL,
+    asset_uuid uuid NOT NULL,
+    owner_user_id bigint NOT NULL DEFAULT 0,
+    title text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    start_ms bigint NOT NULL DEFAULT 0,
+    end_ms bigint NOT NULL DEFAULT 0,
+    poster_time_ms bigint NOT NULL DEFAULT 0,
+    transcript_excerpt text NOT NULL DEFAULT '',
+    caption_text text NOT NULL DEFAULT '',
+    status text NOT NULL DEFAULT 'draft',
+    visibility text NOT NULL DEFAULT 'private',
+    output_attachment_id bigint NOT NULL DEFAULT 0,
+    poster_attachment_id bigint NOT NULL DEFAULT 0,
+    remote_job_uuid text NOT NULL DEFAULT '',
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS media_clips_asset_idx ON media_clips(asset_uuid);
+CREATE INDEX IF NOT EXISTS media_clips_status_idx ON media_clips(status);
+
+CREATE TABLE IF NOT EXISTS media_reels (
+    media_reel_id bigint PRIMARY KEY,
+    reel_uuid uuid UNIQUE NOT NULL,
+    owner_user_id bigint NOT NULL DEFAULT 0,
+    title text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    clip_uuids jsonb NOT NULL DEFAULT '[]'::jsonb,
+    visibility text NOT NULL DEFAULT 'private',
+    edition_mode text NOT NULL DEFAULT 'linked',
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS media_reels_visibility_idx ON media_reels(visibility);
+
+CREATE TABLE IF NOT EXISTS media_jobs (
+    media_job_id bigint PRIMARY KEY,
+    job_uuid uuid UNIQUE NOT NULL,
+    clip_uuid uuid NOT NULL,
+    owner_user_id bigint NOT NULL DEFAULT 0,
+    status text NOT NULL,
+    progress integer NOT NULL DEFAULT 0,
+    attempt integer NOT NULL DEFAULT 0,
+    max_attempts integer NOT NULL DEFAULT 3,
+    remote_job_uuid text NOT NULL DEFAULT '',
+    output_attachment_id bigint NOT NULL DEFAULT 0,
+    poster_attachment_id bigint NOT NULL DEFAULT 0,
+    output_sha256 text NOT NULL DEFAULT '',
+    output_bytes bigint NOT NULL DEFAULT 0,
+    error_message text NOT NULL DEFAULT '',
+    created_at timestamptz,
+    updated_at timestamptz,
+    completed_at timestamptz,
+    diagnostics jsonb NOT NULL DEFAULT '{}'::jsonb,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS media_jobs_clip_idx ON media_jobs(clip_uuid, created_at DESC);
+CREATE INDEX IF NOT EXISTS media_jobs_status_idx ON media_jobs(status);
 
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');

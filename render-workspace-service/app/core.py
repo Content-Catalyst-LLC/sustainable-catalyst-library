@@ -6,8 +6,8 @@ import json
 from typing import Any
 
 SYNC_SCHEMA = "sc-library-sync/1.0"
-WORKSPACE_SCHEMA = "sc-library-workspace/1.7"
-SERVICE_VERSION = "1.13.0"
+WORKSPACE_SCHEMA = "sc-library-workspace/1.8"
+SERVICE_VERSION = "1.14.0"
 
 
 def canonical_json(value: Any) -> str:
@@ -33,4 +33,4 @@ def valid_workspace_schema(schema: str) -> bool:
         minor = int(schema.rsplit(".", 1)[1])
     except (TypeError, ValueError):
         return False
-    return 0 <= minor <= 7
+    return 0 <= minor <= 8

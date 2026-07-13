@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * tables or serialized plugin internals.
  */
 final class SC_Library_Portability {
-    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.3';
+    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.4';
     public const POSTGRES_SCHEMA = 'sustainable_catalyst_library';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 
@@ -80,6 +80,7 @@ final class SC_Library_Portability {
             'relationships' => __('Relationships, terms, and resources', 'sustainable-catalyst-library'),
             'account_workspaces' => __('Persistent account workspaces and revisions', 'sustainable-catalyst-library'),
             'document_editions' => __('Server document jobs and frozen editions', 'sustainable-catalyst-library'),
+            'multimedia' => __('Multimedia assets, clips, reels, and processing jobs', 'sustainable-catalyst-library'),
             'schema' => __('Schema only', 'sustainable-catalyst-library'),
         ];
     }
@@ -323,6 +324,8 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             __('Planning records', 'sustainable-catalyst-library') => $plan_count,
             __('Documentation records', 'sustainable-catalyst-library') => (int) $wpdb->get_var("SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = '_sc_library_doc_status'"),
             __('Account workspaces', 'sustainable-catalyst-library') => class_exists('SC_Library_Workspaces') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Workspaces::table()) : 0,
+            __('Multimedia assets', 'sustainable-catalyst-library') => class_exists('SC_Library_Multimedia') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Multimedia::assets_table()) : 0,
+            __('Multimedia clips', 'sustainable-catalyst-library') => class_exists('SC_Library_Multimedia') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Multimedia::clips_table()) : 0,
         ];
     }
 
@@ -403,6 +406,10 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         $account_workspace_sync_log = $this->export_account_workspace_sync_log();
         $document_jobs = $this->export_document_jobs();
         $document_editions = $this->export_document_editions();
+        $media_assets = $this->export_media_assets();
+        $media_clips = $this->export_media_clips();
+        $media_reels = $this->export_media_reels();
+        $media_jobs = $this->export_media_jobs();
 
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($r) => (int) $r['id'], $public_registry), true);
@@ -414,7 +421,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $documentation = $this->filter_rows_by_ids($documentation, 'record_id', $record_ids);
             $plans = array_values(array_filter($plans, static fn($row) => !empty($row['public'])));
             $plan_dependencies = $this->filter_rows_by_ids($plan_dependencies, 'plan_id', array_column($plans, 'plan_id'));
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
         } elseif ($scope === 'planner') {
             $records = [];
             $terms = [];
@@ -422,7 +429,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $relationships = [];
             $resources = [];
             $documentation = [];
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
         } elseif ($scope === 'documentation') {
             $doc_ids = array_map(static fn($row) => (int) $row['record_id'], $documentation);
             $records = $this->filter_rows_by_ids($records, 'record_id', $doc_ids);
@@ -431,19 +438,21 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $relationships = array_values(array_filter($relationships, static fn($row) => in_array((int) $row['source_post_id'], $doc_ids, true) || in_array((int) $row['target_post_id'], $doc_ids, true)));
             $plans = [];
             $plan_dependencies = [];
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
         } elseif ($scope === 'relationships') {
             $records = [];
             $documentation = [];
             $plans = [];
             $plan_dependencies = [];
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
         } elseif ($scope === 'account_workspaces') {
-            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $document_jobs = $document_editions = [];
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
         } elseif ($scope === 'document_editions') {
-            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = [];
-        } elseif ($scope === 'schema') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $media_assets = $media_clips = $media_reels = $media_jobs = [];
+        } elseif ($scope === 'multimedia') {
             $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = [];
+        } elseif ($scope === 'schema') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
         }
 
         $entities = [
@@ -461,6 +470,10 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'account_workspace_sync_log' => $account_workspace_sync_log,
             'document_jobs' => $document_jobs,
             'document_editions' => $document_editions,
+            'media_assets' => $media_assets,
+            'media_clips' => $media_clips,
+            'media_reels' => $media_reels,
+            'media_jobs' => $media_jobs,
         ];
 
         $counts = [];
@@ -482,9 +495,127 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
                 'Private planning data is excluded unless an administrator explicitly enables it.',
                 'PDFs and repository records remain references; binary media is not embedded in data exports.',
                 'Server document job records and frozen edition manifests are exported without embedding PDF binaries.',
+                'Multimedia exports preserve asset, clip, reel, rights, transcript, and processing metadata without embedding video or audio binaries.',
             ],
         ];
         return ['manifest' => $manifest, 'entities' => $entities];
+    }
+
+    private function export_media_assets(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Multimedia')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Multimedia::assets_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(function (array $row): array {
+            return [
+                'media_asset_id' => (int) $row['id'],
+                'asset_uuid' => (string) $row['asset_uuid'],
+                'owner_user_id' => (int) $row['owner_user_id'],
+                'title' => (string) $row['title'],
+                'description' => (string) $row['description'],
+                'media_type' => (string) $row['media_type'],
+                'source_kind' => (string) $row['source_kind'],
+                'attachment_id' => (int) $row['attachment_id'],
+                'source_url' => (string) $row['source_url'],
+                'duration_ms' => (int) $row['duration_ms'],
+                'rights_status' => (string) $row['rights_status'],
+                'rights_holder' => (string) $row['rights_holder'],
+                'license_name' => (string) $row['license_name'],
+                'license_url' => (string) $row['license_url'],
+                'rights_note' => (string) $row['rights_note'],
+                'source_citation' => (string) $row['source_citation'],
+                'transcript_text' => (string) $row['transcript_text'],
+                'transcript_vtt' => (string) $row['transcript_vtt'],
+                'captions_url' => (string) $row['captions_url'],
+                'poster_attachment_id' => (int) $row['poster_attachment_id'],
+                'poster_time_ms' => (int) $row['poster_time_ms'],
+                'accessibility_text' => (string) $row['accessibility_text'],
+                'visibility' => (string) $row['visibility'],
+                'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+                'updated_at' => $this->rfc3339_or_null((string) $row['updated_at']),
+                'payload' => json_decode((string) $row['metadata_json'], true) ?: [],
+            ];
+        }, $rows);
+    }
+
+    private function export_media_clips(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Multimedia')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Multimedia::clips_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(function (array $row): array {
+            $payload = json_decode((string) $row['metadata_json'], true) ?: [];
+            $payload['annotations'] = json_decode((string) $row['annotations_json'], true) ?: [];
+            return [
+                'media_clip_id' => (int) $row['id'],
+                'clip_uuid' => (string) $row['clip_uuid'],
+                'asset_uuid' => (string) $row['asset_uuid'],
+                'owner_user_id' => (int) $row['owner_user_id'],
+                'title' => (string) $row['title'],
+                'description' => (string) $row['description'],
+                'start_ms' => (int) $row['start_ms'],
+                'end_ms' => (int) $row['end_ms'],
+                'poster_time_ms' => (int) $row['poster_time_ms'],
+                'transcript_excerpt' => (string) $row['transcript_excerpt'],
+                'caption_text' => (string) $row['caption_text'],
+                'status' => (string) $row['status'],
+                'visibility' => (string) $row['visibility'],
+                'output_attachment_id' => (int) $row['output_attachment_id'],
+                'poster_attachment_id' => (int) $row['poster_attachment_id'],
+                'remote_job_uuid' => (string) $row['remote_job_uuid'],
+                'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+                'updated_at' => $this->rfc3339_or_null((string) $row['updated_at']),
+                'payload' => $payload,
+            ];
+        }, $rows);
+    }
+
+    private function export_media_reels(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Multimedia')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Multimedia::reels_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(function (array $row): array {
+            return [
+                'media_reel_id' => (int) $row['id'],
+                'reel_uuid' => (string) $row['reel_uuid'],
+                'owner_user_id' => (int) $row['owner_user_id'],
+                'title' => (string) $row['title'],
+                'description' => (string) $row['description'],
+                'clip_uuids' => json_decode((string) $row['clip_uuids_json'], true) ?: [],
+                'visibility' => (string) $row['visibility'],
+                'edition_mode' => (string) $row['edition_mode'],
+                'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+                'updated_at' => $this->rfc3339_or_null((string) $row['updated_at']),
+                'payload' => json_decode((string) $row['metadata_json'], true) ?: [],
+            ];
+        }, $rows);
+    }
+
+    private function export_media_jobs(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Multimedia')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Multimedia::jobs_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(function (array $row): array {
+            return [
+                'media_job_id' => (int) $row['id'],
+                'job_uuid' => (string) $row['job_uuid'],
+                'clip_uuid' => (string) $row['clip_uuid'],
+                'owner_user_id' => (int) $row['owner_user_id'],
+                'status' => (string) $row['status'],
+                'progress' => (int) $row['progress'],
+                'attempt' => (int) $row['attempt'],
+                'max_attempts' => (int) $row['max_attempts'],
+                'remote_job_uuid' => (string) $row['remote_job_uuid'],
+                'output_attachment_id' => (int) $row['output_attachment_id'],
+                'poster_attachment_id' => (int) $row['poster_attachment_id'],
+                'output_sha256' => (string) $row['output_sha256'],
+                'output_bytes' => (int) $row['output_bytes'],
+                'error_message' => (string) $row['error_message'],
+                'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+                'updated_at' => $this->rfc3339_or_null((string) $row['updated_at']),
+                'completed_at' => $this->rfc3339_or_null((string) $row['completed_at']),
+                'diagnostics' => json_decode((string) $row['diagnostics_json'], true) ?: [],
+                'payload' => ['request' => json_decode((string) $row['request_json'], true) ?: []],
+            ];
+        }, $rows);
     }
 
     private function export_document_jobs(): array {
@@ -1151,6 +1282,100 @@ CREATE TABLE IF NOT EXISTS document_editions (
 );
 CREATE INDEX IF NOT EXISTS document_editions_book_idx ON document_editions(book_id, frozen_at DESC);
 
+CREATE TABLE IF NOT EXISTS media_assets (
+    media_asset_id bigint PRIMARY KEY,
+    asset_uuid uuid UNIQUE NOT NULL,
+    owner_user_id bigint NOT NULL DEFAULT 0,
+    title text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    media_type text NOT NULL,
+    source_kind text NOT NULL,
+    attachment_id bigint NOT NULL DEFAULT 0,
+    source_url text NOT NULL DEFAULT '',
+    duration_ms bigint NOT NULL DEFAULT 0,
+    rights_status text NOT NULL,
+    rights_holder text NOT NULL DEFAULT '',
+    license_name text NOT NULL DEFAULT '',
+    license_url text NOT NULL DEFAULT '',
+    rights_note text NOT NULL DEFAULT '',
+    source_citation text NOT NULL DEFAULT '',
+    transcript_text text NOT NULL DEFAULT '',
+    transcript_vtt text NOT NULL DEFAULT '',
+    captions_url text NOT NULL DEFAULT '',
+    poster_attachment_id bigint NOT NULL DEFAULT 0,
+    poster_time_ms bigint NOT NULL DEFAULT 0,
+    accessibility_text text NOT NULL DEFAULT '',
+    visibility text NOT NULL DEFAULT 'private',
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS media_assets_rights_idx ON media_assets(rights_status);
+CREATE INDEX IF NOT EXISTS media_assets_visibility_idx ON media_assets(visibility);
+
+CREATE TABLE IF NOT EXISTS media_clips (
+    media_clip_id bigint PRIMARY KEY,
+    clip_uuid uuid UNIQUE NOT NULL,
+    asset_uuid uuid NOT NULL,
+    owner_user_id bigint NOT NULL DEFAULT 0,
+    title text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    start_ms bigint NOT NULL DEFAULT 0,
+    end_ms bigint NOT NULL DEFAULT 0,
+    poster_time_ms bigint NOT NULL DEFAULT 0,
+    transcript_excerpt text NOT NULL DEFAULT '',
+    caption_text text NOT NULL DEFAULT '',
+    status text NOT NULL DEFAULT 'draft',
+    visibility text NOT NULL DEFAULT 'private',
+    output_attachment_id bigint NOT NULL DEFAULT 0,
+    poster_attachment_id bigint NOT NULL DEFAULT 0,
+    remote_job_uuid text NOT NULL DEFAULT '',
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS media_clips_asset_idx ON media_clips(asset_uuid);
+CREATE INDEX IF NOT EXISTS media_clips_status_idx ON media_clips(status);
+
+CREATE TABLE IF NOT EXISTS media_reels (
+    media_reel_id bigint PRIMARY KEY,
+    reel_uuid uuid UNIQUE NOT NULL,
+    owner_user_id bigint NOT NULL DEFAULT 0,
+    title text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    clip_uuids jsonb NOT NULL DEFAULT '[]'::jsonb,
+    visibility text NOT NULL DEFAULT 'private',
+    edition_mode text NOT NULL DEFAULT 'linked',
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS media_reels_visibility_idx ON media_reels(visibility);
+
+CREATE TABLE IF NOT EXISTS media_jobs (
+    media_job_id bigint PRIMARY KEY,
+    job_uuid uuid UNIQUE NOT NULL,
+    clip_uuid uuid NOT NULL,
+    owner_user_id bigint NOT NULL DEFAULT 0,
+    status text NOT NULL,
+    progress integer NOT NULL DEFAULT 0,
+    attempt integer NOT NULL DEFAULT 0,
+    max_attempts integer NOT NULL DEFAULT 3,
+    remote_job_uuid text NOT NULL DEFAULT '',
+    output_attachment_id bigint NOT NULL DEFAULT 0,
+    poster_attachment_id bigint NOT NULL DEFAULT 0,
+    output_sha256 text NOT NULL DEFAULT '',
+    output_bytes bigint NOT NULL DEFAULT 0,
+    error_message text NOT NULL DEFAULT '',
+    created_at timestamptz,
+    updated_at timestamptz,
+    completed_at timestamptz,
+    diagnostics jsonb NOT NULL DEFAULT '{}'::jsonb,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS media_jobs_clip_idx ON media_jobs(clip_uuid, created_at DESC);
+CREATE INDEX IF NOT EXISTS media_jobs_status_idx ON media_jobs(status);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 
@@ -1209,6 +1434,10 @@ SQL;
             'account_workspace_sync_log' => ['sync_log_id','workspace_id','workspace_uuid','direction','status','response_code','message','content_hash','created_at'],
             'document_jobs' => ['document_job_id','job_uuid','owner_user_id','workspace_uuid','book_id','title','document_type','status','progress','attempt','max_attempts','content_hash','renderer_version','output_attachment_id','output_sha256','output_bytes','error_message','created_at','updated_at','completed_at','manifest','diagnostics','payload'],
             'document_editions' => ['document_edition_id','edition_uuid','job_uuid','owner_user_id','workspace_uuid','book_id','title','edition_label','content_hash','output_sha256','output_attachment_id','output_url','frozen_at','created_at','manifest'],
+            'media_assets' => ['media_asset_id','asset_uuid','owner_user_id','title','description','media_type','source_kind','attachment_id','source_url','duration_ms','rights_status','rights_holder','license_name','license_url','rights_note','source_citation','transcript_text','transcript_vtt','captions_url','poster_attachment_id','poster_time_ms','accessibility_text','visibility','created_at','updated_at','payload'],
+            'media_clips' => ['media_clip_id','clip_uuid','asset_uuid','owner_user_id','title','description','start_ms','end_ms','poster_time_ms','transcript_excerpt','caption_text','status','visibility','output_attachment_id','poster_attachment_id','remote_job_uuid','created_at','updated_at','payload'],
+            'media_reels' => ['media_reel_id','reel_uuid','owner_user_id','title','description','clip_uuids','visibility','edition_mode','created_at','updated_at','payload'],
+            'media_jobs' => ['media_job_id','job_uuid','clip_uuid','owner_user_id','status','progress','attempt','max_attempts','remote_job_uuid','output_attachment_id','poster_attachment_id','output_sha256','output_bytes','error_message','created_at','updated_at','completed_at','diagnostics','payload'],
             default => [],
         };
         if (!$columns) return '';
@@ -1217,12 +1446,12 @@ SQL;
             $literals = [];
             foreach ($columns as $column) {
                 $value = $row[$column] ?? null;
-                if (in_array($column, ['payload', 'expected_release', 'manifest', 'diagnostics'], true)) $literals[] = $this->sql_json($value ?: []);
+                if (in_array($column, ['payload', 'expected_release', 'manifest', 'diagnostics', 'clip_uuids'], true)) $literals[] = $this->sql_json($value ?: []);
                 elseif (in_array($column, ['dependency_ids'], true)) $literals[] = $this->sql_bigint_array(is_array($value) ? $value : []);
                 elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at','completed_at','frozen_at'], true)) $literals[] = $this->sql_timestamp($value);
                 elseif (in_array($column, ['last_reviewed','planned_start','actual_start','actual_publication_date'], true)) $literals[] = $value ? $this->sql_text((string) $value) . '::date' : 'NULL';
                 elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
-                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','progress','attempt','max_attempts','output_attachment_id','output_bytes'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','progress','attempt','max_attempts','output_attachment_id','output_bytes'], true)) ? (string) (int) $value : 'NULL';
+                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes'], true)) ? (string) (int) $value : 'NULL';
                 elseif (in_array($column, ['series_order','estimated_effort','actual_effort'], true)) $literals[] = (string) (float) $value;
                 else $literals[] = $this->sql_text((string) ($value ?? ''));
             }
@@ -1243,6 +1472,10 @@ SQL;
             'account_workspace_sync_log' => 'sync_log_id',
             'document_jobs' => 'document_job_id',
             'document_editions' => 'document_edition_id',
+            'media_assets' => 'media_asset_id',
+            'media_clips' => 'media_clip_id',
+            'media_reels' => 'media_reel_id',
+            'media_jobs' => 'media_job_id',
             default => '',
         };
         return "INSERT INTO {$entity} (" . implode(', ', $columns) . ") VALUES\n" . implode(",\n", $values) . ($conflict ? "\nON CONFLICT ({$conflict}) DO NOTHING;" : ';');

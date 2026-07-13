@@ -88,6 +88,24 @@ def sample_packet() -> DocumentJobPacket:
                     },
                 },
             },
+            {
+                "position": 5,
+                "type": "source",
+                "title": "Recorded systems briefing",
+                "html": "<section><p>A recorded explanation connected to this edition.</p></section>",
+                "source_url": "https://sustainablecatalyst.com/channel/example/",
+                "citation": "Sustainable Catalyst. Recorded systems briefing.",
+                "alt_text": "Recorded briefing with transcript excerpt and QR access.",
+                "metadata": {
+                    "media": {
+                        "title": "Recorded systems briefing",
+                        "url": "https://sustainablecatalyst.com/channel/example/",
+                        "description": "A non-destructive linked media excerpt.",
+                        "selected_segment": "00:02:10–00:03:05",
+                        "transcript": "This excerpt explains why stocks and flows must be interpreted together.",
+                    }
+                },
+            },
         ],
         "options": {
             "include_toc": True,
@@ -107,10 +125,12 @@ def test_render_document_pdf():
     assert len(pdf) > 2000
     assert manifest["schema"] == "sc-library-edition/1.0"
     assert manifest["title"] == "Systems Research Reader"
-    assert len(manifest["sections"]) == 4
-    assert diagnostics["sections_rendered"] == 4
+    assert len(manifest["sections"]) == 5
+    assert diagnostics["sections_rendered"] == 5
     assert diagnostics["tables"] == 2
     assert diagnostics["matrices_rendered"] == 1
     assert diagnostics["boards_rendered"] == 1
     assert diagnostics["annotations_rendered"] == 1
     assert diagnostics["ink_strokes_rendered"] >= 2
+    assert diagnostics["media_fallbacks"] == 1
+    assert diagnostics["qr_codes"] == 1

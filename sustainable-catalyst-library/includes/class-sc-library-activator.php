@@ -45,6 +45,10 @@ final class SC_Library_Activator {
         $document_jobs_table = $wpdb->prefix . 'sc_library_document_jobs';
         $document_editions_table = $wpdb->prefix . 'sc_library_document_editions';
         $scan_items_table = $wpdb->prefix . 'sc_library_scan_items';
+        $media_assets_table = $wpdb->prefix . 'sc_library_media_assets';
+        $media_clips_table = $wpdb->prefix . 'sc_library_media_clips';
+        $media_reels_table = $wpdb->prefix . 'sc_library_media_reels';
+        $media_jobs_table = $wpdb->prefix . 'sc_library_media_jobs';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -249,6 +253,122 @@ final class SC_Library_Activator {
             KEY processed_at (processed_at)
         ) {$charset};";
 
+
+
+        $media_assets_sql = "CREATE TABLE {$media_assets_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            asset_uuid CHAR(36) NOT NULL,
+            owner_user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            title VARCHAR(255) NOT NULL,
+            description LONGTEXT NULL,
+            media_type VARCHAR(16) NOT NULL DEFAULT 'video',
+            source_kind VARCHAR(32) NOT NULL DEFAULT 'attachment',
+            attachment_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            source_url LONGTEXT NOT NULL,
+            duration_ms BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            rights_status VARCHAR(32) NOT NULL DEFAULT 'unknown',
+            rights_holder VARCHAR(255) NOT NULL DEFAULT '',
+            license_name VARCHAR(191) NOT NULL DEFAULT '',
+            license_url LONGTEXT NULL,
+            rights_note LONGTEXT NULL,
+            source_citation LONGTEXT NULL,
+            transcript_text LONGTEXT NULL,
+            transcript_vtt LONGTEXT NULL,
+            captions_url LONGTEXT NULL,
+            poster_attachment_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            poster_time_ms BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            accessibility_text LONGTEXT NULL,
+            visibility VARCHAR(16) NOT NULL DEFAULT 'private',
+            metadata_json LONGTEXT NOT NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY asset_uuid (asset_uuid),
+            KEY owner_user_id (owner_user_id),
+            KEY attachment_id (attachment_id),
+            KEY media_type (media_type),
+            KEY rights_status (rights_status),
+            KEY visibility (visibility),
+            KEY updated_at (updated_at)
+        ) {$charset};";
+
+        $media_clips_sql = "CREATE TABLE {$media_clips_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            clip_uuid CHAR(36) NOT NULL,
+            asset_uuid CHAR(36) NOT NULL,
+            owner_user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            title VARCHAR(255) NOT NULL,
+            description LONGTEXT NULL,
+            start_ms BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            end_ms BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            poster_time_ms BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            transcript_excerpt LONGTEXT NULL,
+            caption_text LONGTEXT NULL,
+            annotations_json LONGTEXT NOT NULL,
+            status VARCHAR(24) NOT NULL DEFAULT 'draft',
+            visibility VARCHAR(16) NOT NULL DEFAULT 'private',
+            output_attachment_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            poster_attachment_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            remote_job_uuid CHAR(36) NOT NULL DEFAULT '',
+            metadata_json LONGTEXT NOT NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY clip_uuid (clip_uuid),
+            KEY asset_uuid (asset_uuid),
+            KEY owner_user_id (owner_user_id),
+            KEY status (status),
+            KEY visibility (visibility),
+            KEY updated_at (updated_at)
+        ) {$charset};";
+
+        $media_reels_sql = "CREATE TABLE {$media_reels_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            reel_uuid CHAR(36) NOT NULL,
+            owner_user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            title VARCHAR(255) NOT NULL,
+            description LONGTEXT NULL,
+            clip_uuids_json LONGTEXT NOT NULL,
+            visibility VARCHAR(16) NOT NULL DEFAULT 'private',
+            edition_mode VARCHAR(24) NOT NULL DEFAULT 'linked',
+            metadata_json LONGTEXT NOT NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY reel_uuid (reel_uuid),
+            KEY owner_user_id (owner_user_id),
+            KEY visibility (visibility),
+            KEY updated_at (updated_at)
+        ) {$charset};";
+
+        $media_jobs_sql = "CREATE TABLE {$media_jobs_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            job_uuid CHAR(36) NOT NULL,
+            clip_uuid CHAR(36) NOT NULL,
+            owner_user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            status VARCHAR(24) NOT NULL DEFAULT 'queued',
+            progress INT NOT NULL DEFAULT 0,
+            attempt INT NOT NULL DEFAULT 0,
+            max_attempts INT NOT NULL DEFAULT 3,
+            request_json LONGTEXT NOT NULL,
+            remote_job_uuid CHAR(36) NOT NULL,
+            output_attachment_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            poster_attachment_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            output_sha256 CHAR(64) NOT NULL DEFAULT '',
+            output_bytes BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            diagnostics_json LONGTEXT NOT NULL,
+            error_message LONGTEXT NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            completed_at DATETIME NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY job_uuid (job_uuid),
+            KEY clip_uuid (clip_uuid),
+            KEY owner_user_id (owner_user_id),
+            KEY status (status),
+            KEY updated_at (updated_at)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
         dbDelta($workspaces_sql);
@@ -258,6 +378,10 @@ final class SC_Library_Activator {
         dbDelta($document_jobs_sql);
         dbDelta($document_editions_sql);
         dbDelta($scan_items_sql);
+        dbDelta($media_assets_sql);
+        dbDelta($media_clips_sql);
+        dbDelta($media_reels_sql);
+        dbDelta($media_jobs_sql);
     }
 
     private static function install_defaults(): void {
@@ -304,6 +428,14 @@ final class SC_Library_Activator {
         add_option('sc_library_document_max_attempts', 3);
         add_option('sc_library_document_retention_days', 30);
         add_option('sc_library_enable_documentation', 1);
+        add_option('sc_library_enable_multimedia', 1);
+        add_option('sc_library_media_service_url', '');
+        add_option('sc_library_media_service_api_key', '');
+        add_option('sc_library_media_allow_remote_urls', 0);
+        add_option('sc_library_media_max_source_mb', 500);
+        add_option('sc_library_media_max_clip_minutes', 30);
+        add_option('sc_library_media_retention_days', 14);
+        add_option('sc_library_media_auto_import', 1);
         add_option('sc_library_enable_planner', 1);
         add_option('sc_library_enable_portability', 1);
         add_option('sc_library_release_capacity_threshold', 40);
@@ -337,5 +469,6 @@ final class SC_Library_Activator {
     public static function deactivate(): void {
         wp_clear_scheduled_hook('sc_library_daily_reconcile');
         wp_clear_scheduled_hook('sc_library_sync_workspace');
+        wp_clear_scheduled_hook('sc_library_refresh_media_job');
     }
 }

@@ -4,7 +4,8 @@ if (!defined('ABSPATH')) {
 }
 
 final class SC_Library_Notebook {
-    public const SCHEMA = 'sc-library-workspace/1.7';
+    public const SCHEMA = 'sc-library-workspace/1.8';
+    public const PREVIOUS_SCHEMA = 'sc-library-workspace/1.7';
     public const LEGACY_SCHEMA = 'sc-library-workspace/1.6';
     public const EARLIER_SCHEMA = 'sc-library-workspace/1.5';
     public const ORIGINAL_SCHEMA = 'sc-library-workspace/1.4';
@@ -28,7 +29,7 @@ final class SC_Library_Notebook {
     }
 
     public static function legacy_schemas(): array {
-        return [self::LEGACY_SCHEMA, self::EARLIER_SCHEMA, self::ORIGINAL_SCHEMA, self::FIRST_SCHEMA, self::INITIAL_SCHEMA, self::FIRST_RELEASE_SCHEMA, self::ORIGINAL_RELEASE_SCHEMA];
+        return [self::PREVIOUS_SCHEMA, self::LEGACY_SCHEMA, self::EARLIER_SCHEMA, self::ORIGINAL_SCHEMA, self::FIRST_SCHEMA, self::INITIAL_SCHEMA, self::FIRST_RELEASE_SCHEMA, self::ORIGINAL_RELEASE_SCHEMA];
     }
 
     public static function enqueue_assets(): void {

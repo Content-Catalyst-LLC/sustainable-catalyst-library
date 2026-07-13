@@ -65,3 +65,7 @@ No conflict is silently resolved.
 - Render is optional secondary storage.
 - Canonical publications remain in WordPress posts and taxonomies.
 - Private research is never added to the public Library index.
+
+## v1.14.0 service addendum
+
+The optional service now reports version `1.14.0` and workspace schema `sc-library-workspace/1.8`. Existing 1.7 workspaces remain accepted and migrate forward. The same signed service can also process document and authorized media jobs.

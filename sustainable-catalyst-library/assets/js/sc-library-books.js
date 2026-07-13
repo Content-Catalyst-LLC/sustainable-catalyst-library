@@ -3,10 +3,10 @@
 
   const shared = window.SCBooksShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.7';
+  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.8';
   const legacySchemas = Array.isArray(shared.legacyWorkspaceSchemas) ? shared.legacyWorkspaceSchemas : [];
   const bookSchema = shared.schema || 'sc-library-book/1.0';
-  const version = shared.version || '1.13.3';
+  const version = shared.version || '1.14.0';
   const restBase = String(shared.restBase || '/wp-json/sustainable-catalyst/v1/library').replace(/\/$/, '');
   const themes = Object.fromEntries((shared.themes || []).map((item) => [item.id, item]));
   const pageSizes = Object.fromEntries((shared.pageSizes || []).map((item) => [item.id, item]));
@@ -246,6 +246,13 @@
           has_annotations: item.type === 'annotation',
           source_type: artifact?.type || item.type,
           artifact: ['matrix', 'board', 'annotation'].includes(item.type) && artifact ? deepClone(artifact) : null,
+          media: item.type === 'source' && artifact && (['video', 'podcast', 'audio'].includes(artifact.type) || /youtube|youtu\.be|vimeo|\.mp4|\.mp3/i.test(artifact.url || '')) ? {
+            title: artifact.title || item.title,
+            url: artifact.url || item.sourceUrl || '',
+            description: artifact.description || artifact.notes || '',
+            selected_segment: artifact.chapter || artifact.pages || '',
+            transcript: artifact.transcript || '',
+          } : null,
         },
       });
     }

@@ -23,6 +23,7 @@ from .core import (
     valid_workspace_schema,
 )
 from .documents import create_documents_router, initialize_document_database
+from .media import create_media_router, initialize_media_database
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 API_KEY = os.getenv("SC_LIBRARY_SYNC_API_KEY", "").strip()
@@ -122,6 +123,7 @@ def initialize_database() -> None:
 async def lifespan(_: FastAPI):
     initialize_database()
     initialize_document_database(connect)
+    initialize_media_database(connect)
     yield
 
 
@@ -159,6 +161,7 @@ async def authorize(
 
 
 app.include_router(create_documents_router(connect, authorize))
+app.include_router(create_media_router(connect, authorize))
 
 
 def response_record(row: dict[str, Any]) -> dict[str, Any]:
@@ -195,6 +198,7 @@ def health() -> dict[str, Any]:
         "service": "sustainable-catalyst-library-service",
         "document_job_schema": "sc-library-document-job/1.0",
         "edition_schema": "sc-library-edition/1.0",
+        "media_job_schema": "sc-library-media-job/1.0",
         "version": SERVICE_VERSION,
         "schema": SYNC_SCHEMA,
         "workspace_schema": WORKSPACE_SCHEMA,

@@ -27,6 +27,16 @@ services:
         value: 3
       - key: SC_LIBRARY_ALLOW_REMOTE_IMAGES
         value: true
+      - key: SC_LIBRARY_ALLOW_REMOTE_MEDIA
+        value: true
+      - key: SC_LIBRARY_MEDIA_MAX_SOURCE_MB
+        value: 500
+      - key: SC_LIBRARY_MEDIA_MAX_OUTPUT_MB
+        value: 500
+      - key: SC_LIBRARY_MEDIA_MAX_CLIP_MINUTES
+        value: 30
+      - key: SC_LIBRARY_MEDIA_MAX_ATTEMPTS
+        value: 3
 
 databases:
   - name: sustainable-catalyst-library-postgres

@@ -42,3 +42,7 @@ Administrator server exports can now include normalized `account_workspaces`, `a
 ## Server document production records
 
 Portable exports can include normalized document-job and frozen-edition manifests. PDF binary files are not embedded; WordPress attachment URLs and SHA-256 checksums are preserved.
+
+## v1.14.0 multimedia export addendum
+
+Portable export schema `sc-library-portable-export/1.4` adds normalized `media_assets`, `media_clips`, `media_reels`, and `media_jobs` entities. The multimedia scope exports rights, provenance, transcripts, clip boundaries, reel order, output references, and diagnostics without embedding media binaries.

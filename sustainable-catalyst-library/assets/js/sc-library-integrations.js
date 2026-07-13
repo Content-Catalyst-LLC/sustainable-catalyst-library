@@ -2,7 +2,7 @@
   'use strict';
   const shared = window.SCIntegrationShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.7';
+  const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.8';
   const handoffSchema = shared.handoffSchema || 'sc-library-handoff/1.0';
   const restBase = String(shared.restBase || '').replace(/\/$/, '');
   const targets = Array.isArray(shared.targets) ? shared.targets : [];

@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * key or database credentials.
  */
 final class SC_Library_Workspaces {
-    public const WORKSPACE_SCHEMA = 'sc-library-workspace/1.7';
+    public const WORKSPACE_SCHEMA = 'sc-library-workspace/1.8';
     public const SYNC_SCHEMA = 'sc-library-sync/1.0';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 

@@ -428,6 +428,20 @@ final class SC_Library_Admin {
                         </td>
                     </tr>
                     <tr>
+                        <th scope="row"><?php esc_html_e('Multimedia Studio and video snippets', 'sustainable-catalyst-library'); ?></th>
+                        <td>
+                            <label><input name="sc_library_enable_multimedia" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_multimedia', 1), 1); ?>> <?php esc_html_e('Enable authorized media records, transcripts, captions, non-destructive clips, annotations, evidence reels, and optional server processing.', 'sustainable-catalyst-library'); ?></label>
+                            <p><label for="sc_library_media_service_url"><?php esc_html_e('Media service URL:', 'sustainable-catalyst-library'); ?></label> <input class="regular-text code" id="sc_library_media_service_url" name="sc_library_media_service_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_media_service_url', '')); ?>" placeholder="https://your-library-service.onrender.com"></p>
+                            <p><label for="sc_library_media_service_api_key"><?php esc_html_e('Media service API key:', 'sustainable-catalyst-library'); ?></label> <input class="regular-text code" id="sc_library_media_service_api_key" name="sc_library_media_service_api_key" type="password" value="<?php echo esc_attr((string) get_option('sc_library_media_service_api_key', '')); ?>" autocomplete="new-password"></p>
+                            <p class="description"><?php esc_html_e('Leave these fields empty to reuse the document/workspace Render service URL and key. WordPress remains the authority for assets, rights, clips, and reels.', 'sustainable-catalyst-library'); ?></p>
+                            <p><label><input name="sc_library_media_allow_remote_urls" type="checkbox" value="1" <?php checked((int) get_option('sc_library_media_allow_remote_urls', 0), 1); ?>> <?php esc_html_e('Allow administrators to register public HTTPS media URLs outside the WordPress Media Library.', 'sustainable-catalyst-library'); ?></label></p>
+                            <p><label><input name="sc_library_media_auto_import" type="checkbox" value="1" <?php checked((int) get_option('sc_library_media_auto_import', 1), 1); ?>> <?php esc_html_e('Automatically import completed clips and poster frames into the WordPress Media Library.', 'sustainable-catalyst-library'); ?></label></p>
+                            <p><label for="sc_library_media_max_source_mb"><?php esc_html_e('Maximum source size:', 'sustainable-catalyst-library'); ?></label> <input id="sc_library_media_max_source_mb" name="sc_library_media_max_source_mb" type="number" min="10" max="2048" value="<?php echo esc_attr((int) get_option('sc_library_media_max_source_mb', 500)); ?>"> MB &nbsp; <label for="sc_library_media_max_clip_minutes"><?php esc_html_e('Maximum clip:', 'sustainable-catalyst-library'); ?></label> <input id="sc_library_media_max_clip_minutes" name="sc_library_media_max_clip_minutes" type="number" min="1" max="240" value="<?php echo esc_attr((int) get_option('sc_library_media_max_clip_minutes', 30)); ?>"> minutes</p>
+                            <p><label for="sc_library_media_retention_days"><?php esc_html_e('Remote output retention:', 'sustainable-catalyst-library'); ?></label> <input id="sc_library_media_retention_days" name="sc_library_media_retention_days" type="number" min="1" max="365" value="<?php echo esc_attr((int) get_option('sc_library_media_retention_days', 14)); ?>"> days</p>
+                            <p><a href="<?php echo esc_url(admin_url('admin.php?page=sc-library-multimedia')); ?>"><?php esc_html_e('Open Multimedia Studio →', 'sustainable-catalyst-library'); ?></a></p>
+                        </td>
+                    </tr>
+                    <tr>
                         <th scope="row"><?php esc_html_e('Content Planner and public registry', 'sustainable-catalyst-library'); ?></th>
                         <td><label><input name="sc_library_enable_planner" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_planner', 1), 1); ?>> <?php esc_html_e('Enable planned-content records, Article Map Planner, complete public registry, roadmap tracker, release expectations, and registry exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('Only published planning records explicitly marked public appear in public Library and registry results.', 'sustainable-catalyst-library'); ?></p></td>
                     </tr>
@@ -501,6 +515,8 @@ final class SC_Library_Admin {
                 <p><code>[sc_library_boards]</code> — combined visual board launcher.</p>
                 <p><code>[sc_library_integrations]</code> — standalone connected research-tool studio.</p>
                 <p><code>[sc_library_annotation_studio]</code> — standalone annotation and handwriting studio.</p>
+                <p><code>[sc_library_multimedia_studio]</code> — multimedia assets, clips, transcripts, captions, annotations, and evidence reels.</p>
+                <p><code>[sc_library_evidence_reel id="UUID"]</code> — public evidence reel.</p>
                 <p><code>[sc_library_book_builder]</code> — standalone Custom Book Builder.</p>
                 <p><code>[sc_library_portability]</code> — standalone PostgreSQL and portable browser-workspace export studio.</p>
                 <p><code>[sc_library_account_workspaces]</code> — standalone account workspace and synchronization manager.</p>

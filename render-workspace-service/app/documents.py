@@ -24,6 +24,7 @@ from reportlab.lib.pagesizes import A4, LETTER
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.graphics.shapes import Drawing, Ellipse, Line, Path as GraphicsPath, Polygon, Rect, String
+from reportlab.graphics.barcode.qr import QrCodeWidget
 from reportlab.platypus import (
     Image,
     PageBreak,
@@ -39,7 +40,7 @@ from .core import constant_time_equal
 
 DOCUMENT_JOB_SCHEMA = "sc-library-document-job/1.0"
 EDITION_SCHEMA = "sc-library-edition/1.0"
-RENDERER_VERSION = "1.13.0"
+RENDERER_VERSION = "1.14.0"
 MAX_REQUEST_BYTES = max(1, min(25, int(os.getenv("SC_LIBRARY_MAX_DOCUMENT_REQUEST_MB", "8")))) * 1024 * 1024
 MAX_PDF_BYTES = max(1, min(50, int(os.getenv("SC_LIBRARY_MAX_PDF_MB", "20")))) * 1024 * 1024
 MAX_ATTEMPTS = max(1, min(10, int(os.getenv("SC_LIBRARY_DOCUMENT_MAX_ATTEMPTS", "3"))))
@@ -600,6 +601,58 @@ def _artifact_flowables(section: DocumentSection, styles: dict[str, ParagraphSty
         return _annotation_flowables(artifact, styles, diagnostics)
     return []
 
+def _media_flowables(section: DocumentSection, styles: dict[str, ParagraphStyle], diagnostics: dict[str, Any]) -> list[Any]:
+    """Render durable media references for print/PDF editions.
+
+    A frozen PDF cannot embed interactive playback reliably, so media sections receive
+    a human-readable description, clickable URL, transcript excerpt, and QR fallback.
+    """
+    metadata = section.metadata if isinstance(section.metadata, dict) else {}
+    media = metadata.get("media")
+    if not isinstance(media, dict):
+        return []
+    url = str(media.get("url") or section.source_url or "").strip()
+    if not url.startswith(("https://", "http://")):
+        return []
+
+    title = str(media.get("title") or section.title or "Media source").strip()
+    description = str(media.get("description") or "").strip()
+    segment = str(media.get("selected_segment") or "").strip()
+    transcript = str(media.get("transcript") or "").strip()
+    flowables: list[Any] = [Spacer(1, 7), Paragraph("Media access", styles["Heading2"])]
+    if description:
+        flowables.append(Paragraph(_safe_para(description), styles["BodyText"]))
+    if segment:
+        flowables.append(Paragraph(_safe_para(f"Selected segment: {segment}"), styles["Small"]))
+    flowables.append(Paragraph(f'<link href="{escape(url)}">{escape(url)}</link>', styles["Small"]))
+
+    try:
+        qr = QrCodeWidget(url)
+        bounds = qr.getBounds()
+        width = max(1.0, bounds[2] - bounds[0])
+        height = max(1.0, bounds[3] - bounds[1])
+        size = 86.0
+        drawing = Drawing(size, size, transform=[size / width, 0, 0, size / height, -bounds[0] * size / width, -bounds[1] * size / height])
+        drawing.add(qr)
+        label = Paragraph(_safe_para(f"Scan to open {title}. Interactive playback is provided by the linked source."), styles["Caption"])
+        qr_table = Table([[drawing, label]], colWidths=[1.32 * inch, 4.55 * inch], hAlign="LEFT")
+        qr_table.setStyle(TableStyle([
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("BOX", (0, 0), (-1, -1), 0.4, colors.HexColor("#999999")),
+            ("PADDING", (0, 0), (-1, -1), 7),
+        ]))
+        flowables.append(qr_table)
+        diagnostics["qr_codes"] += 1
+    except Exception as exc:  # pragma: no cover - fallback remains the clickable URL
+        diagnostics["media_warnings"].append({"url": url[:500], "error": str(exc)[:300]})
+
+    if transcript:
+        excerpt = transcript[:1800] + ("…" if len(transcript) > 1800 else "")
+        flowables.extend([Spacer(1, 5), Paragraph("Transcript excerpt", styles["Heading3"]), Paragraph(_safe_para(excerpt), styles["BodyText"])])
+    diagnostics["media_fallbacks"] += 1
+    return flowables
+
+
 def _styles(theme: str, grayscale: bool) -> dict[str, ParagraphStyle]:
     base = getSampleStyleSheet()
     accent = colors.HexColor("#111111" if grayscale else "#6d1022")
@@ -638,6 +691,9 @@ def render_document_pdf(packet: DocumentJobPacket) -> tuple[bytes, dict[str, Any
         "boards_rendered": 0,
         "annotations_rendered": 0,
         "ink_strokes_rendered": 0,
+        "media_fallbacks": 0,
+        "qr_codes": 0,
+        "media_warnings": [],
         "styles": styles,
     }
     buffer = io.BytesIO()
@@ -694,6 +750,9 @@ def render_document_pdf(packet: DocumentJobPacket) -> tuple[bytes, dict[str, Any
         if not rendered:
             rendered = [Paragraph("This section did not contain renderable text. Its provenance remains in the edition manifest.", styles["BodyText"])]
         story.extend(rendered)
+        media_rendered = _media_flowables(section, styles, diagnostics)
+        if media_rendered:
+            story.extend(media_rendered)
         if section.source_url:
             source_urls.append(section.source_url)
             story.extend([Spacer(1, 5), Paragraph(f'Source: <link href="{escape(section.source_url)}">{escape(section.source_url)}</link>', styles["Small"])])
@@ -731,6 +790,8 @@ def render_document_pdf(packet: DocumentJobPacket) -> tuple[bytes, dict[str, Any
             ["Whiteboards and Chalkboards", str(diagnostics["boards_rendered"])],
             ["Annotated pages", str(diagnostics["annotations_rendered"])],
             ["Vector ink strokes", str(diagnostics["ink_strokes_rendered"])],
+            ["Media link fallbacks", str(diagnostics["media_fallbacks"])],
+            ["Media QR codes", str(diagnostics["qr_codes"])],
             ["Unique source URLs", str(len(set(source_urls)))],
             ["Citation records", str(len(set(citations)))],
         ]
