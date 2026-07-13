@@ -1,76 +1,77 @@
 === Sustainable Catalyst Library ===
 Contributors: contentcatalyst
-Tags: knowledge-base, postgresql, data-export, content-planner, documentation, research
+Tags: knowledge-base, content-planner, roadmap, dependencies, release-management, postgresql
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.10.0
+Stable tag: 1.11.0
 License: GPLv2 or later
 
-A native WordPress knowledge base with PostgreSQL and portable research-data exports, a public registry, content planner, documentation authority, research workspaces, and custom books.
+A native WordPress knowledge base with planning analytics, dependencies, release coordination, a public registry, documentation authority, research workspaces, custom books, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v1.10.0 adds normalized PostgreSQL and portable research-data export.
+Sustainable Catalyst Library v1.11.0 adds planning analytics, dependency intelligence, and release coordination.
 
-WordPress remains the canonical publishing source. The plugin converts Library records into a stable application schema rather than copying raw WordPress tables, revisions, serialized options, or theme metadata.
+= Planning Analytics =
 
-= PostgreSQL Export =
+* Active, completed, blocked, overdue, unscheduled, and high-priority totals.
+* Due-soon and recent-publication metrics.
+* Planned-versus-actual timing variance and on-time rate.
+* Average planning completeness.
+* Workload and progress by area, product, owner, status, type, and release group.
+* Coverage-gap diagnostics for missing sources, areas, products, responsible areas, release windows, artifacts, questions, and article-map links.
 
-* Portable plain SQL for restoration with psql.
-* Schema-and-data, schema-only, and data-only modes.
-* Complete Library, public-registry, planner, documentation, relationship, and schema scopes.
-* Normalized records, terms, record-term assignments, relationships, resources, documentation, plans, and export metadata.
-* Optional full article text in JSONB payloads.
-* Optional administrator export of private planning records and internal planning notes.
+= Dependencies =
 
-= Portable Bundles =
+* Dependency policies for all, any, or informational relationships.
+* Resolved and unresolved dependency counts.
+* Missing dependency detection.
+* Circular-dependency detection.
+* Native dependency graph without third-party libraries.
 
-* CSV ZIP bundles with one file per entity.
-* JSONL ZIP bundles for analytics and migration workflows.
-* Single-file JSON snapshots.
-* schema.sql, manifest.json, README, and SHA-256 checksums.
+= Release Coordination =
 
-= Browser Research Workspace =
+* Release groups, tracks, milestones, capacity owners, effort estimates, actual effort, and progress.
+* Planned and actual start dates.
+* Manual blockers and blocker notes.
+* Release-window capacity thresholds.
+* Over-capacity, blocked, and overdue release warnings.
+* Printable roadmap reports.
 
-* Export local collections, saved records, notes, sources, Translation Matrices, Whiteboards, Chalkboards, annotations, custom books, and application handoffs.
-* PostgreSQL workspace SQL.
-* JSONL workspace export.
-* Versioned JSON workspace manifest.
-* Dedicated workspace tables in the same normalized PostgreSQL schema.
-* Private Notebook data remains in browser storage until the user exports it.
+= Public Interfaces =
 
-= Existing Knowledge-Base Capabilities =
+* Aggregate public planning analytics.
+* Public release roadmap.
+* Existing complete public registry and roadmap tracker.
+* Public results include only plans deliberately marked for the public roadmap.
 
-* Search-first public knowledge base.
-* Knowledge relationships and record panels.
-* Research Notebook and source collection.
-* Technical Translation Matrix.
-* Whiteboards and Chalkboards.
-* Workbench, Decision Studio, and Site Intelligence handoffs.
-* Annotation Studio and handwriting.
-* Custom Book Builder and browser PDF generation.
-* Foundations Documentation Library and authority model.
-* Content Planner, public registry, and roadmap tracker.
+= Portable Data =
+
+* PostgreSQL portable-export schema v1.1.
+* Expanded planning fields in the normalized plans table.
+* Normalized plan_dependencies table.
+* SQL, CSV bundle, JSONL bundle, and JSON export formats remain available.
 
 == Installation ==
 
 1. Upload and activate the plugin.
 2. Open SC Library.
-3. Enable PostgreSQL and portable data.
-4. Save settings and rebuild the Library index.
-5. Open SC Library → Portable Data Export.
-6. Test a schema-only PostgreSQL export before exporting complete data.
+3. Rebuild the Library index after replacing an earlier version.
+4. Open SC Library → Planning Analytics.
+5. Open SC Library → Release Coordination and set a capacity threshold.
+6. Edit planned records to add effort, ownership, progress, milestones, and blockers.
 
 == Shortcodes ==
 
-* `[sc_library_portability]`
-* `[sc_library_notebook tab="portability"]`
+* `[sc_library_planning_analytics]`
+* `[sc_library_release_coordination]`
 * `[sc_library_registry mode="public"]`
 * `[sc_library_planner_tracker mode="public"]`
+* `[sc_library_portability]`
+* `[sc_library_notebook tab="portability"]`
 * `[sc_library mode="registry"]`
 * `[sc_library collection="foundations" mode="documentation"]`
-* `[sc_foundations_library mode="public"]`
 * `[sc_library]`
 * `[sc_library_notebook]`
 * `[sc_library_book_builder]`
@@ -83,38 +84,32 @@ WordPress remains the canonical publishing source. The plugin converts Library r
 
 == REST API ==
 
+* `/wp-json/sustainable-catalyst/v1/library/planning/analytics`
+* `/wp-json/sustainable-catalyst/v1/library/planning/dependencies`
+* `/wp-json/sustainable-catalyst/v1/library/planning/releases`
+* `/wp-json/sustainable-catalyst/v1/library/planning/coordination-schema`
 * `/wp-json/sustainable-catalyst/v1/library/export/formats`
 * `/wp-json/sustainable-catalyst/v1/library/export/postgresql-schema`
-* `/wp-json/sustainable-catalyst/v1/library/export/manifest` — administrator only
 
 == Changelog ==
 
+= 1.11.0 =
+
+* Added planning analytics, workload summaries, velocity metrics, and completeness reports.
+* Added release groups, tracks, milestones, capacity owners, effort, progress, and start dates.
+* Added dependency policies, blocker state, dependency graph, and cycle detection.
+* Added release-window capacity thresholds and coordination warnings.
+* Added planned-versus-actual timing and on-time-rate analytics.
+* Added printable administrator reports and public planning shortcodes.
+* Added planning analytics, dependency, release, and schema REST endpoints.
+* Added CSV and JSON planning analytics exports.
+* Expanded PostgreSQL export schema to sc-library-portable-export/1.1.
+* Added normalized plan_dependencies export table.
+
 = 1.10.0 =
 
-* Added normalized PostgreSQL schema and plain SQL export.
-* Added schema-and-data, schema-only, and data-only modes.
-* Added complete, registry, planner, documentation, relationship, and schema scopes.
-* Added CSV ZIP and JSONL ZIP bundles.
-* Added JSON snapshots, manifests, restore notes, and SHA-256 checksums.
-* Added browser-local Notebook export to PostgreSQL SQL and JSONL.
-* Added workspace schema migration to sc-library-workspace/1.6.
-* Added standalone portability shortcode and administrator export studio.
-* Added public export format and PostgreSQL schema endpoints.
-* Added administrator-only export manifest endpoint.
-* Documented psql restore and pg_dump custom-archive workflow.
+* Added PostgreSQL and portable research-data export.
 
 = 1.9.0 =
 
 * Added Content Planner, Article Map Planner, public registry, and roadmap tracker.
-
-= 1.8.0 =
-
-* Added the Foundations Documentation Library and authority model.
-
-= 1.7.0 =
-
-* Added the local-first Custom Book Builder and browser PDF workflow.
-
-= 1.6.0 =
-
-* Added the local-first Annotation Studio and handwriting layers.

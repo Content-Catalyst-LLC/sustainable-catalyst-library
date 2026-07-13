@@ -217,7 +217,7 @@ final class SC_Library_Planner {
                         <?php foreach (['Q1', 'Q2', 'Q3', 'Q4'] as $quarter) : ?><option value="<?php echo esc_attr($quarter); ?>" <?php selected($release['quarter'], $quarter); ?>><?php echo esc_html($quarter); ?></option><?php endforeach; ?>
                     </select></label>
                     <label><span><?php esc_html_e('Year', 'sustainable-catalyst-library'); ?></span><input type="number" min="2020" max="2200" name="sc_plan_release_year" value="<?php echo esc_attr((string) $release['year']); ?>"></label>
-                    <label><span><?php esc_html_e('Product release', 'sustainable-catalyst-library'); ?></span><input type="text" name="sc_plan_product_release" value="<?php echo esc_attr($release['product_release']); ?>" placeholder="Library v1.10.0"></label>
+                    <label><span><?php esc_html_e('Product release', 'sustainable-catalyst-library'); ?></span><input type="text" name="sc_plan_product_release" value="<?php echo esc_attr($release['product_release']); ?>" placeholder="Library v1.12.0"></label>
                     <label><span><?php esc_html_e('Release note', 'sustainable-catalyst-library'); ?></span><input type="text" name="sc_plan_release_note" value="<?php echo esc_attr($release['note']); ?>" placeholder="Timing may depend on source review"></label>
                 </div>
             </fieldset>
@@ -431,7 +431,7 @@ final class SC_Library_Planner {
         if ($admin) {
             $payload['internal_notes'] = (string) get_post_meta($post_id, '_sc_plan_internal_notes', true);
         }
-        return $payload;
+        return apply_filters('sc_library_plan_payload', $payload, $post_id, $admin);
     }
 
     public function sync_published_plan(string $new_status, string $old_status, WP_Post $post): void {

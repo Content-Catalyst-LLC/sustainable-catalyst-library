@@ -117,6 +117,9 @@ final class SC_Library_Activator {
         add_option('sc_library_enable_documentation', 1);
         add_option('sc_library_enable_planner', 1);
         add_option('sc_library_enable_portability', 1);
+        add_option('sc_library_release_capacity_threshold', 40);
+        add_option('sc_library_default_effort_unit', 'points');
+        add_option('sc_library_on_time_tolerance_days', 7);
         add_option('sc_library_export_schema_name', 'sustainable_catalyst_library');
         add_option('sc_library_registry_include_planned', 1);
         add_option('sc_library_registry_include_archived', 1);

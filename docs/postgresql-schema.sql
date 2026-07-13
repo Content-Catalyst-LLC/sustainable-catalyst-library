@@ -124,6 +124,20 @@ CREATE TABLE IF NOT EXISTS plans (
     linked_draft_id bigint,
     published_record_id bigint,
     dependency_ids bigint[] NOT NULL DEFAULT '{}'::bigint[],
+    release_group text NOT NULL DEFAULT '',
+    release_track text NOT NULL DEFAULT '',
+    milestone text NOT NULL DEFAULT '',
+    capacity_owner text NOT NULL DEFAULT '',
+    estimated_effort numeric(14,3) NOT NULL DEFAULT 0,
+    effort_unit text NOT NULL DEFAULT 'points',
+    actual_effort numeric(14,3) NOT NULL DEFAULT 0,
+    progress_percent integer NOT NULL DEFAULT 0 CHECK (progress_percent BETWEEN 0 AND 100),
+    planned_start date,
+    actual_start date,
+    dependency_policy text NOT NULL DEFAULT 'all',
+    blocked_override boolean NOT NULL DEFAULT false,
+    blocked_reason text NOT NULL DEFAULT '',
+    actual_publication_date date,
     created_at timestamptz,
     modified_at timestamptz,
     payload jsonb NOT NULL DEFAULT '{}'::jsonb
@@ -131,6 +145,18 @@ CREATE TABLE IF NOT EXISTS plans (
 CREATE INDEX IF NOT EXISTS plans_status_idx ON plans(plan_status);
 CREATE INDEX IF NOT EXISTS plans_area_idx ON plans(area);
 CREATE INDEX IF NOT EXISTS plans_product_idx ON plans(product);
+CREATE INDEX IF NOT EXISTS plans_release_group_idx ON plans(release_group);
+CREATE INDEX IF NOT EXISTS plans_capacity_owner_idx ON plans(capacity_owner);
+
+CREATE TABLE IF NOT EXISTS plan_dependencies (
+    plan_id bigint NOT NULL,
+    dependency_record_id bigint NOT NULL,
+    dependency_order integer NOT NULL DEFAULT 0,
+    dependency_policy text NOT NULL DEFAULT 'all',
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    PRIMARY KEY (plan_id, dependency_record_id)
+);
+CREATE INDEX IF NOT EXISTS plan_dependencies_target_idx ON plan_dependencies(dependency_record_id);
 
 -- Browser-local Research Notebook tables. These are populated by the
 -- [sc_library_portability] or Notebook PostgreSQL export, not by server exports.

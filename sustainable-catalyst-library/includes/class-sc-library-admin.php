@@ -168,11 +168,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.10.0 activated.</strong> Rebuild the Library index, then open SC Library → Portable Data Export to test a schema-only PostgreSQL export and a complete public-registry export.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.11.0 activated.</strong> Rebuild the Library index, then open SC Library → Planning Analytics and Release Coordination to review workload, dependencies, capacity, and release risk.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.10.0.</strong> The release adds normalized PostgreSQL SQL, CSV, JSONL, and JSON exports; schema-only and data-only modes; manifests and checksums; scoped server exports; and browser-local Notebook SQL and JSONL exports. Rebuild the index once, then test a schema export and a complete registry export.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.11.0.</strong> The release adds planning analytics, dependency intelligence, release groups, milestones, effort and progress tracking, capacity warnings, planned-versus-actual timing, printable reports, and expanded portable planning data. Rebuild the index once, then review Planning Analytics and Release Coordination.</p></div>';
         }
     }
 

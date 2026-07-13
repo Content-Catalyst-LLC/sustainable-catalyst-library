@@ -1,103 +1,76 @@
-# Sustainable Catalyst Library v1.10.0
+# Sustainable Catalyst Library v1.11.0
 
-Library v1.10.0 adds the **PostgreSQL and Portable Research-Data Export** layer to the Sustainable Catalyst knowledge base.
+Library v1.11.0 adds **Planning Analytics, Dependencies, and Release Coordination** to the Sustainable Catalyst knowledge base.
 
-WordPress remains the canonical publishing and editorial source. The export system translates Library records into a normalized, application-oriented schema rather than copying raw WordPress tables, serialized options, revisions, or theme metadata.
+The release extends the v1.9 Content Planner and v1.10 portability layer with operational analytics. It does not automatically schedule WordPress posts or change canonical publication dates.
 
 ## Included
 
-- PostgreSQL-compatible plain SQL exports
-- Schema-and-data, schema-only, and data-only modes
-- Complete Library, public-registry, planner, documentation, relationship, and schema scopes
-- CSV ZIP bundles with one file per normalized entity
-- JSONL ZIP bundles for analytics and migration workflows
-- Single-file JSON snapshots
-- SHA-256 checksum manifests
-- Restore and custom-archive instructions
-- Normalized records, terms, record-term links, relationships, resources, documentation, and plans
-- Optional administrator export of private/draft planning records
-- Optional normalized full article content in record payloads
-- Browser-local Research Notebook export to PostgreSQL SQL, JSONL, and versioned JSON
-- Dedicated PostgreSQL tables for collections, notes, sources, matrices, boards, annotations, books, saved records, and application handoffs
-- Public schema and format REST endpoints
-- Administrator-only export manifest endpoint
-- Standalone `[sc_library_portability]` interface
-- Research Notebook portability controls
+- Planning metrics for active, completed, blocked, overdue, and unscheduled records
+- Publication velocity for the previous 30 and 90 days
+- Planned-versus-actual release variance and on-time-rate calculations
+- Estimated and actual effort tracking
+- Progress percentages, milestones, release groups, release tracks, and capacity owners
+- Planned and actual start dates
+- Dependency policies: all, any, or informational
+- Dependency resolution, missing-record detection, and circular-dependency detection
+- Release-window capacity thresholds and overload warnings
+- Workload breakdowns by area, product, owner, status, type, and release group
+- Planning-completeness and documentation-gap reports
+- Printable planning and release-coordination reports
+- Public planning-analytics and release-roadmap shortcodes
+- Public and administrator REST endpoints
+- CSV and JSON planning-analytics exports
+- PostgreSQL export schema v1.1 with normalized `plan_dependencies`
 
-## Architectural boundary
+## WordPress administration
 
-Server-side exports include canonical WordPress and Library data:
-
-- Published and indexed records
-- Public registry state
-- Content Planner records
-- Documentation authority metadata
-- Taxonomies and record-term assignments
-- Typed relationships
-- Repository, dataset, video, Workbench, Decision Studio, and Site Intelligence resource references
-
-Private Notebook content remains in browser storage and is never silently uploaded to WordPress. It is exported from the Notebook **Import / Export** tab or the standalone portability shortcode.
-
-## WordPress installation
-
-Upload `sustainable-catalyst-library-v1.10.0.zip`, replace the existing plugin, activate it, open **SC Library**, enable PostgreSQL and portable data, save settings, and rebuild the Library index.
-
-Then open:
+Open:
 
 ```text
-SC Library → Portable Data Export
+SC Library → Planning Analytics
+SC Library → Release Coordination
 ```
 
-Recommended first validation:
-
-1. Export **Schema only** as PostgreSQL SQL.
-2. Export the **Complete public registry** as PostgreSQL SQL.
-3. Export the **Complete Library server data** as a CSV bundle.
-4. Open the Research Notebook and export the browser workspace as PostgreSQL SQL.
+Each Content Planner record also receives a **Planning Analytics and Release Coordination** panel.
 
 ## Shortcodes
 
-Standalone portability studio:
+Public aggregate planning analytics:
 
 ```text
-[sc_library_portability]
+[sc_library_planning_analytics]
 ```
 
-Standalone Research Notebook opened to portability:
+Public release roadmap:
 
 ```text
-[sc_library_notebook tab="portability"]
+[sc_library_release_coordination]
 ```
 
-The main Library shortcode remains:
+Collection-filtered examples:
 
 ```text
-[sc_library mode="compact" initial_results="0" show_header="false" show_workspace="true"]
+[sc_library_planning_analytics collection="foundations"]
+[sc_library_release_coordination collection="foundations"]
+```
+
+Existing registry and tracker shortcodes remain available:
+
+```text
+[sc_library_registry mode="public"]
+[sc_library_planner_tracker mode="public"]
 ```
 
 ## REST endpoints
 
-- `/wp-json/sustainable-catalyst/v1/library/export/formats`
-- `/wp-json/sustainable-catalyst/v1/library/export/postgresql-schema`
-- `/wp-json/sustainable-catalyst/v1/library/export/manifest` — administrator only
+- `/wp-json/sustainable-catalyst/v1/library/planning/analytics`
+- `/wp-json/sustainable-catalyst/v1/library/planning/dependencies`
+- `/wp-json/sustainable-catalyst/v1/library/planning/releases`
+- `/wp-json/sustainable-catalyst/v1/library/planning/coordination-schema`
 
-## Restore workflow
+Public requests return public-roadmap records only. Authenticated editors can request `?context=edit` for internal planning analytics.
 
-Plain SQL export:
+## Release boundary
 
-```bash
-createdb sustainable_catalyst_library
-psql -X --set ON_ERROR_STOP=on \
-  sustainable_catalyst_library \
-  < sustainable-catalyst-library.sql
-```
-
-Create a compressed PostgreSQL custom archive after restore:
-
-```bash
-pg_dump -Fc \
-  sustainable_catalyst_library \
-  -f sustainable-catalyst-library.backup
-```
-
-The plugin does not claim to generate a native `pg_dump` custom archive from WordPress. That format is created by PostgreSQL after the portable SQL is restored.
+Expected release windows remain optional planning targets. Capacity warnings, blocker calculations, and dependency status do not publish, schedule, or modify WordPress posts automatically.

@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * tables or serialized plugin internals.
  */
 final class SC_Library_Portability {
-    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.0';
+    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.1';
     public const POSTGRES_SCHEMA = 'sustainable_catalyst_library';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 
@@ -393,6 +393,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         $resources = $this->export_resources($record_ids);
         $documentation = $this->export_documentation($record_ids);
         $plans = $this->export_plans($include_private_plans);
+        $plan_dependencies = $this->export_plan_dependencies($plans);
 
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($r) => (int) $r['id'], $public_registry), true);
@@ -403,6 +404,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $resources = $this->filter_rows_by_ids($resources, 'record_id', $record_ids);
             $documentation = $this->filter_rows_by_ids($documentation, 'record_id', $record_ids);
             $plans = array_values(array_filter($plans, static fn($row) => !empty($row['public'])));
+            $plan_dependencies = $this->filter_rows_by_ids($plan_dependencies, 'plan_id', array_column($plans, 'plan_id'));
         } elseif ($scope === 'planner') {
             $records = [];
             $terms = [];
@@ -417,12 +419,14 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $resources = $this->filter_rows_by_ids($resources, 'record_id', $doc_ids);
             $relationships = array_values(array_filter($relationships, static fn($row) => in_array((int) $row['source_post_id'], $doc_ids, true) || in_array((int) $row['target_post_id'], $doc_ids, true)));
             $plans = [];
+            $plan_dependencies = [];
         } elseif ($scope === 'relationships') {
             $records = [];
             $documentation = [];
             $plans = [];
+            $plan_dependencies = [];
         } elseif ($scope === 'schema') {
-            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = [];
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = [];
         }
 
         $entities = [
@@ -433,6 +437,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'resources' => $resources,
             'documentation' => $documentation,
             'plans' => $plans,
+            'plan_dependencies' => $plan_dependencies,
         ];
 
         $counts = [];
@@ -579,6 +584,9 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             '_sc_plan_area', '_sc_plan_product', '_sc_plan_responsible', '_sc_plan_public', '_sc_plan_published_post_id', '_sc_plan_linked_draft_id',
             '_sc_plan_article_map_id', '_sc_plan_series_order', '_sc_plan_target_post_type', '_sc_plan_audience', '_sc_plan_research_questions',
             '_sc_plan_sources', '_sc_plan_expected_artifacts', '_sc_plan_dependency_ids', '_sc_plan_internal_notes', '_sc_plan_actual_publication_date',
+            '_sc_plan_release_group', '_sc_plan_release_track', '_sc_plan_milestone', '_sc_plan_capacity_owner', '_sc_plan_estimated_effort',
+            '_sc_plan_effort_unit', '_sc_plan_actual_effort', '_sc_plan_progress_percent', '_sc_plan_planned_start', '_sc_plan_actual_start',
+            '_sc_plan_dependency_policy', '_sc_plan_blocked_override', '_sc_plan_blocked_reason',
         ];
         $rows = [];
         foreach ($ids as $id) {
@@ -615,10 +623,40 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
                 'linked_draft_id' => (int) ($meta['_sc_plan_linked_draft_id'] ?? 0),
                 'published_record_id' => (int) ($meta['_sc_plan_published_post_id'] ?? 0),
                 'dependency_ids' => $this->integer_list((string) ($meta['_sc_plan_dependency_ids'] ?? '')),
+                'release_group' => (string) ($meta['_sc_plan_release_group'] ?? ''),
+                'release_track' => (string) ($meta['_sc_plan_release_track'] ?? ''),
+                'milestone' => (string) ($meta['_sc_plan_milestone'] ?? ''),
+                'capacity_owner' => (string) ($meta['_sc_plan_capacity_owner'] ?? ''),
+                'estimated_effort' => (float) ($meta['_sc_plan_estimated_effort'] ?? 0),
+                'effort_unit' => (string) ($meta['_sc_plan_effort_unit'] ?? 'points'),
+                'actual_effort' => (float) ($meta['_sc_plan_actual_effort'] ?? 0),
+                'progress_percent' => (int) ($meta['_sc_plan_progress_percent'] ?? 0),
+                'planned_start' => (string) ($meta['_sc_plan_planned_start'] ?? ''),
+                'actual_start' => (string) ($meta['_sc_plan_actual_start'] ?? ''),
+                'dependency_policy' => (string) ($meta['_sc_plan_dependency_policy'] ?? 'all'),
+                'blocked_override' => !empty($meta['_sc_plan_blocked_override']),
+                'blocked_reason' => (string) ($meta['_sc_plan_blocked_reason'] ?? ''),
+                'actual_publication_date' => (string) ($meta['_sc_plan_actual_publication_date'] ?? ''),
                 'created_at' => $this->rfc3339_or_null($post->post_date_gmt ?: $post->post_date),
                 'modified_at' => $this->rfc3339_or_null($post->post_modified_gmt ?: $post->post_modified),
                 'payload' => $meta,
             ];
+        }
+        return $rows;
+    }
+
+    private function export_plan_dependencies(array $plans): array {
+        $rows = [];
+        foreach ($plans as $plan) {
+            foreach (array_values($plan['dependency_ids'] ?? []) as $position => $dependency_id) {
+                $rows[] = [
+                    'plan_id' => (int) ($plan['plan_id'] ?? 0),
+                    'dependency_record_id' => (int) $dependency_id,
+                    'dependency_order' => (int) $position,
+                    'dependency_policy' => (string) ($plan['dependency_policy'] ?? 'all'),
+                    'payload' => [],
+                ];
+            }
         }
         return $rows;
     }
@@ -781,6 +819,20 @@ CREATE TABLE IF NOT EXISTS plans (
     linked_draft_id bigint,
     published_record_id bigint,
     dependency_ids bigint[] NOT NULL DEFAULT '{}'::bigint[],
+    release_group text NOT NULL DEFAULT '',
+    release_track text NOT NULL DEFAULT '',
+    milestone text NOT NULL DEFAULT '',
+    capacity_owner text NOT NULL DEFAULT '',
+    estimated_effort numeric(14,3) NOT NULL DEFAULT 0,
+    effort_unit text NOT NULL DEFAULT 'points',
+    actual_effort numeric(14,3) NOT NULL DEFAULT 0,
+    progress_percent integer NOT NULL DEFAULT 0 CHECK (progress_percent BETWEEN 0 AND 100),
+    planned_start date,
+    actual_start date,
+    dependency_policy text NOT NULL DEFAULT 'all',
+    blocked_override boolean NOT NULL DEFAULT false,
+    blocked_reason text NOT NULL DEFAULT '',
+    actual_publication_date date,
     created_at timestamptz,
     modified_at timestamptz,
     payload jsonb NOT NULL DEFAULT '{}'::jsonb
@@ -788,6 +840,18 @@ CREATE TABLE IF NOT EXISTS plans (
 CREATE INDEX IF NOT EXISTS plans_status_idx ON plans(plan_status);
 CREATE INDEX IF NOT EXISTS plans_area_idx ON plans(area);
 CREATE INDEX IF NOT EXISTS plans_product_idx ON plans(product);
+CREATE INDEX IF NOT EXISTS plans_release_group_idx ON plans(release_group);
+CREATE INDEX IF NOT EXISTS plans_capacity_owner_idx ON plans(capacity_owner);
+
+CREATE TABLE IF NOT EXISTS plan_dependencies (
+    plan_id bigint NOT NULL,
+    dependency_record_id bigint NOT NULL,
+    dependency_order integer NOT NULL DEFAULT 0,
+    dependency_policy text NOT NULL DEFAULT 'all',
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    PRIMARY KEY (plan_id, dependency_record_id)
+);
+CREATE INDEX IF NOT EXISTS plan_dependencies_target_idx ON plan_dependencies(dependency_record_id);
 
 -- Browser-local Research Notebook tables. These are populated by the
 -- [sc_library_portability] or Notebook PostgreSQL export, not by server exports.
@@ -884,7 +948,8 @@ SQL;
             'relationships' => ['relationship_id','source_record_id','target_record_id','relationship_type','note','sort_order','created_at','updated_at','payload'],
             'resources' => ['resource_id','record_id','resource_type','url','label','sort_order','payload'],
             'documentation' => ['record_id','document_status','document_type','document_version','responsible_area','authority_type','authority_url','webpage_url','repository_url','pdf_url','release_url','last_reviewed','review_interval_days','featured','supersedes_record_id','superseded_by_record_id','dependency_ids','correction_url','authority_note','payload'],
-            'plans' => ['plan_id','title','description','wordpress_status','plan_status','priority','content_type','area','product','responsible_area','public','expected_release','article_map_id','series_order','linked_draft_id','published_record_id','dependency_ids','created_at','modified_at','payload'],
+            'plans' => ['plan_id','title','description','wordpress_status','plan_status','priority','content_type','area','product','responsible_area','public','expected_release','article_map_id','series_order','linked_draft_id','published_record_id','dependency_ids','release_group','release_track','milestone','capacity_owner','estimated_effort','effort_unit','actual_effort','progress_percent','planned_start','actual_start','dependency_policy','blocked_override','blocked_reason','actual_publication_date','created_at','modified_at','payload'],
+            'plan_dependencies' => ['plan_id','dependency_record_id','dependency_order','dependency_policy','payload'],
             default => [],
         };
         if (!$columns) return '';
@@ -896,10 +961,10 @@ SQL;
                 if (in_array($column, ['payload', 'expected_release'], true)) $literals[] = $this->sql_json($value ?: []);
                 elseif (in_array($column, ['dependency_ids'], true)) $literals[] = $this->sql_bigint_array(is_array($value) ? $value : []);
                 elseif (in_array($column, ['published_at','modified_at','created_at','updated_at'], true)) $literals[] = $this->sql_timestamp($value);
-                elseif ($column === 'last_reviewed') $literals[] = $value ? $this->sql_text((string) $value) . '::date' : 'NULL';
-                elseif (in_array($column, ['authoritative','historical','featured','public'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
-                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order'], true)) $literals[] = ((int) $value > 0 || $column === 'sort_order' || $column === 'term_order' || $column === 'review_interval_days') ? (string) (int) $value : 'NULL';
-                elseif ($column === 'series_order') $literals[] = (string) (float) $value;
+                elseif (in_array($column, ['last_reviewed','planned_start','actual_start','actual_publication_date'], true)) $literals[] = $value ? $this->sql_text((string) $value) . '::date' : 'NULL';
+                elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
+                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent'], true)) ? (string) (int) $value : 'NULL';
+                elseif (in_array($column, ['series_order','estimated_effort','actual_effort'], true)) $literals[] = (string) (float) $value;
                 else $literals[] = $this->sql_text((string) ($value ?? ''));
             }
             $values[] = '(' . implode(', ', $literals) . ')';
@@ -912,6 +977,7 @@ SQL;
             'resources' => 'resource_id',
             'documentation' => 'record_id',
             'plans' => 'plan_id',
+            'plan_dependencies' => 'plan_id, dependency_record_id',
             default => '',
         };
         return "INSERT INTO {$entity} (" . implode(', ', $columns) . ") VALUES\n" . implode(",\n", $values) . ($conflict ? "\nON CONFLICT ({$conflict}) DO NOTHING;" : ';');
