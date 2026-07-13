@@ -1,4 +1,10 @@
-# Sustainable Catalyst Library v2.0.1
+# Sustainable Catalyst Library
+
+## v2.1.0 — Foundation Document Pages
+
+Dedicated page-like Foundation Docs with one-click Media Library PDF embedding and a Foundations-only public shortcode.
+
+v2.0.1
 
 Sustainable Catalyst Library v2.0.1 repairs the unified discovery interface while v2.0.0 unifies the complete Library platform into a Living Knowledge System with three coordinated layers:
 
