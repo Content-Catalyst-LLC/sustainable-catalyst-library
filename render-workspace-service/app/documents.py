@@ -40,7 +40,7 @@ from .core import constant_time_equal
 
 DOCUMENT_JOB_SCHEMA = "sc-library-document-job/1.0"
 EDITION_SCHEMA = "sc-library-edition/1.0"
-RENDERER_VERSION = "1.14.0"
+RENDERER_VERSION = "1.14.1"
 MAX_REQUEST_BYTES = max(1, min(25, int(os.getenv("SC_LIBRARY_MAX_DOCUMENT_REQUEST_MB", "8")))) * 1024 * 1024
 MAX_PDF_BYTES = max(1, min(50, int(os.getenv("SC_LIBRARY_MAX_PDF_MB", "20")))) * 1024 * 1024
 MAX_ATTEMPTS = max(1, min(10, int(os.getenv("SC_LIBRARY_DOCUMENT_MAX_ATTEMPTS", "3"))))

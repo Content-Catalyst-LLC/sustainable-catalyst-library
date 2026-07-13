@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../sustainable-catalyst-library/assets/css/sc-library.css">
+<style>body{margin:0;padding:24px;background:#eee} .test-shell{width:1120px;max-width:100%;margin:auto;background:white}</style>
+</head>
+<body>
+<div class="test-shell">
+<section class="sc-library">
+<div class="sc-library__results">
+<article class="sc-library-record sc-library-record--responsive" data-layout-version="1.14.1">
+<div class="sc-library-record__meta"><span class="sc-library-record__type">Published Post</span><span class="sc-library-record__topics"><span>Chemistry</span></span></div>
+<div class="sc-library-record__body">
+<h4><a href="#">Chemistry, Ethics, and the Governance of Molecular Power Across Complex Industrial and Environmental Systems</a></h4>
+<p class="sc-library-record__excerpt">Chemistry gives human beings extraordinary power over matter. This intentionally long record excerpt reproduces the conditions shown in the uploaded Research Library PDF and verifies that normal words wrap across a useful line width instead of collapsing into a single-character column when every research action is present.</p>
+</div>
+<div class="sc-library-record__foot">
+<div class="sc-library-record__resources"><span>Code</span><span>PDF</span></div>
+<div class="sc-library-record__actions"><time>Updated May 29, 2026</time><button>Save to Notebook</button><button>Open Translation Matrix</button><button>Open Whiteboard</button><button>Open Chalkboard</button><button>Annotate and Handwrite</button><button>Add to Custom Book</button><button>View knowledge record</button></div>
+</div>
+</article>
+</div>
+</section>
+</div>
+<pre id="metrics"></pre>
+<script>
+addEventListener('load', () => {
+ const card=document.querySelector('.sc-library-record');
+ const body=document.querySelector('.sc-library-record__body');
+ const title=document.querySelector('.sc-library-record__body h4');
+ const excerpt=document.querySelector('.sc-library-record__excerpt');
+ const actions=document.querySelector('.sc-library-record__actions');
+ const data={card:card.getBoundingClientRect().width, body:body.getBoundingClientRect().width, title:title.getBoundingClientRect().width, excerpt:excerpt.getBoundingClientRect().width, actions:actions.getBoundingClientRect().width, writingMode:getComputedStyle(title).writingMode, wordBreak:getComputedStyle(title).wordBreak, actionWhiteSpace:getComputedStyle(actions).whiteSpace};
+ document.getElementById('metrics').textContent=JSON.stringify(data);
+ document.title='layout:'+JSON.stringify(data);
+});
+</script>
+</body></html>

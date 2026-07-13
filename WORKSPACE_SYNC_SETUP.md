@@ -68,4 +68,4 @@ No conflict is silently resolved.
 
 ## v1.14.0 service addendum
 
-The optional service now reports version `1.14.0` and workspace schema `sc-library-workspace/1.8`. Existing 1.7 workspaces remain accepted and migrate forward. The same signed service can also process document and authorized media jobs.
+The optional service now reports version `1.14.1` and workspace schema `sc-library-workspace/1.8`. Existing 1.7 workspaces remain accepted and migrate forward. The same signed service can also process document and authorized media jobs.

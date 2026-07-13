@@ -87,4 +87,4 @@ An unavailable Render service does not take the Library, Notebook, Book Builder,
 
 ## v1.14.0 media fallback addendum
 
-Server PDFs now represent connected media with clickable links, selected timestamps, transcript excerpts, and QR access. Interactive playback is not claimed inside frozen PDF output. The document renderer version is `1.14.0`.
+Server PDFs now represent connected media with clickable links, selected timestamps, transcript excerpts, and QR access. Interactive playback is not claimed inside frozen PDF output. The document renderer version is `1.14.1`.

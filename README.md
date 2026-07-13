@@ -1,6 +1,11 @@
-# Sustainable Catalyst Library v1.14.0
+# Sustainable Catalyst Library v1.14.1
 
-Library v1.14.0 adds a native Multimedia Studio for source-aware video and audio records, non-destructive clip definitions, transcript-linked excerpts, captions, poster frames, annotations, evidence reels, and optional server processing.
+Library v1.14.1 repairs public record-card sizing and responsive rendering so long titles, excerpts, resource badges, and expanded research actions remain readable on desktop, tablet, mobile, and printed/PDF output. It retains the complete v1.14.0 Multimedia Studio and all earlier Library capabilities.
+
+
+## Public record-card repair
+
+The public Knowledge Records interface now uses a full-width content column and a separate wrapping footer for resource badges and research actions. Long titles and excerpts remain horizontal and readable, expanded action sets cannot squeeze the content column, mobile controls reflow into compact grids, and print output suppresses interactive buttons.
 
 WordPress remains the canonical store for media metadata, rights, permissions, public reel presentation, job history, and imported output files. The included FastAPI/PostgreSQL service is optional and is used only when an editor explicitly requests a rendered clip.
 
@@ -75,7 +80,7 @@ Media binaries are not embedded in portable research-data exports. WordPress att
 
 ## Retained systems
 
-v1.14.0 retains:
+v1.14.1 retains:
 
 - Large-Library Index Tools and cursor reconciliation
 - Persistent workspaces and account revisions
@@ -84,4 +89,4 @@ v1.14.0 retains:
 - Research Notebook, matrices, boards, annotations, and books
 - PostgreSQL and portable export
 
-See `MULTIMEDIA_STUDIO_SETUP.md`, `RELEASE_NOTES_1.14.0.md`, and `render-workspace-service/README.md`.
+See `PUBLIC_RECORD_LAYOUT_REPAIR_SETUP.md`, `RELEASE_NOTES_1.14.1.md`, `MULTIMEDIA_STUDIO_SETUP.md`, and `render-workspace-service/README.md`.

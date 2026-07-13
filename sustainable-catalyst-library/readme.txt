@@ -4,14 +4,14 @@ Tags: knowledge-base, multimedia, video, audio, evidence-reels, pdf, render, res
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.14.0
+Stable tag: 1.14.1
 License: GPLv2 or later
 
 A native WordPress knowledge system with multimedia clips and evidence reels, persistent workspaces, server-rendered books and PDFs, planning, notebooks, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v1.14.0 adds a native Multimedia Studio for authorized video and audio assets, non-destructive clip definitions, transcript-linked snippets, captions, poster frames, annotations, evidence reels, and optional Render processing. WordPress remains the source of truth, and all earlier large-library indexing, workspace, planning, book, PDF, and portable-export features remain available.
+Sustainable Catalyst Library v1.14.1 repairs the public Library record-card layout across desktop, tablet, mobile, and print while retaining the v1.14.0 Multimedia Studio for authorized video and audio assets, non-destructive clip definitions, transcript-linked snippets, captions, poster frames, annotations, evidence reels, and optional Render processing. WordPress remains the source of truth, and all earlier large-library indexing, workspace, planning, book, PDF, and portable-export features remain available.
 
 = Multimedia Studio =
 
@@ -114,6 +114,15 @@ Sustainable Catalyst Library v1.14.0 adds a native Multimedia Studio for authori
 * `/wp-json/sustainable-catalyst/v1/library/workspaces/{uuid}`
 
 == Changelog ==
+
+= 1.14.1 =
+* Rebuilt public record cards as a single-column responsive grid so action controls cannot collapse title and excerpt columns.
+* Added semantic excerpt and responsive-card hooks to the public renderer.
+* Normalized horizontal writing mode, word breaking, inline sizing, and flex/grid minimum widths.
+* Made resource badges and action controls wrap safely on desktop and tablet.
+* Added compact two-column and one-column mobile action layouts.
+* Added print rules that hide interactive controls and preserve readable full-width titles and excerpts.
+* Added static and browser-layout regression tests for long titles, long excerpts, and expanded action sets.
 
 = 1.14.0 =
 * Added the native Multimedia Studio.

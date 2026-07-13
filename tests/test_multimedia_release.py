@@ -12,8 +12,8 @@ DOCUMENTS = (SERVICE / "app/documents.py").read_text()
 
 
 def test_release_markers_and_bootstrap():
-    assert "Version: 1.14.0" in MAIN
-    assert "SC_LIBRARY_VERSION', '1.14.0'" in MAIN
+    assert "Version: 1.14.1" in MAIN
+    assert "SC_LIBRARY_VERSION', '1.14.1'" in MAIN
     assert "class-sc-library-multimedia.php" in MAIN
     assert "new SC_Library_Multimedia" in MAIN
 
@@ -47,4 +47,4 @@ def test_portability_and_pdf_fallbacks():
     assert "sc-library-portable-export/1.4" in PORTABILITY
     assert "QrCodeWidget" in DOCUMENTS
     assert "media_fallbacks" in DOCUMENTS
-    assert 'RENDERER_VERSION = "1.14.0"' in DOCUMENTS
+    assert 'RENDERER_VERSION = "1.14.1"' in DOCUMENTS

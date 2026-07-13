@@ -166,7 +166,8 @@
 
       items.forEach((item) => {
         const article = document.createElement('article');
-        article.className = 'sc-library-record';
+        article.className = 'sc-library-record sc-library-record--responsive';
+        article.dataset.layoutVersion = '1.14.1';
         article.dataset.recordId = String(item.id);
         const categories = (item.categories || []).slice(0, 2).map((term) => `<span>${escapeHtml(term.name)}</span>`).join('');
         const concepts = (item.concepts || []).slice(0, 3).map((term) => `<span>${escapeHtml(term.name)}</span>`).join('');
@@ -185,7 +186,7 @@
           </div>
           <div class="sc-library-record__body">
             <h4><a href="${escapeHtml(item.url)}" data-record-link>${escapeHtml(item.title)}</a></h4>
-            <p>${escapeHtml(item.excerpt || '')}</p>
+            <p class="sc-library-record__excerpt">${escapeHtml(item.excerpt || '')}</p>
             ${item.expected_release?.display ? `<p class="sc-library-record__release">${escapeHtml(item.expected_release.display)}</p>` : ''}
             ${item.notice ? `<p class="sc-library-record__notice">${escapeHtml(item.notice)}</p>` : ''}
             ${concepts ? `<div class="sc-library-record__concepts">${concepts}</div>` : ''}

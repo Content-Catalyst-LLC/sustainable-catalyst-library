@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.14.0"
+VERSION="1.14.1"
 REMOTE_SSH="git@github.com:Content-Catalyst-LLC/sustainable-catalyst-library.git"
 REMOTE_SLUG="Content-Catalyst-LLC/sustainable-catalyst-library"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -35,46 +35,48 @@ validate_marker() {
 
 validate_marker "Version: $VERSION" "$PLUGIN_DIR/sustainable-catalyst-library.php" "Plugin version marker validation failed."
 validate_marker "SC_LIBRARY_VERSION', '$VERSION'" "$PLUGIN_DIR/sustainable-catalyst-library.php" "Runtime version marker validation failed."
+validate_marker "Stable tag: $VERSION" "$PLUGIN_DIR/readme.txt" "Stable tag validation failed."
+validate_marker "sc-library-record sc-library-record--responsive" "$PLUGIN_DIR/assets/js/sc-library.js" "Responsive record-card renderer hook is missing."
+validate_marker "sc-library-record__excerpt" "$PLUGIN_DIR/assets/js/sc-library.js" "Semantic excerpt hook is missing."
+validate_marker "grid-template-columns:minmax(0,1fr);" "$PLUGIN_DIR/assets/css/sc-library.css" "Single-column public card grid is missing."
+validate_marker "grid-template-areas:" "$PLUGIN_DIR/assets/css/sc-library.css" "Named public card grid areas are missing."
+validate_marker "writing-mode: horizontal-tb !important" "$PLUGIN_DIR/assets/css/sc-library.css" "Horizontal record text safeguard is missing."
+validate_marker "overflow-wrap: break-word !important" "$PLUGIN_DIR/assets/css/sc-library.css" "Record text wrapping safeguard is missing."
+validate_marker "@media print" "$PLUGIN_DIR/assets/css/sc-library.css" "Print repair rules are missing."
+validate_marker "display: none !important" "$PLUGIN_DIR/assets/css/sc-library.css" "Print action suppression is missing."
+validate_marker "Public Record Card Layout and Responsive Rendering Repair" "$SOURCE_DIR/RELEASE_NOTES_1.14.1.md" "Release notes marker is missing."
+validate_marker "No index rebuild required" "$SOURCE_DIR/PUBLIC_RECORD_LAYOUT_REPAIR_SETUP.md" "Setup guide is incomplete."
+
+# Retained v1.14.0 capability checks.
 validate_marker "class-sc-library-multimedia.php" "$PLUGIN_DIR/sustainable-catalyst-library.php" "Multimedia bootstrap is missing."
 validate_marker "sc-library-media-asset/1.0" "$PLUGIN_DIR/includes/class-sc-library-multimedia.php" "Media asset schema is missing."
-validate_marker "sc-library-media-clip/1.0" "$PLUGIN_DIR/includes/class-sc-library-multimedia.php" "Media clip schema is missing."
-validate_marker "sc-library-media-reel/1.0" "$PLUGIN_DIR/includes/class-sc-library-multimedia.php" "Media reel schema is missing."
-validate_marker "sc-library-media-job/1.0" "$PLUGIN_DIR/includes/class-sc-library-multimedia.php" "Media job schema is missing."
-validate_marker "sc_library_media_assets" "$PLUGIN_DIR/includes/class-sc-library-activator.php" "Media database tables are missing."
-validate_marker "Verify the media rights status before processing" "$PLUGIN_DIR/includes/class-sc-library-multimedia.php" "Rights gate is missing."
-validate_marker "/library/media/jobs/(?P<uuid>[a-f0-9-]{36})/retry" "$PLUGIN_DIR/includes/class-sc-library-multimedia.php" "WordPress media retry route is missing."
 validate_marker "sc-library-portable-export/1.4" "$PLUGIN_DIR/includes/class-sc-library-portability.php" "Portable export schema 1.4 is missing."
-validate_marker "CREATE TABLE IF NOT EXISTS media_assets" "$PLUGIN_DIR/includes/class-sc-library-portability.php" "Portable media schema is missing."
 validate_marker "sc-library-workspace/1.8" "$PLUGIN_DIR/includes/class-sc-library-workspaces.php" "Workspace schema 1.8 is missing."
-validate_marker "MEDIA_PROCESSOR_VERSION = \"1.14.0\"" "$SOURCE_DIR/render-workspace-service/app/media.py" "Media processor is missing."
-validate_marker "validate_public_https_url(current_url)" "$SOURCE_DIR/render-workspace-service/app/media.py" "Redirect URL validation is missing."
-validate_marker "subprocess.run(args" "$SOURCE_DIR/render-workspace-service/app/media.py" "Bounded FFmpeg command execution is missing."
-validate_marker "/api/v1/media/jobs/{job_uuid}/retry" "$SOURCE_DIR/render-workspace-service/app/media.py" "Render media retry route is missing."
-validate_marker "QrCodeWidget" "$SOURCE_DIR/render-workspace-service/app/documents.py" "PDF QR media fallback is missing."
-validate_marker "Multimedia Studio and Video Snippet Production" "$SOURCE_DIR/RELEASE_NOTES_1.14.0.md" "Release notes marker is missing."
-validate_marker "SC Library → Multimedia Studio" "$SOURCE_DIR/MULTIMEDIA_STUDIO_SETUP.md" "Multimedia setup guide is incomplete."
+validate_marker "MEDIA_PROCESSOR_VERSION = \"1.14.1\"" "$SOURCE_DIR/render-workspace-service/app/media.py" "Media processor version is incorrect."
+validate_marker "RENDERER_VERSION = \"1.14.1\"" "$SOURCE_DIR/render-workspace-service/app/documents.py" "Document renderer version is incorrect."
 validate_marker "sc-library-index-scan/2.0" "$PLUGIN_DIR/includes/class-sc-library-scanner.php" "Large-Library scanner was not retained."
 validate_marker "p.ID > %d" "$PLUGIN_DIR/includes/class-sc-library-indexer.php" "Cursor index discovery was not retained."
 
+if grep -Fq ".sc-library-record{display:grid;grid-template-columns:minmax(0,1fr) auto;" "$PLUGIN_DIR/assets/css/sc-library.css"; then
+  echo "ERROR: The collapsing two-column record-card grid is still present."
+  exit 1
+fi
+if grep -Fq ".sc-library-record__actions{display:flex;align-items:center;gap:.65rem;white-space:nowrap}" "$PLUGIN_DIR/assets/css/sc-library.css"; then
+  echo "ERROR: The non-wrapping action row is still present."
+  exit 1
+fi
 if grep -Fq "shell=True" "$SOURCE_DIR/render-workspace-service/app/media.py"; then
   echo "ERROR: Media processing must not invoke a command shell."
   exit 1
 fi
-if grep -Fq "<iframe" "$PLUGIN_DIR/includes/class-sc-library-multimedia.php"; then
-  echo "ERROR: Multimedia Studio must remain native WordPress UI."
-  exit 1
-fi
 
 for required in \
-  "$PLUGIN_DIR/includes/class-sc-library-multimedia.php" \
-  "$PLUGIN_DIR/assets/js/sc-library-multimedia.js" \
-  "$PLUGIN_DIR/assets/css/sc-library-multimedia.css" \
-  "$PLUGIN_DIR/templates/library-multimedia-studio.php" \
-  "$SOURCE_DIR/render-workspace-service/app/media.py" \
-  "$SOURCE_DIR/render-workspace-service/tests/test_media.py" \
-  "$SOURCE_DIR/tests/test_multimedia_release.py" \
-  "$SOURCE_DIR/MULTIMEDIA_STUDIO_SETUP.md" \
-  "$SOURCE_DIR/RELEASE_NOTES_1.14.0.md" \
+  "$PLUGIN_DIR/assets/css/sc-library.css" \
+  "$PLUGIN_DIR/assets/js/sc-library.js" \
+  "$SOURCE_DIR/tests/test_public_record_layout_release.py" \
+  "$SOURCE_DIR/tests/fixtures/public-record-layout.html" \
+  "$SOURCE_DIR/PUBLIC_RECORD_LAYOUT_REPAIR_SETUP.md" \
+  "$SOURCE_DIR/RELEASE_NOTES_1.14.1.md" \
   "$PLUGIN_ZIP"; do
   [[ -f "$required" ]] || { echo "ERROR: Required release file is missing: $required"; exit 1; }
 done
@@ -96,8 +98,8 @@ for candidate in python3.12 python3 python; do
   fi
 done
 if [[ -n "$PYTHON_BIN" ]]; then
-  echo "Validating the optional Render service in an isolated Python environment..."
-  TEMP_VENV="$(mktemp -d "${TMPDIR:-/tmp}/sc-library-v1140.XXXXXX")"
+  echo "Validating release tests and optional Render service in an isolated Python environment..."
+  TEMP_VENV="$(mktemp -d "${TMPDIR:-/tmp}/sc-library-v1141.XXXXXX")"
   "$PYTHON_BIN" -m venv "$TEMP_VENV/venv"
   "$TEMP_VENV/venv/bin/python" -m pip install --upgrade pip >/dev/null
   "$TEMP_VENV/venv/bin/python" -m pip install -r "$SOURCE_DIR/render-workspace-service/requirements-dev.txt" >/dev/null
@@ -108,10 +110,16 @@ fi
 unzip -t "$PLUGIN_ZIP" >/dev/null
 
 if grep -RInE --exclude-dir=.git --exclude-dir='__pycache__' --exclude-dir='.pytest_cache' --exclude-dir='.venv' \
-  --exclude='.env.example' --exclude='push_library_v1_14_0_to_github.sh' --exclude='install_and_push_library_v1_14_0.sh' \
+  --exclude='.env.example' --exclude='push_library_v1_14_1_to_github.sh' --exclude='install_and_push_library_v1_14_1.sh' \
   '((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|DATABASE_URL=postgres(ql)?://[^<[:space:]]+|SC_LIBRARY_SYNC_API_KEY=[A-Za-z0-9_-]{16,})' "$SOURCE_DIR"; then
   echo "ERROR: Potential secret detected. Review the output above."
   exit 1
+fi
+
+if [[ "${SC_LIBRARY_VALIDATE_ONLY:-0}" == "1" ]]; then
+  echo
+  echo "Sustainable Catalyst Library v1.14.1 validation passed."
+  exit 0
 fi
 
 if ! git ls-remote "$REMOTE_SSH" >/dev/null 2>&1; then
@@ -155,11 +163,11 @@ git add -A
 if git diff --cached --quiet; then
   echo "No changes to commit."
 else
-  git commit -m "Build Library v1.14.0 — Multimedia Studio and Video Snippet Production"
+  git commit -m "Build Library v1.14.1 — Public Record Card Layout and Responsive Rendering Repair"
 fi
 
 git push -u origin main
 
 echo
-echo "Sustainable Catalyst Library v1.14.0 pushed successfully."
+echo "Sustainable Catalyst Library v1.14.1 pushed successfully."
 echo "Repository: https://github.com/$REMOTE_SLUG"

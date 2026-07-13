@@ -21,7 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from psycopg.types.json import Jsonb
 
 MEDIA_JOB_SCHEMA = "sc-library-media-job/1.0"
-MEDIA_PROCESSOR_VERSION = "1.14.0"
+MEDIA_PROCESSOR_VERSION = "1.14.1"
 MAX_SOURCE_BYTES = max(10, min(2048, int(os.getenv("SC_LIBRARY_MEDIA_MAX_SOURCE_MB", "500")))) * 1024 * 1024
 MAX_OUTPUT_BYTES = max(10, min(2048, int(os.getenv("SC_LIBRARY_MEDIA_MAX_OUTPUT_MB", "500")))) * 1024 * 1024
 MAX_CLIP_SECONDS = max(60, min(14400, int(os.getenv("SC_LIBRARY_MEDIA_MAX_CLIP_MINUTES", "30")) * 60))

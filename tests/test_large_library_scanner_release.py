@@ -43,9 +43,9 @@ def test_post_type_discovery_and_reset_controls_exist():
 def test_release_markers():
     main = (PLUGIN / "sustainable-catalyst-library.php").read_text()
     readme = (PLUGIN / "readme.txt").read_text()
-    assert "Version: 1.14.0" in main
-    assert "SC_LIBRARY_VERSION', '1.14.0'" in main
-    assert "Stable tag: 1.14.0" in readme
+    assert "Version: 1.14.1" in main
+    assert "SC_LIBRARY_VERSION', '1.14.1'" in main
+    assert "Stable tag: 1.14.1" in readme
 
 
 def test_global_database_inventory_is_independent_of_saved_scope():
