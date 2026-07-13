@@ -859,6 +859,15 @@ final class SC_Library_Multimedia {
                         'poster_attachment_id' => is_wp_error($poster_id) ? 0 : (int) $poster_id,
                         'updated_at' => current_time('mysql', true),
                     ], ['clip_uuid' => $job['clip_uuid']]);
+                    do_action('sc_library_media_clip_completed', [
+                        'job_uuid' => $uuid,
+                        'clip_uuid' => (string) $job['clip_uuid'],
+                        'title' => (string) $title,
+                        'attachment_id' => (int) $video_id,
+                        'poster_attachment_id' => is_wp_error($poster_id) ? 0 : (int) $poster_id,
+                        'url' => wp_get_attachment_url((int) $video_id),
+                        'sha256' => (string) ($job['output_sha256'] ?? ''),
+                    ]);
                 }
             }
         }

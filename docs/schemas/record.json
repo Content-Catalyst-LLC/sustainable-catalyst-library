@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/wp-json/sustainable-catalyst-library/v1/schemas/record",
+  "title": "Sustainable Catalyst Library record",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "type",
+    "title",
+    "url"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-record/1.0"
+    },
+    "id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "identifier": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "excerpt": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "published_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "modified_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": true
+}

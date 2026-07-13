@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/wp-json/sustainable-catalyst-library/v1/schemas/webhook-event",
+  "title": "Sustainable Catalyst Library webhook event",
+  "type": "object",
+  "required": [
+    "schema",
+    "event_id",
+    "event_type",
+    "occurred_at",
+    "data"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-webhook-event/1.0"
+    },
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "record.published",
+        "record.updated",
+        "record.archived",
+        "plan.created",
+        "plan.transitioned",
+        "documentation.updated",
+        "graph.rebuilt",
+        "workspace.revised",
+        "review.transitioned",
+        "review.approved",
+        "book.rendered",
+        "media.clip.completed",
+        "api.test"
+      ]
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "site": {
+      "type": "string",
+      "format": "uri"
+    },
+    "data": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}

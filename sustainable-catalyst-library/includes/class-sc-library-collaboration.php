@@ -544,6 +544,16 @@ final class SC_Library_Collaboration {
             'completed_at' => $completed,
         ], ['id' => (int) $row['id']], ['%s','%s','%d','%s','%s'], ['%d']);
         $this->log_event((int) $row['id'], 'status_changed', ['from' => (string) $row['status'], 'to' => $status, 'note' => $note]);
+        do_action('sc_library_review_transitioned', [
+            'review_uuid' => (string) $row['review_uuid'],
+            'title' => (string) $row['title'],
+            'from_status' => (string) $row['status'],
+            'status' => $status,
+            'object_type' => (string) $row['object_type'],
+            'object_identifier' => (string) $row['object_identifier'],
+            'visibility' => (string) $row['visibility'],
+            'revision' => $revision,
+        ]);
         return rest_ensure_response($this->review_record($this->review_row((string) $row['review_uuid'])));
     }
 

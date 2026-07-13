@@ -148,6 +148,14 @@ final class SC_Library_REST {
                 'automatic_publication' => false,
                 'endpoints' => ['orchestrator/schema', 'orchestrator/status', 'orchestrator/query', 'orchestrator/sessions', 'orchestrator/events'],
             ],
+            'developer_api' => [
+                'enabled' => class_exists('SC_Library_Developer_API') && SC_Library_Developer_API::enabled(),
+                'schema' => class_exists('SC_Library_Developer_API') ? SC_Library_Developer_API::SCHEMA : '',
+                'namespace' => class_exists('SC_Library_Developer_API') ? SC_Library_Developer_API::API_NAMESPACE : '',
+                'openapi' => class_exists('SC_Library_Developer_API') ? rest_url(SC_Library_Developer_API::API_NAMESPACE . '/openapi.json') : '',
+                'webhook_signatures' => 'timestamped-hmac-sha256',
+                'public_private_boundary' => true,
+            ],
             'integrations' => [
                 'enabled' => class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled(),
                 'handoff_schema' => class_exists('SC_Library_Integrations') ? SC_Library_Integrations::HANDOFF_SCHEMA : '',

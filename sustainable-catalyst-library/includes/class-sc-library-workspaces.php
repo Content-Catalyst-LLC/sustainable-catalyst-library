@@ -331,6 +331,13 @@ final class SC_Library_Workspaces {
         $row = $this->row($uuid);
         $this->store_revision($row, get_current_user_id(), 'created');
         $this->queue_sync($uuid);
+        do_action('sc_library_workspace_revised', [
+            'workspace_uuid' => $uuid,
+            'revision' => 1,
+            'change_type' => 'created',
+            'visibility' => (string) $row['visibility'],
+            'title' => (string) $row['title'],
+        ]);
         return new WP_REST_Response($this->record($row), 201);
     }
 
@@ -377,6 +384,13 @@ final class SC_Library_Workspaces {
         $row = $this->row($uuid);
         $this->store_revision($row, get_current_user_id(), 'updated');
         $this->queue_sync($uuid);
+        do_action('sc_library_workspace_revised', [
+            'workspace_uuid' => $uuid,
+            'revision' => (int) $row['revision'],
+            'change_type' => 'updated',
+            'visibility' => (string) $row['visibility'],
+            'title' => (string) $row['title'],
+        ]);
         return rest_ensure_response($this->record($row));
     }
 

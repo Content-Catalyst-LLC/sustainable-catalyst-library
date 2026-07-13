@@ -16,12 +16,12 @@ README = (PLUGIN / "readme.txt").read_text()
 
 
 def test_release_markers_and_bootstrap():
-    assert "Version: 1.17.0" in MAIN
-    assert "SC_LIBRARY_VERSION', '1.17.0'" in MAIN
+    assert "Version: 1.18.0" in MAIN
+    assert "SC_LIBRARY_VERSION', '1.18.0'" in MAIN
     assert "class-sc-library-orchestrator.php" in MAIN
     assert "new SC_Library_Orchestrator" in MAIN
     assert "$orchestrator->register_hooks()" in MAIN
-    assert "Stable tag: 1.17.0" in README
+    assert "Stable tag: 1.18.0" in README
 
 
 def test_orchestration_tables_and_schema_markers():
@@ -115,7 +115,7 @@ def test_library_record_actions_link_to_orchestrator():
 
 
 def test_portable_orchestration_entities_and_static_schema():
-    assert "sc-library-portable-export/1.7" in PORTABILITY
+    assert "sc-library-portable-export/1.8" in PORTABILITY
     assert "'orchestration'" in PORTABILITY
     for entity in ["orchestration_sessions", "orchestration_events"]:
         assert entity in PORTABILITY
@@ -125,7 +125,7 @@ def test_portable_orchestration_entities_and_static_schema():
 
 
 def test_release_documentation_exists():
-    assert (ROOT / "RELEASE_NOTES_1.17.0.md").exists()
+    assert (ROOT / "RELEASE_NOTES_1.18.0.md").exists()
     assert (ROOT / "RESEARCH_LIBRARIAN_ORCHESTRATION_SETUP.md").exists()
     setup = (ROOT / "RESEARCH_LIBRARIAN_ORCHESTRATION_SETUP.md").read_text()
     assert "Research Librarian Workspace Orchestration" in setup

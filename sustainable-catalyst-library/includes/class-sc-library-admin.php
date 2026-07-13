@@ -211,11 +211,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.17.0 activated.</strong> Open SC Library → Research Librarian to configure the site-scoped orchestration page. Existing graph, editorial, multimedia, workspace, document, and scanner systems remain available.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.18.0 activated.</strong> Open SC Library → Developer API to configure the public API, scoped keys, signed webhooks, and developer portal. Existing orchestration, graph, editorial, multimedia, workspace, document, and scanner systems remain available.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.17.0.</strong> Research Librarian Workspace Orchestration is now available under SC Library → Research Librarian. The Library index and Knowledge Graph remain canonical retrieval sources.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.18.0.</strong> Public API, signed webhooks, OpenAPI, JSON Schemas, and developer documentation are now available under SC Library → Developer API. Public and private data boundaries remain enforced.</p></div>';
         }
     }
 

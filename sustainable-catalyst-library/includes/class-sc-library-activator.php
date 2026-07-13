@@ -58,6 +58,9 @@ final class SC_Library_Activator {
         $graph_edges_table = $wpdb->prefix . 'sc_library_graph_edges';
         $orchestration_sessions_table = $wpdb->prefix . 'sc_library_orchestration_sessions';
         $orchestration_events_table = $wpdb->prefix . 'sc_library_orchestration_events';
+        $api_keys_table = $wpdb->prefix . 'sc_library_api_keys';
+        $webhooks_table = $wpdb->prefix . 'sc_library_webhooks';
+        $webhook_deliveries_table = $wpdb->prefix . 'sc_library_webhook_deliveries';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -615,6 +618,76 @@ final class SC_Library_Activator {
             KEY created_at (created_at)
         ) {$charset};";
 
+        $api_keys_sql = "CREATE TABLE {$api_keys_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            key_uuid CHAR(36) NOT NULL,
+            name VARCHAR(191) NOT NULL,
+            key_prefix CHAR(12) NOT NULL,
+            secret_hash CHAR(64) NOT NULL,
+            scopes_json LONGTEXT NOT NULL,
+            rate_limit_per_hour INT UNSIGNED NOT NULL DEFAULT 1000,
+            status VARCHAR(20) NOT NULL DEFAULT 'active',
+            last_used_at DATETIME NULL,
+            expires_at DATETIME NULL,
+            created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY key_uuid (key_uuid),
+            UNIQUE KEY key_prefix (key_prefix),
+            KEY status (status),
+            KEY expires_at (expires_at),
+            KEY created_by (created_by)
+        ) {$charset};";
+
+        $webhooks_sql = "CREATE TABLE {$webhooks_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            webhook_uuid CHAR(36) NOT NULL,
+            name VARCHAR(191) NOT NULL,
+            endpoint_url LONGTEXT NOT NULL,
+            secret_encrypted LONGTEXT NOT NULL,
+            secret_prefix VARCHAR(20) NOT NULL,
+            events_json LONGTEXT NOT NULL,
+            status VARCHAR(20) NOT NULL DEFAULT 'active',
+            last_delivery_at DATETIME NULL,
+            last_status_code INT NOT NULL DEFAULT 0,
+            failure_count INT UNSIGNED NOT NULL DEFAULT 0,
+            created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY webhook_uuid (webhook_uuid),
+            KEY status (status),
+            KEY created_by (created_by),
+            KEY last_delivery_at (last_delivery_at)
+        ) {$charset};";
+
+        $webhook_deliveries_sql = "CREATE TABLE {$webhook_deliveries_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            delivery_uuid CHAR(36) NOT NULL,
+            webhook_id BIGINT UNSIGNED NOT NULL,
+            event_id CHAR(36) NOT NULL,
+            event_type VARCHAR(64) NOT NULL,
+            payload_json LONGTEXT NOT NULL,
+            attempt INT UNSIGNED NOT NULL DEFAULT 0,
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            response_code INT NOT NULL DEFAULT 0,
+            response_body LONGTEXT NULL,
+            signature VARCHAR(191) NOT NULL DEFAULT '',
+            next_attempt_at DATETIME NULL,
+            delivered_at DATETIME NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY delivery_uuid (delivery_uuid),
+            KEY webhook_id (webhook_id),
+            KEY event_id (event_id),
+            KEY event_type (event_type),
+            KEY status (status),
+            KEY next_attempt_at (next_attempt_at),
+            KEY created_at (created_at)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
         dbDelta($workspaces_sql);
@@ -637,6 +710,9 @@ final class SC_Library_Activator {
         dbDelta($graph_edges_sql);
         dbDelta($orchestration_sessions_sql);
         dbDelta($orchestration_events_sql);
+        dbDelta($api_keys_sql);
+        dbDelta($webhooks_sql);
+        dbDelta($webhook_deliveries_sql);
     }
 
     private static function install_defaults(): void {
@@ -700,6 +776,13 @@ final class SC_Library_Activator {
         add_option('sc_library_orchestrator_timeout', 10);
         add_option('sc_library_orchestrator_max_records', 8);
         add_option('sc_library_orchestrator_graph_depth', 1);
+        add_option('sc_library_enable_developer_api', 1);
+        add_option('sc_library_api_public_rate_limit', 300);
+        add_option('sc_library_api_key_rate_limit', 1000);
+        add_option('sc_library_api_allowed_origins', '');
+        add_option('sc_library_developer_portal_url', home_url('/developers/'));
+        add_option('sc_library_webhook_max_attempts', 4);
+        add_option('sc_library_webhook_timeout', 10);
         add_option('sc_library_review_lock_minutes', 15);
         add_option('sc_library_review_invitation_days', 14);
         add_option('sc_library_media_service_url', '');

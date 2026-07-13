@@ -426,6 +426,15 @@ final class SC_Library_Document_Production {
             'output_bytes' => strlen($bytes),
             'completed_at' => current_time('mysql', true),
         ]);
+        do_action('sc_library_document_rendered', [
+            'job_uuid' => (string) $row['job_uuid'],
+            'edition_uuid' => $edition_uuid,
+            'book_id' => (string) $row['book_id'],
+            'title' => (string) $row['title'],
+            'attachment_id' => (int) $attachment_id,
+            'url' => wp_get_attachment_url((int) $attachment_id),
+            'sha256' => hash('sha256', $bytes),
+        ]);
         return (int) $attachment_id;
     }
 

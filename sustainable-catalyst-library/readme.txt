@@ -4,78 +4,81 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.17.0
+Stable tag: 1.18.0
 License: GPLv2 or later
 
-A native WordPress knowledge system with site-scoped Research Librarian orchestration, a provenance-aware graph, editorial collaboration, multimedia, persistent workspaces, server-rendered documents, planning, notebooks, and PostgreSQL portability.
+A native WordPress knowledge system with a versioned public API, signed webhooks, developer documentation, Research Librarian orchestration, a provenance-aware graph, editorial collaboration, multimedia, workspaces, planning, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v1.17.0 adds Research Librarian Workspace Orchestration while retaining the complete v1.16.0 Library platform.
+Sustainable Catalyst Library v1.18.0 adds a versioned public API, scoped service keys, signed webhooks, OpenAPI 3.1, JSON Schemas, and a public developer portal while retaining the complete v1.17.0 Library platform.
 
-= Research Librarian Orchestration =
+= Public API and developer portal =
 
-* Search only the indexed Sustainable Catalyst Library and public Knowledge Graph.
-* Explain why each publication or graph-connected record was recommended.
-* Infer or accept a research intent such as discover, source, translate, map, calculate, decide, investigate, experiment, write, review, publish, or preserve.
-* Prepare routes into Notebook, Translation Matrix, Whiteboard, Book Builder, Editorial Workflow, Workbench, Decision Studio, Site Intelligence, and Lab.
-* Require explicit confirmation before applying any local workspace action.
-* Keep publication, scheduling, approval, and canonical editing in their existing WordPress workflows.
-* Optionally use a server-to-server synthesis endpoint that cannot alter action packets.
-* Save signed-in account sessions and attributed action history.
+* Public namespace `/wp-json/sustainable-catalyst-library/v1`.
+* Public records, relationships, graph neighborhoods, roadmap data, schemas, status, and OpenAPI routes.
+* Protected export, reindex, and webhook-test operations using scoped administrator-issued keys.
+* Keyed API-key hashes, per-key rate limits, expiration, revocation, and last-used timestamps.
+* Exact-origin opt-in CORS rather than wildcard access.
+* Public shortcode `[sc_library_developer_portal]`.
 
-= Retained systems =
+= Signed webhooks =
 
-* Knowledge Graph, confidence, provenance, graph diagnostics, timeline and place views, and board promotion.
-* Editorial reviews, participant roles, comments, suggestions, approvals, locks, and attribution.
-* Multimedia assets, clips, evidence reels, transcripts, rights, and optional Render processing.
-* Cursor-based large-library indexing and database inventory.
-* Persistent account workspaces and optional Render/PostgreSQL synchronization.
-* Server-side book and PDF production.
-* Content Planner, release coordination, Notebook, boards, annotations, books, and portable exports.
+* HTTPS-only endpoints with private-network and unsafe-URL safeguards.
+* Event subscriptions for publication, plans, documentation, graph rebuilds, workspaces, editorial transitions, books, and media clips.
+* Timestamped HMAC SHA-256 delivery signatures.
+* Bounded retries, delivery history, response summaries, tests, pause, delete, and redelivery controls.
+* Encrypted signing secrets shown only once at creation.
 
 = Portable Data =
 
-* Workspace schema `sc-library-workspace/1.8`.
-* Knowledge graph schema `sc-library-knowledge-graph/1.0`.
-* Orchestration schema `sc-library-orchestration/1.0`.
-* Portable export schema `sc-library-portable-export/1.7`.
-* New normalized entities `orchestration_sessions` and `orchestration_events`.
+* Portable export schema `sc-library-portable-export/1.8`.
+* New normalized entities `api_keys`, `webhooks`, and `webhook_deliveries`.
+* Secret hashes, encrypted signing secrets, full delivery payloads, and delivery signatures are excluded from portable exports.
 
 == Installation ==
 
 1. Upload and activate the plugin.
-2. Confirm the Library index is healthy under SC Library → Index Tools.
-3. Confirm the Knowledge Graph is current.
-4. Open SC Library → Research Librarian.
-5. Create a public page with `[sc_research_librarian_orchestrator]`.
-6. Save that page URL in the orchestration settings.
+2. Open SC Library → Developer API.
+3. Configure public and keyed rate limits.
+4. Create a WordPress page with `[sc_library_developer_portal]`.
+5. Save the page URL in Developer API settings.
+6. Create the minimum scoped key needed for each integration.
+7. Add one HTTPS webhook and send a test delivery.
 
 == Shortcodes ==
 
+* `[sc_library_developer_portal]`
 * `[sc_research_librarian_orchestrator]`
-* `[sc_library_orchestrator]`
 * `[sc_library_knowledge_graph]`
-* `[sc_library_relationship_intelligence]`
 * `[sc_library_editorial_workflow]`
 * `[sc_library_multimedia_studio]`
-* `[sc_library_book_builder]`
-* `[sc_library_account_workspaces]`
-* `[sc_library_notebook]`
 * `[sc_library]`
 * `[sc_library_registry mode="public"]`
 * `[sc_library_portability]`
 
 == REST API ==
 
-* `/wp-json/sustainable-catalyst/v1/library/orchestrator/schema`
-* `/wp-json/sustainable-catalyst/v1/library/orchestrator/status`
-* `/wp-json/sustainable-catalyst/v1/library/orchestrator/query`
-* `/wp-json/sustainable-catalyst/v1/library/orchestrator/sessions`
-* `/wp-json/sustainable-catalyst/v1/library/orchestrator/sessions/{uuid}`
-* `/wp-json/sustainable-catalyst/v1/library/orchestrator/events`
+* `/wp-json/sustainable-catalyst-library/v1/status`
+* `/wp-json/sustainable-catalyst-library/v1/records`
+* `/wp-json/sustainable-catalyst-library/v1/records/{id}`
+* `/wp-json/sustainable-catalyst-library/v1/relationships`
+* `/wp-json/sustainable-catalyst-library/v1/graph`
+* `/wp-json/sustainable-catalyst-library/v1/roadmap`
+* `/wp-json/sustainable-catalyst-library/v1/schemas`
+* `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 1.18.0 =
+* Added a dedicated versioned public API namespace.
+* Added public record, relationship, graph, roadmap, schema, status, and OpenAPI endpoints.
+* Added hashed scoped API keys, rate limits, expiration, revocation, and last-used tracking.
+* Added signed HTTPS webhooks with encrypted secrets, bounded retries, delivery logs, tests, and redelivery.
+* Added publication, plan, documentation, graph, workspace, review, document, and media event bridges.
+* Added a native public developer portal and admin Developer API workspace.
+* Added OpenAPI 3.1, JSON Schemas, JavaScript/Python clients, and webhook-verification examples.
+* Added portable developer metadata entities and export schema 1.8 without exporting secrets.
 
 = 1.17.0 =
 * Added site-scoped Research Librarian Workspace Orchestration.

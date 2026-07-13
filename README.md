@@ -1,78 +1,91 @@
-# Sustainable Catalyst Library v1.17.0
+# Sustainable Catalyst Library v1.18.0
 
-Library v1.17.0 adds **Research Librarian Workspace Orchestration** to the complete v1.16.0 Library platform.
+Library v1.18.0 adds **Public API, Webhooks, and Developer Documentation** to the complete v1.17.0 Library platform.
 
-## Research Librarian orchestration
+## Developer infrastructure
 
-The orchestrator searches the canonical Library index, expands relevant records through the Knowledge Graph, explains why records were recommended, and builds a controlled research route.
-
-```text
-Question
-→ Find
-→ Explain
-→ Collect
-→ Organize
-→ Route
-→ Produce
-```
-
-It can prepare user-confirmed actions for:
-
-- Notebook collections, saved records, sources, and research briefs
-- Technical Translation Matrices
-- Whiteboards
-- Custom books and preservation packets
-- Workbench analysis
-- Decision Studio evidence canvases
-- Site Intelligence investigations
-- Sustainable Catalyst Lab workflows
-- Editorial review and publication coordination
-
-The orchestrator never publishes, approves, schedules, or silently changes canonical content.
-
-## Shortcodes
+The release provides a dedicated, versioned namespace:
 
 ```text
-[sc_research_librarian_orchestrator]
-[sc_library_orchestrator]
+/wp-json/sustainable-catalyst-library/v1
 ```
 
-Create a public Research Librarian page, add one shortcode, and save its URL under **SC Library → Research Librarian**.
+Public routes expose only canonical public Library data. Protected operations require administrator-issued scoped keys whose plaintext is shown once and whose stored representation is a keyed hash.
 
-## REST API
+## Public endpoints
 
 ```text
-/wp-json/sustainable-catalyst/v1/library/orchestrator/schema
-/wp-json/sustainable-catalyst/v1/library/orchestrator/status
-/wp-json/sustainable-catalyst/v1/library/orchestrator/query
-/wp-json/sustainable-catalyst/v1/library/orchestrator/sessions
-/wp-json/sustainable-catalyst/v1/library/orchestrator/sessions/{uuid}
-/wp-json/sustainable-catalyst/v1/library/orchestrator/events
+GET /status
+GET /records
+GET /records/{id}
+GET /relationships
+GET /graph
+GET /roadmap
+GET /schemas
+GET /schemas/{name}
+GET /openapi.json
 ```
+
+## Protected endpoints
+
+```text
+GET  /protected/export-manifest   scope: exports:read
+POST /protected/reindex           scope: index:write
+POST /protected/webhooks/test     scope: webhooks:write
+```
+
+Keys can be supplied through `X-SC-Library-Key` or `Authorization: Bearer`.
+
+## Signed webhooks
+
+Webhook destinations must use safe HTTPS URLs. Delivery headers include:
+
+```text
+X-SC-Event
+X-SC-Delivery
+X-SC-Timestamp
+X-SC-Signature: sha256=HMAC(secret, timestamp.payload)
+```
+
+Retries are bounded and recorded. Webhook signing secrets are encrypted at rest and shown only once when created.
+
+## Developer portal
+
+Create a WordPress page and add:
+
+```text
+[sc_library_developer_portal]
+```
+
+The portal links to the OpenAPI 3.1 document, JSON Schema registry, endpoint catalog, event catalog, authentication guidance, and examples.
 
 ## Portable data
 
 Portable export schema:
 
 ```text
-sc-library-portable-export/1.7
+sc-library-portable-export/1.8
 ```
 
 New normalized entities:
 
-- `orchestration_sessions`
-- `orchestration_events`
+- `api_keys`
+- `webhooks`
+- `webhook_deliveries`
+
+Exports omit key hashes, encrypted webhook secrets, full delivery payloads, and delivery signatures.
 
 ## Retained systems
 
+- Research Librarian Workspace Orchestration
 - Knowledge Graph and relationship intelligence
-- Collaboration, reviews, comments, suggestions, approvals, locks, and attribution
-- Multimedia Studio, clips, transcripts, rights, and evidence reels
-- Large-Library Index Tools and cursor reconciliation
+- Editorial collaboration and review
+- Multimedia Studio and evidence reels
+- Large-Library Index Tools
 - Persistent account workspaces and optional Render synchronization
 - Server-side book and PDF production
 - Content Planner, release coordination, and public registry
 - Research Notebook, matrices, boards, annotations, and books
 - PostgreSQL, CSV, JSONL, and JSON portability
 
-See `RESEARCH_LIBRARIAN_ORCHESTRATION_SETUP.md` and `RELEASE_NOTES_1.17.0.md`.
+See `DEVELOPER_API_SETUP.md` and `RELEASE_NOTES_1.18.0.md`.

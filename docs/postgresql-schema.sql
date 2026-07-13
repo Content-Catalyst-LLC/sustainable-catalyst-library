@@ -576,6 +576,57 @@ CREATE TABLE IF NOT EXISTS orchestration_events (
 );
 CREATE INDEX IF NOT EXISTS orchestration_events_session_idx ON orchestration_events(session_id, created_at);
 
+CREATE TABLE IF NOT EXISTS api_keys (
+    api_key_id bigint PRIMARY KEY,
+    key_uuid uuid UNIQUE NOT NULL,
+    name text NOT NULL,
+    key_prefix text NOT NULL,
+    scopes jsonb NOT NULL DEFAULT '[]'::jsonb,
+    rate_limit_per_hour integer NOT NULL DEFAULT 1000,
+    status text NOT NULL,
+    last_used_at timestamptz,
+    expires_at timestamptz,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    updated_at timestamptz,
+    secret_exported boolean NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS webhooks (
+    webhook_id bigint PRIMARY KEY,
+    webhook_uuid uuid UNIQUE NOT NULL,
+    name text NOT NULL,
+    endpoint_url text NOT NULL,
+    secret_prefix text NOT NULL,
+    events jsonb NOT NULL DEFAULT '[]'::jsonb,
+    status text NOT NULL,
+    last_delivery_at timestamptz,
+    last_status_code integer NOT NULL DEFAULT 0,
+    failure_count integer NOT NULL DEFAULT 0,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    updated_at timestamptz,
+    secret_exported boolean NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS webhook_deliveries (
+    webhook_delivery_id bigint PRIMARY KEY,
+    delivery_uuid uuid UNIQUE NOT NULL,
+    webhook_id bigint NOT NULL REFERENCES webhooks(webhook_id) ON DELETE CASCADE,
+    event_id uuid NOT NULL,
+    event_type text NOT NULL,
+    attempt integer NOT NULL DEFAULT 0,
+    status text NOT NULL,
+    response_code integer NOT NULL DEFAULT 0,
+    response_summary text NOT NULL DEFAULT '',
+    next_attempt_at timestamptz,
+    delivered_at timestamptz,
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload_exported boolean NOT NULL DEFAULT false,
+    signature_exported boolean NOT NULL DEFAULT false
+);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 

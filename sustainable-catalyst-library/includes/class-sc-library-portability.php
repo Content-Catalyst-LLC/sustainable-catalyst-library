@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * tables or serialized plugin internals.
  */
 final class SC_Library_Portability {
-    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.7';
+    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.8';
     public const POSTGRES_SCHEMA = 'sustainable_catalyst_library';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 
@@ -80,6 +80,7 @@ final class SC_Library_Portability {
             'relationships' => __('Relationships, terms, and resources', 'sustainable-catalyst-library'),
             'knowledge_graph' => __('Knowledge graph, relationship provenance, and diagnostics data', 'sustainable-catalyst-library'),
             'orchestration' => __('Research Librarian sessions, routes, and attributed action events', 'sustainable-catalyst-library'),
+            'developer_api' => __('Developer API keys, webhook configuration, and delivery history without secrets', 'sustainable-catalyst-library'),
             'account_workspaces' => __('Persistent account workspaces and revisions', 'sustainable-catalyst-library'),
             'document_editions' => __('Server document jobs and frozen editions', 'sustainable-catalyst-library'),
             'multimedia' => __('Multimedia assets, clips, reels, and processing jobs', 'sustainable-catalyst-library'),
@@ -426,6 +427,9 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         $graph_edges = $this->export_graph_edges();
         $orchestration_sessions = $this->export_orchestration_sessions();
         $orchestration_events = $this->export_orchestration_events();
+        $api_keys = $this->export_api_keys();
+        $webhooks = $this->export_webhooks();
+        $webhook_deliveries = $this->export_webhook_deliveries();
 
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($r) => (int) $r['id'], $public_registry), true);
@@ -490,6 +494,12 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $orchestration_sessions = $orchestration_events = [];
         }
 
+        if ($scope === 'developer_api') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = $graph_nodes = $graph_edges = $orchestration_sessions = $orchestration_events = [];
+        } elseif ($scope !== 'complete') {
+            $api_keys = $webhooks = $webhook_deliveries = [];
+        }
+
         $entities = [
             'records' => $records,
             'terms' => $terms,
@@ -518,6 +528,9 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'editorial_events' => $editorial_events,
             'orchestration_sessions' => $orchestration_sessions,
             'orchestration_events' => $orchestration_events,
+            'api_keys' => $api_keys,
+            'webhooks' => $webhooks,
+            'webhook_deliveries' => $webhook_deliveries,
         ];
 
         $counts = [];
@@ -542,9 +555,82 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
                 'Multimedia exports preserve asset, clip, reel, rights, transcript, and processing metadata without embedding video or audio binaries.',
                 'Knowledge graph exports preserve normalized entities, relationship confidence, provenance, visibility, verification state, and board-promotion lineage.',
                 'Research Librarian orchestration exports are administrator-only and may contain user research questions, recommended routes, and attributed action history.',
+                'Developer API exports omit API-key hashes, webhook signing secrets, and full webhook payload bodies.',
             ],
         ];
         return ['manifest' => $manifest, 'entities' => $entities];
+    }
+
+    private function export_api_keys(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Developer_API')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Developer_API::keys_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(static function (array $row): array {
+            return [
+                'api_key_id' => (int) $row['id'],
+                'key_uuid' => (string) $row['key_uuid'],
+                'name' => (string) $row['name'],
+                'key_prefix' => (string) $row['key_prefix'],
+                'scopes' => json_decode((string) $row['scopes_json'], true) ?: [],
+                'rate_limit_per_hour' => (int) $row['rate_limit_per_hour'],
+                'status' => (string) $row['status'],
+                'last_used_at' => $row['last_used_at'] ? mysql_to_rfc3339((string) $row['last_used_at']) : null,
+                'expires_at' => $row['expires_at'] ? mysql_to_rfc3339((string) $row['expires_at']) : null,
+                'created_by' => (int) $row['created_by'],
+                'created_at' => mysql_to_rfc3339((string) $row['created_at']),
+                'updated_at' => mysql_to_rfc3339((string) $row['updated_at']),
+                'secret_exported' => false,
+            ];
+        }, $rows);
+    }
+
+    private function export_webhooks(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Developer_API')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Developer_API::webhooks_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(static function (array $row): array {
+            return [
+                'webhook_id' => (int) $row['id'],
+                'webhook_uuid' => (string) $row['webhook_uuid'],
+                'name' => (string) $row['name'],
+                'endpoint_url' => (string) $row['endpoint_url'],
+                'secret_prefix' => (string) $row['secret_prefix'],
+                'events' => json_decode((string) $row['events_json'], true) ?: [],
+                'status' => (string) $row['status'],
+                'last_delivery_at' => $row['last_delivery_at'] ? mysql_to_rfc3339((string) $row['last_delivery_at']) : null,
+                'last_status_code' => (int) $row['last_status_code'],
+                'failure_count' => (int) $row['failure_count'],
+                'created_by' => (int) $row['created_by'],
+                'created_at' => mysql_to_rfc3339((string) $row['created_at']),
+                'updated_at' => mysql_to_rfc3339((string) $row['updated_at']),
+                'secret_exported' => false,
+            ];
+        }, $rows);
+    }
+
+    private function export_webhook_deliveries(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Developer_API')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Developer_API::deliveries_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(static function (array $row): array {
+            return [
+                'webhook_delivery_id' => (int) $row['id'],
+                'delivery_uuid' => (string) $row['delivery_uuid'],
+                'webhook_id' => (int) $row['webhook_id'],
+                'event_id' => (string) $row['event_id'],
+                'event_type' => (string) $row['event_type'],
+                'attempt' => (int) $row['attempt'],
+                'status' => (string) $row['status'],
+                'response_code' => (int) $row['response_code'],
+                'response_summary' => function_exists('mb_substr') ? mb_substr((string) $row['response_body'], 0, 500) : substr((string) $row['response_body'], 0, 500),
+                'next_attempt_at' => $row['next_attempt_at'] ? mysql_to_rfc3339((string) $row['next_attempt_at']) : null,
+                'delivered_at' => $row['delivered_at'] ? mysql_to_rfc3339((string) $row['delivered_at']) : null,
+                'created_at' => mysql_to_rfc3339((string) $row['created_at']),
+                'updated_at' => mysql_to_rfc3339((string) $row['updated_at']),
+                'payload_exported' => false,
+                'signature_exported' => false,
+            ];
+        }, $rows);
     }
 
     private function export_media_assets(): array {
@@ -1788,6 +1874,55 @@ CREATE TABLE IF NOT EXISTS orchestration_events (
 );
 CREATE INDEX IF NOT EXISTS orchestration_events_session_idx ON orchestration_events(session_id, created_at);
 
+CREATE TABLE IF NOT EXISTS api_keys (
+    api_key_id bigint PRIMARY KEY,
+    key_uuid uuid UNIQUE NOT NULL,
+    name text NOT NULL,
+    key_prefix text NOT NULL,
+    scopes jsonb NOT NULL DEFAULT '[]'::jsonb,
+    rate_limit_per_hour integer NOT NULL DEFAULT 1000,
+    status text NOT NULL,
+    last_used_at timestamptz,
+    expires_at timestamptz,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    updated_at timestamptz,
+    secret_exported boolean NOT NULL DEFAULT false
+);
+CREATE TABLE IF NOT EXISTS webhooks (
+    webhook_id bigint PRIMARY KEY,
+    webhook_uuid uuid UNIQUE NOT NULL,
+    name text NOT NULL,
+    endpoint_url text NOT NULL,
+    secret_prefix text NOT NULL,
+    events jsonb NOT NULL DEFAULT '[]'::jsonb,
+    status text NOT NULL,
+    last_delivery_at timestamptz,
+    last_status_code integer NOT NULL DEFAULT 0,
+    failure_count integer NOT NULL DEFAULT 0,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    updated_at timestamptz,
+    secret_exported boolean NOT NULL DEFAULT false
+);
+CREATE TABLE IF NOT EXISTS webhook_deliveries (
+    webhook_delivery_id bigint PRIMARY KEY,
+    delivery_uuid uuid UNIQUE NOT NULL,
+    webhook_id bigint NOT NULL REFERENCES webhooks(webhook_id) ON DELETE CASCADE,
+    event_id uuid NOT NULL,
+    event_type text NOT NULL,
+    attempt integer NOT NULL DEFAULT 0,
+    status text NOT NULL,
+    response_code integer NOT NULL DEFAULT 0,
+    response_summary text NOT NULL DEFAULT '',
+    next_attempt_at timestamptz,
+    delivered_at timestamptz,
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload_exported boolean NOT NULL DEFAULT false,
+    signature_exported boolean NOT NULL DEFAULT false
+);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 
@@ -1859,6 +1994,9 @@ SQL;
             'editorial_events' => ['event_id','review_id','user_id','event_type','payload','created_at'],
             'orchestration_sessions' => ['orchestration_session_id','session_uuid','owner_user_id','title','question','intent','status','provider','model','retrieval_mode','created_at','updated_at','payload'],
             'orchestration_events' => ['orchestration_event_id','session_id','event_uuid','event_type','created_by','created_at','payload'],
+            'api_keys' => ['api_key_id','key_uuid','name','key_prefix','scopes','rate_limit_per_hour','status','last_used_at','expires_at','created_by','created_at','updated_at','secret_exported'],
+            'webhooks' => ['webhook_id','webhook_uuid','name','endpoint_url','secret_prefix','events','status','last_delivery_at','last_status_code','failure_count','created_by','created_at','updated_at','secret_exported'],
+            'webhook_deliveries' => ['webhook_delivery_id','delivery_uuid','webhook_id','event_id','event_type','attempt','status','response_code','response_summary','next_attempt_at','delivered_at','created_at','updated_at','payload_exported','signature_exported'],
             default => [],
         };
         if (!$columns) return '';
@@ -1867,12 +2005,12 @@ SQL;
             $literals = [];
             foreach ($columns as $column) {
                 $value = $row[$column] ?? null;
-                if (in_array($column, ['payload', 'expected_release', 'manifest', 'diagnostics', 'clip_uuids', 'anchor'], true)) $literals[] = $this->sql_json($value ?: []);
+                if (in_array($column, ['payload', 'expected_release', 'manifest', 'diagnostics', 'clip_uuids', 'anchor', 'scopes', 'events'], true)) $literals[] = $this->sql_json($value ?: []);
                 elseif (in_array($column, ['dependency_ids'], true)) $literals[] = $this->sql_bigint_array(is_array($value) ? $value : []);
-                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at','completed_at','frozen_at','due_at','locked_at','lock_expires_at','expires_at','resolved_at','decided_at','verified_at'], true)) $literals[] = $this->sql_timestamp($value);
+                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at','completed_at','frozen_at','due_at','locked_at','lock_expires_at','expires_at','resolved_at','decided_at','verified_at','last_used_at','last_delivery_at','next_attempt_at','delivered_at'], true)) $literals[] = $this->sql_timestamp($value);
                 elseif (in_array($column, ['last_reviewed','planned_start','actual_start','actual_publication_date'], true)) $literals[] = $value ? $this->sql_text((string) $value) . '::date' : 'NULL';
-                elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
-                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by'], true)) ? (string) (int) $value : 'NULL';
+                elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override','secret_exported','payload_exported','signature_exported'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
+                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by','api_key_id','rate_limit_per_hour','last_status_code','failure_count','webhook_id','webhook_delivery_id'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by','api_key_id','rate_limit_per_hour','last_status_code','failure_count','webhook_id','webhook_delivery_id'], true)) ? (string) (int) $value : 'NULL';
                 elseif (in_array($column, ['series_order','estimated_effort','actual_effort','confidence'], true)) $literals[] = (string) (float) $value;
                 else $literals[] = $this->sql_text((string) ($value ?? ''));
             }
@@ -1904,6 +2042,11 @@ SQL;
             'editorial_comments' => 'comment_id',
             'editorial_suggestions' => 'suggestion_id',
             'editorial_events' => 'event_id',
+            'orchestration_sessions' => 'orchestration_session_id',
+            'orchestration_events' => 'orchestration_event_id',
+            'api_keys' => 'api_key_id',
+            'webhooks' => 'webhook_id',
+            'webhook_deliveries' => 'webhook_delivery_id',
             default => '',
         };
         return "INSERT INTO {$entity} (" . implode(', ', $columns) . ") VALUES\n" . implode(",\n", $values) . ($conflict ? "\nON CONFLICT ({$conflict}) DO NOTHING;" : ';');
