@@ -1,6 +1,6 @@
-# Library v1.13.1 — Server Document Production Setup
+# Library v1.13.2 — Server Document Production Setup
 
-Library v1.13.1 adds an optional server-side book and PDF pipeline. WordPress remains the source of truth for publications, users, permissions, job history, frozen edition records, and final files. Render performs the computationally expensive PDF rendering.
+Library v1.13.2 adds an optional server-side book and PDF pipeline. WordPress remains the source of truth for publications, users, permissions, job history, frozen edition records, and final files. Render performs the computationally expensive PDF rendering.
 
 ## What works without Render
 

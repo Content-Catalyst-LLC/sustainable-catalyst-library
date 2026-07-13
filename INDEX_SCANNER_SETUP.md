@@ -1,4 +1,4 @@
-# Library v1.13.1 Index Scanner Setup
+# Library v1.13.2 Index Scanner Setup
 
 ## Open the scanner
 

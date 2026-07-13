@@ -13,7 +13,7 @@ final class SC_Library_Admin {
     }
 
     public function register_hooks(): void {
-        add_action('admin_menu', [$this, 'menu']);
+        add_action('admin_menu', [$this, 'menu'], 5);
         add_action('admin_init', [$this, 'settings']);
         add_action('admin_post_sc_library_reindex', [$this, 'handle_reindex']);
         add_action('admin_notices', [$this, 'activation_notice']);
@@ -212,11 +212,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.13.1 activated.</strong> Open SC Library → Index Scanner to run a resumable rebuild and review index diagnostics. Document Production and Render remain independent of indexing.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.13.2 activated.</strong> Open SC Library → Index Scanner to run a resumable rebuild and review index diagnostics. Document Production and Render remain independent of indexing.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.13.1.</strong> The release adds a dedicated resumable Index Scanner, post-type diagnostics, targeted record repair, stale-record cleanup, relationship repair, and downloadable scan logs. Open SC Library → Index Scanner.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.13.2.</strong> The release adds a dedicated resumable Index Scanner, post-type diagnostics, targeted record repair, stale-record cleanup, relationship repair, and downloadable scan logs. Open SC Library → Index Scanner.</p></div>';
         }
     }
 

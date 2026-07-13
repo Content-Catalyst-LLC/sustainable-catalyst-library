@@ -1,6 +1,6 @@
 {
   "schema": "sc-library-portable-export/1.3",
-  "plugin_version": "1.13.1",
+  "plugin_version": "1.13.2",
   "workspace_schema": "sc-library-workspace/1.7",
   "generated_at": "2026-07-12T00:00:00+00:00",
   "site_url": "https://sustainablecatalyst.com/",

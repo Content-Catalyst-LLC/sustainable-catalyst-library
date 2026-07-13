@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.13.1"
+VERSION="1.13.2"
 REMOTE_SSH="git@github.com:Content-Catalyst-LLC/sustainable-catalyst-library.git"
 REMOTE_SLUG="Content-Catalyst-LLC/sustainable-catalyst-library"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -74,7 +74,10 @@ validate_marker() {
 
 validate_marker "Version: $VERSION" sustainable-catalyst-library/sustainable-catalyst-library.php "Plugin version marker validation failed."
 validate_marker "SC_LIBRARY_VERSION', '$VERSION'" sustainable-catalyst-library/sustainable-catalyst-library.php "Runtime version marker validation failed."
-validate_marker "Index Scanner and Rebuild Reliability Patch" README.md "Release marker is missing."
+validate_marker "Index Scanner Administration Route Repair" README.md "Release marker is missing."
+validate_marker "admin_menu'], 20" sustainable-catalyst-library/includes/class-sc-library-scanner.php "Scanner submenu priority repair is missing."
+validate_marker "menu'], 5" sustainable-catalyst-library/includes/class-sc-library-admin.php "Parent menu priority repair is missing."
+validate_marker "Index Scanner Administration Route Repair" RELEASE_NOTES_1.13.2.md "Route-repair release notes are missing."
 validate_marker "sc-library-index-scan/1.0" sustainable-catalyst-library/includes/class-sc-library-scanner.php "Scanner-state schema marker is missing."
 validate_marker "scanner/status" sustainable-catalyst-library/includes/class-sc-library-scanner.php "Scanner REST status route is missing."
 validate_marker "scan_candidate_ids" sustainable-catalyst-library/includes/class-sc-library-indexer.php "Resumable scanner candidate method is missing."
@@ -103,7 +106,8 @@ for required in \
   render-workspace-service/requirements.txt \
   render-workspace-service/tests/test_documents.py \
   "sustainable-catalyst-library-v${VERSION}.zip" \
-  RELEASE_NOTES_1.13.1.md \
+  RELEASE_NOTES_1.13.2.md \
+  INDEX_SCANNER_ROUTE_REPAIR.md \
   INDEX_SCANNER_SETUP.md \
   SERVER_DOCUMENT_PRODUCTION_SETUP.md \
   WORKSPACE_SYNC_SETUP.md \
@@ -141,7 +145,7 @@ if command -v unzip >/dev/null 2>&1; then
 fi
 
 if grep -RInE --exclude-dir=.git --exclude-dir='__pycache__' --exclude-dir='.pytest_cache' \
-  --exclude='.env.example' --exclude='push_library_v1_13_1_to_github.sh' --exclude='install_and_push_library_v1_13_1.sh' \
+  --exclude='.env.example' --exclude='push_library_v1_13_2_to_github.sh' --exclude='install_and_push_library_v1_13_2.sh' \
   '((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|DATABASE_URL=postgres(ql)?://[^<[:space:]]+|SC_LIBRARY_SYNC_API_KEY=[A-Za-z0-9_-]{16,})' .; then
   echo "ERROR: Potential secret detected. Review the output above."
   exit 1
@@ -151,11 +155,11 @@ git add -A
 if git diff --cached --quiet; then
   echo "No changes to commit."
 else
-  git commit -m "Build Library v1.13.1 — Index Scanner and Rebuild Reliability Patch"
+  git commit -m "Build Library v1.13.2 — Index Scanner Administration Route Repair"
 fi
 
 git push -u origin main
 
 echo
-echo "Sustainable Catalyst Library v1.13.1 pushed successfully."
+echo "Sustainable Catalyst Library v1.13.2 pushed successfully."
 echo "Repository: https://github.com/$REMOTE_SLUG"

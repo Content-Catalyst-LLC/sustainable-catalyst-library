@@ -1,6 +1,6 @@
-# Sustainable Catalyst Library v1.13.1
+# Sustainable Catalyst Library v1.13.2
 
-Library v1.13.1 adds the **Index Scanner and Rebuild Reliability Patch** while retaining all v1.13.0 server-side document-production capabilities.
+Library v1.13.2 repairs the **Index Scanner administration route** from v1.13.1 while retaining the complete resumable scanner and all v1.13.0 server-side document-production capabilities.
 
 The Library now has a dedicated resumable scanner with per-post-type diagnostics, missing and outdated record repair, single-record reindexing, relationship repair, stale cleanup, and downloadable scan logs. Indexing remains entirely WordPress-local and does not depend on Render, PostgreSQL, workspaces, or document production.
 
@@ -94,3 +94,8 @@ See:
 - `SERVER_DOCUMENT_PRODUCTION_SETUP.md`
 - `WORKSPACE_SYNC_SETUP.md`
 - `render-workspace-service/README.md`
+
+
+## Index Scanner Administration Route Repair
+
+The SC Library parent menu is registered before the scanner submenu, preventing WordPress from rejecting `/wp-admin/admin.php?page=sc-library-scanner` as an unregistered page.

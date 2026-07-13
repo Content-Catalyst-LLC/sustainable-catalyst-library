@@ -4,14 +4,14 @@ Tags: knowledge-base, pdf, document-production, render, research-workspace, post
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.13.1
+Stable tag: 1.13.2
 License: GPLv2 or later
 
 A native WordPress knowledge base with persistent workspaces, server-rendered books and PDFs, planning, documentation, notebooks, PostgreSQL portability, and optional Render services.
 
 == Description ==
 
-Sustainable Catalyst Library v1.13.1 adds a dedicated resumable Index Scanner while retaining optional server-side book, PDF, and document production.
+Sustainable Catalyst Library v1.13.2 corrects the Index Scanner administration route and retains a dedicated resumable Index Scanner while retaining optional server-side book, PDF, and document production.
 
 
 = Index Scanner =
@@ -83,6 +83,14 @@ Sustainable Catalyst Library v1.13.1 adds a dedicated resumable Index Scanner wh
 * `/wp-json/sustainable-catalyst/v1/library/workspaces/{uuid}`
 
 == Changelog ==
+
+= 1.13.2 =
+
+* Fixed the Index Scanner admin page registration order.
+* Registered the SC Library parent menu before all Library submenus.
+* Registered the Index Scanner after its parent menu exists.
+* Corrected the scanner admin route and asset hook resolution.
+* Retained the resumable scanner, diagnostics, repairs, and downloadable logs from v1.13.1.
 
 = 1.13.1 =
 

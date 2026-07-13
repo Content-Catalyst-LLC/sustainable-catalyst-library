@@ -33,7 +33,7 @@
   };
   const saveWorkspace = (data) => {
     data.schema = workspaceSchema;
-    data.version = shared.version || data.version || '1.13.1';
+    data.version = shared.version || data.version || '1.13.2';
     data.updatedAt = now();
     window.localStorage.setItem(storageKey, JSON.stringify(data));
     window.dispatchEvent(new CustomEvent('sc-library-workspace-updated'));
@@ -64,7 +64,7 @@
     id: uid('handoff'),
     target: targetId,
     created_at: now(),
-    source: {application:'sustainable-catalyst-library',version:shared.version || '1.13.1',url:window.location.href},
+    source: {application:'sustainable-catalyst-library',version:shared.version || '1.13.2',url:window.location.href},
     context: {type:entry.type,id:entry.id,title:entry.title,data:compactObject(entry, ws)},
     request: {purpose:purpose || '',question:question || ''},
     collectionIds: Array.isArray(entry.object?.collectionIds) && entry.object.collectionIds.length ? entry.object.collectionIds : ['collection_inbox'],

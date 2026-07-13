@@ -23,7 +23,7 @@ final class SC_Library_Scanner {
     }
 
     public function register_hooks(): void {
-        add_action('admin_menu', [$this, 'admin_menu'], 6);
+        add_action('admin_menu', [$this, 'admin_menu'], 20);
         add_action('admin_enqueue_scripts', [$this, 'admin_assets']);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
         add_action('admin_post_sc_library_download_scan_log', [$this, 'download_log']);
