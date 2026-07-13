@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * tables or serialized plugin internals.
  */
 final class SC_Library_Portability {
-    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.6';
+    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.7';
     public const POSTGRES_SCHEMA = 'sustainable_catalyst_library';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 
@@ -79,6 +79,7 @@ final class SC_Library_Portability {
             'documentation' => __('Foundations and documentation records', 'sustainable-catalyst-library'),
             'relationships' => __('Relationships, terms, and resources', 'sustainable-catalyst-library'),
             'knowledge_graph' => __('Knowledge graph, relationship provenance, and diagnostics data', 'sustainable-catalyst-library'),
+            'orchestration' => __('Research Librarian sessions, routes, and attributed action events', 'sustainable-catalyst-library'),
             'account_workspaces' => __('Persistent account workspaces and revisions', 'sustainable-catalyst-library'),
             'document_editions' => __('Server document jobs and frozen editions', 'sustainable-catalyst-library'),
             'multimedia' => __('Multimedia assets, clips, reels, and processing jobs', 'sustainable-catalyst-library'),
@@ -331,6 +332,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             __('Editorial reviews', 'sustainable-catalyst-library') => class_exists('SC_Library_Collaboration') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Collaboration::reviews_table()) : 0,
             __('Knowledge graph nodes', 'sustainable-catalyst-library') => class_exists('SC_Library_Knowledge_Graph') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . (new SC_Library_Knowledge_Graph($this->indexer, $this->relationships))->nodes_table() . " WHERE status = 'active'") : 0,
             __('Knowledge graph edges', 'sustainable-catalyst-library') => class_exists('SC_Library_Knowledge_Graph') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . (new SC_Library_Knowledge_Graph($this->indexer, $this->relationships))->edges_table()) : 0,
+            __('Research Librarian sessions', 'sustainable-catalyst-library') => class_exists('SC_Library_Orchestrator') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Orchestrator::sessions_table()) : 0,
         ];
     }
 
@@ -422,6 +424,8 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         $editorial_events = $this->export_editorial_events();
         $graph_nodes = $this->export_graph_nodes();
         $graph_edges = $this->export_graph_edges();
+        $orchestration_sessions = $this->export_orchestration_sessions();
+        $orchestration_events = $this->export_orchestration_events();
 
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($r) => (int) $r['id'], $public_registry), true);
@@ -480,6 +484,12 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $graph_nodes = $graph_edges = [];
         }
 
+        if ($scope === 'orchestration') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = $graph_nodes = $graph_edges = [];
+        } elseif ($scope !== 'complete') {
+            $orchestration_sessions = $orchestration_events = [];
+        }
+
         $entities = [
             'records' => $records,
             'terms' => $terms,
@@ -506,6 +516,8 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'editorial_comments' => $editorial_comments,
             'editorial_suggestions' => $editorial_suggestions,
             'editorial_events' => $editorial_events,
+            'orchestration_sessions' => $orchestration_sessions,
+            'orchestration_events' => $orchestration_events,
         ];
 
         $counts = [];
@@ -529,6 +541,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
                 'Server document job records and frozen edition manifests are exported without embedding PDF binaries.',
                 'Multimedia exports preserve asset, clip, reel, rights, transcript, and processing metadata without embedding video or audio binaries.',
                 'Knowledge graph exports preserve normalized entities, relationship confidence, provenance, visibility, verification state, and board-promotion lineage.',
+                'Research Librarian orchestration exports are administrator-only and may contain user research questions, recommended routes, and attributed action history.',
             ],
         ];
         return ['manifest' => $manifest, 'entities' => $entities];
@@ -1060,6 +1073,46 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             }
         }
         return $rows;
+    }
+
+    private function export_orchestration_sessions(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Orchestrator')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Orchestrator::sessions_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(function (array $row): array {
+            return [
+                'orchestration_session_id' => (int) $row['id'],
+                'session_uuid' => (string) $row['session_uuid'],
+                'owner_user_id' => (int) $row['owner_user_id'],
+                'title' => (string) $row['title'],
+                'question' => (string) $row['question'],
+                'intent' => (string) $row['intent'],
+                'status' => (string) $row['status'],
+                'provider' => (string) $row['provider'],
+                'model' => (string) $row['model'],
+                'retrieval_mode' => (string) $row['retrieval_mode'],
+                'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+                'updated_at' => $this->rfc3339_or_null((string) $row['updated_at']),
+                'payload' => json_decode((string) $row['response_json'], true) ?: [],
+            ];
+        }, $rows);
+    }
+
+    private function export_orchestration_events(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Orchestrator')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Orchestrator::events_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(function (array $row): array {
+            return [
+                'orchestration_event_id' => (int) $row['id'],
+                'session_id' => (int) $row['session_id'],
+                'event_uuid' => (string) $row['event_uuid'],
+                'event_type' => (string) $row['event_type'],
+                'created_by' => (int) $row['created_by'],
+                'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+                'payload' => json_decode((string) $row['payload_json'], true) ?: [],
+            ];
+        }, $rows);
     }
 
     private function export_graph_nodes(): array {
@@ -1706,6 +1759,35 @@ CREATE TABLE IF NOT EXISTS editorial_events (
     created_at timestamptz
 );
 
+CREATE TABLE IF NOT EXISTS orchestration_sessions (
+    orchestration_session_id bigint PRIMARY KEY,
+    session_uuid uuid UNIQUE NOT NULL,
+    owner_user_id bigint NOT NULL,
+    title text NOT NULL,
+    question text NOT NULL,
+    intent text NOT NULL,
+    status text NOT NULL,
+    provider text NOT NULL,
+    model text NOT NULL DEFAULT '',
+    retrieval_mode text NOT NULL,
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS orchestration_sessions_owner_idx ON orchestration_sessions(owner_user_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS orchestration_sessions_intent_idx ON orchestration_sessions(intent, status);
+
+CREATE TABLE IF NOT EXISTS orchestration_events (
+    orchestration_event_id bigint PRIMARY KEY,
+    session_id bigint NOT NULL REFERENCES orchestration_sessions(orchestration_session_id) ON DELETE CASCADE,
+    event_uuid uuid UNIQUE NOT NULL,
+    event_type text NOT NULL,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS orchestration_events_session_idx ON orchestration_events(session_id, created_at);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 
@@ -1775,6 +1857,8 @@ SQL;
             'editorial_comments' => ['comment_id','comment_uuid','review_id','parent_id','user_id','body','status','anchor','resolved_by','resolved_at','created_at','updated_at'],
             'editorial_suggestions' => ['suggestion_id','suggestion_uuid','review_id','user_id','suggestion_type','field_key','original_text','proposed_text','rationale','status','decision_note','decided_by','decided_at','created_at','updated_at'],
             'editorial_events' => ['event_id','review_id','user_id','event_type','payload','created_at'],
+            'orchestration_sessions' => ['orchestration_session_id','session_uuid','owner_user_id','title','question','intent','status','provider','model','retrieval_mode','created_at','updated_at','payload'],
+            'orchestration_events' => ['orchestration_event_id','session_id','event_uuid','event_type','created_by','created_at','payload'],
             default => [],
         };
         if (!$columns) return '';

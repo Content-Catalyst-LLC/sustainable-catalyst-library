@@ -203,7 +203,7 @@ final class SC_Library_Admin {
         register_setting('sc_library_settings', 'sc_library_documentation_search_placeholder', ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field', 'default' => 'Search titles, descriptions, keywords, and document text']);
         register_setting('sc_library_settings', 'sc_library_documentation_include_archived', ['type' => 'boolean', 'sanitize_callback' => static fn($value) => $value ? 1 : 0, 'default' => 0]);
         register_setting('sc_library_settings', 'sc_library_enable_integrations', ['type' => 'boolean', 'sanitize_callback' => static fn($value) => $value ? 1 : 0, 'default' => 1]);
-        foreach (['workbench_health_url', 'decision_studio_url', 'decision_studio_health_url', 'site_intelligence_url', 'site_intelligence_health_url'] as $option) {
+        foreach (['workbench_health_url', 'decision_studio_url', 'decision_studio_health_url', 'site_intelligence_url', 'site_intelligence_health_url', 'lab_url', 'lab_health_url'] as $option) {
             register_setting('sc_library_settings', 'sc_library_' . $option, ['type' => 'string', 'sanitize_callback' => 'esc_url_raw', 'default' => '']);
         }
     }
@@ -211,11 +211,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.16.0 activated.</strong> Open SC Library → Knowledge Graph and rebuild the graph projection from the current Library index. Existing editorial, multimedia, workspace, document, and scanner systems remain available.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.17.0 activated.</strong> Open SC Library → Research Librarian to configure the site-scoped orchestration page. Existing graph, editorial, multimedia, workspace, document, and scanner systems remain available.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.16.0.</strong> Knowledge Graph and Relationship Intelligence are now available under SC Library → Knowledge Graph. Rebuild the graph projection after installation; the Library search index itself does not need to be rebuilt.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.17.0.</strong> Research Librarian Workspace Orchestration is now available under SC Library → Research Librarian. The Library index and Knowledge Graph remain canonical retrieval sources.</p></div>';
         }
     }
 
@@ -341,6 +341,8 @@ final class SC_Library_Admin {
                                 <tr><td><strong><?php esc_html_e('Decision Studio URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_decision_studio_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_decision_studio_url', home_url('/decision-studio/'))); ?>"></td></tr>
                                 <tr><td><strong><?php esc_html_e('Decision Studio health URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_decision_studio_health_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_decision_studio_health_url', '')); ?>" placeholder="https://…/health"></td></tr>
                                 <tr><td><strong><?php esc_html_e('Site Intelligence URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_site_intelligence_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_site_intelligence_url', home_url('/site-intelligence/'))); ?>"></td></tr>
+                                <tr><td><strong><?php esc_html_e('Lab URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_lab_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_lab_url', home_url('/lab/'))); ?>"></td></tr>
+                                <tr><td><strong><?php esc_html_e('Lab health URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_lab_health_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_lab_health_url', '')); ?>" placeholder="https://…/health"></td></tr>
                                 <tr><td><strong><?php esc_html_e('Site Intelligence health URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_site_intelligence_health_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_site_intelligence_health_url', '')); ?>" placeholder="https://…/health"></td></tr>
                             </tbody></table>
                         </td>
@@ -525,7 +527,7 @@ final class SC_Library_Admin {
                 <p><code>[sc_library_notebook tab="annotations"]</code> — open the Notebook directly to annotations.</p>
                 <p><?php esc_html_e('Place this in a dedicated WordPress Shortcode block.', 'sustainable-catalyst-library'); ?></p>
                 <h3><?php esc_html_e('Relationship-aware REST endpoints', 'sustainable-catalyst-library'); ?></h3>
-                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates', 'integrations', 'integrations/status', 'integration-schema', 'items/{id}/handoff?target=workbench', 'annotation-schema', 'book-schema', 'items/{id}/book', 'documentation', 'documentation/categories', 'documentation/statuses', 'documentation/{id}', 'collections/foundations', 'registry', 'registry/facets', 'roadmap/tracker', 'planner/statuses', 'plans/{id}', 'export/formats', 'export/postgresql-schema', 'export/manifest', 'account/status', 'workspaces', 'workspaces/{uuid}', 'workspaces/{uuid}/history', 'workspaces/{uuid}/share', 'workspaces/{uuid}/sync', 'workspaces/render/status', 'scanner/status', 'scanner/start', 'scanner/step', 'scanner/pause', 'scanner/resume', 'scanner/cancel', 'scanner/repair', 'scanner/record'] as $endpoint) : ?>
+                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates', 'integrations', 'integrations/status', 'integration-schema', 'items/{id}/handoff?target=workbench', 'annotation-schema', 'book-schema', 'items/{id}/book', 'documentation', 'documentation/categories', 'documentation/statuses', 'documentation/{id}', 'collections/foundations', 'registry', 'registry/facets', 'roadmap/tracker', 'planner/statuses', 'plans/{id}', 'export/formats', 'export/postgresql-schema', 'export/manifest', 'account/status', 'workspaces', 'workspaces/{uuid}', 'workspaces/{uuid}/history', 'workspaces/{uuid}/share', 'workspaces/{uuid}/sync', 'workspaces/render/status', 'scanner/status', 'scanner/start', 'scanner/step', 'scanner/pause', 'scanner/resume', 'scanner/cancel', 'scanner/repair', 'scanner/record', 'orchestrator/schema', 'orchestrator/status', 'orchestrator/query', 'orchestrator/sessions', 'orchestrator/events'] as $endpoint) : ?>
                     <p><code>/wp-json/sustainable-catalyst/v1/library/<?php echo esc_html($endpoint); ?></code></p>
                 <?php endforeach; ?>
             </div>

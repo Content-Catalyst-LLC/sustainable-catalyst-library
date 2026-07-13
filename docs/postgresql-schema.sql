@@ -546,6 +546,36 @@ CREATE TABLE IF NOT EXISTS editorial_events (
     created_at timestamptz
 );
 
+
+CREATE TABLE IF NOT EXISTS orchestration_sessions (
+    orchestration_session_id bigint PRIMARY KEY,
+    session_uuid uuid UNIQUE NOT NULL,
+    owner_user_id bigint NOT NULL,
+    title text NOT NULL,
+    question text NOT NULL,
+    intent text NOT NULL,
+    status text NOT NULL,
+    provider text NOT NULL,
+    model text NOT NULL DEFAULT '',
+    retrieval_mode text NOT NULL,
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS orchestration_sessions_owner_idx ON orchestration_sessions(owner_user_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS orchestration_sessions_intent_idx ON orchestration_sessions(intent, status);
+
+CREATE TABLE IF NOT EXISTS orchestration_events (
+    orchestration_event_id bigint PRIMARY KEY,
+    session_id bigint NOT NULL REFERENCES orchestration_sessions(orchestration_session_id) ON DELETE CASCADE,
+    event_uuid uuid UNIQUE NOT NULL,
+    event_type text NOT NULL,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS orchestration_events_session_idx ON orchestration_events(session_id, created_at);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 

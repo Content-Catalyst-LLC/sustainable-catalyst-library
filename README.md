@@ -1,76 +1,53 @@
-# Sustainable Catalyst Library v1.16.0
+# Sustainable Catalyst Library v1.17.0
 
-Library v1.16.0 adds a provenance-aware Knowledge Graph and Relationship Intelligence layer to the complete v1.15.0 Library platform.
+Library v1.17.0 adds **Research Librarian Workspace Orchestration** to the complete v1.16.0 Library platform.
 
-## Knowledge Graph
+## Research Librarian orchestration
 
-Open:
-
-```text
-SC Library → Knowledge Graph
-```
-
-The graph is a normalized, cursor-rebuildable projection of canonical WordPress and Library data. It connects:
-
-- Publications, pages, plans, and documentation
-- Concepts, domains, categories, tags, article maps, and series
-- Explicit publication-to-publication relationships
-- Content Planner dependencies
-- Methods, tools, datasets, sources, claims, evidence, questions, places, organizations, and events recorded in post metadata
-- Explicit source-to-claim assertions recorded in publication metadata
-- Whiteboard and Chalkboard entities deliberately promoted by an editor
-
-The graph does not replace WordPress posts, taxonomies, the Library index, or editorial records. Large graph rebuilds run in resumable batches and preserve manual and board-promoted objects.
-
-## Relationship intelligence
-
-Every graph relationship can preserve:
-
-- Relationship type and direction
-- Confidence score and confidence basis
-- Provenance type and source URL
-- Evidence note
-- Public, organization, or private visibility
-- Creator, verifier, and verification timestamp
-
-Diagnostics identify:
-
-- Orphaned Library records
-- Possible duplicate concepts
-- Content-plan dependency cycles
-- Relationships missing provenance
-- Low-confidence and unverified relationships
-
-## Public views
-
-Create a WordPress page containing the graph shortcode, then save that page URL under **SC Library → Knowledge Graph → Public graph page URL**. Library record cards use it for focused graph links.
+The orchestrator searches the canonical Library index, expands relevant records through the Knowledge Graph, explains why records were recommended, and builds a controlled research route.
 
 ```text
-[sc_library_knowledge_graph]
-[sc_library_knowledge_graph root="record:123" depth="2" limit="250"]
-[sc_library_relationship_intelligence]
+Question
+→ Find
+→ Explain
+→ Collect
+→ Organize
+→ Route
+→ Produce
 ```
 
-The public graph returns only active public nodes and public relationships meeting the configured minimum confidence threshold.
+It can prepare user-confirmed actions for:
 
-## Whiteboard promotion
+- Notebook collections, saved records, sources, and research briefs
+- Technical Translation Matrices
+- Whiteboards
+- Custom books and preservation packets
+- Workbench analysis
+- Decision Studio evidence canvases
+- Site Intelligence investigations
+- Sustainable Catalyst Lab workflows
+- Editorial review and publication coordination
 
-Saved research boards can be promoted into the graph by an editor. Promotion is explicit and non-destructive. Original boards remain unchanged, and promoted nodes and edges preserve their board provenance.
+The orchestrator never publishes, approves, schedules, or silently changes canonical content.
+
+## Shortcodes
+
+```text
+[sc_research_librarian_orchestrator]
+[sc_library_orchestrator]
+```
+
+Create a public Research Librarian page, add one shortcode, and save its URL under **SC Library → Research Librarian**.
 
 ## REST API
 
 ```text
-/wp-json/sustainable-catalyst/v1/library/graph/schema
-/wp-json/sustainable-catalyst/v1/library/graph
-/wp-json/sustainable-catalyst/v1/library/graph/diagnostics
-/wp-json/sustainable-catalyst/v1/library/graph/timeline
-/wp-json/sustainable-catalyst/v1/library/graph/places
-/wp-json/sustainable-catalyst/v1/library/graph/rebuild
-/wp-json/sustainable-catalyst/v1/library/graph/rebuild/start
-/wp-json/sustainable-catalyst/v1/library/graph/rebuild/continue
-/wp-json/sustainable-catalyst/v1/library/graph/rebuild/status
-/wp-json/sustainable-catalyst/v1/library/graph/board-promotions
-/wp-json/sustainable-catalyst/v1/library/graph/edges
+/wp-json/sustainable-catalyst/v1/library/orchestrator/schema
+/wp-json/sustainable-catalyst/v1/library/orchestrator/status
+/wp-json/sustainable-catalyst/v1/library/orchestrator/query
+/wp-json/sustainable-catalyst/v1/library/orchestrator/sessions
+/wp-json/sustainable-catalyst/v1/library/orchestrator/sessions/{uuid}
+/wp-json/sustainable-catalyst/v1/library/orchestrator/events
 ```
 
 ## Portable data
@@ -78,22 +55,18 @@ Saved research boards can be promoted into the graph by an editor. Promotion is 
 Portable export schema:
 
 ```text
-sc-library-portable-export/1.6
+sc-library-portable-export/1.7
 ```
 
 New normalized entities:
 
-- `graph_nodes`
-- `graph_edges`
-
-The dedicated Knowledge Graph export scope preserves graph identifiers, confidence, provenance, verification, visibility, source identifiers, and metadata without copying raw WordPress tables.
+- `orchestration_sessions`
+- `orchestration_events`
 
 ## Retained systems
 
-v1.16.0 retains:
-
-- Collaboration, review, comments, suggested edits, approvals, locks, and attribution
-- Public record-card responsive repair
+- Knowledge Graph and relationship intelligence
+- Collaboration, reviews, comments, suggestions, approvals, locks, and attribution
 - Multimedia Studio, clips, transcripts, rights, and evidence reels
 - Large-Library Index Tools and cursor reconciliation
 - Persistent account workspaces and optional Render synchronization
@@ -102,4 +75,4 @@ v1.16.0 retains:
 - Research Notebook, matrices, boards, annotations, and books
 - PostgreSQL, CSV, JSONL, and JSON portability
 
-See `KNOWLEDGE_GRAPH_SETUP.md`, `RELEASE_NOTES_1.16.0.md`, and the retained system setup guides.
+See `RESEARCH_LIBRARIAN_ORCHESTRATION_SETUP.md` and `RELEASE_NOTES_1.17.0.md`.

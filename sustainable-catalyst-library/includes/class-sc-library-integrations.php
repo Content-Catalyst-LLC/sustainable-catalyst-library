@@ -52,6 +52,15 @@ final class SC_Library_Integrations {
                 'health_url' => esc_url_raw((string) get_option('sc_library_site_intelligence_health_url', '')),
                 'capabilities' => ['countries', 'places', 'indicators', 'maps', 'events', 'source_status'],
             ],
+            'lab' => [
+                'id' => 'lab',
+                'label' => __('Sustainable Catalyst Lab', 'sustainable-catalyst-library'),
+                'action_label' => __('Prepare Lab Workflow', 'sustainable-catalyst-library'),
+                'description' => __('Carry research questions, methods, variables, evidence, and validation requirements into a scientific or engineering laboratory workflow.', 'sustainable-catalyst-library'),
+                'url' => esc_url_raw((string) get_option('sc_library_lab_url', home_url('/lab/'))),
+                'health_url' => esc_url_raw((string) get_option('sc_library_lab_health_url', '')),
+                'capabilities' => ['experiments', 'measurements', 'scientific_methods', 'engineering_validation', 'reproducibility'],
+            ],
         ];
     }
 
@@ -139,7 +148,7 @@ final class SC_Library_Integrations {
                 'schema' => self::HANDOFF_SCHEMA,
                 'targets' => array_values(self::public_targets()),
                 'required' => ['schema', 'id', 'target', 'created_at', 'source', 'context'],
-                'context_types' => ['library_record', 'collection', 'note', 'source', 'translation_matrix', 'whiteboard', 'chalkboard'],
+                'context_types' => ['library_record', 'collection', 'note', 'source', 'translation_matrix', 'whiteboard', 'chalkboard', 'orchestration_packet'],
             ]),
             'permission_callback' => '__return_true',
         ]);
@@ -296,12 +305,20 @@ final class SC_Library_Integrations {
                 'decision_methods' => $this->lines((string) get_post_meta($post_id, '_sc_library_decision_methods', true), false),
                 'canvas_sections' => ['research_question', 'claims', 'evidence', 'assumptions', 'uncertainties', 'tradeoffs', 'knowledge_gaps'],
             ];
-        } else {
+        } elseif ($target_id === 'site_intelligence') {
             $common['target_context'] = [
                 'task' => 'investigate_library_geographic_context',
                 'places' => $this->lines((string) get_post_meta($post_id, '_sc_library_site_places', true), false),
                 'indicators' => $this->lines((string) get_post_meta($post_id, '_sc_library_site_indicators', true), false),
                 'source_ids' => $this->lines((string) get_post_meta($post_id, '_sc_library_site_sources', true), false),
+            ];
+        } else {
+            $common['target_context'] = [
+                'task' => 'prepare_library_lab_workflow',
+                'research_questions' => $this->lines((string) get_post_meta($post_id, '_sc_library_workbench_questions', true), false),
+                'methods' => $this->lines((string) get_post_meta($post_id, '_sc_library_decision_methods', true), false),
+                'datasets' => $this->lines((string) get_post_meta($post_id, '_sc_library_dataset_urls', true), true),
+                'requirements' => ['hypothesis_or_question', 'variables', 'method', 'measurements', 'validation', 'provenance', 'responsible_use'],
             ];
         }
 

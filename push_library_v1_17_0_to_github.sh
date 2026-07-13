@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.16.0"
+VERSION="1.17.0"
 REMOTE_SSH="git@github.com:Content-Catalyst-LLC/sustainable-catalyst-library.git"
 REMOTE_SLUG="Content-Catalyst-LLC/sustainable-catalyst-library"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -34,81 +34,82 @@ validate_marker() {
 }
 
 MAIN="$PLUGIN_DIR/sustainable-catalyst-library.php"
-GRAPH="$PLUGIN_DIR/includes/class-sc-library-knowledge-graph.php"
+ORCH="$PLUGIN_DIR/includes/class-sc-library-orchestrator.php"
 ACTIVATOR="$PLUGIN_DIR/includes/class-sc-library-activator.php"
 PORTABILITY="$PLUGIN_DIR/includes/class-sc-library-portability.php"
-RELATIONSHIPS="$PLUGIN_DIR/includes/class-sc-library-relationships.php"
-EDITOR="$PLUGIN_DIR/includes/class-sc-library-editor.php"
-REST="$PLUGIN_DIR/includes/class-sc-library-rest.php"
+INTEGRATIONS="$PLUGIN_DIR/includes/class-sc-library-integrations.php"
+SHORTCODES="$PLUGIN_DIR/includes/class-sc-library-shortcodes.php"
+ORCH_JS="$PLUGIN_DIR/assets/js/sc-library-orchestrator.js"
+ORCH_CSS="$PLUGIN_DIR/assets/css/sc-library-orchestrator.css"
 LIBRARY_JS="$PLUGIN_DIR/assets/js/sc-library.js"
-GRAPH_JS="$PLUGIN_DIR/assets/js/sc-library-knowledge-graph.js"
-GRAPH_CSS="$PLUGIN_DIR/assets/css/sc-library-knowledge-graph.css"
+STATIC_SCHEMA="$SOURCE_DIR/docs/postgresql-schema.sql"
 
 validate_marker "Version: $VERSION" "$MAIN" "Plugin version marker validation failed."
 validate_marker "SC_LIBRARY_VERSION', '$VERSION'" "$MAIN" "Runtime version marker validation failed."
 validate_marker "Stable tag: $VERSION" "$PLUGIN_DIR/readme.txt" "Stable tag validation failed."
-validate_marker "class-sc-library-knowledge-graph.php" "$MAIN" "Knowledge Graph bootstrap is missing."
-validate_marker "new SC_Library_Knowledge_Graph" "$MAIN" "Knowledge Graph service initialization is missing."
-validate_marker "sc-library-knowledge-graph/1.0" "$GRAPH" "Knowledge Graph schema marker is missing."
-validate_marker "sc_library_graph_nodes" "$ACTIVATOR" "Graph node table is missing."
-validate_marker "sc_library_graph_edges" "$ACTIVATOR" "Graph edge table is missing."
-validate_marker "REBUILD_STATE_OPTION" "$GRAPH" "Resumable graph rebuild state is missing."
-validate_marker "post_id > %d" "$GRAPH" "Cursor-based graph record traversal is missing."
-validate_marker "/library/graph/rebuild/start" "$GRAPH" "Graph rebuild start route is missing."
-validate_marker "/library/graph/rebuild/continue" "$GRAPH" "Graph rebuild continue route is missing."
-validate_marker "/library/graph/rebuild/status" "$GRAPH" "Graph rebuild status route is missing."
-validate_marker "source_kind NOT IN ('manual','board')" "$GRAPH" "Manual and board graph preservation is missing."
-validate_marker "_sc_library_graph_source_claims" "$EDITOR" "Source-to-claim editor field is missing."
-validate_marker "Explicit source-to-claim link" "$GRAPH" "Source-to-claim graph projection is missing."
-validate_marker "confidence_basis" "$RELATIONSHIPS" "Relationship confidence basis is missing."
-validate_marker "provenance_type" "$RELATIONSHIPS" "Relationship provenance is missing."
-validate_marker "visibility" "$RELATIONSHIPS" "Relationship visibility is missing."
-validate_marker "(\$relation['visibility'] ?? 'public') !== 'public'" "$REST" "Public relationship privacy filter is missing."
-validate_marker "e.visibility = 'public'" "$GRAPH" "Public graph edge filter is missing."
-validate_marker "n.visibility = 'public'" "$GRAPH" "Public graph node filter is missing."
-validate_marker "sc_library_knowledge_graph" "$GRAPH" "Public graph shortcode is missing."
-validate_marker "sc_library_relationship_intelligence" "$GRAPH" "Relationship intelligence shortcode is missing."
-validate_marker "Promote to Knowledge Graph" "$PLUGIN_DIR/assets/js/sc-library-boards.js" "Whiteboard graph promotion is missing."
-validate_marker "graphPageUrl" "$LIBRARY_JS" "Focused record graph links are missing from the Library."
-validate_marker "View Relationship Graph" "$PLUGIN_DIR/includes/class-sc-library-shortcodes.php" "Graph action label is missing."
-validate_marker "sc-library-portable-export/1.6" "$PORTABILITY" "Portable export schema 1.6 is missing."
-validate_marker "graph_nodes" "$PORTABILITY" "Portable graph nodes are missing."
-validate_marker "graph_edges" "$PORTABILITY" "Portable graph edges are missing."
-validate_marker "Knowledge Graph and Relationship Intelligence" "$SOURCE_DIR/RELEASE_NOTES_1.16.0.md" "Release notes marker is missing."
-validate_marker "Start resumable graph rebuild" "$SOURCE_DIR/KNOWLEDGE_GRAPH_SETUP.md" "Graph setup guide is incomplete."
-validate_marker "sc_library_graph_settings" "$GRAPH" "Isolated graph settings group is missing."
+validate_marker "class-sc-library-orchestrator.php" "$MAIN" "Orchestrator bootstrap is missing."
+validate_marker "new SC_Library_Orchestrator" "$MAIN" "Orchestrator service initialization is missing."
+validate_marker "sc-library-orchestration/1.0" "$ORCH" "Orchestration schema marker is missing."
+validate_marker "sc-library-orchestration-action/1.0" "$ORCH" "Action schema marker is missing."
+validate_marker "sc-library-orchestration-session/1.0" "$ORCH" "Session schema marker is missing."
+validate_marker "sc_library_orchestration_sessions" "$ACTIVATOR" "Orchestration session table is missing."
+validate_marker "sc_library_orchestration_events" "$ACTIVATOR" "Orchestration event table is missing."
+validate_marker "/library/orchestrator/query" "$ORCH" "Orchestration query route is missing."
+validate_marker "/library/orchestrator/sessions" "$ORCH" "Orchestration sessions route is missing."
+validate_marker "/library/orchestrator/events" "$ORCH" "Orchestration events route is missing."
+validate_marker "site_scoped_retrieval' => true" "$ORCH" "Site-scoped retrieval boundary is missing."
+validate_marker "user_confirmation_required' => true" "$ORCH" "User-confirmation boundary is missing."
+validate_marker "automatic_publication' => false" "$ORCH" "Automatic-publication boundary is missing."
+validate_marker "remote_synthesis_can_modify_actions' => false" "$ORCH" "Remote synthesis action boundary is missing."
+validate_marker "use_only_supplied_records" "$ORCH" "Remote synthesis source restriction is missing."
+validate_marker "private static function public_targets" "$ORCH" "Public target privacy filter is missing."
+validate_marker "window.confirm" "$ORCH_JS" "Browser action confirmation is missing."
+validate_marker "action_applied" "$ORCH_JS" "Applied-action attribution is missing."
+validate_marker "Ask Research Librarian" "$LIBRARY_JS" "Library record orchestration action is missing."
+validate_marker "orchestratorPageUrl" "$SHORTCODES" "Orchestrator public page URL is missing."
+validate_marker "'lab'" "$INTEGRATIONS" "Lab integration target is missing."
+validate_marker "orchestration_packet" "$INTEGRATIONS" "Orchestration handoff packet is missing."
+validate_marker "sc-library-portable-export/1.7" "$PORTABILITY" "Portable export schema 1.7 is missing."
+validate_marker "orchestration_sessions" "$PORTABILITY" "Portable orchestration sessions are missing."
+validate_marker "orchestration_events" "$PORTABILITY" "Portable orchestration events are missing."
+validate_marker "CREATE TABLE IF NOT EXISTS orchestration_sessions" "$STATIC_SCHEMA" "Static PostgreSQL orchestration session schema is missing."
+validate_marker "CREATE TABLE IF NOT EXISTS orchestration_events" "$STATIC_SCHEMA" "Static PostgreSQL orchestration event schema is missing."
+validate_marker "Research Librarian Workspace Orchestration" "$SOURCE_DIR/RELEASE_NOTES_1.17.0.md" "Release notes marker is missing."
+validate_marker "explicit confirmation" "$SOURCE_DIR/RESEARCH_LIBRARIAN_ORCHESTRATION_SETUP.md" "Setup guide confirmation boundary is missing."
 
 # Retained capability checks.
-validate_marker "sc-library-record sc-library-record--responsive" "$LIBRARY_JS" "Responsive public record cards were not retained."
-validate_marker "sc-library-record__actions a" "$PLUGIN_DIR/assets/css/sc-library.css" "Responsive graph action-link styling is missing."
+validate_marker "class-sc-library-knowledge-graph.php" "$MAIN" "Knowledge Graph was not retained."
 validate_marker "class-sc-library-collaboration.php" "$MAIN" "Editorial collaboration was not retained."
 validate_marker "class-sc-library-multimedia.php" "$MAIN" "Multimedia Studio was not retained."
-validate_marker "sc-library-workspace/1.8" "$PLUGIN_DIR/includes/class-sc-library-workspaces.php" "Workspace schema 1.8 was not retained."
-validate_marker "sc-library-index-scan/2.0" "$PLUGIN_DIR/includes/class-sc-library-scanner.php" "Large-Library scanner was not retained."
+validate_marker "class-sc-library-scanner.php" "$MAIN" "Large-Library scanner was not retained."
+validate_marker "sc-library-index-scan/2.0" "$PLUGIN_DIR/includes/class-sc-library-scanner.php" "Large-Library scan schema was not retained."
 validate_marker "p.ID > %d" "$PLUGIN_DIR/includes/class-sc-library-indexer.php" "Cursor index discovery was not retained."
+validate_marker "sc-library-knowledge-graph/1.0" "$PLUGIN_DIR/includes/class-sc-library-knowledge-graph.php" "Knowledge Graph schema was not retained."
+validate_marker "sc-library-workspace/1.8" "$PLUGIN_DIR/includes/class-sc-library-workspaces.php" "Workspace schema 1.8 was not retained."
 validate_marker "RENDERER_VERSION = \"1.14.1\"" "$SOURCE_DIR/render-workspace-service/app/documents.py" "Retained document renderer marker is incorrect."
 validate_marker "MEDIA_PROCESSOR_VERSION = \"1.14.1\"" "$SOURCE_DIR/render-workspace-service/app/media.py" "Retained media processor marker is incorrect."
 
 for required in \
-  "$GRAPH" \
-  "$GRAPH_JS" \
-  "$GRAPH_CSS" \
-  "$SOURCE_DIR/tests/test_knowledge_graph_release.py" \
-  "$SOURCE_DIR/KNOWLEDGE_GRAPH_SETUP.md" \
-  "$SOURCE_DIR/RELEASE_NOTES_1.16.0.md" \
-  "$SOURCE_DIR/docs/postgresql-schema.sql" \
+  "$ORCH" \
+  "$ORCH_JS" \
+  "$ORCH_CSS" \
+  "$PLUGIN_DIR/templates/library-orchestrator.php" \
+  "$SOURCE_DIR/tests/test_orchestration_release.py" \
+  "$SOURCE_DIR/RESEARCH_LIBRARIAN_ORCHESTRATION_SETUP.md" \
+  "$SOURCE_DIR/RELEASE_NOTES_1.17.0.md" \
+  "$STATIC_SCHEMA" \
   "$SOURCE_DIR/docs/portable-export-manifest.example.json" \
   "$PLUGIN_ZIP"; do
   [[ -f "$required" ]] || { echo "ERROR: Required release file is missing: $required"; exit 1; }
 done
 
-if grep -RIn "<iframe" "$GRAPH" "$GRAPH_JS" "$GRAPH_CSS"; then
-  echo "ERROR: Knowledge Graph interfaces must remain native and iframe-free."
+if grep -RIn "<iframe" "$ORCH" "$ORCH_JS" "$ORCH_CSS" "$PLUGIN_DIR/templates/library-orchestrator.php"; then
+  echo "ERROR: Orchestration interfaces must remain native and iframe-free."
   exit 1
 fi
 
-if grep -Fq "posts_per_page' => -1" "$GRAPH"; then
-  echo "ERROR: Knowledge Graph rebuild must not use an unbounded WordPress post query."
+if grep -Fq "posts_per_page' => -1" "$ORCH"; then
+  echo "ERROR: Orchestration retrieval must not use an unbounded WordPress post query."
   exit 1
 fi
 
@@ -122,12 +123,12 @@ if command -v node >/dev/null 2>&1; then
 fi
 
 PYTHON_BIN=""
-for candidate in python3.12 python3.13 python3 python; do
+for candidate in python3.12 python3.13 python3.14 python3 python; do
   if command -v "$candidate" >/dev/null 2>&1; then PYTHON_BIN="$(command -v "$candidate")"; break; fi
 done
 if [[ -n "$PYTHON_BIN" ]]; then
   echo "Validating release tests and optional Render service in an isolated Python environment..."
-  TEMP_VENV="$(mktemp -d "${TMPDIR:-/tmp}/sc-library-v1160.XXXXXX")"
+  TEMP_VENV="$(mktemp -d "${TMPDIR:-/tmp}/sc-library-v1170.XXXXXX")"
   "$PYTHON_BIN" -m venv "$TEMP_VENV/venv"
   "$TEMP_VENV/venv/bin/python" -m pip install --upgrade pip >/dev/null
   "$TEMP_VENV/venv/bin/python" -m pip install -r "$SOURCE_DIR/render-workspace-service/requirements-dev.txt" >/dev/null
@@ -138,13 +139,14 @@ else
 fi
 
 unzip -t "$PLUGIN_ZIP" >/dev/null
-TEMP_EXTRACT="$(mktemp -d "${TMPDIR:-/tmp}/sc-library-v1160-zip.XXXXXX")"
+TEMP_EXTRACT="$(mktemp -d "${TMPDIR:-/tmp}/sc-library-v1170-zip.XXXXXX")"
 unzip -q "$PLUGIN_ZIP" -d "$TEMP_EXTRACT"
 [[ -f "$TEMP_EXTRACT/sustainable-catalyst-library/sustainable-catalyst-library.php" ]] || { echo "ERROR: WordPress ZIP root structure is invalid."; exit 1; }
 validate_marker "Version: $VERSION" "$TEMP_EXTRACT/sustainable-catalyst-library/sustainable-catalyst-library.php" "Packaged plugin version is incorrect."
+validate_marker "sc-library-orchestration/1.0" "$TEMP_EXTRACT/sustainable-catalyst-library/includes/class-sc-library-orchestrator.php" "Packaged orchestrator is missing."
 
 if grep -RInE --exclude-dir=.git --exclude-dir='__pycache__' --exclude-dir='.pytest_cache' --exclude-dir='.venv' \
-  --exclude='.env.example' --exclude='push_library_v1_16_0_to_github.sh' --exclude='install_and_push_library_v1_16_0.sh' \
+  --exclude='.env.example' --exclude='push_library_v1_17_0_to_github.sh' --exclude='install_and_push_library_v1_17_0.sh' \
   '((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|DATABASE_URL=postgres(ql)?://[^<[:space:]]+|SC_LIBRARY_SYNC_API_KEY=[A-Za-z0-9_-]{16,})' "$SOURCE_DIR"; then
   echo "ERROR: Potential secret detected. Review the output above."
   exit 1
@@ -152,7 +154,7 @@ fi
 
 if [[ "${SC_LIBRARY_VALIDATE_ONLY:-0}" == "1" ]]; then
   echo
-  echo "Sustainable Catalyst Library v1.16.0 validation passed."
+  echo "Sustainable Catalyst Library v1.17.0 validation passed."
   exit 0
 fi
 
@@ -186,11 +188,11 @@ git add -A
 if git diff --cached --quiet; then
   echo "No changes to commit."
 else
-  git commit -m "Build Library v1.16.0 — Knowledge Graph and Relationship Intelligence"
+  git commit -m "Build Library v1.17.0 — Research Librarian Workspace Orchestration"
 fi
 
 git push -u origin main
 
 echo
-echo "Sustainable Catalyst Library v1.16.0 pushed successfully."
+echo "Sustainable Catalyst Library v1.17.0 pushed successfully."
 echo "Repository: https://github.com/$REMOTE_SLUG"

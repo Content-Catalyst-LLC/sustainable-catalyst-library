@@ -12,11 +12,11 @@ README = (PLUGIN / "readme.txt").read_text()
 
 
 def test_release_markers_and_bootstrap():
-    assert "Version: 1.16.0" in MAIN
-    assert "SC_LIBRARY_VERSION', '1.16.0'" in MAIN
+    assert "Version: 1.17.0" in MAIN
+    assert "SC_LIBRARY_VERSION', '1.17.0'" in MAIN
     assert "class-sc-library-collaboration.php" in MAIN
     assert "new SC_Library_Collaboration" in MAIN
-    assert "Stable tag: 1.16.0" in README
+    assert "Stable tag: 1.17.0" in README
 
 
 def test_normalized_editorial_tables_are_installed():
@@ -66,7 +66,7 @@ def test_comments_suggestions_invitations_and_attribution_routes():
 
 
 def test_portable_export_contains_editorial_entities():
-    assert "sc-library-portable-export/1.6" in PORTABILITY
+    assert "sc-library-portable-export/1.7" in PORTABILITY
     for entity in [
         "editorial_reviews",
         "editorial_participants",

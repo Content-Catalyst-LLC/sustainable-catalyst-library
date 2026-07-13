@@ -56,3 +56,8 @@ Portable export schema `sc-library-portable-export/1.5` adds `editorial_reviews`
 Portable export schema `sc-library-portable-export/1.6` adds `graph_nodes` and `graph_edges`, plus confidence, provenance, evidence, and visibility fields on canonical publication relationships.
 
 Use the **Knowledge graph, relationship provenance, and diagnostics data** scope for a focused graph archive. Public-registry exports contain only active public graph entities and public edges whose endpoints are included. Complete and graph-specific administrative exports can contain private or organization-only research relationships and should be handled as private research data.
+
+
+## v1.17.0 Research Librarian orchestration entities
+
+Portable export schema `sc-library-portable-export/1.7` adds `orchestration_sessions` and `orchestration_events`. These administrator-only exports may contain private research questions, routes, and attributed action history.

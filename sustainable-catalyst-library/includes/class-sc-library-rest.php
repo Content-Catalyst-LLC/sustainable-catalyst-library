@@ -140,6 +140,14 @@ final class SC_Library_REST {
                 'schema' => class_exists('SC_Library_Knowledge_Graph') ? SC_Library_Knowledge_Graph::SCHEMA : '',
                 'endpoints' => ['graph', 'diagnostics', 'timeline', 'places', 'board-promotions'],
             ],
+            'research_librarian_orchestration' => [
+                'enabled' => class_exists('SC_Library_Orchestrator') && SC_Library_Orchestrator::enabled(),
+                'schema' => class_exists('SC_Library_Orchestrator') ? SC_Library_Orchestrator::SCHEMA : '',
+                'site_scoped' => true,
+                'user_confirmation_required' => true,
+                'automatic_publication' => false,
+                'endpoints' => ['orchestrator/schema', 'orchestrator/status', 'orchestrator/query', 'orchestrator/sessions', 'orchestrator/events'],
+            ],
             'integrations' => [
                 'enabled' => class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled(),
                 'handoff_schema' => class_exists('SC_Library_Integrations') ? SC_Library_Integrations::HANDOFF_SCHEMA : '',

@@ -56,6 +56,8 @@ final class SC_Library_Activator {
         $review_events_table = $wpdb->prefix . 'sc_library_review_events';
         $graph_nodes_table = $wpdb->prefix . 'sc_library_graph_nodes';
         $graph_edges_table = $wpdb->prefix . 'sc_library_graph_edges';
+        $orchestration_sessions_table = $wpdb->prefix . 'sc_library_orchestration_sessions';
+        $orchestration_events_table = $wpdb->prefix . 'sc_library_orchestration_events';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -576,6 +578,43 @@ final class SC_Library_Activator {
             KEY source_identifier (source_identifier)
         ) {$charset};";
 
+        $orchestration_sessions_sql = "CREATE TABLE {$orchestration_sessions_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            session_uuid CHAR(36) NOT NULL,
+            owner_user_id BIGINT UNSIGNED NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            question LONGTEXT NOT NULL,
+            intent VARCHAR(32) NOT NULL DEFAULT 'discover',
+            status VARCHAR(24) NOT NULL DEFAULT 'active',
+            provider VARCHAR(100) NOT NULL DEFAULT 'sustainable-catalyst-library',
+            model VARCHAR(100) NOT NULL DEFAULT '',
+            retrieval_mode VARCHAR(64) NOT NULL DEFAULT 'index_plus_graph',
+            response_json LONGTEXT NOT NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY session_uuid (session_uuid),
+            KEY owner_user_id (owner_user_id),
+            KEY intent (intent),
+            KEY status (status),
+            KEY updated_at (updated_at)
+        ) {$charset};";
+
+        $orchestration_events_sql = "CREATE TABLE {$orchestration_events_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            session_id BIGINT UNSIGNED NOT NULL,
+            event_uuid CHAR(36) NOT NULL,
+            event_type VARCHAR(64) NOT NULL,
+            payload_json LONGTEXT NOT NULL,
+            created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY event_uuid (event_uuid),
+            KEY session_id (session_id),
+            KEY event_type (event_type),
+            KEY created_at (created_at)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
         dbDelta($workspaces_sql);
@@ -596,6 +635,8 @@ final class SC_Library_Activator {
         dbDelta($review_events_sql);
         dbDelta($graph_nodes_sql);
         dbDelta($graph_edges_sql);
+        dbDelta($orchestration_sessions_sql);
+        dbDelta($orchestration_events_sql);
     }
 
     private static function install_defaults(): void {
@@ -651,6 +692,14 @@ final class SC_Library_Activator {
         add_option('sc_library_graph_page_url', home_url('/knowledge-graph/'));
         add_option('sc_library_graph_last_rebuild', '');
         add_option('sc_library_graph_rebuild_state', [], '', false);
+        add_option('sc_library_enable_orchestrator', 1);
+        add_option('sc_library_orchestrator_public_discovery', 1);
+        add_option('sc_library_orchestrator_page_url', home_url('/research-librarian/'));
+        add_option('sc_library_orchestrator_service_url', '');
+        add_option('sc_library_orchestrator_service_api_key', '');
+        add_option('sc_library_orchestrator_timeout', 10);
+        add_option('sc_library_orchestrator_max_records', 8);
+        add_option('sc_library_orchestrator_graph_depth', 1);
         add_option('sc_library_review_lock_minutes', 15);
         add_option('sc_library_review_invitation_days', 14);
         add_option('sc_library_media_service_url', '');
@@ -676,6 +725,8 @@ final class SC_Library_Activator {
         add_option('sc_library_decision_studio_health_url', '');
         add_option('sc_library_site_intelligence_url', home_url('/site-intelligence/'));
         add_option('sc_library_site_intelligence_health_url', '');
+        add_option('sc_library_lab_url', home_url('/lab/'));
+        add_option('sc_library_lab_health_url', '');
         add_option('sc_library_featured_pathways', implode("\n", [
             'Systems Thinking|/systems-thinking/|Feedback, resilience, leverage points, and complex change.',
             'Mathematical Thinking|/mathematical-thinking/|Symbols, models, uncertainty, and formal reasoning.',
