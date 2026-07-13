@@ -4,26 +4,26 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.19.0
+Stable tag: 1.20.0
 License: GPLv2 or later
 
 A native WordPress knowledge system with institutional preservation, integrity monitoring, historical editions, embedded Foundation Documents, a public API, Research Librarian orchestration, knowledge graphs, editorial workflows, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v1.19.0 adds Preservation, Integrity, and the Institutional Archive to the complete v1.18.1 platform. It creates immutable record snapshots, SHA-256 manifests, version comparisons, authority history, supersession chains, attachment and link checks, bounded integrity audits, retention and legal-hold controls, public historical browsing, and PostgreSQL-ready preservation exports.
+Sustainable Catalyst Library v1.20.0 is the final pre-2.0 hardening release. It adds a production-readiness center, consistent keyboard and focus behavior, reduced-motion support, touch-target enforcement, responsive table handling, mobile workflow repairs, bounded public REST caching, anonymous rate limiting, security headers, maintenance-schedule repair, and launch diagnostics across the complete Library platform.
 
-= Preservation and Institutional Archive =
+= Accessibility, mobile, performance, and security hardening =
 
-* Immutable snapshots for published Library records with source and manifest checksums.
-* Public shortcode `[sc_library_institutional_archive]` for controlled historical-edition browsing.
-* Version comparison, supersession chains, canonical-record links, and preservation manifests.
-* Bounded cursor-style integrity audits for records and relationships.
-* Attachment existence and checksum verification, authority URL checks, optional external-link monitoring, and missing-replacement diagnostics.
-* Append-only documentation authority history.
-* Record-level retention dates, legal holds, archive notes, and protected cleanup rules.
-* Public and administrative REST routes for archive records, manifests, status, and diagnostics.
-* Portable export schema `sc-library-portable-export/2.0`.
+* Production Readiness dashboard under SC Library.
+* Public status shortcode `[sc_library_readiness_status]` and public summary API.
+* High-visibility keyboard focus, skip links, polite live announcements, responsive table regions, and reduced-motion behavior.
+* Minimum 44-pixel touch targets, mobile-safe forms, one-column narrow-screen actions, and print fallbacks.
+* Bounded cache for an explicit allowlist of unauthenticated public GET routes; private and authenticated endpoints are never cached.
+* Anonymous route-specific rate limiting, security response headers, and cache invalidation on content and taxonomy changes.
+* Runtime, index, cron, API-key storage, remote-media, preservation, PDF extraction, and backup-boundary diagnostics.
+* Daily readiness evaluation and one-click maintenance-schedule repair.
+* Portable export schema `sc-library-portable-export/2.1` with normalized `readiness_runs`.
 
 = Foundation Documents and full-text PDF indexing =
 
@@ -55,7 +55,7 @@ Sustainable Catalyst Library v1.19.0 adds Preservation, Integrity, and the Insti
 
 = Portable Data =
 
-* Portable export schema `sc-library-portable-export/2.0`.
+* Portable export schema `sc-library-portable-export/2.1`.
 * Preservation entities `preservation_snapshots`, `integrity_checks`, and `authority_history`.
 * Existing Foundation Document, API, webhook, workspace, graph, multimedia, editorial, planning, and orchestration entities remain portable.
 * API-key hashes, encrypted signing secrets, full webhook payloads, delivery signatures, and unrelated private workspace data remain excluded from public exports.
@@ -63,15 +63,16 @@ Sustainable Catalyst Library v1.19.0 adds Preservation, Integrity, and the Insti
 == Installation ==
 
 1. Upload and activate the plugin, choosing **Replace current with uploaded** during an upgrade.
-2. Open SC Library → Preservation & Archive.
-3. Create a public WordPress page containing `[sc_library_institutional_archive]`.
-4. Save the archive page URL and review the default retention, batch-size, and link-check settings.
-5. Create one frozen snapshot for a public Library record and download its preservation manifest.
-6. Start the bounded integrity audit and continue it until the saved audit reaches completion.
-7. Configure the Developer API and webhooks only when an external integration requires them.
+2. Clear WordPress, page-builder, Cloudflare, and browser caches.
+3. Open SC Library → Production Readiness.
+4. Run the complete readiness report.
+5. Repair maintenance schedules when any Library cron task is missing.
+6. Review warnings for index volume, accessibility metadata, debug display, file editing, preservation coverage, PDF extraction, and off-site backups.
+7. Create an optional public status page with `[sc_library_readiness_status]`.
 
 == Shortcodes ==
 
+* `[sc_library_readiness_status]`
 * `[sc_library_institutional_archive]`
 * `[sc_library_integrity_status]`
 * `[sc_foundation_document id="123"]`
@@ -86,6 +87,9 @@ Sustainable Catalyst Library v1.19.0 adds Preservation, Integrity, and the Insti
 
 == REST API ==
 
+* `/wp-json/sustainable-catalyst/v1/library/readiness/status`
+* `/wp-json/sustainable-catalyst/v1/library/readiness/report`
+* `/wp-json/sustainable-catalyst/v1/library/readiness/run`
 * `/wp-json/sustainable-catalyst/v1/library/preservation/status`
 * `/wp-json/sustainable-catalyst/v1/library/archive`
 * `/wp-json/sustainable-catalyst/v1/library/archive/{uuid}`
@@ -101,6 +105,15 @@ Sustainable Catalyst Library v1.19.0 adds Preservation, Integrity, and the Insti
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 1.20.0 =
+* Added the Production Readiness dashboard and public status summary.
+* Added keyboard focus, skip links, live announcements, reduced-motion, forced-colors, responsive tables, and mobile touch-target hardening.
+* Added bounded anonymous public REST caching with content-driven generation invalidation.
+* Added route-specific anonymous rate limiting and response-security headers.
+* Added runtime, index, cron, privacy, preservation, PDF, and backup-boundary diagnostics.
+* Added daily readiness evaluation, maintenance-schedule repair, readiness history, and portable readiness exports in schema 2.1.
+
 
 = 1.19.0 =
 * Added immutable institutional snapshots with SHA-256 source and manifest checksums.

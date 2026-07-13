@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sustainable Catalyst Library API",
-    "version": "1.2.0",
-    "description": "Versioned public access to Sustainable Catalyst Library records, preserved historical editions, preservation manifests, embedded Foundation Documents and page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations."
+    "version": "1.3.0",
+    "description": "Versioned public access to Sustainable Catalyst Library records, readiness status, preserved historical editions, preservation manifests, embedded Foundation Documents and page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations."
   },
   "servers": [
     {
@@ -434,6 +434,24 @@
           },
           "404": {
             "description": "Not found"
+          }
+        }
+      }
+    },
+    "/readiness": {
+      "get": {
+        "summary": "Get the aggregate public Library production-readiness status",
+        "operationId": "getLibraryReadiness",
+        "responses": {
+          "200": {
+            "description": "Aggregate readiness status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/readiness-report.json"
+                }
+              }
+            }
           }
         }
       }

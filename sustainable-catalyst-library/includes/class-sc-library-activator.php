@@ -66,6 +66,7 @@ final class SC_Library_Activator {
         $preservation_snapshots_table = $wpdb->prefix . 'sc_library_preservation_snapshots';
         $integrity_checks_table = $wpdb->prefix . 'sc_library_integrity_checks';
         $authority_history_table = $wpdb->prefix . 'sc_library_authority_history';
+        $readiness_runs_table = $wpdb->prefix . 'sc_library_readiness_runs';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -815,6 +816,21 @@ final class SC_Library_Activator {
             KEY changed_at (changed_at)
         ) {$charset};";
 
+        $readiness_runs_sql = "CREATE TABLE {$readiness_runs_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            run_uuid CHAR(36) NOT NULL,
+            overall_status VARCHAR(32) NOT NULL,
+            score INT UNSIGNED NOT NULL DEFAULT 0,
+            report_json LONGTEXT NOT NULL,
+            created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY run_uuid (run_uuid),
+            KEY overall_status (overall_status),
+            KEY score (score),
+            KEY created_at (created_at)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
         dbDelta($workspaces_sql);
@@ -845,6 +861,7 @@ final class SC_Library_Activator {
         dbDelta($preservation_snapshots_sql);
         dbDelta($integrity_checks_sql);
         dbDelta($authority_history_sql);
+        dbDelta($readiness_runs_sql);
     }
 
     private static function install_defaults(): void {
@@ -960,6 +977,14 @@ final class SC_Library_Activator {
         add_option('sc_library_archive_page_url', home_url('/institutional-archive/'));
         add_option('sc_library_integrity_state', [], '', false);
         add_option('sc_library_integrity_last_audit', [], '', false);
+        add_option('sc_library_enable_hardening', 1);
+        add_option('sc_library_enable_public_cache', 1);
+        add_option('sc_library_public_cache_ttl', 300);
+        add_option('sc_library_public_rate_limit', 240);
+        add_option('sc_library_readiness_page_url', home_url('/library-status/'));
+        add_option('sc_library_touch_target_px', 44);
+        add_option('sc_library_public_cache_generation', 1, '', false);
+        add_option('sc_library_readiness_last_report', [], '', false);
         add_option('sc_library_featured_pathways', implode("\n", [
             'Systems Thinking|/systems-thinking/|Feedback, resilience, leverage points, and complex change.',
             'Mathematical Thinking|/mathematical-thinking/|Symbols, models, uncertainty, and formal reasoning.',
@@ -975,6 +1000,9 @@ final class SC_Library_Activator {
         if (!wp_next_scheduled('sc_library_preservation_daily')) {
             wp_schedule_event(time() + (2 * HOUR_IN_SECONDS), 'daily', 'sc_library_preservation_daily');
         }
+        if (!wp_next_scheduled('sc_library_hardening_daily')) {
+            wp_schedule_event(time() + (3 * HOUR_IN_SECONDS), 'daily', 'sc_library_hardening_daily');
+        }
     }
 
     public static function deactivate(): void {
@@ -982,5 +1010,6 @@ final class SC_Library_Activator {
         wp_clear_scheduled_hook('sc_library_sync_workspace');
         wp_clear_scheduled_hook('sc_library_refresh_media_job');
         wp_clear_scheduled_hook('sc_library_preservation_daily');
+        wp_clear_scheduled_hook('sc_library_hardening_daily');
     }
 }

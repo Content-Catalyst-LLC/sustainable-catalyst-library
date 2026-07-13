@@ -749,6 +749,18 @@ CREATE TABLE IF NOT EXISTS authority_history (
 CREATE INDEX IF NOT EXISTS authority_history_record_idx ON authority_history(record_id, changed_at DESC);
 CREATE INDEX IF NOT EXISTS authority_history_type_idx ON authority_history(authority_type, document_status);
 
+CREATE TABLE IF NOT EXISTS readiness_runs (
+    readiness_run_id bigint PRIMARY KEY,
+    run_uuid uuid UNIQUE NOT NULL,
+    overall_status text NOT NULL,
+    score integer NOT NULL DEFAULT 0,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    report jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS readiness_runs_status_idx ON readiness_runs(overall_status, created_at DESC);
+CREATE INDEX IF NOT EXISTS readiness_runs_score_idx ON readiness_runs(score, created_at DESC);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 

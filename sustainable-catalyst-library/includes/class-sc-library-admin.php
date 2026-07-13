@@ -211,11 +211,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.19.0 activated.</strong> Preservation snapshots, integrity audits, checksum manifests, authority history, supersession chains, retention controls, and the Institutional Archive are now available. Existing Foundation Document, API, orchestration, graph, editorial, multimedia, workspace, and scanner systems remain available.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.20.0 activated.</strong> Accessibility, mobile, performance, security, and production-readiness hardening are now available. Existing Foundation Document, API, orchestration, graph, editorial, multimedia, workspace, and scanner systems remain available.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.19.0.</strong> Open SC Library → Preservation & Archive to create frozen snapshots, configure retention, run a bounded integrity audit, and create the public Institutional Archive page. Canonical WordPress records remain the source of truth.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.20.0.</strong> Open SC Library → Production Readiness to run the launch report, review accessibility and mobile checks, and configure bounded public caching and rate limits. Canonical WordPress records remain the source of truth.</p></div>';
         }
     }
 

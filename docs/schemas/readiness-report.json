@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/readiness-report.json",
+  "title": "Sustainable Catalyst Library public readiness report",
+  "type": "object",
+  "required": [
+    "schema",
+    "plugin_version",
+    "generated_at",
+    "overall_status",
+    "score",
+    "counts",
+    "categories"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-production-readiness/1.0"
+    },
+    "plugin_version": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "overall_status": {
+      "enum": [
+        "ready",
+        "review_recommended",
+        "action_required",
+        "unknown"
+      ]
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "categories": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "label",
+          "ready",
+          "warning",
+          "fail",
+          "info"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "ready": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "warning": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "fail": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "info": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

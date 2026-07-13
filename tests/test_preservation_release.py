@@ -14,9 +14,9 @@ JS = (PLUGIN / "assets/js/sc-library-preservation.js").read_text()
 
 
 def test_release_markers_and_bootstrap():
-    assert "Version: 1.19.0" in MAIN
-    assert "SC_LIBRARY_VERSION', '1.19.0'" in MAIN
-    assert "Stable tag: 1.19.0" in README
+    assert "Version: 1.20.0" in MAIN
+    assert "SC_LIBRARY_VERSION', '1.20.0'" in MAIN
+    assert "Stable tag: 1.20.0" in README
     assert "class-sc-library-preservation.php" in MAIN
     assert "new SC_Library_Preservation" in MAIN
     assert "$preservation->register_hooks()" in MAIN
@@ -135,7 +135,7 @@ def test_rest_openapi_and_json_schema():
         assert marker in PRESERVATION
     openapi = json.loads((ROOT / "docs/openapi.json").read_text())
     schema = json.loads((ROOT / "docs/schemas/preservation-snapshot.json").read_text())
-    assert openapi["info"]["version"] == "1.2.0"
+    assert openapi["info"]["version"] == "1.3.0"
     assert "/archive" in openapi["paths"]
     assert "/archive/{uuid}/manifest" in openapi["paths"]
     assert schema["properties"]["schema"]["const"] == "sc-library-preservation/1.0"
@@ -149,7 +149,7 @@ def test_webhook_events_are_bridged():
 
 
 def test_portable_schema_and_entities():
-    assert "sc-library-portable-export/2.0" in PORTABILITY
+    assert "sc-library-portable-export/2.1" in PORTABILITY
     for entity in ["preservation_snapshots", "integrity_checks", "authority_history"]:
         assert entity in PORTABILITY
     static_schema = (ROOT / "docs/postgresql-schema.sql").read_text()

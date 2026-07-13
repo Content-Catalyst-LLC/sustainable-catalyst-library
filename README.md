@@ -1,56 +1,47 @@
-# Sustainable Catalyst Library v1.19.0
+# Sustainable Catalyst Library v1.20.0
 
-Library v1.19.0 adds **Preservation, Integrity, and the Institutional Archive** to the complete v1.18.1 platform.
+Library v1.20.0 is the final pre-2.0 hardening release. It preserves every v1.19.0 feature and adds a production-readiness layer across accessibility, mobile behavior, large-library performance, security, preservation, and operational diagnostics.
 
-## Preservation layer
+## Production Readiness
 
-- Immutable snapshots of canonical WordPress records
-- SHA-256 content and manifest checksums
-- Version and supersession chains
-- Public historical-edition browsing and comparison
-- Downloadable preservation manifests
-- Attachment and PDF checksum verification
-- Authority-history capture
-- Bounded record and relationship integrity audits
-- Optional external-link checks with safe WordPress HTTP handling
-- Record-level retention dates and legal holds
-- Explicit cleanup that protects current and held snapshots
+Open `SC Library → Production Readiness` to review:
 
-## Public interfaces
+- WordPress, PHP, HTTPS, and environment health
+- keyboard, focus, reduced-motion, media-description, and PDF fallback checks
+- mobile record cards, touch targets, responsive tables, and native interface checks
+- Library index volume, cursor reconciliation, public cache, object cache, and cron status
+- debug exposure, file editing, SSL administration, rate limits, API-key storage, and remote-media boundaries
+- preservation snapshots, integrity audits, PDF extraction failures, and off-site backup reminders
+
+Public summary:
 
 ```text
-[sc_library_institutional_archive]
-[sc_library_integrity_status]
+[sc_library_readiness_status]
 ```
+
+REST endpoints:
 
 ```text
-/wp-json/sustainable-catalyst/v1/library/preservation/status
-/wp-json/sustainable-catalyst/v1/library/archive
-/wp-json/sustainable-catalyst/v1/library/archive/{uuid}
-/wp-json/sustainable-catalyst/v1/library/archive/{uuid}/manifest
-/wp-json/sustainable-catalyst-library/v1/archive
+/wp-json/sustainable-catalyst/v1/library/readiness/status
+/wp-json/sustainable-catalyst/v1/library/readiness/report
+/wp-json/sustainable-catalyst/v1/library/readiness/run
+/wp-json/sustainable-catalyst-library/v1/readiness
 ```
-
-Public routes return snapshots only while the canonical WordPress record remains public. Private or deleted records are not exposed.
 
 ## Portable data
 
-Portable export schema:
-
 ```text
-sc-library-portable-export/2.0
+sc-library-portable-export/2.1
 ```
 
-New entities:
+New entity:
 
 ```text
-preservation_snapshots
-integrity_checks
-authority_history
+readiness_runs
 ```
 
 ## Installation
 
-Upload `sustainable-catalyst-library-v1.19.0.zip` through WordPress and choose **Replace current with uploaded**. Open **SC Library → Preservation & Archive**, configure the archive page URL and retention policy, create a test snapshot, then start the bounded integrity audit.
+Upload `sustainable-catalyst-library-v1.20.0.zip`, choose **Replace current with uploaded**, open **SC Library → Production Readiness**, run the complete report, repair maintenance schedules when needed, and clear all site/CDN caches.
 
-See `PRESERVATION_ARCHIVE_SETUP_v1.19.0.md` and `RELEASE_NOTES_1.19.0.md`.
+See `ACCESSIBILITY_SECURITY_HARDENING_SETUP_v1.20.0.md` and `RELEASE_NOTES_1.20.0.md`.

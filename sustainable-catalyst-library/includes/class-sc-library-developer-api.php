@@ -808,7 +808,7 @@ final class SC_Library_Developer_API {
 
     public function rest_export_manifest(WP_REST_Request $request): WP_REST_Response {
         return rest_ensure_response([
-            'schema' => class_exists('SC_Library_Portability') ? SC_Library_Portability::EXPORT_SCHEMA : 'sc-library-portable-export/2.0',
+            'schema' => class_exists('SC_Library_Portability') ? SC_Library_Portability::EXPORT_SCHEMA : 'sc-library-portable-export/2.1',
             'generated_at' => gmdate('c'),
             'site' => home_url('/'),
             'plugin_version' => SC_LIBRARY_VERSION,
@@ -879,6 +879,7 @@ final class SC_Library_Developer_API {
             '/archive' => 'Browse public preserved editions',
             '/archive/{uuid}' => 'Read one public frozen edition',
             '/archive/{uuid}/manifest' => 'Read one preservation manifest',
+            '/readiness' => 'Read the aggregate public production-readiness status',
             '/schemas' => 'List published JSON Schemas',
             '/schemas/{name}' => 'Read one JSON Schema',
             '/openapi.json' => 'Read this OpenAPI document',
@@ -908,8 +909,8 @@ final class SC_Library_Developer_API {
             'openapi' => self::OPENAPI_VERSION,
             'info' => [
                 'title' => 'Sustainable Catalyst Library API',
-                'version' => '1.2.0',
-                'description' => 'Versioned public access to Sustainable Catalyst Library records, preserved historical editions, preservation manifests, embedded Foundation Documents, page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations.',
+                'version' => '1.3.0',
+                'description' => 'Versioned public access to Sustainable Catalyst Library records, preserved historical editions, preservation manifests, production-readiness status, embedded Foundation Documents, page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations.',
             ],
             'servers' => [['url' => untrailingslashit($base)]],
             'paths' => $paths,
@@ -969,6 +970,23 @@ final class SC_Library_Developer_API {
                     'created_at' => ['type' => 'string'],
                 ],
                 'additionalProperties' => true,
+            ],
+            'readiness-report' => [
+                '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+                '$id' => rest_url(self::API_NAMESPACE . '/schemas/readiness-report'),
+                'title' => 'Sustainable Catalyst Library public readiness report',
+                'type' => 'object',
+                'required' => ['schema','plugin_version','generated_at','overall_status','score','counts','categories'],
+                'properties' => [
+                    'schema' => ['const' => 'sc-library-production-readiness/1.0'],
+                    'plugin_version' => ['type' => 'string'],
+                    'generated_at' => ['type' => 'string'],
+                    'overall_status' => ['enum' => ['ready','review_recommended','action_required','unknown']],
+                    'score' => ['type' => 'integer', 'minimum' => 0, 'maximum' => 100],
+                    'counts' => ['type' => 'object'],
+                    'categories' => ['type' => 'object'],
+                ],
+                'additionalProperties' => false,
             ],
             'foundation-document' => [
                 '$schema' => 'https://json-schema.org/draft/2020-12/schema',
