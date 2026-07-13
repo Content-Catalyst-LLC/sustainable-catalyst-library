@@ -1,7 +1,32 @@
-# Sustainable Catalyst Library v1.13.0
+# Sustainable Catalyst Library v1.13.1
 
-Library v1.13.0 adds **Server-Side Book, PDF, and Document Production** to the Sustainable Catalyst knowledge system.
+Library v1.13.1 adds the **Index Scanner and Rebuild Reliability Patch** while retaining all v1.13.0 server-side document-production capabilities.
 
+The Library now has a dedicated resumable scanner with per-post-type diagnostics, missing and outdated record repair, single-record reindexing, relationship repair, stale cleanup, and downloadable scan logs. Indexing remains entirely WordPress-local and does not depend on Render, PostgreSQL, workspaces, or document production.
+
+## Index Scanner
+
+Open:
+
+```text
+SC Library → Index Scanner
+```
+
+Included scanner capabilities:
+
+- Complete safe rebuild
+- Missing-only and outdated-only scans
+- Resumable batch progress stored in WordPress
+- Per-post-type counts and freshness diagnostics
+- Single-record repair by ID or URL
+- Stale-record and relationship cleanup
+- Full-text and daily-reconciliation health checks
+- Downloadable JSON scan logs
+- Synchronous rebuild fallback on the main settings page
+
+See `INDEX_SCANNER_SETUP.md`.
+
+## Retained v1.13.0 document production
 The existing browser Book Builder remains available. Signed-in users can now submit normalized book editions to the optional Render service, monitor queued rendering, retry failures, inspect diagnostics, import completed PDFs into the WordPress Media Library, and preserve frozen edition manifests and checksums.
 
 ## Included
@@ -48,6 +73,17 @@ The normal Library and Notebook shortcodes continue to work.
 - `/wp-json/sustainable-catalyst/v1/library/documents/jobs/{uuid}/refresh`
 - `/wp-json/sustainable-catalyst/v1/library/documents/jobs/{uuid}/retry`
 - `/wp-json/sustainable-catalyst/v1/library/documents/editions`
+
+## Scanner REST endpoints
+
+- `/wp-json/sustainable-catalyst/v1/library/scanner/status`
+- `/wp-json/sustainable-catalyst/v1/library/scanner/start`
+- `/wp-json/sustainable-catalyst/v1/library/scanner/step`
+- `/wp-json/sustainable-catalyst/v1/library/scanner/pause`
+- `/wp-json/sustainable-catalyst/v1/library/scanner/resume`
+- `/wp-json/sustainable-catalyst/v1/library/scanner/cancel`
+- `/wp-json/sustainable-catalyst/v1/library/scanner/repair`
+- `/wp-json/sustainable-catalyst/v1/library/scanner/record`
 
 ## Render service
 

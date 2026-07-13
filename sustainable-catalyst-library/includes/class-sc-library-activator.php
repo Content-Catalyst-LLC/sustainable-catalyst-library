@@ -27,6 +27,12 @@ final class SC_Library_Activator {
         set_transient('sc_library_upgrade_notice', 1, 90);
     }
 
+    public static function repair_schema(): void {
+        self::create_tables();
+        self::install_defaults();
+        self::schedule_reconcile();
+    }
+
     private static function create_tables(): void {
         global $wpdb;
 
@@ -238,6 +244,9 @@ final class SC_Library_Activator {
         add_option('sc_library_items_per_page', 10);
         add_option('sc_library_enable_tags', 1);
         add_option('sc_library_last_full_index', '');
+        add_option('sc_library_scan_state', [], '', false);
+        add_option('sc_library_scan_logs', [], '', false);
+        add_option('sc_library_last_scan_summary', [], '', false);
         add_option('sc_library_default_mode', 'compact');
         add_option('sc_library_initial_results', 0);
         add_option('sc_library_result_density', 'compact');

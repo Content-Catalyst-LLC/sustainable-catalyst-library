@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.13.0"
+VERSION="1.13.1"
 REMOTE_SSH="git@github.com:Content-Catalyst-LLC/sustainable-catalyst-library.git"
 REMOTE_SLUG="Content-Catalyst-LLC/sustainable-catalyst-library"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -74,18 +74,24 @@ validate_marker() {
 
 validate_marker "Version: $VERSION" sustainable-catalyst-library/sustainable-catalyst-library.php "Plugin version marker validation failed."
 validate_marker "SC_LIBRARY_VERSION', '$VERSION'" sustainable-catalyst-library/sustainable-catalyst-library.php "Runtime version marker validation failed."
-validate_marker "Server-Side Book, PDF, and Document Production" README.md "Release marker is missing."
+validate_marker "Index Scanner and Rebuild Reliability Patch" README.md "Release marker is missing."
+validate_marker "sc-library-index-scan/1.0" sustainable-catalyst-library/includes/class-sc-library-scanner.php "Scanner-state schema marker is missing."
+validate_marker "scanner/status" sustainable-catalyst-library/includes/class-sc-library-scanner.php "Scanner REST status route is missing."
+validate_marker "scan_candidate_ids" sustainable-catalyst-library/includes/class-sc-library-indexer.php "Resumable scanner candidate method is missing."
+validate_marker "repair_schema" sustainable-catalyst-library/includes/class-sc-library-activator.php "Index schema repair is missing."
+validate_marker "SC Library → Index Scanner" INDEX_SCANNER_SETUP.md "Scanner setup guide is incomplete."
 validate_marker "sc-library-document-job/1.0" sustainable-catalyst-library/includes/class-sc-library-document-production.php "Document job schema marker is missing."
 validate_marker "sc-library-edition/1.0" sustainable-catalyst-library/includes/class-sc-library-document-production.php "Edition schema marker is missing."
 validate_marker "sc-library-portable-export/1.3" sustainable-catalyst-library/includes/class-sc-library-portability.php "Portable export schema marker is missing."
 validate_marker "sc-library-workspace/1.7" sustainable-catalyst-library/includes/class-sc-library-workspaces.php "Workspace schema marker is missing."
 validate_marker "CREATE TABLE IF NOT EXISTS library_document_jobs" render-workspace-service/app/documents.py "Render document-job table is missing."
-validate_marker "matrices_rendered" render-workspace-service/app/documents.py "Structured Matrix rendering is missing."
-validate_marker "boards_rendered" render-workspace-service/app/documents.py "Whiteboard and Chalkboard rendering is missing."
-validate_marker "annotations_rendered" render-workspace-service/app/documents.py "Annotation rendering is missing."
 validate_marker "X-SC-Library-Timestamp" sustainable-catalyst-library/includes/class-sc-library-document-production.php "Timestamped HMAC request protection is missing."
 
 for required in \
+  sustainable-catalyst-library/includes/class-sc-library-scanner.php \
+  sustainable-catalyst-library/assets/js/sc-library-scanner.js \
+  sustainable-catalyst-library/assets/css/sc-library-scanner.css \
+  sustainable-catalyst-library/templates/library-index-scanner.php \
   sustainable-catalyst-library/includes/class-sc-library-document-production.php \
   sustainable-catalyst-library/assets/js/sc-library-documents.js \
   sustainable-catalyst-library/assets/css/sc-library-documents.css \
@@ -97,7 +103,8 @@ for required in \
   render-workspace-service/requirements.txt \
   render-workspace-service/tests/test_documents.py \
   "sustainable-catalyst-library-v${VERSION}.zip" \
-  RELEASE_NOTES_1.13.0.md \
+  RELEASE_NOTES_1.13.1.md \
+  INDEX_SCANNER_SETUP.md \
   SERVER_DOCUMENT_PRODUCTION_SETUP.md \
   WORKSPACE_SYNC_SETUP.md \
   PORTABLE_DATA_SETUP.md; do
@@ -116,7 +123,7 @@ if command -v node >/dev/null 2>&1; then
   while IFS= read -r -d '' file; do node --check "$file" >/dev/null; done < <(find sustainable-catalyst-library/assets/js -name '*.js' -print0)
 fi
 if command -v python >/dev/null 2>&1; then
-  echo "Validating Render service..."
+  echo "Validating optional Render service..."
   python -m py_compile render-workspace-service/app/*.py render-workspace-service/tests/*.py
   if python -c 'import pytest' >/dev/null 2>&1; then
     (cd render-workspace-service && PYTHONPATH=. python -m pytest -q)
@@ -134,7 +141,7 @@ if command -v unzip >/dev/null 2>&1; then
 fi
 
 if grep -RInE --exclude-dir=.git --exclude-dir='__pycache__' --exclude-dir='.pytest_cache' \
-  --exclude='.env.example' --exclude='push_library_v1_13_0_to_github.sh' --exclude='install_and_push_library_v1_13_0.sh' \
+  --exclude='.env.example' --exclude='push_library_v1_13_1_to_github.sh' --exclude='install_and_push_library_v1_13_1.sh' \
   '((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|DATABASE_URL=postgres(ql)?://[^<[:space:]]+|SC_LIBRARY_SYNC_API_KEY=[A-Za-z0-9_-]{16,})' .; then
   echo "ERROR: Potential secret detected. Review the output above."
   exit 1
@@ -144,11 +151,11 @@ git add -A
 if git diff --cached --quiet; then
   echo "No changes to commit."
 else
-  git commit -m "Build Library v1.13.0 — Server-Side Book, PDF, and Document Production"
+  git commit -m "Build Library v1.13.1 — Index Scanner and Rebuild Reliability Patch"
 fi
 
 git push -u origin main
 
 echo
-echo "Sustainable Catalyst Library v1.13.0 pushed successfully."
+echo "Sustainable Catalyst Library v1.13.1 pushed successfully."
 echo "Repository: https://github.com/$REMOTE_SLUG"

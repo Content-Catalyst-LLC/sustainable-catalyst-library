@@ -1,6 +1,6 @@
-# Library v1.13.0 Portable Data Setup
+# Library v1.13.1 Portable Data Setup
 
-Library v1.13.0 preserves all earlier export formats and upgrades the portable schema to `sc-library-portable-export/1.3`.
+Library v1.13.1 preserves all earlier export formats and upgrades the portable schema to `sc-library-portable-export/1.3`.
 
 ## New planning fields
 
@@ -19,7 +19,7 @@ A new normalized `plan_dependencies` table stores each dependency as an individu
 
 ## Install
 
-1. Upload `sustainable-catalyst-library-v1.13.0.zip`.
+1. Upload `sustainable-catalyst-library-v1.13.1.zip`.
 2. Replace the existing plugin.
 3. Rebuild the Library index.
 4. Open **SC Library → Portable Data Export**.

@@ -218,6 +218,115 @@ final class SC_Library_Indexer {
         return array_values(array_filter(array_map('trim', preg_split('/\R|,/', $raw) ?: [])));
     }
 
+    public function scan_eligibility(int $post_id, ?array $post_types = null): array {
+        $post = get_post($post_id);
+        if (!$post) {
+            return ['eligible' => false, 'reason' => 'post_missing'];
+        }
+        if ($post->post_status !== 'publish') {
+            return ['eligible' => false, 'reason' => 'not_published'];
+        }
+
+        $allowed = $post_types ?: $this->configured_post_types();
+        $allowed = array_values(array_unique(array_filter(array_map('sanitize_key', $allowed))));
+        if (!in_array($post->post_type, $allowed, true)) {
+            return ['eligible' => false, 'reason' => 'post_type_not_configured'];
+        }
+        if (class_exists('SC_Library_Planner') && !SC_Library_Planner::should_index($post_id)) {
+            return ['eligible' => false, 'reason' => 'planner_record_not_public'];
+        }
+        return ['eligible' => true, 'reason' => 'eligible'];
+    }
+
+    public function scan_candidate_ids(?array $post_types = null): array {
+        $post_types = $post_types ?: $this->configured_post_types();
+        $post_types = array_values(array_unique(array_filter(array_map('sanitize_key', $post_types))));
+        if (!$post_types) {
+            return [];
+        }
+
+        $query = new WP_Query([
+            'post_type' => $post_types,
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'orderby' => 'ID',
+            'order' => 'ASC',
+            'no_found_rows' => true,
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
+            'ignore_sticky_posts' => true,
+        ]);
+
+        $ids = [];
+        foreach ($query->posts as $post_id) {
+            $post_id = absint($post_id);
+            if ($this->scan_eligibility($post_id, $post_types)['eligible']) {
+                $ids[] = $post_id;
+            }
+        }
+        return $ids;
+    }
+
+    public function scan_published_count(?array $post_types = null): int {
+        $post_types = $post_types ?: $this->configured_post_types();
+        $post_types = array_values(array_unique(array_filter(array_map('sanitize_key', $post_types))));
+        if (!$post_types) {
+            return 0;
+        }
+
+        $query = new WP_Query([
+            'post_type' => $post_types,
+            'post_status' => 'publish',
+            'posts_per_page' => 1,
+            'fields' => 'ids',
+            'no_found_rows' => false,
+            'update_post_meta_cache' => false,
+            'update_post_term_cache' => false,
+            'ignore_sticky_posts' => true,
+        ]);
+        return (int) $query->found_posts;
+    }
+
+    public function scan_batch_ids(array $post_ids): array {
+        $indexed = 0;
+        $skipped = 0;
+        $failed = 0;
+        $failures = [];
+
+        foreach (array_values(array_unique(array_filter(array_map('absint', $post_ids)))) as $post_id) {
+            $eligibility = $this->scan_eligibility($post_id);
+            if (!$eligibility['eligible']) {
+                $this->delete_record($post_id);
+                $skipped++;
+                continue;
+            }
+
+            try {
+                if ($this->index_post($post_id)) {
+                    $indexed++;
+                } else {
+                    $failed++;
+                    $failures[] = ['post_id' => $post_id, 'reason' => 'database_write_failed'];
+                }
+            } catch (Throwable $error) {
+                $failed++;
+                $failures[] = [
+                    'post_id' => $post_id,
+                    'reason' => sanitize_text_field($error->getMessage()),
+                ];
+            }
+        }
+
+        return [
+            'examined' => count($post_ids),
+            'indexed' => $indexed,
+            'skipped' => $skipped,
+            'failed' => $failed,
+            'failures' => array_slice($failures, 0, 50),
+        ];
+    }
+
     public function delete_record(int $post_id): void {
         global $wpdb;
         $wpdb->delete($this->table_name(), ['post_id' => $post_id], ['%d']);
@@ -238,40 +347,43 @@ final class SC_Library_Indexer {
                    OR posts.post_status <> 'publish'
                    OR posts.post_type NOT IN ({$placeholders})";
 
-        return (int) $wpdb->query($wpdb->prepare($sql, ...$types));
+        $removed = (int) $wpdb->query($wpdb->prepare($sql, ...$types));
+
+        // Some record types, particularly public roadmap plans, have an
+        // additional visibility boundary beyond post_status=publish.
+        $remaining_ids = $wpdb->get_col("SELECT post_id FROM {$this->table_name()}") ?: [];
+        foreach ($remaining_ids as $post_id) {
+            $post_id = absint($post_id);
+            if (!$this->scan_eligibility($post_id, $types)['eligible']) {
+                $this->delete_record($post_id);
+                $removed++;
+            }
+        }
+
+        return $removed;
     }
 
     public function rebuild_all(): array {
-        $page = 1;
         $indexed = 0;
+        $skipped = 0;
         $failed = 0;
         $purged = $this->purge_stale_records();
         $relationships_purged = $this->relationships->purge_stale();
+        $post_ids = $this->scan_candidate_ids();
 
-        do {
-            $query = new WP_Query([
-                'post_type' => $this->configured_post_types(),
-                'post_status' => 'publish',
-                'posts_per_page' => 100,
-                'paged' => $page,
-                'fields' => 'ids',
-                'orderby' => 'ID',
-                'order' => 'ASC',
-                'no_found_rows' => false,
-                'update_post_meta_cache' => true,
-                'update_post_term_cache' => true,
-            ]);
+        foreach (array_chunk($post_ids, 100) as $post_id_batch) {
+            $batch = $this->scan_batch_ids($post_id_batch);
+            $indexed += absint($batch['indexed'] ?? 0);
+            $skipped += absint($batch['skipped'] ?? 0);
+            $failed += absint($batch['failed'] ?? 0);
+        }
 
-            foreach ($query->posts as $post_id) {
-                $this->index_post((int) $post_id) ? $indexed++ : $failed++;
-            }
-            $page++;
-        } while ($page <= (int) $query->max_num_pages);
-
+        $purged += $this->purge_stale_records();
         update_option('sc_library_last_full_index', current_time('mysql', true));
 
         return [
             'indexed' => $indexed,
+            'skipped' => $skipped,
             'failed' => $failed,
             'purged' => $purged,
             'relationships_purged' => $relationships_purged,

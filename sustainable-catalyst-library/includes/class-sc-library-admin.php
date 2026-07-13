@@ -212,11 +212,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.13.0 activated.</strong> Rebuild the Library index, then review Document Production. Browser PDF output works immediately; optional Render setup enables queued server PDFs and frozen editions.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.13.1 activated.</strong> Open SC Library → Index Scanner to run a resumable rebuild and review index diagnostics. Document Production and Render remain independent of indexing.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.13.0.</strong> The release adds queued server PDF production, frozen edition records, Media Library import, checksums, diagnostics, and retries. Rebuild the index once, then review Document Production.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.13.1.</strong> The release adds a dedicated resumable Index Scanner, post-type diagnostics, targeted record repair, stale-record cleanup, relationship repair, and downloadable scan logs. Open SC Library → Index Scanner.</p></div>';
         }
     }
 
@@ -229,6 +229,7 @@ final class SC_Library_Admin {
         $url = add_query_arg([
             'page' => 'sc-library',
             'indexed' => $result['indexed'],
+            'skipped' => $result['skipped'] ?? 0,
             'failed' => $result['failed'],
             'purged' => $result['purged'],
             'relationships_purged' => $result['relationships_purged'] ?? 0,
@@ -246,11 +247,13 @@ final class SC_Library_Admin {
         <div class="wrap">
             <h1><?php esc_html_e('Sustainable Catalyst Library', 'sustainable-catalyst-library'); ?></h1>
             <p><?php esc_html_e('A relationship-aware knowledge base for publications, sources, notebooks, visual research, connected tools, annotations, custom books, and living institutional documentation.', 'sustainable-catalyst-library'); ?></p>
+            <p><a class="button button-primary" href="<?php echo esc_url(admin_url('admin.php?page=sc-library-scanner')); ?>"><?php esc_html_e('Open Index Scanner', 'sustainable-catalyst-library'); ?></a></p>
 
             <?php if (isset($_GET['indexed'])) : ?>
                 <div class="notice notice-success"><p><?php echo esc_html(sprintf(
-                    'Index completed: %d indexed, %d failed, %d stale records removed, %d stale relationships removed.',
+                    'Index completed: %d indexed, %d skipped, %d failed, %d stale records removed, %d stale relationships removed.',
                     absint($_GET['indexed']),
+                    absint($_GET['skipped'] ?? 0),
                     absint($_GET['failed'] ?? 0),
                     absint($_GET['purged'] ?? 0),
                     absint($_GET['relationships_purged'] ?? 0)
@@ -265,7 +268,7 @@ final class SC_Library_Admin {
                 <?php $this->metric_card(__('Library Collections', 'sustainable-catalyst-library'), number_format_i18n($this->term_count(SC_Library_Taxonomies::COLLECTION))); ?>
                 <?php $this->metric_card(__('Documentation Categories', 'sustainable-catalyst-library'), number_format_i18n($this->term_count(SC_Library_Taxonomies::DOCUMENT_CATEGORY))); ?>
                 <?php $this->metric_card(__('Foundations records', 'sustainable-catalyst-library'), number_format_i18n(class_exists('SC_Library_Documentation') ? SC_Library_Documentation::foundation_count() : 0)); ?>
-                <?php $this->metric_card(__('Portable export schema', 'sustainable-catalyst-library'), '1.0'); ?>
+                <?php $this->metric_card(__('Portable export schema', 'sustainable-catalyst-library'), '1.3'); ?>
             </div>
 
             <div class="card" style="max-width:980px">
@@ -505,7 +508,7 @@ final class SC_Library_Admin {
                 <p><code>[sc_library_notebook tab="annotations"]</code> — open the Notebook directly to annotations.</p>
                 <p><?php esc_html_e('Place this in a dedicated WordPress Shortcode block.', 'sustainable-catalyst-library'); ?></p>
                 <h3><?php esc_html_e('Relationship-aware REST endpoints', 'sustainable-catalyst-library'); ?></h3>
-                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates', 'integrations', 'integrations/status', 'integration-schema', 'items/{id}/handoff?target=workbench', 'annotation-schema', 'book-schema', 'items/{id}/book', 'documentation', 'documentation/categories', 'documentation/statuses', 'documentation/{id}', 'collections/foundations', 'registry', 'registry/facets', 'roadmap/tracker', 'planner/statuses', 'plans/{id}', 'export/formats', 'export/postgresql-schema', 'export/manifest', 'account/status', 'workspaces', 'workspaces/{uuid}', 'workspaces/{uuid}/history', 'workspaces/{uuid}/share', 'workspaces/{uuid}/sync', 'workspaces/render/status'] as $endpoint) : ?>
+                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates', 'integrations', 'integrations/status', 'integration-schema', 'items/{id}/handoff?target=workbench', 'annotation-schema', 'book-schema', 'items/{id}/book', 'documentation', 'documentation/categories', 'documentation/statuses', 'documentation/{id}', 'collections/foundations', 'registry', 'registry/facets', 'roadmap/tracker', 'planner/statuses', 'plans/{id}', 'export/formats', 'export/postgresql-schema', 'export/manifest', 'account/status', 'workspaces', 'workspaces/{uuid}', 'workspaces/{uuid}/history', 'workspaces/{uuid}/share', 'workspaces/{uuid}/sync', 'workspaces/render/status', 'scanner/status', 'scanner/start', 'scanner/step', 'scanner/pause', 'scanner/resume', 'scanner/cancel', 'scanner/repair', 'scanner/record'] as $endpoint) : ?>
                     <p><code>/wp-json/sustainable-catalyst/v1/library/<?php echo esc_html($endpoint); ?></code></p>
                 <?php endforeach; ?>
             </div>
