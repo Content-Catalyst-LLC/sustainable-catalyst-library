@@ -4,78 +4,56 @@ Tags: knowledge-base, multimedia, video, audio, evidence-reels, pdf, render, res
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.14.1
+Stable tag: 1.15.0
 License: GPLv2 or later
 
-A native WordPress knowledge system with multimedia clips and evidence reels, persistent workspaces, server-rendered books and PDFs, planning, notebooks, and PostgreSQL portability.
+A native WordPress knowledge system with editorial collaboration, reviews, suggested edits, multimedia, persistent workspaces, server-rendered books and PDFs, planning, notebooks, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v1.14.1 repairs the public Library record-card layout across desktop, tablet, mobile, and print while retaining the v1.14.0 Multimedia Studio for authorized video and audio assets, non-destructive clip definitions, transcript-linked snippets, captions, poster frames, annotations, evidence reels, and optional Render processing. WordPress remains the source of truth, and all earlier large-library indexing, workspace, planning, book, PDF, and portable-export features remain available.
+Sustainable Catalyst Library v1.15.0 adds a native collaboration, review, and editorial workflow layer while retaining the complete v1.14.1 Library, Multimedia Studio, large-library scanner, persistent workspaces, server document production, and portable data systems.
 
-= Multimedia Studio =
+= Collaboration and Editorial Workflow =
 
-* Register WordPress Media Library video and audio attachments.
-* Optionally register controlled public HTTPS source references.
-* Record rights, license, permission, provenance, source citation, and accessibility metadata.
-* Preserve transcripts, WebVTT, caption URLs, and poster timing.
-* Create non-destructive clips using start, end, and poster timestamps.
-* Add transcript excerpts, captions, and annotations to clips.
-* Build private or deliberately public evidence reels.
-* Optionally process authorized direct media through the signed Render service.
-* Import completed clips and poster frames into the WordPress Media Library.
-* Export media assets, clips, reels, and jobs through PostgreSQL, CSV, JSONL, or JSON.
-* Preserve media in PDFs through durable links, timestamps, transcript excerpts, and QR access.
+* Create editorial reviews linked to posts, workspaces, books, boards, documents, plans, or multimedia records.
+* Invite Observers, Reviewers, Editors, and Approvers.
+* Support existing WordPress users and expiring email invitations.
+* Add threaded comments with open and resolved states.
+* Record suggested edits with accepted, rejected, withdrawn, and pending states.
+* Coordinate intake, drafting, review, fact-check, accessibility, approval, scheduling, publication, and archive states.
+* Protect concurrent editing through revision checks and expiring record locks.
+* Preserve attributed activity and decision history.
+* Synchronize accepted workspace-review roles with persistent workspace access.
+* Export editorial records through PostgreSQL, CSV, JSONL, and JSON.
 
+= Retained systems =
 
-= Large-Library Index Scanner =
-
-* Direct WordPress database discovery immune to front-end query filters.
-* Cursor batches using the last processed WordPress post ID.
-* No unbounded WP_Query and no complete ID queue stored in options.
-* Automatic Posts, Pages, and editorial custom-post-type discovery.
-* Recommended post-type selection and saved Library configuration.
-* Complete, missing-only, outdated-only, and repair modes.
-* Per-post-type published, eligible, excluded, indexed, missing, and outdated counts.
-* Dedicated audit table containing every processed post ID and outcome.
-* Explicit exclusion and failure reasons in downloadable JSON reports.
-* Strict processed/indexed/excluded/failed completion accounting.
-* Pause, resume, cancel, and reset controls.
-* No dependency on Render, PostgreSQL, account workspaces, or document production.
-
-= Server Document Production =
-
-* Queued Render PDF jobs with progress, retries, and diagnostics.
-* Stable page size, margins, headers, footers, and page numbers.
-* Cover, front matter, table of contents, chapters, references, indexes, and manifests.
-* Code blocks, tables, source notes, remote-image safeguards, and handwriting transcriptions.
-* Frozen edition records with source-content and PDF SHA-256 checksums.
-* Automatic import into the WordPress Media Library.
-* Render remains optional; browser PDF output continues to work.
-
-= Persistent Workspaces =
-
-* Local, account, and hybrid workspace modes.
-* Revision history, conflict protection, collaboration, and optional Render/PostgreSQL synchronization.
+* Public record-card responsive repair from v1.14.1.
+* Multimedia assets, clips, evidence reels, transcripts, rights, and optional Render processing.
+* Cursor-based large-library indexing and database inventory.
+* Persistent account workspaces and optional Render/PostgreSQL synchronization.
+* Server-side book and PDF production.
+* Content Planner, release coordination, Notebook, boards, annotations, books, and portable exports.
 
 = Portable Data =
 
 * Workspace schema `sc-library-workspace/1.8`.
-* Portable export schema `sc-library-portable-export/1.4`.
-* PostgreSQL-ready document, workspace, media-asset, clip, reel, and job tables without embedded PDF/video/audio binaries.
+* Editorial workflow schema `sc-library-editorial-workflow/1.0`.
+* Portable export schema `sc-library-portable-export/1.5`.
 
 == Installation ==
 
 1. Upload and activate the plugin.
 2. Open SC Library and rebuild the index.
-3. Open SC Library → Multimedia Studio and register one authorized test asset.
-4. Create a linked clip and private evidence reel; Render is not required.
-5. Optionally deploy or upgrade the included Render service.
-6. Configure the media service URL and key under SC Library settings.
-7. Process a short clip and verify WordPress Media Library import.
+3. Open SC Library → Editorial Workflow.
+4. Create a private test review linked to a post or workspace.
+5. Invite an existing WordPress user as Reviewer or Editor.
+6. Test a comment, suggested edit, edit lock, and approval transition.
+7. Configure Multimedia Studio or Render services separately when needed.
 
 == Shortcodes ==
 
+* `[sc_library_editorial_workflow]`
 * `[sc_library_multimedia_studio]`
 * `[sc_library_evidence_reel id="REEL-UUID"]`
 * `[sc_library_book_builder]`
@@ -93,6 +71,16 @@ Sustainable Catalyst Library v1.14.1 repairs the public Library record-card layo
 * `[sc_library_chalkboard]`
 
 == REST API ==
+
+* `/wp-json/sustainable-catalyst/v1/library/editorial/schema`
+* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews`
+* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}`
+* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/transition`
+* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/comments`
+* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/suggestions`
+* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/participants`
+* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/lock`
+* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/activity`
 
 * `/wp-json/sustainable-catalyst/v1/library/media/status`
 * `/wp-json/sustainable-catalyst/v1/library/media/assets`
@@ -114,6 +102,17 @@ Sustainable Catalyst Library v1.14.1 repairs the public Library record-card layo
 * `/wp-json/sustainable-catalyst/v1/library/workspaces/{uuid}`
 
 == Changelog ==
+
+= 1.15.0 =
+* Added native editorial review records and workflow states.
+* Added Observer, Reviewer, Editor, and Approver participant roles.
+* Added existing-account and expiring email invitations.
+* Added comments, resolution, suggested edits, decisions, and attribution history.
+* Added revision conflict detection and expiring editor locks.
+* Added workspace-role synchronization for workspace-linked reviews.
+* Added editorial REST endpoints, admin dashboard, shortcode, and responsive interface.
+* Added five normalized editorial entities to portable export schema 1.5.
+
 
 = 1.14.1 =
 * Rebuilt public record cards as a single-column responsive grid so action controls cannot collapse title and excerpt columns.

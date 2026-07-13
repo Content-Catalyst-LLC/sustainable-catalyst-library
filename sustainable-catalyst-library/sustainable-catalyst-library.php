@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: A native WordPress knowledge base with a database-inventory-aware large-library index scanner, structured indexing, relationships, research notebooks, sources, Technical Translation Matrices, Whiteboards, Chalkboards, Annotation Studio handwriting, custom books, a Foundations Documentation Library, content planner, complete public registry, roadmap tracker, PostgreSQL and portable research-data exports, planning analytics, dependency intelligence, release coordination, persistent account workspaces, Render synchronization, server-side book and PDF production, Multimedia Studio and video snippet production, evidence reels, public record-card layout repair, responsive rendering, frozen editions, authority and version controls, search, filters, and public REST endpoints.
- * Version: 1.14.1
+ * Description: A native WordPress knowledge base with a database-inventory-aware large-library index scanner, structured indexing, relationships, research notebooks, sources, Technical Translation Matrices, Whiteboards, Chalkboards, Annotation Studio handwriting, custom books, a Foundations Documentation Library, content planner, complete public registry, roadmap tracker, PostgreSQL and portable research-data exports, planning analytics, dependency intelligence, release coordination, persistent account workspaces, Render synchronization, server-side book and PDF production, Multimedia Studio and video snippet production, evidence reels, collaboration, invited review participants, suggested edits, comments, approvals, record locks, attribution history, public record-card layout repair, responsive rendering, frozen editions, authority and version controls, search, filters, and public REST endpoints.
+ * Version: 1.15.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '1.14.1');
+define('SC_LIBRARY_VERSION', '1.15.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -40,6 +40,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-planner.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-portability.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-planning-analytics.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-workspaces.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-collaboration.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-shortcodes.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
@@ -82,6 +83,7 @@ final class SC_Library_Plugin {
         $portability = new SC_Library_Portability($indexer, $relationships, $planner);
         $planning_analytics = new SC_Library_Planning_Analytics($planner);
         $workspaces = new SC_Library_Workspaces();
+        $collaboration = new SC_Library_Collaboration();
         $shortcodes = new SC_Library_Shortcodes();
 
         $taxonomies->register_hooks();
@@ -103,6 +105,7 @@ final class SC_Library_Plugin {
         $portability->register_hooks();
         $planning_analytics->register_hooks();
         $workspaces->register_hooks();
+        $collaboration->register_hooks();
         $shortcodes->register_hooks();
     }
 }

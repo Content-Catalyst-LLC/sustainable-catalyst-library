@@ -49,6 +49,11 @@ final class SC_Library_Activator {
         $media_clips_table = $wpdb->prefix . 'sc_library_media_clips';
         $media_reels_table = $wpdb->prefix . 'sc_library_media_reels';
         $media_jobs_table = $wpdb->prefix . 'sc_library_media_jobs';
+        $reviews_table = $wpdb->prefix . 'sc_library_reviews';
+        $review_participants_table = $wpdb->prefix . 'sc_library_review_participants';
+        $review_comments_table = $wpdb->prefix . 'sc_library_review_comments';
+        $review_suggestions_table = $wpdb->prefix . 'sc_library_review_suggestions';
+        $review_events_table = $wpdb->prefix . 'sc_library_review_events';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -369,6 +374,126 @@ final class SC_Library_Activator {
             KEY updated_at (updated_at)
         ) {$charset};";
 
+        $reviews_sql = "CREATE TABLE {$reviews_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            review_uuid CHAR(36) NOT NULL,
+            subject_type VARCHAR(32) NOT NULL DEFAULT 'other',
+            subject_key VARCHAR(191) NOT NULL DEFAULT '',
+            post_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            workspace_uuid VARCHAR(64) NOT NULL DEFAULT '',
+            owner_user_id BIGINT UNSIGNED NOT NULL,
+            assignee_user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            title VARCHAR(255) NOT NULL,
+            summary LONGTEXT NULL,
+            status VARCHAR(32) NOT NULL DEFAULT 'intake',
+            priority VARCHAR(16) NOT NULL DEFAULT 'normal',
+            visibility VARCHAR(20) NOT NULL DEFAULT 'private',
+            due_at DATETIME NULL,
+            decision_note LONGTEXT NULL,
+            locked_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            locked_at DATETIME NULL,
+            lock_expires_at DATETIME NULL,
+            current_revision BIGINT UNSIGNED NOT NULL DEFAULT 1,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            completed_at DATETIME NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY review_uuid (review_uuid),
+            KEY subject_type (subject_type),
+            KEY subject_key (subject_key),
+            KEY post_id (post_id),
+            KEY workspace_uuid (workspace_uuid),
+            KEY owner_user_id (owner_user_id),
+            KEY assignee_user_id (assignee_user_id),
+            KEY status (status),
+            KEY priority (priority),
+            KEY due_at (due_at),
+            KEY updated_at (updated_at)
+        ) {$charset};";
+
+        $review_participants_sql = "CREATE TABLE {$review_participants_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            review_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            email VARCHAR(191) NOT NULL DEFAULT '',
+            role VARCHAR(24) NOT NULL DEFAULT 'reviewer',
+            status VARCHAR(24) NOT NULL DEFAULT 'invited',
+            invited_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            token_hash CHAR(64) NOT NULL DEFAULT '',
+            expires_at DATETIME NULL,
+            accepted_at DATETIME NULL,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            KEY review_user (review_id, user_id),
+            UNIQUE KEY review_email (review_id, email),
+            KEY review_id (review_id),
+            KEY user_id (user_id),
+            KEY role (role),
+            KEY status (status),
+            KEY token_hash (token_hash)
+        ) {$charset};";
+
+        $review_comments_sql = "CREATE TABLE {$review_comments_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            comment_uuid CHAR(36) NOT NULL,
+            review_id BIGINT UNSIGNED NOT NULL,
+            parent_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            user_id BIGINT UNSIGNED NOT NULL,
+            body LONGTEXT NOT NULL,
+            status VARCHAR(16) NOT NULL DEFAULT 'open',
+            anchor_json LONGTEXT NOT NULL,
+            resolved_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            resolved_at DATETIME NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY comment_uuid (comment_uuid),
+            KEY review_id (review_id),
+            KEY parent_id (parent_id),
+            KEY user_id (user_id),
+            KEY status (status),
+            KEY created_at (created_at)
+        ) {$charset};";
+
+        $review_suggestions_sql = "CREATE TABLE {$review_suggestions_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            suggestion_uuid CHAR(36) NOT NULL,
+            review_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL,
+            suggestion_type VARCHAR(24) NOT NULL DEFAULT 'replace',
+            field_key VARCHAR(64) NOT NULL DEFAULT 'content',
+            original_text LONGTEXT NULL,
+            proposed_text LONGTEXT NOT NULL,
+            rationale LONGTEXT NULL,
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            decision_note LONGTEXT NULL,
+            decided_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            decided_at DATETIME NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY suggestion_uuid (suggestion_uuid),
+            KEY review_id (review_id),
+            KEY user_id (user_id),
+            KEY status (status),
+            KEY field_key (field_key),
+            KEY created_at (created_at)
+        ) {$charset};";
+
+        $review_events_sql = "CREATE TABLE {$review_events_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            review_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            event_type VARCHAR(64) NOT NULL,
+            payload_json LONGTEXT NOT NULL,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            KEY review_id (review_id),
+            KEY user_id (user_id),
+            KEY event_type (event_type),
+            KEY created_at (created_at)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
         dbDelta($workspaces_sql);
@@ -382,6 +507,11 @@ final class SC_Library_Activator {
         dbDelta($media_clips_sql);
         dbDelta($media_reels_sql);
         dbDelta($media_jobs_sql);
+        dbDelta($reviews_sql);
+        dbDelta($review_participants_sql);
+        dbDelta($review_comments_sql);
+        dbDelta($review_suggestions_sql);
+        dbDelta($review_events_sql);
     }
 
     private static function install_defaults(): void {
@@ -429,6 +559,9 @@ final class SC_Library_Activator {
         add_option('sc_library_document_retention_days', 30);
         add_option('sc_library_enable_documentation', 1);
         add_option('sc_library_enable_multimedia', 1);
+        add_option('sc_library_enable_collaboration', 1);
+        add_option('sc_library_review_lock_minutes', 15);
+        add_option('sc_library_review_invitation_days', 14);
         add_option('sc_library_media_service_url', '');
         add_option('sc_library_media_service_api_key', '');
         add_option('sc_library_media_allow_remote_urls', 0);

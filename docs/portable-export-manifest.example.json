@@ -1,5 +1,5 @@
 {
-  "schema": "sc-library-portable-export/1.4",
+  "schema": "sc-library-portable-export/1.5",
   "plugin_version": "1.14.1",
   "workspace_schema": "sc-library-workspace/1.8",
   "generated_at": "2026-07-12T00:00:00+00:00",
@@ -25,7 +25,12 @@
     "media_assets": 0,
     "media_clips": 0,
     "media_reels": 0,
-    "media_jobs": 0
+    "media_jobs": 0,
+    "editorial_reviews": 0,
+    "editorial_participants": 0,
+    "editorial_comments": 0,
+    "editorial_suggestions": 0,
+    "editorial_events": 0
   },
   "entities": [
     "records",
@@ -45,6 +50,11 @@
     "media_assets",
     "media_clips",
     "media_reels",
-    "media_jobs"
+    "media_jobs",
+    "editorial_reviews",
+    "editorial_participants",
+    "editorial_comments",
+    "editorial_suggestions",
+    "editorial_events"
   ]
 }

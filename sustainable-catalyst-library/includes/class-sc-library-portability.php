@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * tables or serialized plugin internals.
  */
 final class SC_Library_Portability {
-    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.4';
+    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.5';
     public const POSTGRES_SCHEMA = 'sustainable_catalyst_library';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 
@@ -81,6 +81,7 @@ final class SC_Library_Portability {
             'account_workspaces' => __('Persistent account workspaces and revisions', 'sustainable-catalyst-library'),
             'document_editions' => __('Server document jobs and frozen editions', 'sustainable-catalyst-library'),
             'multimedia' => __('Multimedia assets, clips, reels, and processing jobs', 'sustainable-catalyst-library'),
+            'editorial' => __('Collaboration, reviews, comments, suggestions, and attribution history', 'sustainable-catalyst-library'),
             'schema' => __('Schema only', 'sustainable-catalyst-library'),
         ];
     }
@@ -326,6 +327,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             __('Account workspaces', 'sustainable-catalyst-library') => class_exists('SC_Library_Workspaces') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Workspaces::table()) : 0,
             __('Multimedia assets', 'sustainable-catalyst-library') => class_exists('SC_Library_Multimedia') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Multimedia::assets_table()) : 0,
             __('Multimedia clips', 'sustainable-catalyst-library') => class_exists('SC_Library_Multimedia') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Multimedia::clips_table()) : 0,
+            __('Editorial reviews', 'sustainable-catalyst-library') => class_exists('SC_Library_Collaboration') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Collaboration::reviews_table()) : 0,
         ];
     }
 
@@ -410,6 +412,11 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         $media_clips = $this->export_media_clips();
         $media_reels = $this->export_media_reels();
         $media_jobs = $this->export_media_jobs();
+        $editorial_reviews = $this->export_editorial_reviews();
+        $editorial_participants = $this->export_editorial_participants();
+        $editorial_comments = $this->export_editorial_comments();
+        $editorial_suggestions = $this->export_editorial_suggestions();
+        $editorial_events = $this->export_editorial_events();
 
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($r) => (int) $r['id'], $public_registry), true);
@@ -421,7 +428,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $documentation = $this->filter_rows_by_ids($documentation, 'record_id', $record_ids);
             $plans = array_values(array_filter($plans, static fn($row) => !empty($row['public'])));
             $plan_dependencies = $this->filter_rows_by_ids($plan_dependencies, 'plan_id', array_column($plans, 'plan_id'));
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
         } elseif ($scope === 'planner') {
             $records = [];
             $terms = [];
@@ -429,7 +436,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $relationships = [];
             $resources = [];
             $documentation = [];
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
         } elseif ($scope === 'documentation') {
             $doc_ids = array_map(static fn($row) => (int) $row['record_id'], $documentation);
             $records = $this->filter_rows_by_ids($records, 'record_id', $doc_ids);
@@ -438,21 +445,23 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $relationships = array_values(array_filter($relationships, static fn($row) => in_array((int) $row['source_post_id'], $doc_ids, true) || in_array((int) $row['target_post_id'], $doc_ids, true)));
             $plans = [];
             $plan_dependencies = [];
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
         } elseif ($scope === 'relationships') {
             $records = [];
             $documentation = [];
             $plans = [];
             $plan_dependencies = [];
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
         } elseif ($scope === 'account_workspaces') {
-            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
         } elseif ($scope === 'document_editions') {
-            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $media_assets = $media_clips = $media_reels = $media_jobs = [];
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
         } elseif ($scope === 'multimedia') {
-            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = [];
-        } elseif ($scope === 'schema') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
+        } elseif ($scope === 'editorial') {
             $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = [];
+        } elseif ($scope === 'schema') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
         }
 
         $entities = [
@@ -474,6 +483,11 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'media_clips' => $media_clips,
             'media_reels' => $media_reels,
             'media_jobs' => $media_jobs,
+            'editorial_reviews' => $editorial_reviews,
+            'editorial_participants' => $editorial_participants,
+            'editorial_comments' => $editorial_comments,
+            'editorial_suggestions' => $editorial_suggestions,
+            'editorial_events' => $editorial_events,
         ];
 
         $counts = [];
@@ -616,6 +630,87 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
                 'payload' => ['request' => json_decode((string) $row['request_json'], true) ?: []],
             ];
         }, $rows);
+    }
+
+    private function export_editorial_reviews(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Collaboration')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Collaboration::reviews_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(fn(array $row): array => [
+            'review_id' => (int) $row['id'],
+            'review_uuid' => (string) $row['review_uuid'],
+            'subject_type' => (string) $row['subject_type'],
+            'subject_key' => (string) $row['subject_key'],
+            'post_id' => (int) $row['post_id'],
+            'workspace_uuid' => (string) $row['workspace_uuid'],
+            'owner_user_id' => (int) $row['owner_user_id'],
+            'assignee_user_id' => (int) $row['assignee_user_id'],
+            'title' => (string) $row['title'],
+            'summary' => (string) $row['summary'],
+            'status' => (string) $row['status'],
+            'priority' => (string) $row['priority'],
+            'visibility' => (string) $row['visibility'],
+            'due_at' => $this->rfc3339_or_null((string) $row['due_at']),
+            'decision_note' => (string) $row['decision_note'],
+            'locked_by' => (int) $row['locked_by'],
+            'locked_at' => $this->rfc3339_or_null((string) $row['locked_at']),
+            'lock_expires_at' => $this->rfc3339_or_null((string) $row['lock_expires_at']),
+            'current_revision' => (int) $row['current_revision'],
+            'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+            'updated_at' => $this->rfc3339_or_null((string) $row['updated_at']),
+            'completed_at' => $this->rfc3339_or_null((string) $row['completed_at']),
+            'payload' => [],
+        ], $rows);
+    }
+
+    private function export_editorial_participants(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Collaboration')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Collaboration::participants_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(fn(array $row): array => [
+            'participant_id' => (int) $row['id'], 'review_id' => (int) $row['review_id'], 'user_id' => (int) $row['user_id'],
+            'email' => (string) $row['email'], 'role' => (string) $row['role'], 'status' => (string) $row['status'],
+            'invited_by' => (int) $row['invited_by'], 'expires_at' => $this->rfc3339_or_null((string) $row['expires_at']),
+            'accepted_at' => $this->rfc3339_or_null((string) $row['accepted_at']), 'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+        ], $rows);
+    }
+
+    private function export_editorial_comments(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Collaboration')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Collaboration::comments_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(fn(array $row): array => [
+            'comment_id' => (int) $row['id'], 'comment_uuid' => (string) $row['comment_uuid'], 'review_id' => (int) $row['review_id'],
+            'parent_id' => (int) $row['parent_id'], 'user_id' => (int) $row['user_id'], 'body' => (string) $row['body'],
+            'status' => (string) $row['status'], 'anchor' => json_decode((string) $row['anchor_json'], true) ?: [],
+            'resolved_by' => (int) $row['resolved_by'], 'resolved_at' => $this->rfc3339_or_null((string) $row['resolved_at']),
+            'created_at' => $this->rfc3339_or_null((string) $row['created_at']), 'updated_at' => $this->rfc3339_or_null((string) $row['updated_at']),
+        ], $rows);
+    }
+
+    private function export_editorial_suggestions(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Collaboration')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Collaboration::suggestions_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(fn(array $row): array => [
+            'suggestion_id' => (int) $row['id'], 'suggestion_uuid' => (string) $row['suggestion_uuid'], 'review_id' => (int) $row['review_id'],
+            'user_id' => (int) $row['user_id'], 'suggestion_type' => (string) $row['suggestion_type'], 'field_key' => (string) $row['field_key'],
+            'original_text' => (string) $row['original_text'], 'proposed_text' => (string) $row['proposed_text'], 'rationale' => (string) $row['rationale'],
+            'status' => (string) $row['status'], 'decision_note' => (string) $row['decision_note'], 'decided_by' => (int) $row['decided_by'],
+            'decided_at' => $this->rfc3339_or_null((string) $row['decided_at']), 'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+            'updated_at' => $this->rfc3339_or_null((string) $row['updated_at']),
+        ], $rows);
+    }
+
+    private function export_editorial_events(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Collaboration')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Collaboration::events_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(fn(array $row): array => [
+            'event_id' => (int) $row['id'], 'review_id' => (int) $row['review_id'], 'user_id' => (int) $row['user_id'],
+            'event_type' => (string) $row['event_type'], 'payload' => json_decode((string) $row['payload_json'], true) ?: [],
+            'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+        ], $rows);
     }
 
     private function export_document_jobs(): array {
@@ -1376,6 +1471,86 @@ CREATE TABLE IF NOT EXISTS media_jobs (
 CREATE INDEX IF NOT EXISTS media_jobs_clip_idx ON media_jobs(clip_uuid, created_at DESC);
 CREATE INDEX IF NOT EXISTS media_jobs_status_idx ON media_jobs(status);
 
+CREATE TABLE IF NOT EXISTS editorial_reviews (
+    review_id bigint PRIMARY KEY,
+    review_uuid uuid UNIQUE NOT NULL,
+    subject_type text NOT NULL,
+    subject_key text NOT NULL DEFAULT '',
+    post_id bigint NOT NULL DEFAULT 0,
+    workspace_uuid text NOT NULL DEFAULT '',
+    owner_user_id bigint NOT NULL,
+    assignee_user_id bigint NOT NULL DEFAULT 0,
+    title text NOT NULL,
+    summary text NOT NULL DEFAULT '',
+    status text NOT NULL,
+    priority text NOT NULL,
+    visibility text NOT NULL,
+    due_at timestamptz,
+    decision_note text NOT NULL DEFAULT '',
+    locked_by bigint NOT NULL DEFAULT 0,
+    locked_at timestamptz,
+    lock_expires_at timestamptz,
+    current_revision bigint NOT NULL DEFAULT 1,
+    created_at timestamptz,
+    updated_at timestamptz,
+    completed_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS editorial_reviews_status_idx ON editorial_reviews(status, updated_at DESC);
+CREATE INDEX IF NOT EXISTS editorial_reviews_owner_idx ON editorial_reviews(owner_user_id, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS editorial_participants (
+    participant_id bigint PRIMARY KEY,
+    review_id bigint NOT NULL REFERENCES editorial_reviews(review_id) ON DELETE CASCADE,
+    user_id bigint NOT NULL DEFAULT 0,
+    email text NOT NULL DEFAULT '',
+    role text NOT NULL,
+    status text NOT NULL,
+    invited_by bigint NOT NULL DEFAULT 0,
+    expires_at timestamptz,
+    accepted_at timestamptz,
+    created_at timestamptz
+);
+CREATE TABLE IF NOT EXISTS editorial_comments (
+    comment_id bigint PRIMARY KEY,
+    comment_uuid uuid UNIQUE NOT NULL,
+    review_id bigint NOT NULL REFERENCES editorial_reviews(review_id) ON DELETE CASCADE,
+    parent_id bigint NOT NULL DEFAULT 0,
+    user_id bigint NOT NULL,
+    body text NOT NULL,
+    status text NOT NULL,
+    anchor jsonb NOT NULL DEFAULT '{}'::jsonb,
+    resolved_by bigint NOT NULL DEFAULT 0,
+    resolved_at timestamptz,
+    created_at timestamptz,
+    updated_at timestamptz
+);
+CREATE TABLE IF NOT EXISTS editorial_suggestions (
+    suggestion_id bigint PRIMARY KEY,
+    suggestion_uuid uuid UNIQUE NOT NULL,
+    review_id bigint NOT NULL REFERENCES editorial_reviews(review_id) ON DELETE CASCADE,
+    user_id bigint NOT NULL,
+    suggestion_type text NOT NULL,
+    field_key text NOT NULL,
+    original_text text NOT NULL DEFAULT '',
+    proposed_text text NOT NULL,
+    rationale text NOT NULL DEFAULT '',
+    status text NOT NULL,
+    decision_note text NOT NULL DEFAULT '',
+    decided_by bigint NOT NULL DEFAULT 0,
+    decided_at timestamptz,
+    created_at timestamptz,
+    updated_at timestamptz
+);
+CREATE TABLE IF NOT EXISTS editorial_events (
+    event_id bigint PRIMARY KEY,
+    review_id bigint NOT NULL REFERENCES editorial_reviews(review_id) ON DELETE CASCADE,
+    user_id bigint NOT NULL DEFAULT 0,
+    event_type text NOT NULL,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz
+);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 
@@ -1438,6 +1613,11 @@ SQL;
             'media_clips' => ['media_clip_id','clip_uuid','asset_uuid','owner_user_id','title','description','start_ms','end_ms','poster_time_ms','transcript_excerpt','caption_text','status','visibility','output_attachment_id','poster_attachment_id','remote_job_uuid','created_at','updated_at','payload'],
             'media_reels' => ['media_reel_id','reel_uuid','owner_user_id','title','description','clip_uuids','visibility','edition_mode','created_at','updated_at','payload'],
             'media_jobs' => ['media_job_id','job_uuid','clip_uuid','owner_user_id','status','progress','attempt','max_attempts','remote_job_uuid','output_attachment_id','poster_attachment_id','output_sha256','output_bytes','error_message','created_at','updated_at','completed_at','diagnostics','payload'],
+            'editorial_reviews' => ['review_id','review_uuid','subject_type','subject_key','post_id','workspace_uuid','owner_user_id','assignee_user_id','title','summary','status','priority','visibility','due_at','decision_note','locked_by','locked_at','lock_expires_at','current_revision','created_at','updated_at','completed_at','payload'],
+            'editorial_participants' => ['participant_id','review_id','user_id','email','role','status','invited_by','expires_at','accepted_at','created_at'],
+            'editorial_comments' => ['comment_id','comment_uuid','review_id','parent_id','user_id','body','status','anchor','resolved_by','resolved_at','created_at','updated_at'],
+            'editorial_suggestions' => ['suggestion_id','suggestion_uuid','review_id','user_id','suggestion_type','field_key','original_text','proposed_text','rationale','status','decision_note','decided_by','decided_at','created_at','updated_at'],
+            'editorial_events' => ['event_id','review_id','user_id','event_type','payload','created_at'],
             default => [],
         };
         if (!$columns) return '';
@@ -1446,12 +1626,12 @@ SQL;
             $literals = [];
             foreach ($columns as $column) {
                 $value = $row[$column] ?? null;
-                if (in_array($column, ['payload', 'expected_release', 'manifest', 'diagnostics', 'clip_uuids'], true)) $literals[] = $this->sql_json($value ?: []);
+                if (in_array($column, ['payload', 'expected_release', 'manifest', 'diagnostics', 'clip_uuids', 'anchor'], true)) $literals[] = $this->sql_json($value ?: []);
                 elseif (in_array($column, ['dependency_ids'], true)) $literals[] = $this->sql_bigint_array(is_array($value) ? $value : []);
-                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at','completed_at','frozen_at'], true)) $literals[] = $this->sql_timestamp($value);
+                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at','completed_at','frozen_at','due_at','locked_at','lock_expires_at','expires_at','resolved_at','decided_at'], true)) $literals[] = $this->sql_timestamp($value);
                 elseif (in_array($column, ['last_reviewed','planned_start','actual_start','actual_publication_date'], true)) $literals[] = $value ? $this->sql_text((string) $value) . '::date' : 'NULL';
                 elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
-                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes'], true)) ? (string) (int) $value : 'NULL';
+                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id'], true)) ? (string) (int) $value : 'NULL';
                 elseif (in_array($column, ['series_order','estimated_effort','actual_effort'], true)) $literals[] = (string) (float) $value;
                 else $literals[] = $this->sql_text((string) ($value ?? ''));
             }
@@ -1476,6 +1656,11 @@ SQL;
             'media_clips' => 'media_clip_id',
             'media_reels' => 'media_reel_id',
             'media_jobs' => 'media_job_id',
+            'editorial_reviews' => 'review_id',
+            'editorial_participants' => 'participant_id',
+            'editorial_comments' => 'comment_id',
+            'editorial_suggestions' => 'suggestion_id',
+            'editorial_events' => 'event_id',
             default => '',
         };
         return "INSERT INTO {$entity} (" . implode(', ', $columns) . ") VALUES\n" . implode(",\n", $values) . ($conflict ? "\nON CONFLICT ({$conflict}) DO NOTHING;" : ';');

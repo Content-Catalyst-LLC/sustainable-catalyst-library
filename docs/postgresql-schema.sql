@@ -394,6 +394,89 @@ CREATE TABLE IF NOT EXISTS media_jobs (
 CREATE INDEX IF NOT EXISTS media_jobs_clip_idx ON media_jobs(clip_uuid, created_at DESC);
 CREATE INDEX IF NOT EXISTS media_jobs_status_idx ON media_jobs(status);
 
+CREATE TABLE IF NOT EXISTS editorial_reviews (
+    review_id bigint PRIMARY KEY,
+    review_uuid uuid UNIQUE NOT NULL,
+    subject_type text NOT NULL,
+    subject_key text NOT NULL DEFAULT '',
+    post_id bigint NOT NULL DEFAULT 0,
+    workspace_uuid text NOT NULL DEFAULT '',
+    owner_user_id bigint NOT NULL,
+    assignee_user_id bigint NOT NULL DEFAULT 0,
+    title text NOT NULL,
+    summary text NOT NULL DEFAULT '',
+    status text NOT NULL,
+    priority text NOT NULL,
+    visibility text NOT NULL,
+    due_at timestamptz,
+    decision_note text NOT NULL DEFAULT '',
+    locked_by bigint NOT NULL DEFAULT 0,
+    locked_at timestamptz,
+    lock_expires_at timestamptz,
+    current_revision bigint NOT NULL DEFAULT 1,
+    created_at timestamptz,
+    updated_at timestamptz,
+    completed_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS editorial_reviews_status_idx ON editorial_reviews(status, updated_at DESC);
+CREATE INDEX IF NOT EXISTS editorial_reviews_owner_idx ON editorial_reviews(owner_user_id, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS editorial_participants (
+    participant_id bigint PRIMARY KEY,
+    review_id bigint NOT NULL REFERENCES editorial_reviews(review_id) ON DELETE CASCADE,
+    user_id bigint NOT NULL DEFAULT 0,
+    email text NOT NULL DEFAULT '',
+    role text NOT NULL,
+    status text NOT NULL,
+    invited_by bigint NOT NULL DEFAULT 0,
+    expires_at timestamptz,
+    accepted_at timestamptz,
+    created_at timestamptz
+);
+
+CREATE TABLE IF NOT EXISTS editorial_comments (
+    comment_id bigint PRIMARY KEY,
+    comment_uuid uuid UNIQUE NOT NULL,
+    review_id bigint NOT NULL REFERENCES editorial_reviews(review_id) ON DELETE CASCADE,
+    parent_id bigint NOT NULL DEFAULT 0,
+    user_id bigint NOT NULL,
+    body text NOT NULL,
+    status text NOT NULL,
+    anchor jsonb NOT NULL DEFAULT '{}'::jsonb,
+    resolved_by bigint NOT NULL DEFAULT 0,
+    resolved_at timestamptz,
+    created_at timestamptz,
+    updated_at timestamptz
+);
+
+CREATE TABLE IF NOT EXISTS editorial_suggestions (
+    suggestion_id bigint PRIMARY KEY,
+    suggestion_uuid uuid UNIQUE NOT NULL,
+    review_id bigint NOT NULL REFERENCES editorial_reviews(review_id) ON DELETE CASCADE,
+    user_id bigint NOT NULL,
+    suggestion_type text NOT NULL,
+    field_key text NOT NULL,
+    original_text text NOT NULL DEFAULT '',
+    proposed_text text NOT NULL,
+    rationale text NOT NULL DEFAULT '',
+    status text NOT NULL,
+    decision_note text NOT NULL DEFAULT '',
+    decided_by bigint NOT NULL DEFAULT 0,
+    decided_at timestamptz,
+    created_at timestamptz,
+    updated_at timestamptz
+);
+
+CREATE TABLE IF NOT EXISTS editorial_events (
+    event_id bigint PRIMARY KEY,
+    review_id bigint NOT NULL REFERENCES editorial_reviews(review_id) ON DELETE CASCADE,
+    user_id bigint NOT NULL DEFAULT 0,
+    event_type text NOT NULL,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz
+);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 

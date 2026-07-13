@@ -46,3 +46,7 @@ Portable exports can include normalized document-job and frozen-edition manifest
 ## v1.14.0 multimedia export addendum
 
 Portable export schema `sc-library-portable-export/1.4` adds normalized `media_assets`, `media_clips`, `media_reels`, and `media_jobs` entities. The multimedia scope exports rights, provenance, transcripts, clip boundaries, reel order, output references, and diagnostics without embedding media binaries.
+
+## v1.15.0 editorial workflow entities
+
+Portable export schema `sc-library-portable-export/1.5` adds `editorial_reviews`, `editorial_participants`, `editorial_comments`, `editorial_suggestions`, and `editorial_events`. Use the Editorial export scope for a focused review archive. These records can include private comments, email addresses, invitation state, and editorial decisions.
