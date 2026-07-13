@@ -34,17 +34,7 @@ final class SC_Library_Indexer {
         return array_values(array_unique($types));
     }
 
-    public function normalize_post_types(array $post_types): array {
-        $known = get_post_types([], 'names');
-        $types = array_values(array_unique(array_filter(array_map('sanitize_key', $post_types))));
-        return array_values(array_intersect($types, $known));
-    }
-
-    /**
-     * Discover editorial post types without relying on a front-end WP_Query.
-     * Built-in technical records are excluded even when another plugin exposes them.
-     */
-    public function discoverable_post_types(): array {
+    public function scanner_excluded_post_types(): array {
         $excluded = apply_filters('sc_library_scanner_excluded_post_types', [
             'attachment',
             'revision',
@@ -60,9 +50,61 @@ final class SC_Library_Indexer {
             'wp_navigation',
             'wp_font_family',
             'wp_font_face',
+            'acf-field',
+            'acf-field-group',
+            'elementor_library',
+            'e-landing-page',
+            'shop_order',
+            'shop_order_refund',
+            'shop_coupon',
+            'wpforms',
+            'wpforms_log',
         ]);
-        $excluded = array_fill_keys(array_map('sanitize_key', (array) $excluded), true);
+        return array_values(array_unique(array_filter(array_map('sanitize_key', (array) $excluded))));
+    }
+
+    /** Raw published inventory grouped by post type, independent of plugin registration and saved Library settings. */
+    public function database_published_post_type_counts(bool $include_technical = false): array {
+        global $wpdb;
+        static $cache = [];
+        $key = $include_technical ? 'all' : 'editorial';
+        if (isset($cache[$key])) {
+            return $cache[$key];
+        }
+        $rows = $wpdb->get_results(
+            "SELECT post_type, COUNT(*) AS total FROM {$wpdb->posts} WHERE post_status = 'publish' GROUP BY post_type ORDER BY post_type ASC",
+            ARRAY_A
+        ) ?: [];
+        $excluded = array_fill_keys($this->scanner_excluded_post_types(), true);
+        $counts = [];
+        foreach ($rows as $row) {
+            $type = sanitize_key((string) ($row['post_type'] ?? ''));
+            if ($type === '' || (!$include_technical && isset($excluded[$type]))) {
+                continue;
+            }
+            $counts[$type] = absint($row['total'] ?? 0);
+        }
+        $cache[$key] = $counts;
+        return $counts;
+    }
+
+    public function normalize_post_types(array $post_types): array {
+        $known = array_merge(get_post_types([], 'names'), array_keys($this->database_published_post_type_counts(false)));
+        $known = array_values(array_unique(array_filter(array_map('sanitize_key', $known))));
+        $excluded = array_fill_keys($this->scanner_excluded_post_types(), true);
+        $types = array_values(array_unique(array_filter(array_map('sanitize_key', $post_types))));
+        $types = array_values(array_filter($types, static fn(string $type): bool => !isset($excluded[$type])));
+        return array_values(array_intersect($types, $known));
+    }
+
+    /**
+     * Discover editorial post types without relying on a front-end WP_Query or
+     * assuming that every stored post type is registered on this admin request.
+     */
+    public function discoverable_post_types(): array {
+        $excluded = array_fill_keys($this->scanner_excluded_post_types(), true);
         $objects = get_post_types([], 'objects');
+        $database_types = array_keys($this->database_published_post_type_counts(false));
         $types = [];
         foreach ($objects as $name => $object) {
             if (isset($excluded[$name])) {
@@ -75,21 +117,20 @@ final class SC_Library_Indexer {
                 continue;
             }
             $editorial = (bool) ($object->public || $object->publicly_queryable || (!$object->_builtin && $object->show_ui));
-            if (!$editorial) {
-                continue;
+            if ($editorial) {
+                $types[] = $name;
             }
-            $types[] = $name;
         }
-        // Preserve explicitly configured editorial types even when another
-        // plugin registers them as non-public and without a visible UI.
+        // Raw database types are visible even when their registering plugin is
+        // late, conditionally loaded, or temporarily inactive.
+        foreach ($database_types as $database_type) {
+            if (!isset($excluded[$database_type])) {
+                $types[] = $database_type;
+            }
+        }
         $configured = get_option('sc_library_post_types', []);
         if (is_array($configured)) {
-            foreach ($configured as $configured_type) {
-                $configured_type = sanitize_key((string) $configured_type);
-                if ($configured_type !== '' && !isset($excluded[$configured_type])) {
-                    $types[] = $configured_type;
-                }
-            }
+            $types = array_merge($types, $configured);
         }
         if (post_type_exists('post')) {
             array_unshift($types, 'post');
@@ -102,14 +143,21 @@ final class SC_Library_Indexer {
 
     public function recommended_post_types(): array {
         $recommended = [];
+        $database_counts = $this->database_published_post_type_counts(false);
         foreach ($this->discoverable_post_types() as $post_type) {
             $object = get_post_type_object($post_type);
             $is_planner = class_exists('SC_Library_Planner') && $post_type === SC_Library_Planner::POST_TYPE;
-            if (in_array($post_type, ['post', 'page'], true) || $is_planner || ($object && ($object->public || $object->publicly_queryable))) {
+            $registered_public = $object && ($object->public || $object->publicly_queryable);
+            $stored_editorial = absint($database_counts[$post_type] ?? 0) > 0;
+            if (in_array($post_type, ['post', 'page'], true) || $is_planner || $registered_public || $stored_editorial) {
                 $recommended[] = $post_type;
             }
         }
         return $this->normalize_post_types((array) apply_filters('sc_library_scanner_recommended_post_types', $recommended));
+    }
+
+    public function global_published_count(bool $include_technical = false): int {
+        return array_sum($this->database_published_post_type_counts($include_technical));
     }
 
     public function save_configured_post_types(array $post_types): array {

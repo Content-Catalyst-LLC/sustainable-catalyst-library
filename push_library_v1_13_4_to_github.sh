@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.13.3"
+VERSION="1.13.4"
 REMOTE_SSH="git@github.com:Content-Catalyst-LLC/sustainable-catalyst-library.git"
 REMOTE_SLUG="Content-Catalyst-LLC/sustainable-catalyst-library"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -55,8 +55,8 @@ validate_marker "sc_library_scan_items" "$PLUGIN_DIR/includes/class-sc-library-a
 validate_marker "accounting_ok" "$PLUGIN_DIR/includes/class-sc-library-scanner.php" "Completion accounting is missing."
 validate_marker "'step', 'pause', 'resume', 'cancel', 'reset'" "$PLUGIN_DIR/includes/class-sc-library-scanner.php" "Scanner reset route is missing."
 validate_marker "discoverable_post_types" "$PLUGIN_DIR/includes/class-sc-library-indexer.php" "Post-type discovery is missing."
-validate_marker "Large-Library Index Discovery and Batch Reliability Patch" "$SOURCE_DIR/RELEASE_NOTES_1.13.3.md" "Release notes marker is missing."
-validate_marker "SC Library → Index Scanner" "$SOURCE_DIR/INDEX_SCANNER_SETUP.md" "Scanner setup guide is incomplete."
+validate_marker "Database Inventory and Full Reconciliation Repair" "$SOURCE_DIR/RELEASE_NOTES_1.13.4.md" "Release notes marker is missing."
+validate_marker "SC Library → Index Tools" "$SOURCE_DIR/INDEX_SCANNER_SETUP.md" "Scanner setup guide is incomplete."
 validate_marker "menu'], 5" "$PLUGIN_DIR/includes/class-sc-library-admin.php" "SC Library parent menu priority repair is missing."
 validate_marker "admin_menu'], 20" "$PLUGIN_DIR/includes/class-sc-library-scanner.php" "Index Scanner submenu priority repair is missing."
 validate_marker "sc-library-document-job/1.0" "$PLUGIN_DIR/includes/class-sc-library-document-production.php" "Document production was not retained."
@@ -85,7 +85,7 @@ for required in \
   "$SOURCE_DIR/tests/test_large_library_scanner_release.py" \
   "$SOURCE_DIR/render-workspace-service/app/documents.py" \
   "$SOURCE_DIR/render-workspace-service/tests/test_documents.py" \
-  "$SOURCE_DIR/RELEASE_NOTES_1.13.3.md" \
+  "$SOURCE_DIR/RELEASE_NOTES_1.13.4.md" \
   "$SOURCE_DIR/INDEX_SCANNER_SETUP.md" \
   "$PLUGIN_ZIP"; do
   if [[ ! -f "$required" ]]; then
@@ -112,7 +112,7 @@ for candidate in python3.12 python3 python; do
 done
 if [[ -n "$PYTHON_BIN" ]]; then
   echo "Validating scanner and optional Render service in an isolated Python environment..."
-  TEMP_VENV="$(mktemp -d "${TMPDIR:-/tmp}/sc-library-v1133.XXXXXX")"
+  TEMP_VENV="$(mktemp -d "${TMPDIR:-/tmp}/sc-library-v1134.XXXXXX")"
   "$PYTHON_BIN" -m venv "$TEMP_VENV/venv"
   "$TEMP_VENV/venv/bin/python" -m pip install --upgrade pip >/dev/null
   "$TEMP_VENV/venv/bin/python" -m pip install -r "$SOURCE_DIR/render-workspace-service/requirements-dev.txt" >/dev/null
@@ -124,7 +124,7 @@ fi
 unzip -t "$PLUGIN_ZIP" >/dev/null
 
 if grep -RInE --exclude-dir=.git --exclude-dir='__pycache__' --exclude-dir='.pytest_cache' --exclude-dir='.venv' \
-  --exclude='.env.example' --exclude='push_library_v1_13_3_to_github.sh' --exclude='install_and_push_library_v1_13_3.sh' \
+  --exclude='.env.example' --exclude='push_library_v1_13_4_to_github.sh' --exclude='install_and_push_library_v1_13_4.sh' \
   '((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|DATABASE_URL=postgres(ql)?://[^<[:space:]]+|SC_LIBRARY_SYNC_API_KEY=[A-Za-z0-9_-]{16,})' "$SOURCE_DIR"; then
   echo "ERROR: Potential secret detected. Review the output above."
   exit 1
@@ -172,11 +172,11 @@ git add -A
 if git diff --cached --quiet; then
   echo "No changes to commit."
 else
-  git commit -m "Build Library v1.13.3 — Large-Library Index Discovery and Batch Reliability Patch"
+  git commit -m "Build Library v1.13.4 — Database Inventory and Full Reconciliation Repair"
 fi
 
 git push -u origin main
 
 echo
-echo "Sustainable Catalyst Library v1.13.3 pushed successfully."
+echo "Sustainable Catalyst Library v1.13.4 pushed successfully."
 echo "Repository: https://github.com/$REMOTE_SLUG"

@@ -43,6 +43,30 @@ def test_post_type_discovery_and_reset_controls_exist():
 def test_release_markers():
     main = (PLUGIN / "sustainable-catalyst-library.php").read_text()
     readme = (PLUGIN / "readme.txt").read_text()
-    assert "Version: 1.13.3" in main
-    assert "SC_LIBRARY_VERSION', '1.13.3'" in main
-    assert "Stable tag: 1.13.3" in readme
+    assert "Version: 1.13.4" in main
+    assert "SC_LIBRARY_VERSION', '1.13.4'" in main
+    assert "Stable tag: 1.13.4" in readme
+
+
+def test_global_database_inventory_is_independent_of_saved_scope():
+    assert "database_published_post_type_counts" in INDEXER
+    assert "global_published_count" in INDEXER
+    assert "standard_posts_published" in SCANNER
+    assert "selected_published" in SCANNER
+    assert "global_indexed" in SCANNER
+
+
+def test_legacy_scope_migration_and_server_fallback_exist():
+    template = (PLUGIN / "templates/library-index-scanner.php").read_text()
+    assert "maybe_expand_legacy_scope" in SCANNER
+    assert "sc_library_scanner_1134_scope_checked" in SCANNER
+    assert "server_reconcile" in SCANNER
+    assert "sc_library_server_reconcile" in template
+    assert "default_selected" in SCANNER
+
+
+def test_stable_route_and_relative_rest_path_exist():
+    assert "sc-library-index-tools" in SCANNER
+    assert "sc-library-scanner" in SCANNER
+    assert "'path' => '/' . self::REST_NAMESPACE . '/scanner'" in SCANNER
+    assert "path: `${config.path" in JS

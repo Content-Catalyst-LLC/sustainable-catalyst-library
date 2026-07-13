@@ -4,14 +4,14 @@ Tags: knowledge-base, pdf, document-production, render, research-workspace, post
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.13.3
+Stable tag: 1.13.4
 License: GPLv2 or later
 
 A native WordPress knowledge base with persistent workspaces, server-rendered books and PDFs, planning, documentation, notebooks, PostgreSQL portability, and optional Render services.
 
 == Description ==
 
-Sustainable Catalyst Library v1.13.3 adds direct cursor-based discovery and auditable batch reconciliation for sites with thousands of WordPress records while retaining optional server-side book, PDF, and document production.
+Sustainable Catalyst Library v1.13.4 adds raw database inventory, automatic legacy-scope expansion, stable Index Tools routing, and a server-side reconciliation fallback so large Libraries cannot remain trapped in an old configured subset.
 
 
 = Large-Library Index Scanner =
@@ -87,6 +87,16 @@ Sustainable Catalyst Library v1.13.3 adds direct cursor-based discovery and audi
 * `/wp-json/sustainable-catalyst/v1/library/workspaces/{uuid}`
 
 == Changelog ==
+
+= 1.13.4 =
+* Added raw published inventory independent of saved Library post-type settings.
+* Added separate counts for standard Posts, all editorial records, selected scope, and global indexed rows.
+* Automatically expands the legacy Posts-only scope when additional editorial records are present.
+* Selects all recommended editorial post types by default on Index Tools.
+* Added database-only post-type discovery for conditionally registered content types.
+* Added a bounded server-side reconciliation fallback for stalled REST/JavaScript scans.
+* Added the stable SC Library → Index Tools route while preserving the legacy scanner alias.
+* Switched scanner API calls to WordPress-relative REST paths.
 
 = 1.13.3 =
 

@@ -1,6 +1,6 @@
-# Sustainable Catalyst Library v1.13.3
+# Sustainable Catalyst Library v1.13.4
 
-Library v1.13.3 replaces the earlier scanner queue with a **cursor-based large-library indexer** designed for WordPress sites containing thousands of publications.
+Library v1.13.4 repairs the remaining large-library scope problem by comparing the saved scan configuration against a raw WordPress database inventory and providing both browser-driven and server-side reconciliation paths.
 
 Published discovery now comes directly from the WordPress posts table. The scanner is not affected by `pre_get_posts`, theme archive rules, front-end query limits, or search customizations, and it never stores the complete post-ID list in a WordPress option.
 
@@ -31,7 +31,7 @@ Included scanner capabilities:
 Scanner state schema: `sc-library-index-scan/2.0`  
 Scan report schema: `sc-library-index-scan-log/2.0`
 
-See `INDEX_SCANNER_SETUP.md` and `RELEASE_NOTES_1.13.3.md`.
+See `INDEX_SCANNER_SETUP.md` and `RELEASE_NOTES_1.13.4.md`.
 
 ## Retained v1.13.0 document production
 The existing browser Book Builder remains available. Signed-in users can now submit normalized book editions to the optional Render service, monitor queued rendering, retry failures, inspect diagnostics, import completed PDFs into the WordPress Media Library, and preserve frozen edition manifests and checksums.

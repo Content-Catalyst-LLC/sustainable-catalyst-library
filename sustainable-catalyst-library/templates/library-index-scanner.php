@@ -26,6 +26,13 @@ $status_label = match ($status) {
         </div>
     </div>
 
+    <?php if (isset($_GET['server_scan'])) : ?>
+        <div class="notice notice-info inline sc-library-scanner__notice">
+            <p><strong><?php esc_html_e('Server-side reconciliation ran.', 'sustainable-catalyst-library'); ?></strong>
+            <?php echo esc_html(sprintf(__('Processed %1$d of %2$d records in this pass. Continue the server scan if the status is still running.', 'sustainable-catalyst-library'), absint($_GET['processed'] ?? 0), absint($_GET['total'] ?? 0))); ?></p>
+        </div>
+    <?php endif; ?>
+
     <?php if (!empty($diagnostics['unconfigured_recommended'])) : ?>
         <div class="notice notice-warning inline sc-library-scanner__notice" data-sc-unconfigured-notice>
             <p><strong><?php esc_html_e('Published content exists in recommended post types that are not currently configured for the Library.', 'sustainable-catalyst-library'); ?></strong></p>
@@ -36,11 +43,13 @@ $status_label = match ($status) {
     <div class="sc-library-scanner__metrics" data-sc-diagnostic-metrics>
         <?php
         $cards = [
-            ['key' => 'discovered-published', 'label' => __('Discovered published', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['discovered_published'] ?? 0)],
-            ['key' => 'eligible-records', 'label' => __('Eligible records', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['eligible_records'] ?? 0)],
-            ['key' => 'indexed-records', 'label' => __('Indexed records', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['indexed_records'] ?? 0)],
-            ['key' => 'missing-records', 'label' => __('Missing records', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['missing_records'] ?? 0)],
-            ['key' => 'excluded-records', 'label' => __('Explicitly excluded', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['excluded_records'] ?? 0)],
+            ['key' => 'standard-posts', 'label' => __('Published Posts', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['standard_posts_published'] ?? 0)],
+            ['key' => 'discovered-published', 'label' => __('All editorial records', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['discovered_published'] ?? 0)],
+            ['key' => 'selected-published', 'label' => __('Selected scan scope', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['selected_published'] ?? 0)],
+            ['key' => 'eligible-records', 'label' => __('Selected eligible', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['eligible_records'] ?? 0)],
+            ['key' => 'indexed-records', 'label' => __('Indexed globally', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['indexed_records'] ?? 0)],
+            ['key' => 'missing-records', 'label' => __('Missing in selected scope', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['missing_records'] ?? 0)],
+            ['key' => 'excluded-records', 'label' => __('Selected exclusions', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['excluded_records'] ?? 0)],
             ['key' => 'failed-records', 'label' => __('Failed in last scan', 'sustainable-catalyst-library'), 'value' => (int) ($diagnostics['failed_records'] ?? 0)],
         ];
         foreach ($cards as $card) :
@@ -74,11 +83,12 @@ $status_label = match ($status) {
                     <div class="sc-library-scanner__types" data-sc-type-list>
                         <?php foreach ($post_types as $post_type) : ?>
                             <label data-sc-type-card data-recommended="<?php echo !empty($post_type['recommended']) ? '1' : '0'; ?>">
-                                <input type="checkbox" value="<?php echo esc_attr($post_type['name']); ?>" data-sc-post-type <?php checked(!empty($post_type['configured'])); ?>>
+                                <input type="checkbox" value="<?php echo esc_attr($post_type['name']); ?>" data-sc-post-type <?php checked(!empty($post_type['default_selected'])); ?>>
                                 <span>
                                     <strong><?php echo esc_html($post_type['label']); ?></strong>
                                     <small><code><?php echo esc_html($post_type['name']); ?></code> · <?php echo esc_html(sprintf(_n('%d published record', '%d published records', (int) $post_type['published'], 'sustainable-catalyst-library'), (int) $post_type['published'])); ?></small>
                                     <?php if (!empty($post_type['recommended'])) : ?><em><?php esc_html_e('Recommended', 'sustainable-catalyst-library'); ?></em><?php endif; ?>
+                                    <?php if (!empty($post_type['database_only'])) : ?><em><?php esc_html_e('Stored in database; type not registered on this request', 'sustainable-catalyst-library'); ?></em><?php endif; ?>
                                 </span>
                             </label>
                         <?php endforeach; ?>
@@ -112,6 +122,22 @@ $status_label = match ($status) {
                     <button type="button" class="button" data-sc-pause><?php esc_html_e('Pause', 'sustainable-catalyst-library'); ?></button>
                     <button type="button" class="button button-link-delete" data-sc-cancel><?php esc_html_e('Cancel', 'sustainable-catalyst-library'); ?></button>
                     <button type="button" class="button" data-sc-reset><?php esc_html_e('Reset scanner state', 'sustainable-catalyst-library'); ?></button>
+                </div>
+
+                <div class="sc-library-scanner__server-fallback">
+                    <h3><?php esc_html_e('Server-side fallback', 'sustainable-catalyst-library'); ?></h3>
+                    <p><?php esc_html_e('Use this when the browser/REST loop stalls. Each request processes bounded cursor batches for up to twelve seconds and preserves progress.', 'sustainable-catalyst-library'); ?></p>
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                        <input type="hidden" name="action" value="sc_library_server_reconcile">
+                        <input type="hidden" name="restart" value="1">
+                        <?php wp_nonce_field('sc_library_server_reconcile'); ?>
+                        <?php submit_button(__('Start complete server reconciliation', 'sustainable-catalyst-library'), 'secondary', 'submit', false); ?>
+                    </form>
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                        <input type="hidden" name="action" value="sc_library_server_reconcile">
+                        <?php wp_nonce_field('sc_library_server_reconcile'); ?>
+                        <?php submit_button(__('Continue saved server reconciliation', 'sustainable-catalyst-library'), 'secondary', 'submit', false); ?>
+                    </form>
                 </div>
             </div>
 

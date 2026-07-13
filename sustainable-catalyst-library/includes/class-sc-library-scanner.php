@@ -28,15 +28,26 @@ final class SC_Library_Scanner {
     public function register_hooks(): void {
         add_action('admin_menu', [$this, 'admin_menu'], 20);
         add_action('admin_enqueue_scripts', [$this, 'admin_assets']);
+        add_action('admin_init', [$this, 'maybe_expand_legacy_scope'], 25);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
         add_action('admin_post_sc_library_download_scan_log', [$this, 'download_log']);
+        add_action('admin_post_sc_library_server_reconcile', [$this, 'server_reconcile']);
     }
 
     public function admin_menu(): void {
         add_submenu_page(
             'sc-library',
+            __('Index Tools', 'sustainable-catalyst-library'),
+            __('Index Tools', 'sustainable-catalyst-library'),
+            'manage_options',
+            'sc-library-index-tools',
+            [$this, 'render_page']
+        );
+        // Keep the v1.13.1-v1.13.3 route alive as a hidden compatibility alias.
+        add_submenu_page(
+            null,
             __('Index Scanner', 'sustainable-catalyst-library'),
-            __('Index Scanner', 'sustainable-catalyst-library'),
+            '',
             'manage_options',
             'sc-library-scanner',
             [$this, 'render_page']
@@ -44,13 +55,16 @@ final class SC_Library_Scanner {
     }
 
     public function admin_assets(string $hook): void {
-        if ($hook !== 'sc-library_page_sc-library-scanner') {
+        $is_index_tools = in_array($hook, ['sc-library_page_sc-library-index-tools', 'admin_page_sc-library-scanner'], true);
+        $is_main_fallback = $hook === 'toplevel_page_sc-library' && sanitize_key((string) ($_GET['tab'] ?? '')) === 'index-tools';
+        if (!$is_index_tools && !$is_main_fallback) {
             return;
         }
 
         wp_enqueue_style('sc-library-scanner', SC_LIBRARY_URL . 'assets/css/sc-library-scanner.css', [], SC_LIBRARY_VERSION);
         wp_enqueue_script('sc-library-scanner', SC_LIBRARY_URL . 'assets/js/sc-library-scanner.js', ['wp-api-fetch'], SC_LIBRARY_VERSION, true);
         wp_localize_script('sc-library-scanner', 'SCLibraryScanner', [
+            'path' => '/' . self::REST_NAMESPACE . '/scanner',
             'root' => esc_url_raw(rest_url(self::REST_NAMESPACE . '/scanner')),
             'nonce' => wp_create_nonce('wp_rest'),
             'downloadLogUrl' => wp_nonce_url(admin_url('admin-post.php?action=sc_library_download_scan_log'), 'sc_library_download_scan_log'),
@@ -117,6 +131,69 @@ final class SC_Library_Scanner {
         include SC_LIBRARY_DIR . 'templates/library-index-scanner.php';
     }
 
+    /** Expand the legacy Posts-only scope once when the database clearly contains additional editorial records. */
+    public function maybe_expand_legacy_scope(): void {
+        if (!current_user_can('manage_options') || get_option('sc_library_scanner_1134_scope_checked')) {
+            return;
+        }
+        $configured = $this->indexer->configured_post_types(false);
+        $recommended = $this->indexer->recommended_post_types();
+        $configured_count = $this->indexer->scan_published_count($configured);
+        $recommended_count = $this->indexer->scan_published_count($recommended);
+        $expanded = false;
+        if ($recommended && $recommended_count > $configured_count && $configured === ['post']) {
+            $this->indexer->save_configured_post_types($recommended);
+            $expanded = true;
+        }
+        update_option('sc_library_scanner_1134_scope_checked', [
+            'checked_at' => current_time('mysql', true),
+            'expanded' => $expanded,
+            'configured_count_before' => $configured_count,
+            'recommended_count' => $recommended_count,
+        ], false);
+    }
+
+    /** No-JavaScript/server fallback. Processes as many cursor batches as fit safely in one request. */
+    public function server_reconcile(): void {
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('You do not have permission to run the Library scanner.', 'sustainable-catalyst-library'));
+        }
+        check_admin_referer('sc_library_server_reconcile');
+        $restart = !empty($_POST['restart']);
+        if ($restart || !$this->get_state() || !in_array((string) ($this->get_state()['status'] ?? ''), ['running', 'paused'], true)) {
+            $start = new WP_REST_Request('POST');
+            $start->set_param('post_types', $this->indexer->recommended_post_types());
+            $start->set_param('batch_size', 100);
+            $start->set_param('mode', 'full');
+            $start->set_param('persist_post_types', true);
+            $this->rest_start($start);
+        } else {
+            $state = $this->get_state();
+            if (($state['status'] ?? '') === 'paused') {
+                $this->rest_resume(new WP_REST_Request('POST'));
+            }
+        }
+
+        $deadline = microtime(true) + 12.0;
+        do {
+            $state = $this->get_state();
+            if (($state['status'] ?? '') !== 'running') {
+                break;
+            }
+            $this->rest_step(new WP_REST_Request('POST'));
+        } while (microtime(true) < $deadline);
+
+        $state = $this->public_state($this->get_state());
+        $url = add_query_arg([
+            'page' => 'sc-library-index-tools',
+            'server_scan' => sanitize_key((string) ($state['status'] ?? 'idle')),
+            'processed' => absint($state['processed'] ?? 0),
+            'total' => absint($state['total'] ?? 0),
+        ], admin_url('admin.php'));
+        wp_safe_redirect($url);
+        exit;
+    }
+
     public function rest_status(WP_REST_Request $request): WP_REST_Response {
         $payload = [
             'ok' => true,
@@ -134,7 +211,8 @@ final class SC_Library_Scanner {
         $discoverable = $this->indexer->discoverable_post_types();
         $requested = $request->get_param('post_types');
         $requested = is_array($requested) ? array_map('sanitize_key', $requested) : [];
-        $post_types = array_values(array_intersect($requested ?: $this->indexer->recommended_post_types(), $discoverable));
+        $post_types = $this->indexer->normalize_post_types($requested ?: $this->indexer->recommended_post_types());
+        $post_types = array_values(array_intersect($post_types, $discoverable));
         if (!$post_types) {
             return new WP_Error('sc_library_scanner_no_types', __('Select at least one discovered editorial post type.', 'sustainable-catalyst-library'), ['status' => 400]);
         }
@@ -437,13 +515,22 @@ final class SC_Library_Scanner {
         $discoverable = $this->indexer->discoverable_post_types();
         $recommended = $this->indexer->recommended_post_types();
         $published_by_type = $this->indexer->scan_published_counts_by_type($discoverable);
+        $database_inventory = $this->indexer->database_published_post_type_counts(false);
+        $all_database_inventory = $this->indexer->database_published_post_type_counts(true);
+        $global_editorial_published = array_sum($database_inventory);
+        $all_database_published = array_sum($all_database_inventory);
+        $standard_posts_published = absint($all_database_inventory['post'] ?? 0);
         $table = $this->indexer->table_name();
         $table_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) === $table;
         $raw = $this->indexer->scan_published_count($post_types);
         $eligible = $this->indexer->scan_count_for_mode($post_types, 'full', true);
         $indexed = 0;
+        $global_indexed = 0;
         $indexed_by_type = [];
         $latest_by_type = [];
+        if ($table_exists) {
+            $global_indexed = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
+        }
         if ($table_exists && $post_types) {
             $placeholders = implode(',', array_fill(0, count($post_types), '%s'));
             $rows = $wpdb->get_results($wpdb->prepare(
@@ -474,6 +561,7 @@ final class SC_Library_Scanner {
                 'label' => $object ? $object->labels->name : $post_type,
                 'configured' => in_array($post_type, $post_types, true),
                 'recommended' => in_array($post_type, $recommended, true),
+                'database_only' => !post_type_exists($post_type),
                 'discovered' => $discovered_count,
                 'eligible' => $eligible_count,
                 'excluded' => max(0, $discovered_count - $eligible_count),
@@ -510,10 +598,15 @@ final class SC_Library_Scanner {
             'discoverable_post_types' => $discoverable,
             'recommended_post_types' => $recommended,
             'published_candidates' => $raw,
-            'discovered_published' => $raw,
+            'selected_published' => $raw,
+            'discovered_published' => $global_editorial_published,
+            'global_editorial_published' => $global_editorial_published,
+            'all_database_published' => $all_database_published,
+            'standard_posts_published' => $standard_posts_published,
             'eligible_records' => $eligible,
             'excluded_records' => max(0, $raw - $eligible),
-            'indexed_records' => $indexed,
+            'indexed_records' => $global_indexed,
+            'selected_indexed_records' => $indexed,
             'missing_records' => $missing,
             'outdated_records' => $outdated,
             'stale_records' => $stale_count,
@@ -544,6 +637,8 @@ final class SC_Library_Scanner {
                 'published' => absint($counts[$post_type] ?? 0),
                 'configured' => in_array($post_type, $configured, true),
                 'recommended' => in_array($post_type, $recommended, true),
+                'default_selected' => in_array($post_type, $configured, true) || in_array($post_type, $recommended, true),
+                'database_only' => !post_type_exists($post_type),
             ];
         }
         return $result;

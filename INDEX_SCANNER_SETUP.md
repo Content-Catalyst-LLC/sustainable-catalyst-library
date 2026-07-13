@@ -1,9 +1,9 @@
-# Library v1.13.3 Large-Library Index Scanner Setup
+# Library v1.13.4 Database Inventory and Reconciliation Setup
 
 ## Open the scanner
 
 ```text
-SC Library → Index Scanner
+SC Library → Index Tools
 ```
 
 Direct administration path:
@@ -14,7 +14,7 @@ Direct administration path:
 
 ## First reconciliation after upgrading
 
-1. Open **SC Library → Index Scanner**.
+1. Open **SC Library → Index Tools**.
 2. Select **Select recommended types**.
 3. Keep **Save selected types as the Library index configuration** enabled.
 4. Choose **Complete safe rebuild and reconciliation**.
@@ -100,3 +100,13 @@ After a clean full reconciliation:
 - **Failed in last scan** should be zero.
 
 The scanner remains independent of Render, PostgreSQL, workspaces, and document production.
+
+
+## v1.13.4 recovery sequence
+
+1. Open **SC Library → Index Tools**.
+2. Confirm **Published Posts** and **All editorial records** reflect the raw WordPress database inventory.
+3. Keep every recommended type selected.
+4. Start a complete cursor scan.
+5. If the browser loop stalls, use **Start complete server reconciliation**, then **Continue saved server reconciliation** until complete.
+6. The global indexed total should rise beyond the legacy 272-record subset as records are processed.

@@ -20,7 +20,7 @@
   const recordResult = qs('[data-sc-record-result]');
 
   const api = (path, method = 'GET', data = undefined) => window.wp.apiFetch({
-    url: `${config.root}${path}`,
+    path: `${config.path || '/sustainable-catalyst/v1/library/scanner'}${path}`,
     method,
     data,
     headers: { 'X-WP-Nonce': config.nonce },
@@ -101,7 +101,9 @@
 
   const renderMetrics = (diagnostics = {}) => {
     const map = {
+      'standard-posts': diagnostics.standard_posts_published,
       'discovered-published': diagnostics.discovered_published,
+      'selected-published': diagnostics.selected_published,
       'eligible-records': diagnostics.eligible_records,
       'indexed-records': diagnostics.indexed_records,
       'missing-records': diagnostics.missing_records,
@@ -148,6 +150,11 @@
           const small = document.createElement('small');
           small.textContent = 'Recommended';
           type.append(document.createElement('br'), small);
+        }
+        if (row.database_only) {
+          const stored = document.createElement('small');
+          stored.textContent = 'Database-only type';
+          type.append(document.createElement('br'), stored);
         }
         tr.append(type);
         [row.configured ? 'Yes' : 'No', row.discovered, row.eligible, row.excluded, row.indexed, row.missing, row.outdated, row.latest_indexed_at || '—'].forEach((value) => {

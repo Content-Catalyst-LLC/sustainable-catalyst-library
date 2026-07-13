@@ -34,10 +34,9 @@ final class SC_Library_Admin {
     public function settings(): void {
         register_setting('sc_library_settings', 'sc_library_post_types', [
             'type' => 'array',
-            'sanitize_callback' => static function ($value): array {
-                $allowed = get_post_types(['public' => true], 'names');
+            'sanitize_callback' => function ($value): array {
                 $value = is_array($value) ? $value : [];
-                return array_values(array_intersect(array_map('sanitize_key', $value), $allowed));
+                return $this->indexer->normalize_post_types($value);
             },
             'default' => ['post'],
         ]);
@@ -247,7 +246,7 @@ final class SC_Library_Admin {
         <div class="wrap">
             <h1><?php esc_html_e('Sustainable Catalyst Library', 'sustainable-catalyst-library'); ?></h1>
             <p><?php esc_html_e('A relationship-aware knowledge base for publications, sources, notebooks, visual research, connected tools, annotations, custom books, and living institutional documentation.', 'sustainable-catalyst-library'); ?></p>
-            <p><a class="button button-primary" href="<?php echo esc_url(admin_url('admin.php?page=sc-library-scanner')); ?>"><?php esc_html_e('Open Index Scanner', 'sustainable-catalyst-library'); ?></a></p>
+            <p><a class="button button-primary" href="<?php echo esc_url(admin_url('admin.php?page=sc-library-index-tools')); ?>"><?php esc_html_e('Open Index Scanner', 'sustainable-catalyst-library'); ?></a></p>
 
             <?php if (isset($_GET['indexed'])) : ?>
                 <div class="notice notice-success"><p><?php echo esc_html(sprintf(
@@ -261,6 +260,8 @@ final class SC_Library_Admin {
             <?php endif; ?>
 
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;max-width:980px;margin:20px 0">
+                <?php $this->metric_card(__('Published Posts in database', 'sustainable-catalyst-library'), number_format_i18n((int) ($this->indexer->database_published_post_type_counts(true)['post'] ?? 0))); ?>
+                <?php $this->metric_card(__('Published editorial records', 'sustainable-catalyst-library'), number_format_i18n($this->indexer->global_published_count(false))); ?>
                 <?php $this->metric_card(__('Indexed records', 'sustainable-catalyst-library'), number_format_i18n($this->indexer->count_indexed())); ?>
                 <?php $this->metric_card(__('Typed relationships', 'sustainable-catalyst-library'), number_format_i18n($this->relationships->count())); ?>
                 <?php $this->metric_card(__('Library Series', 'sustainable-catalyst-library'), number_format_i18n($this->term_count(SC_Library_Taxonomies::SERIES))); ?>
