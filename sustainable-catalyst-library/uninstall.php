@@ -3,5 +3,7 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
     exit;
 }
 
-// Preserve Library index data and settings by default for safe reinstall or upgrade.
-// Site administrators may remove the wp_sc_library_index table and sc_library_* options manually for permanent deletion.
+// Preserve Library indexes, account workspaces, revisions, collaborator records,
+// sync logs, and settings by default for safe reinstall or upgrade. Site
+// administrators may remove wp_sc_library_* tables and sc_library_* options
+// manually only after exporting required research data.

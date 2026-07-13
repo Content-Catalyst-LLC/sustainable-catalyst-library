@@ -1,6 +1,6 @@
-# Library v1.11.0 Portable Data Setup
+# Library v1.12.0 Portable Data Setup
 
-Library v1.11.0 preserves all v1.10.0 export formats and upgrades the portable schema to `sc-library-portable-export/1.1`.
+Library v1.12.0 preserves all earlier export formats and upgrades the portable schema to `sc-library-portable-export/1.2`.
 
 ## New planning fields
 
@@ -19,7 +19,7 @@ A new normalized `plan_dependencies` table stores each dependency as an individu
 
 ## Install
 
-1. Upload `sustainable-catalyst-library-v1.11.0.zip`.
+1. Upload `sustainable-catalyst-library-v1.12.0.zip`.
 2. Replace the existing plugin.
 3. Rebuild the Library index.
 4. Open **SC Library → Portable Data Export**.
@@ -32,3 +32,8 @@ A new normalized `plan_dependencies` table stores each dependency as an individu
 4. Restore into a disposable PostgreSQL database before using the export operationally.
 
 A PostgreSQL restore is optional for normal WordPress use.
+
+
+## Persistent account workspaces in v1.12.0
+
+Administrator server exports can now include normalized `account_workspaces`, `account_workspace_revisions`, `account_workspace_collaborators`, and `account_workspace_sync_log` entities. These exports contain user-authored research and should be handled as private data. Public registry exports exclude them.

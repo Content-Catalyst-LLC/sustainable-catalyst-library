@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * tables or serialized plugin internals.
  */
 final class SC_Library_Portability {
-    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.1';
+    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.2';
     public const POSTGRES_SCHEMA = 'sustainable_catalyst_library';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 
@@ -78,6 +78,7 @@ final class SC_Library_Portability {
             'planner' => __('Content Planner and roadmap', 'sustainable-catalyst-library'),
             'documentation' => __('Foundations and documentation records', 'sustainable-catalyst-library'),
             'relationships' => __('Relationships, terms, and resources', 'sustainable-catalyst-library'),
+            'account_workspaces' => __('Persistent account workspaces and revisions', 'sustainable-catalyst-library'),
             'schema' => __('Schema only', 'sustainable-catalyst-library'),
         ];
     }
@@ -320,6 +321,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             __('Typed relationships', 'sustainable-catalyst-library') => $this->relationships->count(),
             __('Planning records', 'sustainable-catalyst-library') => $plan_count,
             __('Documentation records', 'sustainable-catalyst-library') => (int) $wpdb->get_var("SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = '_sc_library_doc_status'"),
+            __('Account workspaces', 'sustainable-catalyst-library') => class_exists('SC_Library_Workspaces') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Workspaces::table()) : 0,
         ];
     }
 
@@ -394,6 +396,10 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         $documentation = $this->export_documentation($record_ids);
         $plans = $this->export_plans($include_private_plans);
         $plan_dependencies = $this->export_plan_dependencies($plans);
+        $account_workspaces = $this->export_account_workspaces();
+        $account_workspace_revisions = $this->export_account_workspace_revisions();
+        $account_workspace_collaborators = $this->export_account_workspace_collaborators();
+        $account_workspace_sync_log = $this->export_account_workspace_sync_log();
 
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($r) => (int) $r['id'], $public_registry), true);
@@ -405,6 +411,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $documentation = $this->filter_rows_by_ids($documentation, 'record_id', $record_ids);
             $plans = array_values(array_filter($plans, static fn($row) => !empty($row['public'])));
             $plan_dependencies = $this->filter_rows_by_ids($plan_dependencies, 'plan_id', array_column($plans, 'plan_id'));
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = [];
         } elseif ($scope === 'planner') {
             $records = [];
             $terms = [];
@@ -412,6 +419,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $relationships = [];
             $resources = [];
             $documentation = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = [];
         } elseif ($scope === 'documentation') {
             $doc_ids = array_map(static fn($row) => (int) $row['record_id'], $documentation);
             $records = $this->filter_rows_by_ids($records, 'record_id', $doc_ids);
@@ -420,13 +428,17 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $relationships = array_values(array_filter($relationships, static fn($row) => in_array((int) $row['source_post_id'], $doc_ids, true) || in_array((int) $row['target_post_id'], $doc_ids, true)));
             $plans = [];
             $plan_dependencies = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = [];
         } elseif ($scope === 'relationships') {
             $records = [];
             $documentation = [];
             $plans = [];
             $plan_dependencies = [];
-        } elseif ($scope === 'schema') {
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = [];
+        } elseif ($scope === 'account_workspaces') {
             $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = [];
+        } elseif ($scope === 'schema') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = [];
         }
 
         $entities = [
@@ -438,6 +450,10 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'documentation' => $documentation,
             'plans' => $plans,
             'plan_dependencies' => $plan_dependencies,
+            'account_workspaces' => $account_workspaces,
+            'account_workspace_revisions' => $account_workspace_revisions,
+            'account_workspace_collaborators' => $account_workspace_collaborators,
+            'account_workspace_sync_log' => $account_workspace_sync_log,
         ];
 
         $counts = [];
@@ -455,11 +471,85 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'entities' => array_keys($entities),
             'notes' => [
                 'Browser-local Notebook content is exported separately from the Notebook or sc_library_portability shortcode.',
+                'Persistent account workspaces are administrator-only server exports and contain user-authored research data.',
                 'Private planning data is excluded unless an administrator explicitly enables it.',
                 'PDFs and repository records remain references; binary media is not embedded in data exports.',
             ],
         ];
         return ['manifest' => $manifest, 'entities' => $entities];
+    }
+
+    private function export_account_workspaces(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Workspaces')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Workspaces::table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(static function (array $row): array {
+            return [
+                'workspace_id' => (int) $row['id'],
+                'workspace_uuid' => (string) $row['workspace_uuid'],
+                'owner_user_id' => (int) $row['owner_user_id'],
+                'title' => (string) $row['title'],
+                'description' => (string) $row['description'],
+                'visibility' => (string) $row['visibility'],
+                'schema_version' => (string) $row['schema_version'],
+                'content_hash' => (string) $row['content_hash'],
+                'revision' => (int) $row['revision'],
+                'last_synced_revision' => (int) $row['last_synced_revision'],
+                'sync_status' => (string) $row['sync_status'],
+                'last_synced_at' => $row['last_synced_at'] ? mysql_to_rfc3339((string) $row['last_synced_at']) : null,
+                'created_at' => mysql_to_rfc3339((string) $row['created_at']),
+                'updated_at' => mysql_to_rfc3339((string) $row['updated_at']),
+                'payload' => json_decode((string) $row['workspace_json'], true) ?: [],
+            ];
+        }, $rows);
+    }
+
+    private function export_account_workspace_revisions(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Workspaces')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Workspaces::revisions_table() . ' ORDER BY workspace_id, revision', ARRAY_A) ?: [];
+        return array_map(static fn(array $row): array => [
+            'revision_id' => (int) $row['id'],
+            'workspace_id' => (int) $row['workspace_id'],
+            'revision' => (int) $row['revision'],
+            'content_hash' => (string) $row['content_hash'],
+            'change_type' => (string) $row['change_type'],
+            'created_by' => (int) $row['created_by'],
+            'created_at' => mysql_to_rfc3339((string) $row['created_at']),
+            'payload' => json_decode((string) $row['workspace_json'], true) ?: [],
+        ], $rows);
+    }
+
+    private function export_account_workspace_collaborators(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Workspaces')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Workspaces::collaborators_table() . ' ORDER BY workspace_id, user_id', ARRAY_A) ?: [];
+        return array_map(static fn(array $row): array => [
+            'collaboration_id' => (int) $row['id'],
+            'workspace_id' => (int) $row['workspace_id'],
+            'user_id' => (int) $row['user_id'],
+            'role' => (string) $row['role'],
+            'invited_by' => (int) $row['invited_by'],
+            'created_at' => mysql_to_rfc3339((string) $row['created_at']),
+            'accepted_at' => $row['accepted_at'] ? mysql_to_rfc3339((string) $row['accepted_at']) : null,
+        ], $rows);
+    }
+
+    private function export_account_workspace_sync_log(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Workspaces')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Workspaces::sync_log_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(static fn(array $row): array => [
+            'sync_log_id' => (int) $row['id'],
+            'workspace_id' => (int) $row['workspace_id'],
+            'workspace_uuid' => (string) $row['workspace_uuid'],
+            'direction' => (string) $row['direction'],
+            'status' => (string) $row['status'],
+            'response_code' => (int) $row['response_code'],
+            'message' => (string) $row['message'],
+            'content_hash' => (string) $row['content_hash'],
+            'created_at' => mysql_to_rfc3339((string) $row['created_at']),
+        ], $rows);
     }
 
     private function export_terms(): array {
@@ -898,6 +988,57 @@ CREATE TABLE IF NOT EXISTS workspace_annotations (annotation_id text PRIMARY KEY
 CREATE TABLE IF NOT EXISTS workspace_books (book_id text PRIMARY KEY, title text NOT NULL, edition text NOT NULL DEFAULT '', collection_ids text[] NOT NULL DEFAULT '{}'::text[], payload jsonb NOT NULL DEFAULT '{}'::jsonb);
 CREATE TABLE IF NOT EXISTS workspace_handoffs (handoff_id text PRIMARY KEY, target text NOT NULL DEFAULT '', collection_ids text[] NOT NULL DEFAULT '{}'::text[], payload jsonb NOT NULL DEFAULT '{}'::jsonb);
 
+CREATE TABLE IF NOT EXISTS account_workspaces (
+    workspace_id bigint PRIMARY KEY,
+    workspace_uuid uuid UNIQUE NOT NULL,
+    owner_user_id bigint NOT NULL,
+    title text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    visibility text NOT NULL DEFAULT 'private',
+    schema_version text NOT NULL,
+    content_hash char(64) NOT NULL,
+    revision bigint NOT NULL,
+    last_synced_revision bigint NOT NULL DEFAULT 0,
+    sync_status text NOT NULL DEFAULT 'local',
+    last_synced_at timestamptz,
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS account_workspaces_owner_idx ON account_workspaces(owner_user_id);
+CREATE TABLE IF NOT EXISTS account_workspace_revisions (
+    revision_id bigint PRIMARY KEY,
+    workspace_id bigint NOT NULL REFERENCES account_workspaces(workspace_id) ON DELETE CASCADE,
+    revision bigint NOT NULL,
+    content_hash char(64) NOT NULL,
+    change_type text NOT NULL,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    UNIQUE(workspace_id, revision)
+);
+CREATE TABLE IF NOT EXISTS account_workspace_collaborators (
+    collaboration_id bigint PRIMARY KEY,
+    workspace_id bigint NOT NULL REFERENCES account_workspaces(workspace_id) ON DELETE CASCADE,
+    user_id bigint NOT NULL,
+    role text NOT NULL,
+    invited_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    accepted_at timestamptz,
+    UNIQUE(workspace_id, user_id)
+);
+CREATE TABLE IF NOT EXISTS account_workspace_sync_log (
+    sync_log_id bigint PRIMARY KEY,
+    workspace_id bigint NOT NULL REFERENCES account_workspaces(workspace_id) ON DELETE CASCADE,
+    workspace_uuid uuid NOT NULL,
+    direction text NOT NULL,
+    status text NOT NULL,
+    response_code integer NOT NULL DEFAULT 0,
+    message text NOT NULL DEFAULT '',
+    content_hash char(64) NOT NULL DEFAULT '',
+    created_at timestamptz
+);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 
@@ -950,6 +1091,10 @@ SQL;
             'documentation' => ['record_id','document_status','document_type','document_version','responsible_area','authority_type','authority_url','webpage_url','repository_url','pdf_url','release_url','last_reviewed','review_interval_days','featured','supersedes_record_id','superseded_by_record_id','dependency_ids','correction_url','authority_note','payload'],
             'plans' => ['plan_id','title','description','wordpress_status','plan_status','priority','content_type','area','product','responsible_area','public','expected_release','article_map_id','series_order','linked_draft_id','published_record_id','dependency_ids','release_group','release_track','milestone','capacity_owner','estimated_effort','effort_unit','actual_effort','progress_percent','planned_start','actual_start','dependency_policy','blocked_override','blocked_reason','actual_publication_date','created_at','modified_at','payload'],
             'plan_dependencies' => ['plan_id','dependency_record_id','dependency_order','dependency_policy','payload'],
+            'account_workspaces' => ['workspace_id','workspace_uuid','owner_user_id','title','description','visibility','schema_version','content_hash','revision','last_synced_revision','sync_status','last_synced_at','created_at','updated_at','payload'],
+            'account_workspace_revisions' => ['revision_id','workspace_id','revision','content_hash','change_type','created_by','created_at','payload'],
+            'account_workspace_collaborators' => ['collaboration_id','workspace_id','user_id','role','invited_by','created_at','accepted_at'],
+            'account_workspace_sync_log' => ['sync_log_id','workspace_id','workspace_uuid','direction','status','response_code','message','content_hash','created_at'],
             default => [],
         };
         if (!$columns) return '';
@@ -960,10 +1105,10 @@ SQL;
                 $value = $row[$column] ?? null;
                 if (in_array($column, ['payload', 'expected_release'], true)) $literals[] = $this->sql_json($value ?: []);
                 elseif (in_array($column, ['dependency_ids'], true)) $literals[] = $this->sql_bigint_array(is_array($value) ? $value : []);
-                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at'], true)) $literals[] = $this->sql_timestamp($value);
+                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at'], true)) $literals[] = $this->sql_timestamp($value);
                 elseif (in_array($column, ['last_reviewed','planned_start','actual_start','actual_publication_date'], true)) $literals[] = $value ? $this->sql_text((string) $value) . '::date' : 'NULL';
                 elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
-                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent'], true)) ? (string) (int) $value : 'NULL';
+                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code'], true)) ? (string) (int) $value : 'NULL';
                 elseif (in_array($column, ['series_order','estimated_effort','actual_effort'], true)) $literals[] = (string) (float) $value;
                 else $literals[] = $this->sql_text((string) ($value ?? ''));
             }
@@ -978,6 +1123,10 @@ SQL;
             'documentation' => 'record_id',
             'plans' => 'plan_id',
             'plan_dependencies' => 'plan_id, dependency_record_id',
+            'account_workspaces' => 'workspace_id',
+            'account_workspace_revisions' => 'revision_id',
+            'account_workspace_collaborators' => 'collaboration_id',
+            'account_workspace_sync_log' => 'sync_log_id',
             default => '',
         };
         return "INSERT INTO {$entity} (" . implode(', ', $columns) . ") VALUES\n" . implode(",\n", $values) . ($conflict ? "\nON CONFLICT ({$conflict}) DO NOTHING;" : ';');

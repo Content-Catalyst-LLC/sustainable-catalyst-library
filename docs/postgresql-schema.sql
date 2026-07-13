@@ -203,6 +203,61 @@ CREATE TABLE IF NOT EXISTS workspace_annotations (annotation_id text PRIMARY KEY
 CREATE TABLE IF NOT EXISTS workspace_books (book_id text PRIMARY KEY, title text NOT NULL, edition text NOT NULL DEFAULT '', collection_ids text[] NOT NULL DEFAULT '{}'::text[], payload jsonb NOT NULL DEFAULT '{}'::jsonb);
 CREATE TABLE IF NOT EXISTS workspace_handoffs (handoff_id text PRIMARY KEY, target text NOT NULL DEFAULT '', collection_ids text[] NOT NULL DEFAULT '{}'::text[], payload jsonb NOT NULL DEFAULT '{}'::jsonb);
 
+
+CREATE TABLE IF NOT EXISTS account_workspaces (
+    workspace_id bigint PRIMARY KEY,
+    workspace_uuid uuid UNIQUE NOT NULL,
+    owner_user_id bigint NOT NULL,
+    title text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    visibility text NOT NULL DEFAULT 'private',
+    schema_version text NOT NULL,
+    content_hash char(64) NOT NULL,
+    revision bigint NOT NULL,
+    last_synced_revision bigint NOT NULL DEFAULT 0,
+    sync_status text NOT NULL DEFAULT 'local',
+    last_synced_at timestamptz,
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS account_workspaces_owner_idx ON account_workspaces(owner_user_id);
+
+CREATE TABLE IF NOT EXISTS account_workspace_revisions (
+    revision_id bigint PRIMARY KEY,
+    workspace_id bigint NOT NULL REFERENCES account_workspaces(workspace_id) ON DELETE CASCADE,
+    revision bigint NOT NULL,
+    content_hash char(64) NOT NULL,
+    change_type text NOT NULL,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    UNIQUE(workspace_id, revision)
+);
+
+CREATE TABLE IF NOT EXISTS account_workspace_collaborators (
+    collaboration_id bigint PRIMARY KEY,
+    workspace_id bigint NOT NULL REFERENCES account_workspaces(workspace_id) ON DELETE CASCADE,
+    user_id bigint NOT NULL,
+    role text NOT NULL,
+    invited_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz,
+    accepted_at timestamptz,
+    UNIQUE(workspace_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS account_workspace_sync_log (
+    sync_log_id bigint PRIMARY KEY,
+    workspace_id bigint NOT NULL REFERENCES account_workspaces(workspace_id) ON DELETE CASCADE,
+    workspace_uuid uuid NOT NULL,
+    direction text NOT NULL,
+    status text NOT NULL,
+    response_code integer NOT NULL DEFAULT 0,
+    message text NOT NULL DEFAULT '',
+    content_hash char(64) NOT NULL DEFAULT '',
+    created_at timestamptz
+);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 

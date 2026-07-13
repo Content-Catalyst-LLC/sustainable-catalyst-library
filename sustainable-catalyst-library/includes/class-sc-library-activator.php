@@ -32,6 +32,10 @@ final class SC_Library_Activator {
 
         $index_table = $wpdb->prefix . 'sc_library_index';
         $relationships_table = $wpdb->prefix . 'sc_library_relationships';
+        $workspaces_table = $wpdb->prefix . 'sc_library_workspaces';
+        $workspace_revisions_table = $wpdb->prefix . 'sc_library_workspace_revisions';
+        $workspace_collaborators_table = $wpdb->prefix . 'sc_library_workspace_collaborators';
+        $workspace_sync_log_table = $wpdb->prefix . 'sc_library_workspace_sync_log';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -86,8 +90,84 @@ final class SC_Library_Activator {
             KEY relationship_type (relationship_type)
         ) {$charset};";
 
+        $workspaces_sql = "CREATE TABLE {$workspaces_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            workspace_uuid CHAR(36) NOT NULL,
+            owner_user_id BIGINT UNSIGNED NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            description TEXT NULL,
+            visibility VARCHAR(20) NOT NULL DEFAULT 'private',
+            schema_version VARCHAR(64) NOT NULL,
+            workspace_json LONGTEXT NOT NULL,
+            content_hash CHAR(64) NOT NULL,
+            revision BIGINT UNSIGNED NOT NULL DEFAULT 1,
+            last_synced_revision BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            render_etag VARCHAR(191) NOT NULL DEFAULT '',
+            sync_status VARCHAR(24) NOT NULL DEFAULT 'local',
+            sync_error TEXT NULL,
+            last_synced_at DATETIME NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY workspace_uuid (workspace_uuid),
+            KEY owner_user_id (owner_user_id),
+            KEY visibility (visibility),
+            KEY sync_status (sync_status),
+            KEY updated_at (updated_at)
+        ) {$charset};";
+
+        $workspace_revisions_sql = "CREATE TABLE {$workspace_revisions_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            workspace_id BIGINT UNSIGNED NOT NULL,
+            revision BIGINT UNSIGNED NOT NULL,
+            content_hash CHAR(64) NOT NULL,
+            workspace_json LONGTEXT NOT NULL,
+            change_type VARCHAR(32) NOT NULL DEFAULT 'updated',
+            created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY workspace_revision (workspace_id, revision),
+            KEY workspace_id (workspace_id),
+            KEY created_at (created_at)
+        ) {$charset};";
+
+        $workspace_collaborators_sql = "CREATE TABLE {$workspace_collaborators_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            workspace_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL,
+            role VARCHAR(20) NOT NULL DEFAULT 'viewer',
+            invited_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            accepted_at DATETIME NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY workspace_user (workspace_id, user_id),
+            KEY user_id (user_id),
+            KEY role (role)
+        ) {$charset};";
+
+        $workspace_sync_log_sql = "CREATE TABLE {$workspace_sync_log_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            workspace_id BIGINT UNSIGNED NOT NULL,
+            workspace_uuid CHAR(36) NOT NULL,
+            direction VARCHAR(16) NOT NULL,
+            status VARCHAR(24) NOT NULL,
+            response_code INT NOT NULL DEFAULT 0,
+            message TEXT NULL,
+            content_hash CHAR(64) NOT NULL DEFAULT '',
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            KEY workspace_id (workspace_id),
+            KEY workspace_uuid (workspace_uuid),
+            KEY status (status),
+            KEY created_at (created_at)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
+        dbDelta($workspaces_sql);
+        dbDelta($workspace_revisions_sql);
+        dbDelta($workspace_collaborators_sql);
+        dbDelta($workspace_sync_log_sql);
     }
 
     private static function install_defaults(): void {
@@ -104,6 +184,13 @@ final class SC_Library_Activator {
         add_option('sc_library_workbench_url', home_url('/workbench/'));
         add_option('sc_library_enable_notebook', 1);
         add_option('sc_library_notebook_storage_mode', 'local');
+        add_option('sc_library_enable_persistent_workspaces', 1);
+        add_option('sc_library_workspace_storage_mode', 'hybrid');
+        add_option('sc_library_workspace_auto_sync', 0);
+        add_option('sc_library_workspace_max_mb', 8);
+        add_option('sc_library_render_sync_url', '');
+        add_option('sc_library_render_sync_api_key', '');
+        add_option('sc_library_render_sync_timeout', 8);
         add_option('sc_library_enable_translation_matrix', 1);
         add_option('sc_library_default_matrix_template', 'technical_translation');
         add_option('sc_library_enable_boards', 1);
@@ -147,5 +234,6 @@ final class SC_Library_Activator {
 
     public static function deactivate(): void {
         wp_clear_scheduled_hook('sc_library_daily_reconcile');
+        wp_clear_scheduled_hook('sc_library_sync_workspace');
     }
 }

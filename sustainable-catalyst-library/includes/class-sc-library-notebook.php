@@ -4,13 +4,14 @@ if (!defined('ABSPATH')) {
 }
 
 final class SC_Library_Notebook {
-    public const SCHEMA = 'sc-library-workspace/1.6';
-    public const LEGACY_SCHEMA = 'sc-library-workspace/1.5';
-    public const EARLIER_SCHEMA = 'sc-library-workspace/1.4';
-    public const ORIGINAL_SCHEMA = 'sc-library-workspace/1.3';
-    public const FIRST_SCHEMA = 'sc-library-workspace/1.2';
-    public const INITIAL_SCHEMA = 'sc-library-workspace/1.1';
-    public const FIRST_RELEASE_SCHEMA = 'sc-library-workspace/1.0';
+    public const SCHEMA = 'sc-library-workspace/1.7';
+    public const LEGACY_SCHEMA = 'sc-library-workspace/1.6';
+    public const EARLIER_SCHEMA = 'sc-library-workspace/1.5';
+    public const ORIGINAL_SCHEMA = 'sc-library-workspace/1.4';
+    public const FIRST_SCHEMA = 'sc-library-workspace/1.3';
+    public const INITIAL_SCHEMA = 'sc-library-workspace/1.2';
+    public const FIRST_RELEASE_SCHEMA = 'sc-library-workspace/1.1';
+    public const ORIGINAL_RELEASE_SCHEMA = 'sc-library-workspace/1.0';
 
     public function register_hooks(): void {
         add_shortcode('sc_library_notebook', [$this, 'render_shortcode']);
@@ -27,7 +28,7 @@ final class SC_Library_Notebook {
     }
 
     public static function legacy_schemas(): array {
-        return [self::LEGACY_SCHEMA, self::EARLIER_SCHEMA, self::ORIGINAL_SCHEMA, self::FIRST_SCHEMA, self::INITIAL_SCHEMA, self::FIRST_RELEASE_SCHEMA];
+        return [self::LEGACY_SCHEMA, self::EARLIER_SCHEMA, self::ORIGINAL_SCHEMA, self::FIRST_SCHEMA, self::INITIAL_SCHEMA, self::FIRST_RELEASE_SCHEMA, self::ORIGINAL_RELEASE_SCHEMA];
     }
 
     public static function enqueue_assets(): void {
@@ -55,6 +56,7 @@ final class SC_Library_Notebook {
             'integrationsEnabled' => class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled(),
             'annotationsEnabled' => class_exists('SC_Library_Annotations') && SC_Library_Annotations::enabled(),
             'booksEnabled' => class_exists('SC_Library_Books') && SC_Library_Books::enabled(),
+            'persistentWorkspacesEnabled' => class_exists('SC_Library_Workspaces') && SC_Library_Workspaces::enabled(),
             'strings' => [
                 'saved' => __('Saved to the Research Notebook.', 'sustainable-catalyst-library'),
                 'alreadySaved' => __('This record is already saved.', 'sustainable-catalyst-library'),
@@ -84,6 +86,9 @@ final class SC_Library_Notebook {
         }
         if (class_exists('SC_Library_Portability') && SC_Library_Portability::enabled()) {
             SC_Library_Portability::enqueue_assets();
+        }
+        if (class_exists('SC_Library_Workspaces') && SC_Library_Workspaces::enabled()) {
+            SC_Library_Workspaces::enqueue_assets();
         }
     }
 
@@ -124,7 +129,7 @@ final class SC_Library_Notebook {
         $workspace_standalone = $standalone;
         $workspace_open = filter_var($atts['open'] ?? 'true', FILTER_VALIDATE_BOOLEAN);
         $workspace_initial_tab = sanitize_key((string) ($atts['tab'] ?? 'overview'));
-        if (!in_array($workspace_initial_tab, ['overview', 'collections', 'notes', 'sources', 'matrices', 'boards', 'annotations', 'books', 'integrations', 'portability'], true)) {
+        if (!in_array($workspace_initial_tab, ['overview', 'collections', 'notes', 'sources', 'matrices', 'boards', 'annotations', 'books', 'integrations', 'sync', 'portability'], true)) {
             $workspace_initial_tab = 'overview';
         }
         if ($workspace_initial_tab === 'matrices' && !self::matrix_enabled()) {
@@ -140,6 +145,9 @@ final class SC_Library_Notebook {
             $workspace_initial_tab = 'overview';
         }
         if ($workspace_initial_tab === 'integrations' && (!class_exists('SC_Library_Integrations') || !SC_Library_Integrations::enabled())) {
+            $workspace_initial_tab = 'overview';
+        }
+        if ($workspace_initial_tab === 'sync' && (!class_exists('SC_Library_Workspaces') || !SC_Library_Workspaces::enabled())) {
             $workspace_initial_tab = 'overview';
         }
 

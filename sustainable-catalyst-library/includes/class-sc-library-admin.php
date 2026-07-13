@@ -98,8 +98,43 @@ final class SC_Library_Admin {
         ]);
         register_setting('sc_library_settings', 'sc_library_notebook_storage_mode', [
             'type' => 'string',
-            'sanitize_callback' => static fn($value) => 'local',
-            'default' => 'local',
+            'sanitize_callback' => static fn($value) => in_array($value, ['local', 'account', 'hybrid'], true) ? $value : 'hybrid',
+            'default' => 'hybrid',
+        ]);
+        register_setting('sc_library_settings', 'sc_library_enable_persistent_workspaces', [
+            'type' => 'boolean',
+            'sanitize_callback' => static fn($value) => $value ? 1 : 0,
+            'default' => 1,
+        ]);
+        register_setting('sc_library_settings', 'sc_library_workspace_storage_mode', [
+            'type' => 'string',
+            'sanitize_callback' => static fn($value) => in_array($value, ['local', 'account', 'hybrid'], true) ? $value : 'hybrid',
+            'default' => 'hybrid',
+        ]);
+        register_setting('sc_library_settings', 'sc_library_workspace_auto_sync', [
+            'type' => 'boolean',
+            'sanitize_callback' => static fn($value) => $value ? 1 : 0,
+            'default' => 0,
+        ]);
+        register_setting('sc_library_settings', 'sc_library_workspace_max_mb', [
+            'type' => 'integer',
+            'sanitize_callback' => static fn($value) => min(25, max(1, absint($value))),
+            'default' => 8,
+        ]);
+        register_setting('sc_library_settings', 'sc_library_render_sync_url', [
+            'type' => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+            'default' => '',
+        ]);
+        register_setting('sc_library_settings', 'sc_library_render_sync_api_key', [
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => '',
+        ]);
+        register_setting('sc_library_settings', 'sc_library_render_sync_timeout', [
+            'type' => 'integer',
+            'sanitize_callback' => static fn($value) => min(30, max(2, absint($value))),
+            'default' => 8,
         ]);
         register_setting('sc_library_settings', 'sc_library_enable_translation_matrix', [
             'type' => 'boolean',
@@ -168,11 +203,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.11.0 activated.</strong> Rebuild the Library index, then open SC Library → Planning Analytics and Release Coordination to review workload, dependencies, capacity, and release risk.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.12.0 activated.</strong> Rebuild the Library index, then configure Persistent Workspaces under SC Library and test account storage before enabling optional Render synchronization.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.11.0.</strong> The release adds planning analytics, dependency intelligence, release groups, milestones, effort and progress tracking, capacity warnings, planned-versus-actual timing, printable reports, and expanded portable planning data. Rebuild the index once, then review Planning Analytics and Release Coordination.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.12.0.</strong> The release adds persistent account workspaces, local-to-account migration, revisions, collaborator permissions, conflict detection, optional Render/PostgreSQL synchronization, health diagnostics, and recovery-safe exports. Rebuild the index once, then review Workspace Sync.</p></div>';
         }
     }
 
@@ -299,7 +334,22 @@ final class SC_Library_Admin {
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Research Notebook', 'sustainable-catalyst-library'); ?></th>
-                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable local saved collections, personal notes, external sources, citations, matrices, visual boards, and portable exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('v1.10 stores personal workspace data in each visitor’s browser. It does not write private research into WordPress or expose it through public REST endpoints.', 'sustainable-catalyst-library'); ?></p></td>
+                        <td><label><input name="sc_library_enable_notebook" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_notebook', 1), 1); ?>> <?php esc_html_e('Enable saved collections, personal notes, external sources, citations, matrices, visual boards, and portable exports.', 'sustainable-catalyst-library'); ?></label><p class="description"><?php esc_html_e('The browser remains a valid local workspace. Signed-in users can optionally migrate or synchronize explicit revisions to their WordPress account.', 'sustainable-catalyst-library'); ?></p></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Persistent workspaces and Render synchronization', 'sustainable-catalyst-library'); ?></th>
+                        <td>
+                            <label><input name="sc_library_enable_persistent_workspaces" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_persistent_workspaces', 1), 1); ?>> <?php esc_html_e('Enable account-owned workspaces, revisions, sharing, conflict detection, and optional Render synchronization.', 'sustainable-catalyst-library'); ?></label>
+                            <p><label for="sc_library_workspace_storage_mode"><?php esc_html_e('Default storage mode:', 'sustainable-catalyst-library'); ?></label> <select id="sc_library_workspace_storage_mode" name="sc_library_workspace_storage_mode"><option value="local" <?php selected(get_option('sc_library_workspace_storage_mode', 'hybrid'), 'local'); ?>><?php esc_html_e('Local browser only', 'sustainable-catalyst-library'); ?></option><option value="account" <?php selected(get_option('sc_library_workspace_storage_mode', 'hybrid'), 'account'); ?>><?php esc_html_e('Account workspace', 'sustainable-catalyst-library'); ?></option><option value="hybrid" <?php selected(get_option('sc_library_workspace_storage_mode', 'hybrid'), 'hybrid'); ?>><?php esc_html_e('Hybrid local + account revision', 'sustainable-catalyst-library'); ?></option></select></p>
+                            <p><label><input name="sc_library_workspace_auto_sync" type="checkbox" value="1" <?php checked((int) get_option('sc_library_workspace_auto_sync', 0), 1); ?>> <?php esc_html_e('Automatically save linked browser workspaces after local changes and queue Render synchronization.', 'sustainable-catalyst-library'); ?></label></p>
+                            <p><label for="sc_library_workspace_max_mb"><?php esc_html_e('Maximum account workspace size:', 'sustainable-catalyst-library'); ?></label> <input id="sc_library_workspace_max_mb" name="sc_library_workspace_max_mb" type="number" min="1" max="25" value="<?php echo esc_attr((int) get_option('sc_library_workspace_max_mb', 8)); ?>"> MB</p>
+                            <table class="widefat striped" style="margin-top:12px;max-width:900px"><tbody>
+                                <tr><td><strong><?php esc_html_e('Render workspace service URL', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text" name="sc_library_render_sync_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_render_sync_url', '')); ?>" placeholder="https://your-library-workspace-service.onrender.com/"></td></tr>
+                                <tr><td><strong><?php esc_html_e('Server-to-server API key', 'sustainable-catalyst-library'); ?></strong></td><td><input class="large-text code" name="sc_library_render_sync_api_key" type="password" autocomplete="new-password" value="<?php echo esc_attr((string) get_option('sc_library_render_sync_api_key', '')); ?>"><p class="description"><?php esc_html_e('The key stays in WordPress and is never sent to the browser.', 'sustainable-catalyst-library'); ?></p></td></tr>
+                                <tr><td><strong><?php esc_html_e('Request timeout', 'sustainable-catalyst-library'); ?></strong></td><td><input name="sc_library_render_sync_timeout" type="number" min="2" max="30" value="<?php echo esc_attr((int) get_option('sc_library_render_sync_timeout', 8)); ?>"> seconds</td></tr>
+                            </tbody></table>
+                            <p class="description"><?php esc_html_e('Render synchronization is optional. WordPress remains the authority for account identity, permissions, and the primary workspace revision.', 'sustainable-catalyst-library'); ?></p>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e('Technical Translation Matrix', 'sustainable-catalyst-library'); ?></th>
@@ -426,11 +476,13 @@ final class SC_Library_Admin {
                 <p><code>[sc_library_annotation_studio]</code> — standalone annotation and handwriting studio.</p>
                 <p><code>[sc_library_book_builder]</code> — standalone Custom Book Builder.</p>
                 <p><code>[sc_library_portability]</code> — standalone PostgreSQL and portable browser-workspace export studio.</p>
+                <p><code>[sc_library_account_workspaces]</code> — standalone account workspace and synchronization manager.</p>
+                <p><code>[sc_library_notebook tab="sync"]</code> — open the Notebook directly to account and Render synchronization.</p>
                 <p><code>[sc_library_notebook tab="books"]</code> — open the Notebook directly to saved books.</p>
                 <p><code>[sc_library_notebook tab="annotations"]</code> — open the Notebook directly to annotations.</p>
                 <p><?php esc_html_e('Place this in a dedicated WordPress Shortcode block.', 'sustainable-catalyst-library'); ?></p>
                 <h3><?php esc_html_e('Relationship-aware REST endpoints', 'sustainable-catalyst-library'); ?></h3>
-                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates', 'integrations', 'integrations/status', 'integration-schema', 'items/{id}/handoff?target=workbench', 'annotation-schema', 'book-schema', 'items/{id}/book', 'documentation', 'documentation/categories', 'documentation/statuses', 'documentation/{id}', 'collections/foundations', 'registry', 'registry/facets', 'roadmap/tracker', 'planner/statuses', 'plans/{id}', 'export/formats', 'export/postgresql-schema', 'export/manifest'] as $endpoint) : ?>
+                <?php foreach (['status', 'categories', 'series', 'concepts', 'pathways', 'items', 'items/{id}', 'items/{id}/related', 'source-types', 'citation-formats', 'source-template', 'matrix-templates', 'board-templates', 'integrations', 'integrations/status', 'integration-schema', 'items/{id}/handoff?target=workbench', 'annotation-schema', 'book-schema', 'items/{id}/book', 'documentation', 'documentation/categories', 'documentation/statuses', 'documentation/{id}', 'collections/foundations', 'registry', 'registry/facets', 'roadmap/tracker', 'planner/statuses', 'plans/{id}', 'export/formats', 'export/postgresql-schema', 'export/manifest', 'account/status', 'workspaces', 'workspaces/{uuid}', 'workspaces/{uuid}/history', 'workspaces/{uuid}/share', 'workspaces/{uuid}/sync', 'workspaces/render/status'] as $endpoint) : ?>
                     <p><code>/wp-json/sustainable-catalyst/v1/library/<?php echo esc_html($endpoint); ?></code></p>
                 <?php endforeach; ?>
             </div>

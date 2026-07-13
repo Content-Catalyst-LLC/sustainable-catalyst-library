@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: sustainable-catalyst-library-workspaces
+    runtime: python
+    plan: free
+    rootDir: render-workspace-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: false
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.12
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sustainable-catalyst-library-postgres
+          property: connectionString
+      - key: SC_LIBRARY_SYNC_API_KEY
+        generateValue: true
+      - key: SC_LIBRARY_MAX_WORKSPACE_MB
+        value: 8
+
+databases:
+  - name: sustainable-catalyst-library-postgres
+    plan: free
+    databaseName: sustainable_catalyst_library
+    user: sustainable_catalyst_library

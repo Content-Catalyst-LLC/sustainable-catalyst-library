@@ -3,10 +3,10 @@
 
   const shared = window.SCNotebookShared || {};
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
-  const schema = shared.schema || 'sc-library-workspace/1.6';
-  const legacySchema = shared.legacySchema || 'sc-library-workspace/1.6';
+  const schema = shared.schema || 'sc-library-workspace/1.7';
+  const legacySchema = shared.legacySchema || 'sc-library-workspace/1.7';
   const legacySchemas = Array.isArray(shared.legacySchemas) ? shared.legacySchemas : [legacySchema, 'sc-library-workspace/1.0'];
-  const version = shared.version || '1.11.0';
+  const version = shared.version || '1.12.0';
   const strings = shared.strings || {};
   const sourceTypes = shared.sourceTypes || {};
   const citationFormats = shared.citationFormats || {};
@@ -17,6 +17,7 @@
   const integrationsEnabled = shared.integrationsEnabled !== false;
   const annotationsEnabled = shared.annotationsEnabled !== false;
   const booksEnabled = shared.booksEnabled !== false;
+  const persistentWorkspacesEnabled = shared.persistentWorkspacesEnabled !== false;
   const defaultMatrixTemplate = shared.defaultMatrixTemplate || 'technical_translation';
   const roots = Array.from(document.querySelectorAll('[data-sc-library-workspace-root]'));
   if (!roots.length) return;
@@ -235,6 +236,7 @@
           ${annotationsEnabled ? '<button type="button" data-workspace-quick="annotation"><strong>Open Annotation Studio</strong><span>Add handwritten notes, highlights, shapes, and anchored comments to research material.</span></button>' : ''}
           ${booksEnabled ? '<button type="button" data-workspace-quick="book"><strong>Build a custom book</strong><span>Arrange publications and research artifacts into a PDF-ready edition.</span></button>' : ''}
           ${integrationsEnabled ? '<button type="button" data-workspace-tab="integrations"><strong>Connect a research tool</strong><span>Prepare a source-aware Workbench, Decision Studio, or Site Intelligence handoff.</span></button>' : ''}
+          ${persistentWorkspacesEnabled ? '<button type="button" data-workspace-tab="sync"><strong>Account and sync</strong><span>Save explicit revisions across devices and optionally synchronize with Render.</span></button>' : ''}
           <button type="button" data-workspace-tab="portability"><strong>Export workspace</strong><span>Create a portable JSON research manifest.</span></button>
         </div>
         <section class="sc-library-workspace__recent-work">
@@ -541,11 +543,13 @@
       else if (activeTab === 'annotations') content.innerHTML = '<div data-sc-library-annotations-inline></div>';
       else if (activeTab === 'books') content.innerHTML = '<div data-sc-library-books-inline></div>';
       else if (activeTab === 'integrations') content.innerHTML = '<div data-sc-library-integrations-inline></div>';
+      else if (activeTab === 'sync') content.innerHTML = '<div data-sc-library-sync-inline></div>';
       else if (activeTab === 'portability') content.innerHTML = portabilityHtml();
       else content.innerHTML = overviewHtml();
       if (activeTab === 'annotations') document.dispatchEvent(new CustomEvent('sc-library-annotations-render'));
       if (activeTab === 'books') document.dispatchEvent(new CustomEvent('sc-library-books-render'));
       if (activeTab === 'integrations') window.dispatchEvent(new CustomEvent('sc-library-integrations-render'));
+      if (activeTab === 'sync') window.dispatchEvent(new CustomEvent('sc-library-account-sync-render'));
     };
 
     const open = (tab = 'overview') => {
@@ -902,6 +906,21 @@
   });
 
   const renderAll = () => controllers.forEach((controller) => controller.render());
+  window.SCLibraryWorkspaceAPI = {
+    schema,
+    storageKey,
+    getWorkspace() { return JSON.parse(JSON.stringify(workspace)); },
+    replaceWorkspace(next) {
+      workspace = sanitizeImported(next);
+      if (!workspace.collections.length) workspace.collections.push(initialWorkspace().collections[0]);
+      persist();
+      renderAll();
+      return this.getWorkspace();
+    },
+    saveWorkspace() { persist(); renderAll(); return this.getWorkspace(); },
+    itemCount,
+    storageAvailable() { return storageAvailable; },
+  };
   const controllerForEvent = (event) => {
     const library = event.target?.closest?.('[data-sc-library]');
     const workspaceRoot = library?.querySelector?.('[data-sc-library-workspace-root]');
