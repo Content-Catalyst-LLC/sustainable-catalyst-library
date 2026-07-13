@@ -7,7 +7,6 @@
 
   let autoRun = false;
   let requestActive = false;
-
   const qs = (selector) => root.querySelector(selector);
   const qsa = (selector) => [...root.querySelectorAll(selector)];
   const statusWrap = qs('[data-sc-status-wrap]');
@@ -17,6 +16,7 @@
   const progressLabel = qs('[data-sc-progress-label]');
   const progressDetail = qs('[data-sc-progress-detail]');
   const scanMessage = qs('[data-sc-scan-message]');
+  const accounting = qs('[data-sc-accounting]');
   const recordResult = qs('[data-sc-record-result]');
 
   const api = (path, method = 'GET', data = undefined) => window.wp.apiFetch({
@@ -31,14 +31,15 @@
     running: 'Running',
     paused: 'Paused',
     complete: 'Complete',
+    complete_with_errors: 'Complete with errors',
+    incomplete: 'Incomplete',
     cancelled: 'Cancelled',
   }[status] || status);
 
   const setBusy = (busy) => {
     requestActive = busy;
     qsa('button').forEach((button) => {
-      if (button.matches('[data-sc-pause], [data-sc-cancel]') && autoRun) return;
-      if (button.matches('[data-sc-start], [data-sc-reindex-record], [data-sc-repair], [data-sc-refresh]')) {
+      if (button.matches('[data-sc-start], [data-sc-reindex-record], [data-sc-repair], [data-sc-refresh], [data-sc-reset]')) {
         button.disabled = busy;
       }
     });
@@ -59,41 +60,53 @@
 
     const values = {
       '[data-sc-scan-indexed]': state.indexed || 0,
-      '[data-sc-scan-skipped]': state.skipped || 0,
+      '[data-sc-scan-excluded]': state.excluded || state.skipped || 0,
       '[data-sc-scan-failed]': state.failed || 0,
+      '[data-sc-scan-accounted]': state.accounted || 0,
       '[data-sc-scan-purged]': state.purged || 0,
+      '[data-sc-scan-cursor]': state.cursor_id || state.last_post_id || 0,
     };
     Object.entries(values).forEach(([selector, value]) => {
       const element = qs(selector);
       if (element) element.textContent = String(value);
     });
 
+    if (accounting) {
+      const inventory = state.inventory_changed ? ' The published inventory changed while the scan was running.' : '';
+      accounting.textContent = state.accounting_ok === false
+        ? `Accounting does not reconcile: ${processed} processed versus ${state.accounted || 0} accounted.${inventory}`
+        : `Accounting reconciles: ${state.accounted || 0} outcomes for ${processed} processed records.${inventory}`;
+      accounting.classList.toggle('is-bad', state.accounting_ok === false);
+    }
+
     const start = qs('[data-sc-start]');
     const resume = qs('[data-sc-resume]');
     const pause = qs('[data-sc-pause]');
     const cancel = qs('[data-sc-cancel]');
     if (start) start.disabled = requestActive || status === 'running';
-    if (resume) resume.disabled = requestActive || !['paused', 'running'].includes(status) || autoRun;
-    if (pause) pause.disabled = requestActive || status !== 'running' || !autoRun;
+    if (resume) resume.disabled = requestActive || status !== 'paused' || autoRun;
+    if (pause) pause.disabled = requestActive || status !== 'running';
     if (cancel) cancel.disabled = requestActive || !['running', 'paused'].includes(status);
 
     if (scanMessage) {
       if (status === 'running') scanMessage.textContent = config.strings.working;
       else if (status === 'complete') scanMessage.textContent = config.strings.complete;
-      else if (status === 'paused') scanMessage.textContent = 'The scan is paused and can be resumed.';
-      else if (status === 'cancelled') scanMessage.textContent = 'The scan was cancelled. Completed index records remain available.';
+      else if (status === 'complete_with_errors') scanMessage.textContent = config.strings.completeErrors;
+      else if (status === 'incomplete') scanMessage.textContent = config.strings.incomplete;
+      else if (status === 'paused') scanMessage.textContent = 'The cursor scan is paused and can be resumed.';
+      else if (status === 'cancelled') scanMessage.textContent = 'The scan was cancelled. Completed index records and the audit trail remain available.';
       else scanMessage.textContent = 'No scan is currently running.';
     }
   };
 
   const renderMetrics = (diagnostics = {}) => {
     const map = {
+      'discovered-published': diagnostics.discovered_published,
       'eligible-records': diagnostics.eligible_records,
       'indexed-records': diagnostics.indexed_records,
       'missing-records': diagnostics.missing_records,
-      'outdated-records': diagnostics.outdated_records,
-      'stale-records': diagnostics.stale_records,
-      relationships: diagnostics.relationships,
+      'excluded-records': diagnostics.excluded_records,
+      'failed-records': diagnostics.failed_records,
     };
     Object.entries(map).forEach(([key, value]) => {
       const element = qs(`[data-sc-metric="${key}"]`);
@@ -110,11 +123,11 @@
 
   const renderDiagnostics = (diagnostics = {}) => {
     renderMetrics(diagnostics);
-
     const health = qs('[data-sc-health]');
     if (health) {
       health.replaceChildren(
         healthBadge('Index table', diagnostics.table_exists ? 'Available' : 'Missing', !!diagnostics.table_exists),
+        healthBadge('Scan audit table', diagnostics.scan_items_table_exists ? 'Available' : 'Missing', !!diagnostics.scan_items_table_exists),
         healthBadge('Full-text index', diagnostics.fulltext_index ? 'Available' : 'Needs review', !!diagnostics.fulltext_index, !diagnostics.fulltext_index),
         healthBadge('Daily reconciliation', diagnostics.daily_reconcile_scheduled ? 'Scheduled' : 'Not scheduled', !!diagnostics.daily_reconcile_scheduled, !diagnostics.daily_reconcile_scheduled),
       );
@@ -131,8 +144,13 @@
         const code = document.createElement('code');
         code.textContent = row.post_type;
         type.append(strong, document.createElement('br'), code);
+        if (row.recommended) {
+          const small = document.createElement('small');
+          small.textContent = 'Recommended';
+          type.append(document.createElement('br'), small);
+        }
         tr.append(type);
-        [row.eligible, row.indexed, row.missing, row.outdated, row.latest_indexed_at || '—'].forEach((value) => {
+        [row.configured ? 'Yes' : 'No', row.discovered, row.eligible, row.excluded, row.indexed, row.missing, row.outdated, row.latest_indexed_at || '—'].forEach((value) => {
           const td = document.createElement('td');
           td.textContent = String(value ?? 0);
           tr.append(td);
@@ -229,27 +247,30 @@
           autoRun = false;
           break;
         }
-        await new Promise((resolve) => window.setTimeout(resolve, 120));
+        await new Promise((resolve) => window.setTimeout(resolve, 100));
       }
       await refresh(true);
     } catch (error) {
       autoRun = false;
       if (scanMessage) scanMessage.textContent = error?.message || config.strings.error;
       await refresh(false).catch(() => {});
-    } finally {
-      renderState((await api('/status?diagnostics=0').catch(() => ({ state: { status: 'paused' } }))).state);
     }
   };
 
   qs('[data-sc-start]')?.addEventListener('click', async () => {
     if (!window.confirm(config.strings.confirmStart)) return;
     const postTypes = qsa('[data-sc-post-type]:checked').map((input) => input.value);
+    if (!postTypes.length) {
+      if (scanMessage) scanMessage.textContent = 'Select at least one discovered post type.';
+      return;
+    }
     setBusy(true);
     try {
       const response = await api('/start', 'POST', {
         post_types: postTypes,
         batch_size: Number(qs('[data-sc-batch-size]')?.value || 50),
         mode: qs('[data-sc-scan-mode]')?.value || 'full',
+        persist_post_types: !!qs('[data-sc-persist-types]')?.checked,
       });
       renderState(response.state);
       setBusy(false);
@@ -287,6 +308,30 @@
     await refresh(true);
   });
 
+  qs('[data-sc-reset]')?.addEventListener('click', async () => {
+    if (!window.confirm(config.strings.confirmReset)) return;
+    autoRun = false;
+    setBusy(true);
+    try {
+      const response = await api('/reset', 'POST', {});
+      renderState(response.state);
+      renderDiagnostics(response.diagnostics || {});
+    } catch (error) {
+      if (scanMessage) scanMessage.textContent = error?.message || config.strings.error;
+    } finally {
+      setBusy(false);
+    }
+  });
+
+  qs('[data-sc-select-recommended]')?.addEventListener('click', () => {
+    qsa('[data-sc-type-card]').forEach((card) => {
+      const input = card.querySelector('[data-sc-post-type]');
+      if (input) input.checked = card.dataset.recommended === '1';
+    });
+  });
+  qs('[data-sc-select-all]')?.addEventListener('click', () => qsa('[data-sc-post-type]').forEach((input) => { input.checked = true; }));
+  qs('[data-sc-clear-types]')?.addEventListener('click', () => qsa('[data-sc-post-type]').forEach((input) => { input.checked = false; }));
+
   qsa('[data-sc-repair]').forEach((button) => {
     button.addEventListener('click', async () => {
       setBusy(true);
@@ -315,7 +360,7 @@
       if (recordResult) {
         recordResult.textContent = response.result.indexed
           ? `Indexed #${response.result.post_id}: ${response.result.title}`
-          : `Record #${response.result.post_id} was removed or skipped: ${response.result.reason}`;
+          : `Record #${response.result.post_id} was removed or excluded: ${response.result.reason}`;
       }
       renderDiagnostics(response.diagnostics || {});
       await refresh(true);
@@ -333,7 +378,7 @@
 
   refresh(true).then((response) => {
     if (response.state?.status === 'running') {
-      if (scanMessage) scanMessage.textContent = 'An interrupted scan is ready to resume.';
+      if (scanMessage) scanMessage.textContent = 'An interrupted cursor scan is ready to resume.';
       renderState({ ...response.state, status: 'paused' });
     }
   }).catch(() => {});

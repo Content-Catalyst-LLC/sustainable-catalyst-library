@@ -44,6 +44,7 @@ final class SC_Library_Activator {
         $workspace_sync_log_table = $wpdb->prefix . 'sc_library_workspace_sync_log';
         $document_jobs_table = $wpdb->prefix . 'sc_library_document_jobs';
         $document_editions_table = $wpdb->prefix . 'sc_library_document_editions';
+        $scan_items_table = $wpdb->prefix . 'sc_library_scan_items';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -229,6 +230,25 @@ final class SC_Library_Activator {
             KEY frozen_at (frozen_at)
         ) {$charset};";
 
+
+        $scan_items_sql = "CREATE TABLE {$scan_items_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            scan_id CHAR(36) NOT NULL,
+            post_id BIGINT UNSIGNED NOT NULL,
+            post_type VARCHAR(64) NOT NULL DEFAULT '',
+            outcome VARCHAR(24) NOT NULL,
+            reason VARCHAR(191) NOT NULL DEFAULT '',
+            title TEXT NULL,
+            processed_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY scan_post (scan_id, post_id),
+            KEY scan_id (scan_id),
+            KEY post_id (post_id),
+            KEY post_type (post_type),
+            KEY outcome (outcome),
+            KEY processed_at (processed_at)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
         dbDelta($workspaces_sql);
@@ -237,6 +257,7 @@ final class SC_Library_Activator {
         dbDelta($workspace_sync_log_sql);
         dbDelta($document_jobs_sql);
         dbDelta($document_editions_sql);
+        dbDelta($scan_items_sql);
     }
 
     private static function install_defaults(): void {

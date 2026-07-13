@@ -5,7 +5,7 @@
   const storageKey = shared.storageKey || 'scLibraryWorkspaceV120';
   const schema = shared.schema || 'sc-library-workspace/1.7';
   const legacySchemas = Array.isArray(shared.legacySchemas) ? shared.legacySchemas : ['sc-library-workspace/1.1', 'sc-library-workspace/1.0'];
-  const version = shared.version || '1.13.2';
+  const version = shared.version || '1.13.3';
   const templates = shared.templates || {};
   const nodeTypes = shared.nodeTypes || {};
   const edgeTypes = shared.edgeTypes || {};

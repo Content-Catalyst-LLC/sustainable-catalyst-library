@@ -1,10 +1,10 @@
-# Sustainable Catalyst Library v1.13.2
+# Sustainable Catalyst Library v1.13.3
 
-Library v1.13.2 repairs the **Index Scanner administration route** from v1.13.1 while retaining the complete resumable scanner and all v1.13.0 server-side document-production capabilities.
+Library v1.13.3 replaces the earlier scanner queue with a **cursor-based large-library indexer** designed for WordPress sites containing thousands of publications.
 
-The Library now has a dedicated resumable scanner with per-post-type diagnostics, missing and outdated record repair, single-record reindexing, relationship repair, stale cleanup, and downloadable scan logs. Indexing remains entirely WordPress-local and does not depend on Render, PostgreSQL, workspaces, or document production.
+Published discovery now comes directly from the WordPress posts table. The scanner is not affected by `pre_get_posts`, theme archive rules, front-end query limits, or search customizations, and it never stores the complete post-ID list in a WordPress option.
 
-## Index Scanner
+## Large-Library Index Scanner
 
 Open:
 
@@ -14,17 +14,24 @@ SC Library → Index Scanner
 
 Included scanner capabilities:
 
-- Complete safe rebuild
-- Missing-only and outdated-only scans
-- Resumable batch progress stored in WordPress
-- Per-post-type counts and freshness diagnostics
-- Single-record repair by ID or URL
-- Stale-record and relationship cleanup
-- Full-text and daily-reconciliation health checks
-- Downloadable JSON scan logs
-- Synchronous rebuild fallback on the main settings page
+- Direct database discovery by ascending WordPress post ID
+- Bounded cursor batches from 25 to 500 records
+- Automatic discovery of Posts, Pages, and editorial custom post types
+- Recommended-type selection and configuration persistence
+- Complete, missing-only, outdated-only, and repair modes
+- Pause, resume, cancel, and scanner-state reset
+- Dedicated scan audit table with every post ID and outcome
+- Explicit exclusion reasons separated from failures
+- Per-post-type published, eligible, excluded, indexed, missing, and outdated counts
+- Completion accounting that must reconcile before a clean completion
+- Full JSON audit report
+- Cursor-based synchronous fallback rebuild
+- No dependency on Render, PostgreSQL, workspaces, or document production
 
-See `INDEX_SCANNER_SETUP.md`.
+Scanner state schema: `sc-library-index-scan/2.0`  
+Scan report schema: `sc-library-index-scan-log/2.0`
+
+See `INDEX_SCANNER_SETUP.md` and `RELEASE_NOTES_1.13.3.md`.
 
 ## Retained v1.13.0 document production
 The existing browser Book Builder remains available. Signed-in users can now submit normalized book editions to the optional Render service, monitor queued rendering, retry failures, inspect diagnostics, import completed PDFs into the WordPress Media Library, and preserve frozen edition manifests and checksums.
@@ -82,6 +89,7 @@ The normal Library and Notebook shortcodes continue to work.
 - `/wp-json/sustainable-catalyst/v1/library/scanner/pause`
 - `/wp-json/sustainable-catalyst/v1/library/scanner/resume`
 - `/wp-json/sustainable-catalyst/v1/library/scanner/cancel`
+- `/wp-json/sustainable-catalyst/v1/library/scanner/reset`
 - `/wp-json/sustainable-catalyst/v1/library/scanner/repair`
 - `/wp-json/sustainable-catalyst/v1/library/scanner/record`
 
@@ -95,7 +103,3 @@ See:
 - `WORKSPACE_SYNC_SETUP.md`
 - `render-workspace-service/README.md`
 
-
-## Index Scanner Administration Route Repair
-
-The SC Library parent menu is registered before the scanner submenu, preventing WordPress from rejecting `/wp-admin/admin.php?page=sc-library-scanner` as an unregistered page.

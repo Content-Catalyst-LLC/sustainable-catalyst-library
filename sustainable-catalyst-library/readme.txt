@@ -4,25 +4,29 @@ Tags: knowledge-base, pdf, document-production, render, research-workspace, post
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.13.2
+Stable tag: 1.13.3
 License: GPLv2 or later
 
 A native WordPress knowledge base with persistent workspaces, server-rendered books and PDFs, planning, documentation, notebooks, PostgreSQL portability, and optional Render services.
 
 == Description ==
 
-Sustainable Catalyst Library v1.13.2 corrects the Index Scanner administration route and retains a dedicated resumable Index Scanner while retaining optional server-side book, PDF, and document production.
+Sustainable Catalyst Library v1.13.3 adds direct cursor-based discovery and auditable batch reconciliation for sites with thousands of WordPress records while retaining optional server-side book, PDF, and document production.
 
 
-= Index Scanner =
+= Large-Library Index Scanner =
 
-* Dedicated SC Library → Index Scanner administration screen.
-* Resumable batch scans with saved progress.
+* Direct WordPress database discovery immune to front-end query filters.
+* Cursor batches using the last processed WordPress post ID.
+* No unbounded WP_Query and no complete ID queue stored in options.
+* Automatic Posts, Pages, and editorial custom-post-type discovery.
+* Recommended post-type selection and saved Library configuration.
 * Complete, missing-only, outdated-only, and repair modes.
-* Per-post-type counts, freshness diagnostics, and issue samples.
-* Single-record repair by post ID or canonical URL.
-* Stale-record, relationship, and identifier repair.
-* Downloadable JSON scan logs.
+* Per-post-type published, eligible, excluded, indexed, missing, and outdated counts.
+* Dedicated audit table containing every processed post ID and outcome.
+* Explicit exclusion and failure reasons in downloadable JSON reports.
+* Strict processed/indexed/excluded/failed completion accounting.
+* Pause, resume, cancel, and reset controls.
 * No dependency on Render, PostgreSQL, account workspaces, or document production.
 
 = Server Document Production =
@@ -83,6 +87,19 @@ Sustainable Catalyst Library v1.13.2 corrects the Index Scanner administration r
 * `/wp-json/sustainable-catalyst/v1/library/workspaces/{uuid}`
 
 == Changelog ==
+
+= 1.13.3 =
+
+* Replaced the large candidate queue with cursor-based direct database scanning.
+* Added direct published counts immune to pre_get_posts and theme query filters.
+* Added automatic discovery of Posts, Pages, and editorial custom post types.
+* Added recommended-type selection and configuration persistence.
+* Added a scan audit table with every post ID, outcome, and reason.
+* Added explicit exclusion counts separate from failed records.
+* Added strict completion accounting and incomplete/error states.
+* Added scanner-state reset and complete JSON audit reports.
+* Protected other configured post types during subset scans.
+* Converted the synchronous fallback rebuild to bounded cursor batches.
 
 = 1.13.2 =
 

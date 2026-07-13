@@ -212,11 +212,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.13.2 activated.</strong> Open SC Library → Index Scanner to run a resumable rebuild and review index diagnostics. Document Production and Render remain independent of indexing.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.13.3 activated.</strong> Open SC Library → Index Scanner, select the recommended post types, and run a cursor-based reconciliation. Large-library discovery no longer depends on WP_Query.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.13.2.</strong> The release adds a dedicated resumable Index Scanner, post-type diagnostics, targeted record repair, stale-record cleanup, relationship repair, and downloadable scan logs. Open SC Library → Index Scanner.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.13.3.</strong> The Index Scanner now uses direct cursor-based database discovery, supports 2,000+ records without storing an ID queue, records every outcome in an audit table, and verifies completion accounting. Open SC Library → Index Scanner and run a complete reconciliation.</p></div>';
         }
     }
 

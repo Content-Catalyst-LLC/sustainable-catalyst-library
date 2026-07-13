@@ -20,7 +20,7 @@
         if (saved) return saved;
       } catch {}
       const stamp = new Date().toISOString();
-      return {schema:cfg.schemas?.workspace || 'sc-library-workspace/1.7',version:'1.13.2',createdAt:stamp,updatedAt:stamp,collections:[{id:'collection_inbox',title:'Research Inbox',description:'Newly saved Library records and research material.',createdAt:stamp,updatedAt:stamp}],savedRecords:[],notes:[],sources:[],matrices:[],boards:[],handoffs:[],annotations:[],books:[]};
+      return {schema:cfg.schemas?.workspace || 'sc-library-workspace/1.7',version:'1.13.3',createdAt:stamp,updatedAt:stamp,collections:[{id:'collection_inbox',title:'Research Inbox',description:'Newly saved Library records and research material.',createdAt:stamp,updatedAt:stamp}],savedRecords:[],notes:[],sources:[],matrices:[],boards:[],handoffs:[],annotations:[],books:[]};
     },
     replaceWorkspace(next) { localStorage.setItem(cfg.storageKey || 'scLibraryWorkspaceV120', JSON.stringify(next)); window.dispatchEvent(new CustomEvent('sc-library-workspace-updated')); return next; },
   };
