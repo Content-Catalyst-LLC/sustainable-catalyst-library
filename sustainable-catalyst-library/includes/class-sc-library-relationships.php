@@ -49,6 +49,31 @@ final class SC_Library_Relationships {
         ];
     }
 
+
+    public function provenance_types(): array {
+        return class_exists('SC_Library_Knowledge_Graph')
+            ? SC_Library_Knowledge_Graph::provenance_types()
+            : [
+                'editorial' => __('Editorially asserted', 'sustainable-catalyst-library'),
+                'taxonomy' => __('Taxonomy assignment', 'sustainable-catalyst-library'),
+                'article_map' => __('Article map or series', 'sustainable-catalyst-library'),
+                'content_plan' => __('Content Planner dependency', 'sustainable-catalyst-library'),
+                'post_metadata' => __('Publication metadata', 'sustainable-catalyst-library'),
+                'other' => __('Other documented provenance', 'sustainable-catalyst-library'),
+            ];
+    }
+
+    public function confidence_bases(): array {
+        return [
+            'declared' => __('Declared in canonical metadata', 'sustainable-catalyst-library'),
+            'editorial' => __('Editorial judgment', 'sustainable-catalyst-library'),
+            'evidence_review' => __('Evidence review', 'sustainable-catalyst-library'),
+            'rule_inferred' => __('Rule inferred', 'sustainable-catalyst-library'),
+            'machine_inferred' => __('Machine inferred', 'sustainable-catalyst-library'),
+            'unknown' => __('Not yet documented', 'sustainable-catalyst-library'),
+        ];
+    }
+
     public function count(): int {
         global $wpdb;
         return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name()}");
@@ -81,6 +106,12 @@ final class SC_Library_Relationships {
                 'type' => $type,
                 'type_label' => $types[$type],
                 'note' => (string) $row['note'],
+                'confidence' => isset($row['confidence']) ? (float) $row['confidence'] : 0.85,
+                'confidence_basis' => (string) ($row['confidence_basis'] ?? 'editorial'),
+                'provenance_type' => (string) ($row['provenance_type'] ?? 'editorial'),
+                'provenance_url' => (string) ($row['provenance_url'] ?? ''),
+                'evidence_note' => (string) ($row['evidence_note'] ?? ''),
+                'visibility' => (string) ($row['visibility'] ?? 'public'),
                 'sort_order' => (int) $row['sort_order'],
             ];
         }
@@ -107,6 +138,12 @@ final class SC_Library_Relationships {
                     'type' => $type,
                     'type_label' => sprintf(__('Referenced as: %s', 'sustainable-catalyst-library'), $types[$type]),
                     'note' => (string) $row['note'],
+                    'confidence' => isset($row['confidence']) ? (float) $row['confidence'] : 0.85,
+                    'confidence_basis' => (string) ($row['confidence_basis'] ?? 'editorial'),
+                    'provenance_type' => (string) ($row['provenance_type'] ?? 'editorial'),
+                    'provenance_url' => (string) ($row['provenance_url'] ?? ''),
+                    'evidence_note' => (string) ($row['evidence_note'] ?? ''),
+                    'visibility' => (string) ($row['visibility'] ?? 'public'),
                     'sort_order' => (int) $row['sort_order'],
                 ];
             }
@@ -125,9 +162,20 @@ final class SC_Library_Relationships {
 
         $seen = [];
         foreach ($relationships as $position => $relationship) {
-            $target_id = absint($relationship['target_post_id'] ?? 0);
+            $manual_target_id = absint($relationship['target_post_id_manual'] ?? 0);
+            $target_id = $manual_target_id ?: absint($relationship['target_post_id'] ?? 0);
             $type = sanitize_key((string) ($relationship['relationship_type'] ?? 'related_to'));
             $note = sanitize_textarea_field((string) ($relationship['note'] ?? ''));
+            $confidence = min(1, max(0, (float) ($relationship['confidence'] ?? 0.85)));
+            $confidence_basis = sanitize_key((string) ($relationship['confidence_basis'] ?? 'editorial'));
+            if (!isset($this->confidence_bases()[$confidence_basis])) $confidence_basis = 'editorial';
+            $provenance_type = sanitize_key((string) ($relationship['provenance_type'] ?? 'editorial'));
+            if (!isset($this->provenance_types()[$provenance_type])) $provenance_type = 'editorial';
+            $provenance_url = esc_url_raw((string) ($relationship['provenance_url'] ?? ''));
+            $evidence_note = sanitize_textarea_field((string) ($relationship['evidence_note'] ?? ''));
+            $visibility = in_array((string) ($relationship['visibility'] ?? 'public'), ['public', 'private', 'organization'], true)
+                ? (string) $relationship['visibility']
+                : 'public';
 
             if ($target_id < 1 || $target_id === $post_id || !isset($types[$type]) || get_post_status($target_id) !== 'publish') {
                 continue;
@@ -144,10 +192,16 @@ final class SC_Library_Relationships {
                 'target_post_id' => $target_id,
                 'relationship_type' => $type,
                 'note' => $note,
+                'confidence' => $confidence,
+                'confidence_basis' => $confidence_basis,
+                'provenance_type' => $provenance_type,
+                'provenance_url' => $provenance_url,
+                'evidence_note' => $evidence_note,
+                'visibility' => $visibility,
                 'sort_order' => (int) $position,
                 'created_at' => $now,
                 'updated_at' => $now,
-            ], ['%d', '%d', '%s', '%s', '%d', '%s', '%s']);
+            ], ['%d', '%d', '%s', '%s', '%f', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s']);
         }
     }
 

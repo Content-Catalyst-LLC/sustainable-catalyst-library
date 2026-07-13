@@ -50,3 +50,9 @@ Portable export schema `sc-library-portable-export/1.4` adds normalized `media_a
 ## v1.15.0 editorial workflow entities
 
 Portable export schema `sc-library-portable-export/1.5` adds `editorial_reviews`, `editorial_participants`, `editorial_comments`, `editorial_suggestions`, and `editorial_events`. Use the Editorial export scope for a focused review archive. These records can include private comments, email addresses, invitation state, and editorial decisions.
+
+## v1.16.0 knowledge graph entities
+
+Portable export schema `sc-library-portable-export/1.6` adds `graph_nodes` and `graph_edges`, plus confidence, provenance, evidence, and visibility fields on canonical publication relationships.
+
+Use the **Knowledge graph, relationship provenance, and diagnostics data** scope for a focused graph archive. Public-registry exports contain only active public graph entities and public edges whose endpoints are included. Complete and graph-specific administrative exports can contain private or organization-only research relationships and should be handled as private research data.

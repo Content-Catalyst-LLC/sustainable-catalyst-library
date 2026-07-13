@@ -211,11 +211,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.15.0 activated.</strong> Open SC Library → Editorial Workflow to configure collaboration and create a private test review. Existing index, multimedia, workspace, and document systems remain available.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.16.0 activated.</strong> Open SC Library → Knowledge Graph and rebuild the graph projection from the current Library index. Existing editorial, multimedia, workspace, document, and scanner systems remain available.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.15.0.</strong> Collaboration, review comments, suggested edits, approval states, record locks, and attributed activity are now available under SC Library → Editorial Workflow. No index rebuild is required.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.16.0.</strong> Knowledge Graph and Relationship Intelligence are now available under SC Library → Knowledge Graph. Rebuild the graph projection after installation; the Library search index itself does not need to be rebuilt.</p></div>';
         }
     }
 

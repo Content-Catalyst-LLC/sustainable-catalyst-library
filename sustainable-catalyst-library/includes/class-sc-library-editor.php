@@ -61,6 +61,12 @@ final class SC_Library_Editor {
         $site_places = (string) get_post_meta($post->ID, '_sc_library_site_places', true);
         $site_indicators = (string) get_post_meta($post->ID, '_sc_library_site_indicators', true);
         $site_sources = (string) get_post_meta($post->ID, '_sc_library_site_sources', true);
+        $graph_claims = (string) get_post_meta($post->ID, '_sc_library_graph_claims', true);
+        $graph_evidence = (string) get_post_meta($post->ID, '_sc_library_graph_evidence', true);
+        $graph_questions = (string) get_post_meta($post->ID, '_sc_library_graph_questions', true);
+        $graph_organizations = (string) get_post_meta($post->ID, '_sc_library_graph_organizations', true);
+        $graph_events = (string) get_post_meta($post->ID, '_sc_library_graph_events', true);
+        $graph_source_claims = (string) get_post_meta($post->ID, '_sc_library_graph_source_claims', true);
         $relations = $this->relationships->get_for_post($post->ID, false);
         $categories = get_categories(['hide_empty' => false, 'orderby' => 'name']);
         $candidate_posts = $this->candidate_posts($post->ID);
@@ -129,6 +135,17 @@ final class SC_Library_Editor {
                 <label><span><?php esc_html_e('Site Intelligence source IDs', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_site_sources" rows="4" placeholder="world-bank&#10;nasa-eo"><?php echo esc_textarea($site_sources); ?></textarea><small><?php esc_html_e('Public source-registry identifiers used for geographic context.', 'sustainable-catalyst-library'); ?></small></label>
             </div>
 
+            <h3><?php esc_html_e('Knowledge Graph entities', 'sustainable-catalyst-library'); ?></h3>
+            <p class="description"><?php esc_html_e('Record named claims, evidence objects, questions, organizations, and events that should become explicit graph entities during the next graph rebuild.', 'sustainable-catalyst-library'); ?></p>
+            <div class="sc-library-admin-grid sc-library-admin-grid--wide">
+                <label><span><?php esc_html_e('Claims', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_graph_claims" rows="4" placeholder="One concise claim per line"><?php echo esc_textarea($graph_claims); ?></textarea><small><?php esc_html_e('Publication-to-claim relationships use Describes.', 'sustainable-catalyst-library'); ?></small></label>
+                <label><span><?php esc_html_e('Evidence objects', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_graph_evidence" rows="4" placeholder="Dataset finding, documented observation, or evidence record"><?php echo esc_textarea($graph_evidence); ?></textarea><small><?php esc_html_e('Publication-to-evidence relationships use Documents.', 'sustainable-catalyst-library'); ?></small></label>
+                <label><span><?php esc_html_e('Research questions', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_graph_questions" rows="4" placeholder="One question per line"><?php echo esc_textarea($graph_questions); ?></textarea><small><?php esc_html_e('Questions become reusable graph entities.', 'sustainable-catalyst-library'); ?></small></label>
+                <label><span><?php esc_html_e('Organizations', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_graph_organizations" rows="4" placeholder="Organization name"><?php echo esc_textarea($graph_organizations); ?></textarea><small><?php esc_html_e('One named institution or organization per line.', 'sustainable-catalyst-library'); ?></small></label>
+                <label><span><?php esc_html_e('Events', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_graph_events" rows="4" placeholder="2026-07-13 | Event label"><?php echo esc_textarea($graph_events); ?></textarea><small><?php esc_html_e('Use YYYY-MM-DD | Label to place an event in the graph timeline.', 'sustainable-catalyst-library'); ?></small></label>
+                <label><span><?php esc_html_e('Source-to-claim links', 'sustainable-catalyst-library'); ?></span><textarea name="sc_library_graph_source_claims" rows="4" placeholder="Source label or URL => Claim text"><?php echo esc_textarea($graph_source_claims); ?></textarea><small><?php esc_html_e('One explicit source-to-claim assertion per line. These links use Supports with declared metadata provenance.', 'sustainable-catalyst-library'); ?></small></label>
+            </div>
+
             <section class="sc-library-admin-relations">
                 <div class="sc-library-admin-relations__head">
                     <div>
@@ -158,6 +175,12 @@ final class SC_Library_Editor {
         $target_id = absint($relation['target_post_id'] ?? 0);
         $type = sanitize_key((string) ($relation['type'] ?? 'related_to'));
         $note = (string) ($relation['note'] ?? '');
+        $confidence = isset($relation['confidence']) ? (float) $relation['confidence'] : 0.85;
+        $confidence_basis = sanitize_key((string) ($relation['confidence_basis'] ?? 'editorial'));
+        $provenance_type = sanitize_key((string) ($relation['provenance_type'] ?? 'editorial'));
+        $provenance_url = (string) ($relation['provenance_url'] ?? '');
+        $evidence_note = (string) ($relation['evidence_note'] ?? '');
+        $visibility = sanitize_key((string) ($relation['visibility'] ?? 'public'));
         $name = 'sc_library_relationships[' . $index . ']';
         ?>
         <div class="sc-library-admin-relation" data-sc-relationship-row>
@@ -172,6 +195,11 @@ final class SC_Library_Editor {
                     <?php endforeach; ?>
                 </select>
             </label>
+            <label class="sc-library-admin-relation__manual-target">
+                <span><?php esc_html_e('Or enter target post ID', 'sustainable-catalyst-library'); ?></span>
+                <input type="number" min="1" name="<?php echo esc_attr($name); ?>[target_post_id_manual]" value="" placeholder="<?php esc_attr_e('Any published Library post ID', 'sustainable-catalyst-library'); ?>">
+                <small><?php esc_html_e('Use this for records not shown in the bounded selector. A manual ID overrides the selector.', 'sustainable-catalyst-library'); ?></small>
+            </label>
             <label>
                 <span><?php esc_html_e('Relationship', 'sustainable-catalyst-library'); ?></span>
                 <select name="<?php echo esc_attr($name); ?>[relationship_type]">
@@ -184,6 +212,44 @@ final class SC_Library_Editor {
                 <span><?php esc_html_e('Context note', 'sustainable-catalyst-library'); ?></span>
                 <input type="text" name="<?php echo esc_attr($name); ?>[note]" value="<?php echo esc_attr($note); ?>" placeholder="<?php esc_attr_e('Why these records are connected', 'sustainable-catalyst-library'); ?>">
             </label>
+            <div class="sc-library-admin-relation__intelligence">
+                <label>
+                    <span><?php esc_html_e('Confidence', 'sustainable-catalyst-library'); ?></span>
+                    <input type="number" min="0" max="1" step="0.01" name="<?php echo esc_attr($name); ?>[confidence]" value="<?php echo esc_attr(number_format($confidence, 2, '.', '')); ?>">
+                </label>
+                <label>
+                    <span><?php esc_html_e('Confidence basis', 'sustainable-catalyst-library'); ?></span>
+                    <select name="<?php echo esc_attr($name); ?>[confidence_basis]">
+                        <?php foreach ($this->relationships->confidence_bases() as $value => $label) : ?>
+                            <option value="<?php echo esc_attr($value); ?>" <?php selected($confidence_basis, $value); ?>><?php echo esc_html($label); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>
+                    <span><?php esc_html_e('Provenance', 'sustainable-catalyst-library'); ?></span>
+                    <select name="<?php echo esc_attr($name); ?>[provenance_type]">
+                        <?php foreach ($this->relationships->provenance_types() as $value => $label) : ?>
+                            <option value="<?php echo esc_attr($value); ?>" <?php selected($provenance_type, $value); ?>><?php echo esc_html($label); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>
+                    <span><?php esc_html_e('Visibility', 'sustainable-catalyst-library'); ?></span>
+                    <select name="<?php echo esc_attr($name); ?>[visibility]">
+                        <option value="public" <?php selected($visibility, 'public'); ?>><?php esc_html_e('Public', 'sustainable-catalyst-library'); ?></option>
+                        <option value="organization" <?php selected($visibility, 'organization'); ?>><?php esc_html_e('Organization', 'sustainable-catalyst-library'); ?></option>
+                        <option value="private" <?php selected($visibility, 'private'); ?>><?php esc_html_e('Private', 'sustainable-catalyst-library'); ?></option>
+                    </select>
+                </label>
+                <label class="sc-library-admin-relation__source">
+                    <span><?php esc_html_e('Provenance URL', 'sustainable-catalyst-library'); ?></span>
+                    <input type="url" name="<?php echo esc_attr($name); ?>[provenance_url]" value="<?php echo esc_attr($provenance_url); ?>" placeholder="https://…">
+                </label>
+                <label class="sc-library-admin-relation__evidence">
+                    <span><?php esc_html_e('Evidence or verification note', 'sustainable-catalyst-library'); ?></span>
+                    <textarea rows="2" name="<?php echo esc_attr($name); ?>[evidence_note]" placeholder="<?php esc_attr_e('Why this relationship is credible and how it was verified', 'sustainable-catalyst-library'); ?>"><?php echo esc_textarea($evidence_note); ?></textarea>
+                </label>
+            </div>
             <button type="button" class="button-link-delete" data-sc-remove-relationship><?php esc_html_e('Remove', 'sustainable-catalyst-library'); ?></button>
         </div>
         <?php
@@ -193,7 +259,7 @@ final class SC_Library_Editor {
         $query = new WP_Query([
             'post_type' => $this->indexer->configured_post_types(),
             'post_status' => 'publish',
-            'posts_per_page' => 1500,
+            'posts_per_page' => 500,
             'post__not_in' => [$exclude_id],
             'orderby' => 'title',
             'order' => 'ASC',
@@ -250,6 +316,12 @@ final class SC_Library_Editor {
         update_post_meta($post_id, '_sc_library_site_places', $this->sanitize_lines((string) ($_POST['sc_library_site_places'] ?? ''), false));
         update_post_meta($post_id, '_sc_library_site_indicators', $this->sanitize_lines((string) ($_POST['sc_library_site_indicators'] ?? ''), false));
         update_post_meta($post_id, '_sc_library_site_sources', $this->sanitize_lines((string) ($_POST['sc_library_site_sources'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_graph_claims', $this->sanitize_lines((string) ($_POST['sc_library_graph_claims'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_graph_evidence', $this->sanitize_lines((string) ($_POST['sc_library_graph_evidence'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_graph_questions', $this->sanitize_lines((string) ($_POST['sc_library_graph_questions'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_graph_organizations', $this->sanitize_lines((string) ($_POST['sc_library_graph_organizations'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_graph_events', $this->sanitize_lines((string) ($_POST['sc_library_graph_events'] ?? ''), false));
+        update_post_meta($post_id, '_sc_library_graph_source_claims', $this->sanitize_lines((string) ($_POST['sc_library_graph_source_claims'] ?? ''), false));
 
         $raw_relationships = isset($_POST['sc_library_relationships']) && is_array($_POST['sc_library_relationships'])
             ? wp_unslash($_POST['sc_library_relationships'])

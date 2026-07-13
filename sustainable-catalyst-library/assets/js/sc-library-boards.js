@@ -24,6 +24,18 @@
   const clone = (value) => JSON.parse(JSON.stringify(value));
   const slug = (value) => words(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'board';
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const promoteBoardToGraph = async (board) => {
+    if (!shared.graphEnabled || !shared.graphEndpoint) return;
+    const response = await fetch(shared.graphEndpoint, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': shared.restNonce || '' },
+      body: JSON.stringify(board),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || strings.graphPromotionFailed || 'Graph promotion failed.');
+    window.alert(`${strings.graphPromoted || 'Board promoted to Knowledge Graph.'} ${data.nodes_promoted || 0} entities · ${data.edges_promoted || 0} relationships.`);
+  };
 
   const initialWorkspace = () => {
     const createdAt = now();
@@ -599,7 +611,7 @@
     stage.className = 'sc-board-studio__stage sc-board-library-screen';
     stage.style.width = '100%'; stage.style.height = '100%'; stage.style.transform = 'none';
     modal.querySelector('[data-board-sizer]').style.width = '100%'; modal.querySelector('[data-board-sizer]').style.height = '100%';
-    stage.innerHTML = `<div class="sc-board-library-list">${workspace.boards.length ? workspace.boards.map((board) => `<article><span>${escapeHtml(board.type === 'chalkboard' ? 'Chalkboard' : 'Whiteboard')}</span><h3>${escapeHtml(board.title)}</h3><p>${escapeHtml(board.description || '')}</p><small>${board.nodes?.length || 0} cards · ${board.edges?.length || 0} relationships · Updated ${escapeHtml(new Date(board.updatedAt || board.createdAt).toLocaleDateString())}</small><div><button type="button" data-open-saved-board="${escapeHtml(board.id)}">Open</button><button type="button" data-export-saved-board="${escapeHtml(board.id)}">JSON</button><button type="button" data-delete-saved-board="${escapeHtml(board.id)}">Delete</button></div></article>`).join('') : '<p>No saved boards yet.</p>'}</div>`;
+    stage.innerHTML = `<div class="sc-board-library-list">${workspace.boards.length ? workspace.boards.map((board) => `<article><span>${escapeHtml(board.type === 'chalkboard' ? 'Chalkboard' : 'Whiteboard')}</span><h3>${escapeHtml(board.title)}</h3><p>${escapeHtml(board.description || '')}</p><small>${board.nodes?.length || 0} cards · ${board.edges?.length || 0} relationships · Updated ${escapeHtml(new Date(board.updatedAt || board.createdAt).toLocaleDateString())}</small><div><button type="button" data-open-saved-board="${escapeHtml(board.id)}">Open</button><button type="button" data-export-saved-board="${escapeHtml(board.id)}">JSON</button>${shared.graphEnabled ? `<button type="button" data-promote-saved-board="${escapeHtml(board.id)}">${escapeHtml(strings.promoteGraph || 'Promote to Knowledge Graph')}</button>` : ''}<button type="button" data-delete-saved-board="${escapeHtml(board.id)}">Delete</button></div></article>`).join('') : '<p>No saved boards yet.</p>'}</div>`;
     draft = null;
     setDirty(false);
   };
@@ -614,6 +626,8 @@
       if (openSaved) { refreshWorkspace(); const found = boardById(openSaved.dataset.openSavedBoard); if (found) openEditor(found); return; }
       const exportSaved = event.target.closest('[data-export-saved-board]');
       if (exportSaved) { refreshWorkspace(); const found = boardById(exportSaved.dataset.exportSavedBoard); if (found) { const previous = draft; draft = clone(found); exportBoard('json'); draft = previous; } return; }
+      const promoteSaved = event.target.closest('[data-promote-saved-board]');
+      if (promoteSaved) { refreshWorkspace(); const found = boardById(promoteSaved.dataset.promoteSavedBoard); if (found) promoteBoardToGraph(found).catch((error) => window.alert(error.message || strings.graphPromotionFailed)); return; }
       const deleteSaved = event.target.closest('[data-delete-saved-board]');
       if (deleteSaved) { refreshWorkspace(); if (!window.confirm(strings.confirmDelete || 'Delete this board?')) return; workspace.boards = workspace.boards.filter((item) => item.id !== deleteSaved.dataset.deleteSavedBoard); writeWorkspace(workspace); openBoardLibrary(); return; }
       if (!draft) return;

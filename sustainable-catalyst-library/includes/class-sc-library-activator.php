@@ -54,6 +54,8 @@ final class SC_Library_Activator {
         $review_comments_table = $wpdb->prefix . 'sc_library_review_comments';
         $review_suggestions_table = $wpdb->prefix . 'sc_library_review_suggestions';
         $review_events_table = $wpdb->prefix . 'sc_library_review_events';
+        $graph_nodes_table = $wpdb->prefix . 'sc_library_graph_nodes';
+        $graph_edges_table = $wpdb->prefix . 'sc_library_graph_edges';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -98,6 +100,12 @@ final class SC_Library_Activator {
             target_post_id BIGINT UNSIGNED NOT NULL,
             relationship_type VARCHAR(64) NOT NULL,
             note TEXT NULL,
+            confidence DECIMAL(5,4) NOT NULL DEFAULT 0.8500,
+            confidence_basis VARCHAR(32) NOT NULL DEFAULT 'editorial',
+            provenance_type VARCHAR(32) NOT NULL DEFAULT 'editorial',
+            provenance_url LONGTEXT NULL,
+            evidence_note LONGTEXT NULL,
+            visibility VARCHAR(16) NOT NULL DEFAULT 'public',
             sort_order INT NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL,
@@ -105,7 +113,10 @@ final class SC_Library_Activator {
             UNIQUE KEY source_target_type (source_post_id, target_post_id, relationship_type),
             KEY source_post_id (source_post_id),
             KEY target_post_id (target_post_id),
-            KEY relationship_type (relationship_type)
+            KEY relationship_type (relationship_type),
+            KEY visibility (visibility),
+            KEY confidence (confidence),
+            KEY provenance_type (provenance_type)
         ) {$charset};";
 
         $workspaces_sql = "CREATE TABLE {$workspaces_table} (
@@ -494,6 +505,77 @@ final class SC_Library_Activator {
             KEY created_at (created_at)
         ) {$charset};";
 
+
+        $graph_nodes_sql = "CREATE TABLE {$graph_nodes_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            node_uuid CHAR(36) NOT NULL,
+            external_key VARCHAR(191) NOT NULL,
+            node_type VARCHAR(32) NOT NULL DEFAULT 'other',
+            subtype VARCHAR(64) NOT NULL DEFAULT '',
+            label TEXT NOT NULL,
+            description LONGTEXT NULL,
+            canonical_url LONGTEXT NULL,
+            post_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            term_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            taxonomy VARCHAR(64) NOT NULL DEFAULT '',
+            visibility VARCHAR(16) NOT NULL DEFAULT 'public',
+            source_kind VARCHAR(32) NOT NULL DEFAULT 'generated',
+            source_identifier VARCHAR(191) NOT NULL DEFAULT '',
+            metadata_json LONGTEXT NOT NULL,
+            published_at DATETIME NULL,
+            modified_at DATETIME NULL,
+            sync_token VARCHAR(64) NOT NULL DEFAULT '',
+            status VARCHAR(16) NOT NULL DEFAULT 'active',
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY node_uuid (node_uuid),
+            UNIQUE KEY external_key (external_key),
+            KEY node_type (node_type),
+            KEY subtype (subtype),
+            KEY post_id (post_id),
+            KEY term_taxonomy (term_id, taxonomy),
+            KEY visibility (visibility),
+            KEY source_kind (source_kind),
+            KEY sync_token (sync_token),
+            KEY status (status)
+        ) {$charset};";
+
+        $graph_edges_sql = "CREATE TABLE {$graph_edges_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            edge_uuid CHAR(36) NOT NULL,
+            source_node_id BIGINT UNSIGNED NOT NULL,
+            target_node_id BIGINT UNSIGNED NOT NULL,
+            relationship_type VARCHAR(64) NOT NULL,
+            label VARCHAR(191) NOT NULL DEFAULT '',
+            directionality VARCHAR(16) NOT NULL DEFAULT 'directed',
+            confidence DECIMAL(5,4) NOT NULL DEFAULT 0.7500,
+            confidence_basis VARCHAR(32) NOT NULL DEFAULT 'editorial',
+            provenance_type VARCHAR(32) NOT NULL DEFAULT 'editorial',
+            provenance_url LONGTEXT NULL,
+            evidence_note LONGTEXT NULL,
+            visibility VARCHAR(16) NOT NULL DEFAULT 'public',
+            source_kind VARCHAR(32) NOT NULL DEFAULT 'manual',
+            source_identifier VARCHAR(191) NOT NULL DEFAULT '',
+            sort_order INT NOT NULL DEFAULT 0,
+            metadata_json LONGTEXT NOT NULL,
+            created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            verified_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            verified_at DATETIME NULL,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY edge_uuid (edge_uuid),
+            KEY source_node_id (source_node_id),
+            KEY target_node_id (target_node_id),
+            KEY relationship_type (relationship_type),
+            KEY confidence (confidence),
+            KEY provenance_type (provenance_type),
+            KEY visibility (visibility),
+            KEY source_kind (source_kind),
+            KEY source_identifier (source_identifier)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
         dbDelta($workspaces_sql);
@@ -512,6 +594,8 @@ final class SC_Library_Activator {
         dbDelta($review_comments_sql);
         dbDelta($review_suggestions_sql);
         dbDelta($review_events_sql);
+        dbDelta($graph_nodes_sql);
+        dbDelta($graph_edges_sql);
     }
 
     private static function install_defaults(): void {
@@ -560,6 +644,13 @@ final class SC_Library_Activator {
         add_option('sc_library_enable_documentation', 1);
         add_option('sc_library_enable_multimedia', 1);
         add_option('sc_library_enable_collaboration', 1);
+        add_option('sc_library_enable_knowledge_graph', 1);
+        add_option('sc_library_graph_public_limit', 250);
+        add_option('sc_library_graph_default_depth', 2);
+        add_option('sc_library_graph_min_public_confidence', 0.25);
+        add_option('sc_library_graph_page_url', home_url('/knowledge-graph/'));
+        add_option('sc_library_graph_last_rebuild', '');
+        add_option('sc_library_graph_rebuild_state', [], '', false);
         add_option('sc_library_review_lock_minutes', 15);
         add_option('sc_library_review_invitation_days', 14);
         add_option('sc_library_media_service_url', '');

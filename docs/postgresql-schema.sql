@@ -61,6 +61,12 @@ CREATE TABLE IF NOT EXISTS relationships (
     target_record_id bigint NOT NULL,
     relationship_type text NOT NULL,
     note text NOT NULL DEFAULT '',
+    confidence numeric(5,4) NOT NULL DEFAULT 0.8500,
+    confidence_basis text NOT NULL DEFAULT 'editorial',
+    provenance_type text NOT NULL DEFAULT 'editorial',
+    provenance_url text NOT NULL DEFAULT '',
+    evidence_note text NOT NULL DEFAULT '',
+    visibility text NOT NULL DEFAULT 'public',
     sort_order integer NOT NULL DEFAULT 0,
     created_at timestamptz,
     updated_at timestamptz,
@@ -70,6 +76,69 @@ CREATE TABLE IF NOT EXISTS relationships (
 CREATE INDEX IF NOT EXISTS relationships_source_idx ON relationships(source_record_id);
 CREATE INDEX IF NOT EXISTS relationships_target_idx ON relationships(target_record_id);
 CREATE INDEX IF NOT EXISTS relationships_type_idx ON relationships(relationship_type);
+CREATE INDEX IF NOT EXISTS relationships_confidence_idx ON relationships(confidence);
+CREATE INDEX IF NOT EXISTS relationships_provenance_idx ON relationships(provenance_type);
+CREATE INDEX IF NOT EXISTS relationships_visibility_idx ON relationships(visibility);
+
+CREATE TABLE IF NOT EXISTS graph_nodes (
+    graph_node_id bigint PRIMARY KEY,
+    node_uuid uuid UNIQUE NOT NULL,
+    external_key text UNIQUE NOT NULL,
+    node_type text NOT NULL,
+    subtype text NOT NULL DEFAULT '',
+    label text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    canonical_url text NOT NULL DEFAULT '',
+    post_id bigint,
+    term_id bigint,
+    taxonomy text NOT NULL DEFAULT '',
+    visibility text NOT NULL DEFAULT 'public',
+    source_kind text NOT NULL,
+    source_identifier text NOT NULL DEFAULT '',
+    published_at timestamptz,
+    modified_at timestamptz,
+    status text NOT NULL DEFAULT 'active',
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS graph_nodes_type_idx ON graph_nodes(node_type);
+CREATE INDEX IF NOT EXISTS graph_nodes_post_idx ON graph_nodes(post_id);
+CREATE INDEX IF NOT EXISTS graph_nodes_term_idx ON graph_nodes(term_id, taxonomy);
+CREATE INDEX IF NOT EXISTS graph_nodes_visibility_idx ON graph_nodes(visibility);
+CREATE INDEX IF NOT EXISTS graph_nodes_payload_gin ON graph_nodes USING gin(payload);
+
+CREATE TABLE IF NOT EXISTS graph_edges (
+    graph_edge_id bigint PRIMARY KEY,
+    edge_uuid uuid UNIQUE NOT NULL,
+    source_node_id bigint NOT NULL REFERENCES graph_nodes(graph_node_id) ON DELETE CASCADE,
+    target_node_id bigint NOT NULL REFERENCES graph_nodes(graph_node_id) ON DELETE CASCADE,
+    relationship_type text NOT NULL,
+    label text NOT NULL DEFAULT '',
+    directionality text NOT NULL DEFAULT 'directed',
+    confidence numeric(5,4) NOT NULL DEFAULT 0.7500,
+    confidence_basis text NOT NULL DEFAULT 'editorial',
+    provenance_type text NOT NULL DEFAULT 'editorial',
+    provenance_url text NOT NULL DEFAULT '',
+    evidence_note text NOT NULL DEFAULT '',
+    visibility text NOT NULL DEFAULT 'public',
+    source_kind text NOT NULL,
+    source_identifier text NOT NULL DEFAULT '',
+    sort_order integer NOT NULL DEFAULT 0,
+    created_by bigint NOT NULL DEFAULT 0,
+    verified_by bigint NOT NULL DEFAULT 0,
+    verified_at timestamptz,
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS graph_edges_source_idx ON graph_edges(source_node_id);
+CREATE INDEX IF NOT EXISTS graph_edges_target_idx ON graph_edges(target_node_id);
+CREATE INDEX IF NOT EXISTS graph_edges_type_idx ON graph_edges(relationship_type);
+CREATE INDEX IF NOT EXISTS graph_edges_confidence_idx ON graph_edges(confidence);
+CREATE INDEX IF NOT EXISTS graph_edges_provenance_idx ON graph_edges(provenance_type);
+CREATE INDEX IF NOT EXISTS graph_edges_visibility_idx ON graph_edges(visibility);
+CREATE INDEX IF NOT EXISTS graph_edges_payload_gin ON graph_edges USING gin(payload);
 
 CREATE TABLE IF NOT EXISTS resources (
     resource_id text PRIMARY KEY,

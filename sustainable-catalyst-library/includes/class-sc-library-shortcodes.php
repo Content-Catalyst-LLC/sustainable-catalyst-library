@@ -82,6 +82,8 @@ final class SC_Library_Shortcodes {
             'integrationsEnabled' => class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled(),
             'annotationsEnabled' => class_exists('SC_Library_Annotations') && SC_Library_Annotations::enabled(),
             'booksEnabled' => class_exists('SC_Library_Books') && SC_Library_Books::enabled(),
+            'graphEnabled' => class_exists('SC_Library_Knowledge_Graph') && SC_Library_Knowledge_Graph::enabled(),
+            'graphPageUrl' => esc_url_raw((string) get_option('sc_library_graph_page_url', home_url('/knowledge-graph/'))),
             'strings' => [
                 'loading' => __('Searching the knowledge base…', 'sustainable-catalyst-library'),
                 'empty' => __('No knowledge records match this request.', 'sustainable-catalyst-library'),
@@ -101,6 +103,7 @@ final class SC_Library_Shortcodes {
                 'siteRecord' => __('Investigate Geographic Context', 'sustainable-catalyst-library'),
                 'annotateRecord' => __('Annotate and Handwrite', 'sustainable-catalyst-library'),
                 'bookRecord' => __('Add to Custom Book', 'sustainable-catalyst-library'),
+                'graphRecord' => __('View Relationship Graph', 'sustainable-catalyst-library'),
                 'results' => __('results', 'sustainable-catalyst-library'),
                 'result' => __('result', 'sustainable-catalyst-library'),
             ],

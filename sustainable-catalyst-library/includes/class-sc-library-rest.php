@@ -135,6 +135,11 @@ final class SC_Library_REST {
                 'postgresql_schema' => (string) get_option('sc_library_export_schema_name', 'sustainable_catalyst_library'),
                 'formats' => class_exists('SC_Library_Portability') ? array_keys(SC_Library_Portability::formats()) : [],
             ],
+            'knowledge_graph' => [
+                'enabled' => class_exists('SC_Library_Knowledge_Graph') && SC_Library_Knowledge_Graph::enabled(),
+                'schema' => class_exists('SC_Library_Knowledge_Graph') ? SC_Library_Knowledge_Graph::SCHEMA : '',
+                'endpoints' => ['graph', 'diagnostics', 'timeline', 'places', 'board-promotions'],
+            ],
             'integrations' => [
                 'enabled' => class_exists('SC_Library_Integrations') && SC_Library_Integrations::enabled(),
                 'handoff_schema' => class_exists('SC_Library_Integrations') ? SC_Library_Integrations::HANDOFF_SCHEMA : '',
@@ -512,6 +517,9 @@ final class SC_Library_REST {
         $seen = [];
 
         foreach ($relations as $relation) {
+            if (($relation['visibility'] ?? 'public') !== 'public' && !current_user_can('edit_posts')) {
+                continue;
+            }
             $related_id = $relation['direction'] === 'incoming'
                 ? (int) $relation['source_post_id']
                 : (int) $relation['target_post_id'];
@@ -525,6 +533,12 @@ final class SC_Library_REST {
                 'type' => $relation['type'],
                 'type_label' => $relation['type_label'],
                 'note' => $relation['note'],
+                'confidence' => (float) ($relation['confidence'] ?? 0.85),
+                'confidence_basis' => (string) ($relation['confidence_basis'] ?? 'editorial'),
+                'provenance_type' => (string) ($relation['provenance_type'] ?? 'editorial'),
+                'provenance_url' => esc_url_raw((string) ($relation['provenance_url'] ?? '')),
+                'evidence_note' => (string) ($relation['evidence_note'] ?? ''),
+                'visibility' => (string) ($relation['visibility'] ?? 'public'),
                 'record' => $record,
             ];
             $hydrated[] = $entry;

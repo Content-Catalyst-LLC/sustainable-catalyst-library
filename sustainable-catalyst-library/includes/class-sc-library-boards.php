@@ -33,6 +33,9 @@ final class SC_Library_Boards {
             'templates' => self::board_templates(),
             'nodeTypes' => self::node_types(),
             'edgeTypes' => self::edge_types(),
+            'graphEnabled' => class_exists('SC_Library_Knowledge_Graph') && SC_Library_Knowledge_Graph::enabled(),
+            'graphEndpoint' => esc_url_raw(rest_url('sustainable-catalyst/v1/library/graph/board-promotions')),
+            'restNonce' => wp_create_nonce('wp_rest'),
             'strings' => [
                 'saved' => __('Board saved to the Research Notebook.', 'sustainable-catalyst-library'),
                 'deleted' => __('Board deleted.', 'sustainable-catalyst-library'),
@@ -40,6 +43,9 @@ final class SC_Library_Boards {
                 'confirmDelete' => __('Delete this board from local browser storage?', 'sustainable-catalyst-library'),
                 'storageError' => __('The board could not be saved in browser storage. Export it before leaving.', 'sustainable-catalyst-library'),
                 'connectionLabel' => __('Relationship label', 'sustainable-catalyst-library'),
+                'promoteGraph' => __('Promote to Knowledge Graph', 'sustainable-catalyst-library'),
+                'graphPromoted' => __('Board entities and relationships were promoted to the Knowledge Graph.', 'sustainable-catalyst-library'),
+                'graphPromotionFailed' => __('The board could not be promoted to the Knowledge Graph.', 'sustainable-catalyst-library'),
             ],
         ]);
     }

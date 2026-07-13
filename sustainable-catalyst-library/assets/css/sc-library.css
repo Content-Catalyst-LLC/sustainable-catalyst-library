@@ -90,11 +90,25 @@
   max-inline-size: 100%;
 }
 
-.sc-library .sc-library-record__actions button {
+.sc-library .sc-library-record__actions button,
+.sc-library .sc-library-record__actions a {
   min-inline-size: 0;
   white-space: normal;
   text-align: left;
   line-height: 1.35;
+}
+
+.sc-library .sc-library-record__actions a {
+  color: #8b1e2d;
+  font-size: .76rem;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sc-library .sc-library-record__actions a:hover,
+.sc-library .sc-library-record__actions a:focus-visible {
+  color: #111;
 }
 
 @media (max-width: 980px) {
@@ -124,7 +138,10 @@
     grid-column: 1 / -1;
   }
 
-  .sc-library .sc-library-record__actions button {
+  .sc-library .sc-library-record__actions button,
+  .sc-library .sc-library-record__actions a {
+    display: flex;
+    align-items: center;
     width: 100%;
     min-height: 38px;
     padding: .42rem .5rem;
@@ -179,7 +196,8 @@
     white-space: normal !important;
   }
 
-  .sc-library .sc-library-record__actions button {
+  .sc-library .sc-library-record__actions button,
+  .sc-library .sc-library-record__actions a {
     display: none !important;
   }
 

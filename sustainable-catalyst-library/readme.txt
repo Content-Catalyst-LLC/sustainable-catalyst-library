@@ -1,33 +1,39 @@
 === Sustainable Catalyst Library ===
 Contributors: contentcatalyst
-Tags: knowledge-base, multimedia, video, audio, evidence-reels, pdf, render, research-workspace, postgresql
+Tags: knowledge-base, knowledge-graph, relationships, provenance, research-workspace, postgresql
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.15.0
+Stable tag: 1.16.0
 License: GPLv2 or later
 
-A native WordPress knowledge system with editorial collaboration, reviews, suggested edits, multimedia, persistent workspaces, server-rendered books and PDFs, planning, notebooks, and PostgreSQL portability.
+A native WordPress knowledge system with a provenance-aware graph, editorial collaboration, multimedia, persistent workspaces, server-rendered documents, planning, notebooks, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v1.15.0 adds a native collaboration, review, and editorial workflow layer while retaining the complete v1.14.1 Library, Multimedia Studio, large-library scanner, persistent workspaces, server document production, and portable data systems.
+Sustainable Catalyst Library v1.16.0 adds Knowledge Graph and Relationship Intelligence while retaining the complete v1.15.0 Library platform.
 
-= Collaboration and Editorial Workflow =
+= Knowledge Graph =
 
-* Create editorial reviews linked to posts, workspaces, books, boards, documents, plans, or multimedia records.
-* Invite Observers, Reviewers, Editors, and Approvers.
-* Support existing WordPress users and expiring email invitations.
-* Add threaded comments with open and resolved states.
-* Record suggested edits with accepted, rejected, withdrawn, and pending states.
-* Coordinate intake, drafting, review, fact-check, accessibility, approval, scheduling, publication, and archive states.
-* Protect concurrent editing through revision checks and expiring record locks.
-* Preserve attributed activity and decision history.
-* Synchronize accepted workspace-review roles with persistent workspace access.
-* Export editorial records through PostgreSQL, CSV, JSONL, and JSON.
+* Build a normalized graph projection from the current Library index and WordPress metadata.
+* Connect publications, concepts, domains, tags, article maps, plans, methods, tools, datasets, sources, claims, evidence, places, organizations, and events.
+* Preserve relationship type, direction, confidence, provenance, evidence notes, visibility, attribution, and verification.
+* Explore a native responsive SVG graph with search, entity filters, relationship filters, rooted neighborhoods, and an accessible relationship list.
+* Preserve manual and board-promoted entities across generated graph rebuilds.
+
+= Relationship Intelligence =
+
+* Detect orphaned Library records.
+* Identify possible duplicate concept groups.
+* Detect Content Planner dependency cycles.
+* Find provenance gaps, low-confidence relationships, and unverified relationships.
+* Exclude private and organization-only relationships from signed-out public responses.
+* Provide timeline and place-relationship endpoints.
+* Promote deliberate Whiteboard and Chalkboard entities into the graph without altering the original board.
 
 = Retained systems =
 
+* Editorial reviews, participant roles, comments, suggestions, approvals, locks, and attribution.
 * Public record-card responsive repair from v1.14.1.
 * Multimedia assets, clips, evidence reels, transcripts, rights, and optional Render processing.
 * Cursor-based large-library indexing and database inventory.
@@ -39,20 +45,24 @@ Sustainable Catalyst Library v1.15.0 adds a native collaboration, review, and ed
 
 * Workspace schema `sc-library-workspace/1.8`.
 * Editorial workflow schema `sc-library-editorial-workflow/1.0`.
-* Portable export schema `sc-library-portable-export/1.5`.
+* Knowledge graph schema `sc-library-knowledge-graph/1.0`.
+* Portable export schema `sc-library-portable-export/1.6`.
+* New normalized entities `graph_nodes` and `graph_edges`.
 
 == Installation ==
 
 1. Upload and activate the plugin.
-2. Open SC Library and rebuild the index.
-3. Open SC Library → Editorial Workflow.
-4. Create a private test review linked to a post or workspace.
-5. Invite an existing WordPress user as Reviewer or Editor.
-6. Test a comment, suggested edit, edit lock, and approval transition.
-7. Configure Multimedia Studio or Render services separately when needed.
+2. Confirm the existing Library index is healthy under SC Library → Index Tools.
+3. Open SC Library → Knowledge Graph.
+4. Choose a batch size and select Start resumable graph rebuild.
+5. Review orphan, duplicate-concept, dependency-cycle, provenance, confidence, and verification diagnostics.
+6. Add a graph shortcode only after reviewing public visibility and confidence settings.
 
 == Shortcodes ==
 
+* `[sc_library_knowledge_graph]`
+* `[sc_library_knowledge_graph root="record:123" depth="2" limit="250"]`
+* `[sc_library_relationship_intelligence]`
 * `[sc_library_editorial_workflow]`
 * `[sc_library_multimedia_studio]`
 * `[sc_library_evidence_reel id="REEL-UUID"]`
@@ -72,36 +82,38 @@ Sustainable Catalyst Library v1.15.0 adds a native collaboration, review, and ed
 
 == REST API ==
 
+* `/wp-json/sustainable-catalyst/v1/library/graph/schema`
+* `/wp-json/sustainable-catalyst/v1/library/graph`
+* `/wp-json/sustainable-catalyst/v1/library/graph/diagnostics`
+* `/wp-json/sustainable-catalyst/v1/library/graph/timeline`
+* `/wp-json/sustainable-catalyst/v1/library/graph/places`
+* `/wp-json/sustainable-catalyst/v1/library/graph/rebuild`
+* `/wp-json/sustainable-catalyst/v1/library/graph/rebuild/start`
+* `/wp-json/sustainable-catalyst/v1/library/graph/rebuild/continue`
+* `/wp-json/sustainable-catalyst/v1/library/graph/rebuild/status`
+* `/wp-json/sustainable-catalyst/v1/library/graph/board-promotions`
+* `/wp-json/sustainable-catalyst/v1/library/graph/edges`
+
 * `/wp-json/sustainable-catalyst/v1/library/editorial/schema`
 * `/wp-json/sustainable-catalyst/v1/library/editorial/reviews`
-* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}`
-* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/transition`
-* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/comments`
-* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/suggestions`
-* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/participants`
-* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/lock`
-* `/wp-json/sustainable-catalyst/v1/library/editorial/reviews/{uuid}/activity`
-
 * `/wp-json/sustainable-catalyst/v1/library/media/status`
 * `/wp-json/sustainable-catalyst/v1/library/media/assets`
-* `/wp-json/sustainable-catalyst/v1/library/media/clips`
-* `/wp-json/sustainable-catalyst/v1/library/media/clips/{uuid}/process`
-* `/wp-json/sustainable-catalyst/v1/library/media/reels`
-* `/wp-json/sustainable-catalyst/v1/library/media/reels/public/{uuid}`
-* `/wp-json/sustainable-catalyst/v1/library/media/jobs`
-* `/wp-json/sustainable-catalyst/v1/library/media/jobs/{uuid}/refresh`
-* `/wp-json/sustainable-catalyst/v1/library/media/jobs/{uuid}/retry`
-
 * `/wp-json/sustainable-catalyst/v1/library/documents/status`
-* `/wp-json/sustainable-catalyst/v1/library/documents/jobs`
-* `/wp-json/sustainable-catalyst/v1/library/documents/jobs/{uuid}`
-* `/wp-json/sustainable-catalyst/v1/library/documents/jobs/{uuid}/refresh`
-* `/wp-json/sustainable-catalyst/v1/library/documents/jobs/{uuid}/retry`
-* `/wp-json/sustainable-catalyst/v1/library/documents/editions`
 * `/wp-json/sustainable-catalyst/v1/library/workspaces`
-* `/wp-json/sustainable-catalyst/v1/library/workspaces/{uuid}`
 
 == Changelog ==
+
+= 1.16.0 =
+* Added normalized graph-node and graph-edge WordPress tables.
+* Added publication, concept, domain, series, method, tool, dataset, source, claim, evidence, place, organization, event, and other graph entities.
+* Added confidence, confidence basis, provenance, evidence, visibility, attribution, and verification fields.
+* Added rebuildable graph projection from the Library index, taxonomies, explicit relationships, planner dependencies, and metadata.
+* Added orphaned-record, duplicate-concept, dependency-cycle, provenance-gap, low-confidence, and verification diagnostics.
+* Added native SVG graph, accessible relationship list, inspectors, filters, rooted neighborhoods, timeline, and place views.
+* Added explicit Whiteboard and Chalkboard promotion into the graph.
+* Added graph REST endpoints and public shortcodes.
+* Added `graph_nodes` and `graph_edges` to portable export schema 1.6.
+* Added public relationship privacy filtering for non-public edges.
 
 = 1.15.0 =
 * Added native editorial review records and workflow states.

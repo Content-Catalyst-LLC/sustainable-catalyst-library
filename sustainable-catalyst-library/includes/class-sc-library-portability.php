@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * tables or serialized plugin internals.
  */
 final class SC_Library_Portability {
-    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.5';
+    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.6';
     public const POSTGRES_SCHEMA = 'sustainable_catalyst_library';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 
@@ -78,6 +78,7 @@ final class SC_Library_Portability {
             'planner' => __('Content Planner and roadmap', 'sustainable-catalyst-library'),
             'documentation' => __('Foundations and documentation records', 'sustainable-catalyst-library'),
             'relationships' => __('Relationships, terms, and resources', 'sustainable-catalyst-library'),
+            'knowledge_graph' => __('Knowledge graph, relationship provenance, and diagnostics data', 'sustainable-catalyst-library'),
             'account_workspaces' => __('Persistent account workspaces and revisions', 'sustainable-catalyst-library'),
             'document_editions' => __('Server document jobs and frozen editions', 'sustainable-catalyst-library'),
             'multimedia' => __('Multimedia assets, clips, reels, and processing jobs', 'sustainable-catalyst-library'),
@@ -328,6 +329,8 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             __('Multimedia assets', 'sustainable-catalyst-library') => class_exists('SC_Library_Multimedia') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Multimedia::assets_table()) : 0,
             __('Multimedia clips', 'sustainable-catalyst-library') => class_exists('SC_Library_Multimedia') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Multimedia::clips_table()) : 0,
             __('Editorial reviews', 'sustainable-catalyst-library') => class_exists('SC_Library_Collaboration') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . SC_Library_Collaboration::reviews_table()) : 0,
+            __('Knowledge graph nodes', 'sustainable-catalyst-library') => class_exists('SC_Library_Knowledge_Graph') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . (new SC_Library_Knowledge_Graph($this->indexer, $this->relationships))->nodes_table() . " WHERE status = 'active'") : 0,
+            __('Knowledge graph edges', 'sustainable-catalyst-library') => class_exists('SC_Library_Knowledge_Graph') ? (int) $wpdb->get_var('SELECT COUNT(*) FROM ' . (new SC_Library_Knowledge_Graph($this->indexer, $this->relationships))->edges_table()) : 0,
         ];
     }
 
@@ -417,6 +420,8 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         $editorial_comments = $this->export_editorial_comments();
         $editorial_suggestions = $this->export_editorial_suggestions();
         $editorial_events = $this->export_editorial_events();
+        $graph_nodes = $this->export_graph_nodes();
+        $graph_edges = $this->export_graph_edges();
 
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($r) => (int) $r['id'], $public_registry), true);
@@ -464,11 +469,24 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
         }
 
+
+        if ($scope === 'knowledge_graph') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = [];
+        } elseif ($scope === 'registry') {
+            $graph_nodes = array_values(array_filter($graph_nodes, static fn($row) => ($row['visibility'] ?? '') === 'public' && ($row['status'] ?? '') === 'active'));
+            $public_graph_ids = array_fill_keys(array_map(static fn($row) => (int) $row['graph_node_id'], $graph_nodes), true);
+            $graph_edges = array_values(array_filter($graph_edges, static fn($row) => ($row['visibility'] ?? '') === 'public' && isset($public_graph_ids[(int) $row['source_node_id']]) && isset($public_graph_ids[(int) $row['target_node_id']])));
+        } elseif (!in_array($scope, ['complete', 'relationships'], true)) {
+            $graph_nodes = $graph_edges = [];
+        }
+
         $entities = [
             'records' => $records,
             'terms' => $terms,
             'record_terms' => $record_terms,
             'relationships' => array_map([$this, 'normalize_relationship'], $relationships),
+            'graph_nodes' => $graph_nodes,
+            'graph_edges' => $graph_edges,
             'resources' => $resources,
             'documentation' => $documentation,
             'plans' => $plans,
@@ -510,6 +528,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
                 'PDFs and repository records remain references; binary media is not embedded in data exports.',
                 'Server document job records and frozen edition manifests are exported without embedding PDF binaries.',
                 'Multimedia exports preserve asset, clip, reel, rights, transcript, and processing metadata without embedding video or audio binaries.',
+                'Knowledge graph exports preserve normalized entities, relationship confidence, provenance, visibility, verification state, and board-promotion lineage.',
             ],
         ];
         return ['manifest' => $manifest, 'entities' => $entities];
@@ -1043,6 +1062,70 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         return $rows;
     }
 
+    private function export_graph_nodes(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Knowledge_Graph')) return [];
+        $graph = new SC_Library_Knowledge_Graph($this->indexer, $this->relationships);
+        $rows = $wpdb->get_results('SELECT * FROM ' . $graph->nodes_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(function (array $row): array {
+            return [
+                'graph_node_id' => (int) $row['id'],
+                'node_uuid' => (string) $row['node_uuid'],
+                'external_key' => (string) $row['external_key'],
+                'node_type' => (string) $row['node_type'],
+                'subtype' => (string) $row['subtype'],
+                'label' => (string) $row['label'],
+                'description' => (string) $row['description'],
+                'canonical_url' => (string) $row['canonical_url'],
+                'post_id' => (int) $row['post_id'],
+                'term_id' => (int) $row['term_id'],
+                'taxonomy' => (string) $row['taxonomy'],
+                'visibility' => (string) $row['visibility'],
+                'source_kind' => (string) $row['source_kind'],
+                'source_identifier' => (string) $row['source_identifier'],
+                'published_at' => $this->rfc3339_or_null((string) ($row['published_at'] ?? '')),
+                'modified_at' => $this->rfc3339_or_null((string) ($row['modified_at'] ?? '')),
+                'status' => (string) $row['status'],
+                'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+                'updated_at' => $this->rfc3339_or_null((string) $row['updated_at']),
+                'payload' => json_decode((string) $row['metadata_json'], true) ?: [],
+            ];
+        }, $rows);
+    }
+
+    private function export_graph_edges(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Knowledge_Graph')) return [];
+        $graph = new SC_Library_Knowledge_Graph($this->indexer, $this->relationships);
+        $rows = $wpdb->get_results('SELECT * FROM ' . $graph->edges_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(function (array $row): array {
+            return [
+                'graph_edge_id' => (int) $row['id'],
+                'edge_uuid' => (string) $row['edge_uuid'],
+                'source_node_id' => (int) $row['source_node_id'],
+                'target_node_id' => (int) $row['target_node_id'],
+                'relationship_type' => (string) $row['relationship_type'],
+                'label' => (string) $row['label'],
+                'directionality' => (string) $row['directionality'],
+                'confidence' => (float) $row['confidence'],
+                'confidence_basis' => (string) $row['confidence_basis'],
+                'provenance_type' => (string) $row['provenance_type'],
+                'provenance_url' => (string) $row['provenance_url'],
+                'evidence_note' => (string) $row['evidence_note'],
+                'visibility' => (string) $row['visibility'],
+                'source_kind' => (string) $row['source_kind'],
+                'source_identifier' => (string) $row['source_identifier'],
+                'sort_order' => (int) $row['sort_order'],
+                'created_by' => (int) $row['created_by'],
+                'verified_by' => (int) $row['verified_by'],
+                'verified_at' => $this->rfc3339_or_null((string) ($row['verified_at'] ?? '')),
+                'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
+                'updated_at' => $this->rfc3339_or_null((string) $row['updated_at']),
+                'payload' => json_decode((string) $row['metadata_json'], true) ?: [],
+            ];
+        }, $rows);
+    }
+
     private function normalize_relationship(array $row): array {
         return [
             'relationship_id' => (int) $row['id'],
@@ -1050,6 +1133,12 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'target_record_id' => (int) $row['target_post_id'],
             'relationship_type' => (string) $row['relationship_type'],
             'note' => (string) $row['note'],
+            'confidence' => isset($row['confidence']) ? (float) $row['confidence'] : 0.85,
+            'confidence_basis' => (string) ($row['confidence_basis'] ?? 'editorial'),
+            'provenance_type' => (string) ($row['provenance_type'] ?? 'editorial'),
+            'provenance_url' => (string) ($row['provenance_url'] ?? ''),
+            'evidence_note' => (string) ($row['evidence_note'] ?? ''),
+            'visibility' => (string) ($row['visibility'] ?? 'public'),
             'sort_order' => (int) $row['sort_order'],
             'created_at' => $this->rfc3339_or_null((string) $row['created_at']),
             'updated_at' => $this->rfc3339_or_null((string) $row['updated_at']),
@@ -1138,6 +1227,12 @@ CREATE TABLE IF NOT EXISTS relationships (
     target_record_id bigint NOT NULL,
     relationship_type text NOT NULL,
     note text NOT NULL DEFAULT '',
+    confidence numeric(5,4) NOT NULL DEFAULT 0.8500,
+    confidence_basis text NOT NULL DEFAULT 'editorial',
+    provenance_type text NOT NULL DEFAULT 'editorial',
+    provenance_url text NOT NULL DEFAULT '',
+    evidence_note text NOT NULL DEFAULT '',
+    visibility text NOT NULL DEFAULT 'public',
     sort_order integer NOT NULL DEFAULT 0,
     created_at timestamptz,
     updated_at timestamptz,
@@ -1147,6 +1242,66 @@ CREATE TABLE IF NOT EXISTS relationships (
 CREATE INDEX IF NOT EXISTS relationships_source_idx ON relationships(source_record_id);
 CREATE INDEX IF NOT EXISTS relationships_target_idx ON relationships(target_record_id);
 CREATE INDEX IF NOT EXISTS relationships_type_idx ON relationships(relationship_type);
+
+
+CREATE TABLE IF NOT EXISTS graph_nodes (
+    graph_node_id bigint PRIMARY KEY,
+    node_uuid uuid UNIQUE NOT NULL,
+    external_key text UNIQUE NOT NULL,
+    node_type text NOT NULL,
+    subtype text NOT NULL DEFAULT '',
+    label text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    canonical_url text NOT NULL DEFAULT '',
+    post_id bigint,
+    term_id bigint,
+    taxonomy text NOT NULL DEFAULT '',
+    visibility text NOT NULL DEFAULT 'public',
+    source_kind text NOT NULL,
+    source_identifier text NOT NULL DEFAULT '',
+    published_at timestamptz,
+    modified_at timestamptz,
+    status text NOT NULL DEFAULT 'active',
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS graph_nodes_type_idx ON graph_nodes(node_type);
+CREATE INDEX IF NOT EXISTS graph_nodes_post_idx ON graph_nodes(post_id);
+CREATE INDEX IF NOT EXISTS graph_nodes_term_idx ON graph_nodes(term_id, taxonomy);
+CREATE INDEX IF NOT EXISTS graph_nodes_visibility_idx ON graph_nodes(visibility);
+CREATE INDEX IF NOT EXISTS graph_nodes_payload_gin ON graph_nodes USING gin(payload);
+
+CREATE TABLE IF NOT EXISTS graph_edges (
+    graph_edge_id bigint PRIMARY KEY,
+    edge_uuid uuid UNIQUE NOT NULL,
+    source_node_id bigint NOT NULL REFERENCES graph_nodes(graph_node_id) ON DELETE CASCADE,
+    target_node_id bigint NOT NULL REFERENCES graph_nodes(graph_node_id) ON DELETE CASCADE,
+    relationship_type text NOT NULL,
+    label text NOT NULL DEFAULT '',
+    directionality text NOT NULL DEFAULT 'directed',
+    confidence numeric(5,4) NOT NULL DEFAULT 0.7500,
+    confidence_basis text NOT NULL DEFAULT 'editorial',
+    provenance_type text NOT NULL DEFAULT 'editorial',
+    provenance_url text NOT NULL DEFAULT '',
+    evidence_note text NOT NULL DEFAULT '',
+    visibility text NOT NULL DEFAULT 'public',
+    source_kind text NOT NULL,
+    source_identifier text NOT NULL DEFAULT '',
+    sort_order integer NOT NULL DEFAULT 0,
+    created_by bigint NOT NULL DEFAULT 0,
+    verified_by bigint NOT NULL DEFAULT 0,
+    verified_at timestamptz,
+    created_at timestamptz,
+    updated_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS graph_edges_source_idx ON graph_edges(source_node_id);
+CREATE INDEX IF NOT EXISTS graph_edges_target_idx ON graph_edges(target_node_id);
+CREATE INDEX IF NOT EXISTS graph_edges_type_idx ON graph_edges(relationship_type);
+CREATE INDEX IF NOT EXISTS graph_edges_confidence_idx ON graph_edges(confidence);
+CREATE INDEX IF NOT EXISTS graph_edges_provenance_idx ON graph_edges(provenance_type);
+CREATE INDEX IF NOT EXISTS graph_edges_payload_gin ON graph_edges USING gin(payload);
 
 CREATE TABLE IF NOT EXISTS resources (
     resource_id text PRIMARY KEY,
@@ -1598,7 +1753,9 @@ SQL;
             'records' => ['record_id','record_identifier','kind','post_type','title','excerpt','canonical_url','record_state','content_type','area','product','responsible_area','published_at','modified_at','expected_release','article_map_id','series_order','authoritative','authority_label','historical','payload'],
             'terms' => ['term_id','taxonomy','slug','name','description','parent_term_id','payload'],
             'record_terms' => ['record_id','taxonomy','term_id','term_order'],
-            'relationships' => ['relationship_id','source_record_id','target_record_id','relationship_type','note','sort_order','created_at','updated_at','payload'],
+            'relationships' => ['relationship_id','source_record_id','target_record_id','relationship_type','note','confidence','confidence_basis','provenance_type','provenance_url','evidence_note','visibility','sort_order','created_at','updated_at','payload'],
+            'graph_nodes' => ['graph_node_id','node_uuid','external_key','node_type','subtype','label','description','canonical_url','post_id','term_id','taxonomy','visibility','source_kind','source_identifier','published_at','modified_at','status','created_at','updated_at','payload'],
+            'graph_edges' => ['graph_edge_id','edge_uuid','source_node_id','target_node_id','relationship_type','label','directionality','confidence','confidence_basis','provenance_type','provenance_url','evidence_note','visibility','source_kind','source_identifier','sort_order','created_by','verified_by','verified_at','created_at','updated_at','payload'],
             'resources' => ['resource_id','record_id','resource_type','url','label','sort_order','payload'],
             'documentation' => ['record_id','document_status','document_type','document_version','responsible_area','authority_type','authority_url','webpage_url','repository_url','pdf_url','release_url','last_reviewed','review_interval_days','featured','supersedes_record_id','superseded_by_record_id','dependency_ids','correction_url','authority_note','payload'],
             'plans' => ['plan_id','title','description','wordpress_status','plan_status','priority','content_type','area','product','responsible_area','public','expected_release','article_map_id','series_order','linked_draft_id','published_record_id','dependency_ids','release_group','release_track','milestone','capacity_owner','estimated_effort','effort_unit','actual_effort','progress_percent','planned_start','actual_start','dependency_policy','blocked_override','blocked_reason','actual_publication_date','created_at','modified_at','payload'],
@@ -1628,11 +1785,11 @@ SQL;
                 $value = $row[$column] ?? null;
                 if (in_array($column, ['payload', 'expected_release', 'manifest', 'diagnostics', 'clip_uuids', 'anchor'], true)) $literals[] = $this->sql_json($value ?: []);
                 elseif (in_array($column, ['dependency_ids'], true)) $literals[] = $this->sql_bigint_array(is_array($value) ? $value : []);
-                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at','completed_at','frozen_at','due_at','locked_at','lock_expires_at','expires_at','resolved_at','decided_at'], true)) $literals[] = $this->sql_timestamp($value);
+                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at','completed_at','frozen_at','due_at','locked_at','lock_expires_at','expires_at','resolved_at','decided_at','verified_at'], true)) $literals[] = $this->sql_timestamp($value);
                 elseif (in_array($column, ['last_reviewed','planned_start','actual_start','actual_publication_date'], true)) $literals[] = $value ? $this->sql_text((string) $value) . '::date' : 'NULL';
                 elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
-                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id'], true)) ? (string) (int) $value : 'NULL';
-                elseif (in_array($column, ['series_order','estimated_effort','actual_effort'], true)) $literals[] = (string) (float) $value;
+                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by'], true)) ? (string) (int) $value : 'NULL';
+                elseif (in_array($column, ['series_order','estimated_effort','actual_effort','confidence'], true)) $literals[] = (string) (float) $value;
                 else $literals[] = $this->sql_text((string) ($value ?? ''));
             }
             $values[] = '(' . implode(', ', $literals) . ')';
@@ -1642,6 +1799,8 @@ SQL;
             'terms' => 'taxonomy, term_id',
             'record_terms' => 'record_id, taxonomy, term_id',
             'relationships' => 'relationship_id',
+            'graph_nodes' => 'graph_node_id',
+            'graph_edges' => 'graph_edge_id',
             'resources' => 'resource_id',
             'documentation' => 'record_id',
             'plans' => 'plan_id',

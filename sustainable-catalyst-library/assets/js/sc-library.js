@@ -9,6 +9,13 @@
   const integrationsEnabled = shared.integrationsEnabled !== false;
   const annotationsEnabled = shared.annotationsEnabled !== false;
   const booksEnabled = shared.booksEnabled !== false;
+  const graphEnabled = Boolean(shared.graphEnabled && shared.graphPageUrl);
+  const graphPageUrl = String(shared.graphPageUrl || '');
+  const graphUrlFor = (recordId) => {
+    const url = new URL(graphPageUrl, window.location.href);
+    url.searchParams.set('root', `record:${Number(recordId)}`);
+    return url.toString();
+  };
 
   const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;'
@@ -200,6 +207,7 @@
               ${boardsEnabled ? `<button type="button" data-board-record="${Number(item.id)}" data-board-type="whiteboard">${escapeHtml(strings.whiteboardRecord || 'Whiteboard')}</button><button type="button" data-board-record="${Number(item.id)}" data-board-type="chalkboard">${escapeHtml(strings.chalkboardRecord || 'Chalkboard')}</button>` : ''}
               ${annotationsEnabled ? `<button type="button" data-annotate-record="${Number(item.id)}">${escapeHtml(strings.annotateRecord || 'Annotate')}</button>` : ''}
               ${booksEnabled ? `<button type="button" data-book-record="${Number(item.id)}">${escapeHtml(strings.bookRecord || 'Add to Book')}</button>` : ''}
+              ${graphEnabled ? `<a href="${escapeHtml(graphUrlFor(item.id))}">${escapeHtml(strings.graphRecord || 'View Relationship Graph')}</a>` : ''}
               <button type="button" data-open-context="${Number(item.id)}">View knowledge record</button>
             </div>
           </div>`;
@@ -553,6 +561,7 @@
             ${boardsEnabled ? `<button type="button" class="sc-library-context__secondary" data-board-record data-board-type="whiteboard">${escapeHtml(strings.whiteboardRecord || 'Open Whiteboard')}</button><button type="button" class="sc-library-context__secondary" data-board-record data-board-type="chalkboard">${escapeHtml(strings.chalkboardRecord || 'Open Chalkboard')}</button>` : ''}
             ${annotationsEnabled ? `<button type="button" class="sc-library-context__secondary" data-annotate-record>${escapeHtml(strings.annotateRecord || 'Annotate and Handwrite')}</button>` : ''}
             ${booksEnabled ? `<button type="button" class="sc-library-context__secondary" data-book-record>${escapeHtml(strings.bookRecord || 'Add to Custom Book')}</button>` : ''}
+            ${graphEnabled ? `<a class="sc-library-context__secondary" href="${escapeHtml(graphUrlFor(item.id))}">${escapeHtml(strings.graphRecord || 'View Relationship Graph')}</a>` : ''}
             <button type="button" class="sc-library-context__secondary" data-copy-record>Copy record link</button>
           </div>
           ${relationGroups ? `<section class="sc-library-context__relationships"><h3>Knowledge relationships</h3>${relationGroups}</section>` : ''}
