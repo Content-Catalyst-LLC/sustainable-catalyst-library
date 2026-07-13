@@ -1,8 +1,8 @@
-# Library v1.12.0 Workspace Sync Setup
+# Library v1.13.0 Workspace Sync Setup
 
 ## 1. Install the WordPress update
 
-Upload `sustainable-catalyst-library-v1.12.0.zip`, replace the previous plugin, and activate it.
+Upload `sustainable-catalyst-library-v1.13.0.zip`, replace the previous plugin, and activate it.
 
 Open **SC Library**, save settings once, and rebuild the Library index.
 
@@ -37,7 +37,7 @@ Do not place the key in page HTML, JavaScript, a public repository, or browser s
 
 ## 4. Verify health
 
-Open **SC Library → Workspace Sync**. The service should show **Online** with version `1.12.0`.
+Open **SC Library → Workspace Sync**. The service should show **Online** with version `1.13.0`.
 
 The WordPress health request uses:
 

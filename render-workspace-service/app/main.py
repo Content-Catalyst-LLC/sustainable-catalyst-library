@@ -22,6 +22,7 @@ from .core import (
     signature,
     valid_workspace_schema,
 )
+from .documents import create_documents_router, initialize_document_database
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 API_KEY = os.getenv("SC_LIBRARY_SYNC_API_KEY", "").strip()
@@ -120,11 +121,12 @@ def initialize_database() -> None:
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     initialize_database()
+    initialize_document_database(connect)
     yield
 
 
 app = FastAPI(
-    title="Sustainable Catalyst Library Workspace Service",
+    title="Sustainable Catalyst Library Workspace and Document Service",
     version=SERVICE_VERSION,
     lifespan=lifespan,
 )
@@ -154,6 +156,9 @@ async def authorize(
     if not request_signature or not constant_time_equal(request_signature, expected):
         raise HTTPException(status_code=401, detail="invalid request signature")
     return body
+
+
+app.include_router(create_documents_router(connect, authorize))
 
 
 def response_record(row: dict[str, Any]) -> dict[str, Any]:
@@ -187,7 +192,9 @@ def health() -> dict[str, Any]:
             database = "unavailable"
     return {
         "ok": database == "online",
-        "service": "sustainable-catalyst-library-workspaces",
+        "service": "sustainable-catalyst-library-service",
+        "document_job_schema": "sc-library-document-job/1.0",
+        "edition_schema": "sc-library-edition/1.0",
         "version": SERVICE_VERSION,
         "schema": SYNC_SCHEMA,
         "workspace_schema": WORKSPACE_SCHEMA,

@@ -6,13 +6,15 @@
   const workspaceSchema = shared.workspaceSchema || 'sc-library-workspace/1.7';
   const legacySchemas = Array.isArray(shared.legacyWorkspaceSchemas) ? shared.legacyWorkspaceSchemas : [];
   const bookSchema = shared.schema || 'sc-library-book/1.0';
-  const version = shared.version || '1.12.0';
+  const version = shared.version || '1.13.0';
   const restBase = String(shared.restBase || '/wp-json/sustainable-catalyst/v1/library').replace(/\/$/, '');
   const themes = Object.fromEntries((shared.themes || []).map((item) => [item.id, item]));
   const pageSizes = Object.fromEntries((shared.pageSizes || []).map((item) => [item.id, item]));
   const mediaModes = Object.fromEntries((shared.mediaModes || []).map((item) => [item.id, item]));
   const defaultTheme = shared.defaultTheme || 'institutional';
   const defaultPageSize = shared.defaultPageSize || 'letter';
+  const documentProduction = shared.documentProduction || {};
+  const documentRestBase = String(documentProduction.restBase || '/wp-json/sustainable-catalyst/v1/library/documents').replace(/\/$/, '');
   const strings = shared.strings || {};
   const controllers = new WeakMap();
 
@@ -97,6 +99,8 @@
       includeManifest: seed.includeManifest !== false,
       includeCitations: seed.includeCitations !== false,
       includeAnnotations: seed.includeAnnotations !== false,
+      includeIndexes: seed.includeIndexes !== false,
+      includeAccessibilityNotes: seed.includeAccessibilityNotes !== false,
       grayscale: Boolean(seed.grayscale),
       frontMatter: {
         preface: words(seed.frontMatter?.preface),
@@ -222,6 +226,65 @@
     return `<section class="book-chapter"><h2>${escapeHtml(item.title)}</h2>${paragraphs(item.excerpt || 'The original workspace item is no longer available. Its title and manifest reference have been preserved.')}</section>`;
   };
 
+  const buildServerPacket = async (book) => {
+    const sections = [];
+    for (let index = 0; index < book.items.length; index += 1) {
+      const item = book.items[index];
+      const artifact = artifactBy(item.type, item.refId);
+      const html = await resolveItem(book, item);
+      sections.push({
+        position: index + 1,
+        type: item.type,
+        title: item.title,
+        html,
+        source_url: item.sourceUrl || artifact?.url || artifact?.targetUrl || '',
+        citation: item.type === 'source' && artifact ? citation(artifact) : '',
+        alt_text: item.type === 'annotation' && artifact ? (artifact.transcription || artifact.title || '') : '',
+        metadata: {
+          reference_id: item.refId || '',
+          presentation: item.presentation || 'full',
+          has_annotations: item.type === 'annotation',
+          source_type: artifact?.type || item.type,
+          artifact: ['matrix', 'board', 'annotation'].includes(item.type) && artifact ? deepClone(artifact) : null,
+        },
+      });
+    }
+    return {
+      workspace_uuid: '',
+      book: deepClone(book),
+      sections,
+      options: {
+        include_toc: Boolean(book.includeToc),
+        include_manifest: Boolean(book.includeManifest),
+        include_citations: Boolean(book.includeCitations),
+        include_indexes: Boolean(book.includeIndexes),
+        include_accessibility_notes: Boolean(book.includeAccessibilityNotes),
+        grayscale: Boolean(book.grayscale),
+        language: document.documentElement.lang || 'en-US',
+      },
+    };
+  };
+
+  const createServerJob = async (book) => {
+    if (!documentProduction.enabled || !documentProduction.configured || !documentProduction.authenticated) {
+      throw new Error(strings.serverUnavailable || 'Server PDF production is not available.');
+    }
+    const packet = await buildServerPacket(book);
+    const response = await fetch(`${documentRestBase}/jobs`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'X-WP-Nonce': documentProduction.nonce || '',
+      },
+      body: JSON.stringify(packet),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || data.code || `HTTP ${response.status}`);
+    return data;
+  };
+
   const bookCss = (book) => {
     const theme = book.theme || 'institutional';
     const page = pageSizes[book.pageSize]?.css || 'letter';
@@ -282,12 +345,12 @@
 
     const bookListHtml = () => workspace.books.length ? workspace.books.slice().sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt))).map((book) => `<button type="button" data-select-book="${escapeAttr(book.id)}" class="${book.id === activeId ? 'is-active' : ''}"><strong>${escapeHtml(book.title)}</strong><small>${book.items.length} sections · ${escapeHtml(formatDate(book.updatedAt))}</small></button>`).join('') : '<p>No saved books.</p>';
     const overview = () => `<div class="sc-library-books__summary-grid"><div class="sc-library-books__metric"><strong>${draft.items.length}</strong><span>Book sections</span></div><div class="sc-library-books__metric"><strong>${workspace.savedRecords.length}</strong><span>Available publications</span></div><div class="sc-library-books__metric"><strong>${workspace.notes.length + workspace.sources.length}</strong><span>Notes and sources</span></div><div class="sc-library-books__metric"><strong>${workspace.matrices.length + workspace.boards.length + workspace.annotations.length}</strong><span>Research artifacts</span></div></div><div class="sc-library-books__help"><strong>Build a book from the Library, not a webpage printout.</strong><p>Select full publications or summaries, insert personal notes and sources, add matrices, boards, and handwriting, arrange the sequence, then generate a themed browser preview that can be saved as PDF.</p></div><div class="sc-library-books__actions"><button type="button" data-book-tab="details">Edit book details</button><button type="button" data-book-tab="contents">Build contents</button><button type="button" data-book-tab="export">Generate PDF edition</button></div>`;
-    const details = () => `<form class="sc-library-books__form" data-book-details><div class="sc-library-books__grid"><label><span>Book title</span><input required name="title" value="${escapeAttr(draft.title)}"></label><label><span>Subtitle</span><input name="subtitle" value="${escapeAttr(draft.subtitle)}"></label></div><div class="sc-library-books__grid"><label><span>Compiler or editor</span><input name="editor" value="${escapeAttr(draft.editor)}"></label><label><span>Edition</span><input name="edition" value="${escapeAttr(draft.edition)}"></label></div><label><span>Description</span><textarea name="description" rows="3">${escapeHtml(draft.description)}</textarea></label><div class="sc-library-books__grid sc-library-books__grid--three"><label><span>Print theme</span><select name="theme">${themeOptions(draft.theme)}</select></label><label><span>Page size</span><select name="pageSize">${pageSizeOptions(draft.pageSize)}</select></label><label><span>Video treatment</span><select name="mediaMode">${mediaModeOptions(draft.mediaMode)}</select></label></div><label><span>Preface</span><textarea name="preface" rows="5">${escapeHtml(draft.frontMatter.preface)}</textarea></label><label><span>Introduction</span><textarea name="introduction" rows="5">${escapeHtml(draft.frontMatter.introduction)}</textarea></label><label><span>Conclusion</span><textarea name="conclusion" rows="5">${escapeHtml(draft.backMatter.conclusion)}</textarea></label><fieldset><legend>Edition options</legend><div class="sc-library-books__checks"><label><input type="checkbox" name="includeToc" ${draft.includeToc ? 'checked' : ''}> Table of contents</label><label><input type="checkbox" name="includeManifest" ${draft.includeManifest ? 'checked' : ''}> Provenance manifest</label><label><input type="checkbox" name="includeCitations" ${draft.includeCitations ? 'checked' : ''}> Citations</label><label><input type="checkbox" name="includeAnnotations" ${draft.includeAnnotations ? 'checked' : ''}> Annotation layers</label><label><input type="checkbox" name="grayscale" ${draft.grayscale ? 'checked' : ''}> Grayscale / minimal ink</label></div></fieldset><fieldset><legend>Collections</legend><div class="sc-library-books__checks">${collectionOptions(draft.collectionIds)}</div></fieldset><div class="sc-library-books__actions"><button class="is-primary" type="submit">Save book project</button></div></form>`;
+    const details = () => `<form class="sc-library-books__form" data-book-details><div class="sc-library-books__grid"><label><span>Book title</span><input required name="title" value="${escapeAttr(draft.title)}"></label><label><span>Subtitle</span><input name="subtitle" value="${escapeAttr(draft.subtitle)}"></label></div><div class="sc-library-books__grid"><label><span>Compiler or editor</span><input name="editor" value="${escapeAttr(draft.editor)}"></label><label><span>Edition</span><input name="edition" value="${escapeAttr(draft.edition)}"></label></div><label><span>Description</span><textarea name="description" rows="3">${escapeHtml(draft.description)}</textarea></label><div class="sc-library-books__grid sc-library-books__grid--three"><label><span>Print theme</span><select name="theme">${themeOptions(draft.theme)}</select></label><label><span>Page size</span><select name="pageSize">${pageSizeOptions(draft.pageSize)}</select></label><label><span>Video treatment</span><select name="mediaMode">${mediaModeOptions(draft.mediaMode)}</select></label></div><label><span>Preface</span><textarea name="preface" rows="5">${escapeHtml(draft.frontMatter.preface)}</textarea></label><label><span>Introduction</span><textarea name="introduction" rows="5">${escapeHtml(draft.frontMatter.introduction)}</textarea></label><label><span>Conclusion</span><textarea name="conclusion" rows="5">${escapeHtml(draft.backMatter.conclusion)}</textarea></label><fieldset><legend>Edition options</legend><div class="sc-library-books__checks"><label><input type="checkbox" name="includeToc" ${draft.includeToc ? 'checked' : ''}> Table of contents</label><label><input type="checkbox" name="includeManifest" ${draft.includeManifest ? 'checked' : ''}> Provenance manifest</label><label><input type="checkbox" name="includeCitations" ${draft.includeCitations ? 'checked' : ''}> Citations</label><label><input type="checkbox" name="includeAnnotations" ${draft.includeAnnotations ? 'checked' : ''}> Annotation layers</label><label><input type="checkbox" name="includeIndexes" ${draft.includeIndexes ? 'checked' : ''}> Figure, table, equation, and source indexes</label><label><input type="checkbox" name="includeAccessibilityNotes" ${draft.includeAccessibilityNotes ? 'checked' : ''}> Accessibility transcriptions and alt-text notes</label><label><input type="checkbox" name="grayscale" ${draft.grayscale ? 'checked' : ''}> Grayscale / minimal ink</label></div></fieldset><fieldset><legend>Collections</legend><div class="sc-library-books__checks">${collectionOptions(draft.collectionIds)}</div></fieldset><div class="sc-library-books__actions"><button class="is-primary" type="submit">Save book project</button></div></form>`;
     const contents = () => {
       const included = new Set(draft.items.map(itemKey));
       return `<form class="sc-library-books__custom-form" data-custom-section><div class="sc-library-books__grid"><label><span>Custom section title</span><input required name="title" placeholder="Editorial bridge, introduction, reflection, or appendix"></label><label><span>Section type</span><select name="presentation"><option value="full">Chapter or section</option><option value="summary">Short transition</option></select></label></div><label><span>Custom text</span><textarea required name="content" rows="4"></textarea></label><button type="submit">Add custom section</button></form><h3>Current book sequence</h3><div class="sc-library-books__sequence">${draft.items.length ? draft.items.map((item, index) => `<article><span class="sc-library-books__sequence-index">${index + 1}</span><div><span>${escapeHtml(item.type.replace(/_/g, ' '))}</span><h4>${escapeHtml(item.title)}</h4><p>${escapeHtml(item.excerpt || item.content || '')}</p>${item.type === 'record' ? `<label><span>Publication treatment</span><select data-book-presentation="${escapeAttr(item.id)}"><option value="full" ${item.presentation === 'full' ? 'selected' : ''}>Full normalized article</option><option value="summary" ${item.presentation === 'summary' ? 'selected' : ''}>Summary only</option></select></label>` : ''}</div><div class="sc-library-books__row-actions"><button type="button" data-move-book-item="${escapeAttr(item.id)}" data-direction="up" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-move-book-item="${escapeAttr(item.id)}" data-direction="down" ${index === draft.items.length - 1 ? 'disabled' : ''}>↓</button><button type="button" data-remove-book-item="${escapeAttr(item.id)}">Remove</button></div></article>`).join('') : '<p class="sc-library-books__empty">No sections yet. Add publications and research artifacts below.</p>'}</div><h3>Available research material</h3><div class="sc-library-books__item-browser">${allArtifacts().map((artifact) => `<article class="sc-library-books__available"><div><span>${escapeHtml(artifact.meta)}</span><h4>${escapeHtml(artifact.title)}</h4><p>${escapeHtml(artifact.excerpt || '')}</p></div><button type="button" data-add-book-artifact="${escapeAttr(artifact.type)}|${escapeAttr(artifact.refId)}" ${included.has(artifactKey(artifact.type, artifact.refId)) ? 'disabled' : ''}>${included.has(artifactKey(artifact.type, artifact.refId)) ? 'Added' : 'Add'}</button></article>`).join('') || '<p class="sc-library-books__empty">Save publications, notes, sources, matrices, boards, or annotations in the Notebook to add them here.</p>'}</div>`;
     };
-    const exportTab = () => { const manifest = { schema: bookSchema, id: draft.id, title: draft.title, edition: draft.edition, theme: draft.theme, pageSize: draft.pageSize, mediaMode: draft.mediaMode, sections: draft.items.map((item, index) => ({ position: index + 1, type: item.type, reference_id: item.refId, title: item.title })) }; return `<div class="sc-library-books__help"><strong>PDF generation</strong><p>The preview creates a complete print document using normalized publication content and selected research artifacts. Choose <em>Print / Save as PDF</em> in the preview. Direct MP4 media can play in the browser preview; PDF output always retains a clickable fallback link and source metadata.</p></div><div class="sc-library-books__actions"><button class="is-primary" type="button" data-preview-book>Open preview / Save as PDF</button><button type="button" data-download-book-html>Download portable HTML edition</button><button type="button" data-export-book-json>Export editable book JSON</button><button type="button" data-duplicate-book>Duplicate book</button><button class="sc-library-books__danger" type="button" data-delete-book>Delete book</button></div><h3>Edition manifest</h3><pre class="sc-library-books__manifest">${escapeHtml(JSON.stringify(manifest, null, 2))}</pre>`; };
+    const exportTab = () => { const manifest = { schema: bookSchema, id: draft.id, title: draft.title, edition: draft.edition, theme: draft.theme, pageSize: draft.pageSize, mediaMode: draft.mediaMode, sections: draft.items.map((item, index) => ({ position: index + 1, type: item.type, reference_id: item.refId, title: item.title })) }; const serverReady = documentProduction.enabled && documentProduction.configured && documentProduction.authenticated; return `<div class="sc-library-books__help"><strong>PDF generation</strong><p>Browser preview remains available for immediate print/PDF output. Server production creates a queued Render job with stable pagination, a frozen content snapshot, checksums, diagnostics, and optional Media Library import.</p></div><div class="sc-library-books__actions"><button class="is-primary" type="button" data-preview-book>Open browser preview / Save as PDF</button>${serverReady ? '<button class="is-primary" type="button" data-server-pdf>Create server-rendered PDF</button>' : '<button type="button" disabled title="Sign in and configure the Render document service">Server PDF unavailable</button>'}<button type="button" data-download-book-html>Download portable HTML edition</button><button type="button" data-export-book-json>Export editable book JSON</button><button type="button" data-duplicate-book>Duplicate book</button><button class="sc-library-books__danger" type="button" data-delete-book>Delete book</button></div>${serverReady ? `<p class="sc-library-server-pdf-note">Completed server PDFs are tracked in <a href="${escapeAttr(documentProduction.dashboardUrl || '#')}">Document Production</a>.</p>` : '<p class="sc-library-server-pdf-note">Server rendering requires a signed-in WordPress account and configured service. Browser PDF output continues to work without it.</p>'}<h3>Edition manifest</h3><pre class="sc-library-books__manifest">${escapeHtml(JSON.stringify(manifest, null, 2))}</pre>`; };
 
     const render = () => {
       stage.innerHTML = `<section class="sc-library-books"><header class="sc-library-books__header"><div><p class="sc-library__eyebrow">Local-first book project</p><h3>${escapeHtml(draft.title)}</h3><p>${escapeHtml(draft.subtitle || 'Build, arrange, annotate, and export a custom research edition.')}</p></div><div class="sc-library-books__actions"><button class="is-primary" type="button" data-save-book>Save project</button></div></header>${notice ? `<div class="sc-library-books__notice ${noticeType === 'error' ? 'is-error' : ''}">${escapeHtml(notice)}</div>` : ''}<div class="sc-library-books__layout"><aside class="sc-library-books__sidebar"><button type="button" data-new-book>New book</button><div class="sc-library-books__book-list">${bookListHtml()}</div></aside><main class="sc-library-books__main"><nav class="sc-library-books__tabs"><button type="button" data-book-tab="overview" class="${tab === 'overview' ? 'is-active' : ''}">Overview</button><button type="button" data-book-tab="details" class="${tab === 'details' ? 'is-active' : ''}">Book details</button><button type="button" data-book-tab="contents" class="${tab === 'contents' ? 'is-active' : ''}">Contents</button><button type="button" data-book-tab="export" class="${tab === 'export' ? 'is-active' : ''}">PDF / Export</button></nav>${tab === 'details' ? details() : tab === 'contents' ? contents() : tab === 'export' ? exportTab() : overview()}</main></div></section>`;
@@ -311,6 +374,7 @@
       if (event.target.closest('[data-duplicate-book]')) { draft = makeBook({ ...deepClone(draft), id: '', title: `${draft.title} — Copy`, createdAt: '' }); activeId = ''; saveDraft(); return; }
       if (event.target.closest('[data-delete-book]')) { if (!window.confirm(strings.confirmDelete || 'Delete this book project?')) return; workspace.books = workspace.books.filter((item) => item.id !== draft.id); persist(); activeId = workspace.books[0]?.id || ''; draft = activeId ? deepClone(bookById(activeId)) : makeBook(); tab = 'overview'; setNotice(strings.deleted || 'Book deleted.'); renderAll(); return; }
       if (event.target.closest('[data-preview-book]')) { saveDraft(); const win = window.open('', '_blank'); if (!win) { setNotice(strings.blockedPopup || 'Popup blocked.', 'error'); return; } win.document.write('<p style="font-family:Arial;padding:30px">Preparing book content…</p>'); try { const html = await buildBookHtml(draft); win.document.open(); win.document.write(html); win.document.close(); } catch (error) { win.document.body.innerHTML = `<p>${escapeHtml(strings.contentError || 'Could not prepare all content.')}</p>`; } return; }
+      if (event.target.closest('[data-server-pdf]')) { saveDraft(); setNotice(strings.loadingContent || 'Preparing server document packet…'); render(); try { const job = await createServerJob(draft); setNotice(`${strings.serverQueued || 'Server PDF job created.'} Job ${job.job_uuid || ''}`); tab = 'export'; render(); } catch (error) { setNotice(error.message || strings.serverUnavailable || 'Server PDF production failed.', 'error'); render(); } return; }
       if (event.target.closest('[data-download-book-html]')) { saveDraft(); const html = await buildBookHtml(draft); download(html, `sustainable-catalyst-book-${slug(draft.title)}-${today()}.html`, 'text/html'); return; }
     });
 
@@ -324,7 +388,7 @@
       const form = event.target;
       const data = new FormData(form);
       if (form.matches('[data-book-details]')) {
-        draft.title = words(data.get('title')) || 'Untitled Research Book'; draft.subtitle = words(data.get('subtitle')); draft.editor = words(data.get('editor')); draft.edition = words(data.get('edition')) || 'First edition'; draft.description = words(data.get('description')); draft.theme = words(data.get('theme')); draft.pageSize = words(data.get('pageSize')); draft.mediaMode = words(data.get('mediaMode')); draft.frontMatter.preface = words(data.get('preface')); draft.frontMatter.introduction = words(data.get('introduction')); draft.backMatter.conclusion = words(data.get('conclusion')); draft.includeToc = data.has('includeToc'); draft.includeManifest = data.has('includeManifest'); draft.includeCitations = data.has('includeCitations'); draft.includeAnnotations = data.has('includeAnnotations'); draft.grayscale = data.has('grayscale'); draft.collectionIds = data.getAll('collectionIds').map(String); if (!draft.collectionIds.length) draft.collectionIds = ['collection_inbox']; saveDraft(); return;
+        draft.title = words(data.get('title')) || 'Untitled Research Book'; draft.subtitle = words(data.get('subtitle')); draft.editor = words(data.get('editor')); draft.edition = words(data.get('edition')) || 'First edition'; draft.description = words(data.get('description')); draft.theme = words(data.get('theme')); draft.pageSize = words(data.get('pageSize')); draft.mediaMode = words(data.get('mediaMode')); draft.frontMatter.preface = words(data.get('preface')); draft.frontMatter.introduction = words(data.get('introduction')); draft.backMatter.conclusion = words(data.get('conclusion')); draft.includeToc = data.has('includeToc'); draft.includeManifest = data.has('includeManifest'); draft.includeCitations = data.has('includeCitations'); draft.includeAnnotations = data.has('includeAnnotations'); draft.includeIndexes = data.has('includeIndexes'); draft.includeAccessibilityNotes = data.has('includeAccessibilityNotes'); draft.grayscale = data.has('grayscale'); draft.collectionIds = data.getAll('collectionIds').map(String); if (!draft.collectionIds.length) draft.collectionIds = ['collection_inbox']; saveDraft(); return;
       }
       if (form.matches('[data-custom-section]')) { draft.items.push({ id: uid('bookitem'), type: 'custom', refId: '', title: words(data.get('title')), excerpt: words(data.get('content')).slice(0, 180), content: words(data.get('content')), sourceUrl: '', presentation: words(data.get('presentation')) || 'full', createdAt: now() }); tab = 'contents'; render(); }
     });

@@ -24,6 +24,9 @@ final class SC_Library_Books {
 
         wp_enqueue_style('sc-library', SC_LIBRARY_URL . 'assets/css/sc-library.css', [], SC_LIBRARY_VERSION);
         wp_enqueue_style('sc-library-books', SC_LIBRARY_URL . 'assets/css/sc-library-books.css', ['sc-library'], SC_LIBRARY_VERSION);
+        if (class_exists('SC_Library_Document_Production') && SC_Library_Document_Production::enabled()) {
+            wp_enqueue_style('sc-library-documents', SC_LIBRARY_URL . 'assets/css/sc-library-documents.css', ['sc-library-books'], SC_LIBRARY_VERSION);
+        }
         wp_enqueue_script('sc-library-books', SC_LIBRARY_URL . 'assets/js/sc-library-books.js', [], SC_LIBRARY_VERSION, true);
         wp_localize_script('sc-library-books', 'SCBooksShared', [
             'version' => SC_LIBRARY_VERSION,
@@ -38,6 +41,14 @@ final class SC_Library_Books {
             'itemTypes' => array_values(self::item_types()),
             'defaultTheme' => (string) get_option('sc_library_default_book_theme', 'institutional'),
             'defaultPageSize' => (string) get_option('sc_library_default_book_page_size', 'letter'),
+            'documentProduction' => [
+                'enabled' => class_exists('SC_Library_Document_Production') && SC_Library_Document_Production::enabled(),
+                'configured' => class_exists('SC_Library_Document_Production') && SC_Library_Document_Production::configured(),
+                'authenticated' => is_user_logged_in(),
+                'nonce' => is_user_logged_in() ? wp_create_nonce('wp_rest') : '',
+                'restBase' => esc_url_raw(rest_url('sustainable-catalyst/v1/library/documents')),
+                'dashboardUrl' => esc_url_raw(admin_url('admin.php?page=sc-library-document-production')),
+            ],
             'strings' => [
                 'saved' => __('Book project saved.', 'sustainable-catalyst-library'),
                 'deleted' => __('Book project deleted.', 'sustainable-catalyst-library'),
@@ -45,6 +56,8 @@ final class SC_Library_Books {
                 'blockedPopup' => __('The browser blocked the preview window.', 'sustainable-catalyst-library'),
                 'loadingContent' => __('Preparing publication content and research artifacts…', 'sustainable-catalyst-library'),
                 'contentError' => __('Some publication content could not be loaded. The available metadata and links were retained.', 'sustainable-catalyst-library'),
+                'serverQueued' => __('Server PDF job created. Open Document Production to monitor rendering and download the frozen edition.', 'sustainable-catalyst-library'),
+                'serverUnavailable' => __('Server PDF production requires a signed-in account and configured Render document service.', 'sustainable-catalyst-library'),
             ],
         ]);
     }

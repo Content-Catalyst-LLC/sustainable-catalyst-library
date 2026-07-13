@@ -185,6 +185,15 @@ final class SC_Library_Admin {
             },
             'default' => 'letter',
         ]);
+        register_setting('sc_library_settings', 'sc_library_enable_server_documents', ['type' => 'boolean', 'sanitize_callback' => static fn($value) => $value ? 1 : 0, 'default' => 1]);
+        register_setting('sc_library_settings', 'sc_library_document_service_url', ['type' => 'string', 'sanitize_callback' => 'esc_url_raw', 'default' => '']);
+        register_setting('sc_library_settings', 'sc_library_document_service_api_key', ['type' => 'string', 'sanitize_callback' => 'sanitize_text_field', 'default' => '']);
+        register_setting('sc_library_settings', 'sc_library_document_timeout', ['type' => 'integer', 'sanitize_callback' => static fn($value) => min(120, max(5, absint($value))), 'default' => 30]);
+        register_setting('sc_library_settings', 'sc_library_document_auto_import', ['type' => 'boolean', 'sanitize_callback' => static fn($value) => $value ? 1 : 0, 'default' => 1]);
+        register_setting('sc_library_settings', 'sc_library_document_max_request_mb', ['type' => 'integer', 'sanitize_callback' => static fn($value) => min(25, max(1, absint($value))), 'default' => 8]);
+        register_setting('sc_library_settings', 'sc_library_document_max_pdf_mb', ['type' => 'integer', 'sanitize_callback' => static fn($value) => min(50, max(1, absint($value))), 'default' => 20]);
+        register_setting('sc_library_settings', 'sc_library_document_max_attempts', ['type' => 'integer', 'sanitize_callback' => static fn($value) => min(10, max(1, absint($value))), 'default' => 3]);
+        register_setting('sc_library_settings', 'sc_library_document_retention_days', ['type' => 'integer', 'sanitize_callback' => static fn($value) => min(365, max(1, absint($value))), 'default' => 30]);
         register_setting('sc_library_settings', 'sc_library_enable_documentation', ['type' => 'boolean', 'sanitize_callback' => static fn($value) => $value ? 1 : 0, 'default' => 1]);
         register_setting('sc_library_settings', 'sc_library_enable_planner', [
             'type' => 'boolean',
@@ -203,11 +212,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.12.0 activated.</strong> Rebuild the Library index, then configure Persistent Workspaces under SC Library and test account storage before enabling optional Render synchronization.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.13.0 activated.</strong> Rebuild the Library index, then review Document Production. Browser PDF output works immediately; optional Render setup enables queued server PDFs and frozen editions.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.12.0.</strong> The release adds persistent account workspaces, local-to-account migration, revisions, collaborator permissions, conflict detection, optional Render/PostgreSQL synchronization, health diagnostics, and recovery-safe exports. Rebuild the index once, then review Workspace Sync.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.13.0.</strong> The release adds queued server PDF production, frozen edition records, Media Library import, checksums, diagnostics, and retries. Rebuild the index once, then review Document Production.</p></div>';
         }
     }
 
@@ -397,7 +406,21 @@ final class SC_Library_Admin {
                                     <option value="<?php echo esc_attr($size_id); ?>" <?php selected(get_option('sc_library_default_book_page_size', 'letter'), $size_id); ?>><?php echo esc_html($size['label']); ?></option>
                                 <?php endforeach; ?>
                             </select></p>
-                            <p class="description"><?php esc_html_e('Book projects remain editable in browser storage. v1.10 generates a browser preview and uses Print/Save as PDF; server-rendered archival PDF packages can be added in a later Render-backed release.', 'sustainable-catalyst-library'); ?></p>
+                            <p class="description"><?php esc_html_e('Browser Print / Save as PDF remains available. v1.13 can also send normalized book packets to the optional Render document service for stable server pagination and frozen editions.', 'sustainable-catalyst-library'); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e('Server-side document production', 'sustainable-catalyst-library'); ?></th>
+                        <td>
+                            <label><input name="sc_library_enable_server_documents" type="checkbox" value="1" <?php checked((int) get_option('sc_library_enable_server_documents', 1), 1); ?>> <?php esc_html_e('Enable queued Render PDF jobs, frozen edition manifests, checksums, retries, diagnostics, and Media Library import.', 'sustainable-catalyst-library'); ?></label>
+                            <p><label for="sc_library_document_service_url"><?php esc_html_e('Document service URL:', 'sustainable-catalyst-library'); ?></label> <input class="regular-text code" id="sc_library_document_service_url" name="sc_library_document_service_url" type="url" value="<?php echo esc_attr((string) get_option('sc_library_document_service_url', '')); ?>" placeholder="https://your-library-service.onrender.com"></p>
+                            <p><label for="sc_library_document_service_api_key"><?php esc_html_e('Document service API key:', 'sustainable-catalyst-library'); ?></label> <input class="regular-text code" id="sc_library_document_service_api_key" name="sc_library_document_service_api_key" type="password" value="<?php echo esc_attr((string) get_option('sc_library_document_service_api_key', '')); ?>" autocomplete="new-password"></p>
+                            <p class="description"><?php esc_html_e('Leave these two fields empty to reuse the v1.12 Render workspace service URL and API key.', 'sustainable-catalyst-library'); ?></p>
+                            <p><label><input name="sc_library_document_auto_import" type="checkbox" value="1" <?php checked((int) get_option('sc_library_document_auto_import', 1), 1); ?>> <?php esc_html_e('Automatically import completed PDFs into the WordPress Media Library.', 'sustainable-catalyst-library'); ?></label></p>
+                            <p><label for="sc_library_document_timeout"><?php esc_html_e('Request timeout:', 'sustainable-catalyst-library'); ?></label> <input id="sc_library_document_timeout" name="sc_library_document_timeout" type="number" min="5" max="120" value="<?php echo esc_attr((int) get_option('sc_library_document_timeout', 30)); ?>"> seconds</p>
+                            <p><label for="sc_library_document_max_request_mb"><?php esc_html_e('Maximum request:', 'sustainable-catalyst-library'); ?></label> <input id="sc_library_document_max_request_mb" name="sc_library_document_max_request_mb" type="number" min="1" max="25" value="<?php echo esc_attr((int) get_option('sc_library_document_max_request_mb', 8)); ?>"> MB &nbsp; <label for="sc_library_document_max_pdf_mb"><?php esc_html_e('Maximum imported PDF:', 'sustainable-catalyst-library'); ?></label> <input id="sc_library_document_max_pdf_mb" name="sc_library_document_max_pdf_mb" type="number" min="1" max="50" value="<?php echo esc_attr((int) get_option('sc_library_document_max_pdf_mb', 20)); ?>"> MB</p>
+                            <p><label for="sc_library_document_max_attempts"><?php esc_html_e('Maximum render attempts:', 'sustainable-catalyst-library'); ?></label> <input id="sc_library_document_max_attempts" name="sc_library_document_max_attempts" type="number" min="1" max="10" value="<?php echo esc_attr((int) get_option('sc_library_document_max_attempts', 3)); ?>"> &nbsp; <label for="sc_library_document_retention_days"><?php esc_html_e('Remote retention:', 'sustainable-catalyst-library'); ?></label> <input id="sc_library_document_retention_days" name="sc_library_document_retention_days" type="number" min="1" max="365" value="<?php echo esc_attr((int) get_option('sc_library_document_retention_days', 30)); ?>"> days</p>
+                            <p><a href="<?php echo esc_url(admin_url('admin.php?page=sc-library-document-production')); ?>"><?php esc_html_e('Open Document Production dashboard →', 'sustainable-catalyst-library'); ?></a></p>
                         </td>
                     </tr>
                     <tr>

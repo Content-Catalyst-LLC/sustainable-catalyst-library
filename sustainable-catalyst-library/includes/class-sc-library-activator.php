@@ -36,6 +36,8 @@ final class SC_Library_Activator {
         $workspace_revisions_table = $wpdb->prefix . 'sc_library_workspace_revisions';
         $workspace_collaborators_table = $wpdb->prefix . 'sc_library_workspace_collaborators';
         $workspace_sync_log_table = $wpdb->prefix . 'sc_library_workspace_sync_log';
+        $document_jobs_table = $wpdb->prefix . 'sc_library_document_jobs';
+        $document_editions_table = $wpdb->prefix . 'sc_library_document_editions';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -162,12 +164,73 @@ final class SC_Library_Activator {
             KEY created_at (created_at)
         ) {$charset};";
 
+        $document_jobs_sql = "CREATE TABLE {$document_jobs_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            job_uuid CHAR(36) NOT NULL,
+            owner_user_id BIGINT UNSIGNED NOT NULL,
+            workspace_uuid VARCHAR(64) NOT NULL DEFAULT '',
+            book_id VARCHAR(191) NOT NULL DEFAULT '',
+            title VARCHAR(255) NOT NULL,
+            document_type VARCHAR(24) NOT NULL DEFAULT 'pdf',
+            status VARCHAR(24) NOT NULL DEFAULT 'queued',
+            progress INT NOT NULL DEFAULT 0,
+            attempt INT NOT NULL DEFAULT 0,
+            max_attempts INT NOT NULL DEFAULT 3,
+            request_json LONGTEXT NOT NULL,
+            content_hash CHAR(64) NOT NULL,
+            remote_job_uuid CHAR(36) NOT NULL,
+            renderer_version VARCHAR(64) NOT NULL DEFAULT '',
+            output_attachment_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            output_sha256 CHAR(64) NOT NULL DEFAULT '',
+            output_bytes BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            manifest_json LONGTEXT NULL,
+            diagnostics_json LONGTEXT NULL,
+            error_message TEXT NULL,
+            poll_count INT NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            updated_at DATETIME NOT NULL,
+            completed_at DATETIME NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY job_uuid (job_uuid),
+            KEY owner_user_id (owner_user_id),
+            KEY workspace_uuid (workspace_uuid),
+            KEY book_id (book_id),
+            KEY status (status),
+            KEY created_at (created_at)
+        ) {$charset};";
+
+        $document_editions_sql = "CREATE TABLE {$document_editions_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            edition_uuid CHAR(36) NOT NULL,
+            job_uuid CHAR(36) NOT NULL,
+            owner_user_id BIGINT UNSIGNED NOT NULL,
+            workspace_uuid VARCHAR(64) NOT NULL DEFAULT '',
+            book_id VARCHAR(191) NOT NULL DEFAULT '',
+            title VARCHAR(255) NOT NULL,
+            edition_label VARCHAR(191) NOT NULL DEFAULT '',
+            content_hash CHAR(64) NOT NULL,
+            output_sha256 CHAR(64) NOT NULL,
+            output_attachment_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            manifest_json LONGTEXT NOT NULL,
+            frozen_at DATETIME NOT NULL,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY edition_uuid (edition_uuid),
+            KEY job_uuid (job_uuid),
+            KEY owner_user_id (owner_user_id),
+            KEY book_id (book_id),
+            KEY content_hash (content_hash),
+            KEY frozen_at (frozen_at)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
         dbDelta($workspaces_sql);
         dbDelta($workspace_revisions_sql);
         dbDelta($workspace_collaborators_sql);
         dbDelta($workspace_sync_log_sql);
+        dbDelta($document_jobs_sql);
+        dbDelta($document_editions_sql);
     }
 
     private static function install_defaults(): void {
@@ -201,6 +264,15 @@ final class SC_Library_Activator {
         add_option('sc_library_enable_books', 1);
         add_option('sc_library_default_book_theme', 'institutional');
         add_option('sc_library_default_book_page_size', 'letter');
+        add_option('sc_library_enable_server_documents', 1);
+        add_option('sc_library_document_service_url', '');
+        add_option('sc_library_document_service_api_key', '');
+        add_option('sc_library_document_timeout', 30);
+        add_option('sc_library_document_auto_import', 1);
+        add_option('sc_library_document_max_request_mb', 8);
+        add_option('sc_library_document_max_pdf_mb', 20);
+        add_option('sc_library_document_max_attempts', 3);
+        add_option('sc_library_document_retention_days', 30);
         add_option('sc_library_enable_documentation', 1);
         add_option('sc_library_enable_planner', 1);
         add_option('sc_library_enable_portability', 1);

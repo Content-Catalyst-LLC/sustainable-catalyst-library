@@ -7,7 +7,7 @@ from typing import Any
 
 SYNC_SCHEMA = "sc-library-sync/1.0"
 WORKSPACE_SCHEMA = "sc-library-workspace/1.7"
-SERVICE_VERSION = "1.12.0"
+SERVICE_VERSION = "1.13.0"
 
 
 def canonical_json(value: Any) -> str:

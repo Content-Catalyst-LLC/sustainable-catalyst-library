@@ -1,78 +1,60 @@
-# Sustainable Catalyst Library v1.12.0
+# Sustainable Catalyst Library v1.13.0
 
-Library v1.12.0 adds **Persistent Workspaces, Accounts, and Render Synchronization** to the Sustainable Catalyst knowledge base.
+Library v1.13.0 adds **Server-Side Book, PDF, and Document Production** to the Sustainable Catalyst knowledge system.
 
-The browser-local Notebook remains fully usable. Signed-in WordPress users can explicitly save account revisions, move research across devices, share workspaces with viewer or editor roles, review revision history, and optionally synchronize a secondary copy to a Render FastAPI/PostgreSQL service.
+The existing browser Book Builder remains available. Signed-in users can now submit normalized book editions to the optional Render service, monitor queued rendering, retry failures, inspect diagnostics, import completed PDFs into the WordPress Media Library, and preserve frozen edition manifests and checksums.
 
 ## Included
 
-- WordPress account-owned persistent workspaces
-- Local, account, and hybrid storage modes
-- One-click local-to-account migration
-- Explicit save and load controls
-- Optional debounced account autosave
-- Revision numbers and content hashes
-- Optimistic concurrency and HTTP 409 conflict responses
-- Revision history
-- Private, shared, and public visibility
-- Viewer and editor collaborators tied to WordPress accounts
-- Export-before-replace safeguards
-- Independent sync states: local, pending, synced, conflict, and error
-- Optional Render health checks and server-to-server synchronization
-- Signed `sc-library-sync/1.0` handoff packets
-- Render FastAPI/PostgreSQL service and Blueprint
-- PostgreSQL portable-export schema v1.2 with account workspace entities
-- Workspace schema `sc-library-workspace/1.7`
+- Browser and server PDF production paths
+- WordPress document-job registry
+- Frozen edition registry
+- Signed Render job submission and polling
+- Automatic Media Library import
+- Stable pagination and page numbering
+- Cover, front matter, table of contents, chapters, conclusion, and manifest
+- Headings, lists, code blocks, blockquotes, tables, and bounded remote images
+- Structured Translation Matrix tables, Whiteboard and Chalkboard diagrams, and vector annotation ink
+- Source notes, citations, accessibility transcriptions, and basic document indexes
+- SHA-256 content and output checksums
+- Renderer diagnostics and retry controls
+- Portable export schema v1.3 with document-job and edition entities
+- Optional FastAPI/PostgreSQL rendering service
 
 ## WordPress administration
 
 Open:
 
 ```text
-SC Library → Workspace Sync
+SC Library → Document Production
 ```
 
-Configure persistence in **SC Library** settings:
-
-- Enable persistent workspaces
-- Choose local, account, or hybrid mode
-- Set the maximum account workspace size
-- Enable account autosave only after testing
-- Optionally enter the Render service URL and server key
+Configure the service under **SC Library → Server-side document production**.
 
 ## Shortcodes
 
 ```text
-[sc_library_account_workspaces]
-[sc_library_notebook tab="sync"]
+[sc_library_book_builder]
+[sc_library_document_production]
 ```
 
-Existing Library and Notebook shortcodes continue to work.
+The normal Library and Notebook shortcodes continue to work.
 
 ## REST endpoints
 
-- `/wp-json/sustainable-catalyst/v1/library/account/status`
-- `/wp-json/sustainable-catalyst/v1/library/workspaces`
-- `/wp-json/sustainable-catalyst/v1/library/workspaces/{uuid}`
-- `/wp-json/sustainable-catalyst/v1/library/workspaces/{uuid}/history`
-- `/wp-json/sustainable-catalyst/v1/library/workspaces/{uuid}/share`
-- `/wp-json/sustainable-catalyst/v1/library/workspaces/{uuid}/sync`
-- `/wp-json/sustainable-catalyst/v1/library/workspaces/render/status`
-
-Account routes require a signed-in WordPress user and REST nonce. The public route returns only workspaces explicitly marked public.
+- `/wp-json/sustainable-catalyst/v1/library/documents/status`
+- `/wp-json/sustainable-catalyst/v1/library/documents/jobs`
+- `/wp-json/sustainable-catalyst/v1/library/documents/jobs/{uuid}`
+- `/wp-json/sustainable-catalyst/v1/library/documents/jobs/{uuid}/refresh`
+- `/wp-json/sustainable-catalyst/v1/library/documents/jobs/{uuid}/retry`
+- `/wp-json/sustainable-catalyst/v1/library/documents/editions`
 
 ## Render service
 
-The optional service is in `render-workspace-service/`.
+The optional service remains in `render-workspace-service/` and now handles both workspace synchronization and document production.
 
-```text
-WordPress account workspace
-        ↓ signed server request
-Render FastAPI service
-        ↓
-PostgreSQL workspace and revision tables
-```
+See:
 
-WordPress remains the identity and permission authority. Render stores a secondary application copy and rejects stale or divergent revisions.
-
-See `WORKSPACE_SYNC_SETUP.md` and `render-workspace-service/README.md`.
+- `SERVER_DOCUMENT_PRODUCTION_SETUP.md`
+- `WORKSPACE_SYNC_SETUP.md`
+- `render-workspace-service/README.md`

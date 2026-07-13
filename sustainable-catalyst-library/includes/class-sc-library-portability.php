@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * tables or serialized plugin internals.
  */
 final class SC_Library_Portability {
-    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.2';
+    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.3';
     public const POSTGRES_SCHEMA = 'sustainable_catalyst_library';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 
@@ -79,6 +79,7 @@ final class SC_Library_Portability {
             'documentation' => __('Foundations and documentation records', 'sustainable-catalyst-library'),
             'relationships' => __('Relationships, terms, and resources', 'sustainable-catalyst-library'),
             'account_workspaces' => __('Persistent account workspaces and revisions', 'sustainable-catalyst-library'),
+            'document_editions' => __('Server document jobs and frozen editions', 'sustainable-catalyst-library'),
             'schema' => __('Schema only', 'sustainable-catalyst-library'),
         ];
     }
@@ -400,6 +401,8 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         $account_workspace_revisions = $this->export_account_workspace_revisions();
         $account_workspace_collaborators = $this->export_account_workspace_collaborators();
         $account_workspace_sync_log = $this->export_account_workspace_sync_log();
+        $document_jobs = $this->export_document_jobs();
+        $document_editions = $this->export_document_editions();
 
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($r) => (int) $r['id'], $public_registry), true);
@@ -411,7 +414,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $documentation = $this->filter_rows_by_ids($documentation, 'record_id', $record_ids);
             $plans = array_values(array_filter($plans, static fn($row) => !empty($row['public'])));
             $plan_dependencies = $this->filter_rows_by_ids($plan_dependencies, 'plan_id', array_column($plans, 'plan_id'));
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = [];
         } elseif ($scope === 'planner') {
             $records = [];
             $terms = [];
@@ -419,7 +422,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $relationships = [];
             $resources = [];
             $documentation = [];
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = [];
         } elseif ($scope === 'documentation') {
             $doc_ids = array_map(static fn($row) => (int) $row['record_id'], $documentation);
             $records = $this->filter_rows_by_ids($records, 'record_id', $doc_ids);
@@ -428,17 +431,19 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $relationships = array_values(array_filter($relationships, static fn($row) => in_array((int) $row['source_post_id'], $doc_ids, true) || in_array((int) $row['target_post_id'], $doc_ids, true)));
             $plans = [];
             $plan_dependencies = [];
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = [];
         } elseif ($scope === 'relationships') {
             $records = [];
             $documentation = [];
             $plans = [];
             $plan_dependencies = [];
-            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = [];
+            $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = [];
         } elseif ($scope === 'account_workspaces') {
-            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = [];
-        } elseif ($scope === 'schema') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $document_jobs = $document_editions = [];
+        } elseif ($scope === 'document_editions') {
             $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = [];
+        } elseif ($scope === 'schema') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = [];
         }
 
         $entities = [
@@ -454,6 +459,8 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'account_workspace_revisions' => $account_workspace_revisions,
             'account_workspace_collaborators' => $account_workspace_collaborators,
             'account_workspace_sync_log' => $account_workspace_sync_log,
+            'document_jobs' => $document_jobs,
+            'document_editions' => $document_editions,
         ];
 
         $counts = [];
@@ -474,9 +481,68 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
                 'Persistent account workspaces are administrator-only server exports and contain user-authored research data.',
                 'Private planning data is excluded unless an administrator explicitly enables it.',
                 'PDFs and repository records remain references; binary media is not embedded in data exports.',
+                'Server document job records and frozen edition manifests are exported without embedding PDF binaries.',
             ],
         ];
         return ['manifest' => $manifest, 'entities' => $entities];
+    }
+
+    private function export_document_jobs(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Document_Production')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Document_Production::jobs_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(static function (array $row): array {
+            return [
+                'document_job_id' => (int) $row['id'],
+                'job_uuid' => (string) $row['job_uuid'],
+                'owner_user_id' => (int) $row['owner_user_id'],
+                'workspace_uuid' => (string) $row['workspace_uuid'],
+                'book_id' => (string) $row['book_id'],
+                'title' => (string) $row['title'],
+                'document_type' => (string) $row['document_type'],
+                'status' => (string) $row['status'],
+                'progress' => (int) $row['progress'],
+                'attempt' => (int) $row['attempt'],
+                'max_attempts' => (int) $row['max_attempts'],
+                'content_hash' => (string) $row['content_hash'],
+                'renderer_version' => (string) $row['renderer_version'],
+                'output_attachment_id' => (int) $row['output_attachment_id'],
+                'output_sha256' => (string) $row['output_sha256'],
+                'output_bytes' => (int) $row['output_bytes'],
+                'error_message' => (string) $row['error_message'],
+                'created_at' => $row['created_at'] ? mysql_to_rfc3339((string) $row['created_at']) : null,
+                'updated_at' => $row['updated_at'] ? mysql_to_rfc3339((string) $row['updated_at']) : null,
+                'completed_at' => $row['completed_at'] ? mysql_to_rfc3339((string) $row['completed_at']) : null,
+                'manifest' => json_decode((string) $row['manifest_json'], true) ?: [],
+                'diagnostics' => json_decode((string) $row['diagnostics_json'], true) ?: [],
+                'payload' => ['request' => json_decode((string) $row['request_json'], true) ?: []],
+            ];
+        }, $rows);
+    }
+
+    private function export_document_editions(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Document_Production')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Document_Production::editions_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(static function (array $row): array {
+            return [
+                'document_edition_id' => (int) $row['id'],
+                'edition_uuid' => (string) $row['edition_uuid'],
+                'job_uuid' => (string) $row['job_uuid'],
+                'owner_user_id' => (int) $row['owner_user_id'],
+                'workspace_uuid' => (string) $row['workspace_uuid'],
+                'book_id' => (string) $row['book_id'],
+                'title' => (string) $row['title'],
+                'edition_label' => (string) $row['edition_label'],
+                'content_hash' => (string) $row['content_hash'],
+                'output_sha256' => (string) $row['output_sha256'],
+                'output_attachment_id' => (int) $row['output_attachment_id'],
+                'output_url' => (int) $row['output_attachment_id'] ? wp_get_attachment_url((int) $row['output_attachment_id']) : '',
+                'frozen_at' => $row['frozen_at'] ? mysql_to_rfc3339((string) $row['frozen_at']) : null,
+                'created_at' => $row['created_at'] ? mysql_to_rfc3339((string) $row['created_at']) : null,
+                'manifest' => json_decode((string) $row['manifest_json'], true) ?: [],
+            ];
+        }, $rows);
     }
 
     private function export_account_workspaces(): array {
@@ -1039,6 +1105,52 @@ CREATE TABLE IF NOT EXISTS account_workspace_sync_log (
     created_at timestamptz
 );
 
+CREATE TABLE IF NOT EXISTS document_jobs (
+    document_job_id bigint PRIMARY KEY,
+    job_uuid uuid UNIQUE NOT NULL,
+    owner_user_id bigint NOT NULL,
+    workspace_uuid text NOT NULL DEFAULT '',
+    book_id text NOT NULL DEFAULT '',
+    title text NOT NULL,
+    document_type text NOT NULL DEFAULT 'pdf',
+    status text NOT NULL,
+    progress integer NOT NULL DEFAULT 0,
+    attempt integer NOT NULL DEFAULT 0,
+    max_attempts integer NOT NULL DEFAULT 3,
+    content_hash char(64) NOT NULL,
+    renderer_version text NOT NULL DEFAULT '',
+    output_attachment_id bigint NOT NULL DEFAULT 0,
+    output_sha256 char(64) NOT NULL DEFAULT '',
+    output_bytes bigint NOT NULL DEFAULT 0,
+    error_message text NOT NULL DEFAULT '',
+    created_at timestamptz,
+    updated_at timestamptz,
+    completed_at timestamptz,
+    manifest jsonb NOT NULL DEFAULT '{}'::jsonb,
+    diagnostics jsonb NOT NULL DEFAULT '{}'::jsonb,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS document_jobs_owner_idx ON document_jobs(owner_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS document_jobs_status_idx ON document_jobs(status, updated_at DESC);
+CREATE TABLE IF NOT EXISTS document_editions (
+    document_edition_id bigint PRIMARY KEY,
+    edition_uuid uuid UNIQUE NOT NULL,
+    job_uuid uuid NOT NULL,
+    owner_user_id bigint NOT NULL,
+    workspace_uuid text NOT NULL DEFAULT '',
+    book_id text NOT NULL DEFAULT '',
+    title text NOT NULL,
+    edition_label text NOT NULL DEFAULT '',
+    content_hash char(64) NOT NULL,
+    output_sha256 char(64) NOT NULL,
+    output_attachment_id bigint NOT NULL DEFAULT 0,
+    output_url text NOT NULL DEFAULT '',
+    frozen_at timestamptz,
+    created_at timestamptz,
+    manifest jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS document_editions_book_idx ON document_editions(book_id, frozen_at DESC);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 
@@ -1095,6 +1207,8 @@ SQL;
             'account_workspace_revisions' => ['revision_id','workspace_id','revision','content_hash','change_type','created_by','created_at','payload'],
             'account_workspace_collaborators' => ['collaboration_id','workspace_id','user_id','role','invited_by','created_at','accepted_at'],
             'account_workspace_sync_log' => ['sync_log_id','workspace_id','workspace_uuid','direction','status','response_code','message','content_hash','created_at'],
+            'document_jobs' => ['document_job_id','job_uuid','owner_user_id','workspace_uuid','book_id','title','document_type','status','progress','attempt','max_attempts','content_hash','renderer_version','output_attachment_id','output_sha256','output_bytes','error_message','created_at','updated_at','completed_at','manifest','diagnostics','payload'],
+            'document_editions' => ['document_edition_id','edition_uuid','job_uuid','owner_user_id','workspace_uuid','book_id','title','edition_label','content_hash','output_sha256','output_attachment_id','output_url','frozen_at','created_at','manifest'],
             default => [],
         };
         if (!$columns) return '';
@@ -1103,12 +1217,12 @@ SQL;
             $literals = [];
             foreach ($columns as $column) {
                 $value = $row[$column] ?? null;
-                if (in_array($column, ['payload', 'expected_release'], true)) $literals[] = $this->sql_json($value ?: []);
+                if (in_array($column, ['payload', 'expected_release', 'manifest', 'diagnostics'], true)) $literals[] = $this->sql_json($value ?: []);
                 elseif (in_array($column, ['dependency_ids'], true)) $literals[] = $this->sql_bigint_array(is_array($value) ? $value : []);
-                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at'], true)) $literals[] = $this->sql_timestamp($value);
+                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at','completed_at','frozen_at'], true)) $literals[] = $this->sql_timestamp($value);
                 elseif (in_array($column, ['last_reviewed','planned_start','actual_start','actual_publication_date'], true)) $literals[] = $value ? $this->sql_text((string) $value) . '::date' : 'NULL';
                 elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
-                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code'], true)) ? (string) (int) $value : 'NULL';
+                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','progress','attempt','max_attempts','output_attachment_id','output_bytes'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','progress','attempt','max_attempts','output_attachment_id','output_bytes'], true)) ? (string) (int) $value : 'NULL';
                 elseif (in_array($column, ['series_order','estimated_effort','actual_effort'], true)) $literals[] = (string) (float) $value;
                 else $literals[] = $this->sql_text((string) ($value ?? ''));
             }
@@ -1127,6 +1241,8 @@ SQL;
             'account_workspace_revisions' => 'revision_id',
             'account_workspace_collaborators' => 'collaboration_id',
             'account_workspace_sync_log' => 'sync_log_id',
+            'document_jobs' => 'document_job_id',
+            'document_editions' => 'document_edition_id',
             default => '',
         };
         return "INSERT INTO {$entity} (" . implode(', ', $columns) . ") VALUES\n" . implode(",\n", $values) . ($conflict ? "\nON CONFLICT ({$conflict}) DO NOTHING;" : ';');

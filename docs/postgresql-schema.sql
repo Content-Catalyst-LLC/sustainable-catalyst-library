@@ -258,6 +258,54 @@ CREATE TABLE IF NOT EXISTS account_workspace_sync_log (
     created_at timestamptz
 );
 
+CREATE TABLE IF NOT EXISTS document_jobs (
+    document_job_id bigint PRIMARY KEY,
+    job_uuid uuid UNIQUE NOT NULL,
+    owner_user_id bigint NOT NULL,
+    workspace_uuid text NOT NULL DEFAULT '',
+    book_id text NOT NULL DEFAULT '',
+    title text NOT NULL,
+    document_type text NOT NULL DEFAULT 'pdf',
+    status text NOT NULL,
+    progress integer NOT NULL DEFAULT 0,
+    attempt integer NOT NULL DEFAULT 0,
+    max_attempts integer NOT NULL DEFAULT 3,
+    content_hash char(64) NOT NULL,
+    renderer_version text NOT NULL DEFAULT '',
+    output_attachment_id bigint NOT NULL DEFAULT 0,
+    output_sha256 char(64) NOT NULL DEFAULT '',
+    output_bytes bigint NOT NULL DEFAULT 0,
+    error_message text NOT NULL DEFAULT '',
+    created_at timestamptz,
+    updated_at timestamptz,
+    completed_at timestamptz,
+    manifest jsonb NOT NULL DEFAULT '{}'::jsonb,
+    diagnostics jsonb NOT NULL DEFAULT '{}'::jsonb,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS document_jobs_owner_idx ON document_jobs(owner_user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS document_jobs_status_idx ON document_jobs(status, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS document_editions (
+    document_edition_id bigint PRIMARY KEY,
+    edition_uuid uuid UNIQUE NOT NULL,
+    job_uuid uuid NOT NULL,
+    owner_user_id bigint NOT NULL,
+    workspace_uuid text NOT NULL DEFAULT '',
+    book_id text NOT NULL DEFAULT '',
+    title text NOT NULL,
+    edition_label text NOT NULL DEFAULT '',
+    content_hash char(64) NOT NULL,
+    output_sha256 char(64) NOT NULL,
+    output_attachment_id bigint NOT NULL DEFAULT 0,
+    output_url text NOT NULL DEFAULT '',
+    frozen_at timestamptz,
+    created_at timestamptz,
+    manifest jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS document_editions_book_idx ON document_editions(book_id, frozen_at DESC);
+
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 

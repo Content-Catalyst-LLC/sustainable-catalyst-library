@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="1.12.0"
+VERSION="1.13.0"
 REMOTE_SSH="git@github.com:Content-Catalyst-LLC/sustainable-catalyst-library.git"
 REMOTE_SLUG="Content-Catalyst-LLC/sustainable-catalyst-library"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,7 +9,7 @@ SOURCE_DIR="$SCRIPT_DIR"
 TARGET_DIR="$HOME/Downloads/sustainable-catalyst-library"
 PLUGIN_DIR="$SOURCE_DIR/sustainable-catalyst-library"
 SERVICE_DIR="$SOURCE_DIR/render-workspace-service"
-PLUGIN_ZIP="$SOURCE_DIR/sustainable-catalyst-library-v1.12.0.zip"
+PLUGIN_ZIP="$SOURCE_DIR/sustainable-catalyst-library-v${VERSION}.zip"
 
 printf '\nSustainable Catalyst Library v%s\n' "$VERSION"
 printf '%s\n\n' '===================================='
@@ -56,7 +56,13 @@ else
 fi
 
 find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
-rsync -a --exclude .git --exclude '__pycache__' --exclude '.pytest_cache' --exclude '.venv' --exclude '.env' "$SOURCE_DIR/" "$TARGET_DIR/"
+rsync -a \
+  --exclude .git \
+  --exclude '__pycache__' \
+  --exclude '.pytest_cache' \
+  --exclude '.venv' \
+  --exclude '.env' \
+  "$SOURCE_DIR/" "$TARGET_DIR/"
 
 validate_marker() {
   local pattern="$1" file="$2" message="$3"
@@ -68,26 +74,31 @@ validate_marker() {
 
 validate_marker "Version: $VERSION" sustainable-catalyst-library/sustainable-catalyst-library.php "Plugin version marker validation failed."
 validate_marker "SC_LIBRARY_VERSION', '$VERSION'" sustainable-catalyst-library/sustainable-catalyst-library.php "Runtime version marker validation failed."
-validate_marker "Persistent Workspaces, Accounts, and Render Synchronization" README.md "Release marker is missing."
+validate_marker "Server-Side Book, PDF, and Document Production" README.md "Release marker is missing."
+validate_marker "sc-library-document-job/1.0" sustainable-catalyst-library/includes/class-sc-library-document-production.php "Document job schema marker is missing."
+validate_marker "sc-library-edition/1.0" sustainable-catalyst-library/includes/class-sc-library-document-production.php "Edition schema marker is missing."
+validate_marker "sc-library-portable-export/1.3" sustainable-catalyst-library/includes/class-sc-library-portability.php "Portable export schema marker is missing."
 validate_marker "sc-library-workspace/1.7" sustainable-catalyst-library/includes/class-sc-library-workspaces.php "Workspace schema marker is missing."
-validate_marker "sc-library-sync/1.0" sustainable-catalyst-library/includes/class-sc-library-workspaces.php "Sync schema marker is missing."
-validate_marker "sc-library-portable-export/1.2" sustainable-catalyst-library/includes/class-sc-library-portability.php "Portable export schema marker is missing."
-validate_marker "CREATE TABLE IF NOT EXISTS account_workspaces" sustainable-catalyst-library/includes/class-sc-library-portability.php "PostgreSQL account workspace table is missing."
-validate_marker "library_account_workspaces" render-workspace-service/app/main.py "Render PostgreSQL workspace table is missing."
-validate_marker "X-SC-Library-Timestamp" sustainable-catalyst-library/includes/class-sc-library-workspaces.php "Timestamped HMAC request protection is missing."
+validate_marker "CREATE TABLE IF NOT EXISTS library_document_jobs" render-workspace-service/app/documents.py "Render document-job table is missing."
+validate_marker "matrices_rendered" render-workspace-service/app/documents.py "Structured Matrix rendering is missing."
+validate_marker "boards_rendered" render-workspace-service/app/documents.py "Whiteboard and Chalkboard rendering is missing."
+validate_marker "annotations_rendered" render-workspace-service/app/documents.py "Annotation rendering is missing."
+validate_marker "X-SC-Library-Timestamp" sustainable-catalyst-library/includes/class-sc-library-document-production.php "Timestamped HMAC request protection is missing."
 
 for required in \
-  sustainable-catalyst-library/includes/class-sc-library-workspaces.php \
-  sustainable-catalyst-library/assets/js/sc-library-workspace-sync.js \
-  sustainable-catalyst-library/assets/css/sc-library-workspace-sync.css \
-  sustainable-catalyst-library/templates/library-account-workspaces.php \
+  sustainable-catalyst-library/includes/class-sc-library-document-production.php \
+  sustainable-catalyst-library/assets/js/sc-library-documents.js \
+  sustainable-catalyst-library/assets/css/sc-library-documents.css \
+  sustainable-catalyst-library/templates/library-document-production.php \
+  render-workspace-service/app/documents.py \
   render-workspace-service/app/main.py \
   render-workspace-service/app/core.py \
   render-workspace-service/render.yaml \
   render-workspace-service/requirements.txt \
-  render-workspace-service/requirements-dev.txt \
-  sustainable-catalyst-library-v1.12.0.zip \
-  RELEASE_NOTES_1.12.0.md \
+  render-workspace-service/tests/test_documents.py \
+  "sustainable-catalyst-library-v${VERSION}.zip" \
+  RELEASE_NOTES_1.13.0.md \
+  SERVER_DOCUMENT_PRODUCTION_SETUP.md \
   WORKSPACE_SYNC_SETUP.md \
   PORTABLE_DATA_SETUP.md; do
   if [[ ! -f "$required" ]]; then
@@ -97,23 +108,33 @@ for required in \
 done
 
 if command -v php >/dev/null 2>&1; then
+  echo "Validating PHP..."
   while IFS= read -r -d '' file; do php -l "$file" >/dev/null; done < <(find sustainable-catalyst-library -name '*.php' -print0)
 fi
 if command -v node >/dev/null 2>&1; then
+  echo "Validating JavaScript..."
   while IFS= read -r -d '' file; do node --check "$file" >/dev/null; done < <(find sustainable-catalyst-library/assets/js -name '*.js' -print0)
 fi
 if command -v python >/dev/null 2>&1; then
+  echo "Validating Render service..."
   python -m py_compile render-workspace-service/app/*.py render-workspace-service/tests/*.py
   if python -c 'import pytest' >/dev/null 2>&1; then
     (cd render-workspace-service && PYTHONPATH=. python -m pytest -q)
   fi
+  if python -c 'import yaml' >/dev/null 2>&1; then
+    python - <<'PY'
+import pathlib, yaml
+with pathlib.Path('render-workspace-service/render.yaml').open() as handle:
+    yaml.safe_load(handle)
+PY
+  fi
 fi
 if command -v unzip >/dev/null 2>&1; then
-  unzip -t sustainable-catalyst-library-v1.12.0.zip >/dev/null
+  unzip -t "sustainable-catalyst-library-v${VERSION}.zip" >/dev/null
 fi
 
 if grep -RInE --exclude-dir=.git --exclude-dir='__pycache__' --exclude-dir='.pytest_cache' \
-  --exclude='.env.example' --exclude='push_library_v1_12_0_to_github.sh' --exclude='install_and_push_library_v1_12_0.sh' \
+  --exclude='.env.example' --exclude='push_library_v1_13_0_to_github.sh' --exclude='install_and_push_library_v1_13_0.sh' \
   '((^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|DATABASE_URL=postgres(ql)?://[^<[:space:]]+|SC_LIBRARY_SYNC_API_KEY=[A-Za-z0-9_-]{16,})' .; then
   echo "ERROR: Potential secret detected. Review the output above."
   exit 1
@@ -123,11 +144,11 @@ git add -A
 if git diff --cached --quiet; then
   echo "No changes to commit."
 else
-  git commit -m "Build Library v1.12.0 — Persistent Workspaces, Accounts, and Render Synchronization"
+  git commit -m "Build Library v1.13.0 — Server-Side Book, PDF, and Document Production"
 fi
 
 git push -u origin main
 
 echo
-echo "Sustainable Catalyst Library v1.12.0 pushed successfully."
+echo "Sustainable Catalyst Library v1.13.0 pushed successfully."
 echo "Repository: https://github.com/$REMOTE_SLUG"

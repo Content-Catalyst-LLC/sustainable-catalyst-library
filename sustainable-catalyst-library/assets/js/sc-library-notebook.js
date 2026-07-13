@@ -6,7 +6,7 @@
   const schema = shared.schema || 'sc-library-workspace/1.7';
   const legacySchema = shared.legacySchema || 'sc-library-workspace/1.7';
   const legacySchemas = Array.isArray(shared.legacySchemas) ? shared.legacySchemas : [legacySchema, 'sc-library-workspace/1.0'];
-  const version = shared.version || '1.12.0';
+  const version = shared.version || '1.13.0';
   const strings = shared.strings || {};
   const sourceTypes = shared.sourceTypes || {};
   const citationFormats = shared.citationFormats || {};

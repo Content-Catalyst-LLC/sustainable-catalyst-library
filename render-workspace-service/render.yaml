@@ -19,6 +19,14 @@ services:
         generateValue: true
       - key: SC_LIBRARY_MAX_WORKSPACE_MB
         value: 8
+      - key: SC_LIBRARY_MAX_DOCUMENT_REQUEST_MB
+        value: 8
+      - key: SC_LIBRARY_MAX_PDF_MB
+        value: 20
+      - key: SC_LIBRARY_DOCUMENT_MAX_ATTEMPTS
+        value: 3
+      - key: SC_LIBRARY_ALLOW_REMOTE_IMAGES
+        value: true
 
 databases:
   - name: sustainable-catalyst-library-postgres
