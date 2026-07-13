@@ -1,6 +1,6 @@
 {
-  "schema": "sc-library-portable-export/1.9",
-  "plugin_version": "1.18.1",
+  "schema": "sc-library-portable-export/2.0",
+  "plugin_version": "1.19.0",
   "workspace_schema": "sc-library-workspace/1.8",
   "generated_at": "2026-07-12T00:00:00+00:00",
   "site_url": "https://sustainablecatalyst.com/",
@@ -40,7 +40,10 @@
     "webhook_deliveries": 0,
     "foundation_documents": 0,
     "pdf_pages": 0,
-    "foundation_versions": 0
+    "foundation_versions": 0,
+    "preservation_snapshots": 0,
+    "integrity_checks": 0,
+    "authority_history": 0
   },
   "entities": [
     "records",
@@ -75,6 +78,9 @@
     "orchestration_events",
     "api_keys",
     "webhooks",
-    "webhook_deliveries"
+    "webhook_deliveries",
+    "preservation_snapshots",
+    "integrity_checks",
+    "authority_history"
   ]
 }

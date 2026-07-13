@@ -1,61 +1,56 @@
-# Sustainable Catalyst Library v1.18.1
+# Sustainable Catalyst Library v1.19.0
 
-Library v1.18.1 adds **Embedded Document Records and Full-Text PDF Indexing** to the complete v1.18.0 platform.
+Library v1.19.0 adds **Preservation, Integrity, and the Institutional Archive** to the complete v1.18.1 platform.
 
-## Foundation Document system
+## Preservation layer
 
-- Native `sc_foundation_doc` WordPress record type
-- WordPress Media Library PDF selection
-- Bundled PDF.js inline viewer without an iframe
-- Explicit Open PDF and Download PDF controls
-- Browser-local page-aware text extraction
-- Search snippets linked to exact PDF pages
-- Research Librarian synchronization
-- Metadata, version history, checksums, and related records
-- BibTeX, RIS, CSL JSON, and plain-text citations
-- Extraction status, retries, and failure diagnostics
-- Mobile fallback presentation
-- Migration of existing direct-download Foundation links
-
-## Data boundaries
-
-WordPress remains canonical. PDF binaries remain in the Media Library or at an explicitly recorded source URL. Extracted text is stored page by page in `sc_library_pdf_pages`; version manifests are stored in `sc_library_foundation_versions`. Browser extraction uses the bundled PDF.js library and does not upload the PDF to an external extraction provider.
+- Immutable snapshots of canonical WordPress records
+- SHA-256 content and manifest checksums
+- Version and supersession chains
+- Public historical-edition browsing and comparison
+- Downloadable preservation manifests
+- Attachment and PDF checksum verification
+- Authority-history capture
+- Bounded record and relationship integrity audits
+- Optional external-link checks with safe WordPress HTTP handling
+- Record-level retention dates and legal holds
+- Explicit cleanup that protects current and held snapshots
 
 ## Public interfaces
 
 ```text
-[sc_foundation_document id="123"]
+[sc_library_institutional_archive]
+[sc_library_integrity_status]
 ```
 
 ```text
-/wp-json/sustainable-catalyst/v1/library/foundation-documents
-/wp-json/sustainable-catalyst/v1/library/foundation-documents/{id}
-/wp-json/sustainable-catalyst/v1/library/foundation-documents/{id}/pages
-/wp-json/sustainable-catalyst/v1/library/foundation-documents/{id}/citation
+/wp-json/sustainable-catalyst/v1/library/preservation/status
+/wp-json/sustainable-catalyst/v1/library/archive
+/wp-json/sustainable-catalyst/v1/library/archive/{uuid}
+/wp-json/sustainable-catalyst/v1/library/archive/{uuid}/manifest
+/wp-json/sustainable-catalyst-library/v1/archive
 ```
 
-The versioned developer namespace also exposes public Foundation Document routes under `/wp-json/sustainable-catalyst-library/v1`.
+Public routes return snapshots only while the canonical WordPress record remains public. Private or deleted records are not exposed.
 
 ## Portable data
 
 Portable export schema:
 
 ```text
-sc-library-portable-export/1.9
+sc-library-portable-export/2.0
 ```
 
 New entities:
 
 ```text
-foundation_documents
-pdf_pages
-foundation_versions
+preservation_snapshots
+integrity_checks
+authority_history
 ```
-
-PDF binaries are referenced rather than embedded.
 
 ## Installation
 
-Upload `sustainable-catalyst-library-v1.18.1.zip` through WordPress and choose **Replace current with uploaded**. Existing Library records and indexes are preserved. Create or migrate Foundation Document records, extract each PDF, and then verify page-aware search.
+Upload `sustainable-catalyst-library-v1.19.0.zip` through WordPress and choose **Replace current with uploaded**. Open **SC Library → Preservation & Archive**, configure the archive page URL and retention policy, create a test snapshot, then start the bounded integrity audit.
 
-See `EMBEDDED_DOCUMENT_RECORDS_SETUP_v1.18.1.md` and `RELEASE_NOTES_1.18.1.md`.
+See `PRESERVATION_ARCHIVE_SETUP_v1.19.0.md` and `RELEASE_NOTES_1.19.0.md`.

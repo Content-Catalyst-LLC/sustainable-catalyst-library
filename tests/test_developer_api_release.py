@@ -17,8 +17,8 @@ def text(path: Path) -> str:
 
 def test_release_version_and_bootstrap() -> None:
     main = text(MAIN)
-    assert "Version: 1.18.1" in main
-    assert "SC_LIBRARY_VERSION', '1.18.1'" in main
+    assert "Version: 1.19.0" in main
+    assert "SC_LIBRARY_VERSION', '1.19.0'" in main
     assert "class-sc-library-developer-api.php" in main
     assert "new SC_Library_Developer_API" in main
     assert "$developer_api->register_hooks()" in main
@@ -118,7 +118,7 @@ def test_public_privacy_boundaries() -> None:
 def test_openapi_and_json_schemas_are_valid_json() -> None:
     openapi = json.loads(text(ROOT / "docs" / "openapi.json"))
     assert openapi["openapi"] == "3.1.0"
-    assert openapi["info"]["version"] == "1.1.0"
+    assert openapi["info"]["version"] == "1.2.0"
     assert "/records" in openapi["paths"]
     assert "/media/reels" in openapi["paths"]
     assert "/media/reels/{uuid}" in openapi["paths"]
@@ -130,7 +130,7 @@ def test_openapi_and_json_schemas_are_valid_json() -> None:
 
 def test_portable_schema_excludes_secrets() -> None:
     portability = text(PORTABILITY)
-    assert "sc-library-portable-export/1.9" in portability
+    assert "sc-library-portable-export/2.0" in portability
     for entity in ["api_keys", "webhooks", "webhook_deliveries"]:
         assert entity in portability
     assert "secret_exported' => false" in portability

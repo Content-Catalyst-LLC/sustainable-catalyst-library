@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/preservation-snapshot.json",
+  "title": "Sustainable Catalyst preserved snapshot",
+  "type": "object",
+  "required": [
+    "schema",
+    "snapshot_uuid",
+    "record_id",
+    "title",
+    "snapshot_status",
+    "source_hash",
+    "created_at"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-preservation/1.0"
+    },
+    "snapshot_uuid": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "record_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "record_type": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "canonical_url": {
+      "type": "string"
+    },
+    "version_label": {
+      "type": "string"
+    },
+    "snapshot_status": {
+      "enum": [
+        "current",
+        "preserved",
+        "superseded",
+        "archived"
+      ]
+    },
+    "source_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "manifest_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "content_html": {
+      "type": "string"
+    },
+    "supersedes_uuid": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "manifest_url": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

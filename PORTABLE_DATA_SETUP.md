@@ -1,68 +1,42 @@
-# Library v1.13.3 Portable Data Setup
+# Library v1.19.0 Portable Data Setup
 
-Library v1.13.3 preserves all earlier export formats and upgrades the portable schema to `sc-library-portable-export/1.3`.
+Library v1.19.0 preserves every earlier export scope and advances the portable schema to `sc-library-portable-export/2.0`. WordPress remains the canonical publishing system; the export is a normalized, application-oriented representation suitable for PostgreSQL, CSV, JSONL, JSON, preservation review, and disaster-recovery testing.
 
-## New planning fields
+## Preservation entities
 
-The normalized `plans` table now includes:
+The Preservation scope adds:
 
-- Release group and release track
-- Milestone and capacity owner
-- Estimated and actual effort
-- Progress percentage
-- Planned and actual start dates
-- Dependency policy
-- Manual blocker state and blocker note
-- Actual publication date
+- `preservation_snapshots` — immutable content editions, metadata, resources, relationships, source hashes, manifest hashes, supersession links, retention dates, and hold flags
+- `integrity_checks` — bounded audit outcomes for records, relationships, attachments, authority URLs, and optional external links
+- `authority_history` — append-only documentation authority, version, status, and supersession changes
 
-A new normalized `plan_dependencies` table stores each dependency as an individual relation.
+Snapshot HTML, normalized text, and manifests are included. WordPress attachments and PDF binaries remain external file references; their URLs, metadata, and SHA-256 checksums are preserved.
 
-## Install
+## Complete normalized model
 
-1. Upload `sustainable-catalyst-library-v1.13.3.zip`.
-2. Replace the existing plugin.
-3. Rebuild the Library index.
-4. Open **SC Library → Portable Data Export**.
+The v2.0 schema also retains the earlier entities for:
 
-## Recommended validation
+- Canonical records, terms, relationships, resources, documentation, plans, and dependencies
+- Persistent account workspaces, revisions, collaborators, and synchronization logs
+- Server document jobs and frozen PDF editions
+- Multimedia assets, clips, reels, rights metadata, and processing jobs
+- Editorial reviews, participants, comments, suggestions, and attributed events
+- Knowledge Graph nodes and edges with confidence, provenance, visibility, and verification
+- Research Librarian orchestration sessions and action events
+- Foundation Documents, page-aware PDF text, and version manifests
+- Developer API keys, webhooks, and delivery metadata without exporting credentials or signing secrets
 
-1. Export **Schema only** as PostgreSQL SQL.
-2. Confirm the `plans` and `plan_dependencies` tables are present.
-3. Export the **Content Planner and roadmap** scope.
-4. Restore into a disposable PostgreSQL database before using the export operationally.
+## Install and validate
 
-A PostgreSQL restore is optional for normal WordPress use.
+1. Upload `sustainable-catalyst-library-v1.19.0.zip` and replace the current plugin.
+2. Open **SC Library → Portable Data Export**.
+3. Export **Schema only** as PostgreSQL SQL and confirm the preservation tables are present.
+4. Export the **Preservation** scope as JSONL or CSV and inspect `manifest.json` and `checksums.sha256`.
+5. Restore the SQL into a disposable PostgreSQL database before treating the export as an operational recovery source.
+6. Store exports containing private workspaces, editorial data, or administrative audit details as private institutional records.
 
+A PostgreSQL restore is optional for normal WordPress use. It is recommended as a periodic recovery test.
 
-## Persistent account workspaces and document editions in v1.13.0
+## Security and privacy boundaries
 
-Administrator server exports can now include normalized `account_workspaces`, `account_workspace_revisions`, `account_workspace_collaborators`, and `account_workspace_sync_log` entities. These exports contain user-authored research and should be handled as private data. Public registry exports exclude them.
-
-
-## Server document production records
-
-Portable exports can include normalized document-job and frozen-edition manifests. PDF binary files are not embedded; WordPress attachment URLs and SHA-256 checksums are preserved.
-
-## v1.14.0 multimedia export addendum
-
-Portable export schema `sc-library-portable-export/1.4` adds normalized `media_assets`, `media_clips`, `media_reels`, and `media_jobs` entities. The multimedia scope exports rights, provenance, transcripts, clip boundaries, reel order, output references, and diagnostics without embedding media binaries.
-
-## v1.15.0 editorial workflow entities
-
-Portable export schema `sc-library-portable-export/1.5` adds `editorial_reviews`, `editorial_participants`, `editorial_comments`, `editorial_suggestions`, and `editorial_events`. Use the Editorial export scope for a focused review archive. These records can include private comments, email addresses, invitation state, and editorial decisions.
-
-## v1.16.0 knowledge graph entities
-
-Portable export schema `sc-library-portable-export/1.6` adds `graph_nodes` and `graph_edges`, plus confidence, provenance, evidence, and visibility fields on canonical publication relationships.
-
-Use the **Knowledge graph, relationship provenance, and diagnostics data** scope for a focused graph archive. Public-registry exports contain only active public graph entities and public edges whose endpoints are included. Complete and graph-specific administrative exports can contain private or organization-only research relationships and should be handled as private research data.
-
-
-## v1.17.0 Research Librarian orchestration entities
-
-Portable export schema `sc-library-portable-export/1.7` adds `orchestration_sessions` and `orchestration_events`. These administrator-only exports may contain private research questions, routes, and attributed action history.
-
-
-## Foundation Document entities (v1.18.1)
-
-`foundation_documents`, `pdf_pages`, and `foundation_versions` preserve document metadata, page-aware text, extraction diagnostics, citations, and version manifests. PDF binaries remain referenced Media Library resources and are not embedded.
+Portable exports never include plaintext API keys, API-key hashes, encrypted webhook secrets, delivery signatures, authentication tokens, or provider credentials. Public-registry exports exclude private workspaces, private graph objects, internal editorial comments, and nonpublic planning records. Administrative scopes may contain sensitive research and institutional history and should be access-controlled.

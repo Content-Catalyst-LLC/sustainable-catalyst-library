@@ -59,6 +59,8 @@ final class SC_Library_Developer_API {
         add_action('sc_library_document_rendered', [$this, 'capture_document_rendered'], 10, 1);
         add_action('sc_library_media_clip_completed', [$this, 'capture_media_completed'], 10, 1);
         add_action('sc_library_foundation_document_extracted', [$this, 'capture_foundation_document_extracted'], 10, 2);
+        add_action('sc_library_preservation_snapshot_created', [$this, 'capture_preservation_snapshot'], 10, 1);
+        add_action('sc_library_integrity_audit_completed', [$this, 'capture_integrity_audit'], 10, 1);
     }
 
     public static function enabled(): bool {
@@ -108,6 +110,8 @@ final class SC_Library_Developer_API {
             'book.rendered' => __('Server document rendered', 'sustainable-catalyst-library'),
             'media.clip.completed' => __('Media clip processing completed', 'sustainable-catalyst-library'),
             'foundation-document.extracted' => __('Foundation Document PDF extracted and indexed', 'sustainable-catalyst-library'),
+            'preservation.snapshot.created' => __('Frozen preservation snapshot created', 'sustainable-catalyst-library'),
+            'integrity.audit.completed' => __('Institutional integrity audit completed', 'sustainable-catalyst-library'),
             'api.test' => __('Developer webhook test', 'sustainable-catalyst-library'),
         ];
     }
@@ -804,7 +808,7 @@ final class SC_Library_Developer_API {
 
     public function rest_export_manifest(WP_REST_Request $request): WP_REST_Response {
         return rest_ensure_response([
-            'schema' => class_exists('SC_Library_Portability') ? SC_Library_Portability::EXPORT_SCHEMA : 'sc-library-portable-export/1.9',
+            'schema' => class_exists('SC_Library_Portability') ? SC_Library_Portability::EXPORT_SCHEMA : 'sc-library-portable-export/2.0',
             'generated_at' => gmdate('c'),
             'site' => home_url('/'),
             'plugin_version' => SC_LIBRARY_VERSION,
@@ -872,6 +876,9 @@ final class SC_Library_Developer_API {
             '/foundation-documents/{id}' => 'Read one embedded Foundation Document record',
             '/foundation-documents/{id}/pages' => 'Read page-aware extracted PDF text',
             '/foundation-documents/{id}/citation' => 'Export a Foundation Document citation',
+            '/archive' => 'Browse public preserved editions',
+            '/archive/{uuid}' => 'Read one public frozen edition',
+            '/archive/{uuid}/manifest' => 'Read one preservation manifest',
             '/schemas' => 'List published JSON Schemas',
             '/schemas/{name}' => 'Read one JSON Schema',
             '/openapi.json' => 'Read this OpenAPI document',
@@ -901,8 +908,8 @@ final class SC_Library_Developer_API {
             'openapi' => self::OPENAPI_VERSION,
             'info' => [
                 'title' => 'Sustainable Catalyst Library API',
-                'version' => '1.1.0',
-                'description' => 'Versioned public access to Sustainable Catalyst Library records, embedded Foundation Documents, page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations.',
+                'version' => '1.2.0',
+                'description' => 'Versioned public access to Sustainable Catalyst Library records, preserved historical editions, preservation manifests, embedded Foundation Documents, page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations.',
             ],
             'servers' => [['url' => untrailingslashit($base)]],
             'paths' => $paths,
@@ -942,6 +949,24 @@ final class SC_Library_Developer_API {
                     'url' => ['type' => 'string', 'format' => 'uri'],
                     'published_at' => ['type' => ['string', 'null'], 'format' => 'date-time'],
                     'modified_at' => ['type' => ['string', 'null'], 'format' => 'date-time'],
+                ],
+                'additionalProperties' => true,
+            ],
+            'preservation-snapshot' => [
+                '$schema' => 'https://json-schema.org/draft/2020-12/schema',
+                '$id' => rest_url(self::API_NAMESPACE . '/schemas/preservation-snapshot'),
+                'title' => 'Sustainable Catalyst preserved snapshot',
+                'type' => 'object',
+                'required' => ['schema','snapshot_uuid','record_id','title','snapshot_status','source_hash','created_at'],
+                'properties' => [
+                    'schema' => ['const' => 'sc-library-preservation/1.0'],
+                    'snapshot_uuid' => ['type' => 'string', 'format' => 'uuid'],
+                    'record_id' => ['type' => 'integer'],
+                    'title' => ['type' => 'string'],
+                    'snapshot_status' => ['enum' => ['current','preserved','superseded','archived']],
+                    'source_hash' => ['type' => 'string'],
+                    'manifest_hash' => ['type' => 'string'],
+                    'created_at' => ['type' => 'string'],
                 ],
                 'additionalProperties' => true,
             ],
@@ -1461,6 +1486,26 @@ final class SC_Library_Developer_API {
             'record_url' => get_permalink($post_id),
             'page_count' => (int) ($summary['pages'] ?? 0),
             'character_count' => (int) ($summary['chars'] ?? 0),
+        ]);
+    }
+
+    public function capture_preservation_snapshot(array $snapshot): void {
+        $this->emit_event('preservation.snapshot.created', [
+            'snapshot_uuid' => (string) ($snapshot['snapshot_uuid'] ?? ''),
+            'record_id' => (int) ($snapshot['record_id'] ?? 0),
+            'record_type' => (string) ($snapshot['record_type'] ?? ''),
+            'snapshot_status' => (string) ($snapshot['snapshot_status'] ?? ''),
+            'source_hash' => (string) ($snapshot['source_hash'] ?? ''),
+            'created_at' => (string) ($snapshot['created_at'] ?? ''),
+        ]);
+    }
+
+    public function capture_integrity_audit(array $summary): void {
+        $this->emit_event('integrity.audit.completed', [
+            'run_uuid' => (string) ($summary['run_uuid'] ?? ''),
+            'status' => (string) ($summary['status'] ?? ''),
+            'counts' => (array) ($summary['counts'] ?? []),
+            'completed_at' => (string) ($summary['completed_at'] ?? ''),
         ]);
     }
 

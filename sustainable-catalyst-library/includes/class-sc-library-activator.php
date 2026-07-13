@@ -63,6 +63,9 @@ final class SC_Library_Activator {
         $webhook_deliveries_table = $wpdb->prefix . 'sc_library_webhook_deliveries';
         $pdf_pages_table = $wpdb->prefix . 'sc_library_pdf_pages';
         $foundation_versions_table = $wpdb->prefix . 'sc_library_foundation_versions';
+        $preservation_snapshots_table = $wpdb->prefix . 'sc_library_preservation_snapshots';
+        $integrity_checks_table = $wpdb->prefix . 'sc_library_integrity_checks';
+        $authority_history_table = $wpdb->prefix . 'sc_library_authority_history';
         $charset = $wpdb->get_charset_collate();
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -725,6 +728,93 @@ final class SC_Library_Activator {
             KEY created_at (created_at)
         ) {$charset};";
 
+
+
+        $preservation_snapshots_sql = "CREATE TABLE {$preservation_snapshots_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            snapshot_uuid CHAR(36) NOT NULL,
+            record_id BIGINT UNSIGNED NOT NULL,
+            record_type VARCHAR(64) NOT NULL DEFAULT '',
+            title TEXT NOT NULL,
+            canonical_url LONGTEXT NOT NULL,
+            version_label VARCHAR(191) NOT NULL DEFAULT '',
+            snapshot_status VARCHAR(24) NOT NULL DEFAULT 'current',
+            reason VARCHAR(48) NOT NULL DEFAULT 'manual',
+            source_hash CHAR(64) NOT NULL,
+            manifest_hash CHAR(64) NOT NULL,
+            content_html LONGTEXT NOT NULL,
+            content_text LONGTEXT NOT NULL,
+            metadata_json LONGTEXT NOT NULL,
+            relationships_json LONGTEXT NOT NULL,
+            resources_json LONGTEXT NOT NULL,
+            manifest_json LONGTEXT NOT NULL,
+            supersedes_uuid CHAR(36) NOT NULL DEFAULT '',
+            is_current TINYINT(1) NOT NULL DEFAULT 1,
+            legal_hold TINYINT(1) NOT NULL DEFAULT 0,
+            retention_until DATETIME NULL,
+            created_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY snapshot_uuid (snapshot_uuid),
+            KEY record_id (record_id),
+            KEY record_type (record_type),
+            KEY snapshot_status (snapshot_status),
+            KEY source_hash (source_hash),
+            KEY manifest_hash (manifest_hash),
+            KEY is_current (is_current),
+            KEY legal_hold (legal_hold),
+            KEY retention_until (retention_until),
+            KEY created_at (created_at),
+            FULLTEXT KEY sc_library_snapshot_search (title, content_text)
+        ) {$charset};";
+
+        $integrity_checks_sql = "CREATE TABLE {$integrity_checks_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            check_uuid CHAR(36) NOT NULL,
+            run_uuid CHAR(36) NOT NULL,
+            record_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            object_type VARCHAR(32) NOT NULL DEFAULT 'record',
+            check_type VARCHAR(64) NOT NULL,
+            target_url LONGTEXT NULL,
+            expected_hash CHAR(64) NOT NULL DEFAULT '',
+            actual_hash CHAR(64) NOT NULL DEFAULT '',
+            status VARCHAR(20) NOT NULL DEFAULT 'warning',
+            response_code INT NOT NULL DEFAULT 0,
+            message TEXT NULL,
+            details_json LONGTEXT NOT NULL,
+            checked_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY check_uuid (check_uuid),
+            KEY run_uuid (run_uuid),
+            KEY record_id (record_id),
+            KEY object_type (object_type),
+            KEY check_type (check_type),
+            KEY status (status),
+            KEY checked_at (checked_at)
+        ) {$charset};";
+
+        $authority_history_sql = "CREATE TABLE {$authority_history_table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            authority_uuid CHAR(36) NOT NULL,
+            record_id BIGINT UNSIGNED NOT NULL,
+            document_status VARCHAR(32) NOT NULL DEFAULT '',
+            authority_type VARCHAR(32) NOT NULL DEFAULT '',
+            authority_url LONGTEXT NULL,
+            version_label VARCHAR(191) NOT NULL DEFAULT '',
+            responsible_area VARCHAR(191) NOT NULL DEFAULT '',
+            supersedes_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            superseded_by_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            payload_json LONGTEXT NOT NULL,
+            changed_by BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            changed_at DATETIME NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY authority_uuid (authority_uuid),
+            KEY record_id (record_id),
+            KEY document_status (document_status),
+            KEY authority_type (authority_type),
+            KEY changed_at (changed_at)
+        ) {$charset};";
+
         dbDelta($index_sql);
         dbDelta($relationships_sql);
         dbDelta($workspaces_sql);
@@ -752,6 +842,9 @@ final class SC_Library_Activator {
         dbDelta($webhook_deliveries_sql);
         dbDelta($pdf_pages_sql);
         dbDelta($foundation_versions_sql);
+        dbDelta($preservation_snapshots_sql);
+        dbDelta($integrity_checks_sql);
+        dbDelta($authority_history_sql);
     }
 
     private static function install_defaults(): void {
@@ -858,6 +951,15 @@ final class SC_Library_Activator {
             $configured_post_types[] = 'sc_foundation_doc';
             update_option('sc_library_post_types', array_values(array_unique($configured_post_types)));
         }
+        add_option('sc_library_enable_preservation', 1);
+        add_option('sc_library_preservation_auto_snapshot', 1);
+        add_option('sc_library_preservation_retention_years', 10);
+        add_option('sc_library_preservation_batch_size', 50);
+        add_option('sc_library_integrity_link_timeout', 8);
+        add_option('sc_library_integrity_check_external_links', 0);
+        add_option('sc_library_archive_page_url', home_url('/institutional-archive/'));
+        add_option('sc_library_integrity_state', [], '', false);
+        add_option('sc_library_integrity_last_audit', [], '', false);
         add_option('sc_library_featured_pathways', implode("\n", [
             'Systems Thinking|/systems-thinking/|Feedback, resilience, leverage points, and complex change.',
             'Mathematical Thinking|/mathematical-thinking/|Symbols, models, uncertainty, and formal reasoning.',
@@ -870,11 +972,15 @@ final class SC_Library_Activator {
         if (!wp_next_scheduled('sc_library_daily_reconcile')) {
             wp_schedule_event(time() + HOUR_IN_SECONDS, 'daily', 'sc_library_daily_reconcile');
         }
+        if (!wp_next_scheduled('sc_library_preservation_daily')) {
+            wp_schedule_event(time() + (2 * HOUR_IN_SECONDS), 'daily', 'sc_library_preservation_daily');
+        }
     }
 
     public static function deactivate(): void {
         wp_clear_scheduled_hook('sc_library_daily_reconcile');
         wp_clear_scheduled_hook('sc_library_sync_workspace');
         wp_clear_scheduled_hook('sc_library_refresh_media_job');
+        wp_clear_scheduled_hook('sc_library_preservation_daily');
     }
 }

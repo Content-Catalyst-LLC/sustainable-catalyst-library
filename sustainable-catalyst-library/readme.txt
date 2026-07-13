@@ -4,14 +4,26 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 1.18.1
+Stable tag: 1.19.0
 License: GPLv2 or later
 
-A native WordPress knowledge system with embedded Foundation Document records, page-aware PDF indexing, a public API, Research Librarian orchestration, knowledge graphs, editorial workflows, and PostgreSQL portability.
+A native WordPress knowledge system with institutional preservation, integrity monitoring, historical editions, embedded Foundation Documents, a public API, Research Librarian orchestration, knowledge graphs, editorial workflows, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v1.18.1 adds first-class Foundation Document records, Media Library PDF selection, an inline PDF.js reader, full-text page-aware extraction, citations, diagnostics, version history, related records, Research Librarian synchronization, and migration of legacy Foundation download links while retaining the complete v1.18.0 platform.
+Sustainable Catalyst Library v1.19.0 adds Preservation, Integrity, and the Institutional Archive to the complete v1.18.1 platform. It creates immutable record snapshots, SHA-256 manifests, version comparisons, authority history, supersession chains, attachment and link checks, bounded integrity audits, retention and legal-hold controls, public historical browsing, and PostgreSQL-ready preservation exports.
+
+= Preservation and Institutional Archive =
+
+* Immutable snapshots for published Library records with source and manifest checksums.
+* Public shortcode `[sc_library_institutional_archive]` for controlled historical-edition browsing.
+* Version comparison, supersession chains, canonical-record links, and preservation manifests.
+* Bounded cursor-style integrity audits for records and relationships.
+* Attachment existence and checksum verification, authority URL checks, optional external-link monitoring, and missing-replacement diagnostics.
+* Append-only documentation authority history.
+* Record-level retention dates, legal holds, archive notes, and protected cleanup rules.
+* Public and administrative REST routes for archive records, manifests, status, and diagnostics.
+* Portable export schema `sc-library-portable-export/2.0`.
 
 = Foundation Documents and full-text PDF indexing =
 
@@ -43,22 +55,25 @@ Sustainable Catalyst Library v1.18.1 adds first-class Foundation Document record
 
 = Portable Data =
 
-* Portable export schema `sc-library-portable-export/1.9`.
-* New normalized entities `api_keys`, `webhooks`, and `webhook_deliveries`.
-* Secret hashes, encrypted signing secrets, full delivery payloads, and delivery signatures are excluded from portable exports.
+* Portable export schema `sc-library-portable-export/2.0`.
+* Preservation entities `preservation_snapshots`, `integrity_checks`, and `authority_history`.
+* Existing Foundation Document, API, webhook, workspace, graph, multimedia, editorial, planning, and orchestration entities remain portable.
+* API-key hashes, encrypted signing secrets, full webhook payloads, delivery signatures, and unrelated private workspace data remain excluded from public exports.
 
 == Installation ==
 
-1. Upload and activate the plugin.
-2. Open SC Library → Developer API.
-3. Configure public and keyed rate limits.
-4. Create a WordPress page with `[sc_library_developer_portal]`.
-5. Save the page URL in Developer API settings.
-6. Create the minimum scoped key needed for each integration.
-7. Add one HTTPS webhook and send a test delivery.
+1. Upload and activate the plugin, choosing **Replace current with uploaded** during an upgrade.
+2. Open SC Library → Preservation & Archive.
+3. Create a public WordPress page containing `[sc_library_institutional_archive]`.
+4. Save the archive page URL and review the default retention, batch-size, and link-check settings.
+5. Create one frozen snapshot for a public Library record and download its preservation manifest.
+6. Start the bounded integrity audit and continue it until the saved audit reaches completion.
+7. Configure the Developer API and webhooks only when an external integration requires them.
 
 == Shortcodes ==
 
+* `[sc_library_institutional_archive]`
+* `[sc_library_integrity_status]`
 * `[sc_foundation_document id="123"]`
 * `[sc_library_developer_portal]`
 * `[sc_research_librarian_orchestrator]`
@@ -71,6 +86,11 @@ Sustainable Catalyst Library v1.18.1 adds first-class Foundation Document record
 
 == REST API ==
 
+* `/wp-json/sustainable-catalyst/v1/library/preservation/status`
+* `/wp-json/sustainable-catalyst/v1/library/archive`
+* `/wp-json/sustainable-catalyst/v1/library/archive/{uuid}`
+* `/wp-json/sustainable-catalyst/v1/library/archive/{uuid}/manifest`
+* `/wp-json/sustainable-catalyst-library/v1/archive`
 * `/wp-json/sustainable-catalyst-library/v1/status`
 * `/wp-json/sustainable-catalyst-library/v1/records`
 * `/wp-json/sustainable-catalyst-library/v1/records/{id}`
@@ -81,6 +101,15 @@ Sustainable Catalyst Library v1.18.1 adds first-class Foundation Document record
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 1.19.0 =
+* Added immutable institutional snapshots with SHA-256 source and manifest checksums.
+* Added bounded integrity audits for content drift, attachments, authority URLs, supersession chains, and relationships.
+* Added append-only authority history, record retention dates, legal holds, and protected cleanup.
+* Added public historical browsing, version comparison, canonical-record links, and downloadable preservation manifests.
+* Added preservation, integrity, and authority REST routes and webhook events.
+* Added PostgreSQL entities `preservation_snapshots`, `integrity_checks`, and `authority_history` in portable schema 2.0.
+
 
 = 1.18.1 =
 * Added the Foundation Document record type and Media Library PDF selector.

@@ -678,6 +678,77 @@ CREATE TABLE IF NOT EXISTS webhook_deliveries (
     signature_exported boolean NOT NULL DEFAULT false
 );
 
+
+
+CREATE TABLE IF NOT EXISTS preservation_snapshots (
+    preservation_snapshot_id bigint PRIMARY KEY,
+    snapshot_uuid uuid UNIQUE NOT NULL,
+    record_id bigint NOT NULL,
+    record_type text NOT NULL,
+    title text NOT NULL,
+    canonical_url text NOT NULL DEFAULT '',
+    version_label text NOT NULL DEFAULT '',
+    snapshot_status text NOT NULL,
+    reason text NOT NULL,
+    source_hash text NOT NULL,
+    manifest_hash text NOT NULL,
+    content_html text NOT NULL,
+    content_text text NOT NULL,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    relationships jsonb NOT NULL DEFAULT '[]'::jsonb,
+    resources jsonb NOT NULL DEFAULT '[]'::jsonb,
+    manifest jsonb NOT NULL DEFAULT '{}'::jsonb,
+    supersedes_uuid uuid,
+    is_current boolean NOT NULL DEFAULT false,
+    legal_hold boolean NOT NULL DEFAULT false,
+    retention_until timestamptz,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS preservation_snapshots_record_idx ON preservation_snapshots(record_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS preservation_snapshots_status_idx ON preservation_snapshots(snapshot_status);
+CREATE INDEX IF NOT EXISTS preservation_snapshots_source_hash_idx ON preservation_snapshots(source_hash);
+CREATE INDEX IF NOT EXISTS preservation_snapshots_manifest_gin ON preservation_snapshots USING gin(manifest);
+CREATE INDEX IF NOT EXISTS preservation_snapshots_search_idx ON preservation_snapshots USING gin(to_tsvector('simple', title || ' ' || content_text));
+
+CREATE TABLE IF NOT EXISTS integrity_checks (
+    integrity_check_id bigint PRIMARY KEY,
+    check_uuid uuid UNIQUE NOT NULL,
+    run_uuid uuid NOT NULL,
+    record_id bigint,
+    object_type text NOT NULL,
+    check_type text NOT NULL,
+    target_url text NOT NULL DEFAULT '',
+    expected_hash text NOT NULL DEFAULT '',
+    actual_hash text NOT NULL DEFAULT '',
+    status text NOT NULL,
+    response_code integer NOT NULL DEFAULT 0,
+    message text NOT NULL DEFAULT '',
+    checked_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS integrity_checks_run_idx ON integrity_checks(run_uuid, checked_at);
+CREATE INDEX IF NOT EXISTS integrity_checks_record_idx ON integrity_checks(record_id, status);
+CREATE INDEX IF NOT EXISTS integrity_checks_type_idx ON integrity_checks(check_type, status);
+
+CREATE TABLE IF NOT EXISTS authority_history (
+    authority_history_id bigint PRIMARY KEY,
+    authority_uuid uuid UNIQUE NOT NULL,
+    record_id bigint NOT NULL,
+    document_status text NOT NULL DEFAULT '',
+    authority_type text NOT NULL DEFAULT '',
+    authority_url text NOT NULL DEFAULT '',
+    version_label text NOT NULL DEFAULT '',
+    responsible_area text NOT NULL DEFAULT '',
+    supersedes_id bigint,
+    superseded_by_id bigint,
+    changed_by bigint NOT NULL DEFAULT 0,
+    changed_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS authority_history_record_idx ON authority_history(record_id, changed_at DESC);
+CREATE INDEX IF NOT EXISTS authority_history_type_idx ON authority_history(authority_type, document_status);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 

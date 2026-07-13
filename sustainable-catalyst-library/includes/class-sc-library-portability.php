@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * tables or serialized plugin internals.
  */
 final class SC_Library_Portability {
-    public const EXPORT_SCHEMA = 'sc-library-portable-export/1.9';
+    public const EXPORT_SCHEMA = 'sc-library-portable-export/2.0';
     public const POSTGRES_SCHEMA = 'sustainable_catalyst_library';
     public const REST_NAMESPACE = 'sustainable-catalyst/v1';
 
@@ -82,6 +82,7 @@ final class SC_Library_Portability {
             'knowledge_graph' => __('Knowledge graph, relationship provenance, and diagnostics data', 'sustainable-catalyst-library'),
             'orchestration' => __('Research Librarian sessions, routes, and attributed action events', 'sustainable-catalyst-library'),
             'developer_api' => __('Developer API keys, webhook configuration, and delivery history without secrets', 'sustainable-catalyst-library'),
+            'preservation' => __('Preservation snapshots, integrity checks, authority history, and archive manifests', 'sustainable-catalyst-library'),
             'account_workspaces' => __('Persistent account workspaces and revisions', 'sustainable-catalyst-library'),
             'document_editions' => __('Server document jobs and frozen editions', 'sustainable-catalyst-library'),
             'multimedia' => __('Multimedia assets, clips, reels, and processing jobs', 'sustainable-catalyst-library'),
@@ -436,6 +437,9 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
         $api_keys = $this->export_api_keys();
         $webhooks = $this->export_webhooks();
         $webhook_deliveries = $this->export_webhook_deliveries();
+        $preservation_snapshots = $this->export_preservation_snapshots();
+        $integrity_checks = $this->export_integrity_checks();
+        $authority_history = $this->export_authority_history();
 
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($r) => (int) $r['id'], $public_registry), true);
@@ -514,6 +518,12 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             $api_keys = $webhooks = $webhook_deliveries = [];
         }
 
+        if ($scope === 'preservation') {
+            $records = $terms = $record_terms = $relationships = $resources = $documentation = $plans = $plan_dependencies = $account_workspaces = $account_workspace_revisions = $account_workspace_collaborators = $account_workspace_sync_log = $document_jobs = $document_editions = $foundation_documents = $pdf_pages = $foundation_versions = $media_assets = $media_clips = $media_reels = $media_jobs = $editorial_reviews = $editorial_participants = $editorial_comments = $editorial_suggestions = $editorial_events = $graph_nodes = $graph_edges = $orchestration_sessions = $orchestration_events = $api_keys = $webhooks = $webhook_deliveries = [];
+        } elseif ($scope !== 'complete') {
+            $preservation_snapshots = $integrity_checks = $authority_history = [];
+        }
+
         // Embedded Foundation Document data follows the canonical record scope.
         if ($scope === 'registry') {
             $public_ids = array_fill_keys(array_map(static fn($row) => (int) $row['record_id'], $records), true);
@@ -565,6 +575,9 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'api_keys' => $api_keys,
             'webhooks' => $webhooks,
             'webhook_deliveries' => $webhook_deliveries,
+            'preservation_snapshots' => $preservation_snapshots,
+            'integrity_checks' => $integrity_checks,
+            'authority_history' => $authority_history,
         ];
 
         $counts = [];
@@ -591,6 +604,7 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
                 'Knowledge graph exports preserve normalized entities, relationship confidence, provenance, visibility, verification state, and board-promotion lineage.',
                 'Research Librarian orchestration exports are administrator-only and may contain user research questions, recommended routes, and attributed action history.',
                 'Developer API exports omit API-key hashes, webhook signing secrets, and full webhook payload bodies.',
+                'Preservation exports include immutable snapshot payloads, checksums, manifests, integrity outcomes, authority changes, retention dates, and hold flags without deleting canonical WordPress records.',
             ],
         ];
         return ['manifest' => $manifest, 'entities' => $entities];
@@ -661,6 +675,80 @@ pg_dump -Fc sustainable_catalyst_library -f sustainable-catalyst-library.backup<
             'created_by' => (int) $row['created_by'],
             'created_at' => mysql_to_rfc3339((string) $row['created_at']),
             'payload' => json_decode((string) $row['metadata_json'], true) ?: [],
+        ], $rows);
+    }
+
+    private function export_preservation_snapshots(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Preservation')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Preservation::snapshots_table() . ' ORDER BY record_id ASC, id ASC', ARRAY_A) ?: [];
+        return array_map(static fn(array $row): array => [
+            'preservation_snapshot_id' => (int) $row['id'],
+            'snapshot_uuid' => (string) $row['snapshot_uuid'],
+            'record_id' => (int) $row['record_id'],
+            'record_type' => (string) $row['record_type'],
+            'title' => (string) $row['title'],
+            'canonical_url' => (string) $row['canonical_url'],
+            'version_label' => (string) $row['version_label'],
+            'snapshot_status' => (string) $row['snapshot_status'],
+            'reason' => (string) $row['reason'],
+            'source_hash' => (string) $row['source_hash'],
+            'manifest_hash' => (string) $row['manifest_hash'],
+            'content_html' => (string) $row['content_html'],
+            'content_text' => (string) $row['content_text'],
+            'metadata' => json_decode((string) $row['metadata_json'], true) ?: [],
+            'relationships' => json_decode((string) $row['relationships_json'], true) ?: [],
+            'resources' => json_decode((string) $row['resources_json'], true) ?: [],
+            'manifest' => json_decode((string) $row['manifest_json'], true) ?: [],
+            'supersedes_uuid' => (string) $row['supersedes_uuid'],
+            'is_current' => !empty($row['is_current']),
+            'legal_hold' => !empty($row['legal_hold']),
+            'retention_until' => $row['retention_until'] ? mysql_to_rfc3339((string) $row['retention_until']) : null,
+            'created_by' => (int) $row['created_by'],
+            'created_at' => mysql_to_rfc3339((string) $row['created_at']),
+        ], $rows);
+    }
+
+    private function export_integrity_checks(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Preservation')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Preservation::checks_table() . ' ORDER BY id ASC', ARRAY_A) ?: [];
+        return array_map(static fn(array $row): array => [
+            'integrity_check_id' => (int) $row['id'],
+            'check_uuid' => (string) $row['check_uuid'],
+            'run_uuid' => (string) $row['run_uuid'],
+            'record_id' => (int) $row['record_id'],
+            'object_type' => (string) $row['object_type'],
+            'check_type' => (string) $row['check_type'],
+            'target_url' => (string) $row['target_url'],
+            'expected_hash' => (string) $row['expected_hash'],
+            'actual_hash' => (string) $row['actual_hash'],
+            'status' => (string) $row['status'],
+            'response_code' => (int) $row['response_code'],
+            'message' => (string) $row['message'],
+            'checked_at' => mysql_to_rfc3339((string) $row['checked_at']),
+            'payload' => json_decode((string) $row['details_json'], true) ?: [],
+        ], $rows);
+    }
+
+    private function export_authority_history(): array {
+        global $wpdb;
+        if (!class_exists('SC_Library_Preservation')) return [];
+        $rows = $wpdb->get_results('SELECT * FROM ' . SC_Library_Preservation::authority_table() . ' ORDER BY record_id ASC, id ASC', ARRAY_A) ?: [];
+        return array_map(static fn(array $row): array => [
+            'authority_history_id' => (int) $row['id'],
+            'authority_uuid' => (string) $row['authority_uuid'],
+            'record_id' => (int) $row['record_id'],
+            'document_status' => (string) $row['document_status'],
+            'authority_type' => (string) $row['authority_type'],
+            'authority_url' => (string) $row['authority_url'],
+            'version_label' => (string) $row['version_label'],
+            'responsible_area' => (string) $row['responsible_area'],
+            'supersedes_id' => (int) $row['supersedes_id'],
+            'superseded_by_id' => (int) $row['superseded_by_id'],
+            'changed_by' => (int) $row['changed_by'],
+            'changed_at' => mysql_to_rfc3339((string) $row['changed_at']),
+            'payload' => json_decode((string) $row['payload_json'], true) ?: [],
         ], $rows);
     }
 
@@ -2077,6 +2165,76 @@ CREATE TABLE IF NOT EXISTS webhook_deliveries (
     signature_exported boolean NOT NULL DEFAULT false
 );
 
+
+CREATE TABLE IF NOT EXISTS preservation_snapshots (
+    preservation_snapshot_id bigint PRIMARY KEY,
+    snapshot_uuid uuid UNIQUE NOT NULL,
+    record_id bigint NOT NULL,
+    record_type text NOT NULL,
+    title text NOT NULL,
+    canonical_url text NOT NULL DEFAULT '',
+    version_label text NOT NULL DEFAULT '',
+    snapshot_status text NOT NULL,
+    reason text NOT NULL,
+    source_hash text NOT NULL,
+    manifest_hash text NOT NULL,
+    content_html text NOT NULL,
+    content_text text NOT NULL,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    relationships jsonb NOT NULL DEFAULT '[]'::jsonb,
+    resources jsonb NOT NULL DEFAULT '[]'::jsonb,
+    manifest jsonb NOT NULL DEFAULT '{}'::jsonb,
+    supersedes_uuid uuid,
+    is_current boolean NOT NULL DEFAULT false,
+    legal_hold boolean NOT NULL DEFAULT false,
+    retention_until timestamptz,
+    created_by bigint NOT NULL DEFAULT 0,
+    created_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS preservation_snapshots_record_idx ON preservation_snapshots(record_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS preservation_snapshots_status_idx ON preservation_snapshots(snapshot_status);
+CREATE INDEX IF NOT EXISTS preservation_snapshots_source_hash_idx ON preservation_snapshots(source_hash);
+CREATE INDEX IF NOT EXISTS preservation_snapshots_manifest_gin ON preservation_snapshots USING gin(manifest);
+CREATE INDEX IF NOT EXISTS preservation_snapshots_search_idx ON preservation_snapshots USING gin(to_tsvector('simple', title || ' ' || content_text));
+
+CREATE TABLE IF NOT EXISTS integrity_checks (
+    integrity_check_id bigint PRIMARY KEY,
+    check_uuid uuid UNIQUE NOT NULL,
+    run_uuid uuid NOT NULL,
+    record_id bigint,
+    object_type text NOT NULL,
+    check_type text NOT NULL,
+    target_url text NOT NULL DEFAULT '',
+    expected_hash text NOT NULL DEFAULT '',
+    actual_hash text NOT NULL DEFAULT '',
+    status text NOT NULL,
+    response_code integer NOT NULL DEFAULT 0,
+    message text NOT NULL DEFAULT '',
+    checked_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS integrity_checks_run_idx ON integrity_checks(run_uuid, checked_at);
+CREATE INDEX IF NOT EXISTS integrity_checks_record_idx ON integrity_checks(record_id, status);
+CREATE INDEX IF NOT EXISTS integrity_checks_type_idx ON integrity_checks(check_type, status);
+
+CREATE TABLE IF NOT EXISTS authority_history (
+    authority_history_id bigint PRIMARY KEY,
+    authority_uuid uuid UNIQUE NOT NULL,
+    record_id bigint NOT NULL,
+    document_status text NOT NULL DEFAULT '',
+    authority_type text NOT NULL DEFAULT '',
+    authority_url text NOT NULL DEFAULT '',
+    version_label text NOT NULL DEFAULT '',
+    responsible_area text NOT NULL DEFAULT '',
+    supersedes_id bigint,
+    superseded_by_id bigint,
+    changed_by bigint NOT NULL DEFAULT 0,
+    changed_at timestamptz,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS authority_history_record_idx ON authority_history(record_id, changed_at DESC);
+CREATE INDEX IF NOT EXISTS authority_history_type_idx ON authority_history(authority_type, document_status);
+
 CREATE OR REPLACE VIEW current_registry AS
 SELECT * FROM records WHERE historical = false AND record_state NOT IN ('archived', 'superseded', 'cancelled');
 
@@ -2154,6 +2312,9 @@ SQL;
             'api_keys' => ['api_key_id','key_uuid','name','key_prefix','scopes','rate_limit_per_hour','status','last_used_at','expires_at','created_by','created_at','updated_at','secret_exported'],
             'webhooks' => ['webhook_id','webhook_uuid','name','endpoint_url','secret_prefix','events','status','last_delivery_at','last_status_code','failure_count','created_by','created_at','updated_at','secret_exported'],
             'webhook_deliveries' => ['webhook_delivery_id','delivery_uuid','webhook_id','event_id','event_type','attempt','status','response_code','response_summary','next_attempt_at','delivered_at','created_at','updated_at','payload_exported','signature_exported'],
+            'preservation_snapshots' => ['preservation_snapshot_id','snapshot_uuid','record_id','record_type','title','canonical_url','version_label','snapshot_status','reason','source_hash','manifest_hash','content_html','content_text','metadata','relationships','resources','manifest','supersedes_uuid','is_current','legal_hold','retention_until','created_by','created_at'],
+            'integrity_checks' => ['integrity_check_id','check_uuid','run_uuid','record_id','object_type','check_type','target_url','expected_hash','actual_hash','status','response_code','message','checked_at','payload'],
+            'authority_history' => ['authority_history_id','authority_uuid','record_id','document_status','authority_type','authority_url','version_label','responsible_area','supersedes_id','superseded_by_id','changed_by','changed_at','payload'],
             default => [],
         };
         if (!$columns) return '';
@@ -2162,12 +2323,12 @@ SQL;
             $literals = [];
             foreach ($columns as $column) {
                 $value = $row[$column] ?? null;
-                if (in_array($column, ['payload', 'expected_release', 'manifest', 'diagnostics', 'clip_uuids', 'anchor', 'scopes', 'events'], true)) $literals[] = $this->sql_json($value ?: []);
+                if (in_array($column, ['payload', 'expected_release', 'manifest', 'metadata', 'relationships', 'resources', 'diagnostics', 'clip_uuids', 'anchor', 'scopes', 'events'], true)) $literals[] = $this->sql_json($value ?: []);
                 elseif (in_array($column, ['dependency_ids','related_record_ids'], true)) $literals[] = $this->sql_bigint_array(is_array($value) ? $value : []);
-                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at','completed_at','frozen_at','due_at','locked_at','lock_expires_at','expires_at','resolved_at','decided_at','verified_at','last_used_at','last_delivery_at','next_attempt_at','delivered_at'], true)) $literals[] = $this->sql_timestamp($value);
+                elseif (in_array($column, ['published_at','modified_at','created_at','updated_at','last_synced_at','accepted_at','completed_at','frozen_at','due_at','locked_at','lock_expires_at','expires_at','resolved_at','decided_at','verified_at','last_used_at','last_delivery_at','next_attempt_at','delivered_at','retention_until','checked_at','changed_at'], true)) $literals[] = $this->sql_timestamp($value);
                 elseif (in_array($column, ['last_reviewed','planned_start','actual_start','actual_publication_date'], true)) $literals[] = $value ? $this->sql_text((string) $value) . '::date' : 'NULL';
-                elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override','secret_exported','payload_exported','signature_exported','download_enabled','viewer_enabled'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
-                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by','api_key_id','rate_limit_per_hour','last_status_code','failure_count','webhook_id','webhook_delivery_id','pdf_page_id','foundation_version_id','page_number','character_count','page_count'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by','api_key_id','rate_limit_per_hour','last_status_code','failure_count','webhook_id','webhook_delivery_id','pdf_page_id','foundation_version_id','page_number','character_count','page_count'], true)) ? (string) (int) $value : 'NULL';
+                elseif (in_array($column, ['authoritative','historical','featured','public','blocked_override','secret_exported','payload_exported','signature_exported','download_enabled','viewer_enabled','is_current','legal_hold'], true)) $literals[] = $value ? 'TRUE' : 'FALSE';
+                elseif (in_array($column, ['record_id','term_id','parent_term_id','article_map_id','relationship_id','source_record_id','target_record_id','sort_order','review_interval_days','supersedes_record_id','superseded_by_record_id','plan_id','linked_draft_id','published_record_id','term_order','dependency_record_id','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by','api_key_id','rate_limit_per_hour','last_status_code','failure_count','webhook_id','webhook_delivery_id','pdf_page_id','foundation_version_id','preservation_snapshot_id','integrity_check_id','authority_history_id','supersedes_id','superseded_by_id','page_number','character_count','page_count'], true)) $literals[] = ((int) $value > 0 || in_array($column, ['sort_order','term_order','review_interval_days','dependency_order','progress_percent','workspace_id','owner_user_id','revision','last_synced_revision','revision_id','created_by','collaboration_id','user_id','invited_by','sync_log_id','response_code','document_job_id','document_edition_id','media_asset_id','media_clip_id','media_reel_id','media_job_id','attachment_id','duration_ms','poster_attachment_id','poster_time_ms','start_ms','end_ms','progress','attempt','max_attempts','output_attachment_id','output_bytes','review_id','post_id','assignee_user_id','locked_by','current_revision','participant_id','comment_id','parent_id','resolved_by','suggestion_id','decided_by','event_id','graph_node_id','graph_edge_id','source_node_id','target_node_id','verified_by','api_key_id','rate_limit_per_hour','last_status_code','failure_count','webhook_id','webhook_delivery_id','pdf_page_id','foundation_version_id','preservation_snapshot_id','integrity_check_id','authority_history_id','supersedes_id','superseded_by_id','page_number','character_count','page_count'], true)) ? (string) (int) $value : 'NULL';
                 elseif (in_array($column, ['series_order','estimated_effort','actual_effort','confidence'], true)) $literals[] = (string) (float) $value;
                 else $literals[] = $this->sql_text((string) ($value ?? ''));
             }
@@ -2207,6 +2368,9 @@ SQL;
             'api_keys' => 'api_key_id',
             'webhooks' => 'webhook_id',
             'webhook_deliveries' => 'webhook_delivery_id',
+            'preservation_snapshots' => 'preservation_snapshot_id',
+            'integrity_checks' => 'integrity_check_id',
+            'authority_history' => 'authority_history_id',
             default => '',
         };
         return "INSERT INTO {$entity} (" . implode(', ', $columns) . ") VALUES\n" . implode(",\n", $values) . ($conflict ? "\nON CONFLICT ({$conflict}) DO NOTHING;" : ';');

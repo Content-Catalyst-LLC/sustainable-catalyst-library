@@ -1,13 +1,13 @@
-# Library v1.18.0 Public API, Webhooks, and Developer Documentation
+# Library v1.19.0 Public API, Webhooks, and Preservation Routes
 
 ## Install
 
-1. Upload `sustainable-catalyst-library-v1.18.0.zip` in WordPress.
+1. Upload `sustainable-catalyst-library-v1.19.0.zip` in WordPress.
 2. Choose **Replace current with uploaded**.
-3. Confirm **Sustainable Catalyst Library 1.18.0**.
-4. Open **SC Library → Developer API**.
+3. Confirm **Sustainable Catalyst Library 1.19.0**.
+4. Open **SC Library → Developer API** and **SC Library → Preservation & Archive**.
 
-No Library index rebuild is required solely for this upgrade. API record results reflect the current Library index, so confirm Index Tools is healthy before external integration.
+No Library index rebuild is required solely for this upgrade. API record results reflect the current Library index, while archive routes reflect completed preservation snapshots.
 
 ## Developer portal
 
@@ -37,13 +37,26 @@ JSON Schema registry:
 /wp-json/sustainable-catalyst-library/v1/schemas
 ```
 
-Public collections are paginated with `page` and `per_page` parameters and return `X-WP-Total` headers. Public multimedia evidence reels are available at:
+## Institutional Archive routes
+
+Public archive routes expose frozen snapshots only while the canonical WordPress record remains published and not password protected:
 
 ```text
-/wp-json/sustainable-catalyst-library/v1/media/reels
+/wp-json/sustainable-catalyst-library/v1/archive
+/wp-json/sustainable-catalyst-library/v1/archive/{uuid}
+/wp-json/sustainable-catalyst-library/v1/archive/{uuid}/manifest
 ```
 
-Roadmap records are available at `/roadmap` and can be filtered by Library collection slug.
+The internal Library namespace also provides:
+
+```text
+/wp-json/sustainable-catalyst/v1/library/preservation/status
+/wp-json/sustainable-catalyst/v1/library/archive
+/wp-json/sustainable-catalyst/v1/library/archive/{uuid}
+/wp-json/sustainable-catalyst/v1/library/archive/{uuid}/manifest
+```
+
+Administrative preservation diagnostics require an authenticated administrator.
 
 ## API keys
 
@@ -61,6 +74,17 @@ or:
 Authorization: Bearer scl_live_...
 ```
 
+## Preservation webhook events
+
+The webhook catalog includes:
+
+```text
+preservation.snapshot.created
+integrity.audit.completed
+```
+
+Each delivery uses the same timestamped HMAC signature as other Library events.
+
 ## Webhook verification
 
 For each delivery, calculate:
@@ -73,13 +97,12 @@ Compare it in constant time with the hexadecimal value following `sha256=` in `X
 
 ## Privacy boundary
 
-Public API and webhooks do not expose private workspaces, editorial comments, participant email addresses, invitation tokens, internal planning notes, API-key hashes, webhook secrets, full delivery payload archives, or provider credentials.
+Public API and webhooks do not expose private workspaces, editorial comments, participant email addresses, invitation tokens, internal planning notes, API-key hashes, webhook secrets, full delivery payload archives, provider credentials, or snapshots whose canonical records are no longer public.
 
 ## Portable export
 
-Schema `sc-library-portable-export/1.9` adds developer API metadata. Secrets and hashes remain excluded.
+Schema `sc-library-portable-export/2.0` includes preservation snapshots, integrity outcomes, authority history, and nonsecret developer metadata. Credentials, hashes, and signing secrets remain excluded.
 
-
-## Foundation Document routes (v1.18.1)
+## Foundation Document routes
 
 Public API clients can list Foundation Documents, retrieve a record, inspect extracted page text, and request citation formats. Public routes expose only published records.

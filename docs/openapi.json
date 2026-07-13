@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sustainable Catalyst Library API",
-    "version": "1.1.0",
-    "description": "Versioned public access to Sustainable Catalyst Library records, embedded Foundation Documents and page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations."
+    "version": "1.2.0",
+    "description": "Versioned public access to Sustainable Catalyst Library records, preserved historical editions, preservation manifests, embedded Foundation Documents and page-aware PDF text, relationships, graph data, roadmap data, schemas, and explicitly scoped service operations."
   },
   "servers": [
     {
@@ -344,6 +344,99 @@
           }
         }
       }
+    },
+    "/archive": {
+      "get": {
+        "summary": "Browse public preserved editions",
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Preserved edition collection"
+          }
+        }
+      }
+    },
+    "/archive/{uuid}": {
+      "get": {
+        "summary": "Read one public frozen edition",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Preserved snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreservationSnapshot"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/archive/{uuid}/manifest": {
+      "get": {
+        "summary": "Read one preservation manifest",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Preservation manifest"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -514,6 +607,75 @@
       },
       "foundation-document": {
         "$ref": "./schemas/foundation-document.json"
+      },
+      "PreservationSnapshot": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://sustainablecatalyst.com/schemas/preservation-snapshot.json",
+        "title": "Sustainable Catalyst preserved snapshot",
+        "type": "object",
+        "required": [
+          "schema",
+          "snapshot_uuid",
+          "record_id",
+          "title",
+          "snapshot_status",
+          "source_hash",
+          "created_at"
+        ],
+        "properties": {
+          "schema": {
+            "const": "sc-library-preservation/1.0"
+          },
+          "snapshot_uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "record_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "record_type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "canonical_url": {
+            "type": "string"
+          },
+          "version_label": {
+            "type": "string"
+          },
+          "snapshot_status": {
+            "enum": [
+              "current",
+              "preserved",
+              "superseded",
+              "archived"
+            ]
+          },
+          "source_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "manifest_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "content_html": {
+            "type": "string"
+          },
+          "supersedes_uuid": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "manifest_url": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
       }
     }
   },

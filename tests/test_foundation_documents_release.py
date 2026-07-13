@@ -18,9 +18,9 @@ README = (PLUGIN / "readme.txt").read_text()
 
 
 def test_release_markers():
-    assert "Version: 1.18.1" in MAIN
-    assert "SC_LIBRARY_VERSION', '1.18.1'" in MAIN
-    assert "Stable tag: 1.18.1" in README
+    assert "Version: 1.19.0" in MAIN
+    assert "SC_LIBRARY_VERSION', '1.19.0'" in MAIN
+    assert "Stable tag: 1.19.0" in README
     assert "embedded Foundation Document records" in MAIN
 
 
@@ -147,7 +147,7 @@ def test_public_and_developer_api_routes():
 
 
 def test_portable_export_schema_and_entities():
-    assert "sc-library-portable-export/1.9" in PORTABILITY
+    assert "sc-library-portable-export/2.0" in PORTABILITY
     for entity in ["foundation_documents", "pdf_pages", "foundation_versions"]:
         assert entity in PORTABILITY
     static_schema = (ROOT / "docs/postgresql-schema.sql").read_text()

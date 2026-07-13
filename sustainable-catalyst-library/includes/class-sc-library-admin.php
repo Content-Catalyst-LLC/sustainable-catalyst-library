@@ -211,11 +211,11 @@ final class SC_Library_Admin {
     public function activation_notice(): void {
         if (get_transient('sc_library_activation_notice')) {
             delete_transient('sc_library_activation_notice');
-            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.18.1 activated.</strong> Foundation Document records, embedded PDF.js reading, page-aware extraction, citation exports, and Foundation PDF migration are now available. Existing API, orchestration, graph, editorial, multimedia, workspace, and scanner systems remain available.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Sustainable Catalyst Library v1.19.0 activated.</strong> Preservation snapshots, integrity audits, checksum manifests, authority history, supersession chains, retention controls, and the Institutional Archive are now available. Existing Foundation Document, API, orchestration, graph, editorial, multimedia, workspace, and scanner systems remain available.</p></div>';
         }
         if (get_transient('sc_library_upgrade_notice')) {
             delete_transient('sc_library_upgrade_notice');
-            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.18.1.</strong> Open Foundation Documents to attach and extract PDFs, or use SC Library → PDF Migration to convert existing Foundation download links. PDF binaries remain in the Media Library and extracted text remains page-aware.</p></div>';
+            echo '<div class="notice notice-info is-dismissible"><p><strong>Sustainable Catalyst Library upgraded to v1.19.0.</strong> Open SC Library → Preservation & Archive to create frozen snapshots, configure retention, run a bounded integrity audit, and create the public Institutional Archive page. Canonical WordPress records remain the source of truth.</p></div>';
         }
     }
 
@@ -269,7 +269,7 @@ final class SC_Library_Admin {
                 <?php $this->metric_card(__('Library Collections', 'sustainable-catalyst-library'), number_format_i18n($this->term_count(SC_Library_Taxonomies::COLLECTION))); ?>
                 <?php $this->metric_card(__('Documentation Categories', 'sustainable-catalyst-library'), number_format_i18n($this->term_count(SC_Library_Taxonomies::DOCUMENT_CATEGORY))); ?>
                 <?php $this->metric_card(__('Foundations records', 'sustainable-catalyst-library'), number_format_i18n(class_exists('SC_Library_Documentation') ? SC_Library_Documentation::foundation_count() : 0)); ?>
-                <?php $this->metric_card(__('Portable export schema', 'sustainable-catalyst-library'), '1.3'); ?>
+                <?php $this->metric_card(__('Portable export schema', 'sustainable-catalyst-library'), '2.0'); ?>
             </div>
 
             <div class="card" style="max-width:980px">
