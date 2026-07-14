@@ -13,6 +13,7 @@ final class SC_Library_Foundation_Pages {
     public const POST_TYPE = 'sc_foundation_doc';
     public const META_PDF_ID = '_sc_library_foundation_page_pdf_id';
     public const SCHEMA = 'sc-library-foundation-page/1.0';
+    public const ROUTE_VERSION = '2.1.1';
 
     private static $allow_foundation_query = false;
     private static $saving_title = false;
@@ -33,7 +34,7 @@ final class SC_Library_Foundation_Pages {
         add_filter( 'use_block_editor_for_post_type', array( $this, 'use_classic_editor' ), 30, 2 );
         add_filter( 'enter_title_here', array( $this, 'title_placeholder' ), 20, 2 );
 
-        add_action( 'add_meta_boxes_' . self::POST_TYPE, array( $this, 'add_pdf_meta_box' ), 100 );
+        add_action( 'edit_form_after_title', array( $this, 'render_inline_pdf_selector' ), 20 );
         add_action( 'do_meta_boxes', array( $this, 'simplify_editor_meta_boxes' ), 100, 3 );
         add_action( 'save_post_' . self::POST_TYPE, array( $this, 'save_document' ), 30, 3 );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
@@ -42,7 +43,6 @@ final class SC_Library_Foundation_Pages {
         add_action( 'wp_enqueue_scripts', array( $this, 'register_public_assets' ) );
         add_filter( 'template_include', array( $this, 'single_template' ), 100 );
         add_filter( 'body_class', array( $this, 'body_classes' ) );
-        add_filter( 'pre_get_posts', array( $this, 'exclude_from_unrelated_queries' ), 100 );
 
         add_shortcode( 'sc_foundation_documents', array( $this, 'shortcode_foundation_documents' ) );
     }
@@ -74,6 +74,7 @@ final class SC_Library_Foundation_Pages {
         $args['public']              = true;
         $args['publicly_queryable']  = true;
         $args['show_ui']             = true;
+        $args['show_in_menu']        = 'sc-library';
         $args['show_in_rest']        = true;
         $args['show_in_nav_menus']   = false;
         $args['exclude_from_search'] = true;
@@ -108,9 +109,15 @@ final class SC_Library_Foundation_Pages {
             unregister_taxonomy_for_object_type( $taxonomy, self::POST_TYPE );
         }
 
-        if ( '2.1.0' !== get_option( 'sc_library_foundation_pages_rewrite_version' ) ) {
+        add_rewrite_rule(
+            '^foundations/([^/]+)/?$',
+            'index.php?post_type=' . self::POST_TYPE . '&name=$matches[1]',
+            'top'
+        );
+
+        if ( self::ROUTE_VERSION !== get_option( 'sc_library_foundation_pages_rewrite_version' ) ) {
             flush_rewrite_rules( false );
-            update_option( 'sc_library_foundation_pages_rewrite_version', '2.1.0', false );
+            update_option( 'sc_library_foundation_pages_rewrite_version', self::ROUTE_VERSION, false );
         }
     }
 
@@ -125,15 +132,22 @@ final class SC_Library_Foundation_Pages {
         return $placeholder;
     }
 
-    public function add_pdf_meta_box( $post ) {
-        add_meta_box(
-            'sc-library-foundation-page-pdf',
-            __( 'PDF document', 'sustainable-catalyst-library' ),
-            array( $this, 'render_pdf_meta_box' ),
-            self::POST_TYPE,
-            'normal',
-            'high'
-        );
+    public function render_inline_pdf_selector( $post ) {
+        if ( ! $post instanceof WP_Post || self::POST_TYPE !== $post->post_type || $this->is_advanced_editor() ) {
+            return;
+        }
+        ?>
+        <div class="sc-foundation-page-inline-panel">
+            <div class="sc-foundation-page-inline-panel__heading">
+                <span class="dashicons dashicons-pdf" aria-hidden="true"></span>
+                <div>
+                    <h2><?php esc_html_e( 'Foundation PDF', 'sustainable-catalyst-library' ); ?></h2>
+                    <p><?php esc_html_e( 'Select one PDF from the Media Library. It will be embedded automatically on the published document page.', 'sustainable-catalyst-library' ); ?></p>
+                </div>
+            </div>
+            <?php $this->render_pdf_meta_box( $post ); ?>
+        </div>
+        <?php
     }
 
     public function render_pdf_meta_box( $post ) {
@@ -186,7 +200,6 @@ final class SC_Library_Foundation_Pages {
         $preserve = array(
             'submitdiv',
             'slugdiv',
-            'sc-library-foundation-page-pdf',
             'revisionsdiv',
         );
 
@@ -260,14 +273,14 @@ final class SC_Library_Foundation_Pages {
         wp_enqueue_media();
         wp_enqueue_script(
             'sc-library-foundation-pages-admin',
-            plugins_url( '../assets/js/sc-library-foundation-pages-admin.js', __FILE__ ),
+            SC_LIBRARY_URL . 'assets/js/sc-library-foundation-pages-admin.js',
             array( 'jquery' ),
             $this->version(),
             true
         );
         wp_enqueue_style(
             'sc-library-foundation-pages-admin',
-            plugins_url( '../assets/css/sc-library-foundation-pages.css', __FILE__ ),
+            SC_LIBRARY_URL . 'assets/css/sc-library-foundation-pages.css',
             array(),
             $this->version()
         );
@@ -295,7 +308,7 @@ final class SC_Library_Foundation_Pages {
     public function register_public_assets() {
         wp_register_style(
             'sc-library-foundation-pages',
-            plugins_url( '../assets/css/sc-library-foundation-pages.css', __FILE__ ),
+            SC_LIBRARY_URL . 'assets/css/sc-library-foundation-pages.css',
             array(),
             $this->version()
         );
@@ -326,18 +339,18 @@ final class SC_Library_Foundation_Pages {
         if ( ! $query instanceof WP_Query || is_admin() || self::$allow_foundation_query ) {
             return $query;
         }
-        if ( $query->is_singular( self::POST_TYPE ) || $this->is_allowed_foundation_rest_request() ) {
+
+        // Never modify direct Foundation Document requests.
+        if (
+            $query->is_singular()
+            || self::POST_TYPE === $query->get( 'post_type' ) && $query->get( 'name' )
+            || $query->get( self::POST_TYPE )
+        ) {
             return $query;
         }
 
-        $post_type = $query->get( 'post_type' );
-        if ( self::POST_TYPE === $post_type ) {
-            $query->set( 'post__in', array( 0 ) );
-            return $query;
-        }
-        if ( is_array( $post_type ) && in_array( self::POST_TYPE, $post_type, true ) ) {
-            $query->set( 'post_type', array_values( array_diff( $post_type, array( self::POST_TYPE ) ) ) );
-        }
+        // The post type registration already excludes Foundation Docs from ordinary search,
+        // navigation, feeds, blog archives, categories, and tags. No query mutation is needed.
         return $query;
     }
 

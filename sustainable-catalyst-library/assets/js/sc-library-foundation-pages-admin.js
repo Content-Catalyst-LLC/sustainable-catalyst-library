@@ -26,6 +26,11 @@
       $root.on('click', '[data-sc-foundation-select-pdf]', function (event) {
         event.preventDefault();
 
+        if (!window.wp || !wp.media) {
+          window.alert('The WordPress Media Library could not be loaded. Reload this editor and try again.');
+          return;
+        }
+
         if (frame) {
           frame.open();
           return;
