@@ -1,5 +1,5 @@
 /*
- * Sustainable Catalyst Library v2.5.0
+ * Sustainable Catalyst Library v2.5.1
  * Citation and Research Source Manager
  */
 
@@ -614,5 +614,105 @@
   .sc-project-bibliography__list li {
     break-inside: avoid;
     border-color: #777;
+  }
+}
+
+/* v2.5.1 — Citation Formatting and Source Reliability */
+.sc-source-reliability-card {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid #c3c4c7;
+  border-left: 5px solid #646970;
+  background: #f6f7f7;
+}
+
+.sc-source-reliability-card.is-ready,
+.sc-source-reliability-state.is-ready {
+  border-left-color: #167047;
+  color: #167047;
+}
+
+.sc-source-reliability-card.is-needs-review,
+.sc-source-reliability-state.is-needs-review {
+  border-left-color: #996800;
+  color: #7a4d00;
+}
+
+.sc-source-reliability-card.is-invalid,
+.sc-source-reliability-state.is-invalid {
+  border-left-color: #b32d2e;
+  color: #b32d2e;
+}
+
+.sc-source-reliability-card strong,
+.sc-source-reliability-card span,
+.sc-source-reliability-state {
+  display: block;
+}
+
+.sc-source-reliability-issues {
+  margin: 10px 0;
+  padding-left: 18px;
+}
+
+.sc-source-reliability-issues li {
+  margin: 0 0 7px;
+}
+
+.sc-source-reliability-issues .is-error {
+  color: #b32d2e;
+}
+
+.sc-source-reliability-issues .is-warning {
+  color: #7a4d00;
+}
+
+.sc-source-duplicate-table td,
+.sc-source-duplicate-table th {
+  vertical-align: top;
+}
+
+.sc-source-duplicate-table select {
+  width: 100%;
+  min-width: 190px;
+}
+
+.sc-source-history-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sc-source-history-list li {
+  display: grid;
+  grid-template-columns: minmax(150px, .35fr) minmax(240px, 1fr) minmax(160px, .45fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid #dcdcde;
+  background: #fff;
+}
+
+.sc-source-history-list span,
+.sc-source-history-list small {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .sc-source-history-list li {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-source-duplicate-table,
+  .sc-source-duplicate-table tbody,
+  .sc-source-duplicate-table tr,
+  .sc-source-duplicate-table th,
+  .sc-source-duplicate-table td {
+    display: block;
+    width: 100%;
   }
 }

@@ -7,6 +7,7 @@ CITATIONS = PLUGIN / "includes" / "class-sc-library-citation-source-manager.php"
 OCR = PLUGIN / "includes" / "class-sc-library-document-ocr-processing.php"
 OCR_RELIABILITY = PLUGIN / "includes" / "class-sc-library-document-ocr-reliability.php"
 REPOSITORY = PLUGIN / "includes" / "class-sc-library-document-public-repository.php"
+CITATION_RELIABILITY = PLUGIN / "includes" / "class-sc-library-citation-source-reliability.php"
 BULK = PLUGIN / "includes" / "class-sc-library-pdf-bulk-import-repair.php"
 JS = PLUGIN / "assets" / "js" / "sc-library-citation-manager.js"
 CSS = PLUGIN / "assets" / "css" / "sc-library-citation-manager.css"
@@ -19,7 +20,7 @@ def read(path: Path) -> str:
 
 
 def test_required_files_exist():
-    for path in (WRAPPER, CITATIONS, OCR, OCR_RELIABILITY, REPOSITORY, BULK, JS, CSS, SINGLE, ARCHIVE):
+    for path in (WRAPPER, CITATIONS, CITATION_RELIABILITY, OCR, OCR_RELIABILITY, REPOSITORY, BULK, JS, CSS, SINGLE, ARCHIVE):
         assert path.is_file(), path
 
 
@@ -33,7 +34,9 @@ def test_loader_preserves_existing_systems_and_adds_citations_last():
         "class-sc-library-document-ocr-reliability.php",
         "class-sc-library-document-public-repository.php",
         "class-sc-library-citation-source-manager.php",
+        "class-sc-library-citation-source-reliability.php",
         "new SC_Library_Citation_Source_Manager",
+        "new SC_Library_Citation_Source_Reliability",
     ):
         assert marker in text, marker
     assert text.index("class-sc-library-document-public-repository.php") < text.index("class-sc-library-citation-source-manager.php")
@@ -322,8 +325,8 @@ def test_version_and_existing_route_compatibility():
     wrapper = read(WRAPPER)
     citations = read(CITATIONS)
     repository = read(REPOSITORY)
-    assert "public const VERSION = '2.5.0'" in citations
-    assert "SC_LIBRARY_VERSION : '2.5.0'" in wrapper
+    assert "public const VERSION = '2.5.1'" in citations
+    assert "SC_LIBRARY_VERSION : '2.5.1'" in wrapper
     assert "public const ROUTE_VERSION = '2.3.0'" in repository
     assert "public const VERSION = '2.4.1'" in read(OCR)
     assert "public const VERSION = '2.4.1'" in read(OCR_RELIABILITY)

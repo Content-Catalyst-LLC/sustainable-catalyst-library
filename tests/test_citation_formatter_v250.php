@@ -13,6 +13,9 @@ if ( ! function_exists( 'sanitize_key' ) ) {
 if ( ! function_exists( 'sanitize_text_field' ) ) {
     function sanitize_text_field( $value ) { return trim( strip_tags( (string) $value ) ); }
 }
+if ( ! function_exists( 'absint' ) ) {
+    function absint( $value ) { return abs( intval( $value ) ); }
+}
 if ( ! function_exists( 'wp_strip_all_tags' ) ) {
     function wp_strip_all_tags( $value ) { return strip_tags( (string) $value ); }
 }
@@ -124,7 +127,7 @@ $chapter['pages'] = '90-104';
 $chapter['doi'] = '';
 
 assert_same(
-    "Jones, A. (2026). 'Evidence records'. in M. Lee (ed.), Handbook of Research Systems, pp. 90–104. London: Open Press.",
+    "Jones, A. (2026). 'Evidence records'. In: M. Lee (ed.), Handbook of Research Systems, pp. 90–104. London: Open Press.",
     SC_Library_Citation_Source_Manager::format_citation( $chapter, 'harvard', 'reference' ),
     'Book chapter reference'
 );

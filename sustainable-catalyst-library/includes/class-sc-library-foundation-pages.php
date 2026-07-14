@@ -988,11 +988,11 @@ final class SC_Library_Foundation_Pages {
     }
 
     private function version() {
-        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.5.0';
+        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.5.1';
     }
 }
 
-// Knowledge Library v2.5.0: retain document/OCR systems and add citation and research-source infrastructure.
+// Knowledge Library v2.5.1: retain citation/source records and add formatting, history, duplicate, and API reliability safeguards.
 require_once __DIR__ . '/class-sc-library-pdf-to-document.php';
 require_once __DIR__ . '/class-sc-library-pdf-conversion-reliability.php';
 require_once __DIR__ . '/class-sc-library-pdf-bulk-import-repair.php';
@@ -1001,6 +1001,7 @@ require_once __DIR__ . '/class-sc-library-document-ocr-reliability.php';
 require_once __DIR__ . '/class-sc-library-document-repository-hardening.php';
 require_once __DIR__ . '/class-sc-library-document-public-repository.php';
 require_once __DIR__ . '/class-sc-library-citation-source-manager.php';
+require_once __DIR__ . '/class-sc-library-citation-source-reliability.php';
 new SC_Library_PDF_To_Document();
 new SC_Library_PDF_Conversion_Reliability();
 new SC_Library_PDF_Bulk_Import_Repair();
@@ -1009,3 +1010,4 @@ new SC_Library_Document_OCR_Reliability();
 new SC_Library_Document_Repository_Hardening();
 new SC_Library_Document_Public_Repository();
 new SC_Library_Citation_Source_Manager();
+new SC_Library_Citation_Source_Reliability();

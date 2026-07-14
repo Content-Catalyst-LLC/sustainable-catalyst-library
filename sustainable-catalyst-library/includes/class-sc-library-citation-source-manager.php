@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Citation_Source_Manager {
-    public const VERSION = '2.5.0';
+    public const VERSION = '2.5.1';
     public const API_NAMESPACE = 'sc-library/v1';
     public const STYLE_SCHEMA = 'sc-library-citation-style/1.0';
     public const SOURCE_SCHEMA = 'sc-library-research-source/1.0';
@@ -26,6 +26,7 @@ final class SC_Library_Citation_Source_Manager {
 
     public const META_AUTHORS = '_sc_source_authors';
     public const META_ORGANIZATION = '_sc_source_organization';
+    public const META_ORGANIZATION_SHORT = '_sc_source_organization_short';
     public const META_EDITORS = '_sc_source_editors';
     public const META_YEAR = '_sc_source_year';
     public const META_YEAR_SUFFIX = '_sc_source_year_suffix';
@@ -289,7 +290,7 @@ final class SC_Library_Citation_Source_Manager {
         );
         ?>
         <div class="wrap sc-citation-admin">
-            <p class="sc-citation-kicker"><?php esc_html_e( 'Knowledge Library v2.5.0', 'sustainable-catalyst-library' ); ?></p>
+            <p class="sc-citation-kicker"><?php esc_html_e( 'Knowledge Library v2.5.1', 'sustainable-catalyst-library' ); ?></p>
             <h1><?php esc_html_e( 'Citation and Research Source Manager', 'sustainable-catalyst-library' ); ?></h1>
             <p class="sc-citation-lede"><?php esc_html_e( 'Store structured sources, generate Harvard citations, organize project bibliographies, preserve attachments, and expose permission-controlled source APIs.', 'sustainable-catalyst-library' ); ?></p>
 
@@ -394,6 +395,9 @@ final class SC_Library_Citation_Source_Manager {
                 <textarea id="sc-source-authors" name="sc_source_authors" rows="5" placeholder="Ahmad | Tariq&#10;Smith | Jane M. | | 0000-0000-0000-0000"><?php echo esc_textarea( $authors ); ?></textarea>
                 <label for="sc-source-organization"><strong><?php esc_html_e( 'Organizational author', 'sustainable-catalyst-library' ); ?></strong></label>
                 <input id="sc-source-organization" type="text" name="sc_source_organization" value="<?php echo esc_attr( get_post_meta( $post->ID, self::META_ORGANIZATION, true ) ); ?>">
+                <label for="sc-source-organization-short"><strong><?php esc_html_e( 'Short institutional author', 'sustainable-catalyst-library' ); ?></strong></label>
+                <input id="sc-source-organization-short" type="text" name="sc_source_organization_short" value="<?php echo esc_attr( get_post_meta( $post->ID, self::META_ORGANIZATION_SHORT, true ) ); ?>" placeholder="WHO">
+                <p class="description"><?php esc_html_e( 'Optional abbreviation used only for in-text citations; the full organization remains in the reference list.', 'sustainable-catalyst-library' ); ?></p>
                 <label for="sc-source-editors"><strong><?php esc_html_e( 'Editors', 'sustainable-catalyst-library' ); ?></strong></label>
                 <textarea id="sc-source-editors" name="sc_source_editors" rows="3" placeholder="Jones | Amira"><?php echo esc_textarea( $editors ); ?></textarea>
             </section>
@@ -492,7 +496,7 @@ final class SC_Library_Citation_Source_Manager {
             <?php if ( $in_text ) : ?><button type="button" class="button" data-sc-copy-target=".sc-citation-preview__intext"><?php esc_html_e( 'Copy in-text citation', 'sustainable-catalyst-library' ); ?></button><?php endif; ?>
 
             <p><strong><?php esc_html_e( 'Citation key', 'sustainable-catalyst-library' ); ?></strong><br><code><?php echo esc_html( $key ?: '—' ); ?></code></p>
-            <p class="description"><?php esc_html_e( 'Harvard conventions vary by institution. v2.5.0 uses the configurable Sustainable Catalyst Harvard profile.', 'sustainable-catalyst-library' ); ?></p>
+            <p class="description"><?php esc_html_e( 'Harvard conventions vary by institution. v2.5.1 uses the tested Sustainable Catalyst Harvard profile with reliability checks.', 'sustainable-catalyst-library' ); ?></p>
         </div>
         <?php
     }
@@ -501,6 +505,9 @@ final class SC_Library_Citation_Source_Manager {
         $duplicates = self::id_list( get_post_meta( $post->ID, self::META_DUPLICATES, true ) );
         ?>
         <p><label><input type="checkbox" name="sc_source_verified" value="1" <?php checked( '1', get_post_meta( $post->ID, self::META_VERIFIED, true ) ); ?>> <?php esc_html_e( 'Metadata verified against the source', 'sustainable-catalyst-library' ); ?></label></p>
+        <?php if ( '1' === get_post_meta( $post->ID, self::META_VERIFIED, true ) ) : ?>
+            <p class="sc-source-reverify"><label><input type="checkbox" name="sc_source_reverify" value="1"> <?php esc_html_e( 'I rechecked citation-critical fields changed in this save.', 'sustainable-catalyst-library' ); ?></label></p>
+        <?php endif; ?>
         <p><label><input type="checkbox" name="sc_source_peer_reviewed" value="1" <?php checked( '1', get_post_meta( $post->ID, self::META_PEER_REVIEWED, true ) ); ?>> <?php esc_html_e( 'Peer reviewed', 'sustainable-catalyst-library' ); ?></label></p>
         <?php
         $this->select_field(
@@ -650,6 +657,7 @@ final class SC_Library_Citation_Source_Manager {
             return;
         }
 
+        SC_Library_Citation_Source_Reliability::begin_source_update( $post_id, 'admin' );
         self::$saving_source = true;
         $old_group = (string) get_post_meta( $post_id, self::META_AUTHOR_YEAR_KEY, true );
         $old_projects = self::id_list( get_post_meta( $post_id, self::META_PROJECT_IDS, true ) );
@@ -662,6 +670,7 @@ final class SC_Library_Citation_Source_Manager {
 
         $text_fields = array(
             'sc_source_organization'       => self::META_ORGANIZATION,
+            'sc_source_organization_short' => self::META_ORGANIZATION_SHORT,
             'sc_source_year'               => self::META_YEAR,
             'sc_source_container_title'    => self::META_CONTAINER_TITLE,
             'sc_source_publisher'          => self::META_PUBLISHER,
@@ -700,12 +709,8 @@ final class SC_Library_Citation_Source_Manager {
             self::update_or_delete_meta( $post_id, $meta_key, self::valid_date( $date ) ? $date : '' );
         }
 
-        foreach ( array(
-            'sc_source_url'         => self::META_URL,
-            'sc_source_archive_url' => self::META_ARCHIVE_URL,
-        ) as $request_key => $meta_key ) {
-            self::update_or_delete_meta( $post_id, $meta_key, esc_url_raw( wp_unslash( $_POST[ $request_key ] ?? '' ) ) );
-        }
+        self::update_or_delete_meta( $post_id, self::META_URL, SC_Library_Citation_Source_Reliability::canonical_url( wp_unslash( $_POST['sc_source_url'] ?? '' ) ) );
+        self::update_or_delete_meta( $post_id, self::META_ARCHIVE_URL, esc_url_raw( wp_unslash( $_POST['sc_source_archive_url'] ?? '' ) ) );
 
         self::update_or_delete_meta(
             $post_id,
@@ -765,8 +770,10 @@ final class SC_Library_Citation_Source_Manager {
             wp_set_object_terms( $post_id, array( $source_type ), self::SOURCE_TYPE_TAXONOMY, false );
         }
 
-        $normalized_doi = self::normalize_doi( get_post_meta( $post_id, self::META_DOI, true ) );
-        $normalized_isbn = self::normalize_isbn( get_post_meta( $post_id, self::META_ISBN, true ) );
+        $doi_value = self::normalize_doi( get_post_meta( $post_id, self::META_DOI, true ) );
+        $isbn_value = self::normalize_isbn( get_post_meta( $post_id, self::META_ISBN, true ) );
+        $normalized_doi = SC_Library_Citation_Source_Reliability::valid_doi( $doi_value ) ? $doi_value : '';
+        $normalized_isbn = SC_Library_Citation_Source_Reliability::valid_isbn( $isbn_value ) ? $isbn_value : '';
         $normalized_url = self::normalize_url( get_post_meta( $post_id, self::META_URL, true ) );
         self::update_or_delete_meta( $post_id, self::META_NORMALIZED_DOI, $normalized_doi );
         self::update_or_delete_meta( $post_id, self::META_NORMALIZED_ISBN, $normalized_isbn );
@@ -792,6 +799,7 @@ final class SC_Library_Citation_Source_Manager {
         self::update_id_meta( $post_id, self::META_DUPLICATES, $duplicates );
 
         self::$saving_source = false;
+        SC_Library_Citation_Source_Reliability::finalize_source_update( $post_id, SC_Library_Citation_Source_Reliability::admin_verification_confirmation( $post_id ), 'admin' );
     }
 
     public function save_project( $post_id, $post, $update ) {
@@ -952,7 +960,8 @@ final class SC_Library_Citation_Source_Manager {
                 'meta_query'     => $meta_query,
             )
         );
-        return array_values( array_unique( array_map( 'absint', $ids ) ) );
+        $ids = array_values( array_unique( array_map( 'absint', $ids ) ) );
+        return apply_filters( 'sc_library_source_duplicate_candidates', $ids, $source_id );
     }
 
     private static function recalculate_year_suffixes( $group_key ) {
@@ -1059,14 +1068,21 @@ final class SC_Library_Citation_Source_Manager {
     }
 
     public static function format_citation( $source, $style = 'harvard', $mode = 'reference', $locator = '' ) {
-        $data = is_array( $source ) ? $source : self::get_source_data( absint( $source ), true );
+        $source_id = is_array( $source ) ? 0 : absint( $source );
+        $style = sanitize_key( $style ?: 'harvard' );
+        $mode = sanitize_key( $mode ?: 'reference' );
+        $locator = self::normalize_locator( sanitize_text_field( $locator ) );
+        $cache_key = $style . '|' . $mode . '|' . $locator;
+        if ( $source_id ) {
+            $cache = get_post_meta( $source_id, SC_Library_Citation_Source_Reliability::META_CITATION_CACHE, true );
+            if ( is_array( $cache ) && SC_Library_Citation_Source_Reliability::VERSION === get_post_meta( $source_id, SC_Library_Citation_Source_Reliability::META_CITATION_CACHE_VERSION, true ) && isset( $cache[ $cache_key ] ) ) {
+                return (string) $cache[ $cache_key ];
+            }
+        }
+        $data = is_array( $source ) ? $source : self::get_source_data( $source_id, true );
         if ( ! $data ) {
             return '';
         }
-
-        $style = sanitize_key( $style ?: 'harvard' );
-        $mode = sanitize_key( $mode ?: 'reference' );
-        $locator = sanitize_text_field( $locator );
 
         if ( 'citation-key' === $mode ) {
             $citation = (string) ( $data['citation_key'] ?? '' );
@@ -1078,7 +1094,16 @@ final class SC_Library_Citation_Source_Manager {
             $citation = self::format_harvard_reference( $data, false );
         }
 
-        return apply_filters( 'sc_library_format_citation', $citation, $data, $style, $mode, $locator );
+        $citation = apply_filters( 'sc_library_format_citation', $citation, $data, $style, $mode, $locator );
+        if ( $source_id ) {
+            $cache = get_post_meta( $source_id, SC_Library_Citation_Source_Reliability::META_CITATION_CACHE, true );
+            $cache = is_array( $cache ) ? $cache : array();
+            $cache[ $cache_key ] = $citation;
+            if ( count( $cache ) > 40 ) { $cache = array_slice( $cache, -40, null, true ); }
+            update_post_meta( $source_id, SC_Library_Citation_Source_Reliability::META_CITATION_CACHE, $cache );
+            update_post_meta( $source_id, SC_Library_Citation_Source_Reliability::META_CITATION_CACHE_VERSION, SC_Library_Citation_Source_Reliability::VERSION );
+        }
+        return $citation;
     }
 
     private static function format_in_text_citation( $data, $locator = '' ) {
@@ -1087,10 +1112,6 @@ final class SC_Library_Citation_Source_Manager {
         $inside = trim( $creator . ', ' . $year, ', ' );
 
         if ( $locator ) {
-            $locator = trim( $locator );
-            if ( preg_match( '/^\d+([–-]\d+)?$/u', $locator ) ) {
-                $locator = ( false !== strpos( $locator, '–' ) || false !== strpos( $locator, '-' ) ? 'pp. ' : 'p. ' ) . $locator;
-            }
             $inside .= ', ' . $locator;
         }
         return '(' . $inside . ')';
@@ -1127,7 +1148,7 @@ final class SC_Library_Citation_Source_Manager {
                         $journal .= '(' . $data['issue'] . ')';
                     }
                     if ( $data['pages'] ) {
-                        $journal .= ', pp. ' . self::normalize_page_range( $data['pages'] );
+                        $journal .= ', ' . self::page_label( $data['pages'] ) . ' ' . self::normalize_page_range( $data['pages'] );
                     }
                     $parts[] = $journal;
                 }
@@ -1150,7 +1171,7 @@ final class SC_Library_Citation_Source_Manager {
                 }
                 $editor_statement = self::format_editors_for_chapter( $data['editors'] );
                 if ( $container ) {
-                    $chapter = 'in ';
+                    $chapter = 'In: ';
                     if ( $editor_statement ) {
                         $chapter .= $editor_statement . ', ';
                     }
@@ -1159,7 +1180,7 @@ final class SC_Library_Citation_Source_Manager {
                         $chapter .= '. ' . self::normalize_edition( $data['edition'] );
                     }
                     if ( $data['pages'] ) {
-                        $chapter .= ', pp. ' . self::normalize_page_range( $data['pages'] );
+                        $chapter .= ', ' . self::page_label( $data['pages'] ) . ' ' . self::normalize_page_range( $data['pages'] );
                     }
                     $parts[] = $chapter;
                 }
@@ -1383,7 +1404,7 @@ final class SC_Library_Citation_Source_Manager {
             }
         }
         if ( $data['organization'] ) {
-            return $data['organization'];
+            return ! empty( $data['organization_short'] ) ? $data['organization_short'] : $data['organization'];
         }
         return self::short_title( $data['title'] );
     }
@@ -1490,18 +1511,35 @@ final class SC_Library_Citation_Source_Manager {
     }
 
     private static function normalize_edition( $edition ) {
-        $edition = trim( (string) $edition );
-        if ( ! $edition ) {
-            return '';
+        $edition = trim( preg_replace( '/\s+/u', ' ', (string) $edition ) );
+        if ( ! $edition ) { return ''; }
+        if ( preg_match( '/^(\d+)(?:st|nd|rd|th)?(?:\s+(?:edn|edition))?\.?$/i', $edition, $matches ) ) {
+            $number = absint( $matches[1] );
+            $mod100 = $number % 100;
+            $suffix = in_array( $mod100, array( 11, 12, 13 ), true ) ? 'th' : array( 1 => 'st', 2 => 'nd', 3 => 'rd' )[ $number % 10 ] ?? 'th';
+            return $number . $suffix . ' edn.';
         }
-        if ( preg_match( '/\b(edn|edition)\.?$/i', $edition ) ) {
-            return $edition;
-        }
-        return $edition . ' edn.';
+        $edition = preg_replace( '/\s+(edition|edn)\.?$/i', '', $edition );
+        return rtrim( $edition, '.' ) . ' edn.';
+    }
+
+    private static function page_label( $pages ) {
+        $pages = trim( (string) $pages );
+        return preg_match( '/[–—,-]/u', $pages ) ? 'pp.' : 'p.';
     }
 
     private static function normalize_page_range( $pages ) {
-        return str_replace( '-', '–', trim( (string) $pages ) );
+        $pages = preg_replace( '/\s*[—–-]\s*/u', '–', trim( (string) $pages ) );
+        return preg_replace( '/\s*,\s*/u', ', ', $pages );
+    }
+
+    private static function normalize_locator( $locator ) {
+        $locator = trim( preg_replace( '/\s+/u', ' ', (string) $locator ) );
+        if ( ! $locator ) { return ''; }
+        $locator = preg_replace( '/\s*[—–-]\s*/u', '–', $locator );
+        if ( preg_match( '/^(p{1,2}\.|para\.|paras\.|ch\.|sec\.|§)\s*/iu', $locator ) ) { return $locator; }
+        if ( preg_match( '/^\d+(?:–\d+)?$/u', $locator ) ) { return false !== strpos( $locator, '–' ) ? 'pp. ' . $locator : 'p. ' . $locator; }
+        return $locator;
     }
 
     private static function human_date( $date ) {
@@ -1580,6 +1618,7 @@ final class SC_Library_Citation_Source_Manager {
             'permalink'            => 'publish' === $post->post_status ? get_permalink( $source_id ) : '',
             'authors'              => self::people_array( get_post_meta( $source_id, self::META_AUTHORS, true ) ),
             'organization'         => (string) get_post_meta( $source_id, self::META_ORGANIZATION, true ),
+            'organization_short'   => (string) get_post_meta( $source_id, self::META_ORGANIZATION_SHORT, true ),
             'editors'              => self::people_array( get_post_meta( $source_id, self::META_EDITORS, true ) ),
             'year'                 => (string) get_post_meta( $source_id, self::META_YEAR, true ),
             'year_suffix'          => (string) get_post_meta( $source_id, self::META_YEAR_SUFFIX, true ),
@@ -1616,6 +1655,8 @@ final class SC_Library_Citation_Source_Manager {
             'full_text_status'     => (string) get_post_meta( $source_id, self::META_FULL_TEXT_STATUS, true ),
             'citation_key'         => (string) get_post_meta( $source_id, self::META_CITATION_KEY, true ),
             'last_verified'        => (string) get_post_meta( $source_id, self::META_LAST_VERIFIED, true ),
+            'citation_reliability' => (string) get_post_meta( $source_id, SC_Library_Citation_Source_Reliability::META_RELIABILITY_STATUS, true ),
+            'completeness_score'   => absint( get_post_meta( $source_id, SC_Library_Citation_Source_Reliability::META_COMPLETENESS, true ) ),
             'modified_gmt'         => get_post_modified_time( 'c', true, $source_id ),
         );
 
@@ -1623,6 +1664,9 @@ final class SC_Library_Citation_Source_Manager {
             $data['private_notes'] = (string) get_post_meta( $source_id, self::META_NOTES, true );
             $data['metadata_provenance'] = (string) get_post_meta( $source_id, self::META_PROVENANCE, true );
             $data['duplicate_matches'] = self::id_list( get_post_meta( $source_id, self::META_DUPLICATES, true ) );
+            $data['validation_issues'] = get_post_meta( $source_id, SC_Library_Citation_Source_Reliability::META_VALIDATION, true ) ?: array();
+            $data['duplicate_decisions'] = get_post_meta( $source_id, SC_Library_Citation_Source_Reliability::META_DUPLICATE_DECISIONS, true ) ?: array();
+            $data['canonical_source_id'] = absint( get_post_meta( $source_id, SC_Library_Citation_Source_Reliability::META_CANONICAL_ID, true ) ) ?: $source_id;
         }
 
         $data['citation'] = self::format_citation( $data, 'harvard', 'reference' );
@@ -1633,47 +1677,43 @@ final class SC_Library_Citation_Source_Manager {
     }
 
     private static function people_array( $value ) {
-        if ( ! is_array( $value ) ) {
-            return array();
-        }
+        if ( ! is_array( $value ) ) { return array(); }
         $people = array();
         foreach ( $value as $person ) {
-            if ( ! is_array( $person ) ) {
-                continue;
-            }
-            $family = sanitize_text_field( $person['family'] ?? '' );
-            $given = sanitize_text_field( $person['given'] ?? '' );
-            if ( ! $family && ! $given ) {
-                continue;
-            }
+            if ( ! is_array( $person ) ) { continue; }
+            $family = self::normalize_name_component( $person['family'] ?? '' );
+            $given = self::normalize_name_component( $person['given'] ?? '' );
+            if ( ! $family && ! $given ) { continue; }
             $people[] = array(
                 'family' => $family,
                 'given'  => $given,
-                'suffix' => sanitize_text_field( $person['suffix'] ?? '' ),
-                'orcid'  => sanitize_text_field( $person['orcid'] ?? '' ),
+                'suffix' => self::normalize_name_component( $person['suffix'] ?? '' ),
+                'orcid'  => self::normalize_orcid( $person['orcid'] ?? '' ),
             );
         }
         return $people;
     }
 
     private static function parse_people_lines( $value ) {
-        $lines = preg_split( '/\R/u', (string) $value );
+        $lines = preg_split( '/\\R/u', (string) $value );
         $people = array();
         foreach ( (array) $lines as $line ) {
             $line = trim( $line );
-            if ( '' === $line ) {
-                continue;
+            if ( '' === $line ) { continue; }
+            if ( false !== strpos( $line, '|' ) ) {
+                $parts = array_map( 'trim', explode( '|', $line ) );
+            } elseif ( false !== strpos( $line, ',' ) ) {
+                $parts = array_map( 'trim', explode( ',', $line, 2 ) );
+            } else {
+                $parts = array( $line, '' );
             }
-            $parts = array_map( 'trim', explode( '|', $line ) );
-            $family = sanitize_text_field( $parts[0] ?? '' );
-            $given = sanitize_text_field( $parts[1] ?? '' );
-            if ( ! $family && ! $given ) {
-                continue;
-            }
+            $family = self::normalize_name_component( $parts[0] ?? '' );
+            $given = self::normalize_name_component( $parts[1] ?? '' );
+            if ( ! $family && ! $given ) { continue; }
             $people[] = array(
                 'family' => $family,
                 'given'  => $given,
-                'suffix' => sanitize_text_field( $parts[2] ?? '' ),
+                'suffix' => self::normalize_name_component( $parts[2] ?? '' ),
                 'orcid'  => self::normalize_orcid( $parts[3] ?? '' ),
             );
         }
@@ -1681,63 +1721,47 @@ final class SC_Library_Citation_Source_Manager {
     }
 
     private static function people_to_lines( $value ) {
-        $people = self::people_array( $value );
         $lines = array();
-        foreach ( $people as $person ) {
-            $parts = array(
-                $person['family'],
-                $person['given'],
-                $person['suffix'],
-                $person['orcid'],
-            );
-            while ( $parts && '' === end( $parts ) ) {
-                array_pop( $parts );
-            }
+        foreach ( self::people_array( $value ) as $person ) {
+            $parts = array( $person['family'], $person['given'], $person['suffix'], $person['orcid'] );
+            while ( $parts && '' === end( $parts ) ) { array_pop( $parts ); }
             $lines[] = implode( ' | ', $parts );
         }
-        return implode( "\n", $lines );
+        return implode( "\\n", $lines );
+    }
+
+    private static function normalize_name_component( $value ) {
+        $value = wp_check_invalid_utf8( (string) $value );
+        $value = str_replace( array( '’', '‘', '‐', '‑', '—' ), array( "'", "'", '-', '-', '-' ), $value );
+        return sanitize_text_field( preg_replace( '/\\s+/u', ' ', trim( $value ) ) );
     }
 
     private static function normalize_orcid( $orcid ) {
-        $orcid = preg_replace( '#^https?://orcid\.org/#i', '', trim( (string) $orcid ) );
-        return preg_match( '/^\d{4}-\d{4}-\d{4}-[\dX]{4}$/i', $orcid ) ? strtoupper( $orcid ) : '';
+        $orcid = preg_replace( '#^https?://orcid\\.org/#i', '', trim( (string) $orcid ) );
+        $orcid = strtoupper( preg_replace( '/[^0-9X]/i', '', $orcid ) );
+        if ( 16 !== strlen( $orcid ) ) { return ''; }
+        $orcid = substr( $orcid, 0, 4 ) . '-' . substr( $orcid, 4, 4 ) . '-' . substr( $orcid, 8, 4 ) . '-' . substr( $orcid, 12, 4 );
+        return SC_Library_Citation_Source_Reliability::valid_orcid( $orcid ) ? $orcid : '';
     }
 
     private static function normalize_doi( $doi ) {
         $doi = trim( (string) $doi );
-        $doi = preg_replace( '#^https?://(dx\.)?doi\.org/#i', '', $doi );
-        $doi = preg_replace( '/^doi:\s*/i', '', $doi );
-        return strtolower( trim( $doi ) );
+        $doi = preg_replace( '#^https?://(dx\\.)?doi\\.org/#i', '', $doi );
+        $doi = preg_replace( '/^doi:\\s*/i', '', $doi );
+        $doi = rtrim( trim( $doi ), " \\t\\n\\r\\0\\x0B.,;" );
+        return strtolower( preg_replace( '/\\s+/u', '', $doi ) );
     }
 
     private static function normalize_isbn( $isbn ) {
         return strtoupper( preg_replace( '/[^0-9X]/i', '', (string) $isbn ) );
     }
 
-    private static function format_isbn( $isbn ) {
-        return self::normalize_isbn( $isbn );
-    }
+    private static function format_isbn( $isbn ) { return self::normalize_isbn( $isbn ); }
 
-    private static function normalize_url( $url ) {
-        $url = esc_url_raw( (string) $url );
-        if ( ! $url ) {
-            return '';
-        }
-        $parts = wp_parse_url( $url );
-        if ( ! is_array( $parts ) || empty( $parts['host'] ) ) {
-            return strtolower( untrailingslashit( $url ) );
-        }
-        $scheme = strtolower( $parts['scheme'] ?? 'https' );
-        $host = strtolower( $parts['host'] );
-        $path = isset( $parts['path'] ) ? untrailingslashit( $parts['path'] ) : '';
-        $query = isset( $parts['query'] ) ? '?' . $parts['query'] : '';
-        return $scheme . '://' . $host . $path . $query;
-    }
+    private static function normalize_url( $url ) { return SC_Library_Citation_Source_Reliability::canonical_url( $url ); }
 
     private static function valid_date( $date ) {
-        if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $date ) ) {
-            return false;
-        }
+        if ( ! preg_match( '/^\\d{4}-\\d{2}-\\d{2}$/', (string) $date ) ) { return false; }
         list( $year, $month, $day ) = array_map( 'absint', explode( '-', $date ) );
         return checkdate( $month, $day, $year );
     }
@@ -2096,6 +2120,7 @@ final class SC_Library_Citation_Source_Manager {
                             <?php self::metadata_row( __( 'PMID', 'sustainable-catalyst-library' ), $data['pmid'] ); ?>
                             <?php self::metadata_row( __( 'Language', 'sustainable-catalyst-library' ), $data['language'] ); ?>
                             <?php self::metadata_row( __( 'Review status', 'sustainable-catalyst-library' ), $data['metadata_verified'] ? __( 'Metadata verified', 'sustainable-catalyst-library' ) : __( 'Not yet verified', 'sustainable-catalyst-library' ) ); ?>
+                            <?php self::metadata_row( __( 'Citation status', 'sustainable-catalyst-library' ), $data['citation_reliability'] ? ucfirst( str_replace( '-', ' ', $data['citation_reliability'] ) ) : __( 'Not checked', 'sustainable-catalyst-library' ) ); ?>
                             <?php self::metadata_row( __( 'Full text', 'sustainable-catalyst-library' ), self::full_text_label( $data['full_text_status'] ) ); ?>
                         </dl>
                         <?php if ( $data['topics'] ) : ?>
@@ -2522,6 +2547,10 @@ final class SC_Library_Citation_Source_Manager {
     }
 
     public function rest_create_source( WP_REST_Request $request ) {
+        $rate = SC_Library_Citation_Source_Reliability::enforce_write_rate_limit( $request, 'create-source' );
+        if ( is_wp_error( $rate ) ) { return $rate; }
+        $existing_id = SC_Library_Citation_Source_Reliability::idempotent_create_response( $request );
+        if ( $existing_id ) { return new WP_REST_Response( $this->rest_source_payload( $existing_id, true ), 200 ); }
         $payload = $request->get_json_params();
         $payload = is_array( $payload ) ? $payload : $request->get_params();
         $title = sanitize_text_field( $payload['title'] ?? '' );
@@ -2551,10 +2580,11 @@ final class SC_Library_Citation_Source_Manager {
             return $source_id;
         }
 
+        SC_Library_Citation_Source_Reliability::begin_source_update( $source_id, 'rest-create' );
         $result = $this->apply_rest_source_payload( $source_id, $payload );
-        if ( is_wp_error( $result ) ) {
-            return $result;
-        }
+        if ( is_wp_error( $result ) ) { return $result; }
+        SC_Library_Citation_Source_Reliability::finalize_source_update( $source_id, ! empty( $payload['metadata_verified'] ), 'rest-create' );
+        SC_Library_Citation_Source_Reliability::remember_idempotent_create( $request, $source_id );
 
         $response = new WP_REST_Response( $this->rest_source_payload( $source_id, true ), 201 );
         $response->header( 'Location', rest_url( self::API_NAMESPACE . '/sources/' . $source_id ) );
@@ -2563,6 +2593,11 @@ final class SC_Library_Citation_Source_Manager {
 
     public function rest_update_source( WP_REST_Request $request ) {
         $source_id = absint( $request['id'] );
+        $rate = SC_Library_Citation_Source_Reliability::enforce_write_rate_limit( $request, 'update-source' );
+        if ( is_wp_error( $rate ) ) { return $rate; }
+        $conflict = SC_Library_Citation_Source_Reliability::validate_expected_modified( $source_id, $request );
+        if ( is_wp_error( $conflict ) ) { return $conflict; }
+        SC_Library_Citation_Source_Reliability::begin_source_update( $source_id, 'rest-update' );
         $payload = $request->get_json_params();
         $payload = is_array( $payload ) ? $payload : $request->get_params();
 
@@ -2592,9 +2627,8 @@ final class SC_Library_Citation_Source_Manager {
         }
 
         $result = $this->apply_rest_source_payload( $source_id, $payload );
-        if ( is_wp_error( $result ) ) {
-            return $result;
-        }
+        if ( is_wp_error( $result ) ) { return $result; }
+        SC_Library_Citation_Source_Reliability::finalize_source_update( $source_id, ! empty( $payload['metadata_verified'] ), 'rest-update' );
         return rest_ensure_response( $this->rest_source_payload( $source_id, true ) );
     }
 
@@ -2618,6 +2652,7 @@ final class SC_Library_Citation_Source_Manager {
 
         $map = array(
             'organization'      => self::META_ORGANIZATION,
+            'organization_short'=> self::META_ORGANIZATION_SHORT,
             'year'              => self::META_YEAR,
             'container_title'   => self::META_CONTAINER_TITLE,
             'publisher'         => self::META_PUBLISHER,
@@ -2652,10 +2687,11 @@ final class SC_Library_Citation_Source_Manager {
         if ( array_key_exists( 'isbn', $payload ) ) {
             self::update_or_delete_meta( $source_id, self::META_ISBN, self::format_isbn( $payload['isbn'] ) );
         }
-        foreach ( array( 'url' => self::META_URL, 'archive_url' => self::META_ARCHIVE_URL ) as $field => $meta_key ) {
-            if ( array_key_exists( $field, $payload ) ) {
-                self::update_or_delete_meta( $source_id, $meta_key, esc_url_raw( $payload[ $field ] ) );
-            }
+        if ( array_key_exists( 'url', $payload ) ) {
+            self::update_or_delete_meta( $source_id, self::META_URL, SC_Library_Citation_Source_Reliability::canonical_url( $payload['url'] ) );
+        }
+        if ( array_key_exists( 'archive_url', $payload ) ) {
+            self::update_or_delete_meta( $source_id, self::META_ARCHIVE_URL, esc_url_raw( $payload['archive_url'] ) );
         }
         foreach ( array( 'publication_date' => self::META_PUBLICATION_DATE, 'access_date' => self::META_ACCESS_DATE ) as $field => $meta_key ) {
             if ( array_key_exists( $field, $payload ) ) {
@@ -2707,8 +2743,10 @@ final class SC_Library_Citation_Source_Manager {
             $this->sync_source_projects( $source_id, $old_projects, $projects );
         }
 
-        self::update_or_delete_meta( $source_id, self::META_NORMALIZED_DOI, self::normalize_doi( get_post_meta( $source_id, self::META_DOI, true ) ) );
-        self::update_or_delete_meta( $source_id, self::META_NORMALIZED_ISBN, self::normalize_isbn( get_post_meta( $source_id, self::META_ISBN, true ) ) );
+        $doi_value = self::normalize_doi( get_post_meta( $source_id, self::META_DOI, true ) );
+        $isbn_value = self::normalize_isbn( get_post_meta( $source_id, self::META_ISBN, true ) );
+        self::update_or_delete_meta( $source_id, self::META_NORMALIZED_DOI, SC_Library_Citation_Source_Reliability::valid_doi( $doi_value ) ? $doi_value : '' );
+        self::update_or_delete_meta( $source_id, self::META_NORMALIZED_ISBN, SC_Library_Citation_Source_Reliability::valid_isbn( $isbn_value ) ? $isbn_value : '' );
         self::update_or_delete_meta( $source_id, self::META_NORMALIZED_URL, self::normalize_url( get_post_meta( $source_id, self::META_URL, true ) ) );
 
         $group = self::author_year_key( $source_id );
@@ -2786,6 +2824,8 @@ final class SC_Library_Citation_Source_Manager {
     }
 
     public function rest_update_project_sources( WP_REST_Request $request ) {
+        $rate = SC_Library_Citation_Source_Reliability::enforce_write_rate_limit( $request, 'update-project-sources' );
+        if ( is_wp_error( $rate ) ) { return $rate; }
         $project_id = absint( $request['id'] );
         $payload = $request->get_json_params();
         $payload = is_array( $payload ) ? $payload : $request->get_params();
@@ -2885,6 +2925,67 @@ final class SC_Library_Citation_Source_Manager {
             }
         );
         return $ids;
+    }
+
+    public static function rebuild_source_indexes( $source_id ) {
+        $source_id = absint( $source_id );
+        if ( ! $source_id || self::SOURCE_POST_TYPE !== get_post_type( $source_id ) ) { return false; }
+        self::update_or_delete_meta( $source_id, self::META_NORMALIZED_DOI, SC_Library_Citation_Source_Reliability::valid_doi( get_post_meta( $source_id, self::META_DOI, true ) ) ? self::normalize_doi( get_post_meta( $source_id, self::META_DOI, true ) ) : '' );
+        self::update_or_delete_meta( $source_id, self::META_NORMALIZED_ISBN, SC_Library_Citation_Source_Reliability::valid_isbn( get_post_meta( $source_id, self::META_ISBN, true ) ) ? self::normalize_isbn( get_post_meta( $source_id, self::META_ISBN, true ) ) : '' );
+        self::update_or_delete_meta( $source_id, self::META_NORMALIZED_URL, self::normalize_url( get_post_meta( $source_id, self::META_URL, true ) ) );
+        $old_group = (string) get_post_meta( $source_id, self::META_AUTHOR_YEAR_KEY, true );
+        $group = self::author_year_key( $source_id );
+        self::update_or_delete_meta( $source_id, self::META_AUTHOR_YEAR_KEY, $group );
+        self::update_or_delete_meta( $source_id, self::META_FINGERPRINT, self::source_fingerprint( $source_id ) );
+        if ( $old_group && $old_group !== $group ) { self::recalculate_year_suffixes( $old_group ); }
+        if ( $group ) { self::recalculate_year_suffixes( $group ); } else { self::update_citation_key( $source_id ); }
+        $old_duplicates = self::id_list( get_post_meta( $source_id, self::META_DUPLICATES, true ) );
+        $duplicates = self::find_duplicate_sources( $source_id );
+        self::update_duplicate_relationships( $source_id, $old_duplicates, $duplicates );
+        self::update_id_meta( $source_id, self::META_DUPLICATES, $duplicates );
+        delete_post_meta( $source_id, SC_Library_Citation_Source_Reliability::META_CITATION_CACHE );
+        return true;
+    }
+
+    public static function restore_source_snapshot_data( $source_id, $data ) {
+        $old_projects = self::id_list( get_post_meta( $source_id, self::META_PROJECT_IDS, true ) );
+        $map = array(
+            'authors' => self::META_AUTHORS, 'organization' => self::META_ORGANIZATION, 'organization_short' => self::META_ORGANIZATION_SHORT,
+            'editors' => self::META_EDITORS, 'year' => self::META_YEAR, 'publication_date' => self::META_PUBLICATION_DATE,
+            'access_date' => self::META_ACCESS_DATE, 'container_title' => self::META_CONTAINER_TITLE, 'publisher' => self::META_PUBLISHER,
+            'place' => self::META_PLACE, 'edition' => self::META_EDITION, 'volume' => self::META_VOLUME, 'issue' => self::META_ISSUE,
+            'pages' => self::META_PAGES, 'chapter' => self::META_CHAPTER, 'report_number' => self::META_REPORT_NUMBER,
+            'standard_number' => self::META_STANDARD_NUMBER, 'jurisdiction' => self::META_JURISDICTION, 'doi' => self::META_DOI,
+            'isbn' => self::META_ISBN, 'pmid' => self::META_PMID, 'url' => self::META_URL, 'archive_url' => self::META_ARCHIVE_URL,
+            'language' => self::META_LANGUAGE, 'attachment_id' => self::META_ATTACHMENT_ID, 'related_document_ids' => self::META_RELATED_DOCUMENT_IDS,
+            'project_ids' => self::META_PROJECT_IDS, 'private_notes' => self::META_NOTES, 'metadata_verified' => self::META_VERIFIED,
+            'peer_reviewed' => self::META_PEER_REVIEWED, 'source_level' => self::META_SOURCE_LEVEL, 'full_text_status' => self::META_FULL_TEXT_STATUS,
+            'metadata_provenance' => self::META_PROVENANCE,
+        );
+        foreach ( $map as $field => $meta_key ) {
+            if ( in_array( $field, array( 'metadata_verified', 'peer_reviewed' ), true ) && array_key_exists( $field, $data ) ) {
+                update_post_meta( $source_id, $meta_key, ! empty( $data[ $field ] ) ? '1' : '0' );
+                continue;
+            }
+            if ( array_key_exists( $field, $data ) && ! in_array( $data[ $field ], array( '', array(), null ), true ) ) { update_post_meta( $source_id, $meta_key, $data[ $field ] ); }
+            else { delete_post_meta( $source_id, $meta_key ); }
+        }
+        $new_projects = self::id_list( get_post_meta( $source_id, self::META_PROJECT_IDS, true ) );
+        foreach ( array_diff( $old_projects, $new_projects ) as $project_id ) {
+            $sources = self::id_list( get_post_meta( $project_id, self::META_PROJECT_SOURCE_IDS, true ) );
+            self::update_id_meta( $project_id, self::META_PROJECT_SOURCE_IDS, array_values( array_diff( $sources, array( $source_id ) ) ) );
+        }
+        foreach ( array_diff( $new_projects, $old_projects ) as $project_id ) {
+            if ( self::PROJECT_POST_TYPE !== get_post_type( $project_id ) ) { continue; }
+            $sources = self::id_list( get_post_meta( $project_id, self::META_PROJECT_SOURCE_IDS, true ) );
+            $sources[] = $source_id;
+            self::update_id_meta( $project_id, self::META_PROJECT_SOURCE_IDS, $sources );
+        }
+        if ( ! empty( $data['source_type'] ) ) { wp_set_object_terms( $source_id, array( sanitize_title( $data['source_type'] ) ), self::SOURCE_TYPE_TAXONOMY, false ); }
+        if ( isset( $data['topics'] ) && is_array( $data['topics'] ) ) {
+            $topics = array(); foreach ( $data['topics'] as $topic ) { $topics[] = is_array( $topic ) ? ( $topic['slug'] ?? $topic['name'] ?? '' ) : $topic; }
+            wp_set_object_terms( $source_id, array_values( array_filter( array_map( 'sanitize_text_field', $topics ) ) ), self::SOURCE_TOPIC_TAXONOMY, false );
+        }
     }
 
     private function version() {

@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 2.5.0
+Stable tag: 2.5.1
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,21 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 2.5.1 =
+* Improves personal-name parsing, institutional-author abbreviations, ORCID validation, locators, page labels, editions, and book-chapter formatting.
+* Adds DOI syntax, ISBN checksum, PMID, URL, and source-type reliability checks.
+* Adds canonical URL normalization and excludes invalid DOI/ISBN values from duplicate keys.
+* Adds citation completeness scores, Citation ready/Needs review/Invalid metadata states, and field-level issue records.
+* Adds bounded citation caches with automatic invalidation after structured source changes.
+* Adds structured metadata history, previous-snapshot restoration, and project-relationship repair.
+* Clears verified status after citation-critical changes unless an editor explicitly confirms re-verification.
+* Adds reviewed duplicate dispositions and canonical-record selection without automatic merges or deletions.
+* Adds REST write limits, Idempotency-Key source creation, optimistic concurrency, ETag, and Last-Modified support.
+* Adds reliability, history, and duplicate-review REST endpoints.
+* Adds incremental reliability migration for existing Source records.
+* Preserves v2.5.0 Source/Project records, public routes, shortcodes, citation API namespace, and all v2.4.x document/OCR systems.
+
 
 = 2.5.0 =
 * Adds structured Research Source records for scholarly, library, web, dataset, legal, media, software, and archival materials.
