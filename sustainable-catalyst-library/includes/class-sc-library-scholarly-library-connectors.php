@@ -520,6 +520,7 @@ final class SC_Library_Scholarly_Library_Connectors {
             'restUrl'          => rest_url( self::API_NAMESPACE ),
             'restNonce'        => wp_create_nonce( 'wp_rest' ),
             'canImport'        => current_user_can( 'edit_posts' ),
+            'projectId'        => absint( wp_unslash( $_GET['project_id'] ?? 0 ) ),
             'strings'          => array(
                 'searching'     => __( 'Searching provider…', 'sustainable-catalyst-library' ),
                 'complete'      => __( 'Search complete.', 'sustainable-catalyst-library' ),
@@ -1784,6 +1785,10 @@ final class SC_Library_Scholarly_Library_Connectors {
             $source_ids = array_values( array_unique( array_filter( array_map( 'absint', (array) $source_ids ) ) ) );
             $source_ids[] = $source_id;
             update_post_meta( $project_id, SC_Library_Citation_Source_Manager::META_PROJECT_SOURCE_IDS, array_values( array_unique( $source_ids ) ) );
+
+            if ( class_exists( 'SC_Library_Connected_Research_Environment' ) ) {
+                SC_Library_Connected_Research_Environment::attach_source_to_project( $project_id, $source_id, 'candidate', 'background' );
+            }
         }
 
         SC_Library_Citation_Source_Manager::rebuild_source_indexes( $source_id );

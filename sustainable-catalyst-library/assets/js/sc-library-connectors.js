@@ -282,6 +282,7 @@
       request('sc_library_v260_import_result', {
         token: button.dataset.scImportToken,
         mode: 'fill_empty',
+        project_id: config.projectId || 0,
         idempotency_key: button.dataset.scIdempotencyKey
       }).then(function (payload) {
         if (status) {

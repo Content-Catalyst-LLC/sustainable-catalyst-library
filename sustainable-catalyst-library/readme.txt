@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 2.7.0
+Stable tag: 3.0.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,22 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 3.0.0 =
+* Adds the Connected Research Project and Bibliography Environment.
+* Adds research questions, objectives, methods, scope, dates, team roles, and connected documents to Research Projects.
+* Adds project-specific Source roles, bibliography sections, inclusion states, priorities, annotations, and audit fields.
+* Synchronizes the augmented Source registry with retained project and Source relationship IDs.
+* Adds project-aware Source Discovery imports that enter projects as Candidate Sources.
+* Adds grouped live bibliographies and section, author, year, title, and priority sort modes.
+* Adds bibliography health and readiness diagnostics.
+* Adds bounded, hashed bibliography snapshots.
+* Adds Markdown, text, HTML, BibTeX, RIS, CSL JSON, and connected JSON exports.
+* Adds a six-tab Research Environment workspace.
+* Adds connected public project and bibliography shortcodes with strict privacy boundaries.
+* Adds workspace, bibliography, snapshots, export, and activity REST endpoints.
+* Preserves v2.7.0 evidence and claims, v2.6.x connectors and holdings, v2.5.x citations, v2.4.x OCR, v2.3.x repository routes, and v2.2.x PDF systems.
+
 
 = 2.7.0 =
 * Adds private Evidence Note and Research Claim record types with revisions and structured taxonomies.
