@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 2.1.3
+Stable tag: 2.2.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,16 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 2.2.0 =
+* Evolves the existing sc_foundation_doc post type into a PDF-to-Document Knowledge Library.
+* Converts text-based PDFs into editable, searchable, revisioned Knowledge Library documents while preserving the original PDF attachment.
+* Adds hierarchical Document Families with Foundations as the default family.
+* Adds Read Document, View Original PDF, Open PDF, and Download PDF public workflows.
+* Adds Media Library Create Knowledge Document actions and bulk PDF record import.
+* Adds local PDF.js browser extraction, optional pdftotext server extraction, page maps, checksums, summaries, and extraction status.
+* Preserves existing Foundation Document records and redirects legacy /foundations/{slug}/ URLs to /documents/{slug}/.
+
 
 = 2.1.3 =
 * Connects page-based Foundation Documents to the established Foundations Documentation Library shortcode.

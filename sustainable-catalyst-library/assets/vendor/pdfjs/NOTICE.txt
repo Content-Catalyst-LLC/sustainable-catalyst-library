@@ -1,0 +1,9 @@
+PDF.js 6.1.200
+
+Copyright Mozilla Foundation and contributors.
+Licensed under the Apache License, Version 2.0.
+The complete license is included in this directory as LICENSE.
+
+Bundled for local browser-side PDF text extraction in the authenticated
+WordPress administration interface. The original PDF remains the authoritative
+source document and is not sent to a third-party service by this release.
