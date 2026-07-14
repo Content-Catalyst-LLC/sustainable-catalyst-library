@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Document_OCR_Processing {
-    public const VERSION = '2.4.0';
+    public const VERSION = '2.4.1';
     public const POST_TYPE = 'sc_foundation_doc';
     public const JOB_TYPE = 'sc_pdf_ocr_job';
 
@@ -192,16 +192,46 @@ final class SC_Library_Document_OCR_Processing {
     private function render_documents_tab() {
         $page = isset( $_GET['ocr_page'] ) ? max( 1, absint( wp_unslash( $_GET['ocr_page'] ) ) ) : 1;
         $filter = isset( $_GET['ocr_status'] ) ? sanitize_key( wp_unslash( $_GET['ocr_status'] ) ) : 'all';
-        $query = new WP_Query(
-            array(
-                'post_type'      => self::POST_TYPE,
-                'post_status'    => 'any',
-                'posts_per_page' => self::PAGE_SIZE,
-                'paged'          => $page,
-                'orderby'        => 'modified',
-                'order'          => 'DESC',
-            )
+        $query_args = array(
+            'post_type'      => self::POST_TYPE,
+            'post_status'    => 'any',
+            'posts_per_page' => self::PAGE_SIZE,
+            'paged'          => $page,
+            'orderby'        => 'modified',
+            'order'          => 'DESC',
         );
+        if ( 'all' !== $filter ) {
+            $status_values = array(
+                'needs_ocr'      => array( 'needs_ocr' ),
+                'processing'     => array( 'queued', 'processing' ),
+                'low_confidence' => array( 'needs_review' ),
+                'complete'       => array( 'complete' ),
+                'reviewed'       => array( 'reviewed', 'applied', 'applied_with_warnings' ),
+            );
+            if ( 'not_required' === $filter ) {
+                $query_args['meta_query'] = array(
+                    'relation' => 'OR',
+                    array(
+                        'key'     => self::META_STATUS,
+                        'value'   => 'not_required',
+                        'compare' => '=',
+                    ),
+                    array(
+                        'key'     => self::META_STATUS,
+                        'compare' => 'NOT EXISTS',
+                    ),
+                );
+            } elseif ( isset( $status_values[ $filter ] ) ) {
+                $query_args['meta_query'] = array(
+                    array(
+                        'key'     => self::META_STATUS,
+                        'value'   => $status_values[ $filter ],
+                        'compare' => 'IN',
+                    ),
+                );
+            }
+        }
+        $query = new WP_Query( $query_args );
         $totals = $this->workspace_totals();
         ?>
         <section class="sc-ocr-section">
@@ -232,9 +262,6 @@ final class SC_Library_Document_OCR_Processing {
                         $post_id = get_the_ID();
                         $summary = $this->summary( $post_id );
                         $state = $this->document_state( $summary );
-                        if ( 'all' !== $filter && $filter !== $state ) {
-                            continue;
-                        }
                         $shown++;
                         ?>
                         <tr>
@@ -264,8 +291,12 @@ final class SC_Library_Document_OCR_Processing {
             wp_die( esc_html__( 'You are not allowed to review this document.', 'sustainable-catalyst-library' ) );
         }
 
+        $source_state = SC_Library_Document_OCR_Reliability::ensure_source_current( $document_id );
+        $source_changed = is_wp_error( $source_state ) && 'source_changed' === $source_state->get_error_code();
+        $requires_reconversion = is_wp_error( $source_state ) && in_array( $source_state->get_error_code(), array( 'source_changed', 'reconversion_required' ), true );
+
         $pages = $this->pages( $document_id );
-        if ( ! $pages ) {
+        if ( ! $pages && ! $requires_reconversion ) {
             $pages = $this->analyze_document( $document_id, true );
         }
 
@@ -284,6 +315,8 @@ final class SC_Library_Document_OCR_Processing {
         }
         $selected_language = sanitize_text_field( (string) get_post_meta( $document_id, self::META_LANGUAGE, true ) ) ?: 'eng';
         $threshold = $this->confidence_threshold( $document_id );
+        $document_status = get_post_status( $document_id );
+        $has_backup = SC_Library_Document_OCR_Reliability::has_backup( $document_id );
         ?>
         <div class="wrap sc-ocr-admin sc-ocr-document-review">
             <p><a href="<?php echo esc_url( admin_url( 'admin.php?page=sc-library-ocr-review' ) ); ?>">← <?php esc_html_e( 'Back to OCR documents', 'sustainable-catalyst-library' ); ?></a></p>
@@ -299,6 +332,10 @@ final class SC_Library_Document_OCR_Processing {
                     <a class="button" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'action' => 'sc_library_v240_export_document_ocr', 'document_id' => $document_id ), admin_url( 'admin-post.php' ) ), 'sc_library_v240_export_document_ocr_' . $document_id ) ); ?>"><?php esc_html_e( 'Export OCR Report CSV', 'sustainable-catalyst-library' ); ?></a>
                 </div>
             </div>
+
+            <?php if ( $source_changed || $requires_reconversion ) : ?>
+                <div class="notice notice-warning inline"><p><?php esc_html_e( 'The attached PDF changed. Previous OCR records were archived. Run PDF conversion again before analyzing or queueing OCR pages.', 'sustainable-catalyst-library' ); ?></p></div>
+            <?php endif; ?>
 
             <div class="sc-ocr-review-controls">
                 <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -317,13 +354,25 @@ final class SC_Library_Document_OCR_Processing {
                     <button class="button button-primary"><?php esc_html_e( 'Queue Pages Needing OCR', 'sustainable-catalyst-library' ); ?></button>
                 </form>
 
-                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sc-ocr-apply-form">
                     <?php wp_nonce_field( 'sc_library_v240_apply_ocr_' . $document_id ); ?>
                     <input type="hidden" name="action" value="sc_library_v240_apply_ocr">
                     <input type="hidden" name="document_id" value="<?php echo esc_attr( $document_id ); ?>">
                     <label><input type="checkbox" name="allow_unreviewed" value="1"> <?php esc_html_e( 'Allow completed but unreviewed OCR pages', 'sustainable-catalyst-library' ); ?></label>
+                    <?php if ( 'publish' === $document_status ) : ?>
+                        <label class="sc-ocr-published-confirmation"><input type="checkbox" name="confirm_published_draft" value="1" required> <?php esc_html_e( 'Return this published document to Draft so the rebuilt reading layer can be reviewed before republishing.', 'sustainable-catalyst-library' ); ?></label>
+                    <?php endif; ?>
                     <button class="button"><?php esc_html_e( 'Apply Reviewed OCR to Document', 'sustainable-catalyst-library' ); ?></button>
                 </form>
+
+                <?php if ( $has_backup ) : ?>
+                    <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                        <?php wp_nonce_field( 'sc_library_v241_restore_ocr_backup_' . $document_id ); ?>
+                        <input type="hidden" name="action" value="sc_library_v241_restore_ocr_backup">
+                        <input type="hidden" name="document_id" value="<?php echo esc_attr( $document_id ); ?>">
+                        <button class="button"><?php esc_html_e( 'Restore Latest Pre-OCR Backup', 'sustainable-catalyst-library' ); ?></button>
+                    </form>
+                <?php endif; ?>
             </div>
 
             <div class="sc-ocr-review-layout">
@@ -440,6 +489,12 @@ final class SC_Library_Document_OCR_Processing {
                                 <button type="button" class="button" data-sc-ocr-control="retry" <?php disabled( ! $state['failed'] ); ?>><?php esc_html_e( 'Retry Failed', 'sustainable-catalyst-library' ); ?></button>
                                 <button type="button" class="button" data-sc-ocr-control="cancel" <?php disabled( in_array( $state['status'], array( 'complete', 'cancelled' ), true ) ); ?>><?php esc_html_e( 'Cancel', 'sustainable-catalyst-library' ); ?></button>
                                 <a class="button" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'action' => 'sc_library_v240_export_ocr_job', 'job_id' => $job_id ), admin_url( 'admin-post.php' ) ), 'sc_library_v240_export_ocr_job_' . $job_id ) ); ?>"><?php esc_html_e( 'Export CSV', 'sustainable-catalyst-library' ); ?></a>
+                                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sc-ocr-inline-form">
+                                    <?php wp_nonce_field( 'sc_library_v241_repair_ocr_job_' . $job_id ); ?>
+                                    <input type="hidden" name="action" value="sc_library_v241_repair_ocr_job">
+                                    <input type="hidden" name="job_id" value="<?php echo esc_attr( $job_id ); ?>">
+                                    <button class="button"><?php esc_html_e( 'Repair Queue State', 'sustainable-catalyst-library' ); ?></button>
+                                </form>
                             </div>
                             <progress value="<?php echo esc_attr( $state['processed'] ); ?>" max="<?php echo esc_attr( max( 1, $state['total'] ) ); ?>" data-sc-ocr-progress></progress>
                             <div class="sc-pdf-job-stats"><span><strong data-sc-ocr-done><?php echo esc_html( $state['done'] ); ?></strong> <?php esc_html_e( 'complete', 'sustainable-catalyst-library' ); ?></span><span><strong data-sc-ocr-queued><?php echo esc_html( $state['queued'] ); ?></strong> <?php esc_html_e( 'queued', 'sustainable-catalyst-library' ); ?></span><span><strong data-sc-ocr-failed><?php echo esc_html( $state['failed'] ); ?></strong> <?php esc_html_e( 'attention', 'sustainable-catalyst-library' ); ?></span><span><strong data-sc-ocr-reviewed><?php echo esc_html( $state['reviewed'] ); ?></strong> <?php esc_html_e( 'reviewed', 'sustainable-catalyst-library' ); ?></span></div>
@@ -479,10 +534,17 @@ final class SC_Library_Document_OCR_Processing {
                 <tr><th><?php esc_html_e( 'Tesseract', 'sustainable-catalyst-library' ); ?></th><td><code><?php echo esc_html( $local['tesseract'] ?: __( 'Not found', 'sustainable-catalyst-library' ) ); ?></code></td></tr>
                 <tr><th><?php esc_html_e( 'PDF rasterizer', 'sustainable-catalyst-library' ); ?></th><td><code><?php echo esc_html( $local['rasterizer'] ?: __( 'Not found', 'sustainable-catalyst-library' ) ); ?></code></td></tr>
                 <tr><th><?php esc_html_e( 'External endpoint', 'sustainable-catalyst-library' ); ?></th><td><code><?php echo defined( 'SC_LIBRARY_OCR_ENDPOINT' ) && SC_LIBRARY_OCR_ENDPOINT ? esc_html( SC_LIBRARY_OCR_ENDPOINT ) : esc_html__( 'Not configured', 'sustainable-catalyst-library' ); ?></code></td></tr>
+                <tr><th><?php esc_html_e( 'External API key', 'sustainable-catalyst-library' ); ?></th><td><?php echo defined( 'SC_LIBRARY_OCR_API_KEY' ) && SC_LIBRARY_OCR_API_KEY ? esc_html__( 'Configured', 'sustainable-catalyst-library' ) : esc_html__( 'Not configured', 'sustainable-catalyst-library' ); ?></td></tr>
+                <tr><th><?php esc_html_e( 'Lease timeout', 'sustainable-catalyst-library' ); ?></th><td><?php echo esc_html( SC_Library_Document_OCR_Reliability::LEASE_SECONDS ); ?> <?php esc_html_e( 'seconds', 'sustainable-catalyst-library' ); ?></td></tr>
             </tbody></table>
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sc-ocr-provider-maintenance">
+                <?php wp_nonce_field( 'sc_library_v241_cleanup_ocr_temp' ); ?>
+                <input type="hidden" name="action" value="sc_library_v241_cleanup_ocr_temp">
+                <button class="button"><?php esc_html_e( 'Clean Expired OCR Temporary Files', 'sustainable-catalyst-library' ); ?></button>
+            </form>
 
             <h2><?php esc_html_e( 'External provider contract', 'sustainable-catalyst-library' ); ?></h2>
-            <p><?php esc_html_e( 'Define SC_LIBRARY_OCR_ENDPOINT and optionally SC_LIBRARY_OCR_API_KEY. The endpoint receives a signed JSON page request and returns text, confidence, language, provider, and warnings.', 'sustainable-catalyst-library' ); ?></p>
+            <p><?php esc_html_e( 'Define both SC_LIBRARY_OCR_ENDPOINT and SC_LIBRARY_OCR_API_KEY. v2.4.1 requires signed HTTPS requests unless a development-only filter explicitly permits HTTP.', 'sustainable-catalyst-library' ); ?></p>
             <pre>{
   "text": "Recognized page text",
   "confidence": 91.4,
@@ -503,6 +565,10 @@ sc_library_ocr_process_page</pre>
             return;
         }
         if ( in_array( sanitize_key( (string) $meta_value ), array( 'needs_ocr', 'ready_review', 'legacy_content' ), true ) ) {
+            $source_state = SC_Library_Document_OCR_Reliability::ensure_source_current( $post_id );
+            if ( is_wp_error( $source_state ) ) {
+                return;
+            }
             $this->analyze_document( $post_id, false );
         }
     }
@@ -513,6 +579,10 @@ sc_library_ocr_process_page</pre>
             wp_die( esc_html__( 'You are not allowed to analyze this document.', 'sustainable-catalyst-library' ) );
         }
         check_admin_referer( 'sc_library_v240_analyze_document_' . $document_id );
+        $source_state = SC_Library_Document_OCR_Reliability::ensure_source_current( $document_id );
+        if ( is_wp_error( $source_state ) ) {
+            $this->redirect_document( $document_id, $source_state->get_error_code() );
+        }
         $this->analyze_document( $document_id, true );
         $this->redirect_document( $document_id, 'analyzed' );
     }
@@ -523,6 +593,11 @@ sc_library_ocr_process_page</pre>
             wp_die( esc_html__( 'You are not allowed to queue OCR for this document.', 'sustainable-catalyst-library' ) );
         }
         check_admin_referer( 'sc_library_v240_create_ocr_job_' . $document_id );
+
+        $source_state = SC_Library_Document_OCR_Reliability::ensure_source_current( $document_id );
+        if ( is_wp_error( $source_state ) ) {
+            $this->redirect_document( $document_id, $source_state->get_error_code() );
+        }
 
         $pages = $this->pages( $document_id );
         if ( ! $pages ) {
@@ -551,6 +626,10 @@ sc_library_ocr_process_page</pre>
 
         $language = sanitize_text_field( wp_unslash( $_POST['ocr_language'] ?? 'eng' ) ) ?: 'eng';
         $threshold = max( 0, min( 100, absint( wp_unslash( $_POST['ocr_confidence_threshold'] ?? self::DEFAULT_CONFIDENCE_THRESHOLD ) ) ) );
+        $queue_validation = SC_Library_Document_OCR_Reliability::validate_queue_request( $document_id, $provider, $language, $providers );
+        if ( is_wp_error( $queue_validation ) ) {
+            $this->redirect_document( $document_id, $queue_validation->get_error_code() );
+        }
 
         update_post_meta( $document_id, self::META_PROVIDER, $provider );
         update_post_meta( $document_id, self::META_LANGUAGE, $language );
@@ -572,6 +651,7 @@ sc_library_ocr_process_page</pre>
                 'provider'    => $provider,
                 'language'    => $language,
                 'threshold'   => $threshold,
+                'source_checksum' => sanitize_text_field( get_post_meta( $document_id, SC_Library_Document_OCR_Reliability::SOURCE_CHECKSUM_META, true ) ),
                 'state'       => 'queued',
                 'confidence'  => 0,
                 'attempts'    => 0,
@@ -645,6 +725,22 @@ sc_library_ocr_process_page</pre>
         }
         check_admin_referer( 'sc_library_v240_apply_ocr_' . $document_id );
 
+        $source_state = SC_Library_Document_OCR_Reliability::ensure_source_current( $document_id );
+        if ( is_wp_error( $source_state ) ) {
+            $this->redirect_document( $document_id, $source_state->get_error_code() );
+        }
+        if ( SC_Library_Document_OCR_Reliability::has_active_pages( $document_id ) ) {
+            $this->redirect_document( $document_id, 'active_ocr_job' );
+        }
+        if ( 'publish' === get_post_status( $document_id ) && empty( $_POST['confirm_published_draft'] ) ) {
+            $this->redirect_document( $document_id, 'published_confirmation_required' );
+        }
+
+        $snapshot = SC_Library_Document_OCR_Reliability::snapshot_document( $document_id );
+        if ( is_wp_error( $snapshot ) ) {
+            $this->redirect_document( $document_id, $snapshot->get_error_code() );
+        }
+
         $result = $this->apply_ocr_to_document( $document_id, isset( $_POST['allow_unreviewed'] ) );
         $this->redirect_document( $document_id, is_wp_error( $result ) ? $result->get_error_code() : 'ocr_applied' );
     }
@@ -664,17 +760,41 @@ sc_library_ocr_process_page</pre>
         $items = $this->job_items( $job_id );
         $now = time();
         $user_id = get_current_user_id();
+        $client_id = sanitize_text_field( wp_unslash( $_POST['client_id'] ?? '' ) );
         $selected = null;
 
+        if ( $client_id ) {
+            foreach ( $items as $index => $item ) {
+                $lock_time = absint( $item['lock_time'] ?? 0 );
+                if (
+                    'processing' === sanitize_key( $item['state'] ?? '' )
+                    && ! empty( $item['lock_client'] )
+                    && hash_equals( (string) $item['lock_client'], $client_id )
+                    && $lock_time
+                    && $now - $lock_time <= SC_Library_Document_OCR_Reliability::LEASE_SECONDS
+                ) {
+                    $selected = array_merge( $item, array( 'index' => $index ) );
+                    break;
+                }
+            }
+        }
+
         foreach ( $items as $index => &$item ) {
+            if ( null !== $selected ) {
+                break;
+            }
             $state = sanitize_key( $item['state'] ?? '' );
             $lock_time = absint( $item['lock_time'] ?? 0 );
-            $lock_user = absint( $item['lock_user'] ?? 0 );
-            $reclaimable = 'processing' === $state && ( $lock_user === $user_id || ! $lock_time || $now - $lock_time > 240 );
+            $reclaimable = 'processing' === $state && ( ! $lock_time || $now - $lock_time > SC_Library_Document_OCR_Reliability::LEASE_SECONDS );
             if ( 'queued' === $state || $reclaimable ) {
                 $item['state'] = 'processing';
                 $item['lock_user'] = $user_id;
+                $item['lock_client'] = $client_id ?: wp_generate_password( 24, false, false );
                 $item['lock_time'] = $now;
+                $item['lock_token'] = wp_generate_password( 40, false, false );
+                $item['message'] = $reclaimable
+                    ? __( 'Recovered an expired OCR processing lease.', 'sustainable-catalyst-library' )
+                    : __( 'OCR page lease acquired.', 'sustainable-catalyst-library' );
                 $item['updated_at'] = current_time( 'mysql' );
                 $selected = array_merge( $item, array( 'index' => $index ) );
                 break;
@@ -693,21 +813,53 @@ sc_library_ocr_process_page</pre>
 
     public function ajax_process_item() {
         $job_id = $this->verify_job_ajax();
-        $index = absint( wp_unslash( $_POST['item_index'] ?? -1 ) );
+        $index = isset( $_POST['item_index'] ) ? intval( wp_unslash( $_POST['item_index'] ) ) : -1;
+        $lock_token = sanitize_text_field( wp_unslash( $_POST['lock_token'] ?? '' ) );
         $items = $this->job_items( $job_id );
-        if ( ! isset( $items[ $index ] ) ) {
+        if ( $index < 0 || ! isset( $items[ $index ] ) ) {
             wp_send_json_error( array( 'message' => __( 'The OCR queue item no longer exists.', 'sustainable-catalyst-library' ) ), 404 );
         }
 
         $item = $items[ $index ];
-        if ( 'processing' !== ( $item['state'] ?? '' ) ) {
+        $item_state = sanitize_key( $item['state'] ?? '' );
+        if ( in_array( $item_state, array( 'complete', 'low_confidence', 'reviewed', 'failed', 'unavailable', 'cancelled' ), true ) ) {
+            wp_send_json_success( $this->job_state( $job_id ) );
+        }
+        if ( 'processing' !== $item_state ) {
             wp_send_json_error( array( 'message' => __( 'The OCR queue item is not locked for processing.', 'sustainable-catalyst-library' ) ), 409 );
+        }
+        $client_id = sanitize_text_field( wp_unslash( $_POST['client_id'] ?? '' ) );
+        if (
+            ! $lock_token
+            || empty( $item['lock_token'] )
+            || ! hash_equals( (string) $item['lock_token'], $lock_token )
+            || ! $client_id
+            || empty( $item['lock_client'] )
+            || ! hash_equals( (string) $item['lock_client'], $client_id )
+        ) {
+            wp_send_json_error( array( 'message' => __( 'The OCR queue lease token is missing, expired, or owned by another queue runner.', 'sustainable-catalyst-library' ) ), 409 );
         }
 
         $document_id = absint( $item['document_id'] ?? 0 );
         $page_number = absint( $item['page'] ?? 0 );
         if ( ! $document_id || ! $page_number || ! current_user_can( 'edit_post', $document_id ) ) {
             wp_send_json_error( array( 'message' => __( 'You are not allowed to process this OCR page.', 'sustainable-catalyst-library' ) ), 403 );
+        }
+
+        $source_state = SC_Library_Document_OCR_Reliability::ensure_source_current( $document_id );
+        $expected_checksum = sanitize_text_field( $item['source_checksum'] ?? '' );
+        if ( is_wp_error( $source_state ) || ( $expected_checksum && ! hash_equals( $expected_checksum, (string) ( $source_state['checksum'] ?? '' ) ) ) ) {
+            $message = is_wp_error( $source_state )
+                ? $source_state->get_error_message()
+                : __( 'The attached PDF changed after this OCR job was queued.', 'sustainable-catalyst-library' );
+            $items[ $index ]['state'] = 'failed';
+            $items[ $index ]['message'] = $message;
+            $items[ $index ]['updated_at'] = current_time( 'mysql' );
+            unset( $items[ $index ]['lock_user'], $items[ $index ]['lock_client'], $items[ $index ]['lock_time'], $items[ $index ]['lock_token'] );
+            update_post_meta( $job_id, self::META_JOB_ITEMS, $items );
+            $this->job_log( $job_id, 'source-changed', $message );
+            $this->settle_job_status( $job_id, $items );
+            wp_send_json_success( $this->job_state( $job_id ) );
         }
 
         $pages = $this->pages( $document_id );
@@ -728,20 +880,42 @@ sc_library_ocr_process_page</pre>
         );
 
         $attempts = absint( $item['attempts'] ?? 0 ) + 1;
+        if ( 'cancelled' === sanitize_key( (string) get_post_meta( $job_id, self::META_JOB_STATUS, true ) ) ) {
+            $items = $this->job_items( $job_id );
+            if ( isset( $items[ $index ] ) ) {
+                $items[ $index ]['state'] = 'cancelled';
+                $items[ $index ]['message'] = __( 'OCR result discarded because the queue was cancelled.', 'sustainable-catalyst-library' );
+                $items[ $index ]['attempts'] = $attempts;
+                $items[ $index ]['updated_at'] = current_time( 'mysql' );
+                unset( $items[ $index ]['lock_user'], $items[ $index ]['lock_client'], $items[ $index ]['lock_time'], $items[ $index ]['lock_token'] );
+                update_post_meta( $job_id, self::META_JOB_ITEMS, $items );
+            }
+            $pages = $this->pages( $document_id );
+            if ( isset( $pages[ $page_number ] ) ) {
+                $pages[ $page_number ]['status'] = 'cancelled';
+                $pages[ $page_number ]['message'] = __( 'OCR processing was cancelled.', 'sustainable-catalyst-library' );
+                $pages[ $page_number ]['updated_at'] = current_time( 'mysql' );
+                $this->save_pages( $document_id, $pages );
+            }
+            wp_send_json_success( $this->job_state( $job_id ) );
+        }
+
         if ( is_wp_error( $result ) ) {
             $page_status = 'provider_unavailable' === $result->get_error_code() ? 'unavailable' : 'failed';
             $pages = $this->pages( $document_id );
-            $pages[ $page_number ]['status'] = $page_status;
-            $pages[ $page_number ]['message'] = $result->get_error_message();
-            $pages[ $page_number ]['attempts'] = $attempts;
-            $pages[ $page_number ]['updated_at'] = current_time( 'mysql' );
-            $this->save_pages( $document_id, $pages );
+            if ( isset( $pages[ $page_number ] ) ) {
+                $pages[ $page_number ]['status'] = $page_status;
+                $pages[ $page_number ]['message'] = $result->get_error_message();
+                $pages[ $page_number ]['attempts'] = $attempts;
+                $pages[ $page_number ]['updated_at'] = current_time( 'mysql' );
+                $this->save_pages( $document_id, $pages );
+            }
 
             $items[ $index ]['state'] = $page_status;
             $items[ $index ]['message'] = $result->get_error_message();
             $items[ $index ]['attempts'] = $attempts;
             $items[ $index ]['updated_at'] = current_time( 'mysql' );
-            unset( $items[ $index ]['lock_user'], $items[ $index ]['lock_time'] );
+            unset( $items[ $index ]['lock_user'], $items[ $index ]['lock_client'], $items[ $index ]['lock_time'], $items[ $index ]['lock_token'] );
             update_post_meta( $job_id, self::META_JOB_ITEMS, $items );
             $this->job_log( $job_id, $page_status, sprintf( __( 'Page %1$d: %2$s', 'sustainable-catalyst-library' ), $page_number, $result->get_error_message() ) );
             $this->settle_job_status( $job_id, $items );
@@ -773,7 +947,7 @@ sc_library_ocr_process_page</pre>
         $items[ $index ]['message'] = $message;
         $items[ $index ]['attempts'] = $attempts;
         $items[ $index ]['updated_at'] = current_time( 'mysql' );
-        unset( $items[ $index ]['lock_user'], $items[ $index ]['lock_time'] );
+        unset( $items[ $index ]['lock_user'], $items[ $index ]['lock_client'], $items[ $index ]['lock_time'], $items[ $index ]['lock_token'] );
         update_post_meta( $job_id, self::META_JOB_ITEMS, $items );
 
         $this->job_log( $job_id, $page_status, sprintf( __( 'Page %1$d completed at %2$s%% confidence.', 'sustainable-catalyst-library' ), $page_number, number_format_i18n( $confidence, 1 ) ) );
@@ -798,7 +972,8 @@ sc_library_ocr_process_page</pre>
                 if ( in_array( $item['state'] ?? '', array( 'failed', 'unavailable', 'low_confidence' ), true ) ) {
                     $item['state'] = 'queued';
                     $item['message'] = __( 'Returned to OCR queue.', 'sustainable-catalyst-library' );
-                    unset( $item['lock_user'], $item['lock_time'] );
+                    $this->sync_page_state_from_job_item( $item, 'queued', $item['message'] );
+                    unset( $item['lock_user'], $item['lock_client'], $item['lock_time'], $item['lock_token'] );
                 }
             }
             unset( $item );
@@ -810,7 +985,8 @@ sc_library_ocr_process_page</pre>
                 if ( in_array( $item['state'] ?? '', array( 'queued', 'processing' ), true ) ) {
                     $item['state'] = 'cancelled';
                     $item['message'] = __( 'Cancelled by an administrator.', 'sustainable-catalyst-library' );
-                    unset( $item['lock_user'], $item['lock_time'] );
+                    $this->sync_page_state_from_job_item( $item, 'cancelled', $item['message'] );
+                    unset( $item['lock_user'], $item['lock_client'], $item['lock_time'], $item['lock_token'] );
                 }
             }
             unset( $item );
@@ -924,6 +1100,9 @@ sc_library_ocr_process_page</pre>
         }
 
         $filtered = apply_filters( 'sc_library_ocr_process_page', null, $context, $provider_id );
+        if ( is_wp_error( $filtered ) ) {
+            return $filtered;
+        }
         if ( is_array( $filtered ) && isset( $filtered['text'] ) ) {
             return $this->validate_provider_result( $filtered, $provider_id );
         }
@@ -1080,6 +1259,10 @@ sc_library_ocr_process_page</pre>
         if ( '' === trim( $text ) ) {
             return new WP_Error( 'ocr_empty', __( 'The OCR provider returned no readable text.', 'sustainable-catalyst-library' ) );
         }
+        $max_chars = max( 1000, absint( apply_filters( 'sc_library_ocr_max_page_characters', 500000, $result, $provider_id ) ) );
+        if ( strlen( $text ) > $max_chars ) {
+            return new WP_Error( 'ocr_response_too_large', __( 'The OCR page text exceeded the configured size limit.', 'sustainable-catalyst-library' ) );
+        }
 
         return array(
             'text'       => $text,
@@ -1227,6 +1410,12 @@ sc_library_ocr_process_page</pre>
     }
 
     private function local_provider_status() {
+        $cache_key = 'sc_library_v241_local_ocr_status';
+        $cached = get_transient( $cache_key );
+        if ( is_array( $cached ) && isset( $cached['available'], $cached['tesseract'], $cached['rasterizer'], $cached['languages'] ) ) {
+            return $cached;
+        }
+
         $tesseract = $this->find_binary( apply_filters( 'sc_library_tesseract_candidates', array( '/usr/bin/tesseract', '/usr/local/bin/tesseract', '/opt/homebrew/bin/tesseract' ) ) );
         $rasterizer = $this->find_binary( apply_filters( 'sc_library_pdf_rasterizer_candidates', array( '/usr/bin/pdftoppm', '/usr/local/bin/pdftoppm', '/opt/homebrew/bin/pdftoppm', '/usr/bin/pdftocairo', '/usr/local/bin/pdftocairo', '/opt/homebrew/bin/pdftocairo' ) ) );
 
@@ -1243,12 +1432,14 @@ sc_library_ocr_process_page</pre>
             }
         }
 
-        return array(
+        $status = array(
             'available'  => (bool) ( $tesseract && $rasterizer && function_exists( 'proc_open' ) ),
             'tesseract'  => $tesseract,
             'rasterizer' => $rasterizer,
             'languages'  => array_values( array_unique( $languages ) ),
         );
+        set_transient( $cache_key, $status, 10 * MINUTE_IN_SECONDS );
+        return $status;
     }
 
     private function find_binary( $candidates ) {
@@ -1331,6 +1522,7 @@ sc_library_ocr_process_page</pre>
                     'ID'           => $document_id,
                     'post_content' => $html,
                     'post_excerpt' => wp_trim_words( trim( preg_replace( '/\s+/u', ' ', $raw ) ), 45, '…' ),
+                    'post_status'  => 'publish' === get_post_status( $document_id ) ? 'draft' : get_post_status( $document_id ),
                 )
             ),
             true
@@ -1401,6 +1593,7 @@ sc_library_ocr_process_page</pre>
 
     private function save_pages( $document_id, $pages ) {
         ksort( $pages );
+        delete_transient( 'sc_library_v241_ocr_workspace_totals' );
         update_post_meta( $document_id, self::META_PAGES, $pages );
 
         $summary = $this->calculate_summary( $pages );
@@ -1482,6 +1675,11 @@ sc_library_ocr_process_page</pre>
     }
 
     private function workspace_totals() {
+        $cached = get_transient( 'sc_library_v241_ocr_workspace_totals' );
+        if ( is_array( $cached ) ) {
+            return $cached;
+        }
+
         $ids = get_posts( array( 'post_type' => self::POST_TYPE, 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) );
         $totals = array( 'documents' => count( $ids ), 'needs_ocr' => 0, 'low_confidence' => 0, 'reviewed' => 0 );
         foreach ( $ids as $document_id ) {
@@ -1492,6 +1690,7 @@ sc_library_ocr_process_page</pre>
             $totals['low_confidence'] += absint( $summary['low_confidence'] );
             $totals['reviewed'] += absint( $summary['reviewed'] );
         }
+        set_transient( 'sc_library_v241_ocr_workspace_totals', $totals, 5 * MINUTE_IN_SECONDS );
         return $totals;
     }
 
@@ -1569,13 +1768,19 @@ sc_library_ocr_process_page</pre>
             }
         }
 
+        $public_items = array();
+        foreach ( $items as $item ) {
+            unset( $item['lock_token'], $item['lock_user'], $item['lock_client'] );
+            $public_items[] = $item;
+        }
+
         return array_merge(
             $state,
             array(
                 'job_id' => $job_id,
                 'status' => sanitize_key( (string) get_post_meta( $job_id, self::META_JOB_STATUS, true ) ) ?: 'created',
                 'total'  => count( $items ),
-                'items'  => $items,
+                'items'  => $public_items,
                 'logs'   => $this->job_logs( $job_id ),
             )
         );
@@ -1653,19 +1858,22 @@ sc_library_ocr_process_page</pre>
         foreach ( $this->pages( $document_id ) as $page ) {
             fputcsv(
                 $out,
-                array(
-                    $document_id,
-                    $page['page'] ?? '',
-                    $page['source_chars'] ?? 0,
-                    $page['status'] ?? '',
-                    $page['confidence'] ?? 0,
-                    $page['language'] ?? '',
-                    $page['provider'] ?? '',
-                    $page['attempts'] ?? 0,
-                    $page['reviewed_at'] ?? '',
-                    $page['reviewed_by'] ?? '',
-                    $page['message'] ?? '',
-                    implode( '; ', (array) ( $page['warnings'] ?? array() ) ),
+                array_map(
+                    array( 'SC_Library_Document_OCR_Reliability', 'safe_csv_cell' ),
+                    array(
+                        $document_id,
+                        $page['page'] ?? '',
+                        $page['source_chars'] ?? 0,
+                        $page['status'] ?? '',
+                        $page['confidence'] ?? 0,
+                        $page['language'] ?? '',
+                        $page['provider'] ?? '',
+                        $page['attempts'] ?? 0,
+                        $page['reviewed_at'] ?? '',
+                        $page['reviewed_by'] ?? '',
+                        $page['message'] ?? '',
+                        implode( '; ', (array) ( $page['warnings'] ?? array() ) ),
+                    )
                 )
             );
         }
@@ -1685,18 +1893,21 @@ sc_library_ocr_process_page</pre>
         foreach ( $this->job_items( $job_id ) as $index => $item ) {
             fputcsv(
                 $out,
-                array(
-                    $index + 1,
-                    $item['document_id'] ?? '',
-                    ! empty( $item['document_id'] ) ? get_the_title( $item['document_id'] ) : '',
-                    $item['page'] ?? '',
-                    $item['provider'] ?? '',
-                    $item['language'] ?? '',
-                    $item['state'] ?? '',
-                    $item['confidence'] ?? 0,
-                    $item['attempts'] ?? 0,
-                    $item['message'] ?? '',
-                    $item['updated_at'] ?? '',
+                array_map(
+                    array( 'SC_Library_Document_OCR_Reliability', 'safe_csv_cell' ),
+                    array(
+                        $index + 1,
+                        $item['document_id'] ?? '',
+                        ! empty( $item['document_id'] ) ? get_the_title( $item['document_id'] ) : '',
+                        $item['page'] ?? '',
+                        $item['provider'] ?? '',
+                        $item['language'] ?? '',
+                        $item['state'] ?? '',
+                        $item['confidence'] ?? 0,
+                        $item['attempts'] ?? 0,
+                        $item['message'] ?? '',
+                        $item['updated_at'] ?? '',
+                    )
                 )
             );
         }
@@ -1904,11 +2115,40 @@ sc_library_ocr_process_page</pre>
         @rmdir( $directory );
     }
 
+    private function sync_page_state_from_job_item( $item, $status, $message ) {
+        $document_id = absint( $item['document_id'] ?? 0 );
+        $page_number = absint( $item['page'] ?? 0 );
+        if ( ! $document_id || ! $page_number ) {
+            return;
+        }
+
+        $pages = $this->pages( $document_id );
+        if ( ! isset( $pages[ $page_number ] ) ) {
+            return;
+        }
+
+        $pages[ $page_number ]['status'] = sanitize_key( $status );
+        $pages[ $page_number ]['message'] = sanitize_text_field( $message );
+        $pages[ $page_number ]['updated_at'] = current_time( 'mysql' );
+        $this->save_pages( $document_id, $pages );
+    }
+
     private function redirect_document( $document_id, $notice, $page_number = 0 ) {
+        $reliability_notices = array(
+            'source_changed',
+            'reconversion_required',
+            'language_unavailable',
+            'published_confirmation_required',
+            'active_ocr_job',
+            'no_backup',
+            'invalid_document',
+            'missing_pdf',
+        );
+        $notice_key = in_array( sanitize_key( $notice ), $reliability_notices, true ) ? 'sc_v241_notice' : 'sc_v240_notice';
         $args = array(
-            'page'           => 'sc-library-ocr-review',
-            'document_id'    => $document_id,
-            'sc_v240_notice' => sanitize_key( $notice ),
+            'page'        => 'sc-library-ocr-review',
+            'document_id' => $document_id,
+            $notice_key   => sanitize_key( $notice ),
         );
         if ( $page_number ) {
             $args['ocr_review_page'] = $page_number;
@@ -1925,8 +2165,16 @@ sc_library_ocr_process_page</pre>
 
     private function prune_jobs() {
         $jobs = get_posts( array( 'post_type' => self::JOB_TYPE, 'post_status' => 'private', 'posts_per_page' => -1, 'fields' => 'ids', 'orderby' => 'date', 'order' => 'DESC' ) );
-        foreach ( array_slice( $jobs, self::JOB_LIMIT ) as $job_id ) {
-            wp_delete_post( $job_id, true );
+        $retained_terminal = 0;
+        foreach ( $jobs as $job_id ) {
+            $status = sanitize_key( (string) get_post_meta( $job_id, self::META_JOB_STATUS, true ) );
+            if ( in_array( $status, array( 'running', 'paused', 'created' ), true ) ) {
+                continue;
+            }
+            $retained_terminal++;
+            if ( $retained_terminal > self::JOB_LIMIT ) {
+                wp_delete_post( $job_id, true );
+            }
         }
     }
 

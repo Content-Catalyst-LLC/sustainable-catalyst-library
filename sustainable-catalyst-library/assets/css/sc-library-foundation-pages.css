@@ -1748,3 +1748,56 @@
     break-inside: avoid;
   }
 }
+
+
+/* v2.4.1 — OCR Reliability and Review Recovery */
+.sc-ocr-inline-form {
+  display: inline-flex;
+  margin: 0;
+}
+
+.sc-ocr-published-confirmation {
+  max-width: 560px;
+  padding: 10px 12px;
+  border: 1px solid #8f1620;
+  border-left-width: 4px;
+  background: #fff8f5;
+  color: #1d2327;
+}
+
+.sc-ocr-apply-form {
+  align-items: start !important;
+}
+
+.sc-ocr-provider-maintenance {
+  margin: 12px 0 24px;
+}
+
+.sc-ocr-review-controls .notice.inline {
+  flex-basis: 100%;
+}
+
+.sc-pdf-job-controls form {
+  margin: 0;
+}
+
+.sc-ocr-document-review .notice.inline {
+  margin: 0 0 18px;
+}
+
+.sc-ocr-state.is-cancelled {
+  color: #646970;
+}
+
+@media (max-width: 760px) {
+  .sc-ocr-inline-form,
+  .sc-ocr-inline-form .button,
+  .sc-ocr-provider-maintenance .button {
+    width: 100%;
+  }
+
+  .sc-pdf-job-controls {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

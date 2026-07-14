@@ -5,6 +5,9 @@
   var $job = $('[data-sc-ocr-job]');
   var stopped = false;
   var processing = false;
+  var clientId = (window.crypto && typeof window.crypto.randomUUID === 'function')
+    ? window.crypto.randomUUID()
+    : 'ocr-' + Date.now() + '-' + Math.random().toString(36).slice(2);
 
   $('[data-sc-select-all]').on('change', function () {
     $(this).closest('table').find('input[type="checkbox"]:not(:disabled)').prop('checked', this.checked);
@@ -31,7 +34,8 @@
         data: $.extend({
           action: action,
           nonce: config.nonce,
-          job_id: config.jobId
+          job_id: config.jobId,
+          client_id: clientId
         }, data || {})
       });
 
@@ -119,7 +123,7 @@
 
         var item = next.item;
         updateMessage('Processing page ' + item.page + ' of “' + (item.document_title || 'document') + '”…');
-        var state = await request('sc_library_v240_process_item', { item_index: item.index });
+        var state = await request('sc_library_v240_process_item', { item_index: item.index, lock_token: item.lock_token || '' });
         updateState(state);
       }
     } catch (error) {

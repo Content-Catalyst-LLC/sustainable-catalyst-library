@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 2.4.0
+Stable tag: 2.4.1
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,20 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 2.4.1 =
+* Pins OCR records and queue items to the SHA-256 checksum of the source PDF.
+* Archives stale OCR records and requires PDF reconversion after an attachment changes.
+* Adds browser-specific queue clients, opaque lease tokens, retry-safe processing, and corrected item-index validation.
+* Adds queue-state repair, stale-lease recovery, cancellation synchronization, and active-job-safe pruning.
+* Adds configured/PATH-aware local OCR binary discovery and cached provider diagnostics.
+* Requires signed HTTPS external OCR requests with API keys and bounded response sizes.
+* Validates installed local OCR languages before queue creation.
+* Blocks OCR application during active jobs, creates pre-apply backups, and returns published records to Draft.
+* Adds restoration of the latest pre-OCR document backup.
+* Adds query-level OCR status filtering, cached workspace totals, formula-safe CSV exports, and temporary-file cleanup.
+* Preserves the v2.4.0 OCR model, v2.3.1 repository accessibility, v2.3.0 public routes, v2.2.2 bulk import, and v2.2.1 conversion recovery.
+
 
 = 2.4.0 =
 * Adds page-level scan and low-text detection using the existing PDF page map.

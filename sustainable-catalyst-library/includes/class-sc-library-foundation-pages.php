@@ -988,20 +988,22 @@ final class SC_Library_Foundation_Pages {
     }
 
     private function version() {
-        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.4.0';
+        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.4.1';
     }
 }
 
-// Knowledge Library v2.4.0: retain document operations and add OCR and scanned-document processing.
+// Knowledge Library v2.4.1: retain OCR processing and add reliability, recovery, and source-integrity safeguards.
 require_once __DIR__ . '/class-sc-library-pdf-to-document.php';
 require_once __DIR__ . '/class-sc-library-pdf-conversion-reliability.php';
 require_once __DIR__ . '/class-sc-library-pdf-bulk-import-repair.php';
 require_once __DIR__ . '/class-sc-library-document-ocr-processing.php';
+require_once __DIR__ . '/class-sc-library-document-ocr-reliability.php';
 require_once __DIR__ . '/class-sc-library-document-repository-hardening.php';
 require_once __DIR__ . '/class-sc-library-document-public-repository.php';
 new SC_Library_PDF_To_Document();
 new SC_Library_PDF_Conversion_Reliability();
 new SC_Library_PDF_Bulk_Import_Repair();
 new SC_Library_Document_OCR_Processing();
+new SC_Library_Document_OCR_Reliability();
 new SC_Library_Document_Repository_Hardening();
 new SC_Library_Document_Public_Repository();

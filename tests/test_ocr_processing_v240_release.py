@@ -182,9 +182,9 @@ def test_version_and_route_compatibility():
     ocr = OCR.read_text(encoding="utf-8")
     repository = REPOSITORY.read_text(encoding="utf-8")
     wrapper = WRAPPER.read_text(encoding="utf-8")
-    assert "public const VERSION = '2.4.0'" in ocr
+    assert "public const VERSION = '2.4.1'" in ocr
     assert "public const ROUTE_VERSION = '2.3.0'" in repository
-    assert "SC_LIBRARY_VERSION : '2.4.0'" in wrapper
+    assert "SC_LIBRARY_VERSION : '2.4.1'" in wrapper
 
 
 def main():
