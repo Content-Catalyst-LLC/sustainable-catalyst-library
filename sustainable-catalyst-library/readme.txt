@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 2.4.1
+Stable tag: 2.5.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,19 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 2.5.0 =
+* Adds structured Research Source records for scholarly, library, web, dataset, legal, media, software, and archival materials.
+* Adds the configurable Harvard — Sustainable Catalyst citation profile with in-text citations, locators, and reference-list entries.
+* Adds same-author/same-year suffixes and reusable citation keys.
+* Adds Research Project records with synchronized source collections and public/private bibliographies.
+* Adds DOI, ISBN, URL, and author-year-title duplicate detection without automatic merging.
+* Adds Media Library source attachments and relationships to Knowledge Library documents.
+* Adds public Source pages, a searchable Source Library, project bibliographies, and inline citation shortcodes.
+* Adds permission-controlled REST endpoints for source search, source creation and updates, citation formatting, project bibliographies, and project-source assignment.
+* Keeps private notes, metadata provenance, and duplicate-review records out of public API responses.
+* Preserves v2.4.1 OCR reliability, v2.4.0 scanned-document processing, v2.3.1 repository accessibility, v2.3.0 public routes, and v2.2.x conversion/import systems.
+
 
 = 2.4.1 =
 * Pins OCR records and queue items to the SHA-256 checksum of the source PDF.
