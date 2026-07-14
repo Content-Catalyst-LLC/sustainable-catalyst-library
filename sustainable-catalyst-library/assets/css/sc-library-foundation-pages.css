@@ -537,3 +537,224 @@
     gap: 2px;
   }
 }
+
+
+/* v2.2.2 — Bulk Import and Collection Repair */
+.sc-pdf-bulk-admin {
+  max-width: 1240px;
+}
+
+.sc-pdf-bulk-section {
+  padding: 22px 0 40px;
+}
+
+.sc-pdf-bulk-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 22px;
+}
+
+.sc-pdf-bulk-cards > div {
+  display: grid;
+  gap: 5px;
+  padding: 18px;
+  border: 1px solid #c3c4c7;
+  border-left: 4px solid #8f1620;
+  background: #fff;
+}
+
+.sc-pdf-bulk-cards strong {
+  font-size: 25px;
+  line-height: 1;
+}
+
+.sc-pdf-bulk-cards span,
+.sc-inventory-state + span {
+  color: #646970;
+}
+
+.sc-pdf-bulk-filter,
+.sc-pdf-bulk-toolbar,
+.sc-pdf-bulk-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin: 0 0 18px;
+  padding: 14px;
+  border: 1px solid #c3c4c7;
+  background: #fff;
+}
+
+.sc-pdf-bulk-filter label,
+.sc-pdf-bulk-toolbar label,
+.sc-pdf-bulk-report-actions label {
+  display: grid;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.sc-pdf-bulk-table .check-column {
+  width: 34px;
+}
+
+.sc-inventory-state,
+.sc-inventory-state + span {
+  display: block;
+}
+
+.sc-inventory-state.is-linked,
+.sc-inventory-state.is-ready {
+  color: #167047;
+}
+
+.sc-inventory-state.is-unlinked,
+.sc-inventory-state.is-orphan,
+.sc-inventory-state.is-duplicate {
+  color: #8f1620;
+}
+
+.sc-repair-issues {
+  margin: 0 0 0 18px;
+}
+
+.sc-pdf-job-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 18px;
+}
+
+.sc-pdf-job-list,
+.sc-pdf-job-detail {
+  border: 1px solid #c3c4c7;
+  background: #fff;
+}
+
+.sc-pdf-job-list {
+  padding: 16px;
+}
+
+.sc-pdf-job-list h2 {
+  margin-top: 0;
+}
+
+.sc-pdf-job-list ul {
+  margin: 0;
+}
+
+.sc-pdf-job-list li {
+  margin: 0;
+  border-top: 1px solid #dcdcde;
+}
+
+.sc-pdf-job-list li:first-child {
+  border-top: 0;
+}
+
+.sc-pdf-job-list li.is-current {
+  border-left: 4px solid #8f1620;
+}
+
+.sc-pdf-job-list a {
+  display: grid;
+  gap: 3px;
+  padding: 11px 8px;
+  text-decoration: none;
+}
+
+.sc-pdf-job-list span {
+  color: #646970;
+  font-size: 12px;
+}
+
+.sc-pdf-job-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  padding: 20px;
+  border-bottom: 1px solid #c3c4c7;
+}
+
+.sc-pdf-bulk-kicker {
+  margin: 0;
+  color: #8f1620;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.sc-pdf-job-header h2 {
+  margin: 4px 0;
+}
+
+.sc-pdf-job-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.sc-pdf-job-header progress {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 10px;
+}
+
+.sc-pdf-job-stats {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  color: #646970;
+}
+
+.sc-pdf-job-items {
+  border: 0;
+}
+
+@media (max-width: 980px) {
+  .sc-pdf-bulk-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sc-pdf-job-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-pdf-job-list ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .sc-pdf-job-list li {
+    border: 1px solid #dcdcde;
+  }
+}
+
+@media (max-width: 640px) {
+  .sc-pdf-bulk-cards,
+  .sc-pdf-job-list ul,
+  .sc-pdf-job-header {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-pdf-bulk-filter,
+  .sc-pdf-bulk-toolbar,
+  .sc-pdf-bulk-report-actions,
+  .sc-pdf-job-controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .sc-pdf-bulk-filter .button,
+  .sc-pdf-bulk-toolbar .button,
+  .sc-pdf-bulk-report-actions .button,
+  .sc-pdf-job-controls .button {
+    width: 100%;
+  }
+}

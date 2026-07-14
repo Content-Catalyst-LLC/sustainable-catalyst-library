@@ -988,12 +988,14 @@ final class SC_Library_Foundation_Pages {
     }
 
     private function version() {
-        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.2.1';
+        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.2.2';
     }
 }
 
-// Knowledge Library v2.2.1: retain the v2.2.0 document architecture and add a dedicated reliability layer.
+// Knowledge Library v2.2.2: retain the document and reliability layers and add bulk import and collection repair.
 require_once __DIR__ . '/class-sc-library-pdf-to-document.php';
 require_once __DIR__ . '/class-sc-library-pdf-conversion-reliability.php';
+require_once __DIR__ . '/class-sc-library-pdf-bulk-import-repair.php';
 new SC_Library_PDF_To_Document();
 new SC_Library_PDF_Conversion_Reliability();
+new SC_Library_PDF_Bulk_Import_Repair();
