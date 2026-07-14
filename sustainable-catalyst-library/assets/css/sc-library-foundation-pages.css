@@ -1493,3 +1493,258 @@
     font-weight: 400;
   }
 }
+
+
+/* v2.4.0 — OCR and Scanned Document Processing */
+.sc-ocr-admin {
+  max-width: 1320px;
+}
+
+.sc-ocr-section {
+  padding: 22px 0 42px;
+}
+
+.sc-ocr-review-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: start;
+  margin: 0 0 18px;
+  padding: 20px;
+  border: 1px solid #c3c4c7;
+  border-left: 4px solid #8f1620;
+  background: #fff;
+}
+
+.sc-ocr-review-header h1 {
+  margin: 4px 0 6px;
+}
+
+.sc-ocr-review-header__actions,
+.sc-ocr-review-controls,
+.sc-ocr-page-inventory__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: end;
+}
+
+.sc-ocr-review-controls {
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid #c3c4c7;
+  background: #fff;
+}
+
+.sc-ocr-review-controls form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: end;
+}
+
+.sc-ocr-review-controls label,
+.sc-ocr-page-inventory__toolbar label {
+  display: grid;
+  gap: 4px;
+  font-weight: 650;
+}
+
+.sc-ocr-review-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, .85fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.sc-ocr-review-pdf,
+.sc-ocr-review-text,
+.sc-ocr-page-inventory {
+  border: 1px solid #c3c4c7;
+  background: #fff;
+}
+
+.sc-ocr-review-pdf h2,
+.sc-ocr-review-text h2,
+.sc-ocr-page-inventory__heading {
+  margin: 0;
+  padding: 14px 16px;
+  border-bottom: 1px solid #c3c4c7;
+  font-size: 1.05rem;
+}
+
+.sc-ocr-review-pdf iframe {
+  display: block;
+  width: 100%;
+  height: min(78vh, 980px);
+  border: 0;
+  background: #e8e8e8;
+}
+
+.sc-ocr-review-text {
+  position: sticky;
+  top: 32px;
+}
+
+.sc-ocr-review-text > form,
+.sc-ocr-review-text > .sc-ocr-page-status,
+.sc-ocr-review-text > details {
+  margin-right: 16px;
+  margin-left: 16px;
+}
+
+.sc-ocr-page-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 15px;
+  margin-top: 15px;
+  margin-bottom: 12px;
+  color: #646970;
+}
+
+.sc-ocr-state {
+  color: #8f1620;
+  font-weight: 800;
+}
+
+.sc-ocr-state.is-not_needed,
+.sc-ocr-state.is-complete,
+.sc-ocr-state.is-reviewed,
+.sc-ocr-state.is-not_required {
+  color: #167047;
+}
+
+.sc-ocr-state.is-processing,
+.sc-ocr-state.is-queued {
+  color: #7a4d00;
+}
+
+.sc-ocr-source-text {
+  margin-bottom: 14px;
+  padding: 10px 0;
+  border-top: 1px solid #dcdcde;
+  border-bottom: 1px solid #dcdcde;
+}
+
+.sc-ocr-source-text summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.sc-ocr-source-text pre,
+.sc-ocr-section > pre {
+  max-height: 280px;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid #dcdcde;
+  background: #f6f7f7;
+  white-space: pre-wrap;
+}
+
+.sc-ocr-review-text textarea {
+  width: 100%;
+  min-height: 420px;
+  margin: 7px 0 10px;
+  padding: 12px;
+  border: 1px solid #8c8f94;
+  border-radius: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  line-height: 1.55;
+}
+
+.sc-ocr-review-confirmation {
+  display: flex;
+  gap: 8px;
+  align-items: start;
+  font-weight: 650;
+}
+
+.sc-ocr-page-inventory {
+  margin-top: 18px;
+}
+
+.sc-ocr-page-inventory__toolbar {
+  padding: 14px 16px;
+  border-bottom: 1px solid #c3c4c7;
+}
+
+.sc-ocr-page-inventory tr.is-current td,
+.sc-ocr-page-inventory tr.is-current th {
+  background: #fff8e5;
+}
+
+.sc-ocr-provider-intro {
+  max-width: 900px;
+}
+
+.sc-ocr-provider-diagnostics {
+  max-width: 900px;
+  margin-bottom: 24px;
+}
+
+.sc-ocr-job-items td {
+  vertical-align: top;
+}
+
+.sc-pdf-document__ocr-notice {
+  margin: 0 0 24px;
+  padding: 15px 18px;
+  border: 1px solid #8f1620;
+  border-left-width: 5px;
+  background: #fff8f5;
+}
+
+.sc-pdf-document__ocr-notice strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #8f1620;
+}
+
+.sc-pdf-document__ocr-notice p {
+  margin: 0;
+}
+
+@media (max-width: 1080px) {
+  .sc-ocr-review-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-ocr-review-text {
+    position: static;
+  }
+
+  .sc-ocr-review-pdf iframe {
+    height: 70vh;
+  }
+}
+
+@media (max-width: 760px) {
+  .sc-ocr-review-header,
+  .sc-ocr-review-controls,
+  .sc-ocr-review-controls form,
+  .sc-ocr-page-inventory__toolbar,
+  .sc-ocr-review-header__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .sc-ocr-review-header .button,
+  .sc-ocr-review-controls .button,
+  .sc-ocr-page-inventory__toolbar .button,
+  .sc-ocr-review-controls input,
+  .sc-ocr-review-controls select,
+  .sc-ocr-page-inventory__toolbar input,
+  .sc-ocr-page-inventory__toolbar select {
+    width: 100%;
+  }
+
+  .sc-ocr-review-pdf iframe {
+    height: 62vh;
+  }
+}
+
+@media print {
+  .sc-pdf-document__ocr-notice {
+    break-inside: avoid;
+  }
+}

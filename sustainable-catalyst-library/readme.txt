@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 2.3.1
+Stable tag: 2.4.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,19 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 2.4.0 =
+* Adds page-level scan and low-text detection using the existing PDF page map.
+* Adds the OCR Review workspace with side-by-side original PDF and editable page text.
+* Adds persistent page-level OCR jobs with pause, resume, retry, cancel, stale-lock recovery, and CSV export.
+* Adds free local Tesseract OCR support when Tesseract and Poppler binaries are available on the WordPress server.
+* Adds a signed external OCR endpoint contract and custom WordPress provider filters.
+* Stores per-page confidence, language hints, provider, warnings, attempts, corrections, and reviewer records.
+* Adds selected-page reprocessing and queueing of all pages requiring OCR.
+* Applies reviewed OCR back to the readable Knowledge Library document while preserving the original PDF as authoritative.
+* Adds public OCR provenance and low-confidence warnings to OCR-derived readable documents.
+* Preserves v2.3.1 repository accessibility, v2.3.0 public routes, v2.2.2 bulk import, and v2.2.1 conversion recovery.
+
 
 = 2.3.1 =
 * Adds unique repository landmarks, result IDs, skip links, and accessible heading relationships.
