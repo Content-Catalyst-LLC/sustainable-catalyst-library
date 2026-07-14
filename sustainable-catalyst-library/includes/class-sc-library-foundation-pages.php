@@ -13,10 +13,12 @@ final class SC_Library_Foundation_Pages {
     public const POST_TYPE = 'sc_foundation_doc';
     public const META_PDF_ID = '_sc_library_foundation_page_pdf_id';
     public const SCHEMA = 'sc-library-foundation-page/1.0';
-    public const ROUTE_VERSION = '2.1.1';
+    public const ROUTE_VERSION = '2.1.2';
 
     private static $allow_foundation_query = false;
     private static $saving_title = false;
+    private static $validation_error = '';
+    private static $slug_adjusted = false;
 
     /** @var string[] */
     private static $compatible_pdf_meta_keys = array(
@@ -36,9 +38,18 @@ final class SC_Library_Foundation_Pages {
 
         add_action( 'edit_form_after_title', array( $this, 'render_inline_pdf_selector' ), 20 );
         add_action( 'do_meta_boxes', array( $this, 'simplify_editor_meta_boxes' ), 100, 3 );
+        add_filter( 'wp_insert_post_data', array( $this, 'prevent_publish_without_pdf' ), 40, 2 );
         add_action( 'save_post_' . self::POST_TYPE, array( $this, 'save_document' ), 30, 3 );
+        add_filter( 'redirect_post_location', array( $this, 'redirect_with_editor_status' ), 40, 2 );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
         add_action( 'admin_notices', array( $this, 'editor_notice' ) );
+        add_filter( 'display_post_states', array( $this, 'document_post_states' ), 20, 2 );
+        add_filter( 'manage_' . self::POST_TYPE . '_posts_columns', array( $this, 'document_columns' ) );
+        add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( $this, 'render_document_column' ), 10, 2 );
+
+        add_action( 'admin_menu', array( $this, 'register_health_page' ), 100 );
+        add_action( 'admin_post_sc_library_repair_foundation_routes', array( $this, 'repair_routes' ) );
+        add_action( 'admin_post_sc_library_repair_foundation_metadata', array( $this, 'repair_metadata' ) );
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_public_assets' ) );
         add_filter( 'template_include', array( $this, 'single_template' ), 100 );
@@ -122,6 +133,8 @@ final class SC_Library_Foundation_Pages {
     }
 
     public function use_classic_editor( $use_block_editor, $post_type ) {
+        // Foundation Documents use one stable page-style editor so the PDF selector
+        // appears consistently regardless of site-wide Gutenberg settings.
         return self::POST_TYPE === $post_type ? false : $use_block_editor;
     }
 
@@ -151,24 +164,28 @@ final class SC_Library_Foundation_Pages {
     }
 
     public function render_pdf_meta_box( $post ) {
-        $attachment_id = self::get_pdf_attachment_id( $post->ID );
+        $health        = self::get_pdf_health( $post->ID );
+        $attachment_id = 'ready' === $health['status'] ? $health['attachment_id'] : 0;
         $attachment    = $attachment_id ? get_post( $attachment_id ) : null;
-        $filename      = $attachment_id ? basename( (string) get_attached_file( $attachment_id ) ) : '';
-        $url           = $attachment_id ? wp_get_attachment_url( $attachment_id ) : '';
+        $filename      = $health['filename'];
+        $url           = $health['url'];
         $advanced_url  = add_query_arg( 'sc_foundation_advanced', '1', get_edit_post_link( $post->ID, 'raw' ) );
 
         wp_nonce_field( 'sc_library_save_foundation_page', 'sc_library_foundation_page_nonce' );
         ?>
-        <div class="sc-foundation-page-selector" data-sc-foundation-page-selector>
+        <div class="sc-foundation-page-selector" data-sc-foundation-page-selector data-pdf-required="true">
             <input type="hidden" name="sc_library_foundation_page_pdf_id" value="<?php echo esc_attr( $attachment_id ); ?>" data-sc-foundation-pdf-id>
-            <div class="sc-foundation-page-selector__summary" data-sc-foundation-pdf-summary>
+            <div class="sc-foundation-page-selector__summary" data-sc-foundation-pdf-summary aria-live="polite">
                 <?php if ( $attachment_id && $url ) : ?>
                     <strong><?php echo esc_html( $attachment ? $attachment->post_title : $filename ); ?></strong>
                     <span><?php echo esc_html( $filename ); ?></span>
                     <a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Open selected PDF', 'sustainable-catalyst-library' ); ?></a>
+                <?php elseif ( 'invalid' === $health['status'] ) : ?>
+                    <strong><?php esc_html_e( 'Selected PDF needs repair', 'sustainable-catalyst-library' ); ?></strong>
+                    <span><?php echo esc_html( $health['message'] ); ?></span>
                 <?php else : ?>
                     <strong><?php esc_html_e( 'No PDF selected', 'sustainable-catalyst-library' ); ?></strong>
-                    <span><?php esc_html_e( 'Choose an existing PDF from the WordPress Media Library.', 'sustainable-catalyst-library' ); ?></span>
+                    <span><?php esc_html_e( 'Choose an existing PDF from the WordPress Media Library. A valid PDF is required before publishing.', 'sustainable-catalyst-library' ); ?></span>
                 <?php endif; ?>
             </div>
             <div class="sc-foundation-page-selector__actions">
@@ -176,7 +193,7 @@ final class SC_Library_Foundation_Pages {
                 <button type="button" class="button" data-sc-foundation-remove-pdf <?php disabled( ! $attachment_id ); ?>><?php esc_html_e( 'Remove PDF', 'sustainable-catalyst-library' ); ?></button>
             </div>
             <p class="description">
-                <?php esc_html_e( 'The selected file is embedded automatically on the public Foundation Document page. Open and Download PDF buttons are also generated automatically.', 'sustainable-catalyst-library' ); ?>
+                <?php esc_html_e( 'A valid PDF is required for publication. The selected file is embedded automatically, with accessible Open and Download controls generated on the public page.', 'sustainable-catalyst-library' ); ?>
             </p>
             <details class="sc-foundation-page-selector__advanced">
                 <summary><?php esc_html_e( 'Advanced Library tools', 'sustainable-catalyst-library' ); ?></summary>
@@ -217,6 +234,30 @@ final class SC_Library_Foundation_Pages {
         }
     }
 
+    public function prevent_publish_without_pdf( $data, $postarr ) {
+        if ( self::POST_TYPE !== ( $data['post_type'] ?? '' ) ) {
+            return $data;
+        }
+
+        $target_status = $data['post_status'] ?? '';
+        if ( ! in_array( $target_status, array( 'publish', 'future', 'private' ), true ) ) {
+            return $data;
+        }
+
+        $post_id = isset( $postarr['ID'] ) ? absint( $postarr['ID'] ) : 0;
+        $submitted_attachment_id = isset( $_POST['sc_library_foundation_page_pdf_id'] )
+            ? absint( wp_unslash( $_POST['sc_library_foundation_page_pdf_id'] ) )
+            : 0;
+        $attachment_id = $submitted_attachment_id ?: self::get_pdf_attachment_id( $post_id );
+
+        if ( ! self::is_valid_pdf_attachment( $attachment_id ) ) {
+            $data['post_status'] = 'draft';
+            self::$validation_error = 'missing_pdf';
+        }
+
+        return $data;
+    }
+
     public function save_document( $post_id, $post, $update ) {
         if ( self::$saving_title || ! $post || self::POST_TYPE !== $post->post_type ) {
             return;
@@ -232,7 +273,7 @@ final class SC_Library_Foundation_Pages {
         }
 
         $attachment_id = isset( $_POST['sc_library_foundation_page_pdf_id'] ) ? absint( $_POST['sc_library_foundation_page_pdf_id'] ) : 0;
-        if ( $attachment_id && 'application/pdf' !== get_post_mime_type( $attachment_id ) ) {
+        if ( ! self::is_valid_pdf_attachment( $attachment_id ) ) {
             $attachment_id = 0;
         }
 
@@ -262,6 +303,26 @@ final class SC_Library_Foundation_Pages {
                 self::$saving_title = false;
             }
         }
+
+        $fresh_post = get_post( $post_id );
+        if ( $fresh_post && $fresh_post->post_title && $fresh_post->post_name ) {
+            $base_slug = sanitize_title( $fresh_post->post_title );
+            if ( $base_slug && preg_match( '/^' . preg_quote( $base_slug, '/' ) . '-[0-9]+$/', $fresh_post->post_name ) ) {
+                self::$slug_adjusted = true;
+            }
+        }
+    }
+
+    public function redirect_with_editor_status( $location, $post_id ) {
+        if ( self::$validation_error ) {
+            $location = add_query_arg( 'sc_foundation_error', self::$validation_error, $location );
+            self::$validation_error = '';
+        }
+        if ( self::$slug_adjusted ) {
+            $location = add_query_arg( 'sc_foundation_slug_adjusted', '1', $location );
+            self::$slug_adjusted = false;
+        }
+        return $location;
     }
 
     public function enqueue_admin_assets( $hook_suffix ) {
@@ -293,6 +354,8 @@ final class SC_Library_Foundation_Pages {
                 'noSelection' => __( 'No PDF selected', 'sustainable-catalyst-library' ),
                 'chooseHelp'  => __( 'Choose an existing PDF from the WordPress Media Library.', 'sustainable-catalyst-library' ),
                 'openPdf'     => __( 'Open selected PDF', 'sustainable-catalyst-library' ),
+                'invalidType' => __( 'Please select a PDF file. Other file types cannot be attached to a Foundation Document.', 'sustainable-catalyst-library' ),
+                'mediaError'  => __( 'The WordPress Media Library could not be loaded. Reload this editor or open Foundation Docs Health for diagnostics.', 'sustainable-catalyst-library' ),
             )
         );
     }
@@ -302,7 +365,219 @@ final class SC_Library_Foundation_Pages {
         if ( ! $screen || self::POST_TYPE !== $screen->post_type || $this->is_advanced_editor() ) {
             return;
         }
-        echo '<div class="notice notice-info sc-foundation-page-notice"><p><strong>' . esc_html__( 'Foundation Document Page', 'sustainable-catalyst-library' ) . '</strong> — ' . esc_html__( 'Add a title, an optional introduction in the editor, select a PDF, and publish. Foundation Docs are separate from blog posts, categories, tags, archives, and feeds.', 'sustainable-catalyst-library' ) . '</p></div>';
+
+        $error = isset( $_GET['sc_foundation_error'] ) ? sanitize_key( wp_unslash( $_GET['sc_foundation_error'] ) ) : '';
+        if ( 'missing_pdf' === $error ) {
+            echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'Foundation Document not published.', 'sustainable-catalyst-library' ) . '</strong> ' . esc_html__( 'Select a valid PDF before publishing. The document was saved as a draft.', 'sustainable-catalyst-library' ) . '</p></div>';
+        }
+
+        if ( isset( $_GET['sc_foundation_slug_adjusted'] ) ) {
+            echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'Document URL adjusted.', 'sustainable-catalyst-library' ) . '</strong> ' . esc_html__( 'WordPress added a number to avoid a duplicate Foundation Document URL. Review the permalink before sharing it.', 'sustainable-catalyst-library' ) . '</p></div>';
+        }
+
+        $post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
+        $health  = $post_id ? self::get_pdf_health( $post_id ) : array( 'status' => 'missing' );
+        if ( $post_id && 'ready' !== $health['status'] ) {
+            echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'PDF required.', 'sustainable-catalyst-library' ) . '</strong> ' . esc_html__( 'This Foundation Document does not currently have a usable PDF. Select or replace the file before publishing.', 'sustainable-catalyst-library' ) . '</p></div>';
+        }
+
+        $health_url = admin_url( 'admin.php?page=sc-library-foundation-health' );
+        echo '<div class="notice notice-info sc-foundation-page-notice"><p><strong>' . esc_html__( 'Foundation Document Page', 'sustainable-catalyst-library' ) . '</strong> — ' . esc_html__( 'Add a title, optional introduction, select one PDF, and publish.', 'sustainable-catalyst-library' ) . ' <a href="' . esc_url( $health_url ) . '">' . esc_html__( 'Open Foundation Docs Health', 'sustainable-catalyst-library' ) . '</a></p></div>';
+    }
+
+    public function document_post_states( $states, $post ) {
+        if ( $post instanceof WP_Post && self::POST_TYPE === $post->post_type && ! self::get_pdf_attachment_id( $post->ID ) ) {
+            $states['sc_foundation_pdf_missing'] = __( 'Needs PDF', 'sustainable-catalyst-library' );
+        }
+        return $states;
+    }
+
+    public function document_columns( $columns ) {
+        $updated = array();
+        foreach ( $columns as $key => $label ) {
+            if ( 'date' === $key ) {
+                $updated['sc_foundation_pdf'] = __( 'PDF status', 'sustainable-catalyst-library' );
+                $updated['sc_foundation_route'] = __( 'Public page', 'sustainable-catalyst-library' );
+            }
+            $updated[ $key ] = $label;
+        }
+        return $updated;
+    }
+
+    public function render_document_column( $column, $post_id ) {
+        if ( 'sc_foundation_pdf' === $column ) {
+            $health = self::get_pdf_health( $post_id );
+            if ( 'ready' === $health['status'] ) {
+                echo '<strong class="sc-foundation-admin-status sc-foundation-admin-status--ready">' . esc_html__( 'Ready', 'sustainable-catalyst-library' ) . '</strong>';
+                echo '<span class="sc-foundation-admin-file">' . esc_html( $health['filename'] ) . '</span>';
+            } else {
+                echo '<strong class="sc-foundation-admin-status sc-foundation-admin-status--warning">' . esc_html__( 'Needs PDF', 'sustainable-catalyst-library' ) . '</strong>';
+                echo '<span class="sc-foundation-admin-file">' . esc_html( $health['message'] ) . '</span>';
+            }
+        }
+
+        if ( 'sc_foundation_route' === $column ) {
+            if ( 'publish' === get_post_status( $post_id ) ) {
+                echo '<a href="' . esc_url( get_permalink( $post_id ) ) . '" target="_blank" rel="noopener">' . esc_html__( 'Open page', 'sustainable-catalyst-library' ) . '</a>';
+            } else {
+                esc_html_e( 'Available after publishing', 'sustainable-catalyst-library' );
+            }
+        }
+    }
+
+    public function register_health_page() {
+        add_submenu_page(
+            'sc-library',
+            __( 'Foundation Docs Health', 'sustainable-catalyst-library' ),
+            __( 'Foundation Docs Health', 'sustainable-catalyst-library' ),
+            'manage_options',
+            'sc-library-foundation-health',
+            array( $this, 'render_health_page' )
+        );
+    }
+
+    public function render_health_page() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        $document_ids = get_posts(
+            array(
+                'post_type'      => self::POST_TYPE,
+                'post_status'    => array( 'publish', 'draft', 'pending', 'future', 'private' ),
+                'posts_per_page' => -1,
+                'fields'         => 'ids',
+                'orderby'        => 'title',
+                'order'          => 'ASC',
+            )
+        );
+
+        $ready = array();
+        $needs_repair = array();
+        foreach ( $document_ids as $document_id ) {
+            $health = self::get_pdf_health( $document_id );
+            if ( 'ready' === $health['status'] ) {
+                $ready[] = $document_id;
+            } else {
+                $needs_repair[ $document_id ] = $health;
+            }
+        }
+
+        $rewrite_rules = get_option( 'rewrite_rules', array() );
+        $route_ready   = is_array( $rewrite_rules ) && array_key_exists( '^foundations/([^/]+)/?$', $rewrite_rules );
+        $media_ready   = function_exists( 'wp_enqueue_media' ) && current_user_can( 'upload_files' );
+        $route_version = get_option( 'sc_library_foundation_pages_rewrite_version', '' );
+
+        $message = isset( $_GET['sc_foundation_health_message'] ) ? sanitize_key( wp_unslash( $_GET['sc_foundation_health_message'] ) ) : '';
+        $count   = isset( $_GET['sc_foundation_health_count'] ) ? absint( $_GET['sc_foundation_health_count'] ) : 0;
+        ?>
+        <div class="wrap sc-foundation-health">
+            <h1><?php esc_html_e( 'Foundation Docs Health', 'sustainable-catalyst-library' ); ?></h1>
+            <p><?php esc_html_e( 'Check PDF attachments, public routes, editor availability, and documents that need repair.', 'sustainable-catalyst-library' ); ?></p>
+
+            <?php if ( 'routes_repaired' === $message ) : ?>
+                <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Foundation Document routes were rebuilt.', 'sustainable-catalyst-library' ); ?></p></div>
+            <?php elseif ( 'metadata_repaired' === $message ) : ?>
+                <div class="notice notice-success is-dismissible"><p><?php echo esc_html( sprintf( __( 'Normalized PDF metadata for %d document(s).', 'sustainable-catalyst-library' ), $count ) ); ?></p></div>
+            <?php endif; ?>
+
+            <div class="sc-foundation-health__cards">
+                <div><strong><?php echo esc_html( count( $document_ids ) ); ?></strong><span><?php esc_html_e( 'Foundation Docs', 'sustainable-catalyst-library' ); ?></span></div>
+                <div><strong><?php echo esc_html( count( $ready ) ); ?></strong><span><?php esc_html_e( 'PDF ready', 'sustainable-catalyst-library' ); ?></span></div>
+                <div><strong><?php echo esc_html( count( $needs_repair ) ); ?></strong><span><?php esc_html_e( 'Need attention', 'sustainable-catalyst-library' ); ?></span></div>
+                <div><strong><?php echo $route_ready ? esc_html__( 'Ready', 'sustainable-catalyst-library' ) : esc_html__( 'Repair', 'sustainable-catalyst-library' ); ?></strong><span><?php esc_html_e( 'Public route', 'sustainable-catalyst-library' ); ?></span></div>
+            </div>
+
+            <table class="widefat striped sc-foundation-health__status">
+                <tbody>
+                    <tr><th><?php esc_html_e( 'Route version', 'sustainable-catalyst-library' ); ?></th><td><?php echo esc_html( $route_version ?: __( 'Not recorded', 'sustainable-catalyst-library' ) ); ?></td></tr>
+                    <tr><th><?php esc_html_e( 'Route rule', 'sustainable-catalyst-library' ); ?></th><td><?php echo $route_ready ? esc_html__( 'Registered', 'sustainable-catalyst-library' ) : esc_html__( 'Missing', 'sustainable-catalyst-library' ); ?></td></tr>
+                    <tr><th><?php esc_html_e( 'Media Library selector', 'sustainable-catalyst-library' ); ?></th><td><?php echo $media_ready ? esc_html__( 'Available', 'sustainable-catalyst-library' ) : esc_html__( 'Unavailable for this account', 'sustainable-catalyst-library' ); ?></td></tr>
+                    <tr><th><?php esc_html_e( 'Editor mode', 'sustainable-catalyst-library' ); ?></th><td><?php esc_html_e( 'Stable page-style editor', 'sustainable-catalyst-library' ); ?></td></tr>
+                </tbody>
+            </table>
+
+            <div class="sc-foundation-health__actions">
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                    <?php wp_nonce_field( 'sc_library_repair_foundation_routes' ); ?>
+                    <input type="hidden" name="action" value="sc_library_repair_foundation_routes">
+                    <?php submit_button( __( 'Repair Foundation Routes', 'sustainable-catalyst-library' ), 'primary', 'submit', false ); ?>
+                </form>
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                    <?php wp_nonce_field( 'sc_library_repair_foundation_metadata' ); ?>
+                    <input type="hidden" name="action" value="sc_library_repair_foundation_metadata">
+                    <?php submit_button( __( 'Normalize PDF Metadata', 'sustainable-catalyst-library' ), 'secondary', 'submit', false ); ?>
+                </form>
+            </div>
+
+            <h2><?php esc_html_e( 'Documents needing attention', 'sustainable-catalyst-library' ); ?></h2>
+            <?php if ( $needs_repair ) : ?>
+                <table class="widefat striped">
+                    <thead><tr><th><?php esc_html_e( 'Document', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'Status', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'Action', 'sustainable-catalyst-library' ); ?></th></tr></thead>
+                    <tbody>
+                    <?php foreach ( $needs_repair as $document_id => $health ) : ?>
+                        <tr>
+                            <td><strong><?php echo esc_html( get_the_title( $document_id ) ?: __( '(Untitled)', 'sustainable-catalyst-library' ) ); ?></strong></td>
+                            <td><?php echo esc_html( $health['message'] ); ?></td>
+                            <td><a class="button" href="<?php echo esc_url( get_edit_post_link( $document_id, 'raw' ) ); ?>"><?php esc_html_e( 'Select or replace PDF', 'sustainable-catalyst-library' ); ?></a></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php else : ?>
+                <div class="notice notice-success inline"><p><?php esc_html_e( 'All Foundation Documents have usable PDF attachments.', 'sustainable-catalyst-library' ); ?></p></div>
+            <?php endif; ?>
+        </div>
+        <?php
+    }
+
+    public function repair_routes() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'You are not allowed to repair Foundation Document routes.', 'sustainable-catalyst-library' ) );
+        }
+        check_admin_referer( 'sc_library_repair_foundation_routes' );
+        flush_rewrite_rules( false );
+        update_option( 'sc_library_foundation_pages_rewrite_version', self::ROUTE_VERSION, false );
+        wp_safe_redirect( add_query_arg( 'sc_foundation_health_message', 'routes_repaired', admin_url( 'admin.php?page=sc-library-foundation-health' ) ) );
+        exit;
+    }
+
+    public function repair_metadata() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'You are not allowed to repair Foundation Document metadata.', 'sustainable-catalyst-library' ) );
+        }
+        check_admin_referer( 'sc_library_repair_foundation_metadata' );
+
+        $document_ids = get_posts(
+            array(
+                'post_type'      => self::POST_TYPE,
+                'post_status'    => 'any',
+                'posts_per_page' => -1,
+                'fields'         => 'ids',
+            )
+        );
+        $updated = 0;
+        foreach ( $document_ids as $document_id ) {
+            $attachment_id = self::get_pdf_attachment_id( $document_id );
+            if ( ! $attachment_id ) {
+                continue;
+            }
+            foreach ( self::$compatible_pdf_meta_keys as $meta_key ) {
+                update_post_meta( $document_id, $meta_key, $attachment_id );
+            }
+            $updated++;
+        }
+
+        wp_safe_redirect(
+            add_query_arg(
+                array(
+                    'sc_foundation_health_message' => 'metadata_repaired',
+                    'sc_foundation_health_count'   => $updated,
+                ),
+                admin_url( 'admin.php?page=sc-library-foundation-health' )
+            )
+        );
+        exit;
     }
 
     public function register_public_assets() {
@@ -369,11 +644,12 @@ final class SC_Library_Foundation_Pages {
 
         wp_enqueue_style( 'sc-library-foundation-pages' );
 
-        $per_page = max( 1, min( 50, absint( $atts['per_page'] ) ) );
-        $paged    = isset( $_GET['foundation_page'] ) ? max( 1, absint( $_GET['foundation_page'] ) ) : 1;
-        $search   = isset( $_GET['foundation_q'] ) ? sanitize_text_field( wp_unslash( $_GET['foundation_q'] ) ) : '';
-        $orderby  = in_array( $atts['orderby'], array( 'title', 'date', 'menu_order' ), true ) ? $atts['orderby'] : 'title';
-        $order    = 'DESC' === strtoupper( $atts['order'] ) ? 'DESC' : 'ASC';
+        $per_page   = max( 1, min( 50, absint( $atts['per_page'] ) ) );
+        $paged      = isset( $_GET['foundation_page'] ) ? max( 1, absint( $_GET['foundation_page'] ) ) : 1;
+        $search     = isset( $_GET['foundation_q'] ) ? sanitize_text_field( wp_unslash( $_GET['foundation_q'] ) ) : '';
+        $orderby    = in_array( $atts['orderby'], array( 'title', 'date', 'menu_order' ), true ) ? $atts['orderby'] : 'title';
+        $order      = 'DESC' === strtoupper( $atts['order'] ) ? 'DESC' : 'ASC';
+        $listing_url = get_queried_object_id() ? get_permalink( get_queried_object_id() ) : remove_query_arg( array( 'foundation_q', 'foundation_page' ) );
 
         self::$allow_foundation_query = true;
         $documents = new WP_Query(
@@ -402,12 +678,15 @@ final class SC_Library_Foundation_Pages {
             <?php endif; ?>
 
             <?php if ( filter_var( $atts['search'], FILTER_VALIDATE_BOOLEAN ) ) : ?>
-                <form class="sc-foundation-documents__search" method="get" action="<?php echo esc_url( remove_query_arg( array( 'foundation_q', 'foundation_page' ) ) ); ?>">
+                <form class="sc-foundation-documents__search" method="get" action="<?php echo esc_url( $listing_url ); ?>" role="search">
                     <label for="sc-foundation-documents-search"><?php esc_html_e( 'Search Foundation Docs', 'sustainable-catalyst-library' ); ?></label>
                     <div>
                         <input id="sc-foundation-documents-search" type="search" name="foundation_q" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search document titles and introductions', 'sustainable-catalyst-library' ); ?>">
                         <button type="submit"><?php esc_html_e( 'Search', 'sustainable-catalyst-library' ); ?></button>
                     </div>
+                    <?php if ( $search ) : ?>
+                        <a class="sc-foundation-documents__clear" href="<?php echo esc_url( $listing_url ); ?>"><?php esc_html_e( 'Clear search', 'sustainable-catalyst-library' ); ?></a>
+                    <?php endif; ?>
                 </form>
             <?php endif; ?>
 
@@ -417,7 +696,7 @@ final class SC_Library_Foundation_Pages {
                         <?php
                         $document_id = get_the_ID();
                         $intro       = trim( wp_strip_all_tags( get_post_field( 'post_content', $document_id ) ) );
-                        $pdf_id      = self::get_pdf_attachment_id( $document_id );
+                        $health      = self::get_pdf_health( $document_id );
                         ?>
                         <article class="sc-foundation-document-card">
                             <p class="sc-foundation-document-card__label"><?php esc_html_e( 'Foundation Document', 'sustainable-catalyst-library' ); ?></p>
@@ -427,19 +706,31 @@ final class SC_Library_Foundation_Pages {
                             <?php endif; ?>
                             <div class="sc-foundation-document-card__footer">
                                 <a href="<?php the_permalink(); ?>"><?php esc_html_e( 'Open document', 'sustainable-catalyst-library' ); ?> →</a>
-                                <?php if ( $pdf_id ) : ?><span><?php esc_html_e( 'PDF', 'sustainable-catalyst-library' ); ?></span><?php endif; ?>
+                                <span class="<?php echo 'ready' === $health['status'] ? 'is-ready' : 'needs-attention'; ?>">
+                                    <?php echo 'ready' === $health['status'] ? esc_html__( 'PDF', 'sustainable-catalyst-library' ) : esc_html__( 'PDF unavailable', 'sustainable-catalyst-library' ); ?>
+                                </span>
                             </div>
                         </article>
                     <?php endwhile; ?>
                 </div>
 
                 <?php if ( $documents->max_num_pages > 1 ) : ?>
+                    <?php
+                    $pagination_url = add_query_arg(
+                        array(
+                            'foundation_page' => 999999999,
+                            'foundation_q'    => $search ?: false,
+                        ),
+                        $listing_url
+                    );
+                    $pagination_base = str_replace( '999999999', '%#%', $pagination_url );
+                    ?>
                     <nav class="sc-foundation-documents__pagination" aria-label="<?php esc_attr_e( 'Foundation Document pages', 'sustainable-catalyst-library' ); ?>">
                         <?php
                         echo wp_kses_post(
                             paginate_links(
                                 array(
-                                    'base'      => add_query_arg( 'foundation_page', '%#%' ),
+                                    'base'      => $pagination_base,
                                     'format'    => '',
                                     'current'   => $paged,
                                     'total'     => $documents->max_num_pages,
@@ -454,7 +745,7 @@ final class SC_Library_Foundation_Pages {
             <?php else : ?>
                 <div class="sc-foundation-documents__empty">
                     <strong><?php esc_html_e( 'No Foundation Documents found.', 'sustainable-catalyst-library' ); ?></strong>
-                    <?php if ( $search ) : ?><p><?php esc_html_e( 'Try a broader search term.', 'sustainable-catalyst-library' ); ?></p><?php endif; ?>
+                    <?php if ( $search ) : ?><p><?php esc_html_e( 'Try a broader search term or clear the search.', 'sustainable-catalyst-library' ); ?></p><?php endif; ?>
                 </div>
             <?php endif; ?>
         </section>
@@ -466,12 +757,21 @@ final class SC_Library_Foundation_Pages {
     public static function render_single_document( $post_id ) {
         wp_enqueue_style( 'sc-library-foundation-pages' );
 
-        $post          = get_post( $post_id );
-        $attachment_id = self::get_pdf_attachment_id( $post_id );
-        $pdf_url       = $attachment_id ? wp_get_attachment_url( $attachment_id ) : '';
-        $filename      = $attachment_id ? basename( (string) get_attached_file( $attachment_id ) ) : '';
-        $intro         = $post ? trim( (string) $post->post_content ) : '';
-        $foundations   = apply_filters( 'sc_library_foundations_page_url', home_url( '/foundations/' ) );
+        $post        = get_post( $post_id );
+        $health      = self::get_pdf_health( $post_id );
+        $pdf_url     = 'ready' === $health['status'] ? $health['url'] : '';
+        $filename    = $health['filename'];
+        $intro       = $post ? trim( (string) $post->post_content ) : '';
+        $foundations = apply_filters( 'sc_library_foundations_page_url', home_url( '/foundations/' ) );
+        $viewer_id   = 'sc-foundation-pdf-viewer-' . absint( $post_id );
+        $file_size   = '';
+
+        if ( 'ready' === $health['status'] && $health['attachment_id'] ) {
+            $file_path = get_attached_file( $health['attachment_id'] );
+            if ( $file_path && is_file( $file_path ) ) {
+                $file_size = size_format( filesize( $file_path ) );
+            }
+        }
 
         ob_start();
         ?>
@@ -485,24 +785,41 @@ final class SC_Library_Foundation_Pages {
             </header>
 
             <?php if ( $pdf_url ) : ?>
-                <div class="sc-foundation-document-single__viewer" aria-label="<?php echo esc_attr( sprintf( __( 'Embedded PDF: %s', 'sustainable-catalyst-library' ), get_the_title( $post_id ) ) ); ?>">
-                    <object data="<?php echo esc_url( $pdf_url ); ?>#view=FitH&amp;toolbar=1&amp;navpanes=0" type="application/pdf">
-                        <div class="sc-foundation-document-single__fallback">
-                            <p><?php esc_html_e( 'This browser cannot display the PDF inline.', 'sustainable-catalyst-library' ); ?></p>
-                            <a href="<?php echo esc_url( $pdf_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Open the PDF', 'sustainable-catalyst-library' ); ?></a>
-                        </div>
-                    </object>
+                <div class="sc-foundation-document-single__file-meta">
+                    <strong><?php esc_html_e( 'PDF document', 'sustainable-catalyst-library' ); ?></strong>
+                    <span><?php echo esc_html( $filename ); ?><?php echo $file_size ? ' · ' . esc_html( $file_size ) : ''; ?></span>
                 </div>
+
+                <div id="<?php echo esc_attr( $viewer_id ); ?>" class="sc-foundation-document-single__viewer" role="region" aria-label="<?php echo esc_attr( sprintf( __( 'Embedded PDF viewer for %s', 'sustainable-catalyst-library' ), get_the_title( $post_id ) ) ); ?>">
+                    <iframe
+                        src="<?php echo esc_url( $pdf_url ); ?>#view=FitH&amp;toolbar=1&amp;navpanes=0"
+                        title="<?php echo esc_attr( sprintf( __( 'PDF: %s', 'sustainable-catalyst-library' ), get_the_title( $post_id ) ) ); ?>"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+
+                <div class="sc-foundation-document-single__viewer-help" role="note">
+                    <strong><?php esc_html_e( 'PDF not visible?', 'sustainable-catalyst-library' ); ?></strong>
+                    <span><?php esc_html_e( 'Some browsers and privacy settings block embedded PDF viewers. The document remains available through the Open PDF and Download PDF controls.', 'sustainable-catalyst-library' ); ?></span>
+                </div>
+
                 <div class="sc-foundation-document-single__actions">
-                    <a class="sc-foundation-document-button sc-foundation-document-button--primary" href="<?php echo esc_url( $pdf_url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Open PDF', 'sustainable-catalyst-library' ); ?></a>
-                    <a class="sc-foundation-document-button" href="<?php echo esc_url( $pdf_url ); ?>" download="<?php echo esc_attr( $filename ); ?>"><?php esc_html_e( 'Download PDF', 'sustainable-catalyst-library' ); ?></a>
+                    <a class="sc-foundation-document-button sc-foundation-document-button--primary" href="<?php echo esc_url( $pdf_url ); ?>" target="_blank" rel="noopener" type="application/pdf"><?php esc_html_e( 'Open PDF', 'sustainable-catalyst-library' ); ?></a>
+                    <a class="sc-foundation-document-button" href="<?php echo esc_url( $pdf_url ); ?>" download="<?php echo esc_attr( $filename ); ?>" type="application/pdf"><?php esc_html_e( 'Download PDF', 'sustainable-catalyst-library' ); ?></a>
                     <a class="sc-foundation-document-button" href="<?php echo esc_url( $foundations ); ?>"><?php esc_html_e( 'Back to Foundations', 'sustainable-catalyst-library' ); ?></a>
                 </div>
+
+                <noscript>
+                    <p class="sc-foundation-document-single__noscript"><a href="<?php echo esc_url( $pdf_url ); ?>"><?php esc_html_e( 'Open the PDF document', 'sustainable-catalyst-library' ); ?></a></p>
+                </noscript>
             <?php else : ?>
                 <div class="sc-foundation-document-single__missing">
                     <strong><?php esc_html_e( 'PDF unavailable', 'sustainable-catalyst-library' ); ?></strong>
-                    <p><?php esc_html_e( 'A PDF has not yet been selected for this Foundation Document.', 'sustainable-catalyst-library' ); ?></p>
+                    <p><?php echo esc_html( $health['message'] ); ?></p>
                     <a href="<?php echo esc_url( $foundations ); ?>"><?php esc_html_e( 'Back to Foundations', 'sustainable-catalyst-library' ); ?></a>
+                    <?php if ( current_user_can( 'edit_post', $post_id ) ) : ?>
+                        <a href="<?php echo esc_url( get_edit_post_link( $post_id, 'raw' ) ); ?>"><?php esc_html_e( 'Repair this Foundation Document', 'sustainable-catalyst-library' ); ?></a>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </article>
@@ -511,13 +828,81 @@ final class SC_Library_Foundation_Pages {
     }
 
     public static function get_pdf_attachment_id( $post_id ) {
+        $health = self::get_pdf_health( $post_id );
+        return 'ready' === $health['status'] ? $health['attachment_id'] : 0;
+    }
+
+    public static function get_pdf_health( $post_id ) {
+        $raw_attachment_id = 0;
         foreach ( self::$compatible_pdf_meta_keys as $meta_key ) {
-            $attachment_id = absint( get_post_meta( $post_id, $meta_key, true ) );
-            if ( $attachment_id && 'application/pdf' === get_post_mime_type( $attachment_id ) ) {
-                return $attachment_id;
+            $candidate = absint( get_post_meta( $post_id, $meta_key, true ) );
+            if ( $candidate ) {
+                $raw_attachment_id = $candidate;
+                break;
             }
         }
-        return 0;
+
+        if ( ! $raw_attachment_id ) {
+            return array(
+                'status'        => 'missing',
+                'attachment_id' => 0,
+                'url'           => '',
+                'filename'      => '',
+                'message'       => __( 'No PDF has been selected.', 'sustainable-catalyst-library' ),
+            );
+        }
+
+        $attachment = get_post( $raw_attachment_id );
+        if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
+            return array(
+                'status'        => 'invalid',
+                'attachment_id' => $raw_attachment_id,
+                'url'           => '',
+                'filename'      => '',
+                'message'       => __( 'The selected Media Library attachment no longer exists.', 'sustainable-catalyst-library' ),
+            );
+        }
+
+        if ( 'application/pdf' !== get_post_mime_type( $raw_attachment_id ) ) {
+            return array(
+                'status'        => 'invalid',
+                'attachment_id' => $raw_attachment_id,
+                'url'           => '',
+                'filename'      => '',
+                'message'       => __( 'The selected attachment is not a PDF.', 'sustainable-catalyst-library' ),
+            );
+        }
+
+        $url = wp_get_attachment_url( $raw_attachment_id );
+        if ( ! $url ) {
+            return array(
+                'status'        => 'invalid',
+                'attachment_id' => $raw_attachment_id,
+                'url'           => '',
+                'filename'      => '',
+                'message'       => __( 'WordPress could not resolve a public URL for the selected PDF.', 'sustainable-catalyst-library' ),
+            );
+        }
+
+        $file = get_attached_file( $raw_attachment_id );
+        return array(
+            'status'        => 'ready',
+            'attachment_id' => $raw_attachment_id,
+            'url'           => $url,
+            'filename'      => $file ? basename( (string) $file ) : basename( wp_parse_url( $url, PHP_URL_PATH ) ),
+            'message'       => __( 'PDF ready.', 'sustainable-catalyst-library' ),
+        );
+    }
+
+    private static function is_valid_pdf_attachment( $attachment_id ) {
+        if ( ! $attachment_id ) {
+            return false;
+        }
+        $attachment = get_post( $attachment_id );
+        return $attachment
+            && 'attachment' === $attachment->post_type
+            && 'application/pdf' === get_post_mime_type( $attachment_id )
+            && (bool) wp_get_attachment_url( $attachment_id );
     }
 
     private function is_advanced_editor() {
@@ -538,6 +923,6 @@ final class SC_Library_Foundation_Pages {
     }
 
     private function version() {
-        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.1.0';
+        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.1.2';
     }
 }

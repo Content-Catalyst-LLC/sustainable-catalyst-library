@@ -379,3 +379,197 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* v2.1.2 — Foundation Document Production Hardening */
+
+.sc-foundation-admin-status,
+.sc-foundation-admin-file {
+  display: block;
+}
+
+.sc-foundation-admin-status--ready {
+  color: #167047;
+}
+
+.sc-foundation-admin-status--warning {
+  color: #8f1620;
+}
+
+.sc-foundation-admin-file {
+  max-width: 260px;
+  margin-top: 4px;
+  color: #646970;
+  overflow-wrap: anywhere;
+}
+
+.sc-foundation-health {
+  max-width: 1120px;
+}
+
+.sc-foundation-health__cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 22px 0;
+}
+
+.sc-foundation-health__cards > div {
+  display: grid;
+  gap: 5px;
+  padding: 18px;
+  border: 1px solid #c3c4c7;
+  border-left: 4px solid #8f1620;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.sc-foundation-health__cards strong {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.sc-foundation-health__cards span {
+  color: #50575e;
+}
+
+.sc-foundation-health__status {
+  max-width: 820px;
+  margin-bottom: 20px;
+}
+
+.sc-foundation-health__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0 30px;
+}
+
+.sc-foundation-health__actions form {
+  margin: 0;
+}
+
+.sc-foundation-document-single__file-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 18px;
+  margin-top: 24px;
+  padding: 14px 16px;
+  border: 1px solid var(--scfd-border);
+  border-radius: 10px;
+  background: var(--scfd-soft);
+}
+
+.sc-foundation-document-single__file-meta span {
+  color: var(--scfd-muted);
+  overflow-wrap: anywhere;
+}
+
+.sc-foundation-document-single__viewer iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #ffffff;
+}
+
+.sc-foundation-document-single__viewer-help {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-left: 4px solid var(--scfd-red);
+  background: var(--scfd-soft);
+  color: var(--scfd-muted);
+}
+
+.sc-foundation-document-single__viewer-help strong {
+  color: var(--scfd-black);
+}
+
+.sc-foundation-document-single__missing a + a {
+  margin-left: 12px;
+}
+
+.sc-foundation-documents__clear {
+  width: fit-content;
+  color: var(--scfd-red);
+  font-weight: 700;
+}
+
+.sc-foundation-document-card__footer .needs-attention {
+  color: #8f1620;
+}
+
+@media (max-width: 900px) {
+  .sc-foundation-health__cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sc-foundation-document-single__viewer {
+    height: 72vh;
+    min-height: 520px;
+  }
+}
+
+@media (max-width: 640px) {
+  .sc-foundation-page-inline-panel {
+    padding: 14px;
+  }
+
+  .sc-foundation-page-inline-panel__heading {
+    align-items: flex-start;
+  }
+
+  .sc-foundation-health__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-foundation-document-single,
+  .sc-foundation-documents {
+    width: min(100% - 20px, 1120px);
+    margin-top: 18px;
+  }
+
+  .sc-foundation-document-single__header {
+    padding: 24px 18px;
+  }
+
+  .sc-foundation-document-single h1 {
+    font-size: clamp(2rem, 12vw, 3.25rem);
+  }
+
+  .sc-foundation-document-single__viewer {
+    height: 65vh;
+    min-height: 420px;
+    border-radius: 8px;
+  }
+
+  .sc-foundation-document-single__actions,
+  .sc-foundation-page-selector__actions,
+  .sc-foundation-health__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .sc-foundation-document-button,
+  .sc-foundation-page-selector__actions .button,
+  .sc-foundation-health__actions .button {
+    width: 100%;
+  }
+
+  .sc-foundation-documents__search > div {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-foundation-documents__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-foundation-document-button,
+  .sc-foundation-documents__pagination .page-numbers {
+    scroll-behavior: auto;
+    transition: none;
+  }
+}

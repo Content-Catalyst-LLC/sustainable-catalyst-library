@@ -27,7 +27,7 @@
         event.preventDefault();
 
         if (!window.wp || !wp.media) {
-          window.alert('The WordPress Media Library could not be loaded. Reload this editor and try again.');
+          window.alert(config.mediaError || 'The WordPress Media Library could not be loaded. Reload this editor and try again.');
           return;
         }
 
@@ -45,7 +45,11 @@
 
         frame.on('select', function () {
           var attachment = frame.state().get('selection').first().toJSON();
-          $input.val(attachment.id);
+          if (attachment.mime !== 'application/pdf' && attachment.subtype !== 'pdf') {
+            window.alert(config.invalidType || 'Please select a PDF file.');
+            return;
+          }
+          $input.val(attachment.id).trigger('change');
           $remove.prop('disabled', false);
           $summary.empty()
             .append($('<strong>').text(attachment.title || attachment.filename))
@@ -64,7 +68,7 @@
 
       $root.on('click', '[data-sc-foundation-remove-pdf]', function (event) {
         event.preventDefault();
-        $input.val('');
+        $input.val('').trigger('change');
         $remove.prop('disabled', true);
         $summary.empty()
           .append($('<strong>').text(config.noSelection || 'No PDF selected'))
