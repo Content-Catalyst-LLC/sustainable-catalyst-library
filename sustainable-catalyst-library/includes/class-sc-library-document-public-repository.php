@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Document_Public_Repository {
-    public const VERSION = '2.3.0';
+    public const VERSION = '2.3.1';
     public const ROUTE_VERSION = '2.3.0';
     public const POST_TYPE = 'sc_foundation_doc';
     public const TAX_FAMILY = 'sc_document_family';
@@ -34,6 +34,9 @@ final class SC_Library_Document_Public_Repository {
     public const DEFAULT_PER_PAGE = 18;
 
     private static $instance = null;
+
+    /** @var int */
+    private $render_instance = 0;
 
     /** @var array<string,string> */
     private static $lifecycle_labels = array(
@@ -433,18 +436,23 @@ final class SC_Library_Document_Public_Repository {
     private function render_repository_shell( $args, $title, $intro, $kicker = '', $current_family = null ) {
         wp_enqueue_style( 'sc-library-foundation-pages' );
 
+        $this->render_instance++;
+        $instance_id = 'sc-document-repository-' . $this->render_instance;
+        $args['instance_id'] = $instance_id;
+
         $counts = $this->repository_counts();
         $repository_url = home_url( '/documents/' );
 
         ob_start();
         ?>
-        <div class="cc-research-library-brand cc-rl-v2 sc-public-document-repository">
-            <header class="cc-rl-hero sc-public-document-repository__hero">
+        <div class="cc-research-library-brand cc-rl-v2 sc-public-document-repository" data-sc-document-repository>
+            <a class="sc-repository-skip-link" href="<?php echo esc_attr( SC_Library_Document_Repository_Hardening::result_fragment( $instance_id ) ); ?>"><?php esc_html_e( 'Skip to document results', 'sustainable-catalyst-library' ); ?></a>
+            <header class="cc-rl-hero sc-public-document-repository__hero" aria-labelledby="<?php echo esc_attr( $instance_id ); ?>-title">
                 <p class="cc-rl-kicker"><?php echo esc_html( $kicker ?: __( 'Sustainable Catalyst Knowledge Library', 'sustainable-catalyst-library' ) ); ?></p>
-                <h1><?php echo esc_html( $title ); ?></h1>
+                <h1 id="<?php echo esc_attr( $instance_id ); ?>-title"><?php echo esc_html( $title ); ?></h1>
                 <?php if ( $intro ) : ?><div class="cc-rl-lede"><?php echo wp_kses_post( wpautop( $intro ) ); ?></div><?php endif; ?>
                 <div class="cc-rl-hero-actions">
-                    <a class="cc-rl-button cc-rl-button-primary" href="#document-repository-results"><?php esc_html_e( 'Browse Documents', 'sustainable-catalyst-library' ); ?></a>
+                    <a class="cc-rl-button cc-rl-button-primary" href="<?php echo esc_attr( SC_Library_Document_Repository_Hardening::result_fragment( $instance_id ) ); ?>"><?php esc_html_e( 'Browse Documents', 'sustainable-catalyst-library' ); ?></a>
                     <?php if ( 'repository' !== ( $args['context'] ?? '' ) ) : ?>
                         <a class="cc-rl-button" href="<?php echo esc_url( $repository_url ); ?>"><?php esc_html_e( 'All Document Families', 'sustainable-catalyst-library' ); ?></a>
                     <?php endif; ?>
@@ -458,24 +466,25 @@ final class SC_Library_Document_Public_Repository {
             </header>
 
             <?php if ( ! empty( $args['families'] ) ) : ?>
-                <section class="cc-rl-section cc-rl-section-cream sc-public-document-repository__families" aria-labelledby="document-family-index-title">
+                <section class="cc-rl-section cc-rl-section-cream sc-public-document-repository__families" aria-labelledby="<?php echo esc_attr( $instance_id ); ?>-family-index-title">
                     <div class="cc-rl-section-heading">
                         <p class="cc-rl-section-kicker"><?php esc_html_e( 'Document Families', 'sustainable-catalyst-library' ); ?></p>
-                        <h2 id="document-family-index-title"><?php esc_html_e( 'Browse the repository by family', 'sustainable-catalyst-library' ); ?></h2>
+                        <h2 id="<?php echo esc_attr( $instance_id ); ?>-family-index-title"><?php esc_html_e( 'Browse the repository by family', 'sustainable-catalyst-library' ); ?></h2>
                     </div>
                     <?php echo $this->render_family_index(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                 </section>
             <?php endif; ?>
 
-            <section id="document-repository-results" class="cc-rl-section cc-rl-section-white sc-public-document-repository__results">
+            <section id="<?php echo esc_attr( $instance_id ); ?>-results" class="cc-rl-section cc-rl-section-white sc-public-document-repository__results" aria-labelledby="<?php echo esc_attr( $instance_id ); ?>-results-title">
+                <h2 id="<?php echo esc_attr( $instance_id ); ?>-results-title" class="screen-reader-text"><?php esc_html_e( 'Document repository results', 'sustainable-catalyst-library' ); ?></h2>
                 <?php echo $this->render_repository( $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
             </section>
 
             <?php if ( $current_family instanceof WP_Term ) : ?>
-                <section class="cc-rl-section cc-rl-section-cream sc-public-document-repository__related" aria-labelledby="related-document-families-title">
+                <section class="cc-rl-section cc-rl-section-cream sc-public-document-repository__related" aria-labelledby="<?php echo esc_attr( $instance_id ); ?>-related-families-title">
                     <div class="cc-rl-section-heading">
                         <p class="cc-rl-section-kicker"><?php esc_html_e( 'Continue Browsing', 'sustainable-catalyst-library' ); ?></p>
-                        <h2 id="related-document-families-title"><?php esc_html_e( 'Related document families', 'sustainable-catalyst-library' ); ?></h2>
+                        <h2 id="<?php echo esc_attr( $instance_id ); ?>-related-families-title"><?php esc_html_e( 'Related document families', 'sustainable-catalyst-library' ); ?></h2>
                     </div>
                     <?php echo $this->render_family_index( $current_family->term_id, 6 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                 </section>
@@ -503,14 +512,21 @@ final class SC_Library_Document_Public_Repository {
         $page = max( 1, absint( $_GET['sc_doc_page'] ?? 1 ) );
         $per_page = max( 1, min( 50, absint( $args['per_page'] ?? self::DEFAULT_PER_PAGE ) ) );
         $active_filters = $this->has_active_filters( $filters );
+        $instance_id = sanitize_html_class( $args['instance_id'] ?? '' );
+        if ( ! $instance_id ) {
+            $this->render_instance++;
+            $instance_id = 'sc-document-repository-' . $this->render_instance;
+        }
 
         $featured_ids = array();
-        if ( ! empty( $args['featured'] ) && 1 === $page && ! $active_filters ) {
+        if ( ! empty( $args['featured'] ) && ! $active_filters ) {
             $featured_ids = $this->featured_document_ids( $family_lock, $type_lock, 4 );
         }
+        $featured_display_ids = 1 === $page ? $featured_ids : array();
 
         $query_args = $this->document_query_args( $filters, $page, $per_page, $featured_ids );
         $documents = new WP_Query( $query_args );
+        $total_documents = absint( $documents->found_posts ) + count( $featured_ids );
 
         ob_start();
         ?>
@@ -524,25 +540,25 @@ final class SC_Library_Document_Public_Repository {
             <?php endif; ?>
 
             <?php if ( ! empty( $args['search'] ) || ! empty( $args['filters'] ) ) : ?>
-                <?php echo $this->render_filter_form( $filters, $base_url, $family_lock, $type_lock, ! empty( $args['search'] ), ! empty( $args['filters'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                <?php echo $this->render_filter_form( $filters, $base_url, $family_lock, $type_lock, ! empty( $args['search'] ), ! empty( $args['filters'] ), $instance_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
             <?php endif; ?>
 
-            <?php if ( $featured_ids ) : ?>
-                <section class="sc-public-document-index__featured" aria-labelledby="featured-documents-title">
+            <?php if ( $featured_display_ids ) : ?>
+                <section class="sc-public-document-index__featured" aria-labelledby="<?php echo esc_attr( $instance_id ); ?>-featured-documents-title">
                     <div class="sc-public-document-index__section-heading">
                         <p><?php esc_html_e( 'Featured Documents', 'sustainable-catalyst-library' ); ?></p>
-                        <h3 id="featured-documents-title"><?php esc_html_e( 'Pinned repository records', 'sustainable-catalyst-library' ); ?></h3>
+                        <h3 id="<?php echo esc_attr( $instance_id ); ?>-featured-documents-title"><?php esc_html_e( 'Pinned repository records', 'sustainable-catalyst-library' ); ?></h3>
                     </div>
                     <div class="sc-public-document-index__rows">
-                        <?php foreach ( $featured_ids as $document_id ) : ?>
+                        <?php foreach ( $featured_display_ids as $document_id ) : ?>
                             <?php echo $this->render_document_row( $document_id, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                         <?php endforeach; ?>
                     </div>
                 </section>
             <?php endif; ?>
 
-            <div class="sc-public-document-index__summary">
-                <strong><?php echo esc_html( sprintf( _n( '%s document', '%s documents', $documents->found_posts, 'sustainable-catalyst-library' ), number_format_i18n( $documents->found_posts ) ) ); ?></strong>
+            <div id="<?php echo esc_attr( $instance_id ); ?>-summary" class="sc-public-document-index__summary" role="status" aria-live="polite" aria-atomic="true" tabindex="-1">
+                <strong><?php echo esc_html( sprintf( _n( '%s document', '%s documents', $total_documents, 'sustainable-catalyst-library' ), number_format_i18n( $total_documents ) ) ); ?></strong>
                 <?php if ( $active_filters ) : ?><span><?php esc_html_e( 'matching the current search and filters', 'sustainable-catalyst-library' ); ?></span><?php endif; ?>
             </div>
 
@@ -591,23 +607,32 @@ final class SC_Library_Document_Public_Repository {
                     ?>
                     <nav class="sc-public-document-index__pagination" aria-label="<?php esc_attr_e( 'Document result pages', 'sustainable-catalyst-library' ); ?>">
                         <?php
-                        echo wp_kses_post(
-                            paginate_links(
-                                array(
-                                    'base'      => str_replace( '999999999', '%#%', $pagination_base ),
-                                    'format'    => '',
-                                    'current'   => $page,
-                                    'total'     => $documents->max_num_pages,
-                                    'prev_text' => __( 'Previous', 'sustainable-catalyst-library' ),
-                                    'next_text' => __( 'Next', 'sustainable-catalyst-library' ),
-                                )
+                        $pagination = paginate_links(
+                            array(
+                                'base'      => str_replace( '999999999', '%#%', $pagination_base ),
+                                'format'    => '',
+                                'current'   => $page,
+                                'total'     => $documents->max_num_pages,
+                                'prev_text' => '<span aria-hidden="true">←</span> ' . __( 'Previous', 'sustainable-catalyst-library' ),
+                                'next_text' => __( 'Next', 'sustainable-catalyst-library' ) . ' <span aria-hidden="true">→</span>',
                             )
                         );
+                        if ( $pagination ) {
+                            $pagination = str_replace( 'class="page-numbers current"', 'class="page-numbers current" aria-current="page"', $pagination );
+                            $pagination = preg_replace_callback(
+                                '/href="([^"]+)"/',
+                                function( $matches ) use ( $instance_id ) {
+                                    return 'href="' . esc_url( SC_Library_Document_Repository_Hardening::append_result_fragment( html_entity_decode( $matches[1] ), $instance_id ) ) . '"';
+                                },
+                                $pagination
+                            );
+                            echo wp_kses_post( $pagination );
+                        }
                         ?>
                     </nav>
                 <?php endif; ?>
-            <?php else : ?>
-                <div class="sc-document-library__empty">
+            <?php elseif ( ! $featured_display_ids ) : ?>
+                <div class="sc-document-library__empty" role="status">
                     <strong><?php esc_html_e( 'No documents found.', 'sustainable-catalyst-library' ); ?></strong>
                     <p><?php esc_html_e( 'Clear one or more filters or try a broader search term.', 'sustainable-catalyst-library' ); ?></p>
                     <a href="<?php echo esc_url( $base_url ); ?>"><?php esc_html_e( 'Reset repository filters', 'sustainable-catalyst-library' ); ?></a>
@@ -618,7 +643,7 @@ final class SC_Library_Document_Public_Repository {
         return ob_get_clean();
     }
 
-    private function render_filter_form( $filters, $base_url, $family_lock, $type_lock, $show_search, $show_filters ) {
+    private function render_filter_form( $filters, $base_url, $family_lock, $type_lock, $show_search, $show_filters, $instance_id ) {
         $families = get_terms(
             array(
                 'taxonomy'   => self::TAX_FAMILY,
@@ -640,19 +665,22 @@ final class SC_Library_Document_Public_Repository {
 
         ob_start();
         ?>
-        <form class="sc-public-document-filter" method="get" action="<?php echo esc_url( $base_url ); ?>" role="search">
-            <div class="sc-public-document-filter__grid">
+        <form class="sc-public-document-filter" method="get" action="<?php echo esc_url( SC_Library_Document_Repository_Hardening::append_result_fragment( $base_url, $instance_id ) ); ?>" role="search" aria-labelledby="<?php echo esc_attr( $instance_id ); ?>-filter-title">
+            <fieldset>
+                <legend id="<?php echo esc_attr( $instance_id ); ?>-filter-title"><?php esc_html_e( 'Search and filter the document repository', 'sustainable-catalyst-library' ); ?></legend>
+                <p id="<?php echo esc_attr( $instance_id ); ?>-filter-help" class="sc-public-document-filter__help"><?php esc_html_e( 'Filters are optional. Applying them reloads the page and moves focus to the result summary.', 'sustainable-catalyst-library' ); ?></p>
+                <div class="sc-public-document-filter__grid" aria-describedby="<?php echo esc_attr( $instance_id ); ?>-filter-help">
                 <?php if ( $show_search ) : ?>
-                    <label class="sc-public-document-filter__search">
+                    <label class="sc-public-document-filter__search" for="<?php echo esc_attr( $instance_id ); ?>-search">
                         <span><?php esc_html_e( 'Search documents', 'sustainable-catalyst-library' ); ?></span>
-                        <input type="search" name="sc_doc_q" value="<?php echo esc_attr( $filters['q'] ); ?>" placeholder="<?php esc_attr_e( 'Search titles, summaries, and readable document text', 'sustainable-catalyst-library' ); ?>">
+                        <input id="<?php echo esc_attr( $instance_id ); ?>-search" type="search" name="sc_doc_q" value="<?php echo esc_attr( $filters['q'] ); ?>" placeholder="<?php esc_attr_e( 'Search titles, summaries, and readable document text', 'sustainable-catalyst-library' ); ?>" autocomplete="off">
                     </label>
                 <?php endif; ?>
 
                 <?php if ( $show_filters && ! $family_lock && ! is_wp_error( $families ) && $families ) : ?>
-                    <label>
+                    <label for="<?php echo esc_attr( $instance_id ); ?>-family">
                         <span><?php esc_html_e( 'Family', 'sustainable-catalyst-library' ); ?></span>
-                        <select name="sc_doc_family">
+                        <select id="<?php echo esc_attr( $instance_id ); ?>-family" name="sc_doc_family">
                             <option value=""><?php esc_html_e( 'All families', 'sustainable-catalyst-library' ); ?></option>
                             <?php foreach ( $families as $family ) : ?>
                                 <option value="<?php echo esc_attr( $family->slug ); ?>" <?php selected( $filters['family'], $family->slug ); ?>><?php echo esc_html( $family->name ); ?></option>
@@ -662,9 +690,9 @@ final class SC_Library_Document_Public_Repository {
                 <?php endif; ?>
 
                 <?php if ( $show_filters && ! $type_lock && ! is_wp_error( $types ) && $types ) : ?>
-                    <label>
+                    <label for="<?php echo esc_attr( $instance_id ); ?>-type">
                         <span><?php esc_html_e( 'Document type', 'sustainable-catalyst-library' ); ?></span>
-                        <select name="sc_doc_type">
+                        <select id="<?php echo esc_attr( $instance_id ); ?>-type" name="sc_doc_type">
                             <option value=""><?php esc_html_e( 'All types', 'sustainable-catalyst-library' ); ?></option>
                             <?php foreach ( $types as $type ) : ?>
                                 <option value="<?php echo esc_attr( $type->slug ); ?>" <?php selected( $filters['type'], $type->slug ); ?>><?php echo esc_html( $type->name ); ?></option>
@@ -674,9 +702,9 @@ final class SC_Library_Document_Public_Repository {
                 <?php endif; ?>
 
                 <?php if ( $show_filters ) : ?>
-                    <label>
+                    <label for="<?php echo esc_attr( $instance_id ); ?>-lifecycle">
                         <span><?php esc_html_e( 'Lifecycle', 'sustainable-catalyst-library' ); ?></span>
-                        <select name="sc_doc_lifecycle">
+                        <select id="<?php echo esc_attr( $instance_id ); ?>-lifecycle" name="sc_doc_lifecycle">
                             <option value=""><?php esc_html_e( 'All statuses', 'sustainable-catalyst-library' ); ?></option>
                             <?php foreach ( self::$lifecycle_labels as $value => $label ) : ?>
                                 <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $filters['lifecycle'], $value ); ?>><?php echo esc_html( $label ); ?></option>
@@ -685,9 +713,9 @@ final class SC_Library_Document_Public_Repository {
                     </label>
 
                     <?php if ( $years ) : ?>
-                        <label>
+                        <label for="<?php echo esc_attr( $instance_id ); ?>-year">
                             <span><?php esc_html_e( 'Publication year', 'sustainable-catalyst-library' ); ?></span>
-                            <select name="sc_doc_year">
+                            <select id="<?php echo esc_attr( $instance_id ); ?>-year" name="sc_doc_year">
                                 <option value=""><?php esc_html_e( 'All years', 'sustainable-catalyst-library' ); ?></option>
                                 <?php foreach ( $years as $year ) : ?>
                                     <option value="<?php echo esc_attr( $year ); ?>" <?php selected( $filters['year'], $year ); ?>><?php echo esc_html( $year ); ?></option>
@@ -697,9 +725,9 @@ final class SC_Library_Document_Public_Repository {
                     <?php endif; ?>
 
                     <?php if ( $versions ) : ?>
-                        <label>
+                        <label for="<?php echo esc_attr( $instance_id ); ?>-version">
                             <span><?php esc_html_e( 'Version', 'sustainable-catalyst-library' ); ?></span>
-                            <select name="sc_doc_version">
+                            <select id="<?php echo esc_attr( $instance_id ); ?>-version" name="sc_doc_version">
                                 <option value=""><?php esc_html_e( 'All versions', 'sustainable-catalyst-library' ); ?></option>
                                 <?php foreach ( $versions as $version ) : ?>
                                     <option value="<?php echo esc_attr( $version ); ?>" <?php selected( $filters['version'], $version ); ?>><?php echo esc_html( $version ); ?></option>
@@ -708,18 +736,19 @@ final class SC_Library_Document_Public_Repository {
                         </label>
                     <?php endif; ?>
 
-                    <label>
+                    <label for="<?php echo esc_attr( $instance_id ); ?>-sort">
                         <span><?php esc_html_e( 'Sort', 'sustainable-catalyst-library' ); ?></span>
-                        <select name="sc_doc_sort">
+                        <select id="<?php echo esc_attr( $instance_id ); ?>-sort" name="sc_doc_sort">
                             <?php foreach ( $this->sort_labels() as $value => $label ) : ?>
                                 <option value="<?php echo esc_attr( $value ); ?>" <?php selected( $filters['sort'], $value ); ?>><?php echo esc_html( $label ); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </label>
                 <?php endif; ?>
-            </div>
+                </div>
+            </fieldset>
             <div class="sc-public-document-filter__actions">
-                <button type="submit"><?php esc_html_e( 'Apply', 'sustainable-catalyst-library' ); ?></button>
+                <button type="submit"><?php esc_html_e( 'Apply filters', 'sustainable-catalyst-library' ); ?></button>
                 <?php if ( $this->has_active_filters( $filters ) ) : ?>
                     <a href="<?php echo esc_url( $base_url ); ?>"><?php esc_html_e( 'Clear filters', 'sustainable-catalyst-library' ); ?></a>
                 <?php endif; ?>
@@ -773,19 +802,25 @@ final class SC_Library_Document_Public_Repository {
                     <?php if ( $file_size ) : ?><div><dt><?php esc_html_e( 'PDF', 'sustainable-catalyst-library' ); ?></dt><dd><?php echo esc_html( $file_size ); ?></dd></div><?php endif; ?>
                 </dl>
             </div>
-            <div class="sc-public-document-row__actions">
-                <a class="sc-public-document-row__primary" href="<?php echo esc_url( get_permalink( $post_id ) ); ?>"><?php esc_html_e( 'Read document', 'sustainable-catalyst-library' ); ?> →</a>
+            <nav class="sc-public-document-row__actions" aria-label="<?php echo esc_attr( sprintf( __( 'Actions for %s', 'sustainable-catalyst-library' ), get_the_title( $post_id ) ) ); ?>">
+                <a class="sc-public-document-row__primary" href="<?php echo esc_url( get_permalink( $post_id ) ); ?>"><?php esc_html_e( 'Read document', 'sustainable-catalyst-library' ); ?> <span aria-hidden="true">→</span></a>
                 <?php if ( 'ready' === $pdf['status'] ) : ?>
-                    <a href="<?php echo esc_url( $pdf['url'] ); ?>" target="_blank" rel="noopener" type="application/pdf"><?php esc_html_e( 'Open PDF', 'sustainable-catalyst-library' ); ?></a>
-                    <a href="<?php echo esc_url( $pdf['url'] ); ?>" download="<?php echo esc_attr( $pdf['filename'] ); ?>" type="application/pdf"><?php esc_html_e( 'Download PDF', 'sustainable-catalyst-library' ); ?></a>
+                    <a href="<?php echo esc_url( $pdf['url'] ); ?>" target="_blank" rel="noopener" type="application/pdf"><?php esc_html_e( 'Open PDF', 'sustainable-catalyst-library' ); ?> <span class="screen-reader-text"><?php esc_html_e( '(opens in a new tab)', 'sustainable-catalyst-library' ); ?></span></a>
+                    <a href="<?php echo esc_url( $pdf['url'] ); ?>" download="<?php echo esc_attr( $pdf['filename'] ); ?>" type="application/pdf"><?php esc_html_e( 'Download PDF', 'sustainable-catalyst-library' ); ?><span class="screen-reader-text"><?php echo $file_size ? esc_html( ' — ' . $file_size ) : ''; ?></span></a>
                 <?php endif; ?>
-            </div>
+            </nav>
         </article>
         <?php
         return ob_get_clean();
     }
 
     private function render_family_index( $exclude_term_id = 0, $limit = 0 ) {
+        $cache_suffix = 'family-index|' . absint( $exclude_term_id ) . '|' . absint( $limit );
+        $cached = SC_Library_Document_Repository_Hardening::cache_get( $cache_suffix );
+        if ( false !== $cached ) {
+            return (string) $cached;
+        }
+
         $families = get_terms(
             array(
                 'taxonomy'   => self::TAX_FAMILY,
@@ -850,7 +885,7 @@ final class SC_Library_Document_Public_Repository {
             <?php endforeach; ?>
         </div>
         <?php
-        return ob_get_clean();
+        return SC_Library_Document_Repository_Hardening::cache_set( $cache_suffix, ob_get_clean() );
     }
 
     private function document_query_args( $filters, $page, $per_page, $exclude_ids ) {
@@ -1088,6 +1123,11 @@ final class SC_Library_Document_Public_Repository {
     }
 
     private function repository_counts() {
+        $cached = SC_Library_Document_Repository_Hardening::cache_get( 'repository-counts' );
+        if ( false !== $cached && is_array( $cached ) ) {
+            return $cached;
+        }
+
         $count = wp_count_posts( self::POST_TYPE );
         $documents = isset( $count->publish ) ? absint( $count->publish ) : 0;
 
@@ -1127,15 +1167,23 @@ final class SC_Library_Document_Public_Repository {
             )
         );
 
-        return array(
-            'documents' => $documents,
-            'families'  => absint( $families ),
-            'current'   => absint( $current->found_posts ),
-            'updated'   => $latest ? get_the_modified_date( get_option( 'date_format' ), $latest[0] ) : __( 'Not yet', 'sustainable-catalyst-library' ),
+        return SC_Library_Document_Repository_Hardening::cache_set(
+            'repository-counts',
+            array(
+                'documents' => $documents,
+                'families'  => absint( $families ),
+                'current'   => absint( $current->found_posts ),
+                'updated'   => $latest ? get_the_modified_date( get_option( 'date_format' ), $latest[0] ) : __( 'Not yet', 'sustainable-catalyst-library' ),
+            )
         );
     }
 
     private function meta_values( $meta_key, $years_only ) {
+        $cache_suffix = 'meta-values|' . sanitize_key( $meta_key ) . '|' . ( $years_only ? 'years' : 'values' );
+        $cached = SC_Library_Document_Repository_Hardening::cache_get( $cache_suffix );
+        if ( false !== $cached && is_array( $cached ) ) {
+            return $cached;
+        }
         global $wpdb;
 
         $values = $wpdb->get_col(
@@ -1176,7 +1224,7 @@ final class SC_Library_Document_Public_Repository {
             $values = array_values( $values );
         }
 
-        return $values;
+        return SC_Library_Document_Repository_Hardening::cache_set( $cache_suffix, $values );
     }
 
     private function sort_labels() {
@@ -1379,6 +1427,8 @@ final class SC_Library_Document_Public_Repository {
                     <tr><th><?php esc_html_e( 'Repository shortcode', 'sustainable-catalyst-library' ); ?></th><td><code>[sc_pdf_document_repository]</code></td></tr>
                     <tr><th><?php esc_html_e( 'Family shortcode', 'sustainable-catalyst-library' ); ?></th><td><code>[sc_pdf_document_library family="foundations"]</code></td></tr>
                     <tr><th><?php esc_html_e( 'Family descriptions', 'sustainable-catalyst-library' ); ?></th><td><?php esc_html_e( 'Edit Document Families and use the standard Description field as the public introduction.', 'sustainable-catalyst-library' ); ?></td></tr>
+                    <tr><th><?php esc_html_e( 'Interface hardening', 'sustainable-catalyst-library' ); ?></th><td><?php esc_html_e( 'v2.3.1 keyboard, screen-reader, mobile, high-contrast, reduced-motion, pagination, and caching layer active.', 'sustainable-catalyst-library' ); ?></td></tr>
+                    <tr><th><?php esc_html_e( 'Cache generation', 'sustainable-catalyst-library' ); ?></th><td><code><?php echo esc_html( SC_Library_Document_Repository_Hardening::cache_generation() ); ?></code></td></tr>
                 </tbody>
             </table>
 
@@ -1392,6 +1442,11 @@ final class SC_Library_Document_Public_Repository {
                     <?php wp_nonce_field( 'sc_library_v230_seed_repository' ); ?>
                     <input type="hidden" name="action" value="sc_library_v230_seed_repository">
                     <?php submit_button( __( 'Seed Recommended Families and Types', 'sustainable-catalyst-library' ), 'secondary', 'submit', false ); ?>
+                </form>
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                    <?php wp_nonce_field( 'sc_library_v231_clear_repository_cache' ); ?>
+                    <input type="hidden" name="action" value="sc_library_v231_clear_repository_cache">
+                    <?php submit_button( __( 'Clear Repository Cache', 'sustainable-catalyst-library' ), 'secondary', 'submit', false ); ?>
                 </form>
             </div>
 
