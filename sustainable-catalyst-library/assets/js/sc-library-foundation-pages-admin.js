@@ -78,8 +78,11 @@
   }
 
   function initializeConversion() {
-    var config = window.SCLibraryPdfDocument || {};
+    var baseConfig = window.SCLibraryPdfDocument || {};
+    var config = window.SCLibraryPdfReliability || {};
+    var strings = config.strings || {};
     var $panel = $('[data-sc-pdf-conversion-panel]');
+    var $reliability = $('[data-sc-pdf-reliability]');
     if (!$panel.length) {
       return;
     }
@@ -88,32 +91,66 @@
     var $button = $panel.find('[data-sc-create-document]');
     var $status = $panel.find('[data-sc-pdf-status]');
     var $progress = $panel.find('[data-sc-pdf-progress]');
+    var $cancel = $reliability.find('[data-sc-cancel-conversion]');
+    var $reliabilityState = $reliability.find('[data-sc-reliability-state]');
+    var $reliabilityDetail = $reliability.find('[data-sc-reliability-detail]');
+    var $log = $reliability.find('[data-sc-conversion-log]');
     var extracting = false;
+    var cancelled = false;
     var pdfModulePromise = null;
+    var activeSession = null;
 
-    function request(action, data) {
+    function sleep(ms) {
+      return new Promise(function (resolve) { window.setTimeout(resolve, ms); });
+    }
+
+    function rawRequest(action, data) {
       return $.ajax({
-        url: config.ajaxUrl,
+        url: config.ajaxUrl || baseConfig.ajaxUrl,
         method: 'POST',
         dataType: 'json',
+        timeout: 120000,
         data: $.extend({
           action: action,
           nonce: config.nonce,
-          post_id: config.postId
+          post_id: config.postId || baseConfig.postId
         }, data || {})
       }).then(function (response) {
         if (!response || !response.success) {
-          var message = response && response.data && response.data.message ? response.data.message : 'The PDF could not be converted.';
-          return $.Deferred().reject(new Error(message)).promise();
+          var payload = response && response.data ? response.data : {};
+          var error = new Error(payload.message || 'The PDF could not be converted.');
+          error.payload = payload;
+          return $.Deferred().reject(error).promise();
         }
         return response.data;
       });
+    }
+
+    async function request(action, data, attempt) {
+      attempt = attempt || 0;
+      try {
+        return await rawRequest(action, data);
+      } catch (error) {
+        var retries = parseInt(config.requestRetries, 10) || 3;
+        if (attempt >= retries || (error.payload && error.payload.code === 'duplicate_pdf')) {
+          throw error;
+        }
+        setStatus('Converting', strings.retrying || 'Connection interrupted. Retrying…', 'extracting');
+        await sleep((parseInt(config.retryDelay, 10) || 900) * Math.pow(2, attempt));
+        return request(action, data, attempt + 1);
+      }
     }
 
     function setStatus(label, message, state) {
       $status.attr('data-status', state || '');
       $status.find('strong').text(label || '');
       $status.find('span').text(message || '');
+      if ($reliabilityState.length) {
+        $reliabilityState.text(label || '');
+      }
+      if ($reliabilityDetail.length) {
+        $reliabilityDetail.text(message || '');
+      }
     }
 
     function setProgress(value, visible) {
@@ -123,6 +160,7 @@
     function setBusy(value) {
       extracting = value;
       $button.prop('disabled', value || !$pdfId.val());
+      $cancel.prop('disabled', !value && !activeSession);
     }
 
     function updateEditor(data) {
@@ -141,81 +179,165 @@
       window.onbeforeunload = null;
     }
 
+    function renderLogs(logs) {
+      if (!$log.length || !Array.isArray(logs)) {
+        return;
+      }
+      $log.empty();
+      if (!logs.length) {
+        $log.append($('<li>').text('No conversion events recorded yet.'));
+        return;
+      }
+      logs.forEach(function (entry) {
+        var $item = $('<li>');
+        $item.append($('<time>').text(entry.time || ''));
+        $item.append($('<strong>').text(entry.event || ''));
+        $item.append($('<span>').text(entry.message || ''));
+        $log.append($item);
+      });
+    }
+
     async function pdfModule() {
       if (!pdfModulePromise) {
-        pdfModulePromise = import(config.pdfJsUrl).then(function (module) {
-          module.GlobalWorkerOptions.workerSrc = config.workerUrl;
+        pdfModulePromise = import(baseConfig.pdfJsUrl).then(function (module) {
+          module.GlobalWorkerOptions.workerSrc = baseConfig.workerUrl;
           return module;
         });
       }
       return pdfModulePromise;
     }
 
-    function pageText(items) {
-      var lines = [];
-      var current = '';
+    function pageData(items) {
+      var rows = [];
       (items || []).forEach(function (item) {
         if (!item || typeof item.str !== 'string') {
           return;
         }
         var text = item.str.replace(/\s+/g, ' ').trim();
-        if (text) {
-          current += (current ? ' ' : '') + text;
+        if (!text) {
+          return;
         }
-        if (item.hasEOL) {
-          if (current.trim()) {
-            lines.push(current.trim());
+        var transform = item.transform || [];
+        var y = Math.round((transform[5] || 0) * 2) / 2;
+        var size = Math.abs(transform[3] || item.height || 0);
+        var fontName = String(item.fontName || '');
+        var row = null;
+        for (var i = rows.length - 1; i >= 0 && i >= rows.length - 8; i -= 1) {
+          if (Math.abs(rows[i].y - y) <= Math.max(1.5, size * 0.25)) {
+            row = rows[i];
+            break;
           }
-          current = '';
         }
+        if (!row) {
+          row = { y: y, size: size, bold: /bold|black|heavy/i.test(fontName), parts: [] };
+          rows.push(row);
+        }
+        row.size = Math.max(row.size, size);
+        row.bold = row.bold || /bold|black|heavy/i.test(fontName);
+        row.parts.push({ x: transform[4] || 0, text: text });
       });
-      if (current.trim()) {
-        lines.push(current.trim());
-      }
-      return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+
+      rows.sort(function (a, b) { return b.y - a.y; });
+      var lines = rows.map(function (row) {
+        row.parts.sort(function (a, b) { return a.x - b.x; });
+        return {
+          text: row.parts.map(function (part) { return part.text; }).join(' ').replace(/\s+/g, ' ').trim(),
+          size: Math.round(row.size * 100) / 100,
+          bold: !!row.bold
+        };
+      }).filter(function (line) { return line.text; });
+
+      return {
+        text: lines.map(function (line) { return line.text; }).join('\n').replace(/\n{3,}/g, '\n\n').trim(),
+        lines: lines
+      };
     }
 
-    async function browserExtract(url, attachmentId) {
-      var pdfjs = await pdfModule();
-      var loadingTask = pdfjs.getDocument({
+    async function openPdf(pdfjs, url) {
+      var options = {
         url: url,
-        cMapUrl: config.cMapUrl,
+        cMapUrl: baseConfig.cMapUrl,
         cMapPacked: true,
-        standardFontDataUrl: config.fontUrl,
-        wasmUrl: config.wasmUrl,
+        standardFontDataUrl: baseConfig.fontUrl,
+        wasmUrl: baseConfig.wasmUrl,
         useWorkerFetch: true
-      });
-      var pdf = await loadingTask.promise;
-      var chunk = [];
-      var characters = 0;
+      };
+      try {
+        return await pdfjs.getDocument(options).promise;
+      } catch (error) {
+        setStatus('Converting', strings.workerFallback || 'PDF worker unavailable. Continuing in compatibility mode…', 'extracting');
+        options.disableWorker = true;
+        options.useWorkerFetch = false;
+        return pdfjs.getDocument(options).promise;
+      }
+    }
 
-      for (var pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+    async function flushChunk(chunk, attachmentId, sessionId, totalPages) {
+      if (!chunk.length) {
+        return;
+      }
+      await request('sc_library_v221_store_pdf_chunk', {
+        attachment_id: attachmentId,
+        session_id: sessionId,
+        total_pages: totalPages,
+        pages: JSON.stringify(chunk)
+      });
+    }
+
+    async function browserExtract(prepared) {
+      var pdfjs = await pdfModule();
+      var pdf = await openPdf(pdfjs, prepared.pdfUrl);
+      var maxPages = parseInt(config.maxPages, 10) || 5000;
+      if (pdf.numPages > maxPages) {
+        await request('sc_library_v221_mark_failure', { failure_code: 'too_large', message: strings.tooManyPages || 'This PDF exceeds the configured page limit.' });
+        throw new Error(strings.tooManyPages || 'This PDF exceeds the configured page limit.');
+      }
+
+      var startPage = Math.max(1, parseInt(prepared.resumePage, 10) || 1);
+      var chunk = [];
+      var chunkCharacters = 0;
+      var characters = 0;
+      var maxChunkPages = parseInt(config.chunkPages, 10) || 5;
+      var maxChunkCharacters = parseInt(config.chunkCharacters, 10) || 240000;
+
+      activeSession = prepared.sessionId;
+      $cancel.prop('disabled', false);
+      if (prepared.resuming) {
+        $button.text(strings.resume || 'Resume Document Conversion');
+      }
+
+      for (var pageNumber = startPage; pageNumber <= pdf.numPages; pageNumber += 1) {
+        if (cancelled) {
+          throw new Error(strings.cancelled || 'Saved conversion cancelled.');
+        }
         var page = await pdf.getPage(pageNumber);
         var textContent = await page.getTextContent({ includeMarkedContent: false });
-        var text = pageText(textContent.items);
-        characters += text.replace(/\s+/g, '').length;
-        chunk.push({ page: pageNumber, text: text });
-        setStatus('Converting', 'Reading page ' + pageNumber + ' of ' + pdf.numPages + '…', 'extracting');
-        setProgress(Math.round((pageNumber / pdf.numPages) * 88), true);
+        var pageResult = pageData(textContent.items);
+        characters += pageResult.text.replace(/\s+/g, '').length;
+        chunkCharacters += pageResult.text.length;
+        chunk.push({ page: pageNumber, text: pageResult.text, lines: pageResult.lines });
 
-        if (chunk.length >= 10 || pageNumber === pdf.numPages) {
-          await request('sc_library_store_pdf_document_chunk', {
-            attachment_id: attachmentId,
-            pages: JSON.stringify(chunk),
-            reset: pageNumber === chunk.length ? '1' : '0'
-          });
+        setStatus('Converting', 'Reading page ' + pageNumber + ' of ' + pdf.numPages + '…', 'extracting');
+        setProgress(Math.round((pageNumber / pdf.numPages) * 91), true);
+
+        if (chunk.length >= maxChunkPages || chunkCharacters >= maxChunkCharacters || pageNumber === pdf.numPages) {
+          await flushChunk(chunk, prepared.attachmentId, prepared.sessionId, pdf.numPages);
           chunk = [];
+          chunkCharacters = 0;
         }
       }
 
-      if (characters < 80) {
-        await request('sc_library_mark_pdf_document_failure', { failure_code: 'needs_ocr' });
+      if (characters < 80 && startPage === 1) {
+        await request('sc_library_v221_mark_failure', { failure_code: 'needs_ocr', message: 'Little or no extractable text was found.' });
         return { status: 'needs_ocr', message: 'Little or no extractable text was found. This PDF needs OCR.' };
       }
 
-      setStatus('Converting', 'Building the readable document…', 'extracting');
-      setProgress(94, true);
-      return request('sc_library_finalize_pdf_document', { attachment_id: attachmentId });
+      setStatus('Converting', 'Building and saving the readable document…', 'extracting');
+      setProgress(96, true);
+      return request('sc_library_v221_finalize_pdf_document', {
+        attachment_id: prepared.attachmentId,
+        session_id: prepared.sessionId
+      });
     }
 
     async function convert() {
@@ -227,47 +349,101 @@
         window.alert('Select a PDF first.');
         return;
       }
-
+      cancelled = false;
       setBusy(true);
       setProgress(2, true);
-      setStatus('Converting', 'Preparing the PDF…', 'extracting');
+      setStatus('Converting', 'Preparing the PDF and checking for a saved session…', 'extracting');
 
       try {
-        var prepared = await request('sc_library_prepare_pdf_document', { attachment_id: attachmentId });
+        var prepared = await request('sc_library_v221_prepare_pdf_document', { attachment_id: attachmentId });
         var result = prepared;
         if (prepared.status === 'browser_required') {
-          result = await browserExtract(prepared.pdfUrl, attachmentId);
+          result = await browserExtract(prepared);
         }
         if (result.status === 'needs_ocr') {
           setStatus('Needs OCR', result.message, 'needs_ocr');
+        } else if (result.status === 'failed') {
+          throw new Error(result.message || 'The generated document could not be saved.');
         } else {
           updateEditor(result);
-          setStatus('Ready for review', result.message || 'Review the generated document below.', 'ready_review');
-          $button.text('Re-create Document from PDF');
+          setStatus('Ready for review', result.message || strings.complete || 'Conversion completed and saved. Review the document below.', 'ready_review');
+          $button.text(strings.restart || 'Re-create Document from PDF');
+          activeSession = null;
+          $cancel.prop('disabled', true);
         }
         setProgress(100, false);
+        await refreshStatus();
       } catch (error) {
-        var message = error && error.message ? error.message : 'The PDF could not be converted.';
-        var code = /password/i.test(message) ? 'password_protected' : 'failed';
-        try {
-          await request('sc_library_mark_pdf_document_failure', { failure_code: code });
-        } catch (ignored) {}
-        setStatus(code === 'password_protected' ? 'Password protected' : 'Conversion failed', message, code);
+        var payload = error && error.payload ? error.payload : {};
+        if (payload.code === 'duplicate_pdf') {
+          var duplicateMessage = payload.message || strings.duplicate || 'This PDF already belongs to another document record.';
+          if (payload.editUrl) {
+            duplicateMessage += ' Open the existing record: ' + payload.editUrl;
+          }
+          setStatus('Duplicate PDF', duplicateMessage, 'failed');
+        } else if (!cancelled) {
+          var message = error && error.message ? error.message : 'The PDF could not be converted.';
+          var code = /password/i.test(message) ? 'password_protected' : 'failed';
+          try {
+            await request('sc_library_v221_mark_failure', { failure_code: code, message: message });
+          } catch (ignored) {}
+          setStatus(code === 'password_protected' ? 'Password protected' : 'Conversion interrupted', message + ' You can retry or resume.', code);
+        }
         setProgress(0, false);
       } finally {
         setBusy(false);
       }
     }
 
-    $button.on('click', convert);
-
-    if (config.autoExtract && $pdfId.val()) {
-      window.setTimeout(convert, 500);
+    async function refreshStatus() {
+      try {
+        var state = await request('sc_library_v221_conversion_status');
+        activeSession = state.active ? state.session_id : null;
+        renderLogs(state.logs || []);
+        if (state.active) {
+          $button.text(strings.resume || 'Resume Document Conversion');
+          $cancel.prop('disabled', false);
+          setStatus('Conversion can be resumed', 'Saved through page ' + state.last_page + ' of ' + (state.total_pages || '?') + '.', 'extracting');
+          if (state.total_pages) {
+            setProgress(Math.round((state.last_page / state.total_pages) * 91), true);
+          }
+        }
+      } catch (ignored) {}
     }
 
+    async function cancelConversion() {
+      if (!activeSession) {
+        return;
+      }
+      cancelled = true;
+      try {
+        await request('sc_library_v221_cancel_conversion');
+        activeSession = null;
+        setStatus('Not converted', strings.cancelled || 'Saved conversion cancelled.', 'pending');
+        setProgress(0, false);
+        $button.text('Create Document from PDF');
+        $cancel.prop('disabled', true);
+        await refreshStatus();
+      } catch (error) {
+        setStatus('Cancel failed', error.message || 'The saved conversion could not be cancelled.', 'failed');
+      }
+    }
+
+    $button.off('click').on('click', convert);
+    $cancel.on('click', cancelConversion);
+
     $(document).on('change', '[data-sc-foundation-pdf-id]', function () {
+      activeSession = null;
       setStatus('Not converted', 'Create the readable document from the selected PDF.', 'pending');
-      $button.prop('disabled', !$(this).val());
+      setProgress(0, false);
+      $button.text('Create Document from PDF').prop('disabled', !$(this).val());
+      $cancel.prop('disabled', true);
+    });
+
+    refreshStatus().then(function () {
+      if (baseConfig.autoExtract && $pdfId.val() && !extracting) {
+        window.setTimeout(convert, 500);
+      }
     });
   }
 

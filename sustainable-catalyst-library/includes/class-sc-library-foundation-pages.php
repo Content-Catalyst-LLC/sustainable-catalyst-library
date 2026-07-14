@@ -988,10 +988,12 @@ final class SC_Library_Foundation_Pages {
     }
 
     private function version() {
-        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.2.0';
+        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.2.1';
     }
 }
 
-// Knowledge Library v2.2.0: evolve the existing Foundation Document type in place.
+// Knowledge Library v2.2.1: retain the v2.2.0 document architecture and add a dedicated reliability layer.
 require_once __DIR__ . '/class-sc-library-pdf-to-document.php';
+require_once __DIR__ . '/class-sc-library-pdf-conversion-reliability.php';
 new SC_Library_PDF_To_Document();
+new SC_Library_PDF_Conversion_Reliability();

@@ -17,7 +17,7 @@ final class SC_Library_PDF_To_Document {
     public const POST_TYPE = 'sc_foundation_doc';
     public const TAX_FAMILY = 'sc_document_family';
     public const DEFAULT_FAMILY = 'foundations';
-    public const ROUTE_VERSION = '2.2.0';
+    public const ROUTE_VERSION = '2.2.1';
     public const SCHEMA = 'sc-library-pdf-document/2.0';
     public const META_PDF_ID = '_sc_library_foundation_page_pdf_id';
     public const META_STATUS = '_sc_document_extraction_status';
@@ -901,6 +901,6 @@ final class SC_Library_PDF_To_Document {
     }
 
     private function version() {
-        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.2.0';
+        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '2.2.1';
     }
 }
