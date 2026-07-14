@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Scholarly_Library_Connectors {
-    public const VERSION = '2.6.0';
+    public const VERSION = '2.6.1';
     public const API_NAMESPACE = 'sc-library/v1';
     public const RESULT_SCHEMA = 'sc-library-discovery-result/1.0';
     public const SEARCH_SCHEMA = 'sc-library-federated-search/1.0';
@@ -246,6 +246,7 @@ final class SC_Library_Scholarly_Library_Connectors {
         $notes = sanitize_textarea_field( wp_unslash( $_POST['sc_library_profile_notes'] ?? '' ) );
         $notes ? update_post_meta( $post_id, self::META_PROFILE_NOTES, $notes ) : delete_post_meta( $post_id, self::META_PROFILE_NOTES );
         update_post_meta( $post_id, self::META_PROFILE_ENABLED, isset( $_POST['sc_library_profile_enabled'] ) ? '1' : '0' );
+        SC_Library_Connector_Holdings_Reliability::validate_library_profile( $post_id, true );
     }
 
     public function render_source_locator_box( $post ) {
@@ -397,6 +398,7 @@ final class SC_Library_Scholarly_Library_Connectors {
                     </article>
                 <?php endforeach; ?>
             </div>
+            <?php SC_Library_Connector_Holdings_Reliability::render_admin_reliability_panel(); ?>
         </section>
         <?php
     }
@@ -814,13 +816,25 @@ final class SC_Library_Scholarly_Library_Connectors {
             if ( is_array( $cached ) ) {
                 $cached['results'] = $this->seal_results( $cached['results'] ?? array(), $provider_id, $query );
                 $cached['cached'] = true;
+                $cached['stale'] = false;
+                $cached['cache_state'] = 'fresh';
+                $cached['provider_health'] = SC_Library_Connector_Holdings_Reliability::provider_health( $provider_id );
                 return $cached;
             }
         }
 
+        $stale_payload = SC_Library_Connector_Holdings_Reliability::get_stale_search_cache( $cache_key );
+        $circuit = SC_Library_Connector_Holdings_Reliability::provider_request_state( $provider_id );
         $backoff = get_transient( self::CACHE_PREFIX . 'backoff_' . $provider_id );
-        if ( $backoff ) {
-            return new WP_Error( 'provider_backoff', sprintf( __( '%s is temporarily paused after a rate-limit or service error.', 'sustainable-catalyst-library' ), $providers[ $provider_id ]['name'] ), array( 'status' => 503 ) );
+        if ( is_wp_error( $circuit ) || $backoff ) {
+            if ( $stale_payload ) {
+                $stale_payload['results'] = $this->seal_results( $stale_payload['results'] ?? array(), $provider_id, $query );
+                $stale_payload['provider_health'] = SC_Library_Connector_Holdings_Reliability::provider_health( $provider_id );
+                return $stale_payload;
+            }
+            return is_wp_error( $circuit )
+                ? $circuit
+                : new WP_Error( 'provider_backoff', sprintf( __( '%s is temporarily paused after a rate-limit or service error.', 'sustainable-catalyst-library' ), $providers[ $provider_id ]['name'] ), array( 'status' => 503 ) );
         }
 
         $method = 'search_' . $provider_id;
@@ -831,6 +845,12 @@ final class SC_Library_Scholarly_Library_Connectors {
         $started = microtime( true );
         $results = $this->{$method}( $query, $limit );
         if ( is_wp_error( $results ) ) {
+            if ( $stale_payload ) {
+                $stale_payload['results'] = $this->seal_results( $stale_payload['results'] ?? array(), $provider_id, $query );
+                $stale_payload['live_error'] = $results->get_error_message();
+                $stale_payload['provider_health'] = SC_Library_Connector_Holdings_Reliability::provider_health( $provider_id );
+                return $stale_payload;
+            }
             return $results;
         }
 
@@ -842,77 +862,27 @@ final class SC_Library_Scholarly_Library_Connectors {
             'result_count' => count( $results ),
             'results'      => array_values( $results ),
             'cached'       => false,
+            'stale'        => false,
+            'cache_state'  => 'network',
             'duration_ms'  => round( ( microtime( true ) - $started ) * 1000 ),
             'searched_at'  => current_time( 'mysql' ),
+            'provider_health' => SC_Library_Connector_Holdings_Reliability::provider_health( $provider_id ),
         );
 
         set_transient( $cache_key, $payload, $this->settings()['cache_ttl'] );
+        SC_Library_Connector_Holdings_Reliability::store_stale_search_cache( $cache_key, $payload );
         $payload['results'] = $this->seal_results( $payload['results'], $provider_id, $query );
         return $payload;
     }
 
     private function request_json( $provider_id, $url, $headers = array(), $timeout = self::DEFAULT_TIMEOUT ) {
-        $host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
-        $allowed_hosts = array(
-            'api.crossref.org',
-            'api.openalex.org',
-            'api.datacite.org',
-            'eutils.ncbi.nlm.nih.gov',
-            'www.loc.gov',
-            'openlibrary.org',
-            'www.googleapis.com',
-            'api.unpaywall.org',
-        );
-        $allowed_hosts = apply_filters( 'sc_library_connector_allowed_hosts', $allowed_hosts, $provider_id );
-        if ( 'https' !== strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) ) || ! in_array( $host, $allowed_hosts, true ) ) {
-            return new WP_Error( 'connector_url_rejected', __( 'Connector URL was rejected by the provider allowlist.', 'sustainable-catalyst-library' ), array( 'status' => 500 ) );
-        }
-
-        $settings = $this->settings();
-        $user_agent = 'SustainableCatalystLibrary/' . self::VERSION;
-        if ( $settings['contact_email'] ) {
-            $user_agent .= ' (mailto:' . $settings['contact_email'] . ')';
-        }
-        $headers = array_merge(
-            array(
-                'Accept'     => 'application/json',
-                'User-Agent' => $user_agent,
-            ),
-            $headers
-        );
-
-        $response = wp_safe_remote_get(
+        return SC_Library_Connector_Holdings_Reliability::request_json(
+            $provider_id,
             $url,
-            array(
-                'timeout'             => max( 5, min( 30, absint( $timeout ) ) ),
-                'redirection'         => 2,
-                'headers'             => $headers,
-                'limit_response_size' => 5 * 1024 * 1024,
-            )
+            $headers,
+            $timeout,
+            $this->settings()
         );
-        if ( is_wp_error( $response ) ) {
-            return new WP_Error( 'connector_transport_error', $response->get_error_message(), array( 'status' => 502 ) );
-        }
-
-        $status = wp_remote_retrieve_response_code( $response );
-        if ( 429 === $status || $status >= 500 ) {
-            $retry_after = absint( wp_remote_retrieve_header( $response, 'retry-after' ) );
-            set_transient( self::CACHE_PREFIX . 'backoff_' . $provider_id, 1, max( MINUTE_IN_SECONDS, min( HOUR_IN_SECONDS, $retry_after ?: 5 * MINUTE_IN_SECONDS ) ) );
-        }
-        if ( $status < 200 || $status >= 300 ) {
-            return new WP_Error(
-                'connector_http_error',
-                sprintf( __( '%1$s returned HTTP %2$d.', 'sustainable-catalyst-library' ), self::$provider_labels[ $provider_id ] ?? $provider_id, $status ),
-                array( 'status' => 502, 'provider_status' => $status )
-            );
-        }
-
-        $body = wp_remote_retrieve_body( $response );
-        $decoded = json_decode( $body, true );
-        if ( ! is_array( $decoded ) ) {
-            return new WP_Error( 'connector_invalid_json', __( 'The provider returned invalid JSON.', 'sustainable-catalyst-library' ), array( 'status' => 502 ) );
-        }
-        return $decoded;
     }
 
     private function search_crossref( $query, $limit ) {
@@ -1595,6 +1565,13 @@ final class SC_Library_Scholarly_Library_Connectors {
             wp_send_json_error( array( 'message' => $rate->get_error_message() ), 429 );
         }
 
+        $idempotency_key = sanitize_text_field( wp_unslash( $_POST['idempotency_key'] ?? '' ) );
+        $replay = SC_Library_Connector_Holdings_Reliability::idempotency_lookup( $idempotency_key );
+        if ( $replay ) {
+            $replay['idempotent_replay'] = true;
+            wp_send_json_success( $replay );
+        }
+
         $sealed = $this->read_sealed_result( wp_unslash( $_POST['token'] ?? '' ) );
         if ( is_wp_error( $sealed ) ) {
             wp_send_json_error( array( 'message' => $sealed->get_error_message() ), absint( $sealed->get_error_data( 'status' ) ?: 400 ) );
@@ -1612,12 +1589,22 @@ final class SC_Library_Scholarly_Library_Connectors {
             wp_send_json_error( array( 'message' => $imported->get_error_message() ), absint( $imported->get_error_data( 'status' ) ?: 400 ) );
         }
 
+        SC_Library_Connector_Holdings_Reliability::idempotency_store( $idempotency_key, $imported );
         wp_send_json_success( $imported );
     }
 
     private function import_result( $result, $source_id = 0, $project_id = 0, $mode = 'fill_empty' ) {
         if ( ! is_array( $result ) || empty( $result['title'] ) || empty( $result['provider'] ) ) {
             return new WP_Error( 'invalid_discovery_result', __( 'The discovery result is incomplete.', 'sustainable-catalyst-library' ), array( 'status' => 400 ) );
+        }
+
+        $idempotent_match = false;
+        if ( ! $source_id ) {
+            $existing_import = SC_Library_Connector_Holdings_Reliability::find_imported_source( $result );
+            if ( $existing_import ) {
+                $source_id = $existing_import;
+                $idempotent_match = true;
+            }
         }
 
         $creating = ! $source_id;
@@ -1674,6 +1661,14 @@ final class SC_Library_Scholarly_Library_Connectors {
             }
             $existing = get_post_meta( $source_id, $meta_key, true );
             if ( 'fill_empty' === $mode && ! in_array( $existing, array( '', array(), null ), true ) ) {
+                SC_Library_Connector_Holdings_Reliability::record_conflict(
+                    $source_id,
+                    $field,
+                    $existing,
+                    $result[ $field ],
+                    $result['provider'],
+                    $result['provider_record_id'] ?? ''
+                );
                 continue;
             }
             update_post_meta( $source_id, $meta_key, $result[ $field ] );
@@ -1684,6 +1679,27 @@ final class SC_Library_Scholarly_Library_Connectors {
                 'imported_at'        => current_time( 'mysql' ),
                 'imported_by'        => get_current_user_id(),
             );
+        }
+
+        if ( ! $creating && 'fill_empty' === $mode ) {
+            SC_Library_Connector_Holdings_Reliability::record_conflict(
+                $source_id,
+                'title',
+                get_the_title( $source_id ),
+                $result['title'],
+                $result['provider'],
+                $result['provider_record_id'] ?? ''
+            );
+            if ( ! empty( $result['abstract'] ) ) {
+                SC_Library_Connector_Holdings_Reliability::record_conflict(
+                    $source_id,
+                    'abstract',
+                    get_post_field( 'post_excerpt', $source_id ),
+                    $result['abstract'],
+                    $result['provider'],
+                    $result['provider_record_id'] ?? ''
+                );
+            }
         }
 
         if ( $creating || 'overwrite' === $mode ) {
@@ -1780,6 +1796,8 @@ final class SC_Library_Scholarly_Library_Connectors {
             'title'          => get_the_title( $source_id ),
             'citation'       => SC_Library_Citation_Source_Manager::format_citation( $source_id, 'harvard', 'reference' ),
             'fields_changed' => $changed,
+            'reused_existing_import' => $idempotent_match,
+            'open_conflict_count' => count( SC_Library_Connector_Holdings_Reliability::open_conflicts( $source_id ) ),
             'message'        => $creating
                 ? __( 'Source imported as a draft for metadata review.', 'sustainable-catalyst-library' )
                 : __( 'Source metadata updated and returned to review.', 'sustainable-catalyst-library' ),
@@ -1834,13 +1852,15 @@ final class SC_Library_Scholarly_Library_Connectors {
             if ( empty( $result[ $field ] ) ) {
                 continue;
             }
-            $locations[] = array(
-                'kind'       => $kind,
-                'provider'   => sanitize_key( $result['provider'] ?? '' ),
-                'label'      => self::$provider_labels[ $result['provider'] ?? '' ] ?? sanitize_text_field( $result['provider'] ?? '' ),
-                'url'        => esc_url_raw( $result[ $field ] ),
-                'status'     => sanitize_key( $result['full_text_status'] ?? '' ),
-                'checked_at' => current_time( 'mysql' ),
+            $locations[] = SC_Library_Connector_Holdings_Reliability::normalize_location(
+                array(
+                    'kind'       => $kind,
+                    'provider'   => sanitize_key( $result['provider'] ?? '' ),
+                    'label'      => self::$provider_labels[ $result['provider'] ?? '' ] ?? sanitize_text_field( $result['provider'] ?? '' ),
+                    'url'        => esc_url_raw( $result[ $field ] ),
+                    'status'     => sanitize_key( $result['full_text_status'] ?? '' ),
+                    'checked_at' => current_time( 'mysql' ),
+                )
             );
         }
         return $locations;
@@ -1849,14 +1869,9 @@ final class SC_Library_Scholarly_Library_Connectors {
     private function store_access_locations( $source_id, $locations ) {
         $existing = get_post_meta( $source_id, self::META_ACCESS_LOCATIONS, true );
         $existing = is_array( $existing ) ? $existing : array();
-        $indexed = array();
-        foreach ( array_merge( $existing, $locations ) as $location ) {
-            if ( empty( $location['url'] ) ) {
-                continue;
-            }
-            $indexed[ md5( $location['url'] ) ] = $location;
-        }
-        update_post_meta( $source_id, self::META_ACCESS_LOCATIONS, array_slice( array_values( $indexed ), -self::LOCATION_LIMIT ) );
+        $merged = SC_Library_Connector_Holdings_Reliability::merge_locations( $existing, $locations, self::LOCATION_LIMIT );
+        update_post_meta( $source_id, self::META_ACCESS_LOCATIONS, $merged );
+        SC_Library_Connector_Holdings_Reliability::holdings_summary( $source_id, true );
     }
 
     public function ajax_locate_source() {
@@ -2282,6 +2297,12 @@ final class SC_Library_Scholarly_Library_Connectors {
         );
         $profiles = array();
         foreach ( $posts as $post ) {
+            if ( $public_only ) {
+                $validation = SC_Library_Connector_Holdings_Reliability::validate_library_profile( $post->ID, false );
+                if ( empty( $validation['valid'] ) ) {
+                    continue;
+                }
+            }
             $profiles[] = array(
                 'schema'           => self::PROFILE_SCHEMA,
                 'id'               => $post->ID,
@@ -2403,18 +2424,27 @@ final class SC_Library_Scholarly_Library_Connectors {
     public function rest_import( WP_REST_Request $request ) {
         $payload = $request->get_json_params();
         $payload = is_array( $payload ) ? $payload : array();
+        $idempotency_key = sanitize_text_field( $request->get_header( 'Idempotency-Key' ) ?: ( $payload['idempotency_key'] ?? '' ) );
+        $replay = SC_Library_Connector_Holdings_Reliability::idempotency_lookup( $idempotency_key );
+        if ( $replay ) {
+            $replay['idempotent_replay'] = true;
+            return rest_ensure_response( $replay );
+        }
         $sealed = $this->read_sealed_result( $payload['token'] ?? '' );
         if ( is_wp_error( $sealed ) ) {
             return $sealed;
         }
-        return rest_ensure_response(
-            $this->import_result(
-                $sealed['result'],
-                absint( $payload['source_id'] ?? 0 ),
-                absint( $payload['project_id'] ?? 0 ),
-                sanitize_key( $payload['mode'] ?? 'fill_empty' )
-            )
+        $imported = $this->import_result(
+            $sealed['result'],
+            absint( $payload['source_id'] ?? 0 ),
+            absint( $payload['project_id'] ?? 0 ),
+            sanitize_key( $payload['mode'] ?? 'fill_empty' )
         );
+        if ( is_wp_error( $imported ) ) {
+            return $imported;
+        }
+        SC_Library_Connector_Holdings_Reliability::idempotency_store( $idempotency_key, $imported );
+        return rest_ensure_response( $imported );
     }
 
     public function rest_locate( WP_REST_Request $request ) {

@@ -171,6 +171,35 @@ function wp_remote_retrieve_response_code( $response ) { return $response['respo
 function wp_remote_retrieve_body( $response ) { return $response['body']; }
 function wp_remote_retrieve_header( $response, $name ) { return $response['headers'][ strtolower( $name ) ] ?? ''; }
 
+
+class SC_Library_Connector_Holdings_Reliability {
+    public static function provider_request_state( $provider_id ) { return true; }
+    public static function get_stale_search_cache( $cache_key ) { return array(); }
+    public static function provider_health( $provider_id ) { return array( 'status' => 'healthy' ); }
+    public static function store_stale_search_cache( $cache_key, $payload ) {}
+    public static function normalize_location( $location ) { return $location; }
+    public static function merge_locations( $existing, $incoming, $limit = 30 ) { return array_slice( array_merge( $existing, $incoming ), 0, $limit ); }
+    public static function holdings_summary( $source_id, $save = true ) { return array(); }
+    public static function validate_library_profile( $profile_id, $save = true ) { return array( 'valid' => true ); }
+    public static function idempotency_lookup( $key ) { return array(); }
+    public static function idempotency_store( $key, $value ) {}
+    public static function find_imported_source( $result ) { return 0; }
+    public static function record_conflict() { return ''; }
+    public static function open_conflicts() { return array(); }
+    public static function request_json( $provider_id, $url, $headers, $timeout, $settings ) {
+        $response = wp_safe_remote_get( $url, array( 'headers' => $headers, 'timeout' => $timeout ) );
+        if ( is_wp_error( $response ) ) {
+            return $response;
+        }
+        $status = wp_remote_retrieve_response_code( $response );
+        if ( $status < 200 || $status >= 300 ) {
+            return new WP_Error( 'connector_http_error', 'Provider error', array( 'status' => 502 ) );
+        }
+        $decoded = json_decode( wp_remote_retrieve_body( $response ), true );
+        return is_array( $decoded ) ? $decoded : new WP_Error( 'connector_invalid_json', 'Invalid JSON', array( 'status' => 502 ) );
+    }
+}
+
 require_once dirname( __DIR__ ) . '/sustainable-catalyst-library/includes/class-sc-library-scholarly-library-connectors.php';
 
 function assert_true( $condition, $label ) {

@@ -4,6 +4,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "sustainable-catalyst-library"
 WRAPPER = PLUGIN / "includes" / "class-sc-library-foundation-pages.php"
 CONNECTORS = PLUGIN / "includes" / "class-sc-library-scholarly-library-connectors.php"
+CONNECTOR_RELIABILITY = PLUGIN / "includes" / "class-sc-library-connector-holdings-reliability.php"
 MANAGER = PLUGIN / "includes" / "class-sc-library-citation-source-manager.php"
 RELIABILITY = PLUGIN / "includes" / "class-sc-library-citation-source-reliability.php"
 OCR = PLUGIN / "includes" / "class-sc-library-document-ocr-processing.php"
@@ -17,7 +18,7 @@ def read(path: Path) -> str:
 
 
 def test_required_files_exist():
-    for path in (WRAPPER, CONNECTORS, MANAGER, RELIABILITY, OCR, REPOSITORY, JS, CSS):
+    for path in (WRAPPER, CONNECTORS, CONNECTOR_RELIABILITY, MANAGER, RELIABILITY, OCR, REPOSITORY, JS, CSS):
         assert path.is_file(), path
 
 
@@ -118,7 +119,7 @@ def test_library_of_congress_digital_collection_connector():
 
 
 def test_open_library_identified_low_volume_book_connector():
-    text = read(CONNECTORS)
+    text = read(CONNECTORS) + read(CONNECTOR_RELIABILITY)
     for marker in (
         "https://openlibrary.org/search.json",
         "https://openlibrary.org/api/books",
@@ -215,7 +216,7 @@ def test_normalized_discovery_schema_and_result_fields():
 
 
 def test_provider_requests_are_https_allowlisted_and_bounded():
-    text = read(CONNECTORS)
+    text = read(CONNECTORS) + read(CONNECTOR_RELIABILITY)
     for marker in (
         "allowed_hosts",
         "connector_url_rejected",
@@ -229,7 +230,7 @@ def test_provider_requests_are_https_allowlisted_and_bounded():
 
 
 def test_cache_backoff_and_per_user_import_tokens():
-    text = read(CONNECTORS)
+    text = read(CONNECTORS) + read(CONNECTOR_RELIABILITY)
     for marker in (
         "CACHE_PREFIX",
         "set_transient",
@@ -394,8 +395,8 @@ def test_version_and_compatibility_boundaries():
     wrapper = read(WRAPPER)
     connectors = read(CONNECTORS)
     repository = read(REPOSITORY)
-    assert "public const VERSION = '2.6.0'" in connectors
-    assert "SC_LIBRARY_VERSION : '2.6.0'" in wrapper
+    assert "public const VERSION = '2.6.1'" in connectors
+    assert "SC_LIBRARY_VERSION : '2.6.1'" in wrapper
     assert "public const ROUTE_VERSION = '2.3.0'" in repository
     assert "public const VERSION = '2.5.1'" in read(RELIABILITY)
     assert "public const VERSION = '2.4.1'" in read(OCR)

@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 2.6.0
+Stable tag: 2.6.1
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,20 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 2.6.1 =
+* Adds persistent provider health states, latency, failure counters, cooldowns, rate-limit headers, and bounded event history.
+* Adds bounded retries with jitter, Retry-After handling, circuit breaking, and half-open recovery.
+* Adds ETag and Last-Modified conditional requests with retained JSON-body recovery.
+* Adds explicit stale-cache fallback when live provider access is unavailable.
+* Adds import idempotency keys and provider/import fingerprint reuse.
+* Adds metadata conflict records and editor resolutions for structured fields, title, and abstract.
+* Adds holdings freshness timestamps, stale detection, manual rechecks, and bounded hourly maintenance.
+* Adds Library Profile HTTPS, host, IP, and catalog-token validation.
+* Prevents invalid library profiles from appearing on public Source pages.
+* Adds connector health, holdings, conflict, and profile-validation REST endpoints.
+* Preserves v2.6.0 connectors, v2.5.x citation systems, v2.4.x OCR systems, v2.3.x document routes, and v2.2.x conversion/import systems.
+
 
 = 2.6.0 =
 * Adds federated scholarly and library discovery connectors for Crossref, OpenAlex, DataCite, PubMed, PubMed Central, Library of Congress, Open Library, and Google Books.

@@ -153,10 +153,17 @@
         String(payload.result_count || 0) +
           ' result' +
           ((payload.result_count || 0) === 1 ? '' : 's') +
-          (payload.cached ? ' · cached' : '')
+          (payload.cache_state === 'stale' ? ' · retained stale cache' : (payload.cached ? ' · cached' : ''))
       )
     );
     section.appendChild(heading);
+
+    if (payload.recovery_notice) {
+      section.appendChild(make('p', 'sc-connector-recovery-notice', payload.recovery_notice));
+    }
+    if (payload.live_error) {
+      section.appendChild(make('p', 'sc-connector-live-error', payload.live_error));
+    }
 
     if (!payload.results || !payload.results.length) {
       section.appendChild(make('p', 'sc-connector-empty', strings.none || 'No matching records were returned.'));
@@ -265,12 +272,23 @@
         status.textContent = strings.importing || 'Importing source…';
       }
 
+      if (!button.dataset.scIdempotencyKey) {
+        button.dataset.scIdempotencyKey =
+          (window.crypto && typeof window.crypto.randomUUID === 'function')
+            ? window.crypto.randomUUID()
+            : 'import-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      }
+
       request('sc_library_v260_import_result', {
         token: button.dataset.scImportToken,
-        mode: 'fill_empty'
+        mode: 'fill_empty',
+        idempotency_key: button.dataset.scIdempotencyKey
       }).then(function (payload) {
         if (status) {
-          status.textContent = payload.message || strings.imported || 'Source imported.';
+          status.textContent =
+            (payload.idempotent_replay ? 'Recovered previous import result. ' : '') +
+            (payload.message || strings.imported || 'Source imported.') +
+            (payload.open_conflict_count ? ' ' + payload.open_conflict_count + ' metadata conflict(s) need review.' : '');
         }
         button.textContent = 'Imported';
         if (payload.edit_url) {
