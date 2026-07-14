@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 2.6.1
+Stable tag: 2.7.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,22 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 2.7.0 =
+* Adds private Evidence Note and Research Claim record types with revisions and structured taxonomies.
+* Adds direct quotation, paraphrase, data point, definition, method, observation, counterevidence, and context evidence types.
+* Adds page, page-range, paragraph, section, chapter, figure, table, timecode, dataset-row, and custom locators.
+* Adds exact-wording, transcription, and locator verification with content-hash invalidation and explicit re-verification.
+* Adds Supports, Contradicts, Qualifies, Contextualizes, Illustrates, and Unresolved claim-evidence relationships with strength and rationale.
+* Adds synchronized Claim evidence indexes and deletion-safe relationship cleanup.
+* Adds claim scope, assumptions, limitations, counterclaims, confidence, review status, and verification invalidation.
+* Adds Research Source and Research Project evidence summary panels.
+* Adds public Source-page Evidence Notes with strict publication and visibility boundaries.
+* Adds citation-ready Harvard quotation, Evidence Note, Claim packet, and Project packet exports.
+* Adds Evidence Note, Claim, Project packet, relationship, and export REST endpoints.
+* Adds responsive, print-aware Evidence and Claims workspace, cards, packet views, copy controls, and Media Library attachments.
+* Preserves v2.6.1 connector/holdings reliability, v2.6.0 discovery, v2.5.x citations, v2.4.x OCR, v2.3.x repository routes, and v2.2.x PDF systems.
+
 
 = 2.6.1 =
 * Adds persistent provider health states, latency, failure counters, cooldowns, rate-limit headers, and bounded event history.

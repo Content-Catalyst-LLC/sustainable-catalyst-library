@@ -326,7 +326,7 @@ def test_version_and_existing_route_compatibility():
     citations = read(CITATIONS)
     repository = read(REPOSITORY)
     assert "public const VERSION = '2.5.1'" in citations
-    assert "SC_LIBRARY_VERSION : '2.6.1'" in wrapper
+    assert "SC_LIBRARY_VERSION : '2.7.0'" in wrapper
     assert "public const ROUTE_VERSION = '2.3.0'" in repository
     assert "public const VERSION = '2.4.1'" in read(OCR)
     assert "public const VERSION = '2.4.1'" in read(OCR_RELIABILITY)
