@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 2.5.1
+Stable tag: 2.6.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,20 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 2.6.0 =
+* Adds federated scholarly and library discovery connectors for Crossref, OpenAlex, DataCite, PubMed, PubMed Central, Library of Congress, Open Library, and Google Books.
+* Adds Unpaywall and OpenAlex DOI-based open-access location checks.
+* Adds compliant Google Scholar and WorldCat browser-search handoffs without automated scraping.
+* Adds private Library Profile records with catalog templates, OpenURL resolvers, proxy prefixes, and interlibrary-loan links.
+* Adds the Source Discovery workspace with independent provider searches, normalized result cards, provider diagnostics, library management, and import history.
+* Adds short-lived user-bound import tokens, field-level provenance, non-destructive fill-empty imports, explicit overwrite mode, and Draft Source creation.
+* Adds provider caching, user-specific token re-sealing, HTTPS host allowlisting, response limits, timeouts, request limits, and provider backoff.
+* Adds Source material location records with provider, access type, status, license/version context, and checked timestamps.
+* Adds public Source-page discovery and published-library handoffs.
+* Adds REST endpoints for connector discovery, provider search, source import, source location, and library profiles.
+* Preserves v2.5.1 citation reliability, v2.5.0 source management, v2.4.x OCR systems, v2.3.x document routes, and v2.2.x conversion/import systems.
+
 
 = 2.5.1 =
 * Improves personal-name parsing, institutional-author abbreviations, ORCID validation, locators, page labels, editions, and book-chapter formatting.

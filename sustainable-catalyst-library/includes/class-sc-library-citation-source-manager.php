@@ -2082,6 +2082,10 @@ final class SC_Library_Citation_Source_Manager {
                     <p class="sc-source-citation-panel__key"><?php esc_html_e( 'Citation key:', 'sustainable-catalyst-library' ); ?> <code><?php echo esc_html( $data['citation_key'] ); ?></code></p>
                 </section>
 
+                <?php if ( class_exists( 'SC_Library_Scholarly_Library_Connectors' ) ) : ?>
+                    <?php echo SC_Library_Scholarly_Library_Connectors::render_public_handoffs( $source_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                <?php endif; ?>
+
                 <div class="sc-source-record__layout">
                     <div class="sc-source-record__main">
                         <?php if ( $data['abstract'] ) : ?>
