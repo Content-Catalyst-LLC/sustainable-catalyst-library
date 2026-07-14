@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Connected_Research_Environment {
-    public const VERSION = '3.0.0';
+    public const VERSION = '3.0.1';
     public const API_NAMESPACE = 'sc-library/v1';
 
     public const WORKSPACE_SCHEMA = 'sc-library-connected-project/1.0';
@@ -215,7 +215,7 @@ final class SC_Library_Connected_Research_Environment {
             array(
                 'post_type'      => SC_Library_Citation_Source_Manager::SOURCE_POST_TYPE,
                 'post_status'    => array( 'publish', 'draft', 'pending', 'private' ),
-                'posts_per_page' => 500,
+                'posts_per_page' => 200,
                 'orderby'        => 'title',
                 'order'          => 'ASC',
             )
@@ -295,7 +295,7 @@ final class SC_Library_Connected_Research_Environment {
             array(
                 'post_type'      => SC_Library_Foundation_Pages::POST_TYPE,
                 'post_status'    => array( 'publish', 'draft', 'pending', 'private' ),
-                'posts_per_page' => 500,
+                'posts_per_page' => 200,
                 'orderby'        => 'title',
                 'order'          => 'ASC',
             )
@@ -442,6 +442,7 @@ final class SC_Library_Connected_Research_Environment {
                 'team'         => count( $team ),
             )
         );
+        do_action( 'sc_library_connected_research_saved', $post_id );
         self::$saving = false;
     }
 
@@ -1093,6 +1094,9 @@ final class SC_Library_Connected_Research_Environment {
         if ( ! $data ) {
             return '';
         }
+        if ( $include_private ) {
+            nocache_headers();
+        }
         wp_enqueue_style( 'sc-library-connected-research' );
         wp_enqueue_script( 'sc-library-connected-research' );
         $bibliography = self::bibliography( $project_id, $include_private );
@@ -1115,6 +1119,9 @@ final class SC_Library_Connected_Research_Environment {
         $bibliography = self::bibliography( $project_id, $include_private );
         if ( ! $bibliography ) {
             return '';
+        }
+        if ( $include_private ) {
+            nocache_headers();
         }
         wp_enqueue_style( 'sc-library-connected-research' );
         wp_enqueue_script( 'sc-library-connected-research' );
@@ -1287,31 +1294,12 @@ final class SC_Library_Connected_Research_Environment {
     }
 
     public function maybe_migrate_projects() {
-        $projects = get_posts(
-            array(
-                'post_type'      => SC_Library_Citation_Source_Manager::PROJECT_POST_TYPE,
-                'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
-                'posts_per_page' => 25,
-                'fields'         => 'ids',
-                'meta_query'     => array(
-                    array(
-                        'key'     => self::META_SOURCE_ENTRIES,
-                        'compare' => 'NOT EXISTS',
-                    ),
-                ),
-            )
-        );
-        foreach ( $projects as $project_id ) {
-            $entries = self::source_entries( $project_id, true );
-            if ( $entries ) {
-                update_post_meta( $project_id, self::META_SOURCE_ENTRIES, $entries );
-            }
-            if ( ! get_post_meta( $project_id, self::META_SECTIONS, true ) ) {
-                update_post_meta( $project_id, self::META_SECTIONS, self::default_sections() );
-            }
-            update_post_meta( $project_id, self::META_HEALTH, self::workspace_health( $project_id, true ) );
+        if ( class_exists( 'SC_Library_Connected_Research_Reliability' ) ) {
+            SC_Library_Connected_Research_Reliability::maybe_schedule_migration();
+            return;
         }
     }
+
 
     private static function sanitize_source_entries( $raw, $sections, $old_entries = array() ) {
         $old_by_source = array();

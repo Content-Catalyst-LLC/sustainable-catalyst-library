@@ -1,0 +1,23 @@
+# Production Checklist — Knowledge Library v3.0.1
+
+- Plugin reports 3.0.1.
+- Production Validation page loads.
+- Migration resumes after an interrupted batch.
+- Migration lock prevents concurrent batches.
+- Existing projects retain Sources and bibliography sections.
+- Project and Source reverse indexes match.
+- Invalid document and team references are reported.
+- Snapshot hashes validate after repair.
+- Large-library Source lookup attaches a Candidate Source.
+- Large-library document lookup attaches a document.
+- Project save queues validation.
+- Source save queues linked projects.
+- Private shortcodes are not cached publicly.
+- Private REST responses return no-store headers.
+- Markdown export validates.
+- HTML export validates.
+- BibTeX export validates and imports downstream.
+- RIS export validates and imports downstream.
+- CSL JSON validates and imports downstream.
+- Connected JSON validates.
+- Retained v2.2.0–v3.0.0 systems remain operational.

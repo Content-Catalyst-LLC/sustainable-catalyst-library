@@ -1,0 +1,178 @@
+/*
+ * Sustainable Catalyst Knowledge Library v3.0.1
+ * Production Validation and Migration Reliability
+ */
+
+.sc-v301-validation-page,
+.sc-v301-project-reliability,
+.sc-v301-record-lookup {
+  --sc-v301-maroon: #741823;
+  --sc-v301-green: #176b42;
+  --sc-v301-amber: #956000;
+  --sc-v301-red: #a52a2a;
+  --sc-v301-line: #d2cec7;
+  --sc-v301-paper: #fffdf8;
+  --sc-v301-soft: #f4f1ea;
+  --sc-v301-ink: #202124;
+}
+
+.sc-v301-project-reliability {
+  display: grid;
+  gap: 9px;
+}
+
+.sc-v301-project-reliability dl {
+  margin: 0;
+}
+
+.sc-v301-project-reliability dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid #dcdcde;
+}
+
+.sc-v301-project-reliability dd {
+  margin: 0;
+  font-weight: 800;
+}
+
+.sc-v301-status {
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.sc-v301-status--valid,
+.sc-v301-status--repaired {
+  color: var(--sc-v301-green);
+}
+
+.sc-v301-status--warning {
+  color: var(--sc-v301-amber);
+}
+
+.sc-v301-status--failed {
+  color: var(--sc-v301-red);
+}
+
+.sc-v301-button-stack {
+  display: grid;
+  gap: 7px;
+}
+
+.sc-v301-record-lookup {
+  display: grid;
+  gap: 13px;
+}
+
+.sc-v301-lookup-controls {
+  display: grid;
+  grid-template-columns: 190px minmax(260px, 1fr) auto;
+  gap: 9px;
+  align-items: end;
+}
+
+.sc-v301-lookup-controls label {
+  display: grid;
+  gap: 5px;
+}
+
+.sc-v301-lookup-controls input,
+.sc-v301-lookup-controls select {
+  width: 100%;
+  max-width: none;
+  min-height: 40px;
+  border-radius: 0;
+}
+
+.sc-v301-search-results {
+  display: grid;
+  gap: 8px;
+}
+
+.sc-v301-search-results article {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 11px;
+  border: 1px solid var(--sc-v301-line);
+  border-left: 4px solid var(--sc-v301-maroon);
+  background: #fff;
+}
+
+.sc-v301-search-results article > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.sc-v301-search-results span {
+  color: #646970;
+  font-size: .84rem;
+  text-transform: capitalize;
+}
+
+.sc-v301-validation-page {
+  max-width: 1450px;
+}
+
+.sc-v301-migration-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 18px;
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid #c3c4c7;
+  border-top: 5px solid var(--sc-v301-maroon);
+  background: #fff;
+}
+
+.sc-v301-migration-card h2 {
+  margin-top: 0;
+}
+
+.sc-v301-validation-page table td,
+.sc-v301-validation-page table th {
+  vertical-align: middle;
+}
+
+[data-sc-v301-project-status],
+[data-sc-v301-migration-message],
+[data-sc-v301-record-results] {
+  min-height: 20px;
+}
+
+.is-working {
+  color: #646970;
+}
+
+.is-success {
+  color: var(--sc-v301-green);
+  font-weight: 700;
+}
+
+.is-error {
+  color: var(--sc-v301-red);
+  font-weight: 700;
+}
+
+@media (max-width: 860px) {
+  .sc-v301-lookup-controls,
+  .sc-v301-migration-card {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-v301-search-results article {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media print {
+  .sc-v301-button-stack,
+  .sc-v301-lookup-controls button,
+  .sc-v301-search-results button {
+    display: none !important;
+  }
+}

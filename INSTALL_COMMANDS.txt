@@ -1,0 +1,14 @@
+Knowledge Library v3.0.1 — Production Validation and Migration Reliability Patch
+
+cd ~/Downloads
+rm -rf sustainable-catalyst-library-v3.0.1-upgrade
+unzip -q sustainable-catalyst-library-v3.0.1-upgrade.zip
+cd sustainable-catalyst-library-v3.0.1-upgrade
+chmod +x install_and_push_library_v3_0_1.sh
+./install_and_push_library_v3_0_1.sh
+
+Upload after completion:
+~/Downloads/sustainable-catalyst-library-v3.0.1.zip
+
+Choose:
+Replace current with uploaded

@@ -1,0 +1,41 @@
+Sustainable Catalyst Knowledge Library v3.0.1 validation
+
+Passed:
+- PHP syntax: 22 plugin PHP files
+- JavaScript syntax: all plugin JavaScript files
+- Shell syntax: macOS-compatible installer
+- Repository helper upgrade from v3.0.0 to v3.0.1
+- OCR and Scanned Document Processing retention checks: 13
+- OCR Reliability and Review Recovery retention checks: 19
+- Citation and Research Source Manager retention checks: 20
+- Harvard formatter behavior checks: 5
+- Citation Formatting and Source Reliability retention checks: 20
+- Citation formatting reliability behavior checks: 20
+- Scholarly and Library Database Connector retention checks: 28
+- Connector fixture behavior checks: 17
+- Connector and Holdings Reliability retention checks: 30
+- Connector reliability fixture checks: 24
+- Quotations, Evidence Notes, and Claim Linking retention checks: 26
+- Evidence and Claim fixture checks: 27
+- Connected Research Project and Bibliography Environment retention checks: 30
+- Connected research environment fixture checks: 29
+- Production Validation and Migration Reliability architecture checks: 24
+- Production validation behavior fixture checks: 20
+- Resumable migration cursor, bounded batches, lock, cron continuation, manual reset, and failure state
+- Project Source entry, retained Source ID, and reverse Source relationship reconciliation
+- Section, document, team, snapshot, activity, sort, and workspace-health repair
+- Snapshot UUID recovery and SHA-256 rehashing
+- Post-save bounded repair queue
+- Large-library Source and document lookup
+- Private shortcode no-cache behavior
+- Private and authenticated project REST no-store headers
+- Markdown, text, HTML, BibTeX, RIS, CSL JSON, and connected JSON structural validation
+- Production Validation dashboard, AJAX controls, REST routes, and WP-CLI commands
+- Existing citation, connector, holdings, OCR, document, evidence, claim, and connected-project systems retained
+
+Runtime boundaries:
+- The package was not executed inside a live WordPress installation.
+- Real WordPress cron, database locks, migration cursor behavior, admin AJAX, REST headers, team permissions, and page caching require live validation.
+- Export validators are structural checks; BibTeX, RIS, and CSL JSON should be imported into intended downstream tools.
+- Repair reconciles valid relationships and removes missing references but does not assess scholarly quality.
+- Large installations should validate query performance and may later move project relationships from postmeta to dedicated tables.

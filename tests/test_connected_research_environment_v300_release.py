@@ -36,7 +36,7 @@ def test_environment_loads_after_retained_layers():
 def test_version_and_schemas():
     text = read(ENVIRONMENT)
     for marker in (
-        "public const VERSION = '3.0.0'",
+        "public const VERSION = '3.0.1'",
         "sc-library-connected-project/1.0",
         "sc-library-project-source-entry/1.0",
         "sc-library-project-bibliography/1.0",
@@ -44,7 +44,7 @@ def test_version_and_schemas():
         "sc-library-project-export/1.0",
     ):
         assert marker in text, marker
-    assert "SC_LIBRARY_VERSION : '3.0.0'" in read(WRAPPER)
+    assert "SC_LIBRARY_VERSION : '3.0.1'" in read(WRAPPER)
 
 
 def test_project_brief_fields():
