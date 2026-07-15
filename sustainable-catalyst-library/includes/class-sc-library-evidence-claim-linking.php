@@ -1324,7 +1324,7 @@ final class SC_Library_Evidence_Claim_Linking {
             $project_ids = array_values( array_filter( $project_ids, array( __CLASS__, 'project_is_public' ) ) );
         }
 
-        return array(
+        $data = array(
             'schema'           => self::CLAIM_SCHEMA,
             'id'               => $claim_id,
             'title'            => get_the_title( $claim_id ),
@@ -1346,6 +1346,8 @@ final class SC_Library_Evidence_Claim_Linking {
             'modified_gmt'     => get_post_modified_time( 'c', true, $claim_id ),
             'public'           => self::claim_is_public( $claim_id ),
         );
+
+        return apply_filters( 'sc_library_claim_data', $data, $claim_id, $include_private );
     }
 
     public static function claim_packet( $claim_id, $include_private = false ) {
@@ -2096,6 +2098,9 @@ final class SC_Library_Evidence_Claim_Linking {
                     <span><?php echo esc_html( sprintf( __( '%d evidence links', 'sustainable-catalyst-library' ), $packet['link_count'] ) ); ?></span>
                 </div>
             </header>
+            <?php if ( class_exists( 'SC_Library_Topics_Concepts_Relationships' ) ) : ?>
+                <?php echo SC_Library_Topics_Concepts_Relationships::render_public_node_panel( 'claim', $claim['id'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <?php endif; ?>
             <?php foreach ( self::relation_options() as $relation => $label ) : ?>
                 <?php
                 $items = array_values(

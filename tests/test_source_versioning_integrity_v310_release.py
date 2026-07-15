@@ -43,7 +43,7 @@ def test_version_and_schemas():
         "sc-library-project-source-integrity/1.0",
     ):
         assert marker in text, marker
-    assert "SC_LIBRARY_VERSION : '3.1.0'" in read(WRAPPER)
+    assert "SC_LIBRARY_VERSION : '3.2.0'" in read(WRAPPER)
 
 
 def test_integrity_statuses():

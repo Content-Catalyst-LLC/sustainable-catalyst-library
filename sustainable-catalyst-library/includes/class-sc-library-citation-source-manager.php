@@ -2094,6 +2094,10 @@ final class SC_Library_Citation_Source_Manager {
                     <?php echo SC_Library_Evidence_Claim_Linking::render_public_source_evidence( $source_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                 <?php endif; ?>
 
+                <?php if ( class_exists( 'SC_Library_Topics_Concepts_Relationships' ) ) : ?>
+                    <?php echo SC_Library_Topics_Concepts_Relationships::render_public_node_panel( 'source', $source_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                <?php endif; ?>
+
                 <div class="sc-source-record__layout">
                     <div class="sc-source-record__main">
                         <?php if ( $data['abstract'] ) : ?>

@@ -245,6 +245,7 @@ function get_posts( $args = array() ) {
 }
 function add_action() {}
 function add_filter() {}
+function apply_filters( $hook, $value ) { return $value; }
 function add_shortcode() {}
 function register_post_type() {}
 function register_taxonomy() {}

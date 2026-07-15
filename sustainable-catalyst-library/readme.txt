@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 3.1.0
+Stable tag: 3.2.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,22 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 3.2.0 =
+* Adds a canonical hierarchical Knowledge Topic taxonomy across documents, Sources, Projects, Claims, Evidence Notes, Concepts, and Named Entities.
+* Adds public Concept, Named Entity, and Controlled Vocabulary records.
+* Adds typed, weighted, audited relationships among nine Knowledge Library node types.
+* Adds document sequence, continuation, translation, summary, companion, containment, and methodology relationships.
+* Adds semantic editors for Topics, Concepts, Entities, and outgoing cross-record relationships.
+* Adds public semantic panels and Concept, Entity, and vocabulary templates.
+* Adds administrative and public Knowledge Relationship Browsers.
+* Adds library and project Topic, Concept, and knowledge-gap analysis.
+* Adds bounded public coverage caching with automatic invalidation.
+* Adds one-time rewrite activation for the new public record types.
+* Adds resumable, non-destructive migration of Source Topics and Foundation Document tags.
+* Adds Knowledge Graph REST routes, shortcodes, and WP-CLI commands.
+* Preserves all v3.1.0 and earlier Knowledge Library systems.
+
 
 = 3.1.0 =
 * Adds Source version labels, version numbers, release dates, and version families.
