@@ -2101,6 +2101,9 @@ final class SC_Library_Evidence_Claim_Linking {
             <?php if ( class_exists( 'SC_Library_Topics_Concepts_Relationships' ) ) : ?>
                 <?php echo SC_Library_Topics_Concepts_Relationships::render_public_node_panel( 'claim', $claim['id'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
             <?php endif; ?>
+            <?php if ( class_exists( 'SC_Library_Knowledge_Pathways_Article_Maps' ) ) : ?>
+                <?php echo SC_Library_Knowledge_Pathways_Article_Maps::render_node_pathways( 'claim', $claim['id'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <?php endif; ?>
             <?php foreach ( self::relation_options() as $relation => $label ) : ?>
                 <?php
                 $items = array_values(

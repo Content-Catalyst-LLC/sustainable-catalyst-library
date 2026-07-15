@@ -890,6 +890,10 @@ final class SC_Library_Foundation_Pages {
                 <?php echo SC_Library_Topics_Concepts_Relationships::render_public_node_panel( 'document', $post_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
             <?php endif; ?>
 
+            <?php if ( class_exists( 'SC_Library_Knowledge_Pathways_Article_Maps' ) ) : ?>
+                <?php echo SC_Library_Knowledge_Pathways_Article_Maps::render_node_pathways( 'document', $post_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <?php endif; ?>
+
             <p class="cc-back-to-top"><a href="<?php echo esc_url( $foundations ); ?>"><?php esc_html_e( 'Back to Foundations', 'sustainable-catalyst-library' ); ?> ↑</a></p>
         </article>
         <?php
@@ -992,11 +996,11 @@ final class SC_Library_Foundation_Pages {
     }
 
     private function version() {
-        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '3.2.0';
+        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '3.3.0';
     }
 }
 
-// Knowledge Library v3.2.0: retain citation/source records and add formatting, history, duplicate, and API reliability safeguards.
+// Knowledge Library v3.3.0: retain citation/source records and add formatting, history, duplicate, and API reliability safeguards.
 require_once __DIR__ . '/class-sc-library-pdf-to-document.php';
 require_once __DIR__ . '/class-sc-library-pdf-conversion-reliability.php';
 require_once __DIR__ . '/class-sc-library-pdf-bulk-import-repair.php';
@@ -1013,6 +1017,7 @@ require_once __DIR__ . '/class-sc-library-connected-research-environment.php';
 require_once __DIR__ . '/class-sc-library-connected-research-reliability.php';
 require_once __DIR__ . '/class-sc-library-source-versioning-integrity.php';
 require_once __DIR__ . '/class-sc-library-topics-concepts-relationships.php';
+require_once __DIR__ . '/class-sc-library-knowledge-pathways-article-maps.php';
 new SC_Library_PDF_To_Document();
 new SC_Library_PDF_Conversion_Reliability();
 new SC_Library_PDF_Bulk_Import_Repair();
@@ -1029,3 +1034,4 @@ new SC_Library_Connected_Research_Environment();
 new SC_Library_Connected_Research_Reliability();
 new SC_Library_Source_Versioning_Integrity();
 new SC_Library_Topics_Concepts_Relationships();
+new SC_Library_Knowledge_Pathways_Article_Maps();
