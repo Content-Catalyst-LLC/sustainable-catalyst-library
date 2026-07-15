@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 3.6.0
+Stable tag: 3.7.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,22 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 3.7.0 =
+* Adds Research Librarian Document Intelligence.
+* Adds deterministic document profiles with source hashes, status, page count, section count, chunk count, summaries, key points, questions, terms, aliases, gaps, and citation signals.
+* Adds HTML-heading and flattened-text section indexing with bounded fallback behavior.
+* Adds 220-word retrieval chunks with 40-word overlap, section relationships, and SHA-256 hashes.
+* Adds exact-title, title-prefix, title-contains, alias, term-overlap, and summary-overlap retrieval ranking.
+* Adds deterministic summaries, key points, suggested research questions, recurring terms, and trusted provider-adapter extension boundaries.
+* Adds DOI, URL, numeric-citation, author-year, reference-heading, claim-like sentence, and possible citation-gap signals.
+* Adds methods, limitations, structure, citation, Topic, Concept, and truncation gap notices.
+* Adds two-to-five-document comparison with shared terms, distinctive terms, shared section labels, and pairwise term similarity.
+* Adds Research Librarian document and project context handoff filters.
+* Adds public document-intelligence, key-point, research-question, and comparison shortcodes.
+* Adds selected-document reindex jobs, stale-document tracking, resumable migration, REST routes, AJAX actions, and WP-CLI commands.
+* Preserves all v3.6.0 and earlier Knowledge Library systems.
+
 
 = 3.6.0 =
 * Adds Institutional Collection, Archive Component, Accession, and Disposition records.
