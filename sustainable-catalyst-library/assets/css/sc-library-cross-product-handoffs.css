@@ -1,0 +1,290 @@
+/*
+ * Sustainable Catalyst Knowledge Library v3.4.0
+ * Cross-Product Research Workspace Handoffs
+ */
+
+.sc-handoff-workspace,
+.sc-handoff-project-panel,
+.sc-public-handoff-workspace,
+.sc-platform-project-identity {
+  --sc-handoff-maroon: #741823;
+  --sc-handoff-maroon-dark: #511019;
+  --sc-handoff-green: #176b42;
+  --sc-handoff-amber: #956000;
+  --sc-handoff-red: #a52a2a;
+  --sc-handoff-blue: #245b8a;
+  --sc-handoff-ink: #202124;
+  --sc-handoff-muted: #646970;
+  --sc-handoff-line: #d2cec7;
+  --sc-handoff-paper: #fffdf8;
+  --sc-handoff-soft: #f4f1ea;
+}
+
+.sc-handoff-project-panel,
+.sc-handoff-workspace {
+  display: grid;
+  gap: 22px;
+}
+
+.sc-handoff-identity-card,
+.sc-handoff-migration {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid var(--sc-handoff-line);
+  border-left: 6px solid var(--sc-handoff-maroon);
+  background: var(--sc-handoff-paper);
+}
+
+.sc-handoff-identity-card h3,
+.sc-handoff-migration h2 {
+  margin: 0 0 8px;
+}
+
+.sc-handoff-identity-card h3 {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: .95rem;
+}
+
+.sc-handoff-creator {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--sc-handoff-line);
+  background: #fff;
+}
+
+.sc-handoff-creator > label,
+.sc-handoff-field-grid label,
+.sc-handoff-products-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.sc-handoff-field-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.sc-handoff-field-grid input,
+.sc-handoff-field-grid select,
+.sc-handoff-creator textarea,
+.sc-handoff-products-form input,
+.sc-handoff-products-form select,
+.sc-handoff-table select,
+.sc-handoff-delivery-card input {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+.sc-handoff-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px 14px;
+  padding: 12px;
+  border: 1px solid var(--sc-handoff-line);
+  background: var(--sc-handoff-soft);
+}
+
+.sc-handoff-sections legend {
+  padding: 0 6px;
+  font-weight: 800;
+}
+
+.sc-handoff-delivery-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--sc-handoff-green);
+  background: #f5fff9;
+}
+
+.sc-handoff-delivery-card strong,
+.sc-handoff-delivery-card small {
+  grid-column: 1 / -1;
+}
+
+.sc-handoff-table-wrap {
+  overflow-x: auto;
+}
+
+.sc-handoff-table td,
+.sc-handoff-table th {
+  vertical-align: middle;
+}
+
+.sc-handoff-table td:first-child {
+  min-width: 260px;
+}
+
+.sc-handoff-table small {
+  display: block;
+  margin-top: 4px;
+  color: var(--sc-handoff-muted);
+}
+
+.sc-handoff-table td:nth-child(3) {
+  min-width: 210px;
+}
+
+.sc-handoff-table td:nth-child(3) select {
+  margin-bottom: 5px;
+}
+
+.sc-handoff-actions {
+  min-width: 250px;
+}
+
+.sc-handoff-inline-delivery {
+  min-width: 340px;
+}
+
+.sc-handoff-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 11px;
+}
+
+.sc-handoff-metrics article {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border: 1px solid #c3c4c7;
+  border-top: 4px solid var(--sc-handoff-maroon);
+  background: #fff;
+}
+
+.sc-handoff-metrics strong {
+  font-size: 1.55rem;
+}
+
+.sc-handoff-products {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.sc-handoff-products article {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--sc-handoff-line);
+  border-top: 4px solid var(--sc-handoff-maroon);
+  background: #fff;
+}
+
+.sc-handoff-products h3 {
+  margin: 0;
+}
+
+.sc-handoff-products code {
+  overflow-wrap: anywhere;
+}
+
+.sc-platform-project-identity,
+.sc-public-handoff-workspace {
+  box-sizing: border-box;
+  width: min(1180px, calc(100% - 32px));
+  margin: 24px auto;
+  padding: clamp(20px, 4vw, 34px);
+  border: 1px solid var(--sc-handoff-line);
+  border-top: 6px solid var(--sc-handoff-maroon);
+  background: #fff;
+  color: var(--sc-handoff-ink);
+}
+
+.sc-platform-project-identity dl {
+  margin: 0;
+}
+
+.sc-platform-project-identity dl > div {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--sc-handoff-line);
+}
+
+.sc-platform-project-identity dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+[data-sc-handoff-message],
+[data-sc-handoff-migration-message] {
+  min-height: 20px;
+}
+
+.is-working {
+  color: var(--sc-handoff-muted);
+}
+
+.is-success {
+  color: var(--sc-handoff-green);
+  font-weight: 750;
+}
+
+.is-error {
+  color: var(--sc-handoff-red);
+  font-weight: 750;
+}
+
+.sc-handoff-project-panel button:focus-visible,
+.sc-handoff-workspace button:focus-visible,
+.sc-handoff-workspace a:focus-visible,
+.sc-public-handoff-workspace a:focus-visible {
+  outline: 3px solid #2166d1;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1100px) {
+  .sc-handoff-field-grid,
+  .sc-handoff-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .sc-handoff-field-grid,
+  .sc-handoff-products,
+  .sc-handoff-metrics,
+  .sc-handoff-identity-card,
+  .sc-handoff-migration,
+  .sc-handoff-delivery-card,
+  .sc-platform-project-identity dl > div {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-handoff-delivery-card strong,
+  .sc-handoff-delivery-card small {
+    grid-column: auto;
+  }
+
+  .sc-handoff-sections {
+    display: grid;
+  }
+}
+
+@media print {
+  .sc-handoff-project-panel button,
+  .sc-handoff-workspace button,
+  .sc-handoff-actions {
+    display: none !important;
+  }
+
+  .sc-platform-project-identity,
+  .sc-public-handoff-workspace {
+    width: 100%;
+    margin: 0;
+  }
+}

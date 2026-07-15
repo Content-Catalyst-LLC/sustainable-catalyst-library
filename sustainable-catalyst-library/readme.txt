@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 3.3.0
+Stable tag: 3.4.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,19 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 3.4.0 =
+* Adds stable UUID and URN identities for cross-product Research Projects.
+* Adds a first-party product registry for Research Lab, Workbench, Decision Studio, Research Librarian, and Site Intelligence.
+* Adds typed product-specific handoff contracts and adapter payloads.
+* Adds snapshot research bundles containing project, bibliography, evidence, semantic, pathway, integrity, and dataset context.
+* Adds expiring HMAC-protected delivery links with token rotation and no plaintext token storage.
+* Adds validated handoff statuses, return links, result URLs, and bounded history records.
+* Adds JSON, Markdown, and ZIP platform research bundle exports.
+* Adds project and administration workspaces, REST routes, shortcodes, extension hooks, and WP-CLI commands.
+* Adds resumable stable-identity migration for existing Research Projects.
+* Preserves all v3.3.0 and earlier Knowledge Library systems.
+
 
 = 3.3.0 =
 * Adds public Knowledge Pathway records and pathway types.
