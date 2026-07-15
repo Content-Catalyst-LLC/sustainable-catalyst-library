@@ -988,11 +988,11 @@ final class SC_Library_Foundation_Pages {
     }
 
     private function version() {
-        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '3.0.1';
+        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '3.1.0';
     }
 }
 
-// Knowledge Library v3.0.1: retain citation/source records and add formatting, history, duplicate, and API reliability safeguards.
+// Knowledge Library v3.1.0: retain citation/source records and add formatting, history, duplicate, and API reliability safeguards.
 require_once __DIR__ . '/class-sc-library-pdf-to-document.php';
 require_once __DIR__ . '/class-sc-library-pdf-conversion-reliability.php';
 require_once __DIR__ . '/class-sc-library-pdf-bulk-import-repair.php';
@@ -1007,6 +1007,7 @@ require_once __DIR__ . '/class-sc-library-connector-holdings-reliability.php';
 require_once __DIR__ . '/class-sc-library-evidence-claim-linking.php';
 require_once __DIR__ . '/class-sc-library-connected-research-environment.php';
 require_once __DIR__ . '/class-sc-library-connected-research-reliability.php';
+require_once __DIR__ . '/class-sc-library-source-versioning-integrity.php';
 new SC_Library_PDF_To_Document();
 new SC_Library_PDF_Conversion_Reliability();
 new SC_Library_PDF_Bulk_Import_Repair();
@@ -1021,3 +1022,4 @@ new SC_Library_Connector_Holdings_Reliability();
 new SC_Library_Evidence_Claim_Linking();
 new SC_Library_Connected_Research_Environment();
 new SC_Library_Connected_Research_Reliability();
+new SC_Library_Source_Versioning_Integrity();

@@ -1,0 +1,388 @@
+/*
+ * Sustainable Catalyst Knowledge Library v3.1.0
+ * Source Versioning, Supersession, and Research Integrity
+ */
+
+.sc-source-integrity-workspace,
+.sc-integrity-editor,
+.sc-integrity-impact-summary,
+.sc-project-integrity-review,
+.sc-public-integrity-notice,
+.sc-integrity-card,
+.sc-public-project-integrity,
+.sc-bibliography-integrity-warning {
+  --sc-integrity-maroon: #741823;
+  --sc-integrity-red: #a52a2a;
+  --sc-integrity-dark-red: #711616;
+  --sc-integrity-amber: #956000;
+  --sc-integrity-blue: #245b8a;
+  --sc-integrity-green: #176b42;
+  --sc-integrity-ink: #202124;
+  --sc-integrity-muted: #646970;
+  --sc-integrity-line: #d2cec7;
+  --sc-integrity-paper: #fffdf8;
+  --sc-integrity-soft: #f4f1ea;
+}
+
+.sc-integrity-editor {
+  display: grid;
+  gap: 17px;
+}
+
+.sc-integrity-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.sc-integrity-field-grid label,
+.sc-integrity-editor > label,
+.sc-integrity-relation-row label {
+  display: grid;
+  gap: 5px;
+}
+
+.sc-integrity-field-grid input,
+.sc-integrity-field-grid select,
+.sc-integrity-editor textarea,
+.sc-integrity-relation-row input,
+.sc-integrity-relation-row select,
+.sc-project-integrity-review input,
+.sc-project-integrity-review select {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+.sc-integrity-public-notice {
+  padding: 11px;
+  border: 1px solid var(--sc-integrity-line);
+  background: var(--sc-integrity-paper);
+}
+
+.sc-integrity-relation-rows {
+  display: grid;
+  gap: 9px;
+}
+
+.sc-integrity-relation-row {
+  display: grid;
+  grid-template-columns: 160px minmax(220px, 1.3fr) 145px minmax(220px, 1.2fr) 90px auto;
+  gap: 8px;
+  align-items: end;
+  padding: 12px;
+  border: 1px solid #dcdcde;
+  border-left: 4px solid var(--sc-integrity-maroon);
+  background: #fff;
+}
+
+.sc-integrity-relation-public {
+  align-self: center;
+}
+
+.sc-integrity-impact-summary {
+  display: grid;
+  gap: 9px;
+}
+
+.sc-integrity-impact-summary dl,
+.sc-integrity-card dl {
+  margin: 0;
+}
+
+.sc-integrity-impact-summary dl > div,
+.sc-integrity-card dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid #dcdcde;
+}
+
+.sc-integrity-impact-summary dd,
+.sc-integrity-card dd {
+  margin: 0;
+  font-weight: 800;
+}
+
+.sc-integrity-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 3px 8px;
+  border: 1px solid currentColor;
+  font-size: .75rem;
+  font-weight: 850;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.severity-none {
+  color: var(--sc-integrity-green);
+}
+
+.severity-info {
+  color: var(--sc-integrity-blue);
+}
+
+.severity-warning {
+  color: var(--sc-integrity-amber);
+}
+
+.severity-high {
+  color: var(--sc-integrity-red);
+}
+
+.severity-critical {
+  color: var(--sc-integrity-dark-red);
+}
+
+.sc-project-integrity-review {
+  display: grid;
+  gap: 14px;
+}
+
+.sc-project-integrity-review > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.sc-project-integrity-review h3 {
+  margin-top: 0;
+}
+
+.sc-project-integrity-counts {
+  display: flex;
+  gap: 7px;
+}
+
+.sc-project-integrity-counts span {
+  padding: 6px 9px;
+  border: 1px solid var(--sc-integrity-line);
+  background: #fff;
+  font-weight: 750;
+}
+
+.sc-project-integrity-table-wrap {
+  overflow-x: auto;
+}
+
+.sc-project-integrity-review td:first-child {
+  min-width: 280px;
+}
+
+.sc-project-integrity-review td small,
+.sc-integrity-alert-table td small {
+  display: block;
+  margin-top: 4px;
+  color: var(--sc-integrity-muted);
+}
+
+.sc-source-integrity-workspace {
+  max-width: 1450px;
+}
+
+.sc-integrity-workspace-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 11px;
+  margin: 20px 0;
+}
+
+.sc-integrity-workspace-metrics article {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border: 1px solid #c3c4c7;
+  border-top: 4px solid var(--sc-integrity-maroon);
+  background: #fff;
+}
+
+.sc-integrity-workspace-metrics strong {
+  font-size: 1.55rem;
+}
+
+.sc-integrity-scan-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 18px;
+  align-items: center;
+  margin: 18px 0 24px;
+  padding: 20px;
+  border: 1px solid #c3c4c7;
+  border-top: 5px solid var(--sc-integrity-maroon);
+  background: #fff;
+}
+
+.sc-integrity-alert-table td,
+.sc-integrity-alert-table th {
+  vertical-align: middle;
+}
+
+.sc-public-integrity-notice,
+.sc-integrity-card,
+.sc-public-project-integrity {
+  box-sizing: border-box;
+  width: min(1180px, calc(100% - 32px));
+  margin: 24px auto;
+  color: var(--sc-integrity-ink);
+}
+
+.sc-public-integrity-notice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, .4fr);
+  gap: 20px;
+  padding: clamp(20px, 4vw, 34px);
+  border: 1px solid var(--sc-integrity-line);
+  border-left: 7px solid var(--sc-integrity-amber);
+  background: var(--sc-integrity-paper);
+}
+
+.sc-public-integrity-notice.severity-high,
+.sc-public-integrity-notice.severity-critical {
+  border-left-color: var(--sc-integrity-red);
+}
+
+.sc-public-integrity-notice__actions {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.sc-public-integrity-notice__actions a,
+.sc-public-integrity-notice__actions span {
+  padding: 9px 11px;
+  border: 1px solid var(--sc-integrity-line);
+  background: #fff;
+}
+
+.sc-bibliography-integrity-warning {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+  padding: 8px 10px;
+  border-left: 4px solid var(--sc-integrity-amber);
+  background: var(--sc-integrity-soft);
+}
+
+.sc-bibliography-integrity-warning.severity-high,
+.sc-bibliography-integrity-warning.severity-critical {
+  border-left-color: var(--sc-integrity-red);
+}
+
+.sc-integrity-card {
+  padding: 22px;
+  border: 1px solid var(--sc-integrity-line);
+  border-top: 5px solid var(--sc-integrity-maroon);
+  background: #fff;
+}
+
+.sc-integrity-card > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sc-public-project-integrity > header {
+  padding: 22px;
+  border: 1px solid var(--sc-integrity-line);
+  border-top: 5px solid var(--sc-integrity-maroon);
+  background: var(--sc-integrity-paper);
+}
+
+.sc-public-project-integrity article {
+  padding: 18px;
+  border: 1px solid var(--sc-integrity-line);
+  border-top: 0;
+  border-left: 5px solid var(--sc-integrity-amber);
+  background: #fff;
+}
+
+.sc-public-project-integrity article.severity-critical,
+.sc-public-project-integrity article.severity-high {
+  border-left-color: var(--sc-integrity-red);
+}
+
+[data-sc-source-integrity-status],
+[data-sc-integrity-scan-status] {
+  min-height: 20px;
+}
+
+.is-working {
+  color: var(--sc-integrity-muted);
+}
+
+.is-success {
+  color: var(--sc-integrity-green);
+  font-weight: 750;
+}
+
+.is-error {
+  color: var(--sc-integrity-red);
+  font-weight: 750;
+}
+
+.sc-source-integrity-workspace a:focus-visible,
+.sc-integrity-editor button:focus-visible,
+.sc-public-integrity-notice a:focus-visible,
+.sc-bibliography-integrity-warning a:focus-visible {
+  outline: 3px solid #2166d1;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1100px) {
+  .sc-integrity-field-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sc-integrity-relation-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sc-integrity-relation-note {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .sc-integrity-field-grid,
+  .sc-integrity-relation-row,
+  .sc-integrity-workspace-metrics,
+  .sc-integrity-scan-panel,
+  .sc-public-integrity-notice {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-integrity-relation-note {
+    grid-column: auto;
+  }
+
+  .sc-project-integrity-review > header,
+  .sc-integrity-card > header {
+    flex-direction: column;
+  }
+
+  .sc-project-integrity-counts {
+    flex-wrap: wrap;
+  }
+}
+
+@media print {
+  .sc-integrity-editor button,
+  .sc-integrity-scan-panel button,
+  .sc-public-integrity-notice__actions a {
+    display: none !important;
+  }
+
+  .sc-public-integrity-notice,
+  .sc-integrity-card,
+  .sc-public-project-integrity {
+    width: 100%;
+    margin: 0;
+  }
+}
