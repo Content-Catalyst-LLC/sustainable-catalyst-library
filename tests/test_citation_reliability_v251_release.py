@@ -27,7 +27,7 @@ def test_required_files_and_load_order():
 def test_source_version_and_route_compatibility():
     assert "public const VERSION = '2.5.1'" in read(MANAGER)
     assert "public const VERSION = '2.5.1'" in read(RELIABILITY)
-    assert "SC_LIBRARY_VERSION : '3.5.0'" in read(WRAPPER)
+    assert "SC_LIBRARY_VERSION : '3.6.0'" in read(WRAPPER)
     assert "public const ROUTE_VERSION = '2.3.0'" in read(REPOSITORY)
     assert "public const VERSION = '2.4.1'" in read(OCR)
 

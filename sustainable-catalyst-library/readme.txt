@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 3.5.0
+Stable tag: 3.6.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,21 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 3.6.0 =
+* Adds Institutional Collection, Archive Component, Accession, and Disposition records.
+* Adds stable collection UUIDs, identifiers, institution, creator, date, extent, language, scope, arrangement, provenance, rights, restrictions, and citation fields.
+* Adds Collection, Fonds, Record Group, Series, Subseries, Box, Folder, Item, and Digital Object levels.
+* Adds Public, Reading Room, Restricted, Embargoed, and Confidential access controls.
+* Adds accession methods, processing states, donor and agreement records, and ordered custody histories.
+* Adds digital-object media metadata, byte counts, checksums, checksum algorithms, and preservation states.
+* Adds preservation audits, dashboard metrics, daily audit scheduling, and missing-checksum alerts.
+* Adds retention classes, review dates, legal holds, disposition actions, approvals, and audit histories.
+* Blocks transfer, deaccession, and destruction while a legal or administrative hold is active.
+* Adds public institutional collection pages, hierarchical finding aids, collection browser, and preservation summaries.
+* Adds resumable archive migration, REST routes, AJAX actions, shortcodes, and WP-CLI commands.
+* Preserves all v3.5.0 and earlier Knowledge Library systems.
+
 
 = 3.5.0 =
 * Adds the Research Quality and Governance Center.
