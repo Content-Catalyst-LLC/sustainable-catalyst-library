@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 3.4.0
+Stable tag: 3.5.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,22 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 3.5.0 =
+* Adds the Research Quality and Governance Center.
+* Adds Exploratory, Standard, High-Assurance, Public Release, and Institutional governance profiles.
+* Adds Draft, Internal Review, Quality Review, Conditional, Approved, Published, and Archived gates.
+* Adds process-readiness scoring across research design, Sources, evidence, provenance, semantics, Pathways, handoffs, and governance.
+* Adds blocking controls for critical issues and failed reviews.
+* Adds reusable Research Policy records with versions, owners, controls, dates, and public-transparency settings.
+* Adds structured quality reviews, findings, actions, due dates, outcomes, and histories.
+* Adds issues, severity, risk acceptance, governed exceptions, expiry dates, and approvers.
+* Adds approval histories and gate-transition audit records.
+* Adds public Research Transparency summaries with private-field filtering.
+* Adds quality-governance context to v3.4.0 cross-product handoff bundles.
+* Adds resumable governance migration, REST routes, shortcodes, AJAX actions, and WP-CLI commands.
+* Preserves all v3.4.0 and earlier Knowledge Library systems.
+
 
 = 3.4.0 =
 * Adds stable UUID and URN identities for cross-product Research Projects.

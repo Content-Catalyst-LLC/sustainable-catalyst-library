@@ -1,0 +1,429 @@
+/*
+ * Sustainable Catalyst Knowledge Library v3.5.0
+ * Research Quality and Governance Center
+ */
+
+.sc-governance-center,
+.sc-quality-editor,
+.sc-quality-readiness,
+.sc-quality-evaluation,
+.sc-public-governance,
+.sc-research-transparency,
+.sc-public-governance-dashboard,
+.sc-policy-editor {
+  --sc-quality-maroon: #741823;
+  --sc-quality-red: #9f1f2f;
+  --sc-quality-amber: #8a5d00;
+  --sc-quality-green: #176b42;
+  --sc-quality-blue: #245b8a;
+  --sc-quality-ink: #202124;
+  --sc-quality-muted: #646970;
+  --sc-quality-line: #d2cec7;
+  --sc-quality-paper: #fffdf8;
+  --sc-quality-soft: #f4f1ea;
+}
+
+.sc-quality-kicker {
+  margin: 0 0 6px;
+  color: var(--sc-quality-maroon);
+  font-size: .76rem;
+  font-weight: 850;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.sc-governance-center {
+  max-width: 1500px;
+}
+
+.sc-governance-metrics {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.sc-governance-metrics article {
+  display: grid;
+  gap: 4px;
+  min-height: 88px;
+  padding: 15px;
+  border: 1px solid #c3c4c7;
+  border-top: 4px solid var(--sc-quality-maroon);
+  background: #fff;
+}
+
+.sc-governance-metrics strong {
+  font-size: 1.55rem;
+}
+
+.sc-governance-migration {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 20px;
+  align-items: center;
+  margin: 22px 0;
+  padding: 20px;
+  border: 1px solid #c3c4c7;
+  border-top: 5px solid var(--sc-quality-maroon);
+  background: #fff;
+}
+
+.sc-governance-section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.sc-governance-table-wrap,
+.sc-quality-records {
+  overflow-x: auto;
+}
+
+.sc-governance-alert-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sc-governance-alert-grid article {
+  padding: 18px;
+  border: 1px solid #c3c4c7;
+  background: #fff;
+}
+
+.sc-quality-editor {
+  display: grid;
+  gap: 20px;
+}
+
+.sc-quality-editor__controls,
+.sc-policy-editor__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.sc-quality-editor__controls label,
+.sc-policy-editor label,
+.sc-quality-dialog label {
+  display: grid;
+  gap: 5px;
+}
+
+.sc-quality-editor__public,
+.sc-policy-editor__public {
+  align-content: center;
+  padding: 10px;
+  border: 1px solid var(--sc-quality-line);
+  background: var(--sc-quality-paper);
+}
+
+.sc-quality-policy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 8px;
+}
+
+.sc-quality-policy-grid label {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 10px;
+  border: 1px solid #dcdcde;
+  background: #fff;
+}
+
+.sc-quality-policy-grid span {
+  display: grid;
+  gap: 2px;
+}
+
+.sc-quality-policy-grid small {
+  color: var(--sc-quality-muted);
+}
+
+.sc-quality-evaluation {
+  padding: 20px;
+  border: 1px solid var(--sc-quality-line);
+  border-left: 6px solid var(--sc-quality-amber);
+  background: var(--sc-quality-paper);
+}
+
+.sc-quality-evaluation.status-ready,
+.sc-research-transparency.status-ready {
+  border-left-color: var(--sc-quality-green);
+}
+
+.sc-quality-evaluation.status-blocked,
+.sc-research-transparency.status-blocked {
+  border-left-color: var(--sc-quality-red);
+}
+
+.sc-quality-evaluation > header,
+.sc-research-transparency > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.sc-quality-evaluation__score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  color: var(--sc-quality-maroon);
+}
+
+.sc-quality-evaluation__score strong {
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.sc-quality-dimensions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.sc-quality-dimensions article {
+  padding: 10px;
+  border: 1px solid var(--sc-quality-line);
+  background: #fff;
+}
+
+.sc-quality-dimensions article > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sc-quality-dimensions progress {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.sc-quality-required-actions {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--sc-quality-line);
+  background: #fff;
+}
+
+.sc-quality-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.sc-quality-records {
+  display: grid;
+  gap: 18px;
+}
+
+.sc-quality-severity,
+.sc-quality-state,
+.sc-quality-exception {
+  display: inline-flex;
+  padding: 3px 7px;
+  border: 1px solid currentColor;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.severity-low,
+.status-ready {
+  color: var(--sc-quality-green);
+}
+
+.severity-medium,
+.status-conditionally-ready,
+.status-needs-review {
+  color: var(--sc-quality-amber);
+}
+
+.severity-high,
+.severity-critical,
+.status-blocked,
+.status-not-ready {
+  color: var(--sc-quality-red);
+}
+
+.sc-quality-readiness {
+  text-align: center;
+}
+
+.sc-quality-score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  margin: 6px auto;
+}
+
+.sc-quality-score strong {
+  font-size: 2.4rem;
+}
+
+.sc-quality-readiness dl {
+  margin: 12px 0 0;
+  text-align: left;
+}
+
+.sc-quality-readiness dl > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid #dcdcde;
+}
+
+.sc-quality-readiness dd {
+  margin: 0;
+  font-weight: 800;
+}
+
+.sc-quality-dialog {
+  width: min(620px, calc(100% - 32px));
+  padding: 0;
+  border: 1px solid var(--sc-quality-line);
+}
+
+.sc-quality-dialog::backdrop {
+  background: rgba(0, 0, 0, .52);
+}
+
+.sc-quality-dialog form {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+}
+
+.sc-quality-dialog form > div {
+  display: flex;
+  gap: 8px;
+}
+
+.sc-public-governance,
+.sc-research-transparency,
+.sc-public-governance-dashboard {
+  box-sizing: border-box;
+  width: min(1180px, calc(100% - 32px));
+  margin: 28px auto;
+  color: var(--sc-quality-ink);
+}
+
+.sc-public-governance,
+.sc-research-transparency,
+.sc-public-governance-dashboard {
+  padding: clamp(20px, 4vw, 34px);
+  border: 1px solid var(--sc-quality-line);
+  border-top: 6px solid var(--sc-quality-maroon);
+  background: #fff;
+}
+
+.sc-transparency-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.sc-transparency-status span {
+  padding: 6px 9px;
+  border: 1px solid var(--sc-quality-line);
+  background: var(--sc-quality-soft);
+  font-weight: 750;
+}
+
+.sc-transparency-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.sc-transparency-grid article {
+  padding: 15px;
+  border: 1px solid var(--sc-quality-line);
+  background: var(--sc-quality-paper);
+}
+
+.sc-research-transparency footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--sc-quality-line);
+  color: var(--sc-quality-muted);
+}
+
+.is-working {
+  color: var(--sc-quality-muted);
+}
+
+.is-success {
+  color: var(--sc-quality-green);
+  font-weight: 750;
+}
+
+.is-error {
+  color: var(--sc-quality-red);
+  font-weight: 750;
+}
+
+.sc-quality-editor button:focus-visible,
+.sc-governance-center a:focus-visible,
+.sc-research-transparency a:focus-visible {
+  outline: 3px solid #2166d1;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1100px) {
+  .sc-governance-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sc-quality-dimensions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sc-governance-alert-grid,
+  .sc-transparency-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .sc-governance-metrics,
+  .sc-governance-migration,
+  .sc-quality-editor__controls,
+  .sc-policy-editor__grid,
+  .sc-quality-policy-grid,
+  .sc-quality-dimensions {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-governance-section-heading,
+  .sc-quality-evaluation > header,
+  .sc-research-transparency > header {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  .sc-quality-actions,
+  .sc-governance-migration button,
+  .sc-quality-dialog {
+    display: none !important;
+  }
+
+  .sc-public-governance,
+  .sc-research-transparency,
+  .sc-public-governance-dashboard {
+    width: 100%;
+    margin: 0;
+  }
+}
