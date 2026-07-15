@@ -42,7 +42,7 @@ def test_version_and_schema_contracts():
         "sc-library-evidence-packet/1.0",
     ):
         assert marker in text, marker
-    assert "SC_LIBRARY_VERSION : '3.7.0'" in read(WRAPPER)
+    assert "SC_LIBRARY_VERSION : '3.8.0'" in read(WRAPPER)
 
 
 def test_private_admin_record_types():

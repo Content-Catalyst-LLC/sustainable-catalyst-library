@@ -27,7 +27,7 @@ def test_load_order_and_version():
     assert "class-sc-library-knowledge-pathways-article-maps.php" in wrapper
     assert wrapper.index("class-sc-library-topics-concepts-relationships.php") < wrapper.index("class-sc-library-knowledge-pathways-article-maps.php")
     assert "new SC_Library_Knowledge_Pathways_Article_Maps" in wrapper
-    assert "SC_LIBRARY_VERSION : '3.7.0'" in wrapper
+    assert "SC_LIBRARY_VERSION : '3.8.0'" in wrapper
     assert "public const VERSION = '3.3.0'" in read(PATHWAYS)
 
 

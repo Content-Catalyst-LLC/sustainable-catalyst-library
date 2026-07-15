@@ -28,7 +28,7 @@ def test_load_order_and_version():
     assert "class-sc-library-cross-product-research-handoffs.php" in wrapper
     assert wrapper.index("class-sc-library-knowledge-pathways-article-maps.php") < wrapper.index("class-sc-library-cross-product-research-handoffs.php")
     assert "new SC_Library_Cross_Product_Research_Handoffs" in wrapper
-    assert "SC_LIBRARY_VERSION : '3.7.0'" in wrapper
+    assert "SC_LIBRARY_VERSION : '3.8.0'" in wrapper
     assert "public const VERSION = '3.4.0'" in read(HANDOFFS)
 
 

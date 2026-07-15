@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 3.7.0
+Stable tag: 3.8.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,22 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 3.8.0 =
+* Adds Collaborative Review and Research Publishing.
+* Adds Research Review, Review Note, and Publication Package records.
+* Adds editorial, methodology, evidence, citation, governance, accessibility, privacy, legal, and publication-readiness review types.
+* Adds author, editor, reviewer, approver, and observer assignments.
+* Adds approve, approve-with-minor-changes, request-changes, reject, and recuse decisions.
+* Adds conflict disclosures, decision notes, invitation and response timestamps, and approval thresholds.
+* Adds SHA-256 document snapshots and post-review change detection.
+* Adds threaded structured review notes with document, section, anchor, quotation, severity, status, assignee, and resolution.
+* Blocks approval for unresolved high-risk notes, conflicts, rejected decisions, requested changes, insufficient approvals, and changed documents.
+* Adds publication versions, release notes, rights, DOI, canonical URL, embargoes, schedules, approvals, readiness checks, manifests, and release history.
+* Adds public review-transparency, publication-record, release-history, and private dashboard shortcodes.
+* Adds scheduled publication processing, Research Librarian context, cross-product handoffs, REST, AJAX, migration, and WP-CLI.
+* Preserves all v3.7.0 and earlier Knowledge Library systems.
+
 
 = 3.7.0 =
 * Adds Research Librarian Document Intelligence.
