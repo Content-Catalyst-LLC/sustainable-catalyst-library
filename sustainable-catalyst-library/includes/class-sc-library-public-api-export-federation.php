@@ -686,7 +686,7 @@ final class SC_Library_Public_API_Export_Federation {
 		if ( ! class_exists( 'SC_Library_PDF_To_Document' ) ) {
 			return array();
 		}
-		$attachment_id = absint( get_post_meta( $post_id, SC_Library_PDF_To_Document::META_SOURCE_ATTACHMENT, true ) );
+		$attachment_id = absint( get_post_meta( $post_id, SC_Library_PDF_To_Document::META_PDF_ID, true ) );
 		if ( ! $attachment_id ) {
 			return array();
 		}

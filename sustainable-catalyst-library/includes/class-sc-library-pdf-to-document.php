@@ -20,6 +20,8 @@ final class SC_Library_PDF_To_Document {
     public const ROUTE_VERSION = '2.2.1';
     public const SCHEMA = 'sc-library-pdf-document/2.0';
     public const META_PDF_ID = '_sc_library_foundation_page_pdf_id';
+    /** Backward-compatible alias retained for export and federation code. */
+    public const META_SOURCE_ATTACHMENT = self::META_PDF_ID;
     public const META_STATUS = '_sc_document_extraction_status';
     public const META_METHOD = '_sc_document_extraction_method';
     public const META_EXTRACTED_AT = '_sc_document_extracted_at';
