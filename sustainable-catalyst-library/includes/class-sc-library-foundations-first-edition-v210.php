@@ -1,26 +1,83 @@
 <?php
-/** Sustainable Catalyst Foundations v2.1.0 First Edition importer. */
+/**
+ * Sustainable Catalyst Foundations v2.1.3
+ *
+ * Automatically creates the 13 Institutional Foundations First Edition
+ * records as real, published WordPress HTML Foundation Documents. The earlier
+ * manual import button is intentionally removed.
+ */
 if (!defined('ABSPATH')) { exit; }
+
 final class SC_Library_Foundations_First_Edition_V210 {
     private static ?self $instance = null;
-    private const RELEASE = '2.1.2';
+
+    private const RELEASE = '2.1.3';
+    private const CONTENT_EDITION = '2.1.0';
+    private const EXPECTED_COUNT = 13;
     private const IMPORT_REL = 'assets/foundations/v2.1.0/import/foundations-first-edition.json';
-    public static function instance(): self { return self::$instance ??= new self(); }
-    private function __construct() {}
-    public function register_hooks(): void {
-        add_action('admin_menu', [$this,'admin_menu'], 90);
-        add_action('admin_notices', [$this,'admin_notice']);
-        add_action('admin_post_sc_foundations_v210_import', [$this,'handle_import']);
-        if (defined('WP_CLI') && WP_CLI) { WP_CLI::add_command('sc foundations-first-edition', [$this,'cli_import']); }
+
+    public static function instance(): self {
+        return self::$instance ??= new self();
     }
+
+    private function __construct() {}
+
+    public function register_hooks(): void {
+        // A plugin replacement does not necessarily fire a WordPress activation
+        // hook. admin_init guarantees provisioning on the first admin request
+        // after the replacement while the post type and taxonomies are loaded.
+        add_action('admin_init', [$this, 'maybe_provision'], 25);
+        add_action('admin_menu', [$this, 'admin_menu'], 90);
+        add_action('admin_notices', [$this, 'admin_notice']);
+        add_action('admin_post_sc_foundations_v213_reprovision', [$this, 'handle_reprovision']);
+
+        if (defined('WP_CLI') && WP_CLI) {
+            WP_CLI::add_command('sc foundations-first-edition', [$this, 'cli_provision']);
+        }
+    }
+
+    /**
+     * Create or repair the collection automatically. No manual import step.
+     */
+    public function maybe_provision(): void {
+        if (wp_installing() || !current_user_can('manage_options')) {
+            return;
+        }
+
+        if (!post_type_exists('sc_foundation_doc')) {
+            $this->store_result([
+                'created' => 0,
+                'updated' => 0,
+                'attachments' => 0,
+                'processed' => 0,
+                'errors' => ['Foundation Document post type is not registered.'],
+            ]);
+            return;
+        }
+
+        $installed = (string) get_option('sc_library_foundations_first_edition_version', '');
+        if ($installed === self::RELEASE && $this->count_provisioned() === self::EXPECTED_COUNT) {
+            return;
+        }
+
+        $result = $this->provision_all();
+        $this->store_result($result);
+
+        if (empty($result['errors']) && (int) $result['processed'] === self::EXPECTED_COUNT) {
+            update_option('sc_library_foundations_first_edition_version', self::RELEASE, false);
+            update_option('sc_library_foundations_first_edition_content_version', self::CONTENT_EDITION, false);
+            set_transient('sc_library_foundations_first_edition_success_notice', $result, 300);
+        }
+    }
+
     public function admin_menu(): void {
         add_submenu_page(
             'sc-library',
             'Institutional Foundations First Edition',
-            'First Edition Import',
+            'First Edition Status',
             'manage_options',
             'sc-foundations-first-edition',
-            [$this,'render_page']
+            [$this, 'render_page']
         );
 
         add_management_page(
@@ -28,112 +85,366 @@ final class SC_Library_Foundations_First_Edition_V210 {
             'Foundations First Edition',
             'manage_options',
             'sc-foundations-first-edition-tools',
-            [$this,'render_page']
+            [$this, 'render_page']
         );
     }
 
     public function admin_notice(): void {
-        if (!current_user_can('manage_options')) return;
-        if ((string) get_option('sc_library_foundations_first_edition_version', '') === self::RELEASE) return;
-
-        $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-        if ($screen && in_array((string) $screen->id, [
-            'sustainable-catalyst-library_page_sc-foundations-first-edition',
-            'tools_page_sc-foundations-first-edition-tools',
-        ], true)) {
+        if (!current_user_can('manage_options')) {
             return;
         }
 
-        $url = admin_url('admin.php?page=sc-foundations-first-edition');
-        echo '<div class="notice notice-info"><p><strong>Institutional Foundations First Edition is ready to import.</strong> ';
-        echo '<a class="button button-primary" href="' . esc_url($url) . '">Open First Edition Import</a></p></div>';
+        $success = get_transient('sc_library_foundations_first_edition_success_notice');
+        if (is_array($success)) {
+            delete_transient('sc_library_foundations_first_edition_success_notice');
+            $list_url = admin_url('edit.php?post_type=sc_foundation_doc');
+            echo '<div class="notice notice-success is-dismissible"><p><strong>Institutional Foundations First Edition is live.</strong> ';
+            echo esc_html(sprintf('%d HTML Foundation Documents were processed.', (int) $success['processed']));
+            echo ' <a class="button button-primary" href="' . esc_url($list_url) . '">View Foundation Documents</a></p></div>';
+            return;
+        }
+
+        $result = get_option('sc_library_foundations_first_edition_last_result', []);
+        if (is_array($result) && !empty($result['errors'])) {
+            $status_url = admin_url('admin.php?page=sc-foundations-first-edition');
+            echo '<div class="notice notice-error"><p><strong>Foundation Document provisioning needs attention.</strong> ';
+            echo esc_html(implode(' ', array_map('strval', (array) $result['errors'])));
+            echo ' <a class="button" href="' . esc_url($status_url) . '">Open First Edition Status</a></p></div>';
+        }
     }
+
     public function render_page(): void {
-        if (!current_user_can('manage_options')) return;
-        $result = get_transient('sc_foundations_v210_import_result_' . get_current_user_id());
-        delete_transient('sc_foundations_v210_import_result_' . get_current_user_id());
-        echo '<div class="wrap"><h1>Institutional Foundations First Edition</h1><p>Import all 13 complete Foundation Documents, metadata, relationships, and PDF snapshots. The safe default is WordPress draft status.</p>';
-        if (is_array($result)) echo '<div class="notice notice-success"><p>'.esc_html(sprintf('Import completed: %d created, %d updated, %d PDFs attached, %d errors.', $result['created'],$result['updated'],$result['attachments'],count($result['errors']))).'</p></div>';
-        echo '<form method="post" action="'.esc_url(admin_url('admin-post.php')).'">'; wp_nonce_field('sc_foundations_v210_import');
-        echo '<input type="hidden" name="action" value="sc_foundations_v210_import"><p><label><input type="checkbox" name="publish" value="1"> Publish records immediately with metadata status Under Review</label></p>';
-        submit_button('Import First Edition'); echo '</form></div>';
-    }
-    public function handle_import(): void {
-        if (!current_user_can('manage_options')) wp_die('Insufficient permission.');
-        check_admin_referer('sc_foundations_v210_import');
-        $result = $this->import_all(!empty($_POST['publish']));
-        set_transient('sc_foundations_v210_import_result_' . get_current_user_id(), $result, 120);
-        wp_safe_redirect(admin_url('admin.php?page=sc-foundations-first-edition')); exit;
-    }
-    public function cli_import(array $args, array $assoc_args): void {
-        $publish = !empty($assoc_args['publish']); $result = $this->import_all($publish);
-        WP_CLI::success(sprintf('Created %d, updated %d, attached %d PDFs, errors %d.', $result['created'],$result['updated'],$result['attachments'],count($result['errors'])));
-    }
-    private function import_all(bool $publish): array {
-        $result=['created'=>0,'updated'=>0,'attachments'=>0,'errors'=>[]];
-        $path=trailingslashit(SC_LIBRARY_DIR).self::IMPORT_REL;
-        if (!is_readable($path)) { $result['errors'][]='Import manifest missing.'; return $result; }
-        $payload=json_decode((string)file_get_contents($path),true);
-        if (!is_array($payload) || empty($payload['documents'])) { $result['errors'][]='Import manifest invalid.'; return $result; }
-        $id_map=[];
-        foreach ($payload['documents'] as $record) {
-            $doc_id=sanitize_text_field((string)($record['document_id']??''));
-            if ($doc_id==='') continue;
-            $existing=$this->find_by_document_id($doc_id);
-            $postarr=['post_type'=>'sc_foundation_doc','post_status'=>$publish?'publish':'draft','post_title'=>sanitize_text_field((string)$record['title']),'post_name'=>sanitize_title((string)$record['slug']),'post_excerpt'=>sanitize_text_field((string)$record['excerpt']),'post_content'=>wp_kses_post((string)$record['content_html']),'menu_order'=>absint($record['menu_order']??0)];
-            if ($existing) $postarr['ID']=$existing;
-            $post_id=wp_insert_post(wp_slash($postarr),true);
-            if (is_wp_error($post_id)) { $result['errors'][]=$doc_id.': '.$post_id->get_error_message(); continue; }
-            $existing ? $result['updated']++ : $result['created']++;
-            $id_map[$doc_id]=(int)$post_id;
-            $this->update_meta((int)$post_id,$record);
-            if ($this->attach_pdf((int)$post_id,$record)) $result['attachments']++;
-            $this->assign_foundations_collection((int)$post_id);
+        if (!current_user_can('manage_options')) {
+            return;
         }
-        foreach ($payload['documents'] as $record) {
-            $doc_id=(string)($record['document_id']??''); if (empty($id_map[$doc_id])) continue;
-            $related=[]; foreach ((array)($record['related_documents']??[]) as $rid) if (!empty($id_map[$rid])) $related[]=$id_map[$rid];
-            update_post_meta($id_map[$doc_id], '_sc_foundation_related_ids', implode(',',array_unique($related)));
+
+        $count = $this->count_provisioned();
+        $result = get_option('sc_library_foundations_first_edition_last_result', []);
+        $complete = $count === self::EXPECTED_COUNT;
+
+        echo '<div class="wrap"><h1>Institutional Foundations First Edition</h1>';
+        echo '<p>The collection is provisioned automatically as published HTML Foundation Documents. No import is required.</p>';
+        echo '<div class="notice ' . ($complete ? 'notice-success' : 'notice-warning') . ' inline"><p>';
+        echo '<strong>' . esc_html(sprintf('%d of %d records are present.', $count, self::EXPECTED_COUNT)) . '</strong>';
+        echo '</p></div>';
+
+        if (is_array($result) && $result) {
+            echo '<h2>Last provisioning result</h2><ul>';
+            echo '<li>Created: ' . esc_html((string) ($result['created'] ?? 0)) . '</li>';
+            echo '<li>Updated: ' . esc_html((string) ($result['updated'] ?? 0)) . '</li>';
+            echo '<li>PDFs attached: ' . esc_html((string) ($result['attachments'] ?? 0)) . '</li>';
+            echo '<li>Processed: ' . esc_html((string) ($result['processed'] ?? 0)) . '</li>';
+            echo '<li>Errors: ' . esc_html((string) count((array) ($result['errors'] ?? []))) . '</li>';
+            echo '</ul>';
+            if (!empty($result['errors'])) {
+                echo '<h3>Errors</h3><ul>';
+                foreach ((array) $result['errors'] as $error) {
+                    echo '<li><code>' . esc_html((string) $error) . '</code></li>';
+                }
+                echo '</ul>';
+            }
         }
-        update_option('sc_library_foundations_first_edition_version',self::RELEASE,false);
-        update_option('sc_library_foundations_first_edition_content_version','2.1.0',false);
+
+        echo '<p><a class="button button-primary" href="' . esc_url(admin_url('edit.php?post_type=sc_foundation_doc')) . '">View Foundation Documents</a> ';
+        echo '<a class="button" href="' . esc_url(home_url('/institution/foundations/')) . '" target="_blank" rel="noopener">View Foundations Page</a></p>';
+
+        echo '<hr><h2>Repair or refresh</h2><p>Re-provisioning is idempotent. It updates records by stable document ID and does not create duplicates.</p>';
+        echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
+        wp_nonce_field('sc_foundations_v213_reprovision');
+        echo '<input type="hidden" name="action" value="sc_foundations_v213_reprovision">';
+        submit_button('Re-provision all 13 HTML documents', 'secondary');
+        echo '</form></div>';
+    }
+
+    public function handle_reprovision(): void {
+        if (!current_user_can('manage_options')) {
+            wp_die('Insufficient permission.');
+        }
+        check_admin_referer('sc_foundations_v213_reprovision');
+
+        delete_option('sc_library_foundations_first_edition_version');
+        $result = $this->provision_all();
+        $this->store_result($result);
+
+        if (empty($result['errors']) && (int) $result['processed'] === self::EXPECTED_COUNT) {
+            update_option('sc_library_foundations_first_edition_version', self::RELEASE, false);
+            update_option('sc_library_foundations_first_edition_content_version', self::CONTENT_EDITION, false);
+        }
+
+        wp_safe_redirect(admin_url('admin.php?page=sc-foundations-first-edition'));
+        exit;
+    }
+
+    public function cli_provision(array $args, array $assoc_args): void {
+        $result = $this->provision_all();
+        $this->store_result($result);
+        if (!empty($result['errors'])) {
+            WP_CLI::error(implode(' | ', (array) $result['errors']));
+        }
+        update_option('sc_library_foundations_first_edition_version', self::RELEASE, false);
+        update_option('sc_library_foundations_first_edition_content_version', self::CONTENT_EDITION, false);
+        WP_CLI::success(sprintf(
+            'Processed %d records: %d created, %d updated, %d PDFs attached.',
+            (int) $result['processed'],
+            (int) $result['created'],
+            (int) $result['updated'],
+            (int) $result['attachments']
+        ));
+    }
+
+    /**
+     * @return array{created:int,updated:int,attachments:int,processed:int,errors:array<int,string>}
+     */
+    private function provision_all(): array {
+        $result = [
+            'created' => 0,
+            'updated' => 0,
+            'attachments' => 0,
+            'processed' => 0,
+            'errors' => [],
+        ];
+
+        $path = trailingslashit(SC_LIBRARY_DIR) . self::IMPORT_REL;
+        if (!is_readable($path)) {
+            $result['errors'][] = 'First Edition payload is missing: ' . $path;
+            return $result;
+        }
+
+        $payload = json_decode((string) file_get_contents($path), true);
+        if (!is_array($payload) || !isset($payload['documents']) || !is_array($payload['documents'])) {
+            $result['errors'][] = 'First Edition payload is invalid JSON.';
+            return $result;
+        }
+        if (count($payload['documents']) !== self::EXPECTED_COUNT) {
+            $result['errors'][] = sprintf('Expected %d documents; payload contains %d.', self::EXPECTED_COUNT, count($payload['documents']));
+            return $result;
+        }
+
+        $id_map = [];
+
+        foreach ($payload['documents'] as $record) {
+            $doc_id = sanitize_text_field((string) ($record['document_id'] ?? ''));
+            if ($doc_id === '') {
+                $result['errors'][] = 'A payload record is missing document_id.';
+                continue;
+            }
+
+            $existing = $this->find_by_document_id($doc_id);
+            $content = (string) ($record['content_html'] ?? '');
+            if (trim(wp_strip_all_tags($content)) === '') {
+                $result['errors'][] = $doc_id . ': HTML content is empty.';
+                continue;
+            }
+
+            $postarr = [
+                'post_type' => 'sc_foundation_doc',
+                'post_status' => 'publish',
+                'post_title' => sanitize_text_field((string) ($record['title'] ?? $doc_id)),
+                'post_name' => sanitize_title((string) ($record['slug'] ?? $doc_id)),
+                'post_excerpt' => sanitize_text_field((string) ($record['excerpt'] ?? '')),
+                'post_content' => wp_kses_post($content),
+                'menu_order' => absint($record['menu_order'] ?? 0),
+            ];
+            if ($existing > 0) {
+                $postarr['ID'] = $existing;
+            }
+
+            $post_id = wp_insert_post(wp_slash($postarr), true);
+            if (is_wp_error($post_id)) {
+                $result['errors'][] = $doc_id . ': ' . $post_id->get_error_message();
+                continue;
+            }
+
+            $post_id = (int) $post_id;
+            $existing > 0 ? $result['updated']++ : $result['created']++;
+            $result['processed']++;
+            $id_map[$doc_id] = $post_id;
+
+            $this->update_meta($post_id, $record);
+            $this->assign_taxonomies($post_id);
+
+            $attachment_result = $this->attach_pdf($post_id, $record);
+            if ($attachment_result === true) {
+                $result['attachments']++;
+            } elseif (is_string($attachment_result) && $attachment_result !== '') {
+                // HTML publication succeeds even when a PDF attachment needs repair.
+                $result['errors'][] = $doc_id . ': ' . $attachment_result;
+            }
+        }
+
+        // Relationships are resolved after all stable IDs have WordPress IDs.
+        foreach ($payload['documents'] as $record) {
+            $doc_id = (string) ($record['document_id'] ?? '');
+            if (empty($id_map[$doc_id])) {
+                continue;
+            }
+            $related = [];
+            foreach ((array) ($record['related_documents'] ?? []) as $related_id) {
+                if (!empty($id_map[$related_id])) {
+                    $related[] = (int) $id_map[$related_id];
+                }
+            }
+            update_post_meta(
+                (int) $id_map[$doc_id],
+                '_sc_foundation_related_ids',
+                implode(',', array_values(array_unique($related)))
+            );
+        }
+
+        flush_rewrite_rules(false);
+
         return $result;
     }
+
     private function find_by_document_id(string $doc_id): int {
-        $q=new WP_Query(['post_type'=>'sc_foundation_doc','post_status'=>'any','posts_per_page'=>1,'fields'=>'ids','meta_key'=>'_sc_foundation_document_id','meta_value'=>$doc_id,'no_found_rows'=>true]);
-        return !empty($q->posts)?(int)$q->posts[0]:0;
+        $query = new WP_Query([
+            'post_type' => 'sc_foundation_doc',
+            'post_status' => 'any',
+            'posts_per_page' => 1,
+            'fields' => 'ids',
+            'meta_key' => '_sc_foundation_document_id',
+            'meta_value' => $doc_id,
+            'no_found_rows' => true,
+            'cache_results' => false,
+        ]);
+
+        return !empty($query->posts) ? (int) $query->posts[0] : 0;
     }
-    private function update_meta(int $post_id,array $r): void {
-        $map=['document_id','subtitle','record_type','authority_level','status','effective_date','last_reviewed','review_cycle','owner','canonical_record','correction_url'];
-        foreach ($map as $k) update_post_meta($post_id,'_sc_foundation_'.$k, is_array($r[$k]??null)?wp_json_encode($r[$k]):sanitize_text_field((string)($r[$k]??'')));
-        update_post_meta($post_id,'_sc_foundation_version',sanitize_text_field((string)($r['version']??'1.0.0')));
-        update_post_meta($post_id,'_sc_foundation_author','Sustainable Catalyst');
-        update_post_meta($post_id,'_sc_foundation_publisher','Sustainable Catalyst');
-        update_post_meta($post_id,'_sc_foundation_show_toc',1);
-        update_post_meta($post_id,'_sc_foundation_revision_history',wp_json_encode($r['revision_history']??[]));
-        update_post_meta($post_id,'_sc_foundation_related_product_slugs',implode(',',array_map('sanitize_title',(array)($r['related_products']??[]))));
-        update_post_meta($post_id,'_sc_foundation_related_repository_urls',implode("\n",array_map('esc_url_raw',(array)($r['related_repositories']??[]))));
-        update_post_meta($post_id,'_sc_foundation_supersedes_labels',implode("\n",array_map('sanitize_text_field',(array)($r['supersedes']??[]))));
-        update_post_meta($post_id,'_sc_library_doc_status','draft');
-        update_post_meta($post_id,'_sc_library_doc_type',sanitize_key((string)($r['record_type']??'institutional-standard')));
-        update_post_meta($post_id,'_sc_library_foundations_system_version',self::RELEASE);
+
+    private function count_provisioned(): int {
+        $query = new WP_Query([
+            'post_type' => 'sc_foundation_doc',
+            'post_status' => ['publish', 'draft', 'pending', 'private'],
+            'posts_per_page' => self::EXPECTED_COUNT + 10,
+            'fields' => 'ids',
+            'meta_query' => [[
+                'key' => '_sc_library_foundations_content_edition',
+                'value' => self::CONTENT_EDITION,
+            ]],
+            'no_found_rows' => true,
+            'cache_results' => false,
+        ]);
+
+        return count($query->posts);
     }
-    private function attach_pdf(int $post_id,array $r): bool {
-        $existing=absint(get_post_meta($post_id,'_sc_foundation_pdf_attachment_id',true));
-        $expected=sanitize_text_field((string)($r['pdf_sha256']??''));
-        if ($existing && get_post_meta($existing,'_sc_foundation_asset_sha256',true)===$expected) return false;
-        $rel=(string)($r['plugin_pdf_file']??''); $source=trailingslashit(SC_LIBRARY_DIR).ltrim($rel,'/');
-        if (!is_readable($source)) return false;
-        $bits=wp_upload_bits(basename($source),null,(string)file_get_contents($source)); if (!empty($bits['error'])) return false;
-        $attachment=wp_insert_attachment(['post_mime_type'=>'application/pdf','post_title'=>sanitize_text_field((string)$r['title'].' - Version '.(string)$r['version']),'post_status'=>'inherit'],$bits['file'],$post_id,true);
-        if (is_wp_error($attachment)) return false;
-        require_once ABSPATH.'wp-admin/includes/image.php'; wp_update_attachment_metadata($attachment,wp_generate_attachment_metadata($attachment,$bits['file']));
-        update_post_meta($attachment,'_sc_foundation_asset_sha256',$expected); update_post_meta($post_id,'_sc_foundation_pdf_attachment_id',(int)$attachment); return true;
+
+    private function update_meta(int $post_id, array $record): void {
+        $text_fields = [
+            'document_id', 'subtitle', 'record_type', 'authority_level', 'status',
+            'effective_date', 'last_reviewed', 'review_cycle', 'owner',
+            'canonical_record', 'correction_url',
+        ];
+
+        foreach ($text_fields as $key) {
+            update_post_meta(
+                $post_id,
+                '_sc_foundation_' . $key,
+                sanitize_text_field((string) ($record[$key] ?? ''))
+            );
+        }
+
+        $version = sanitize_text_field((string) ($record['version'] ?? '1.0.0'));
+        update_post_meta($post_id, '_sc_foundation_version', $version);
+        update_post_meta($post_id, '_sc_foundation_publication_date', sanitize_text_field((string) ($record['effective_date'] ?? '')));
+        update_post_meta($post_id, '_sc_foundation_author', 'Sustainable Catalyst');
+        update_post_meta($post_id, '_sc_foundation_publisher', 'Sustainable Catalyst');
+        update_post_meta($post_id, '_sc_foundation_language', 'en');
+        update_post_meta($post_id, '_sc_foundation_allow_download', 1);
+        update_post_meta($post_id, '_sc_foundation_show_viewer', 1);
+        update_post_meta($post_id, '_sc_foundation_show_toc', 1);
+        update_post_meta($post_id, '_sc_foundation_revision_history', wp_json_encode((array) ($record['revision_history'] ?? [])));
+        update_post_meta($post_id, '_sc_foundation_related_product_slugs', implode(',', array_map('sanitize_title', (array) ($record['related_products'] ?? []))));
+        update_post_meta($post_id, '_sc_foundation_related_repository_urls', implode("\n", array_map('esc_url_raw', (array) ($record['related_repositories'] ?? []))));
+        update_post_meta($post_id, '_sc_foundation_supersedes_labels', implode("\n", array_map('sanitize_text_field', (array) ($record['supersedes'] ?? []))));
+
+        // Keep the retained Documentation Library authority model synchronized.
+        update_post_meta($post_id, '_sc_library_doc_status', 'current');
+        update_post_meta($post_id, '_sc_library_doc_type', 'institution');
+        update_post_meta($post_id, '_sc_library_doc_version', $version);
+        update_post_meta($post_id, '_sc_library_doc_authority_type', 'html');
+        update_post_meta($post_id, '_sc_library_doc_authority_url', esc_url_raw(get_permalink($post_id)));
+        update_post_meta($post_id, '_sc_library_doc_webpage_url', esc_url_raw(get_permalink($post_id)));
+        update_post_meta($post_id, '_sc_library_foundations_system_version', self::RELEASE);
+        update_post_meta($post_id, '_sc_library_foundations_content_edition', self::CONTENT_EDITION);
     }
-    private function assign_foundations_collection(int $post_id): void {
-        if (!class_exists('SC_Library_Taxonomies')) return; $tax=SC_Library_Taxonomies::COLLECTION; if (!taxonomy_exists($tax)) return;
-        $term=term_exists('foundations',$tax); if (!$term) $term=wp_insert_term('Foundations',$tax,['slug'=>'foundations']);
-        if (!is_wp_error($term)) wp_set_object_terms($post_id,['foundations'],$tax,true);
+
+    private function assign_taxonomies(int $post_id): void {
+        if (!class_exists('SC_Library_Taxonomies')) {
+            return;
+        }
+
+        $collection_tax = SC_Library_Taxonomies::COLLECTION;
+        if (taxonomy_exists($collection_tax)) {
+            $slug = class_exists('SC_Library_Documentation')
+                ? SC_Library_Documentation::COLLECTION_SLUG
+                : 'foundations';
+            if (!term_exists($slug, $collection_tax)) {
+                wp_insert_term('Foundations', $collection_tax, ['slug' => $slug]);
+            }
+            wp_set_object_terms($post_id, [$slug], $collection_tax, false);
+        }
+
+        if (defined('SC_Library_Taxonomies::DOCUMENT_CATEGORY')) {
+            $category_tax = SC_Library_Taxonomies::DOCUMENT_CATEGORY;
+            if (taxonomy_exists($category_tax)) {
+                if (!term_exists('institutional-foundations', $category_tax)) {
+                    wp_insert_term('Institutional Foundations', $category_tax, ['slug' => 'institutional-foundations']);
+                }
+                wp_set_object_terms($post_id, ['institutional-foundations'], $category_tax, false);
+            }
+        }
+    }
+
+    /**
+     * @return bool|string True when attached, false when already current, or an error message.
+     */
+    private function attach_pdf(int $post_id, array $record) {
+        $expected_hash = sanitize_text_field((string) ($record['pdf_sha256'] ?? ''));
+        $existing = absint(get_post_meta($post_id, '_sc_foundation_pdf_attachment_id', true));
+        if ($existing > 0 && $expected_hash !== '' && get_post_meta($existing, '_sc_foundation_asset_sha256', true) === $expected_hash) {
+            return false;
+        }
+
+        $relative = ltrim((string) ($record['plugin_pdf_file'] ?? ''), '/');
+        $source = trailingslashit(SC_LIBRARY_DIR) . $relative;
+        if (!is_readable($source)) {
+            return 'PDF snapshot is missing from the plugin.';
+        }
+
+        $contents = file_get_contents($source);
+        if ($contents === false) {
+            return 'PDF snapshot could not be read.';
+        }
+
+        $bits = wp_upload_bits(basename($source), null, $contents);
+        if (!empty($bits['error'])) {
+            return 'WordPress upload failed: ' . (string) $bits['error'];
+        }
+
+        $attachment = wp_insert_attachment([
+            'post_mime_type' => 'application/pdf',
+            'post_title' => sanitize_text_field((string) ($record['title'] ?? '') . ' - Version ' . (string) ($record['version'] ?? '1.0.0')),
+            'post_status' => 'inherit',
+        ], $bits['file'], $post_id, true);
+
+        if (is_wp_error($attachment)) {
+            return 'PDF attachment failed: ' . $attachment->get_error_message();
+        }
+
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+        wp_update_attachment_metadata($attachment, wp_generate_attachment_metadata($attachment, $bits['file']));
+        update_post_meta($attachment, '_sc_foundation_asset_sha256', $expected_hash);
+        update_post_meta($post_id, '_sc_foundation_pdf_attachment_id', (int) $attachment);
+        update_post_meta($post_id, '_sc_library_doc_pdf_url', esc_url_raw((string) wp_get_attachment_url($attachment)));
+
+        return true;
+    }
+
+    private function store_result(array $result): void {
+        $result['record_count'] = $this->count_provisioned();
+        $result['timestamp'] = current_time('mysql', true);
+        update_option('sc_library_foundations_first_edition_last_result', $result, false);
     }
 }
+
 SC_Library_Foundations_First_Edition_V210::instance()->register_hooks();
