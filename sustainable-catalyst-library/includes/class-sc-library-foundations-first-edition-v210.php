@@ -3,17 +3,50 @@
 if (!defined('ABSPATH')) { exit; }
 final class SC_Library_Foundations_First_Edition_V210 {
     private static ?self $instance = null;
-    private const RELEASE = '2.1.0';
+    private const RELEASE = '2.1.2';
     private const IMPORT_REL = 'assets/foundations/v2.1.0/import/foundations-first-edition.json';
     public static function instance(): self { return self::$instance ??= new self(); }
     private function __construct() {}
     public function register_hooks(): void {
-        add_action('admin_menu', [$this,'admin_menu'], 40);
+        add_action('admin_menu', [$this,'admin_menu'], 90);
+        add_action('admin_notices', [$this,'admin_notice']);
         add_action('admin_post_sc_foundations_v210_import', [$this,'handle_import']);
         if (defined('WP_CLI') && WP_CLI) { WP_CLI::add_command('sc foundations-first-edition', [$this,'cli_import']); }
     }
     public function admin_menu(): void {
-        add_submenu_page('edit.php?post_type=sc_foundation_doc','Institutional Foundations First Edition','First Edition Import','manage_options','sc-foundations-first-edition',[$this,'render_page']);
+        add_submenu_page(
+            'sc-library',
+            'Institutional Foundations First Edition',
+            'First Edition Import',
+            'manage_options',
+            'sc-foundations-first-edition',
+            [$this,'render_page']
+        );
+
+        add_management_page(
+            'Institutional Foundations First Edition',
+            'Foundations First Edition',
+            'manage_options',
+            'sc-foundations-first-edition-tools',
+            [$this,'render_page']
+        );
+    }
+
+    public function admin_notice(): void {
+        if (!current_user_can('manage_options')) return;
+        if ((string) get_option('sc_library_foundations_first_edition_version', '') === self::RELEASE) return;
+
+        $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+        if ($screen && in_array((string) $screen->id, [
+            'sustainable-catalyst-library_page_sc-foundations-first-edition',
+            'tools_page_sc-foundations-first-edition-tools',
+        ], true)) {
+            return;
+        }
+
+        $url = admin_url('admin.php?page=sc-foundations-first-edition');
+        echo '<div class="notice notice-info"><p><strong>Institutional Foundations First Edition is ready to import.</strong> ';
+        echo '<a class="button button-primary" href="' . esc_url($url) . '">Open First Edition Import</a></p></div>';
     }
     public function render_page(): void {
         if (!current_user_can('manage_options')) return;
@@ -30,7 +63,7 @@ final class SC_Library_Foundations_First_Edition_V210 {
         check_admin_referer('sc_foundations_v210_import');
         $result = $this->import_all(!empty($_POST['publish']));
         set_transient('sc_foundations_v210_import_result_' . get_current_user_id(), $result, 120);
-        wp_safe_redirect(admin_url('edit.php?post_type=sc_foundation_doc&page=sc-foundations-first-edition')); exit;
+        wp_safe_redirect(admin_url('admin.php?page=sc-foundations-first-edition')); exit;
     }
     public function cli_import(array $args, array $assoc_args): void {
         $publish = !empty($assoc_args['publish']); $result = $this->import_all($publish);
@@ -63,6 +96,7 @@ final class SC_Library_Foundations_First_Edition_V210 {
             update_post_meta($id_map[$doc_id], '_sc_foundation_related_ids', implode(',',array_unique($related)));
         }
         update_option('sc_library_foundations_first_edition_version',self::RELEASE,false);
+        update_option('sc_library_foundations_first_edition_content_version','2.1.0',false);
         return $result;
     }
     private function find_by_document_id(string $doc_id): int {

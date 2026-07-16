@@ -12,7 +12,7 @@ checks={
 'all files':all((root/d['markdown_file']).is_file() and (root/d['html_file']).is_file() and (root/d['pdf_file']).is_file() for d in manifest['documents']),
 'combined pdf':(root/'foundations-first-edition/collection/Sustainable_Catalyst_Institutional_Foundations_First_Edition_v2.1.0.pdf').is_file(),
 'import class':(root/'sustainable-catalyst-library/includes/class-sc-library-foundations-first-edition-v210.php').is_file(),
-'system version':"SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.0" in (root/'sustainable-catalyst-library/includes/class-sc-library-foundation-system-v200.php').read_text(),
+'system version':"SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.2" in (root/'sustainable-catalyst-library/includes/class-sc-library-foundation-system-v200.php').read_text(),
 }
 for k,v in checks.items(): print(('PASS' if v else 'FAIL')+': '+k)
 if not all(checks.values()): sys.exit(1)
