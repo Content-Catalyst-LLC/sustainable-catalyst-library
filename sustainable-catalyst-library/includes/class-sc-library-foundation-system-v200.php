@@ -14,13 +14,15 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('SC_LIBRARY_FOUNDATIONS_VERSION')) {
-    define('SC_LIBRARY_FOUNDATIONS_VERSION', '2.0.0');
+    define('SC_LIBRARY_FOUNDATIONS_VERSION', '2.0.1');
 }
 
 final class SC_Library_Foundation_System_V200 {
     private static ?self $instance = null;
 
     private const META_PREFIX = '_sc_foundation_';
+
+    private const REWRITE_VERSION_OPTION = 'sc_library_foundations_rewrite_version';
 
     private const TYPES = [
         'institutional-standard' => 'Institutional Standard',
@@ -65,6 +67,8 @@ final class SC_Library_Foundation_System_V200 {
 
     public function register_hooks(): void {
         add_action('init', [$this, 'register_meta'], 12);
+        add_action('init', [$this, 'maybe_refresh_rewrite_rules'], 100);
+        add_action('template_redirect', [$this, 'recover_legacy_foundations_route'], 1);
         add_action('add_meta_boxes', [$this, 'add_meta_boxes'], 30);
         add_action('save_post_sc_foundation_doc', [$this, 'save'], 40, 3);
         add_action('wp_enqueue_scripts', [$this, 'public_assets'], 30);
@@ -74,6 +78,49 @@ final class SC_Library_Foundation_System_V200 {
         add_filter('manage_sc_foundation_doc_posts_columns', [$this, 'admin_columns']);
         add_action('manage_sc_foundation_doc_posts_custom_column', [$this, 'admin_column'], 10, 2);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
+    }
+
+    /**
+     * Refresh rewrite rules once for each Foundations release.
+     *
+     * Plugin replacement does not always execute activation hooks. A stale
+     * rewrite cache can therefore make an existing Foundations page appear
+     * missing even though the page record and content remain intact.
+     */
+    public function maybe_refresh_rewrite_rules(): void {
+        $stored_version = (string) get_option(self::REWRITE_VERSION_OPTION, '');
+        if ($stored_version === SC_LIBRARY_FOUNDATIONS_VERSION) {
+            return;
+        }
+        if (!post_type_exists('sc_foundation_doc')) {
+            return;
+        }
+        flush_rewrite_rules(false);
+        update_option(self::REWRITE_VERSION_OPTION, SC_LIBRARY_FOUNDATIONS_VERSION, false);
+    }
+
+    /**
+     * Preserve the earlier public /foundations/ route when canonical redirects
+     * or rewrite rules have not yet been rebuilt.
+     */
+    public function recover_legacy_foundations_route(): void {
+        if (is_admin() || wp_doing_ajax() || !is_404()) {
+            return;
+        }
+
+        $request_uri = isset($_SERVER['REQUEST_URI']) ? wp_unslash((string) $_SERVER['REQUEST_URI']) : '';
+        $path = trim((string) wp_parse_url($request_uri, PHP_URL_PATH), '/');
+        if ($path !== 'foundations') {
+            return;
+        }
+
+        $target = get_page_by_path('institution/foundations', OBJECT, 'page');
+        if (!$target instanceof WP_Post || $target->post_status !== 'publish') {
+            return;
+        }
+
+        wp_safe_redirect(get_permalink($target), 301, 'Sustainable Catalyst Foundations');
+        exit;
     }
 
     public function register_meta(): void {
