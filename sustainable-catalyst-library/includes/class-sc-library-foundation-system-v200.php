@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('SC_LIBRARY_FOUNDATIONS_VERSION')) {
-    define('SC_LIBRARY_FOUNDATIONS_VERSION', '2.0.4');
+    define('SC_LIBRARY_FOUNDATIONS_VERSION', '2.0.5');
 }
 
 final class SC_Library_Foundation_System_V200 {
@@ -71,13 +71,13 @@ final class SC_Library_Foundation_System_V200 {
         add_action('parse_request', [$this, 'protect_foundations_page_route'], 0);
         add_action('init', [$this, 'register_meta'], 12);
         add_action('init', [$this, 'maybe_refresh_rewrite_rules'], 100);
+        add_action('init', [$this, 'replace_foundations_library_shortcode'], 999);
         add_action('add_meta_boxes', [$this, 'add_meta_boxes'], 30);
         add_action('save_post_sc_foundation_doc', [$this, 'save'], 40, 3);
         add_action('wp_enqueue_scripts', [$this, 'public_assets'], 30);
         add_action('admin_enqueue_scripts', [$this, 'admin_assets']);
         add_filter('template_include', [$this, 'template_include'], 99);
         add_shortcode('sc_foundations_catalog', [$this, 'catalog_shortcode']);
-        add_filter('pre_do_shortcode_tag', [$this, 'server_render_foundations_library'], 1, 4);
         add_filter('manage_sc_foundation_doc_posts_columns', [$this, 'admin_columns']);
         add_action('manage_sc_foundation_doc_posts_custom_column', [$this, 'admin_column'], 10, 2);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
@@ -650,52 +650,33 @@ final class SC_Library_Foundation_System_V200 {
     }
 
     /**
-     * Render the canonical Foundations catalog without requiring a browser-side
-     * REST request. The retained documentation interface can continue to use
-     * REST elsewhere, but the institutional Foundations page must remain
-     * readable when REST, caching, CORS, or an edge layer is unavailable.
-     *
-     * @param mixed  $return Existing pre-shortcode result.
-     * @param string $tag    Shortcode tag.
-     * @param mixed  $attr   Shortcode attributes.
-     * @param array  $match  Shortcode parser match.
-     * @return mixed
+     * Replace the retained JavaScript-only Foundations shortcode after every
+     * plugin component has registered its callbacks. Other pages may still use
+     * the original Knowledge Library interface; the canonical institutional
+     * page receives a server-rendered collection.
      */
-    public function server_render_foundations_library($return, $tag, $attr, $match) {
-        if ($return !== null || is_admin() || !$this->is_foundations_page_request()) {
-            return $return;
+    public function replace_foundations_library_shortcode(): void {
+        remove_shortcode('sc_foundations_library');
+        add_shortcode('sc_foundations_library', [$this, 'render_foundations_library_shortcode']);
+    }
+
+    /**
+     * Render the original documentation interface outside the institutional
+     * Foundations page and a REST-independent collection on the canonical page.
+     *
+     * @param mixed $atts Shortcode attributes.
+     */
+    public function render_foundations_library_shortcode($atts = []): string {
+        $attributes = is_array($atts) ? $atts : [];
+
+        if (!$this->is_foundations_page_request()) {
+            if (class_exists('SC_Library_Documentation') && is_callable(['SC_Library_Documentation', 'render_shortcode'])) {
+                return (string) SC_Library_Documentation::render_shortcode($attributes);
+            }
+            return '';
         }
 
-        $attributes = is_array($attr) ? $attr : [];
-        $tag = (string) $tag;
-
-        $is_foundations_library = $tag === 'sc_foundations_library';
-        $is_legacy_library = false;
-
-        if ($tag === 'sc_library') {
-            $collection = sanitize_key((string) ($attributes['collection'] ?? ''));
-            $mode = sanitize_key((string) ($attributes['mode'] ?? ''));
-            $is_legacy_library = $collection === 'foundations'
-                && in_array($mode, ['documentation', 'foundations', 'foundation'], true);
-        }
-
-        if (!$is_foundations_library && !$is_legacy_library) {
-            return $return;
-        }
-
-        $show_header_raw = strtolower((string) ($attributes['show_header'] ?? 'false'));
-        $show_header = in_array($show_header_raw, ['1', 'true', 'yes', 'on'], true) ? 'yes' : 'no';
-        $search_raw = strtolower((string) ($attributes['search'] ?? 'true'));
-        $show_filters = in_array($search_raw, ['0', 'false', 'no', 'off'], true) ? 'no' : 'yes';
-
-        return $this->catalog_shortcode([
-            'title'        => sanitize_text_field((string) ($attributes['title'] ?? __('Foundation Documents', 'sustainable-catalyst-library'))),
-            'status'       => '',
-            'type'         => '',
-            'limit'        => 250,
-            'show_filters' => $show_filters,
-            'show_header'  => $show_header,
-        ]);
+        return $this->render_foundations_collection($attributes);
     }
 
     /**
@@ -719,6 +700,286 @@ final class SC_Library_Foundation_System_V200 {
         $path = trim((string) wp_parse_url($request_uri, PHP_URL_PATH), '/');
 
         return in_array($path, ['institution/foundations', 'foundations'], true);
+    }
+
+    /**
+     * Render every published record assigned to the retained Foundations
+     * collection. This deliberately queries WordPress taxonomy relationships
+     * rather than the Library search index or a public REST endpoint.
+     */
+    private function render_foundations_collection(array $atts): string {
+        $atts = shortcode_atts([
+            'title'            => __('Foundations Documentation', 'sustainable-catalyst-library'),
+            'show_header'      => 'false',
+            'include_archived' => 'false',
+            'per_page'         => '250',
+        ], $atts, 'sc_foundations_library');
+
+        $search = sanitize_text_field(wp_unslash((string) ($_GET['doc_search'] ?? '')));
+        $status_filter = sanitize_key((string) ($_GET['doc_status'] ?? ''));
+        $type_filter = sanitize_key((string) ($_GET['doc_type'] ?? ''));
+        $include_archived = filter_var(
+            $_GET['doc_archived'] ?? $atts['include_archived'],
+            FILTER_VALIDATE_BOOLEAN
+        );
+        $show_header = filter_var($atts['show_header'], FILTER_VALIDATE_BOOLEAN);
+
+        $statuses = class_exists('SC_Library_Documentation')
+            ? SC_Library_Documentation::statuses()
+            : [
+                'living' => 'Living documentation',
+                'current' => 'Current',
+                'pdf_snapshot' => 'PDF snapshot',
+                'draft' => 'Draft',
+                'superseded' => 'Superseded',
+                'archived' => 'Archived',
+            ];
+
+        $types = class_exists('SC_Library_Documentation')
+            ? SC_Library_Documentation::document_types()
+            : [
+                'institution' => 'Institution and foundations',
+                'brand' => 'Brand and identity',
+                'mission' => 'Mission and positioning',
+                'product' => 'Product brief',
+                'technical' => 'Technical documentation',
+                'methodology' => 'Methodology and trust',
+                'policy' => 'Policy or licensing',
+                'release' => 'Release documentation',
+                'historical' => 'Historical brief or snapshot',
+                'custom' => 'Custom documentation',
+            ];
+
+        $records = $this->query_foundations_collection_records(
+            $search,
+            $status_filter,
+            $type_filter,
+            $include_archived,
+            min(500, max(1, absint($atts['per_page'])))
+        );
+
+        ob_start();
+        ?>
+        <section class="sc-fnd-catalog sc-fnd-catalog--collection" data-foundations-server-rendered="1">
+            <?php if ($show_header) : ?>
+                <header>
+                    <p class="sc-fnd-kicker"><?php esc_html_e('Sustainable Catalyst Foundations', 'sustainable-catalyst-library'); ?></p>
+                    <h2><?php echo esc_html((string) $atts['title']); ?></h2>
+                </header>
+            <?php endif; ?>
+
+            <form class="sc-fnd-catalog-filters" method="get" action="">
+                <label>
+                    <span><?php esc_html_e('Search', 'sustainable-catalyst-library'); ?></span>
+                    <input type="search" name="doc_search" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search documentation', 'sustainable-catalyst-library'); ?>">
+                </label>
+                <label>
+                    <span><?php esc_html_e('Category', 'sustainable-catalyst-library'); ?></span>
+                    <select name="doc_type">
+                        <option value=""><?php esc_html_e('All documentation', 'sustainable-catalyst-library'); ?></option>
+                        <?php foreach ($types as $key => $label) : ?>
+                            <option value="<?php echo esc_attr((string) $key); ?>" <?php selected($type_filter, (string) $key); ?>><?php echo esc_html((string) $label); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>
+                    <span><?php esc_html_e('Status', 'sustainable-catalyst-library'); ?></span>
+                    <select name="doc_status">
+                        <option value=""><?php esc_html_e('Current and living', 'sustainable-catalyst-library'); ?></option>
+                        <?php foreach ($statuses as $key => $label) : ?>
+                            <option value="<?php echo esc_attr((string) $key); ?>" <?php selected($status_filter, (string) $key); ?>><?php echo esc_html((string) $label); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label class="sc-fnd-checkbox">
+                    <input type="checkbox" name="doc_archived" value="1" <?php checked($include_archived); ?>>
+                    <span><?php esc_html_e('Include superseded and archived', 'sustainable-catalyst-library'); ?></span>
+                </label>
+                <button class="sc-fnd-button" type="submit"><?php esc_html_e('Apply filters', 'sustainable-catalyst-library'); ?></button>
+                <a class="sc-fnd-button sc-fnd-button--secondary" href="<?php echo esc_url(remove_query_arg(['doc_search', 'doc_type', 'doc_status', 'doc_archived'])); ?>"><?php esc_html_e('Reset', 'sustainable-catalyst-library'); ?></a>
+            </form>
+
+            <p class="sc-fnd-result-count" role="status">
+                <?php
+                printf(
+                    esc_html(_n('%s documentation record', '%s documentation records', count($records), 'sustainable-catalyst-library')),
+                    esc_html(number_format_i18n(count($records)))
+                );
+                ?>
+            </p>
+
+            <div class="sc-fnd-catalog-grid">
+                <?php if ($records) : ?>
+                    <?php foreach ($records as $record) : ?>
+                        <article class="sc-fnd-card">
+                            <div class="sc-fnd-card-meta">
+                                <span><?php echo esc_html($record['identifier']); ?></span>
+                                <span><?php echo esc_html($record['status_label']); ?></span>
+                            </div>
+                            <h3><a href="<?php echo esc_url($record['url']); ?>"><?php echo esc_html($record['title']); ?></a></h3>
+                            <?php if ($record['excerpt']) : ?>
+                                <p><?php echo esc_html($record['excerpt']); ?></p>
+                            <?php endif; ?>
+                            <div class="sc-fnd-card-footer">
+                                <span><?php echo esc_html($record['type_label']); ?></span>
+                                <?php if ($record['version']) : ?><span><?php echo esc_html(sprintf(__('Version %s', 'sustainable-catalyst-library'), $record['version'])); ?></span><?php endif; ?>
+                            </div>
+                            <div class="sc-fnd-card-actions">
+                                <a href="<?php echo esc_url($record['url']); ?>"><?php esc_html_e('Open record', 'sustainable-catalyst-library'); ?></a>
+                                <?php if ($record['authority_url'] && $record['authority_url'] !== $record['url']) : ?>
+                                    <a href="<?php echo esc_url($record['authority_url']); ?>"><?php esc_html_e('Authoritative source', 'sustainable-catalyst-library'); ?></a>
+                                <?php endif; ?>
+                                <?php if ($record['pdf_url']) : ?>
+                                    <a href="<?php echo esc_url($record['pdf_url']); ?>"><?php esc_html_e('PDF snapshot', 'sustainable-catalyst-library'); ?></a>
+                                <?php endif; ?>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <p class="sc-fnd-empty"><?php esc_html_e('No published documentation records match these filters.', 'sustainable-catalyst-library'); ?></p>
+                <?php endif; ?>
+            </div>
+        </section>
+        <?php
+        return (string) ob_get_clean();
+    }
+
+    /**
+     * Query retained collection membership directly from WordPress.
+     *
+     * @return array<int,array<string,string>>
+     */
+    private function query_foundations_collection_records(
+        string $search,
+        string $status_filter,
+        string $type_filter,
+        bool $include_archived,
+        int $limit
+    ): array {
+        if (!class_exists('SC_Library_Taxonomies')) {
+            return [];
+        }
+
+        $taxonomy = SC_Library_Taxonomies::COLLECTION;
+        if (!taxonomy_exists($taxonomy)) {
+            return [];
+        }
+
+        $term = get_term_by('slug', 'foundations', $taxonomy);
+        if (!$term instanceof WP_Term) {
+            return [];
+        }
+
+        $object_ids = get_objects_in_term((int) $term->term_id, $taxonomy);
+        if (is_wp_error($object_ids) || !$object_ids) {
+            return [];
+        }
+
+        $taxonomy_object = get_taxonomy($taxonomy);
+        $post_types = $taxonomy_object && !empty($taxonomy_object->object_type)
+            ? array_values(array_filter(array_map('sanitize_key', (array) $taxonomy_object->object_type), 'post_type_exists'))
+            : ['page', 'post', 'sc_foundation_doc'];
+
+        if (post_type_exists('sc_foundation_doc') && !in_array('sc_foundation_doc', $post_types, true)) {
+            $post_types[] = 'sc_foundation_doc';
+        }
+
+        $query = new WP_Query([
+            'post_type'              => $post_types,
+            'post_status'            => 'publish',
+            'post__in'               => array_values(array_unique(array_map('absint', $object_ids))),
+            'posts_per_page'         => $limit,
+            'orderby'                => ['menu_order' => 'ASC', 'modified' => 'DESC', 'title' => 'ASC'],
+            'order'                  => 'ASC',
+            's'                      => $search,
+            'ignore_sticky_posts'    => true,
+            'no_found_rows'          => true,
+            'update_post_meta_cache' => true,
+            'update_post_term_cache' => true,
+        ]);
+
+        $statuses = class_exists('SC_Library_Documentation') ? SC_Library_Documentation::statuses() : [];
+        $types = class_exists('SC_Library_Documentation') ? SC_Library_Documentation::document_types() : [];
+        $records = [];
+
+        foreach ($query->posts as $post) {
+            if (!$post instanceof WP_Post) {
+                continue;
+            }
+
+            $status = sanitize_key((string) get_post_meta($post->ID, '_sc_library_doc_status', true));
+            if ($status === '') {
+                $status = sanitize_key((string) get_post_meta($post->ID, self::META_PREFIX . 'status', true));
+            }
+            if ($status === '') {
+                $status = 'current';
+            }
+
+            $type = sanitize_key((string) get_post_meta($post->ID, '_sc_library_doc_type', true));
+            if ($type === '') {
+                $type = sanitize_key((string) get_post_meta($post->ID, self::META_PREFIX . 'record_type', true));
+            }
+            if ($type === '') {
+                $type = $post->post_type === 'sc_foundation_doc' ? 'institution' : 'custom';
+            }
+
+            if (!$include_archived && in_array($status, ['superseded', 'archived', 'historical-record', 'withdrawn'], true)) {
+                continue;
+            }
+            if ($status_filter !== '' && $status !== $status_filter) {
+                continue;
+            }
+            if ($type_filter !== '' && $type !== $type_filter) {
+                continue;
+            }
+
+            $new_meta = $post->post_type === 'sc_foundation_doc' ? $this->metadata($post->ID) : [];
+            $identifier = (string) ($new_meta['document_id'] ?? '');
+            if ($identifier === '') {
+                $identifier = sprintf('SC-LIB-%d', $post->ID);
+            }
+
+            $excerpt = trim((string) ($new_meta['subtitle'] ?? ''));
+            if ($excerpt === '') {
+                $excerpt = wp_strip_all_tags(get_the_excerpt($post), true);
+            }
+            if ($excerpt === '') {
+                $excerpt = wp_trim_words(wp_strip_all_tags((string) $post->post_content, true), 32);
+            }
+
+            $version = (string) get_post_meta($post->ID, '_sc_library_doc_version', true);
+            if ($version === '') {
+                $version = (string) get_post_meta($post->ID, '_sc_foundation_version', true);
+            }
+
+            $authority_url = esc_url_raw((string) get_post_meta($post->ID, '_sc_library_doc_authority_url', true));
+            if ($authority_url === '') {
+                $authority_url = esc_url_raw((string) get_post_meta($post->ID, '_sc_library_doc_webpage_url', true));
+            }
+
+            $pdf_url = esc_url_raw((string) get_post_meta($post->ID, '_sc_library_doc_pdf_url', true));
+            if ($pdf_url === '' && $post->post_type === 'sc_foundation_doc') {
+                $pdf_url = $this->pdf_url($post->ID);
+            }
+
+            $records[] = [
+                'identifier'    => $identifier,
+                'title'         => get_the_title($post),
+                'excerpt'       => $excerpt,
+                'url'           => get_permalink($post),
+                'status'        => $status,
+                'status_label'  => (string) ($statuses[$status] ?? self::STATUSES[$status] ?? ucwords(str_replace(['-', '_'], ' ', $status))),
+                'type'          => $type,
+                'type_label'    => (string) ($types[$type] ?? self::TYPES[$type] ?? ucwords(str_replace(['-', '_'], ' ', $type))),
+                'version'       => $version,
+                'authority_url' => $authority_url,
+                'pdf_url'       => $pdf_url,
+            ];
+        }
+
+        wp_reset_postdata();
+
+        return $records;
     }
 
     public function catalog_shortcode(array $atts = []): string {
