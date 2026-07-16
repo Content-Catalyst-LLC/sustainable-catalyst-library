@@ -26,7 +26,7 @@ def test_load_order_and_version():
     assert "class-sc-library-institutional-collections-archives.php" in text
     assert "new SC_Library_Institutional_Collections_Archives" in text
     assert text.index("class-sc-library-research-quality-governance.php") < text.index("class-sc-library-institutional-collections-archives.php")
-    assert "SC_LIBRARY_VERSION : '3.8.0'" in text
+    assert "SC_LIBRARY_VERSION : '3.9.0'" in text
     assert "public const VERSION = '3.6.0'" in read(ARCHIVES)
 
 

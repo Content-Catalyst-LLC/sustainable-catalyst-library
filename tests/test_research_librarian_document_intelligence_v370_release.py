@@ -27,7 +27,7 @@ def test_load_order_and_version():
     assert "class-sc-library-research-librarian-document-intelligence.php" in text
     assert "new SC_Library_Research_Librarian_Document_Intelligence" in text
     assert text.index("class-sc-library-institutional-collections-archives.php") < text.index("class-sc-library-research-librarian-document-intelligence.php")
-    assert "SC_LIBRARY_VERSION : '3.8.0'" in text
+    assert "SC_LIBRARY_VERSION : '3.9.0'" in text
     assert "public const VERSION = '3.7.0'" in read(INTEL)
 
 

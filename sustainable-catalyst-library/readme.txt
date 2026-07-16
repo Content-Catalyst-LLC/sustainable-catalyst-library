@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 3.8.0
+Stable tag: 3.9.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,20 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 3.9.0 =
+* Adds Public API, Export, and Federation Hardening.
+* Adds versioned capability, catalog, record, export, federation, import, dashboard, and migration REST contracts.
+* Adds opaque cursor pagination, bounded page sizes, ETags, conditional GET, cache policy, security headers, and response redaction.
+* Adds 32-byte scoped bearer tokens with SHA-256-only storage, expiration, revocation, last-used tracking, and per-minute limits.
+* Adds JSON, JSON-LD, NDJSON, CSV, and ZIP research-bundle exports.
+* Adds resumable export jobs, private export storage, deterministic sorting, record hashes, records hash, and manifest hash.
+* Adds federation node discovery, governed peers, trust levels, capability checks, HTTPS-only safe remote access, and private-network rejection.
+* Adds HMAC-SHA256 signed webhooks with no redirects, bounded exponential retry, and failure archives.
+* Adds federation import size limits, schema validation, peer-trust validation, SHA-256 quarantine, and administrator decisions without automatic publication.
+* Adds redacted API audit logs, Research Librarian context, cross-product handoffs, shortcodes, migration, AJAX, and WP-CLI.
+* Preserves all v3.8.0 and earlier Knowledge Library systems.
+
 
 = 3.8.0 =
 * Adds Collaborative Review and Research Publishing.

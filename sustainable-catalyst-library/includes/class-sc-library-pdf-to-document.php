@@ -901,6 +901,6 @@ final class SC_Library_PDF_To_Document {
     }
 
     private function version() {
-        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '3.8.0';
+        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '3.9.0';
     }
 }
