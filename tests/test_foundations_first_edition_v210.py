@@ -22,11 +22,11 @@ checks = {
     'HTML content installed': "'post_content' => wp_kses_post($content)" in provisioner,
     'PDF attachment preserved': '_sc_foundation_pdf_attachment_id' in provisioner,
     'Foundations collection assigned': 'wp_set_object_terms' in provisioner,
-    'system version': "SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.4" in system,
+    'system version': "SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.5" in system,
 }
 
 for name, passed in checks.items():
     print(('PASS' if passed else 'FAIL') + ': ' + name)
 if not all(checks.values()):
     sys.exit(1)
-print('PASS: Foundations v2.1.4 native HTML publication package')
+print('PASS: Foundations v2.1.5 live catalog activation package')

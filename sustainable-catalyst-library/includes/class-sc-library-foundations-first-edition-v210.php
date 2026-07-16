@@ -1,6 +1,6 @@
 <?php
 /**
- * Sustainable Catalyst Foundations v2.1.4
+ * Sustainable Catalyst Foundations v2.1.5
  *
  * Automatically creates the 13 Institutional Foundations First Edition
  * records as real, published WordPress HTML Foundation Documents. The earlier
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) { exit; }
 final class SC_Library_Foundations_First_Edition_V210 {
     private static ?self $instance = null;
 
-    private const RELEASE = '2.1.4';
+    private const RELEASE = '2.1.5';
     private const CONTENT_EDITION = '2.1.0';
     private const EXPECTED_COUNT = 13;
     private const IMPORT_REL = 'assets/foundations/v2.1.0/import/foundations-first-edition.json';
@@ -29,7 +29,7 @@ final class SC_Library_Foundations_First_Edition_V210 {
         add_action('admin_init', [$this, 'maybe_provision'], 25);
         add_action('admin_menu', [$this, 'admin_menu'], 90);
         add_action('admin_notices', [$this, 'admin_notice']);
-        add_action('admin_post_sc_foundations_v214_reprovision', [$this, 'handle_reprovision']);
+        add_action('admin_post_sc_foundations_v215_reprovision', [$this, 'handle_reprovision']);
 
         if (defined('WP_CLI') && WP_CLI) {
             WP_CLI::add_command('sc foundations-first-edition', [$this, 'cli_provision']);
@@ -56,7 +56,11 @@ final class SC_Library_Foundations_First_Edition_V210 {
         }
 
         $installed = (string) get_option('sc_library_foundations_first_edition_version', '');
-        if ($installed === self::RELEASE && $this->count_provisioned() === self::EXPECTED_COUNT) {
+        if (
+            $installed === self::RELEASE
+            && $this->count_provisioned() === self::EXPECTED_COUNT
+            && $this->count_catalog_ready() === self::EXPECTED_COUNT
+        ) {
             return;
         }
 
@@ -119,13 +123,15 @@ final class SC_Library_Foundations_First_Edition_V210 {
         }
 
         $count = $this->count_provisioned();
+        $catalog_ready = $this->count_catalog_ready();
         $result = get_option('sc_library_foundations_first_edition_last_result', []);
-        $complete = $count === self::EXPECTED_COUNT;
+        $complete = $count === self::EXPECTED_COUNT && $catalog_ready === self::EXPECTED_COUNT;
 
         echo '<div class="wrap"><h1>Institutional Foundations First Edition</h1>';
         echo '<p>The collection is provisioned automatically as published HTML Foundation Documents. No import is required.</p>';
         echo '<div class="notice ' . ($complete ? 'notice-success' : 'notice-warning') . ' inline"><p>';
-        echo '<strong>' . esc_html(sprintf('%d of %d records are present.', $count, self::EXPECTED_COUNT)) . '</strong>';
+        echo '<strong>' . esc_html(sprintf('%d of %d records are present.', $count, self::EXPECTED_COUNT)) . '</strong><br>';
+        echo esc_html(sprintf('%d of %d are assigned to the Foundations family and Foundation Document type.', $catalog_ready, self::EXPECTED_COUNT));
         echo '</p></div>';
 
         if (is_array($result) && $result) {
@@ -150,8 +156,8 @@ final class SC_Library_Foundations_First_Edition_V210 {
 
         echo '<hr><h2>Repair or refresh</h2><p>Re-provisioning is idempotent. It updates records by stable document ID and does not create duplicates.</p>';
         echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
-        wp_nonce_field('sc_foundations_v214_reprovision');
-        echo '<input type="hidden" name="action" value="sc_foundations_v214_reprovision">';
+        wp_nonce_field('sc_foundations_v215_reprovision');
+        echo '<input type="hidden" name="action" value="sc_foundations_v215_reprovision">';
         submit_button('Re-provision all 13 HTML documents', 'secondary');
         echo '</form></div>';
     }
@@ -160,7 +166,7 @@ final class SC_Library_Foundations_First_Edition_V210 {
         if (!current_user_can('manage_options')) {
             wp_die('Insufficient permission.');
         }
-        check_admin_referer('sc_foundations_v214_reprovision');
+        check_admin_referer('sc_foundations_v215_reprovision');
 
         delete_option('sc_library_foundations_first_edition_version');
         $result = $this->provision_all();
@@ -342,6 +348,40 @@ final class SC_Library_Foundations_First_Edition_V210 {
         return count($query->posts);
     }
 
+    private function count_catalog_ready(): int {
+        if (!taxonomy_exists('sc_document_family') || !taxonomy_exists('sc_document_type')) {
+            return 0;
+        }
+
+        $query = new WP_Query([
+            'post_type' => 'sc_foundation_doc',
+            'post_status' => 'publish',
+            'posts_per_page' => self::EXPECTED_COUNT + 10,
+            'fields' => 'ids',
+            'meta_query' => [[
+                'key' => '_sc_library_foundations_content_edition',
+                'value' => self::CONTENT_EDITION,
+            ]],
+            'tax_query' => [
+                'relation' => 'AND',
+                [
+                    'taxonomy' => 'sc_document_family',
+                    'field' => 'slug',
+                    'terms' => ['foundations'],
+                ],
+                [
+                    'taxonomy' => 'sc_document_type',
+                    'field' => 'slug',
+                    'terms' => ['foundation-document'],
+                ],
+            ],
+            'no_found_rows' => true,
+            'cache_results' => false,
+        ]);
+
+        return count($query->posts);
+    }
+
     private function update_meta(int $post_id, array $record): void {
         $text_fields = [
             'document_id', 'subtitle', 'record_type', 'authority_level', 'status',
@@ -381,6 +421,12 @@ final class SC_Library_Foundations_First_Edition_V210 {
         update_post_meta($post_id, '_sc_library_foundations_system_version', self::RELEASE);
         update_post_meta($post_id, '_sc_library_foundations_content_edition', self::CONTENT_EDITION);
 
+        // Synchronize metadata used by the current public Document Repository.
+        update_post_meta($post_id, '_sc_document_version', $version);
+        update_post_meta($post_id, '_sc_document_publication_date', sanitize_text_field((string) ($record['effective_date'] ?? '')));
+        update_post_meta($post_id, '_sc_document_lifecycle_status', 'current');
+        update_post_meta($post_id, '_sc_document_repository_order', absint($record['menu_order'] ?? 0));
+
         // Native HTML records are authored directly in WordPress. Their PDF is
         // a fixed snapshot and must never trigger PDF-to-HTML conversion gates.
         update_post_meta($post_id, '_sc_foundation_source_mode', 'native_html');
@@ -391,30 +437,60 @@ final class SC_Library_Foundations_First_Edition_V210 {
     }
 
     private function assign_taxonomies(int $post_id): void {
-        if (!class_exists('SC_Library_Taxonomies')) {
-            return;
-        }
-
-        $collection_tax = SC_Library_Taxonomies::COLLECTION;
-        if (taxonomy_exists($collection_tax)) {
-            $slug = class_exists('SC_Library_Documentation')
-                ? SC_Library_Documentation::COLLECTION_SLUG
-                : 'foundations';
-            if (!term_exists($slug, $collection_tax)) {
-                wp_insert_term('Foundations', $collection_tax, ['slug' => $slug]);
-            }
-            wp_set_object_terms($post_id, [$slug], $collection_tax, false);
-        }
-
-        if (defined('SC_Library_Taxonomies::DOCUMENT_CATEGORY')) {
-            $category_tax = SC_Library_Taxonomies::DOCUMENT_CATEGORY;
-            if (taxonomy_exists($category_tax)) {
-                if (!term_exists('institutional-foundations', $category_tax)) {
-                    wp_insert_term('Institutional Foundations', $category_tax, ['slug' => 'institutional-foundations']);
+        if (class_exists('SC_Library_Taxonomies')) {
+            $collection_tax = SC_Library_Taxonomies::COLLECTION;
+            if (taxonomy_exists($collection_tax)) {
+                $slug = class_exists('SC_Library_Documentation')
+                    ? SC_Library_Documentation::COLLECTION_SLUG
+                    : 'foundations';
+                $term_id = $this->ensure_term($collection_tax, $slug, 'Foundations');
+                if ($term_id > 0) {
+                    wp_set_object_terms($post_id, [$term_id], $collection_tax, false);
                 }
-                wp_set_object_terms($post_id, ['institutional-foundations'], $category_tax, false);
+            }
+
+            if (defined('SC_Library_Taxonomies::DOCUMENT_CATEGORY')) {
+                $category_tax = SC_Library_Taxonomies::DOCUMENT_CATEGORY;
+                if (taxonomy_exists($category_tax)) {
+                    $term_id = $this->ensure_term($category_tax, 'institutional-foundations', 'Institutional Foundations');
+                    if ($term_id > 0) {
+                        wp_set_object_terms($post_id, [$term_id], $category_tax, false);
+                    }
+                }
             }
         }
+
+        // The current public repository maps the Foundations shortcode to these
+        // two taxonomies. Both assignments are required for live visibility.
+        foreach ([
+            'sc_document_family' => ['foundations', 'Foundations'],
+            'sc_document_type' => ['foundation-document', 'Foundation Document'],
+        ] as $taxonomy => $definition) {
+            if (!taxonomy_exists($taxonomy)) {
+                continue;
+            }
+            register_taxonomy_for_object_type($taxonomy, 'sc_foundation_doc');
+            $term_id = $this->ensure_term($taxonomy, $definition[0], $definition[1]);
+            if ($term_id > 0) {
+                wp_set_object_terms($post_id, [$term_id], $taxonomy, false);
+            }
+        }
+
+        clean_object_term_cache($post_id, 'sc_foundation_doc');
+        clean_post_cache($post_id);
+    }
+
+    private function ensure_term(string $taxonomy, string $slug, string $name): int {
+        $term = get_term_by('slug', $slug, $taxonomy);
+        if ($term instanceof WP_Term) {
+            return (int) $term->term_id;
+        }
+        $term = get_term_by('name', $name, $taxonomy);
+        if ($term instanceof WP_Term) {
+            return (int) $term->term_id;
+        }
+        $created = wp_insert_term($name, $taxonomy, ['slug' => $slug]);
+        return is_wp_error($created) ? 0 : absint($created['term_id'] ?? 0);
     }
 
     /**
@@ -478,6 +554,7 @@ final class SC_Library_Foundations_First_Edition_V210 {
 
     private function store_result(array $result): void {
         $result['record_count'] = $this->count_provisioned();
+        $result['catalog_ready_count'] = $this->count_catalog_ready();
         $result['timestamp'] = current_time('mysql', true);
         update_option('sc_library_foundations_first_edition_last_result', $result, false);
     }
