@@ -44,7 +44,7 @@ def test_version_and_schemas():
         "sc-library-project-export/1.0",
     ):
         assert marker in text, marker
-    assert "SC_LIBRARY_VERSION : '3.9.0'" in read(WRAPPER)
+    assert "SC_LIBRARY_VERSION : '4.0.0'" in read(WRAPPER)
 
 
 def test_project_brief_fields():

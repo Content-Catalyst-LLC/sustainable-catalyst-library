@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 3.9.0
+Stable tag: 4.0.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,20 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.0.0 =
+* Adds the Connected Institutional Knowledge and Research Platform.
+* Adds public Institution and Research Unit records.
+* Adds a unified typed registry across documents, sources, claims, projects, semantics, pathways, collections, reviews, publications, exports, federation, and institutional records.
+* Adds stable UUIDs, Sustainable Catalyst URNs, institution and unit assignments, visibility, governance state, stewards, content hashes, registry hashes, and registration timestamps.
+* Adds institutional capabilities for reading, administration, record management, publishing, permissions, handoffs, health, and exports.
+* Adds unified public/private search with institution, unit, visibility, governance, facets, opaque cursor pagination, and ETags.
+* Adds an institutional knowledge graph combining v3.2.0 semantic relationships with institution and research-unit edges.
+* Adds platform health across the retained v2.4.0-v3.9.0 subsystems.
+* Adds institutional handoff envelopes integrated with the v3.4.0 cross-product handoff system.
+* Adds the Institutional Platform workspace, public research portal, shortcodes, REST API, AJAX operations, migration, and WP-CLI.
+* Preserves all v3.9.0 and earlier Knowledge Library systems.
+
 
 = 3.9.0 =
 * Adds Public API, Export, and Federation Hardening.

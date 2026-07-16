@@ -28,7 +28,7 @@ def test_reliability_load_order():
 
 
 def test_versions():
-    assert "SC_LIBRARY_VERSION : '3.9.0'" in read(WRAPPER)
+    assert "SC_LIBRARY_VERSION : '4.0.0'" in read(WRAPPER)
     assert "public const VERSION = '3.0.1'" in read(ENVIRONMENT)
     assert "public const VERSION = '3.0.1'" in read(RELIABILITY)
 

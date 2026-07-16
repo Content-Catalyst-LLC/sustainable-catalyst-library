@@ -387,7 +387,7 @@ def test_responsive_spartan_reliability_css():
 
 def test_connector_class_and_wrapper_versions():
     assert "public const VERSION = '2.6.1'" in read(CONNECTORS)
-    assert "SC_LIBRARY_VERSION : '3.9.0'" in read(WRAPPER)
+    assert "SC_LIBRARY_VERSION : '4.0.0'" in read(WRAPPER)
 
 
 def main():

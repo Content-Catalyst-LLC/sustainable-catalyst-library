@@ -230,7 +230,7 @@ def test_recovery_css_and_mobile_controls():
 def test_version_and_route_compatibility():
     assert "public const VERSION = '2.4.1'" in read(OCR)
     assert "public const VERSION = '2.4.1'" in read(RELIABILITY)
-    assert "SC_LIBRARY_VERSION : '3.9.0'" in read(WRAPPER)
+    assert "SC_LIBRARY_VERSION : '4.0.0'" in read(WRAPPER)
     assert "public const ROUTE_VERSION = '2.3.0'" in read(REPOSITORY)
     assert "class-sc-library-pdf-bulk-import-repair.php" in read(WRAPPER)
     assert "class-sc-library-pdf-conversion-reliability.php" in read(WRAPPER)

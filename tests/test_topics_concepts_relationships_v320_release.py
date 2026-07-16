@@ -27,7 +27,7 @@ def test_load_order_and_version():
     assert "class-sc-library-topics-concepts-relationships.php" in wrapper
     assert wrapper.index("class-sc-library-source-versioning-integrity.php") < wrapper.index("class-sc-library-topics-concepts-relationships.php")
     assert "new SC_Library_Topics_Concepts_Relationships" in wrapper
-    assert "SC_LIBRARY_VERSION : '3.9.0'" in wrapper
+    assert "SC_LIBRARY_VERSION : '4.0.0'" in wrapper
     assert "public const VERSION = '3.2.0'" in read(SEMANTIC)
 
 
