@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('SC_LIBRARY_FOUNDATIONS_VERSION')) {
-    define('SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.3');
+    define('SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.4');
 }
 
 final class SC_Library_Foundation_System_V200 {

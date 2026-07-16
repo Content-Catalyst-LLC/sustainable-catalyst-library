@@ -1,6 +1,6 @@
 <?php
 /**
- * Sustainable Catalyst Foundations v2.1.3
+ * Sustainable Catalyst Foundations v2.1.4
  *
  * Automatically creates the 13 Institutional Foundations First Edition
  * records as real, published WordPress HTML Foundation Documents. The earlier
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) { exit; }
 final class SC_Library_Foundations_First_Edition_V210 {
     private static ?self $instance = null;
 
-    private const RELEASE = '2.1.3';
+    private const RELEASE = '2.1.4';
     private const CONTENT_EDITION = '2.1.0';
     private const EXPECTED_COUNT = 13;
     private const IMPORT_REL = 'assets/foundations/v2.1.0/import/foundations-first-edition.json';
@@ -29,7 +29,7 @@ final class SC_Library_Foundations_First_Edition_V210 {
         add_action('admin_init', [$this, 'maybe_provision'], 25);
         add_action('admin_menu', [$this, 'admin_menu'], 90);
         add_action('admin_notices', [$this, 'admin_notice']);
-        add_action('admin_post_sc_foundations_v213_reprovision', [$this, 'handle_reprovision']);
+        add_action('admin_post_sc_foundations_v214_reprovision', [$this, 'handle_reprovision']);
 
         if (defined('WP_CLI') && WP_CLI) {
             WP_CLI::add_command('sc foundations-first-edition', [$this, 'cli_provision']);
@@ -150,8 +150,8 @@ final class SC_Library_Foundations_First_Edition_V210 {
 
         echo '<hr><h2>Repair or refresh</h2><p>Re-provisioning is idempotent. It updates records by stable document ID and does not create duplicates.</p>';
         echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
-        wp_nonce_field('sc_foundations_v213_reprovision');
-        echo '<input type="hidden" name="action" value="sc_foundations_v213_reprovision">';
+        wp_nonce_field('sc_foundations_v214_reprovision');
+        echo '<input type="hidden" name="action" value="sc_foundations_v214_reprovision">';
         submit_button('Re-provision all 13 HTML documents', 'secondary');
         echo '</form></div>';
     }
@@ -160,7 +160,7 @@ final class SC_Library_Foundations_First_Edition_V210 {
         if (!current_user_can('manage_options')) {
             wp_die('Insufficient permission.');
         }
-        check_admin_referer('sc_foundations_v213_reprovision');
+        check_admin_referer('sc_foundations_v214_reprovision');
 
         delete_option('sc_library_foundations_first_edition_version');
         $result = $this->provision_all();
@@ -238,7 +238,10 @@ final class SC_Library_Foundations_First_Edition_V210 {
 
             $postarr = [
                 'post_type' => 'sc_foundation_doc',
-                'post_status' => 'publish',
+                // Create/update the HTML body as a draft first. The retained PDF
+                // publication guards run during wp_insert_post_data and cannot
+                // inspect post meta until the record has an ID.
+                'post_status' => 'draft',
                 'post_title' => sanitize_text_field((string) ($record['title'] ?? $doc_id)),
                 'post_name' => sanitize_title((string) ($record['slug'] ?? $doc_id)),
                 'post_excerpt' => sanitize_text_field((string) ($record['excerpt'] ?? '')),
@@ -267,8 +270,19 @@ final class SC_Library_Foundations_First_Edition_V210 {
             if ($attachment_result === true) {
                 $result['attachments']++;
             } elseif (is_string($attachment_result) && $attachment_result !== '') {
-                // HTML publication succeeds even when a PDF attachment needs repair.
+                // The HTML record remains authoritative even when its optional
+                // fixed PDF snapshot needs repair.
                 $result['errors'][] = $doc_id . ': ' . $attachment_result;
+            }
+
+            $published = wp_update_post(wp_slash([
+                'ID' => $post_id,
+                'post_status' => 'publish',
+            ]), true);
+            if (is_wp_error($published)) {
+                $result['errors'][] = $doc_id . ': publication failed: ' . $published->get_error_message();
+            } elseif ('publish' !== get_post_status($post_id)) {
+                $result['errors'][] = $doc_id . ': publication guard left the HTML record as ' . (string) get_post_status($post_id) . '.';
             }
         }
 
@@ -366,6 +380,14 @@ final class SC_Library_Foundations_First_Edition_V210 {
         update_post_meta($post_id, '_sc_library_doc_webpage_url', esc_url_raw(get_permalink($post_id)));
         update_post_meta($post_id, '_sc_library_foundations_system_version', self::RELEASE);
         update_post_meta($post_id, '_sc_library_foundations_content_edition', self::CONTENT_EDITION);
+
+        // Native HTML records are authored directly in WordPress. Their PDF is
+        // a fixed snapshot and must never trigger PDF-to-HTML conversion gates.
+        update_post_meta($post_id, '_sc_foundation_source_mode', 'native_html');
+        update_post_meta($post_id, '_sc_library_foundation_source_mode', 'native_html');
+        update_post_meta($post_id, '_sc_document_extraction_status', 'legacy_content');
+        update_post_meta($post_id, '_sc_document_extraction_method', 'native_html');
+        update_post_meta($post_id, '_sc_document_reviewed', 1);
     }
 
     private function assign_taxonomies(int $post_id): void {
@@ -402,6 +424,7 @@ final class SC_Library_Foundations_First_Edition_V210 {
         $expected_hash = sanitize_text_field((string) ($record['pdf_sha256'] ?? ''));
         $existing = absint(get_post_meta($post_id, '_sc_foundation_pdf_attachment_id', true));
         if ($existing > 0 && $expected_hash !== '' && get_post_meta($existing, '_sc_foundation_asset_sha256', true) === $expected_hash) {
+            $this->synchronize_pdf_meta($post_id, $existing);
             return false;
         }
 
@@ -434,10 +457,23 @@ final class SC_Library_Foundations_First_Edition_V210 {
         require_once ABSPATH . 'wp-admin/includes/image.php';
         wp_update_attachment_metadata($attachment, wp_generate_attachment_metadata($attachment, $bits['file']));
         update_post_meta($attachment, '_sc_foundation_asset_sha256', $expected_hash);
-        update_post_meta($post_id, '_sc_foundation_pdf_attachment_id', (int) $attachment);
+        $this->synchronize_pdf_meta($post_id, (int) $attachment);
         update_post_meta($post_id, '_sc_library_doc_pdf_url', esc_url_raw((string) wp_get_attachment_url($attachment)));
 
         return true;
+    }
+
+    private function synchronize_pdf_meta(int $post_id, int $attachment_id): void {
+        foreach ([
+            '_sc_library_foundation_page_pdf_id',
+            '_sc_library_pdf_attachment_id',
+            '_sc_library_foundation_pdf_attachment_id',
+            '_sc_library_foundation_attachment_id',
+            '_sc_foundation_pdf_attachment_id',
+            'sc_library_pdf_attachment_id',
+        ] as $meta_key) {
+            update_post_meta($post_id, $meta_key, $attachment_id);
+        }
     }
 
     private function store_result(array $result): void {

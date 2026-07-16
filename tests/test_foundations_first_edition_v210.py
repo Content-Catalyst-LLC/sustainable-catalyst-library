@@ -17,16 +17,16 @@ checks = {
     'combined pdf': (root / 'foundations-first-edition/collection/Sustainable_Catalyst_Institutional_Foundations_First_Edition_v2.1.0.pdf').is_file(),
     'automatic provisioner': "add_action('admin_init', [$this, 'maybe_provision'], 25)" in provisioner,
     'manual import removed': 'admin_post_sc_foundations_v210_import' not in provisioner and 'Import First Edition' not in provisioner,
-    'published post status': "'post_status' => 'publish'" in provisioner,
+    'draft-first publication flow': "'post_status' => 'draft'" in provisioner and "wp_update_post(wp_slash([" in provisioner,
     'stable id update': "'_sc_foundation_document_id'" in provisioner and 'find_by_document_id' in provisioner,
     'HTML content installed': "'post_content' => wp_kses_post($content)" in provisioner,
     'PDF attachment preserved': '_sc_foundation_pdf_attachment_id' in provisioner,
     'Foundations collection assigned': 'wp_set_object_terms' in provisioner,
-    'system version': "SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.3" in system,
+    'system version': "SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.4" in system,
 }
 
 for name, passed in checks.items():
     print(('PASS' if passed else 'FAIL') + ': ' + name)
 if not all(checks.values()):
     sys.exit(1)
-print('PASS: Foundations v2.1.3 automatic HTML provisioning package')
+print('PASS: Foundations v2.1.4 native HTML publication package')

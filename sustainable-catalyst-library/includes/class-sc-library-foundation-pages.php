@@ -246,6 +246,16 @@ final class SC_Library_Foundation_Pages {
         }
 
         $post_id = isset( $postarr['ID'] ) ? absint( $postarr['ID'] ) : 0;
+
+        // Foundations v2.1.4 native HTML publication exemption.
+        $native_mode = sanitize_key( (string) get_post_meta( $post_id, '_sc_foundation_source_mode', true ) );
+        if ( 'native_html' === $native_mode ) {
+            $native_content = trim( wp_strip_all_tags( (string) ( $data['post_content'] ?? '' ) ) );
+            if ( '' !== $native_content ) {
+                return $data;
+            }
+        }
+
         $submitted_attachment_id = isset( $_POST['sc_library_foundation_page_pdf_id'] )
             ? absint( wp_unslash( $_POST['sc_library_foundation_page_pdf_id'] ) )
             : 0;
