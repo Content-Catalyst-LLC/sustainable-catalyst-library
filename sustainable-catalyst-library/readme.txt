@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.0.1
+Stable tag: 4.0.2
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -131,6 +131,14 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.0.2 =
+* Prevents optional extension startup failures from terminating the Research Library page.
+* Wraps the public Research Library shortcode in a Throwable recovery boundary.
+* Adds a complete server-rendered fallback catalog using core WordPress queries.
+* Stores the exact recovered runtime error for administrators.
+* Preserves Foundations v2.1.6 and the 13 First Edition HTML documents.
+
 
 = 4.0.1 =
 * Adds the Discovery Interface Reliability Patch.

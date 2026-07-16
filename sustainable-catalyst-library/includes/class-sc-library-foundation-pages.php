@@ -1010,54 +1010,6 @@ final class SC_Library_Foundation_Pages {
     }
 }
 
-// Knowledge Library v3.9.0: retain citation/source records and add formatting, history, duplicate, and API reliability safeguards.
-require_once __DIR__ . '/class-sc-library-pdf-to-document.php';
-require_once __DIR__ . '/class-sc-library-pdf-conversion-reliability.php';
-require_once __DIR__ . '/class-sc-library-pdf-bulk-import-repair.php';
-require_once __DIR__ . '/class-sc-library-document-ocr-processing.php';
-require_once __DIR__ . '/class-sc-library-document-ocr-reliability.php';
-require_once __DIR__ . '/class-sc-library-document-repository-hardening.php';
-require_once __DIR__ . '/class-sc-library-document-public-repository.php';
-require_once __DIR__ . '/class-sc-library-citation-source-manager.php';
-require_once __DIR__ . '/class-sc-library-citation-source-reliability.php';
-require_once __DIR__ . '/class-sc-library-scholarly-library-connectors.php';
-require_once __DIR__ . '/class-sc-library-connector-holdings-reliability.php';
-require_once __DIR__ . '/class-sc-library-evidence-claim-linking.php';
-require_once __DIR__ . '/class-sc-library-connected-research-environment.php';
-require_once __DIR__ . '/class-sc-library-connected-research-reliability.php';
-require_once __DIR__ . '/class-sc-library-source-versioning-integrity.php';
-require_once __DIR__ . '/class-sc-library-topics-concepts-relationships.php';
-require_once __DIR__ . '/class-sc-library-knowledge-pathways-article-maps.php';
-require_once __DIR__ . '/class-sc-library-cross-product-research-handoffs.php';
-require_once __DIR__ . '/class-sc-library-research-quality-governance.php';
-require_once __DIR__ . '/class-sc-library-institutional-collections-archives.php';
-require_once __DIR__ . '/class-sc-library-research-librarian-document-intelligence.php';
-require_once __DIR__ . '/class-sc-library-collaborative-review-publishing.php';
-require_once __DIR__ . '/class-sc-library-public-api-export-federation.php';
-require_once __DIR__ . '/class-sc-library-connected-institutional-platform.php';
-require_once __DIR__ . '/class-sc-library-discovery-interface-reliability.php';
-new SC_Library_PDF_To_Document();
-new SC_Library_PDF_Conversion_Reliability();
-new SC_Library_PDF_Bulk_Import_Repair();
-new SC_Library_Document_OCR_Processing();
-new SC_Library_Document_OCR_Reliability();
-new SC_Library_Document_Repository_Hardening();
-new SC_Library_Document_Public_Repository();
-new SC_Library_Citation_Source_Manager();
-new SC_Library_Citation_Source_Reliability();
-new SC_Library_Scholarly_Library_Connectors();
-new SC_Library_Connector_Holdings_Reliability();
-new SC_Library_Evidence_Claim_Linking();
-new SC_Library_Connected_Research_Environment();
-new SC_Library_Connected_Research_Reliability();
-new SC_Library_Source_Versioning_Integrity();
-new SC_Library_Topics_Concepts_Relationships();
-new SC_Library_Knowledge_Pathways_Article_Maps();
-new SC_Library_Cross_Product_Research_Handoffs();
-new SC_Library_Research_Quality_Governance();
-new SC_Library_Institutional_Collections_Archives();
-new SC_Library_Research_Librarian_Document_Intelligence();
-new SC_Library_Collaborative_Review_Publishing();
-new SC_Library_Public_API_Export_Federation();
-new SC_Library_Connected_Institutional_Platform();
-new SC_Library_Discovery_Interface_Reliability();
+// Knowledge Library v4.0.2: load optional production extensions through a guarded bootstrap.
+require_once __DIR__ . '/class-sc-library-extension-bootstrap-v402.php';
+SC_Library_Extension_Bootstrap_V402::boot();

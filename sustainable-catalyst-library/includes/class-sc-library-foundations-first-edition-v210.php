@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) { exit; }
 final class SC_Library_Foundations_First_Edition_V210 {
     private static ?self $instance = null;
 
-    private const RELEASE = '2.1.5';
+    private const RELEASE = '2.1.6';
     private const CONTENT_EDITION = '2.1.0';
     private const EXPECTED_COUNT = 13;
     private const IMPORT_REL = 'assets/foundations/v2.1.0/import/foundations-first-edition.json';
@@ -29,7 +29,7 @@ final class SC_Library_Foundations_First_Edition_V210 {
         add_action('admin_init', [$this, 'maybe_provision'], 25);
         add_action('admin_menu', [$this, 'admin_menu'], 90);
         add_action('admin_notices', [$this, 'admin_notice']);
-        add_action('admin_post_sc_foundations_v215_reprovision', [$this, 'handle_reprovision']);
+        add_action('admin_post_sc_foundations_v216_reprovision', [$this, 'handle_reprovision']);
 
         if (defined('WP_CLI') && WP_CLI) {
             WP_CLI::add_command('sc foundations-first-edition', [$this, 'cli_provision']);
@@ -156,8 +156,8 @@ final class SC_Library_Foundations_First_Edition_V210 {
 
         echo '<hr><h2>Repair or refresh</h2><p>Re-provisioning is idempotent. It updates records by stable document ID and does not create duplicates.</p>';
         echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
-        wp_nonce_field('sc_foundations_v215_reprovision');
-        echo '<input type="hidden" name="action" value="sc_foundations_v215_reprovision">';
+        wp_nonce_field('sc_foundations_v216_reprovision');
+        echo '<input type="hidden" name="action" value="sc_foundations_v216_reprovision">';
         submit_button('Re-provision all 13 HTML documents', 'secondary');
         echo '</form></div>';
     }
@@ -166,7 +166,7 @@ final class SC_Library_Foundations_First_Edition_V210 {
         if (!current_user_can('manage_options')) {
             wp_die('Insufficient permission.');
         }
-        check_admin_referer('sc_foundations_v215_reprovision');
+        check_admin_referer('sc_foundations_v216_reprovision');
 
         delete_option('sc_library_foundations_first_edition_version');
         $result = $this->provision_all();
