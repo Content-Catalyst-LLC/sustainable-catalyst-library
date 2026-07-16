@@ -1,0 +1,179 @@
+{
+  "schema": "sc-foundations-source-crosswalk/1.0",
+  "sources": [
+    {
+      "filename": "Catalyst_Analytics_R_One_Pager(3).pdf",
+      "sha256": "4e180fc86e73e338514aa066d0f3aafd416f0898513a289ad3da98e2a32f444a"
+    },
+    {
+      "filename": "Catalyst_Canvas_One_Pager(1).pdf",
+      "sha256": "6f2f80a75874a6600c4c35ed68aed2614765636afa9a3448c791cb1d9a07cfc9"
+    },
+    {
+      "filename": "Catalyst_Canvas_One_Pager.pdf",
+      "sha256": "6f2f80a75874a6600c4c35ed68aed2614765636afa9a3448c791cb1d9a07cfc9"
+    },
+    {
+      "filename": "Catalyst_Data_One_Pager(1).pdf",
+      "sha256": "eadf78ea99723c3d736779054c35abc0c890eb1866793152489a191ff564142b"
+    },
+    {
+      "filename": "Catalyst_Finance_One_Pager (1)(1).pdf",
+      "sha256": "6d5515013b09e387949afbb7d738581633194c97792093d4faa80f3b6218bb56"
+    },
+    {
+      "filename": "Catalyst_Finance_One_Pager (1).pdf",
+      "sha256": "6d5515013b09e387949afbb7d738581633194c97792093d4faa80f3b6218bb56"
+    },
+    {
+      "filename": "Catalyst_Finance_One_Pager(1).pdf",
+      "sha256": "37f104998063ad9d378e2530bee44822e6e2fcdf21678b01fc27050fc6c6c439"
+    },
+    {
+      "filename": "Catalyst_Grit_One_Pager(1).pdf",
+      "sha256": "820bfcf68209f97a7f5dd34cc7773c2080ee1b64c819155d1e64143aa688c980"
+    },
+    {
+      "filename": "Catalyst_Grit_One_Pager(2).pdf",
+      "sha256": "820bfcf68209f97a7f5dd34cc7773c2080ee1b64c819155d1e64143aa688c980"
+    },
+    {
+      "filename": "Global_Impact_Catalyst_One_Pager(1).pdf",
+      "sha256": "7a0e88dc9a625d4c6d82721244df10a505e1b8f12e4fe36f9250ae4cec7add45"
+    },
+    {
+      "filename": "Narrative_Risk_Product_Brief(1).pdf",
+      "sha256": "3764a754409eeb1f44bfca7682ad36f7294da8383acb0cdda9a1ddf4a2bb6a45"
+    },
+    {
+      "filename": "Narrative_Risk_Product_Brief.pdf",
+      "sha256": "3764a754409eeb1f44bfca7682ad36f7294da8383acb0cdda9a1ddf4a2bb6a45"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Brand_Manifesto(1).pdf",
+      "sha256": "e9d576531846e601bec163e865d411096a18db0a9085a21d054da58b64c6c207"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Brand_Manifesto(2).pdf",
+      "sha256": "e9d576531846e601bec163e865d411096a18db0a9085a21d054da58b64c6c207"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Brand_Pillars(2).pdf",
+      "sha256": "2cf2f5e82c1dbc522caf269ff4a6c2075bf6d897f3ae0e7e878bc63655f1257c"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Brand_Pillars(3).pdf",
+      "sha256": "2cf2f5e82c1dbc522caf269ff4a6c2075bf6d897f3ae0e7e878bc63655f1257c"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Disclaimer(1).pdf",
+      "sha256": "9f2ff31e1d88a2bca39378b2d2d814b557221af7b3902eb07fe41581cc1a2551"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Disclaimer(2).pdf",
+      "sha256": "9f2ff31e1d88a2bca39378b2d2d814b557221af7b3902eb07fe41581cc1a2551"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Editorial_Ethos(1).pdf",
+      "sha256": "a9884b1cbfa8a9f58390ffbe02980ee782b85a778314ec5ad394df35dc0c71a5"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Editorial_Ethos(2).pdf",
+      "sha256": "a9884b1cbfa8a9f58390ffbe02980ee782b85a778314ec5ad394df35dc0c71a5"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Ethical_Code_of_Conduct(1).pdf",
+      "sha256": "6afd1b7291772c06e52383c37615abb344e6a16ef1864295b3c0918e393feb1c"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Ethical_Code_of_Conduct(2).pdf",
+      "sha256": "6afd1b7291772c06e52383c37615abb344e6a16ef1864295b3c0918e393feb1c"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Logo_Usage(2).pdf",
+      "sha256": "b3b341c7107685470cc220069b8f5388a3e82ac97ca7903db8aa84d4ec7dd073"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Logo_Usage(3).pdf",
+      "sha256": "b3b341c7107685470cc220069b8f5388a3e82ac97ca7903db8aa84d4ec7dd073"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Mission_Vision(2).pdf",
+      "sha256": "94398e72c952ae4e15d4691532b97dc390fca4e9bf4146b82cf3308dbb18cab2"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Mission_Vision(3).pdf",
+      "sha256": "94398e72c952ae4e15d4691532b97dc390fca4e9bf4146b82cf3308dbb18cab2"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Open_Source_Notice(1).pdf",
+      "sha256": "0c708007257b5e2b5ebe5dee8568c22b5f01c48f74ef3844b132a5b6c78081e2"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Positioning_Snapshot(1).pdf",
+      "sha256": "77257a33d428c8af19c6b6fb49f43d6af23b1223f084b8d2dd25c249c6693069"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Positioning_Snapshot(2).pdf",
+      "sha256": "77257a33d428c8af19c6b6fb49f43d6af23b1223f084b8d2dd25c249c6693069"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Privacy_Policy(1).pdf",
+      "sha256": "3fa2cdbc8d72b228a018ad2c64fb4be10624172c50a64a170db4cbb9824f9c45"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Privacy_Policy(2).pdf",
+      "sha256": "3fa2cdbc8d72b228a018ad2c64fb4be10624172c50a64a170db4cbb9824f9c45"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Style_Notes(1).pdf",
+      "sha256": "867a68ea114abb192f1a1d1d119ab144b48d485eca0cfdb9a2cedecb310cee98"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Style_Notes(2).pdf",
+      "sha256": "867a68ea114abb192f1a1d1d119ab144b48d485eca0cfdb9a2cedecb310cee98"
+    },
+    {
+      "filename": "Sustainable_Catalyst_System_Overview.pdf",
+      "sha256": "10286eea6198053a12de89e3bd881efd9ff92d9296eef92ccd2b10c0e2ce030f"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Terms_of_Use(1).pdf",
+      "sha256": "d71c9407a780197e14536cbf49a4867cb2e798b0c63e98a02c482065309c4b97"
+    },
+    {
+      "filename": "Sustainable_Catalyst_Terms_of_Use(2).pdf",
+      "sha256": "d71c9407a780197e14536cbf49a4867cb2e798b0c63e98a02c482065309c4b97"
+    }
+  ],
+  "supersession_intent": {
+    "SC-FND-001": [
+      "Sustainable Catalyst Mission & Vision (February 2026)",
+      "Sustainable Catalyst Positioning Snapshot (February 2026)",
+      "Sustainable Catalyst Brand Manifesto (February 2026)"
+    ],
+    "SC-FND-002": [
+      "Sustainable Catalyst Brand Pillars (February 2026)",
+      "Sustainable Catalyst Ethical Code of Conduct (February 2026)"
+    ],
+    "SC-FND-004": [
+      "Sustainable Catalyst System Overview (February 2026)"
+    ],
+    "SC-FND-005": [
+      "Sustainable Catalyst Ethical Code of Conduct (February 2026)",
+      "Sustainable Catalyst Editorial Ethos (February 2026)"
+    ],
+    "SC-FND-006": [
+      "Sustainable Catalyst Ethical Code of Conduct - Use of AI & Automation (February 2026)"
+    ],
+    "SC-FND-008": [
+      "Sustainable Catalyst Open Source Notice (February 2026)"
+    ],
+    "SC-FND-009": [
+      "Sustainable Catalyst Editorial Ethos (February 2026)",
+      "Sustainable Catalyst Style Notes (February 2026)",
+      "Sustainable Catalyst Brand Pillars (February 2026)",
+      "Sustainable Catalyst Logo & Usage Guide (February 2026)"
+    ]
+  }
+}

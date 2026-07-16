@@ -1,0 +1,610 @@
+{
+  "schema": "sc-foundations-first-edition/1.0",
+  "release": "2.1.0",
+  "collection_title": "Sustainable Catalyst Institutional Foundations - First Edition",
+  "publication_state": "under-review",
+  "generated_at": "2026-07-16",
+  "document_count": 13,
+  "documents": [
+    {
+      "document_id": "SC-FND-001",
+      "slug": "institutional-charter",
+      "title": "Sustainable Catalyst Institutional Charter",
+      "subtitle": "Purpose, structure, stewardship, independence, and public role",
+      "record_type": "institutional-standard",
+      "authority_level": "institutional",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [
+        "Sustainable Catalyst Mission & Vision (February 2026)",
+        "Sustainable Catalyst Positioning Snapshot (February 2026)",
+        "Sustainable Catalyst Brand Manifesto (February 2026)"
+      ],
+      "related_documents": [
+        "SC-FND-002",
+        "SC-FND-003",
+        "SC-FND-004",
+        "SC-FND-013"
+      ],
+      "related_products": [
+        "Knowledge Library",
+        "Research Librarian",
+        "Sustainable Catalyst Lab",
+        "Site Intelligence",
+        "Workbench",
+        "Decision Studio",
+        "Platform Core",
+        "Feature Suggestions",
+        "Advisory"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-001-institutional-charter.md",
+      "html_file": "foundations-first-edition/html/SC-FND-001-institutional-charter.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-001-institutional-charter-v1.0.0.pdf",
+      "pdf_sha256": "da67ab2b3b1d4e22c688c4da319fcc979c1a91520d70e8b74939db42814a9648"
+    },
+    {
+      "document_id": "SC-FND-002",
+      "slug": "principles-public-commitments",
+      "title": "Sustainable Catalyst Principles and Public Commitments",
+      "subtitle": "The commitments governing research, software, publishing, analysis, and applied work",
+      "record_type": "institutional-standard",
+      "authority_level": "institutional",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [
+        "Sustainable Catalyst Brand Pillars (February 2026)",
+        "Sustainable Catalyst Ethical Code of Conduct (February 2026)"
+      ],
+      "related_documents": [
+        "SC-FND-001",
+        "SC-FND-005",
+        "SC-FND-006",
+        "SC-FND-009",
+        "SC-FND-012"
+      ],
+      "related_products": [
+        "Institution",
+        "Knowledge Library",
+        "Platform",
+        "Advisory"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-002-principles-public-commitments.md",
+      "html_file": "foundations-first-edition/html/SC-FND-002-principles-public-commitments.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-002-principles-public-commitments-v1.0.0.pdf",
+      "pdf_sha256": "ec6a6451c1bd8b21d6f6bc2ab4cce39cea3818a0bcef8ee33a363b86f20c6062"
+    },
+    {
+      "document_id": "SC-FND-003",
+      "slug": "knowledge-research-model",
+      "title": "Sustainable Catalyst Knowledge and Research Model",
+      "subtitle": "How sources become knowledge, investigation, analysis, decisions, and reassessment",
+      "record_type": "institutional-standard",
+      "authority_level": "methodology",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [],
+      "related_documents": [
+        "SC-FND-004",
+        "SC-FND-005",
+        "SC-FND-007",
+        "SC-FND-010",
+        "SC-FND-011"
+      ],
+      "related_products": [
+        "Knowledge Library",
+        "Research Librarian",
+        "Lab",
+        "Site Intelligence",
+        "Workbench",
+        "Decision Studio"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-003-knowledge-research-model.md",
+      "html_file": "foundations-first-edition/html/SC-FND-003-knowledge-research-model.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-003-knowledge-research-model-v1.0.0.pdf",
+      "pdf_sha256": "50b53e812fc4111aec5b46d9aca34ed1626b0c5f0b16cfbafa6320fb3279f3aa"
+    },
+    {
+      "document_id": "SC-FND-004",
+      "slug": "platform-architecture-product-taxonomy",
+      "title": "Sustainable Catalyst Platform Architecture and Product Taxonomy",
+      "subtitle": "The authoritative map of institutional environments, products, modules, and shared infrastructure",
+      "record_type": "product-system-brief",
+      "authority_level": "product",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [
+        "Sustainable Catalyst System Overview (February 2026)"
+      ],
+      "related_documents": [
+        "SC-FND-001",
+        "SC-FND-003",
+        "SC-FND-006"
+      ],
+      "related_products": [
+        "Knowledge Library",
+        "Research Librarian",
+        "Lab",
+        "Site Intelligence",
+        "Workbench",
+        "Decision Studio",
+        "Platform Core",
+        "Feature Suggestions"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-004-platform-architecture-product-taxonomy.md",
+      "html_file": "foundations-first-edition/html/SC-FND-004-platform-architecture-product-taxonomy.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-004-platform-architecture-product-taxonomy-v1.0.0.pdf",
+      "pdf_sha256": "e5a1e6dfdc5f836aabbb55e5c97f9f354b306774fc023f3015ee4835fca01570"
+    },
+    {
+      "document_id": "SC-FND-005",
+      "slug": "evidence-claims-methodology-standard",
+      "title": "Evidence, Claims, and Methodology Standard",
+      "subtitle": "Requirements for sources, assumptions, calculations, uncertainty, provenance, and review",
+      "record_type": "institutional-standard",
+      "authority_level": "methodology",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [
+        "Sustainable Catalyst Ethical Code of Conduct (February 2026)",
+        "Sustainable Catalyst Editorial Ethos (February 2026)"
+      ],
+      "related_documents": [
+        "SC-FND-002",
+        "SC-FND-003",
+        "SC-FND-006",
+        "SC-FND-010",
+        "SC-FND-011"
+      ],
+      "related_products": [
+        "Knowledge Library",
+        "Site Intelligence",
+        "Workbench",
+        "Lab",
+        "Decision Studio",
+        "Narrative Risk"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-005-evidence-claims-methodology-standard.md",
+      "html_file": "foundations-first-edition/html/SC-FND-005-evidence-claims-methodology-standard.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-005-evidence-claims-methodology-standard-v1.0.0.pdf",
+      "pdf_sha256": "13601e996c4bfab0ea42f04d5416d7532caff319fb8d9bc1c7072575e4027b4c"
+    },
+    {
+      "document_id": "SC-FND-006",
+      "slug": "responsible-ai-human-review-standard",
+      "title": "Responsible AI and Human Review Standard",
+      "subtitle": "Rules for assistive, transparent, source-grounded, and accountable AI use",
+      "record_type": "institutional-standard",
+      "authority_level": "methodology",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [
+        "Sustainable Catalyst Ethical Code of Conduct - Use of AI & Automation (February 2026)"
+      ],
+      "related_documents": [
+        "SC-FND-002",
+        "SC-FND-005",
+        "SC-FND-010",
+        "SC-FND-012"
+      ],
+      "related_products": [
+        "Research Librarian",
+        "Knowledge Library",
+        "Lab",
+        "Site Intelligence",
+        "Workbench",
+        "Decision Studio",
+        "Platform Core"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-006-responsible-ai-human-review-standard.md",
+      "html_file": "foundations-first-edition/html/SC-FND-006-responsible-ai-human-review-standard.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-006-responsible-ai-human-review-standard-v1.0.0.pdf",
+      "pdf_sha256": "310bc3526435f029b0c76802e619dc7327b64dcdb5e89cedd7d4fcb484044d6e"
+    },
+    {
+      "document_id": "SC-FND-007",
+      "slug": "documentation-authority-versioning-records-policy",
+      "title": "Documentation Authority, Versioning, and Records Policy",
+      "subtitle": "How current, fixed, draft, superseded, and historical records are governed",
+      "record_type": "policy-legal-record",
+      "authority_level": "policy",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [],
+      "related_documents": [
+        "SC-FND-001",
+        "SC-FND-003",
+        "SC-FND-008",
+        "SC-FND-009"
+      ],
+      "related_products": [
+        "Knowledge Library",
+        "Foundations",
+        "Product Documentation",
+        "Repositories"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-007-documentation-authority-versioning-records-policy.md",
+      "html_file": "foundations-first-edition/html/SC-FND-007-documentation-authority-versioning-records-policy.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-007-documentation-authority-versioning-records-policy-v1.0.0.pdf",
+      "pdf_sha256": "ddf1f6f563c2e46753723021682e5464e44529ce9183da9c2a19af2b1028ac2c"
+    },
+    {
+      "document_id": "SC-FND-008",
+      "slug": "open-knowledge-licensing-attribution-policy",
+      "title": "Open Knowledge, Licensing, and Attribution Policy",
+      "subtitle": "Rules for code, documentation, data, reuse, contribution, and brand identity",
+      "record_type": "policy-legal-record",
+      "authority_level": "policy",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [
+        "Sustainable Catalyst Open Source Notice (February 2026)"
+      ],
+      "related_documents": [
+        "SC-FND-001",
+        "SC-FND-007",
+        "SC-FND-009",
+        "SC-FND-013"
+      ],
+      "related_products": [
+        "Open Source Repositories",
+        "Knowledge Library",
+        "Public APIs",
+        "Documentation"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-008-open-knowledge-licensing-attribution-policy.md",
+      "html_file": "foundations-first-edition/html/SC-FND-008-open-knowledge-licensing-attribution-policy.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-008-open-knowledge-licensing-attribution-policy-v1.0.0.pdf",
+      "pdf_sha256": "e438e0cbb33110a879e1ad92769e7e7b15754ebe5ff072db23c79b5f42c42fed"
+    },
+    {
+      "document_id": "SC-FND-009",
+      "slug": "brand-editorial-standards",
+      "title": "Sustainable Catalyst Brand and Editorial Standards",
+      "subtitle": "Voice, terminology, visual identity, publishing discipline, and public presentation",
+      "record_type": "institutional-standard",
+      "authority_level": "institutional",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [
+        "Sustainable Catalyst Editorial Ethos (February 2026)",
+        "Sustainable Catalyst Style Notes (February 2026)",
+        "Sustainable Catalyst Brand Pillars (February 2026)",
+        "Sustainable Catalyst Logo & Usage Guide (February 2026)"
+      ],
+      "related_documents": [
+        "SC-FND-001",
+        "SC-FND-002",
+        "SC-FND-007",
+        "SC-FND-012"
+      ],
+      "related_products": [
+        "Institution",
+        "Publications",
+        "Knowledge Library",
+        "Platform",
+        "Advisory"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-009-brand-editorial-standards.md",
+      "html_file": "foundations-first-edition/html/SC-FND-009-brand-editorial-standards.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-009-brand-editorial-standards-v1.0.0.pdf",
+      "pdf_sha256": "e036412f9164ddb40d305d64320a1510770e8b336f8d8f8d32504aef1cacdc63"
+    },
+    {
+      "document_id": "SC-FND-010",
+      "slug": "scientific-research-reproducibility-standard",
+      "title": "Scientific Research and Reproducibility Standard",
+      "subtitle": "Requirements for experiments, notebooks, models, instruments, and computational work",
+      "record_type": "institutional-standard",
+      "authority_level": "methodology",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [],
+      "related_documents": [
+        "SC-FND-003",
+        "SC-FND-005",
+        "SC-FND-006",
+        "SC-FND-011"
+      ],
+      "related_products": [
+        "Sustainable Catalyst Lab",
+        "Workbench",
+        "Site Intelligence",
+        "Knowledge Library",
+        "Decision Studio"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-010-scientific-research-reproducibility-standard.md",
+      "html_file": "foundations-first-edition/html/SC-FND-010-scientific-research-reproducibility-standard.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-010-scientific-research-reproducibility-standard-v1.0.0.pdf",
+      "pdf_sha256": "11ac3308b48427dfd446a2ab07ef80f3698bcad88aad4bb94dc1c9aa0f771295"
+    },
+    {
+      "document_id": "SC-FND-011",
+      "slug": "public-data-indicators-source-methodology-standard",
+      "title": "Public Data, Indicators, and Source Methodology Standard",
+      "subtitle": "Requirements for connectors, indicators, maps, comparisons, and live evidence",
+      "record_type": "institutional-standard",
+      "authority_level": "methodology",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [],
+      "related_documents": [
+        "SC-FND-003",
+        "SC-FND-005",
+        "SC-FND-010"
+      ],
+      "related_products": [
+        "Site Intelligence",
+        "Knowledge Library",
+        "Workbench",
+        "Decision Studio",
+        "Catalyst Data"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-011-public-data-indicators-source-methodology-standard.md",
+      "html_file": "foundations-first-edition/html/SC-FND-011-public-data-indicators-source-methodology-standard.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-011-public-data-indicators-source-methodology-standard-v1.0.0.pdf",
+      "pdf_sha256": "5ec286c5d2a2d534d245db254309aff8f7fdce07b5ae07d9242021cf1fdf09c9"
+    },
+    {
+      "document_id": "SC-FND-012",
+      "slug": "accessibility-participation-correction-public-accountability",
+      "title": "Accessibility, Participation, Correction, and Public Accountability Standard",
+      "subtitle": "How people access, challenge, improve, and safely use the institution",
+      "record_type": "institutional-standard",
+      "authority_level": "institutional",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [],
+      "related_documents": [
+        "SC-FND-002",
+        "SC-FND-006",
+        "SC-FND-009"
+      ],
+      "related_products": [
+        "Institution",
+        "Knowledge Library",
+        "Platform",
+        "Feature Suggestions",
+        "Support"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-012-accessibility-participation-correction-public-accountability.md",
+      "html_file": "foundations-first-edition/html/SC-FND-012-accessibility-participation-correction-public-accountability.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-012-accessibility-participation-correction-public-accountability-v1.0.0.pdf",
+      "pdf_sha256": "2c7cb51c02cd09b73a88702e54b9f1b548eb03e37ba6fada3ca90082e85dd9fc"
+    },
+    {
+      "document_id": "SC-FND-013",
+      "slug": "advisory-independence-professional-boundaries",
+      "title": "Advisory Independence and Professional Boundaries Policy",
+      "subtitle": "How applied work relates to public research and open infrastructure",
+      "record_type": "policy-legal-record",
+      "authority_level": "policy",
+      "status": "under-review",
+      "version": "1.0.0",
+      "last_reviewed": "2026-07-16",
+      "review_cycle": "Annual",
+      "owner": "Sustainable Catalyst, stewarded by Content Catalyst LLC",
+      "canonical_record": "living-html",
+      "supersedes": [],
+      "related_documents": [
+        "SC-FND-001",
+        "SC-FND-002",
+        "SC-FND-006",
+        "SC-FND-008"
+      ],
+      "related_products": [
+        "Advisory",
+        "Institution",
+        "Knowledge Library",
+        "Platform"
+      ],
+      "related_repositories": [
+        "https://github.com/Content-Catalyst-LLC"
+      ],
+      "correction_url": "https://sustainablecatalyst.com/institution/contact/",
+      "revision_history": [
+        {
+          "version": "1.0.0",
+          "date": "2026-07-16",
+          "status": "Under Review",
+          "summary": "Institutional Foundations First Edition draft prepared for review and publication."
+        }
+      ],
+      "markdown_file": "foundations-first-edition/markdown/SC-FND-013-advisory-independence-professional-boundaries.md",
+      "html_file": "foundations-first-edition/html/SC-FND-013-advisory-independence-professional-boundaries.html",
+      "pdf_file": "foundations-first-edition/pdf/SC-FND-013-advisory-independence-professional-boundaries-v1.0.0.pdf",
+      "pdf_sha256": "558554798d0389cb11b90c8937d3e6b62a7a46eab3631d0f7433b39f23a7bb6b"
+    }
+  ]
+}

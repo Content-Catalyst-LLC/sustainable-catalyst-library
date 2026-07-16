@@ -37,6 +37,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-document-production.php
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-documentation.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-foundation-documents.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-foundation-pages.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-foundations-first-edition-v210.php';
 
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-foundation-system-v200.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-multimedia.php';
