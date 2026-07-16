@@ -1,0 +1,32 @@
+{
+  "schema": "sc-foundation-document-vocabulary/2.0",
+  "version": "2.0.0",
+  "record_types": {
+    "institutional-standard": "Charters, principles, methodologies, research standards, and governance standards.",
+    "policy-legal-record": "Privacy, terms, disclaimers, licensing, records, participation, and professional-boundary policies.",
+    "product-system-brief": "Architecture, environment, product, service, module, and system briefs."
+  },
+  "statuses": {
+    "draft": "Working record with no institutional authority.",
+    "under-review": "Record undergoing editorial, technical, institutional, or legal review.",
+    "current-approved-record": "Approved current authority within its defined scope.",
+    "current-living-document": "Current authoritative HTML record expected to evolve through governed revision.",
+    "fixed-approved-snapshot": "Approved immutable edition, normally represented by a PDF snapshot.",
+    "superseded": "Former authority replaced by a named current record.",
+    "withdrawn": "Record removed from current use without replacement authority.",
+    "historical-record": "Preserved record with documentary but not current governing value."
+  },
+  "authority_levels": {
+    "institutional": "Institution-wide identity, purpose, structure, or governing commitment.",
+    "methodology": "Shared evidence, research, analytical, scientific, or reproducibility standard.",
+    "policy": "Operational, legal, participation, licensing, privacy, or professional-boundary policy.",
+    "product": "Current product, system, platform, environment, or module record.",
+    "historical": "Preserved earlier record that does not govern current practice."
+  },
+  "canonical_record_types": {
+    "living-html": "The maintained HTML record governs the current statement.",
+    "fixed-pdf": "The approved PDF edition governs the named version.",
+    "repository": "A repository file is the controlling technical record.",
+    "historical": "The record is preserved only as historical evidence."
+  }
+}
