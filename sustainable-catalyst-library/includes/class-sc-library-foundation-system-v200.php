@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('SC_LIBRARY_FOUNDATIONS_VERSION')) {
-    define('SC_LIBRARY_FOUNDATIONS_VERSION', '2.0.3');
+    define('SC_LIBRARY_FOUNDATIONS_VERSION', '2.0.4');
 }
 
 final class SC_Library_Foundation_System_V200 {
@@ -77,6 +77,7 @@ final class SC_Library_Foundation_System_V200 {
         add_action('admin_enqueue_scripts', [$this, 'admin_assets']);
         add_filter('template_include', [$this, 'template_include'], 99);
         add_shortcode('sc_foundations_catalog', [$this, 'catalog_shortcode']);
+        add_filter('pre_do_shortcode_tag', [$this, 'server_render_foundations_library'], 1, 4);
         add_filter('manage_sc_foundation_doc_posts_columns', [$this, 'admin_columns']);
         add_action('manage_sc_foundation_doc_posts_custom_column', [$this, 'admin_column'], 10, 2);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
@@ -425,10 +426,14 @@ final class SC_Library_Foundation_System_V200 {
 
     public function public_assets(): void {
         $post_id = get_queried_object_id();
-        $has_catalog = $post_id && has_shortcode((string) get_post_field('post_content', $post_id), 'sc_foundations_catalog');
-        if (!is_singular('sc_foundation_doc') && !is_post_type_archive('sc_foundation_doc') && !$has_catalog) {
+        $content = $post_id ? (string) get_post_field('post_content', $post_id) : '';
+        $has_catalog = $post_id && has_shortcode($content, 'sc_foundations_catalog');
+        $is_foundations_page = $this->is_foundations_page_request();
+
+        if (!is_singular('sc_foundation_doc') && !is_post_type_archive('sc_foundation_doc') && !$has_catalog && !$is_foundations_page) {
             return;
         }
+
         wp_enqueue_style('sc-library-foundation-system-v200', SC_LIBRARY_URL . 'assets/css/sc-library-foundation-system-v200.css', [], SC_LIBRARY_FOUNDATIONS_VERSION);
         wp_enqueue_script('sc-library-foundation-system-v200', SC_LIBRARY_URL . 'assets/js/sc-library-foundation-system-v200.js', [], SC_LIBRARY_FOUNDATIONS_VERSION, true);
     }
@@ -644,6 +649,78 @@ final class SC_Library_Foundation_System_V200 {
         return array_slice($ids, 0, 24);
     }
 
+    /**
+     * Render the canonical Foundations catalog without requiring a browser-side
+     * REST request. The retained documentation interface can continue to use
+     * REST elsewhere, but the institutional Foundations page must remain
+     * readable when REST, caching, CORS, or an edge layer is unavailable.
+     *
+     * @param mixed  $return Existing pre-shortcode result.
+     * @param string $tag    Shortcode tag.
+     * @param mixed  $attr   Shortcode attributes.
+     * @param array  $match  Shortcode parser match.
+     * @return mixed
+     */
+    public function server_render_foundations_library($return, $tag, $attr, $match) {
+        if ($return !== null || is_admin() || !$this->is_foundations_page_request()) {
+            return $return;
+        }
+
+        $attributes = is_array($attr) ? $attr : [];
+        $tag = (string) $tag;
+
+        $is_foundations_library = $tag === 'sc_foundations_library';
+        $is_legacy_library = false;
+
+        if ($tag === 'sc_library') {
+            $collection = sanitize_key((string) ($attributes['collection'] ?? ''));
+            $mode = sanitize_key((string) ($attributes['mode'] ?? ''));
+            $is_legacy_library = $collection === 'foundations'
+                && in_array($mode, ['documentation', 'foundations', 'foundation'], true);
+        }
+
+        if (!$is_foundations_library && !$is_legacy_library) {
+            return $return;
+        }
+
+        $show_header_raw = strtolower((string) ($attributes['show_header'] ?? 'false'));
+        $show_header = in_array($show_header_raw, ['1', 'true', 'yes', 'on'], true) ? 'yes' : 'no';
+        $search_raw = strtolower((string) ($attributes['search'] ?? 'true'));
+        $show_filters = in_array($search_raw, ['0', 'false', 'no', 'off'], true) ? 'no' : 'yes';
+
+        return $this->catalog_shortcode([
+            'title'        => sanitize_text_field((string) ($attributes['title'] ?? __('Foundation Documents', 'sustainable-catalyst-library'))),
+            'status'       => '',
+            'type'         => '',
+            'limit'        => 250,
+            'show_filters' => $show_filters,
+            'show_header'  => $show_header,
+        ]);
+    }
+
+    /**
+     * Detect the institutional Foundations page by the resolved WordPress page
+     * or by the exact request path.
+     */
+    private function is_foundations_page_request(): bool {
+        if (defined('REST_REQUEST') && REST_REQUEST) {
+            return false;
+        }
+
+        $post_id = get_queried_object_id();
+        if ($post_id && get_post_type($post_id) === 'page') {
+            $page_uri = trim((string) get_page_uri($post_id), '/');
+            if ($page_uri === 'institution/foundations') {
+                return true;
+            }
+        }
+
+        $request_uri = isset($_SERVER['REQUEST_URI']) ? wp_unslash((string) $_SERVER['REQUEST_URI']) : '';
+        $path = trim((string) wp_parse_url($request_uri, PHP_URL_PATH), '/');
+
+        return in_array($path, ['institution/foundations', 'foundations'], true);
+    }
+
     public function catalog_shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => __('Foundation Documents', 'sustainable-catalyst-library'),
@@ -651,6 +728,7 @@ final class SC_Library_Foundation_System_V200 {
             'type' => '',
             'limit' => 100,
             'show_filters' => 'yes',
+            'show_header' => 'yes',
         ], $atts, 'sc_foundations_catalog');
 
         $status = sanitize_key((string) ($_GET['foundation_status'] ?? $atts['status']));
@@ -674,7 +752,9 @@ final class SC_Library_Foundation_System_V200 {
 
         ob_start(); ?>
         <section class="sc-fnd-catalog">
-            <header><p class="sc-fnd-kicker"><?php esc_html_e('Sustainable Catalyst Foundations', 'sustainable-catalyst-library'); ?></p><h2><?php echo esc_html((string) $atts['title']); ?></h2></header>
+            <?php if ($atts['show_header'] === 'yes') : ?>
+                <header><p class="sc-fnd-kicker"><?php esc_html_e('Sustainable Catalyst Foundations', 'sustainable-catalyst-library'); ?></p><h2><?php echo esc_html((string) $atts['title']); ?></h2></header>
+            <?php endif; ?>
             <?php if ($atts['show_filters'] === 'yes') : ?>
                 <form class="sc-fnd-catalog-filters" method="get">
                     <label><span><?php esc_html_e('Search', 'sustainable-catalyst-library'); ?></span><input type="search" name="foundation_search" value="<?php echo esc_attr($search); ?>"></label>
