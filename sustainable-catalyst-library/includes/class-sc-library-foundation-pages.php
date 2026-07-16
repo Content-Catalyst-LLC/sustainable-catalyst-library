@@ -13,7 +13,7 @@ final class SC_Library_Foundation_Pages {
     public const POST_TYPE = 'sc_foundation_doc';
     public const META_PDF_ID = '_sc_library_foundation_page_pdf_id';
     public const SCHEMA = 'sc-library-foundation-page/1.0';
-    public const ROUTE_VERSION = '2.1.3';
+    public const ROUTE_VERSION = '2.0.3';
 
     private static $allow_foundation_query = false;
     private static $saving_title = false;
@@ -95,7 +95,7 @@ final class SC_Library_Foundation_Pages {
         $args['taxonomies']          = array();
         $args['supports']            = array( 'title', 'editor', 'revisions' );
         $args['rewrite']             = array(
-            'slug'       => 'foundations',
+            'slug' => 'foundation-documents',
             'with_front' => false,
         );
         $args['query_var']           = true;
@@ -122,7 +122,7 @@ final class SC_Library_Foundation_Pages {
         }
 
         add_rewrite_rule(
-            '^foundations/([^/]+)/?$',
+            '^foundation-documents/([^/]+)/?$',
             'index.php?post_type=' . self::POST_TYPE . '&name=$matches[1]',
             'top'
         );
@@ -465,7 +465,7 @@ final class SC_Library_Foundation_Pages {
         }
 
         $rewrite_rules = get_option( 'rewrite_rules', array() );
-        $route_ready   = is_array( $rewrite_rules ) && array_key_exists( '^foundations/([^/]+)/?$', $rewrite_rules );
+        $route_ready   = is_array( $rewrite_rules ) && array_key_exists( '^foundation-documents/([^/]+)/?$', $rewrite_rules );
         $media_ready   = function_exists( 'wp_enqueue_media' ) && current_user_can( 'upload_files' );
         $route_version = get_option( 'sc_library_foundation_pages_rewrite_version', '' );
 
@@ -817,7 +817,7 @@ final class SC_Library_Foundation_Pages {
         $pdf_url     = 'ready' === $health['status'] ? $health['url'] : '';
         $filename    = $health['filename'];
         $intro       = $post ? trim( (string) $post->post_content ) : '';
-        $foundations = apply_filters( 'sc_library_foundations_page_url', home_url( '/foundations/' ) );
+        $foundations = apply_filters( 'sc_library_foundations_page_url', home_url( '/institution/foundations/' ) );
         $file_size   = '';
 
         if ( 'ready' === $health['status'] && $health['attachment_id'] ) {

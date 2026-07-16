@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 if (!defined('SC_LIBRARY_FOUNDATIONS_VERSION')) {
-    define('SC_LIBRARY_FOUNDATIONS_VERSION', '2.0.1');
+    define('SC_LIBRARY_FOUNDATIONS_VERSION', '2.0.3');
 }
 
 final class SC_Library_Foundation_System_V200 {
@@ -66,9 +66,11 @@ final class SC_Library_Foundation_System_V200 {
     private function __construct() {}
 
     public function register_hooks(): void {
+        add_filter('register_post_type_args', [$this, 'foundation_document_post_type_args'], 100, 2);
+        add_filter('rewrite_rules_array', [$this, 'remove_legacy_foundation_document_rules'], 100);
+        add_action('parse_request', [$this, 'protect_foundations_page_route'], 0);
         add_action('init', [$this, 'register_meta'], 12);
         add_action('init', [$this, 'maybe_refresh_rewrite_rules'], 100);
-        add_action('template_redirect', [$this, 'recover_legacy_foundations_route'], 1);
         add_action('add_meta_boxes', [$this, 'add_meta_boxes'], 30);
         add_action('save_post_sc_foundation_doc', [$this, 'save'], 40, 3);
         add_action('wp_enqueue_scripts', [$this, 'public_assets'], 30);
@@ -78,6 +80,77 @@ final class SC_Library_Foundation_System_V200 {
         add_filter('manage_sc_foundation_doc_posts_columns', [$this, 'admin_columns']);
         add_action('manage_sc_foundation_doc_posts_custom_column', [$this, 'admin_column'], 10, 2);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
+    }
+
+
+    /**
+     * Keep Foundation Document records on a route that cannot collide with
+     * the public Foundations page.
+     */
+    public function foundation_document_post_type_args(array $args, string $post_type): array {
+        if ($post_type !== 'sc_foundation_doc') {
+            return $args;
+        }
+
+        $args['rewrite'] = [
+            'slug'       => 'foundation-documents',
+            'with_front' => false,
+        ];
+        $args['has_archive'] = false;
+
+        return $args;
+    }
+
+    /**
+     * Remove stale document rules that claim the public /foundations/ path.
+     */
+    public function remove_legacy_foundation_document_rules(array $rules): array {
+        foreach ($rules as $pattern => $query) {
+            $pattern_text = ltrim((string) $pattern, '^');
+            $query_text = (string) $query;
+
+            if (
+                str_starts_with($pattern_text, 'foundations/')
+                && str_contains($query_text, 'post_type=sc_foundation_doc')
+            ) {
+                unset($rules[$pattern]);
+            }
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Guarantee that the canonical institutional Foundations page resolves as
+     * a WordPress page even when stale rewrite or edge-cache state exists.
+     */
+    public function protect_foundations_page_route(WP $wp): void {
+        if (is_admin()) {
+            return;
+        }
+
+        $method = isset($_SERVER['REQUEST_METHOD']) ? strtoupper((string) $_SERVER['REQUEST_METHOD']) : 'GET';
+        if (!in_array($method, ['GET', 'HEAD'], true)) {
+            return;
+        }
+
+        $request_uri = isset($_SERVER['REQUEST_URI']) ? wp_unslash((string) $_SERVER['REQUEST_URI']) : '';
+        $path = trim((string) wp_parse_url($request_uri, PHP_URL_PATH), '/');
+        if ($path !== 'institution/foundations') {
+            return;
+        }
+
+        $page = get_page_by_path('institution/foundations', OBJECT, 'page');
+        if (!$page instanceof WP_Post || $page->post_status !== 'publish') {
+            return;
+        }
+
+        $wp->query_vars = [
+            'page_id'  => (int) $page->ID,
+            'pagename' => 'institution/foundations',
+        ];
+        $wp->matched_rule = 'sc-foundations-canonical-page';
+        $wp->matched_query = 'page_id=' . (int) $page->ID;
     }
 
     /**
@@ -97,30 +170,6 @@ final class SC_Library_Foundation_System_V200 {
         }
         flush_rewrite_rules(false);
         update_option(self::REWRITE_VERSION_OPTION, SC_LIBRARY_FOUNDATIONS_VERSION, false);
-    }
-
-    /**
-     * Preserve the earlier public /foundations/ route when canonical redirects
-     * or rewrite rules have not yet been rebuilt.
-     */
-    public function recover_legacy_foundations_route(): void {
-        if (is_admin() || wp_doing_ajax() || !is_404()) {
-            return;
-        }
-
-        $request_uri = isset($_SERVER['REQUEST_URI']) ? wp_unslash((string) $_SERVER['REQUEST_URI']) : '';
-        $path = trim((string) wp_parse_url($request_uri, PHP_URL_PATH), '/');
-        if ($path !== 'foundations') {
-            return;
-        }
-
-        $target = get_page_by_path('institution/foundations', OBJECT, 'page');
-        if (!$target instanceof WP_Post || $target->post_status !== 'publish') {
-            return;
-        }
-
-        wp_safe_redirect(get_permalink($target), 301, 'Sustainable Catalyst Foundations');
-        exit;
     }
 
     public function register_meta(): void {
