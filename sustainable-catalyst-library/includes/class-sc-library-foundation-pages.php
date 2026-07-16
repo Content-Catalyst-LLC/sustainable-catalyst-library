@@ -996,7 +996,7 @@ final class SC_Library_Foundation_Pages {
     }
 
     private function version() {
-        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '4.0.0';
+        return defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '4.0.1';
     }
 }
 
@@ -1025,6 +1025,7 @@ require_once __DIR__ . '/class-sc-library-research-librarian-document-intelligen
 require_once __DIR__ . '/class-sc-library-collaborative-review-publishing.php';
 require_once __DIR__ . '/class-sc-library-public-api-export-federation.php';
 require_once __DIR__ . '/class-sc-library-connected-institutional-platform.php';
+require_once __DIR__ . '/class-sc-library-discovery-interface-reliability.php';
 new SC_Library_PDF_To_Document();
 new SC_Library_PDF_Conversion_Reliability();
 new SC_Library_PDF_Bulk_Import_Repair();
@@ -1049,3 +1050,4 @@ new SC_Library_Research_Librarian_Document_Intelligence();
 new SC_Library_Collaborative_Review_Publishing();
 new SC_Library_Public_API_Export_Federation();
 new SC_Library_Connected_Institutional_Platform();
+new SC_Library_Discovery_Interface_Reliability();

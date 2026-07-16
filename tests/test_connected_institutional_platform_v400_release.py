@@ -25,7 +25,7 @@ def test_load_order_and_version():
     assert "class-sc-library-connected-institutional-platform.php" in wrapper
     assert "new SC_Library_Connected_Institutional_Platform" in wrapper
     assert wrapper.index("class-sc-library-public-api-export-federation.php") < wrapper.index("class-sc-library-connected-institutional-platform.php")
-    assert "SC_LIBRARY_VERSION : '4.0.0'" in wrapper
+    assert "SC_LIBRARY_VERSION : '4.0.1'" in wrapper
     assert "public const VERSION = '4.0.0'" in read(PLATFORM)
 
 

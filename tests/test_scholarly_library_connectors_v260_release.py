@@ -396,7 +396,7 @@ def test_version_and_compatibility_boundaries():
     connectors = read(CONNECTORS)
     repository = read(REPOSITORY)
     assert "public const VERSION = '2.6.1'" in connectors
-    assert "SC_LIBRARY_VERSION : '4.0.0'" in wrapper
+    assert "SC_LIBRARY_VERSION : '4.0.1'" in wrapper
     assert "public const ROUTE_VERSION = '2.3.0'" in repository
     assert "public const VERSION = '2.5.1'" in read(RELIABILITY)
     assert "public const VERSION = '2.4.1'" in read(OCR)

@@ -1,0 +1,108 @@
+/* Sustainable Catalyst Knowledge Library v4.0.1 — Discovery Interface Reliability Patch */
+
+.sc-library[data-sc-library] details,
+.sc-library[data-sc-library] details > summary,
+.cc-rl-manual-topic-map details,
+.cc-rl-manual-topic-map details > summary {
+  pointer-events: auto !important;
+}
+
+.sc-library[data-sc-library] details > summary,
+.cc-rl-manual-topic-map details > summary {
+  position: relative !important;
+  z-index: 5 !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  touch-action: manipulation !important;
+}
+
+.sc-library[data-sc-library] details > summary *,
+.cc-rl-manual-topic-map details > summary * {
+  pointer-events: none !important;
+}
+
+.sc-library[data-sc-library] details:not([open]) > .sc-library-domain__children,
+.sc-library[data-sc-library] details:not([open]) > .sc-library__domain-grid,
+.sc-library[data-sc-library] details:not([open]) > .sc-library__facet-columns,
+.cc-rl-manual-topic-map details:not([open]) > ul {
+  display: none !important;
+}
+
+.sc-library[data-sc-library] details[open] > .sc-library-domain__children,
+.cc-rl-manual-topic-map details[open] > ul {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.sc-library[data-sc-library] details[open] > .sc-library__domain-grid,
+.sc-library[data-sc-library] details[open] > .sc-library__facet-columns {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.sc-library[data-sc-library] details > summary:focus-visible,
+.cc-rl-manual-topic-map details > summary:focus-visible {
+  outline: 3px solid rgba(230, 0, 0, 0.3) !important;
+  outline-offset: 3px !important;
+}
+
+/* v1.0.1 — compact live knowledge architecture note.
+   This handles both the original direct-child markup and the newer inner wrapper. */
+.cc-research-library-brand.cc-rl-v2 .cc-rl-discovery-note {
+  display: block !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 16px 0 0 !important;
+  padding: 14px 18px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+.cc-research-library-brand.cc-rl-v2 .cc-rl-discovery-note > .cc-rl-discovery-note__content {
+  display: grid !important;
+  grid-template-columns: minmax(185px, 235px) minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 8px 22px !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Backward compatibility when WordPress has removed or not saved the inner wrapper. */
+.cc-research-library-brand.cc-rl-v2 .cc-rl-discovery-note:not(:has(.cc-rl-discovery-note__content)) {
+  display: grid !important;
+  grid-template-columns: minmax(185px, 235px) minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 8px 22px !important;
+}
+
+.cc-research-library-brand.cc-rl-v2 .cc-rl-discovery-note :where(strong, p),
+.cc-research-library-brand.cc-rl-v2 .cc-rl-discovery-note > :where(strong, p) {
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  writing-mode: horizontal-tb !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+.cc-research-library-brand.cc-rl-v2 .cc-rl-discovery-note p {
+  line-height: 1.55 !important;
+}
+
+@media (max-width: 760px) {
+  .cc-research-library-brand.cc-rl-v2 .cc-rl-discovery-note > .cc-rl-discovery-note__content,
+  .cc-research-library-brand.cc-rl-v2 .cc-rl-discovery-note:not(:has(.cc-rl-discovery-note__content)) {
+    grid-template-columns: 1fr !important;
+  }
+}
