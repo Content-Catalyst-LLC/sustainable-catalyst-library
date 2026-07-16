@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class SC_Library_Connected_Research_Environment {
     public const VERSION = '3.0.1';
+    /** Canonical research-project post type; retained for federation compatibility. */
+    public const PROJECT_POST_TYPE = 'sc_research_project';
     public const API_NAMESPACE = 'sc-library/v1';
 
     public const WORKSPACE_SCHEMA = 'sc-library-connected-project/1.0';

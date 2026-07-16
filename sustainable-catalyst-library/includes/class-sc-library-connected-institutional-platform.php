@@ -2007,6 +2007,82 @@ final class SC_Library_Connected_Institutional_Platform {
 	}
 
 	public function shortcode_portal( $atts ) {
+		try {
+			return $this->shortcode_portal_inner( $atts );
+		} catch ( \Throwable $error ) {
+			error_log(
+				'[Sustainable Catalyst Library] Institutional portal recovery: '
+				. wp_json_encode(
+					array(
+						'class'   => get_class( $error ),
+						'message' => $error->getMessage(),
+						'file'    => wp_basename( $error->getFile() ),
+						'line'    => $error->getLine(),
+					)
+				)
+			);
+
+			return $this->render_public_portal_fallback();
+		}
+	}
+
+	private function render_public_portal_fallback() {
+		$post_type = post_type_exists( 'sc_foundation_doc' )
+			? 'sc_foundation_doc'
+			: ( post_type_exists( 'sc_library_document' ) ? 'sc_library_document' : 'post' );
+
+		$ids = get_posts(
+			array(
+				'post_type'           => $post_type,
+				'post_status'         => 'publish',
+				'posts_per_page'      => 12,
+				'fields'              => 'ids',
+				'orderby'             => 'modified',
+				'order'               => 'DESC',
+				'ignore_sticky_posts' => true,
+			)
+		);
+
+		ob_start();
+		?>
+		<section class="sc-inst-public-portal sc-inst-public-portal--recovered" data-sc-library-portal-recovery="4.0.5">
+			<header>
+				<p class="sc-inst-kicker"><?php esc_html_e( 'Research Library', 'sustainable-catalyst-library' ); ?></p>
+				<h2><?php esc_html_e( 'Published research records', 'sustainable-catalyst-library' ); ?></h2>
+				<p><?php esc_html_e( 'The institutional catalog is temporarily using its protected server-rendered view.', 'sustainable-catalyst-library' ); ?></p>
+			</header>
+
+			<?php if ( $ids ) : ?>
+				<div class="sc-inst-public-grid">
+					<?php foreach ( $ids as $id ) : ?>
+						<article>
+							<h3><a href="<?php echo esc_url( get_permalink( $id ) ); ?>"><?php echo esc_html( get_the_title( $id ) ); ?></a></h3>
+							<?php
+							$summary = get_the_excerpt( $id );
+							if ( '' === trim( (string) $summary ) ) {
+								$summary = wp_trim_words(
+									wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ),
+									32
+								);
+							}
+							?>
+							<?php if ( '' !== trim( (string) $summary ) ) : ?>
+								<p><?php echo esc_html( $summary ); ?></p>
+							<?php endif; ?>
+							<p><a href="<?php echo esc_url( get_permalink( $id ) ); ?>"><?php esc_html_e( 'Open record', 'sustainable-catalyst-library' ); ?> →</a></p>
+						</article>
+					<?php endforeach; ?>
+				</div>
+			<?php else : ?>
+				<p><?php esc_html_e( 'No published research records are currently available.', 'sustainable-catalyst-library' ); ?></p>
+			<?php endif; ?>
+		</section>
+		<?php
+
+		return (string) ob_get_clean();
+	}
+
+	private function shortcode_portal_inner( $atts ) {
 		$settings = get_option( self::OPTION_PLATFORM, array() );
 		if ( empty( $settings['public_portal'] ) ) {
 			return '';

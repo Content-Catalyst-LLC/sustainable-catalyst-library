@@ -562,7 +562,7 @@ final class SC_Library_Public_API_Export_Federation {
 
 		$post_type_map = array(
 			'documents'    => class_exists( 'SC_Library_Foundation_Pages' ) ? SC_Library_Foundation_Pages::POST_TYPE : 'sc_foundation_doc',
-			'projects'     => class_exists( 'SC_Library_Connected_Research_Environment' ) ? SC_Library_Connected_Research_Environment::PROJECT_POST_TYPE : 'sc_research_project',
+			'projects'     => class_exists( 'SC_Library_Citation_Source_Manager' ) ? SC_Library_Citation_Source_Manager::PROJECT_POST_TYPE : 'sc_research_project',
 			'sources'      => class_exists( 'SC_Library_Citation_Source_Manager' ) ? SC_Library_Citation_Source_Manager::SOURCE_POST_TYPE : 'sc_research_source',
 			'pathways'     => class_exists( 'SC_Library_Knowledge_Pathways_Article_Maps' ) ? SC_Library_Knowledge_Pathways_Article_Maps::PATHWAY_POST_TYPE : 'sc_knowledge_pathway',
 			'collections'  => class_exists( 'SC_Library_Institutional_Collections_Archives' ) ? SC_Library_Institutional_Collections_Archives::COLLECTION_POST_TYPE : 'sc_inst_collection',
@@ -863,7 +863,7 @@ final class SC_Library_Public_API_Export_Federation {
 	private static function scope_post_types( $scope ) {
 		$map = array(
 			'documents'    => class_exists( 'SC_Library_Foundation_Pages' ) ? SC_Library_Foundation_Pages::POST_TYPE : 'sc_foundation_doc',
-			'projects'     => class_exists( 'SC_Library_Connected_Research_Environment' ) ? SC_Library_Connected_Research_Environment::PROJECT_POST_TYPE : 'sc_research_project',
+			'projects'     => class_exists( 'SC_Library_Citation_Source_Manager' ) ? SC_Library_Citation_Source_Manager::PROJECT_POST_TYPE : 'sc_research_project',
 			'sources'      => class_exists( 'SC_Library_Citation_Source_Manager' ) ? SC_Library_Citation_Source_Manager::SOURCE_POST_TYPE : 'sc_research_source',
 			'pathways'     => class_exists( 'SC_Library_Knowledge_Pathways_Article_Maps' ) ? SC_Library_Knowledge_Pathways_Article_Maps::PATHWAY_POST_TYPE : 'sc_knowledge_pathway',
 			'collections'  => class_exists( 'SC_Library_Institutional_Collections_Archives' ) ? SC_Library_Institutional_Collections_Archives::COLLECTION_POST_TYPE : 'sc_inst_collection',
