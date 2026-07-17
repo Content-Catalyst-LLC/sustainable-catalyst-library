@@ -2022,11 +2022,142 @@ final class SC_Library_Connected_Institutional_Platform {
 				)
 			);
 
-			return $this->render_public_portal_fallback();
+			return $this->render_public_portal_fallback( $atts );
 		}
 	}
 
-	private function render_public_portal_fallback() {
+	private static function shortcode_value_is_true( $value ) {
+		return in_array( strtolower( trim( (string) $value ) ), array( '1', 'true', 'yes', 'on', 'compact' ), true );
+	}
+
+	private static function compact_record_label( $record ) {
+		$title = strtolower( wp_strip_all_tags( (string) ( $record['title'] ?? '' ) ) );
+		$labels = array(
+			'charter'     => __( 'Institutional charter', 'sustainable-catalyst-library' ),
+			'principles'  => __( 'Public commitments', 'sustainable-catalyst-library' ),
+			'policy'      => __( 'Institutional policy', 'sustainable-catalyst-library' ),
+			'standard'    => __( 'Institutional standard', 'sustainable-catalyst-library' ),
+			'architecture'=> __( 'Platform architecture', 'sustainable-catalyst-library' ),
+		);
+		foreach ( $labels as $needle => $label ) {
+			if ( false !== strpos( $title, $needle ) ) {
+				return $label;
+			}
+		}
+		return (string) ( $record['type_label'] ?? __( 'Institutional record', 'sustainable-catalyst-library' ) );
+	}
+
+	private static function prioritize_compact_records( $records ) {
+		$priority_titles = array(
+			'sustainable catalyst institutional charter',
+			'sustainable catalyst principles and public commitments',
+			'sustainable catalyst platform architecture and product taxonomy',
+			'evidence, claims, and methodology standard',
+			'responsible ai and human review standard',
+			'scientific research and reproducibility standard',
+		);
+		$priorities = array_flip( $priority_titles );
+		$prepared = array();
+		foreach ( array_values( (array) $records ) as $index => $record ) {
+			if ( empty( $record['title'] ) || empty( $record['url'] ) ) {
+				continue;
+			}
+			$normalized = strtolower( trim( wp_strip_all_tags( (string) $record['title'] ) ) );
+			$record['_sc_compact_priority'] = isset( $priorities[ $normalized ] ) ? $priorities[ $normalized ] : 1000 + $index;
+			$record['_sc_compact_index'] = $index;
+			$prepared[] = $record;
+		}
+		usort(
+			$prepared,
+			static function ( $left, $right ) {
+				$priority = (int) $left['_sc_compact_priority'] <=> (int) $right['_sc_compact_priority'];
+				return 0 !== $priority ? $priority : ( (int) $left['_sc_compact_index'] <=> (int) $right['_sc_compact_index'] );
+			}
+		);
+		foreach ( $prepared as &$record ) {
+			unset( $record['_sc_compact_priority'], $record['_sc_compact_index'] );
+		}
+		unset( $record );
+		return $prepared;
+	}
+
+	private static function render_compact_record_cards( $records ) {
+		ob_start();
+		?>
+		<div class="sc-inst-compact-grid">
+			<?php foreach ( $records as $record ) : ?>
+				<article class="sc-inst-compact-card">
+					<a href="<?php echo esc_url( $record['url'] ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Open %s', 'sustainable-catalyst-library' ), $record['title'] ) ); ?>">
+						<span class="sc-inst-compact-type"><?php echo esc_html( self::compact_record_label( $record ) ); ?></span>
+						<strong><?php echo esc_html( $record['title'] ); ?></strong>
+						<span class="sc-inst-compact-arrow" aria-hidden="true">→</span>
+					</a>
+				</article>
+			<?php endforeach; ?>
+		</div>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	private function render_compact_public_portal( $records, $featured = 6, $recovered = false ) {
+		$records = self::prioritize_compact_records( $records );
+		$total = count( $records );
+		$featured = max( 1, min( 12, absint( $featured ) ) );
+		$primary = array_slice( $records, 0, $featured );
+		$additional = array_slice( $records, $featured );
+		$state_label = $recovered
+			? __( 'Protected server-rendered catalog', 'sustainable-catalyst-library' )
+			: __( 'Institutional catalog', 'sustainable-catalyst-library' );
+
+		wp_enqueue_style( 'sc-library-connected-institutional-platform' );
+		ob_start();
+		?>
+		<section class="sc-inst-public-portal sc-inst-public-portal--compact<?php echo $recovered ? ' sc-inst-public-portal--recovered' : ''; ?>"<?php echo $recovered ? ' data-sc-library-portal-recovery="4.0.6"' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+			<header class="sc-inst-compact-header">
+				<div>
+					<p class="sc-inst-kicker"><?php esc_html_e( 'Research Library', 'sustainable-catalyst-library' ); ?></p>
+					<h3><?php esc_html_e( 'Public institutional catalog', 'sustainable-catalyst-library' ); ?></h3>
+					<p class="sc-inst-compact-description"><?php esc_html_e( 'Charters, standards, methods, and stewardship records.', 'sustainable-catalyst-library' ); ?></p>
+				</div>
+				<p class="sc-inst-compact-status">
+					<strong><?php echo esc_html( number_format_i18n( $total ) ); ?></strong>
+					<span><?php esc_html_e( 'public records', 'sustainable-catalyst-library' ); ?></span>
+					<small><?php echo esc_html( $state_label ); ?></small>
+				</p>
+			</header>
+
+			<?php if ( $primary ) : ?>
+				<?php echo self::render_compact_record_cards( $primary ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php if ( $additional ) : ?>
+					<details class="sc-inst-compact-more">
+						<summary>
+							<span><?php echo esc_html( sprintf( __( 'Browse all %d institutional records', 'sustainable-catalyst-library' ), $total ) ); ?></span>
+							<span class="sc-inst-compact-toggle" aria-hidden="true">+</span>
+						</summary>
+						<?php echo self::render_compact_record_cards( $additional ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</details>
+				<?php endif; ?>
+			<?php else : ?>
+				<p class="sc-inst-compact-empty"><?php esc_html_e( 'No published research records are currently available.', 'sustainable-catalyst-library' ); ?></p>
+			<?php endif; ?>
+		</section>
+		<?php
+		return (string) ob_get_clean();
+	}
+
+	private function render_public_portal_fallback( $atts = array() ) {
+		$atts = shortcode_atts(
+			array(
+				'documents' => 8,
+				'units'     => 12,
+				'compact'   => 'false',
+				'featured'  => 6,
+			),
+			(array) $atts,
+			'sc_institutional_research_portal'
+		);
+		$compact = self::shortcode_value_is_true( $atts['compact'] );
+		$document_limit = max( 1, min( 30, absint( $atts['documents'] ) ) );
 		$post_type = post_type_exists( 'sc_foundation_doc' )
 			? 'sc_foundation_doc'
 			: ( post_type_exists( 'sc_library_document' ) ? 'sc_library_document' : 'post' );
@@ -2035,7 +2166,7 @@ final class SC_Library_Connected_Institutional_Platform {
 			array(
 				'post_type'           => $post_type,
 				'post_status'         => 'publish',
-				'posts_per_page'      => 12,
+				'posts_per_page'      => $document_limit,
 				'fields'              => 'ids',
 				'orderby'             => 'modified',
 				'order'               => 'DESC',
@@ -2043,13 +2174,29 @@ final class SC_Library_Connected_Institutional_Platform {
 			)
 		);
 
+		if ( $compact ) {
+			$records = array();
+			foreach ( $ids as $id ) {
+				$post_type_object = get_post_type_object( get_post_type( $id ) );
+				$records[] = array(
+					'title'      => get_the_title( $id ),
+					'url'        => get_permalink( $id ),
+					'type_label' => $post_type_object && ! empty( $post_type_object->labels->singular_name )
+						? $post_type_object->labels->singular_name
+						: __( 'Institutional record', 'sustainable-catalyst-library' ),
+				);
+			}
+			return $this->render_compact_public_portal( $records, $atts['featured'], true );
+		}
+
+		wp_enqueue_style( 'sc-library-connected-institutional-platform' );
 		ob_start();
 		?>
-		<section class="sc-inst-public-portal sc-inst-public-portal--recovered" data-sc-library-portal-recovery="4.0.5">
+		<section class="sc-inst-public-portal sc-inst-public-portal--recovered" data-sc-library-portal-recovery="4.0.6">
 			<header>
 				<p class="sc-inst-kicker"><?php esc_html_e( 'Research Library', 'sustainable-catalyst-library' ); ?></p>
 				<h2><?php esc_html_e( 'Published research records', 'sustainable-catalyst-library' ); ?></h2>
-				<p><?php esc_html_e( 'The institutional catalog is temporarily using its protected server-rendered view.', 'sustainable-catalyst-library' ); ?></p>
+				<p><?php esc_html_e( 'The institutional catalog is using its protected server-rendered view.', 'sustainable-catalyst-library' ); ?></p>
 			</header>
 
 			<?php if ( $ids ) : ?>
@@ -2087,8 +2234,19 @@ final class SC_Library_Connected_Institutional_Platform {
 		if ( empty( $settings['public_portal'] ) ) {
 			return '';
 		}
-		$atts = shortcode_atts( array( 'documents' => 8, 'units' => 12 ), $atts, 'sc_institutional_research_portal' );
-		$institutions = get_posts(
+		$atts = shortcode_atts(
+			array(
+				'documents' => 8,
+				'units'     => 12,
+				'compact'   => 'false',
+				'featured'  => 6,
+			),
+			$atts,
+			'sc_institutional_research_portal'
+		);
+		$compact = self::shortcode_value_is_true( $atts['compact'] );
+		$unit_limit = max( 0, min( 50, absint( $atts['units'] ) ) );
+		$institutions = $compact ? array() : get_posts(
 			array(
 				'post_type'      => self::INSTITUTION_POST_TYPE,
 				'post_status'    => 'publish',
@@ -2100,11 +2258,11 @@ final class SC_Library_Connected_Institutional_Platform {
 				'order'          => 'ASC',
 			)
 		);
-		$units = get_posts(
+		$units = ( $compact || 0 === $unit_limit ) ? array() : get_posts(
 			array(
 				'post_type'      => self::UNIT_POST_TYPE,
 				'post_status'    => 'publish',
-				'posts_per_page' => max( 1, min( 50, absint( $atts['units'] ) ) ),
+				'posts_per_page' => $unit_limit,
 				'fields'         => 'ids',
 				'meta_key'       => self::META_UNIT_PUBLIC,
 				'meta_value'     => '1',
@@ -2112,8 +2270,19 @@ final class SC_Library_Connected_Institutional_Platform {
 				'order'          => 'ASC',
 			)
 		);
-		$documents = self::institutional_search( array( 'types' => array( 'document', 'publication', 'pathway', 'collection' ), 'limit' => max( 1, min( 30, absint( $atts['documents'] ) ) ) ), false );
+		$documents = self::institutional_search(
+			array(
+				'types' => array( 'document', 'publication', 'pathway', 'collection' ),
+				'limit' => max( 1, min( 30, absint( $atts['documents'] ) ) ),
+			),
+			false
+		);
 		wp_enqueue_style( 'sc-library-connected-institutional-platform' );
+
+		if ( $compact ) {
+			return $this->render_compact_public_portal( $documents['records'] ?? array(), $atts['featured'], false );
+		}
+
 		ob_start();
 		?>
 		<section class="sc-inst-public-portal">

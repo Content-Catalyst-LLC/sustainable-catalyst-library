@@ -13,15 +13,15 @@ portal = (plugin / "includes/class-sc-library-connected-institutional-platform.p
 readme = (plugin / "readme.txt").read_text(encoding="utf-8")
 
 checks = {
-    "plugin header 4.0.5": "Version: 4.0.5" in main,
-    "plugin constant 4.0.5": "SC_LIBRARY_VERSION', '4.0.5" in main,
-    "stable tag 4.0.5": "Stable tag: 4.0.5" in readme,
+    "plugin header current release": "Version: 4.0.6" in main,
+    "plugin constant current release": "SC_LIBRARY_VERSION', '4.0.6" in main,
+    "stable tag current release": "Stable tag: 4.0.6" in readme,
     "project compatibility alias": "public const PROJECT_POST_TYPE = 'sc_research_project';" in connected,
     "canonical project owner used twice": exporter.count("SC_Library_Citation_Source_Manager::PROJECT_POST_TYPE") >= 2,
     "broken project owner removed": "SC_Library_Connected_Research_Environment::PROJECT_POST_TYPE" not in exporter,
     "portal Throwable boundary": "catch ( \\Throwable $error )" in portal,
     "protected fallback method": "render_public_portal_fallback" in portal,
-    "protected fallback marker": 'data-sc-library-portal-recovery="4.0.5"' in portal,
+    "protected fallback marker": 'data-sc-library-portal-recovery="4.0.6"' in portal,
     "inner portal method": "private function shortcode_portal_inner" in portal,
     "recovery logging": "Institutional portal recovery" in portal,
 }

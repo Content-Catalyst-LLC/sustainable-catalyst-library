@@ -1,0 +1,20 @@
+Sustainable Catalyst Library v4.0.6
+Institutional Portal Compact Layout Repair
+
+Validated:
+- Plugin header and SC_LIBRARY_VERSION: 4.0.6
+- WordPress readme stable tag: 4.0.6
+- PHP syntax across shipped plugin files
+- JavaScript syntax across shipped plugin assets
+- v4.0.5 institutional portal fatal-containment contract
+- v4.0.6 compact institutional portal contract
+- Compact fallback rendering and recovery marker
+- Two-column desktop and one-column mobile CSS contracts
+
+Targeted checks passed:
+- 12 institutional portal containment checks
+- 13 compact institutional portal checks
+- All shipped PHP and JavaScript files parse
+
+Note:
+Several older repository-wide historical tests expect pre-extension-bootstrap load paths and fail on the uploaded main branch before this patch. The v4.0.6 targeted contracts and package syntax checks pass.
