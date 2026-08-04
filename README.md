@@ -1,5 +1,17 @@
 # Sustainable Catalyst Library
 
+## v4.1.3 — Knowledge Library Contrast and Thumbnail Repair
+
+Homepage Spotlight now uses a black structural frame around white, cream, and gray editorial rows, with red Library accents and green operational status. Thumbnail resolution now checks featured images, Library media metadata, PDF previews, attached images, article content, and configured image URLs before showing a neutral Library placeholder. Existing curated categories, cards, schedules, and rotation behavior are preserved.
+
+Primary homepage shortcode:
+
+```text
+[sc_homepage_spotlight]
+```
+
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_4.1.3.md` and `KNOWLEDGE_LIBRARY_CONTRAST_THUMBNAIL_GUIDE_v4.1.3.md`.
+
 ## v2.1.0 — Foundation Document Pages
 
 Dedicated page-like Foundation Docs with one-click Media Library PDF embedding and a Foundations-only public shortcode.

@@ -38,6 +38,30 @@
 
         const label = (name, fallback) => root.dataset[name] || fallback;
 
+        const installThumbnailFallbacks = () => {
+            root.querySelectorAll('.sc-homepage-spotlight__thumbnail-image').forEach((image) => {
+                const showPlaceholder = () => {
+                    const frame = image.closest('.sc-homepage-spotlight__thumbnail');
+                    if (!frame) {
+                        return;
+                    }
+                    frame.classList.add('sc-homepage-spotlight__thumbnail--placeholder');
+                    frame.dataset.thumbnailSource = 'runtime-fallback';
+                    image.remove();
+                    if (!frame.querySelector('.sc-homepage-spotlight__thumbnail-placeholder-mark')) {
+                        const mark = document.createElement('span');
+                        mark.className = 'sc-homepage-spotlight__thumbnail-placeholder-mark';
+                        mark.textContent = 'KL';
+                        frame.append(mark);
+                    }
+                };
+                image.addEventListener('error', showPlaceholder, { once: true });
+                if (image.complete && image.naturalWidth === 0) {
+                    showPlaceholder();
+                }
+            });
+        };
+
         const removeDismissedCards = () => {
             root.querySelectorAll('[data-sc-spotlight-card][data-dismiss-key]').forEach((card) => {
                 if (safeStorageGet(card.dataset.dismissKey) === 'dismissed') {
@@ -197,6 +221,7 @@
             schedule();
         };
 
+        installThumbnailFallbacks();
         removeDismissedCards();
         refreshPages();
         if (!pages.length) {

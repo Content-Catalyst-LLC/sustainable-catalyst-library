@@ -4,24 +4,24 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.1.2
+Stable tag: 4.1.3
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationships, and pathways discovery interface while v2.0.0 unifies the complete v1.x platform into three coordinated layers: Public Knowledge, Research Workspace, and Institutional Operations. It adds a unified public portal, a research-workspace gateway, checksummed system manifests, privacy-aware cross-module activity, public system-status APIs, developer schemas, and portable Living Knowledge System entities while preserving every specialist Library tool.
+Sustainable Catalyst Library v4.1.3 presents a configurable, manually curated Homepage Spotlight with repaired source discovery, durable thumbnail resolution, a black-framed white/cream/gray editorial console, and automatic airport-board rotation. The broader plugin remains a unified Living Knowledge System spanning Public Knowledge, Research Workspace, Institutional Operations, preservation, APIs, and portable evidence records.
 
 
 
 = Curated Homepage Spotlight =
 
 * Configurable subject pages: create, rename, reorder, enable, disable, and replace categories without code changes.
-* Compact four- or five-record airport-board pages with featured treatment for position 1 on five-record pages.
+* Compact four- or five-record airport-board pages with featured treatment for position 1 on five-record pages and durable source thumbnails or neutral Library placeholders.
 * Manual selection, assignment, ordering, scheduling, and activation for every Library record and announcement.
 * Optional starter set for Sustainable Development, Planetary Boundaries, International Law, Biology, and Systems Thinking; all starter pages remain editable.
-* Black Knowledge Library console with white and gray editorial text, purple and pink discovery accents, and restrained green playback status.
+* Black structural frame with white, cream, and gray editorial record surfaces, red Library accents, and restrained green playback status.
 * Category tabs plus previous, pause/play, and next controls; automatic rotation is enabled by default at a 14-second interval and can be disabled by shortcode.
 * Pause on hover and keyboard focus, swipe navigation, reduced-motion protection, and responsive one-column mobile rendering.
 * No latest-content, popularity, taxonomy, random, or automatic-backfill selection paths.
@@ -145,6 +145,15 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.1.3 =
+
+* Repairs Homepage Spotlight thumbnail discovery across featured images, Library media metadata, PDF previews, attached images, content images, and image-URL metadata.
+* Adds a neutral Knowledge Library placeholder when a selected record has no usable public image, preventing empty thumbnail boxes.
+* Loads the first visible screen eagerly and later category screens lazily while preserving responsive image behavior.
+* Rebalances the console palette around a black structural frame, white/cream/gray record surfaces, red editorial accents, and green playback status.
+* Keeps thumbnails visible on mobile and makes new Library cards opt into thumbnail presentation by default.
+* Preserves all manual selection, category, schedule, rotation, accessibility, and no-backfill rules from v4.1.0–v4.1.2.
 
 = 4.1.2 =
 

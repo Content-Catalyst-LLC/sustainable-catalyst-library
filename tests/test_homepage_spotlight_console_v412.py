@@ -12,10 +12,10 @@ JS = (PLUGIN / "assets/js/sc-library-homepage-spotlight.js").read_text(encoding=
 
 
 def test_v412_release_markers():
-    assert "Version: 4.1.2" in MAIN
-    assert "SC_LIBRARY_VERSION', '4.1.2" in MAIN
-    assert "Stable tag: 4.1.2" in README
-    assert "public const VERSION = '4.1.2'" in MODULE
+    assert "Version: 4.1.3" in MAIN
+    assert "SC_LIBRARY_VERSION', '4.1.3" in MAIN
+    assert "Stable tag: 4.1.3" in README
+    assert "public const VERSION = '4.1.3'" in MODULE
 
 
 def test_console_default_rotation_contract():
@@ -29,13 +29,11 @@ def test_console_default_rotation_contract():
     assert "root.dataset.interval || '14000'" in JS
 
 
-def test_black_library_console_palette_and_identity():
+def test_console_frame_identity_and_rotation_surface():
     for fragment in [
-        "--sc-kl-bg: #050507",
-        "--sc-kl-text: #f7f7fb",
-        "--sc-kl-purple: #9d7cff",
-        "--sc-kl-pink: #ff6fb5",
-        "--sc-kl-green: #58e58b",
+        "--sc-kl-black: #090909",
+        "--sc-kl-white: #ffffff",
+        "--sc-kl-green: #168a4a",
         "sc-homepage-spotlight--console",
         "Knowledge Library",
         "Curated Knowledge Library console",
@@ -55,8 +53,8 @@ def test_airport_board_rows_and_status_telemetry():
         "AUTO, HOLD, PAUSED, STATIC, or REDUCED MOTION",
     ]:
         assert fragment.lower() in (TEMPLATE + README).lower()
-    assert "grid-template-columns: 44px auto minmax(0, 1fr) auto" in CSS
-    assert "linear-gradient(90deg, var(--sc-kl-purple), var(--sc-kl-pink), var(--sc-kl-green))" in CSS
+    assert "grid-template-columns: 44px 90px minmax(0, 1fr) auto" in CSS
+    assert "linear-gradient(90deg, var(--sc-kl-red) 0 58%, var(--sc-kl-green) 58% 100%)" in CSS
 
 
 def test_rotation_pause_and_screen_refresh_behavior():

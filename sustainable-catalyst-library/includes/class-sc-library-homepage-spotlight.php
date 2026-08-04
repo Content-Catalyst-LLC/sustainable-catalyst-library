@@ -14,11 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Homepage_Spotlight {
-    public const VERSION = '4.1.2';
+    public const VERSION = '4.1.3';
     public const ITEM_POST_TYPE = 'sc_home_spotlight';
     public const PAGE_POST_TYPE = 'sc_spot_page';
     public const SHORTCODE = 'sc_homepage_spotlight';
-    public const CACHE_KEY = 'sc_library_homepage_spotlight_pages_v410';
+    public const CACHE_KEY = 'sc_library_homepage_spotlight_pages_v413';
     public const CAPABILITY = 'manage_options';
 
     private const META_PAGE_DESCRIPTION = '_sc_spotlight_page_description';
@@ -93,7 +93,9 @@ final class SC_Library_Homepage_Spotlight {
             'interval_default_ms' => 14000,
             'airport_board_rotation' => true,
             'presentation' => 'knowledge_library_console',
-            'palette' => array( 'black', 'white', 'gray', 'purple', 'pink', 'green' ),
+            'palette' => array( 'black', 'white', 'cream', 'gray', 'red', 'green' ),
+            'thumbnail_resolution' => array( 'featured', 'library_meta', 'pdf_preview', 'attached_image', 'content_image', 'image_url', 'placeholder' ),
+            'contrast_model' => 'black_frame_light_editorial_rows',
         );
     }
 
@@ -470,7 +472,7 @@ final class SC_Library_Homepage_Spotlight {
 
             <div class="sc-library-spotlight-checkboxes">
                 <label><input type="checkbox" name="use_canonical" value="1" <?php checked( $values['use_canonical'], 1 ); ?>> <?php esc_html_e( 'Use the linked record’s canonical URL', 'sustainable-catalyst-library' ); ?></label>
-                <label><input type="checkbox" name="show_thumbnail" value="1" <?php checked( $values['show_thumbnail'], 1 ); ?>> <?php esc_html_e( 'Show thumbnail when available', 'sustainable-catalyst-library' ); ?></label>
+                <label><input type="checkbox" id="sc-library-spotlight-show-thumbnail" name="show_thumbnail" value="1" <?php checked( $values['show_thumbnail'], 1 ); ?>> <?php esc_html_e( 'Show resolved thumbnail or Library placeholder', 'sustainable-catalyst-library' ); ?></label>
                 <label><input type="checkbox" name="show_metadata" value="1" <?php checked( $values['show_metadata'], 1 ); ?>> <?php esc_html_e( 'Show document metadata', 'sustainable-catalyst-library' ); ?></label>
                 <label data-announcement-only><input type="checkbox" name="dismissible" value="1" <?php checked( $values['dismissible'], 1 ); ?>> <?php esc_html_e( 'Allow visitors to dismiss this announcement', 'sustainable-catalyst-library' ); ?></label>
                 <label><input type="checkbox" name="enabled" value="1" <?php checked( $values['enabled'], 1 ); ?>> <strong><?php esc_html_e( 'Display this card when its schedule and source are valid', 'sustainable-catalyst-library' ); ?></strong></label>
@@ -1161,9 +1163,15 @@ final class SC_Library_Homepage_Spotlight {
         if ( ! $summary && $source ) {
             $summary = $this->source_summary( $source );
         }
-        $thumbnail = '';
-        if ( $source && get_post_meta( $entry->ID, self::META_SHOW_THUMBNAIL, true ) && has_post_thumbnail( $source ) ) {
-            $thumbnail = get_the_post_thumbnail( $source, 'medium_large', array( 'loading' => 'lazy' ) );
+        $thumbnail = array(
+            'attachment_id' => 0,
+            'url' => '',
+            'alt' => '',
+            'source' => 'none',
+            'placeholder' => false,
+        );
+        if ( $source && get_post_meta( $entry->ID, self::META_SHOW_THUMBNAIL, true ) ) {
+            $thumbnail = $this->resolve_source_thumbnail( $source );
         }
         $label = get_post_meta( $entry->ID, self::META_LABEL, true );
         if ( ! $label ) {
@@ -1182,7 +1190,11 @@ final class SC_Library_Homepage_Spotlight {
             'summary' => sanitize_textarea_field( $summary ),
             'action_label' => sanitize_text_field( $action_label ),
             'url' => esc_url_raw( $url ),
-            'thumbnail' => $thumbnail,
+            'thumbnail_attachment_id' => absint( $thumbnail['attachment_id'] ?? 0 ),
+            'thumbnail_url' => esc_url_raw( (string) ( $thumbnail['url'] ?? '' ) ),
+            'thumbnail_alt' => sanitize_text_field( (string) ( $thumbnail['alt'] ?? '' ) ),
+            'thumbnail_source' => sanitize_key( (string) ( $thumbnail['source'] ?? 'none' ) ),
+            'thumbnail_placeholder' => (bool) ( $thumbnail['placeholder'] ?? false ),
             'show_thumbnail' => (bool) get_post_meta( $entry->ID, self::META_SHOW_THUMBNAIL, true ),
             'show_metadata' => (bool) get_post_meta( $entry->ID, self::META_SHOW_METADATA, true ),
             'metadata' => $source ? $this->source_metadata( $source ) : '',
@@ -1343,7 +1355,7 @@ final class SC_Library_Homepage_Spotlight {
             'action_label' => __( 'Read article', 'sustainable-catalyst-library' ),
             'url' => '',
             'use_canonical' => 1,
-            'show_thumbnail' => 0,
+            'show_thumbnail' => 1,
             'show_metadata' => 1,
             'dismissible' => 0,
             'enabled' => 0,
@@ -1355,6 +1367,153 @@ final class SC_Library_Homepage_Spotlight {
 
     private function page_item_limit( int $page_id ): int {
         return 4 === absint( get_post_meta( $page_id, self::META_PAGE_ITEM_LIMIT, true ) ) ? 4 : 5;
+    }
+
+    /**
+     * Resolve a durable public thumbnail for a Library source.
+     *
+     * Resolution order intentionally favors canonical WordPress media before
+     * inspecting Library-specific metadata or document content. The result is
+     * filterable and always includes an editorial placeholder when no source
+     * image is available, so the public row never collapses into an empty box.
+     *
+     * @return array{attachment_id:int,url:string,alt:string,source:string,placeholder:bool}
+     */
+    private function resolve_source_thumbnail( WP_Post $source ): array {
+        $empty = array(
+            'attachment_id' => 0,
+            'url' => '',
+            'alt' => get_the_title( $source ),
+            'source' => 'none',
+            'placeholder' => false,
+        );
+
+        $from_attachment = function ( int $attachment_id, string $kind ) use ( $source, $empty ): array {
+            if ( $attachment_id <= 0 || 'attachment' !== get_post_type( $attachment_id ) ) {
+                return $empty;
+            }
+            $url = wp_get_attachment_image_url( $attachment_id, 'medium_large' );
+            if ( ! $url ) {
+                return $empty;
+            }
+            $alt = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+            return array(
+                'attachment_id' => $attachment_id,
+                'url' => esc_url_raw( $url ),
+                'alt' => sanitize_text_field( $alt ?: get_the_title( $source ) ),
+                'source' => sanitize_key( $kind ),
+                'placeholder' => false,
+            );
+        };
+
+        $featured_id = get_post_thumbnail_id( $source );
+        if ( $featured_id ) {
+            $featured = $from_attachment( $featured_id, 'featured' );
+            if ( $featured['url'] ) {
+                return $featured;
+            }
+        }
+
+        $attachment_meta_keys = array(
+            '_sc_library_thumbnail_id',
+            '_sc_library_cover_attachment_id',
+            '_sc_library_cover_image_id',
+            '_sc_library_pdf_cover_attachment_id',
+            '_sc_library_pdf_attachment_id',
+            '_sc_library_foundation_pdf_attachment_id',
+            '_sc_library_foundation_attachment_id',
+            '_sc_foundation_pdf_attachment_id',
+            'sc_library_pdf_attachment_id',
+            '_sc_library_source_attachment_id',
+        );
+        foreach ( $attachment_meta_keys as $meta_key ) {
+            $attachment_id = absint( get_post_meta( $source->ID, $meta_key, true ) );
+            if ( ! $attachment_id ) {
+                continue;
+            }
+            $resolved = $from_attachment( $attachment_id, false !== strpos( $meta_key, 'pdf' ) ? 'pdf_preview' : 'library_meta' );
+            if ( $resolved['url'] ) {
+                return $resolved;
+            }
+        }
+
+        $attached_images = get_children(
+            array(
+                'post_parent' => $source->ID,
+                'post_type' => 'attachment',
+                'post_mime_type' => 'image',
+                'post_status' => 'inherit',
+                'numberposts' => 1,
+                'orderby' => 'menu_order ID',
+                'order' => 'ASC',
+            )
+        );
+        if ( $attached_images ) {
+            $attached = reset( $attached_images );
+            if ( $attached instanceof WP_Post ) {
+                $resolved = $from_attachment( $attached->ID, 'attached_image' );
+                if ( $resolved['url'] ) {
+                    return $resolved;
+                }
+            }
+        }
+
+        $content = (string) $source->post_content;
+        if ( preg_match( '/\bwp-image-(\d+)\b/', $content, $matches ) ) {
+            $resolved = $from_attachment( absint( $matches[1] ), 'content_image' );
+            if ( $resolved['url'] ) {
+                return $resolved;
+            }
+        }
+        if ( preg_match( '/<img[^>]+src=["\']([^"\']+)["\']/i', $content, $matches ) ) {
+            $content_url = esc_url_raw( html_entity_decode( $matches[1], ENT_QUOTES, get_bloginfo( 'charset' ) ) );
+            if ( $content_url ) {
+                return array(
+                    'attachment_id' => 0,
+                    'url' => $content_url,
+                    'alt' => get_the_title( $source ),
+                    'source' => 'content_image',
+                    'placeholder' => false,
+                );
+            }
+        }
+
+        $url_meta_keys = array(
+            '_sc_library_thumbnail_url',
+            '_sc_library_cover_image_url',
+            '_sc_library_pdf_cover_url',
+            '_sc_library_document_thumbnail_url',
+            '_thumbnail_url',
+        );
+        foreach ( $url_meta_keys as $meta_key ) {
+            $url = esc_url_raw( get_post_meta( $source->ID, $meta_key, true ) );
+            if ( $url ) {
+                return array(
+                    'attachment_id' => 0,
+                    'url' => $url,
+                    'alt' => get_the_title( $source ),
+                    'source' => 'image_url',
+                    'placeholder' => false,
+                );
+            }
+        }
+
+        $placeholder = array(
+            'attachment_id' => 0,
+            'url' => '',
+            'alt' => '',
+            'source' => 'placeholder',
+            'placeholder' => true,
+        );
+
+        /**
+         * Filter a resolved Homepage Spotlight thumbnail.
+         *
+         * @param array<string,mixed> $placeholder Thumbnail resolution result.
+         * @param WP_Post             $source      Linked public Library source.
+         */
+        $filtered = apply_filters( 'sc_library_spotlight_thumbnail', $placeholder, $source );
+        return is_array( $filtered ) ? wp_parse_args( $filtered, $placeholder ) : $placeholder;
     }
 
     private function source_summary( WP_Post $post ): string {

@@ -85,15 +85,49 @@ if ( ! defined( 'ABSPATH' ) ) {
                         $show_thumbnail = null === $show_thumbnail_override ? $card['show_thumbnail'] : $show_thumbnail_override;
                         $show_metadata = null === $show_metadata_override ? $card['show_metadata'] : $show_metadata_override;
                         $is_lead = $five_card_page && 0 === $card_index;
+                        $render_thumbnail = $show_thumbnail && ( ! empty( $card['thumbnail_url'] ) || ! empty( $card['thumbnail_placeholder'] ) );
+                        $thumbnail_loading = 0 === $page_index ? 'eager' : 'lazy';
+                        $thumbnail_priority = 0 === $page_index && $is_lead ? 'high' : 'auto';
                         ?>
                         <article
-                            class="sc-homepage-spotlight__card<?php echo $is_lead ? ' sc-homepage-spotlight__card--lead' : ''; ?>"
+                            class="sc-homepage-spotlight__card<?php echo $is_lead ? ' sc-homepage-spotlight__card--lead' : ''; ?><?php echo $render_thumbnail ? ' sc-homepage-spotlight__card--has-thumbnail' : ' sc-homepage-spotlight__card--no-thumbnail'; ?>"
                             data-sc-spotlight-card
                             <?php echo $card['dismissible'] ? 'data-dismissible="true" data-dismiss-key="' . esc_attr( $card['dismiss_key'] ) . '"' : ''; ?>
                         >
                             <span class="sc-homepage-spotlight__row-number" aria-hidden="true"><?php echo esc_html( str_pad( (string) ( $card_index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span>
-                            <?php if ( $show_thumbnail && $card['thumbnail'] ) : ?>
-                                <div class="sc-homepage-spotlight__thumbnail"><?php echo wp_kses_post( $card['thumbnail'] ); ?></div>
+                            <?php if ( $render_thumbnail ) : ?>
+                                <figure class="sc-homepage-spotlight__thumbnail<?php echo ! empty( $card['thumbnail_placeholder'] ) ? ' sc-homepage-spotlight__thumbnail--placeholder' : ''; ?>" data-thumbnail-source="<?php echo esc_attr( $card['thumbnail_source'] ); ?>" aria-hidden="true">
+                                    <?php
+                                    $thumbnail_html = '';
+                                    if ( ! empty( $card['thumbnail_attachment_id'] ) ) {
+                                        $thumbnail_html = wp_get_attachment_image(
+                                            (int) $card['thumbnail_attachment_id'],
+                                            'medium_large',
+                                            false,
+                                            array(
+                                                'class' => 'sc-homepage-spotlight__thumbnail-image',
+                                                'loading' => $thumbnail_loading,
+                                                'decoding' => 'async',
+                                                'fetchpriority' => $thumbnail_priority,
+                                                'alt' => '',
+                                            )
+                                        );
+                                    }
+                                    if ( ! $thumbnail_html && ! empty( $card['thumbnail_url'] ) ) {
+                                        $thumbnail_html = sprintf(
+                                            '<img class="sc-homepage-spotlight__thumbnail-image" src="%1$s" alt="" loading="%2$s" decoding="async" fetchpriority="%3$s">',
+                                            esc_url( $card['thumbnail_url'] ),
+                                            esc_attr( $thumbnail_loading ),
+                                            esc_attr( $thumbnail_priority )
+                                        );
+                                    }
+                                    if ( $thumbnail_html ) {
+                                        echo wp_kses_post( $thumbnail_html );
+                                    } else {
+                                        echo '<span class="sc-homepage-spotlight__thumbnail-placeholder-mark">KL</span>';
+                                    }
+                                    ?>
+                                </figure>
                             <?php endif; ?>
                             <div class="sc-homepage-spotlight__card-copy">
                                 <div class="sc-homepage-spotlight__record-line">

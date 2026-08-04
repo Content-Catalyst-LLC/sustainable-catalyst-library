@@ -60,6 +60,10 @@
                 if (summary && !summary.value.trim()) {
                     summary.value = item.excerpt || '';
                 }
+                const showThumbnail = document.getElementById('sc-library-spotlight-show-thumbnail');
+                if (showThumbnail) {
+                    showThumbnail.checked = true;
+                }
             });
             results.append(button);
         });

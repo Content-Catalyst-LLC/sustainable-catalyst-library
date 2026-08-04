@@ -15,9 +15,9 @@ ADMIN_CSS = (PLUGIN / "assets/css/sc-library-homepage-spotlight-admin.css").read
 
 
 def test_release_markers_and_contained_bootstrap():
-    assert "Version: 4.1.2" in MAIN
-    assert "SC_LIBRARY_VERSION', '4.1.2" in MAIN
-    assert "Stable tag: 4.1.2" in README
+    assert "Version: 4.1.3" in MAIN
+    assert "SC_LIBRARY_VERSION', '4.1.3" in MAIN
+    assert "Stable tag: 4.1.3" in README
     assert "class-sc-library-homepage-spotlight.php" in MAIN
     assert "new SC_Library_Homepage_Spotlight" in MAIN
     assert "Homepage Spotlight startup failure" in MAIN
@@ -106,7 +106,7 @@ def test_public_five_page_console_and_four_five_card_layout():
     assert "Previous" in TEMPLATE and "Pause" in TEMPLATE and "Next" in TEMPLATE
     assert ".sc-homepage-spotlight__board" in PUBLIC_CSS
     assert ".sc-homepage-spotlight__card--lead" in PUBLIC_CSS
-    assert "grid-template-columns: 44px auto minmax(0, 1fr) auto" in PUBLIC_CSS
+    assert "grid-template-columns: 44px 90px minmax(0, 1fr) auto" in PUBLIC_CSS
     assert "@media (max-width: 680px)" in PUBLIC_CSS
 
 
@@ -155,7 +155,7 @@ def test_source_validation_and_no_backfill_runtime():
 
 
 def test_cache_boundaries_and_empty_behavior():
-    assert "CACHE_KEY = 'sc_library_homepage_spotlight_pages_v410'" in MODULE
+    assert "CACHE_KEY = 'sc_library_homepage_spotlight_pages_v413'" in MODULE
     assert "next_boundary" in MODULE
     assert "delete_transient( self::CACHE_KEY )" in MODULE
     assert "'empty_queue_behavior' => 'hide'" in MODULE
