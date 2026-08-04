@@ -1,0 +1,53 @@
+Sustainable Catalyst Library v4.1.2 — Knowledge Library Console Presentation Refresh
+Build validation date: 2026-08-04
+
+SOURCE BASELINE
+PASS — v4.1.1 source discovery repair retained
+PASS — existing Spotlight categories and card records require no migration
+PASS — optional module containment retained
+
+RELEASE CONTRACT
+PASS — plugin header 4.1.2
+PASS — SC_LIBRARY_VERSION 4.1.2
+PASS — WordPress stable tag 4.1.2
+PASS — Spotlight module asset version 4.1.2
+PASS — automatic rotation default enabled
+PASS — default interval 14,000 milliseconds
+PASS — manually configurable category names and order retained
+PASS — manual record selection and ordering retained
+PASS — minimum four valid records per public category retained
+PASS — no automatic latest, popular, random, taxonomy, or backfill path
+
+PRESENTATION
+PASS — black console shell
+PASS — white and gray editorial typography
+PASS — purple Knowledge Library/category accents
+PASS — pink featured-record/action accents
+PASS — restrained green automatic-playback status
+PASS — compact numbered airport-board record rows
+PASS — featured position-one treatment for five-record pages
+PASS — visible AUTO, HOLD, PAUSED, STATIC, and REDUCED MOTION states
+PASS — category progress line
+PASS — restrained screen-refresh transition
+PASS — responsive mobile row layout
+
+INTERACTION AND ACCESSIBILITY
+PASS — previous, pause/play, and next controls
+PASS — category tabs and selected state
+PASS — left/right/home/end tab keyboard navigation
+PASS — pause on hover and keyboard focus
+PASS — touch swipe navigation and touch hold
+PASS — browser visibility pause
+PASS — reduced-motion autoplay suppression
+PASS — screen-reader labels and hidden-panel reading-order control
+PASS — post-dismissal four-record minimum enforced client-side
+
+VALIDATION
+PASS — 18 targeted v4.1.0–v4.1.2 Spotlight assertions
+PASS — 119 recent inherited fatal-containment, PDF compatibility, and portal assertions
+PASS — package-wide PHP syntax validation
+PASS — Spotlight public JavaScript syntax validation
+PASS — Spotlight administration JavaScript syntax validation
+
+LIMITATION
+A live WordPress/Astra/browser deployment was not available in the build container. Production visual confirmation, cache purge, and live homepage interaction remain deployment checks.

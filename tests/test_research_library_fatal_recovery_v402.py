@@ -8,8 +8,8 @@ shortcodes = (plugin / 'includes/class-sc-library-shortcodes.php').read_text(enc
 foundation_pages = (plugin / 'includes/class-sc-library-foundation-pages.php').read_text(encoding='utf-8')
 bootstrap = (plugin / 'includes/class-sc-library-extension-bootstrap-v402.php').read_text(encoding='utf-8')
 checks = {
-    'plugin header current release': 'Version: 4.1.1' in main,
-    'plugin constant current release': "SC_LIBRARY_VERSION', '4.1.1" in main,
+    'plugin header current release': 'Version: 4.1.2' in main,
+    'plugin constant current release': "SC_LIBRARY_VERSION', '4.1.2" in main,
     'Foundations integration 2.1.6': "SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.6" in (plugin / 'includes/class-sc-library-foundation-system-v200.php').read_text(encoding='utf-8'),
     'guarded extension bootstrap used': 'SC_Library_Extension_Bootstrap_V402::boot();' in foundation_pages,
     'old unguarded extension constructors removed': 'new SC_Library_Document_Public_Repository();' not in foundation_pages,

@@ -10,10 +10,10 @@ ADMIN_JS = (PLUGIN / "assets/js/sc-library-homepage-spotlight-admin.js").read_te
 
 
 def test_v411_release_markers():
-    assert "Version: 4.1.1" in MAIN
-    assert "SC_LIBRARY_VERSION', '4.1.1" in MAIN
-    assert "Stable tag: 4.1.1" in README
-    assert "public const VERSION = '4.1.1'" in MODULE
+    assert "Version: 4.1.2" in MAIN
+    assert "SC_LIBRARY_VERSION', '4.1.2" in MAIN
+    assert "Stable tag: 4.1.2" in README
+    assert "public const VERSION = '4.1.2'" in MODULE
 
 
 def test_search_filters_cannot_hide_valid_sources():

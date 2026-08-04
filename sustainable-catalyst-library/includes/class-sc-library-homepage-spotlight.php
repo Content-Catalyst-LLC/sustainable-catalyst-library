@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Homepage_Spotlight {
-    public const VERSION = '4.1.1';
+    public const VERSION = '4.1.2';
     public const ITEM_POST_TYPE = 'sc_home_spotlight';
     public const PAGE_POST_TYPE = 'sc_spot_page';
     public const SHORTCODE = 'sc_homepage_spotlight';
@@ -89,7 +89,11 @@ final class SC_Library_Homepage_Spotlight {
             'automatic_random' => false,
             'automatic_backfill' => false,
             'empty_queue_behavior' => 'hide',
-            'autoplay_default' => false,
+            'autoplay_default' => true,
+            'interval_default_ms' => 14000,
+            'airport_board_rotation' => true,
+            'presentation' => 'knowledge_library_console',
+            'palette' => array( 'black', 'white', 'gray', 'purple', 'pink', 'green' ),
         );
     }
 
@@ -339,9 +343,9 @@ final class SC_Library_Homepage_Spotlight {
                 <div class="sc-library-spotlight-section-heading">
                     <div>
                         <h2><?php esc_html_e( '2. Curate the cards', 'sustainable-catalyst-library' ); ?></h2>
-                        <p><?php esc_html_e( 'Each category supports four or five deliberately selected cards. Position 1 becomes the lead card when a page contains five.', 'sustainable-catalyst-library' ); ?></p>
+                        <p><?php esc_html_e( 'Each category supports four or five deliberately selected records. Position 1 receives featured console treatment when a page contains five.', 'sustainable-catalyst-library' ); ?></p>
                     </div>
-                    <code>[sc_homepage_spotlight autoplay="false" interval="16000"]</code>
+                    <code>[sc_homepage_spotlight autoplay="true" interval="14000"]</code>
                 </div>
                 <div class="sc-library-spotlight-admin-grid">
                     <div class="sc-library-spotlight-editor-card">
@@ -974,9 +978,9 @@ final class SC_Library_Homepage_Spotlight {
     public function shortcode( $atts = array() ): string {
         $atts = shortcode_atts(
             array(
-                'autoplay' => 'false',
+                'autoplay' => 'true',
                 'rotate' => '',
-                'interval' => '16000',
+                'interval' => '14000',
                 'controls' => 'true',
                 'tabs' => 'true',
                 'loop' => 'true',

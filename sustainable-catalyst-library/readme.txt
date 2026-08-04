@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.1.1
+Stable tag: 4.1.2
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -18,10 +18,11 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 = Curated Homepage Spotlight =
 
 * Configurable subject pages: create, rename, reorder, enable, disable, and replace categories without code changes.
-* Four- or five-card page layouts with a lead card when five records are selected.
+* Compact four- or five-record airport-board pages with featured treatment for position 1 on five-record pages.
 * Manual selection, assignment, ordering, scheduling, and activation for every Library record and announcement.
 * Optional starter set for Sustainable Development, Planetary Boundaries, International Law, Biology, and Systems Thinking; all starter pages remain editable.
-* Category tabs plus previous, pause/play, and next controls; autoplay is optional and disabled by default.
+* Black Knowledge Library console with white and gray editorial text, purple and pink discovery accents, and restrained green playback status.
+* Category tabs plus previous, pause/play, and next controls; automatic rotation is enabled by default at a 14-second interval and can be disabled by shortcode.
 * Pause on hover and keyboard focus, swipe navigation, reduced-motion protection, and responsive one-column mobile rendering.
 * No latest-content, popularity, taxonomy, random, or automatic-backfill selection paths.
 * Homepage shortcode `[sc_homepage_spotlight]`.
@@ -144,6 +145,15 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.1.2 =
+
+* Refreshes Homepage Spotlight as a compact Knowledge Library Console rather than a conventional article-card grid.
+* Adds a black airport-board presentation with white and gray typography, purple and pink discovery accents, and green automatic-rotation status.
+* Enables automatic category rotation by default at 14 seconds while retaining pause, play, previous, next, category tabs, swipe, focus pause, hover pause, and reduced-motion safeguards.
+* Reworks four- and five-record pages into numbered catalog rows; position 1 receives featured treatment on five-record pages.
+* Adds a visible AUTO, HOLD, PAUSED, STATIC, or REDUCED MOTION state and a restrained rotation progress line.
+* Preserves every v4.1.0–v4.1.1 editorial control, source-discovery repair, schedule, category, and no-backfill rule.
 
 = 4.1.1 =
 * Repairs Homepage Spotlight source discovery for standard published articles and other eligible Library records.

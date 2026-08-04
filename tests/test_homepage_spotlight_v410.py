@@ -15,9 +15,9 @@ ADMIN_CSS = (PLUGIN / "assets/css/sc-library-homepage-spotlight-admin.css").read
 
 
 def test_release_markers_and_contained_bootstrap():
-    assert "Version: 4.1.1" in MAIN
-    assert "SC_LIBRARY_VERSION', '4.1.1" in MAIN
-    assert "Stable tag: 4.1.1" in README
+    assert "Version: 4.1.2" in MAIN
+    assert "SC_LIBRARY_VERSION', '4.1.2" in MAIN
+    assert "Stable tag: 4.1.2" in README
     assert "class-sc-library-homepage-spotlight.php" in MAIN
     assert "new SC_Library_Homepage_Spotlight" in MAIN
     assert "Homepage Spotlight startup failure" in MAIN
@@ -66,7 +66,7 @@ def test_manual_selection_contract_has_no_automatic_population():
         assert fragment in MODULE
     assert "'cards_per_page' => array( 4, 5 )" in MODULE
     assert "'minimum_valid_cards_per_page' => 4" in MODULE
-    assert "'autoplay_default' => false" in MODULE
+    assert "'autoplay_default' => true" in MODULE
     assert "orderby' => 'date'" not in MODULE
     assert "orderby' => 'rand'" not in MODULE.lower()
 
@@ -96,18 +96,18 @@ def test_category_and_card_admin_controls():
 
 def test_public_five_page_console_and_four_five_card_layout():
     assert "[sc_homepage_spotlight" in MODULE
-    assert "'autoplay' => 'false'" in MODULE
-    assert "'interval' => '16000'" in MODULE
+    assert "'autoplay' => 'true'" in MODULE
+    assert "'interval' => '14000'" in MODULE
     assert "'tabs' => 'true'" in MODULE
     assert "data-sc-spotlight-tab" in TEMPLATE
     assert "data-sc-spotlight-page" in TEMPLATE
     assert "data-sc-spotlight-card" in TEMPLATE
     assert "sc-homepage-spotlight__card--lead" in TEMPLATE
     assert "Previous" in TEMPLATE and "Pause" in TEMPLATE and "Next" in TEMPLATE
-    assert "grid-template-columns: repeat(2, minmax(0, 1fr));" in PUBLIC_CSS
+    assert ".sc-homepage-spotlight__board" in PUBLIC_CSS
     assert ".sc-homepage-spotlight__card--lead" in PUBLIC_CSS
-    assert "grid-column: 1 / -1" in PUBLIC_CSS
-    assert "@media (max-width: 760px)" in PUBLIC_CSS
+    assert "grid-template-columns: 44px auto minmax(0, 1fr) auto" in PUBLIC_CSS
+    assert "@media (max-width: 680px)" in PUBLIC_CSS
 
 
 def test_rotation_accessibility_and_reduced_motion():
