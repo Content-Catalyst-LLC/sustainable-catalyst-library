@@ -11,7 +11,7 @@ module_text = MODULE.read_text(encoding='utf-8')
 patcher_text = PATCHER.read_text(encoding='utf-8')
 
 checks = {
-    'v2.0.3 marker': "SC_LIBRARY_FOUNDATIONS_VERSION', '2.0.3" in module_text,
+    'current Foundations marker': "SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.6" in module_text,
     'post type route enforcement': 'foundation_document_post_type_args' in module_text,
     'document route base': "'slug'       => 'foundation-documents'" in module_text,
     'legacy rewrite removal': 'remove_legacy_foundation_document_rules' in module_text,

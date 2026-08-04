@@ -6,7 +6,7 @@ root = Path(__file__).resolve().parents[1]
 module = (root / "sustainable-catalyst-library/includes/class-sc-library-foundation-system-v200.php").read_text(encoding="utf-8")
 
 checks = {
-    "v2.0.5 marker": "SC_LIBRARY_FOUNDATIONS_VERSION', '2.0.5" in module,
+    "current Foundations marker": "SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.6" in module,
     "late shortcode replacement": "replace_foundations_library_shortcode" in module and ", 999);" in module,
     "old pre-shortcode filter removed": "pre_do_shortcode_tag" not in module,
     "original shortcode removed": "remove_shortcode('sc_foundations_library')" in module,

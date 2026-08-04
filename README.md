@@ -1,5 +1,27 @@
 # Sustainable Catalyst Library
 
+## v4.1.0 — Curated Homepage Spotlight
+
+Sustainable Catalyst Library v4.1.0 adds a fully curated homepage discovery console owned by the Knowledge Library.
+
+- Create, rename, reorder, enable, disable, and replace subject pages without code changes.
+- Choose four or five manually selected cards for each public page.
+- Use the optional starter set: Sustainable Development, Planetary Boundaries, International Law, Biology, and Systems Thinking.
+- Select existing Library records or create controlled site-announcement cards.
+- Override card headlines, summaries, labels, action text, thumbnails, and destinations without changing the source record.
+- Schedule cards by start and end time, including planned replacements in the same card slot.
+- Navigate with subject tabs and previous, pause/play, and next controls.
+- Keep autoplay optional and disabled by default; hover, focus, swipe, visibility, and reduced-motion behavior are protected.
+- Never populate categories from taxonomy, recency, popularity, random selection, or unselected fallback content.
+
+Homepage shortcode:
+
+```text
+[sc_homepage_spotlight]
+```
+
+Recommended placement is directly below the homepage hero. Configure content under **SC Library → Homepage Spotlight**.
+
 ## v2.1.0 — Foundation Document Pages
 
 Dedicated page-like Foundation Docs with one-click Media Library PDF embedding and a Foundations-only public shortcode.

@@ -7,8 +7,8 @@ php = (root / 'sustainable-catalyst-library/includes/class-sc-library-foundation
 system = (root / 'sustainable-catalyst-library/includes/class-sc-library-foundation-system-v200.php').read_text(encoding='utf-8')
 
 checks = {
-    'v2.1.5 provisioner': "private const RELEASE = '2.1.5';" in php,
-    'v2.1.5 system': "SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.5" in system,
+    'current provisioner': "private const RELEASE = '2.1.6';" in php,
+    'current Foundations system': "SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.6" in system,
     'Foundations family assigned': "'sc_document_family' => ['foundations', 'Foundations']" in php,
     'Foundation Document type assigned': "'sc_document_type' => ['foundation-document', 'Foundation Document']" in php,
     'taxonomy association': "register_taxonomy_for_object_type($taxonomy, 'sc_foundation_doc')" in php,

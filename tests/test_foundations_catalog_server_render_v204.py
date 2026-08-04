@@ -8,7 +8,7 @@ MODULE = ROOT / "sustainable-catalyst-library/includes/class-sc-library-foundati
 text = MODULE.read_text(encoding="utf-8")
 
 checks = {
-    "v2.0.4 marker": "SC_LIBRARY_FOUNDATIONS_VERSION', '2.0.4" in text,
+    "current Foundations marker": "SC_LIBRARY_FOUNDATIONS_VERSION', '2.1.6" in text,
     "pre-shortcode hook": "pre_do_shortcode_tag" in text,
     "server rendering method": "server_render_foundations_library" in text,
     "canonical page detection": "is_foundations_page_request" in text,

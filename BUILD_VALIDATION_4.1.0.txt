@@ -1,0 +1,51 @@
+Sustainable Catalyst Library v4.1.0
+Curated Homepage Spotlight
+Validated August 4, 2026
+
+CURRENT RELEASE VALIDATION: PASS
+
+Release markers
+- Plugin header: 4.1.0
+- SC_LIBRARY_VERSION: 4.1.0
+- WordPress stable tag: 4.1.0
+
+New v4.1.0 contract
+- 8 pytest cases passed
+- Configurable category-page model
+- Optional editable five-page starter set
+- Four- or five-card capacity
+- Minimum four valid cards before public rendering
+- Manual category and card selection
+- Manual page and card ordering
+- Scheduled same-slot replacements
+- No taxonomy, recency, popularity, random, or unselected fallback population
+- Four-card grid and five-card lead layout
+- Subject tabs and previous/pause-play/next controls
+- Autoplay disabled by default
+- Hover, keyboard-focus, touch-swipe, visibility, and reduced-motion handling
+- Source validation, scheduling boundaries, empty-output behavior, and cache invalidation
+- Contained module startup boundary
+
+Recent inherited regression contracts
+- 86 Research Library fatal-recovery assertions passed
+- 8 PDF source-compatibility assertions passed
+- 12 institutional portal containment assertions passed
+- 13 institutional portal compact-layout assertions passed
+- Total recent inherited assertions passed: 119
+
+Package syntax
+- All shipped PHP files passed php -l
+- All shipped JavaScript files passed node --check
+
+Historical suite note
+The repository includes archived release scripts that assert retired v2.0.4/v2.0.5
+Foundations rendering internals and call SystemExit during pytest collection. A plain
+repository-wide `pytest -q` therefore remains unsuitable as a current-release runner.
+This is inherited test-debt from the supplied v4.0.6 baseline, not a v4.1.0 runtime
+failure. The release ships `tests/run_v410_validation.sh`, which validates the current
+Spotlight contract, recent fatal-containment contracts, and package syntax without
+masking those historical expectations.
+
+No live WordPress browser session or production database was available in the build
+environment. Final site acceptance should confirm the administration workflow and
+homepage rendering after installation.

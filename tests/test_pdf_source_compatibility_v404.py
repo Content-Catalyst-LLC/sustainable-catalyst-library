@@ -11,9 +11,9 @@ exporter = (plugin / "includes/class-sc-library-public-api-export-federation.php
 readme = (plugin / "readme.txt").read_text(encoding="utf-8")
 
 checks = {
-    "plugin header 4.0.4": "Version: 4.0.4" in main,
-    "plugin constant 4.0.4": "SC_LIBRARY_VERSION', '4.0.4" in main,
-    "stable tag 4.0.4": "Stable tag: 4.0.4" in readme,
+    "plugin header current release": "Version: 4.1.0" in main,
+    "plugin constant current release": "SC_LIBRARY_VERSION', '4.1.0" in main,
+    "stable tag current release": "Stable tag: 4.1.0" in readme,
     "canonical PDF meta constant": "public const META_PDF_ID = '_sc_library_foundation_page_pdf_id';" in pdf_class,
     "compatibility alias": "public const META_SOURCE_ATTACHMENT = self::META_PDF_ID;" in pdf_class,
     "exporter uses canonical constant": "SC_Library_PDF_To_Document::META_PDF_ID" in exporter,

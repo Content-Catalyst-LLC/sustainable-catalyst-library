@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.0.6
+Stable tag: 4.1.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -13,6 +13,18 @@ A unified WordPress Living Knowledge System for public discovery, research works
 
 Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationships, and pathways discovery interface while v2.0.0 unifies the complete v1.x platform into three coordinated layers: Public Knowledge, Research Workspace, and Institutional Operations. It adds a unified public portal, a research-workspace gateway, checksummed system manifests, privacy-aware cross-module activity, public system-status APIs, developer schemas, and portable Living Knowledge System entities while preserving every specialist Library tool.
 
+
+
+= Curated Homepage Spotlight =
+
+* Configurable subject pages: create, rename, reorder, enable, disable, and replace categories without code changes.
+* Four- or five-card page layouts with a lead card when five records are selected.
+* Manual selection, assignment, ordering, scheduling, and activation for every Library record and announcement.
+* Optional starter set for Sustainable Development, Planetary Boundaries, International Law, Biology, and Systems Thinking; all starter pages remain editable.
+* Category tabs plus previous, pause/play, and next controls; autoplay is optional and disabled by default.
+* Pause on hover and keyboard focus, swipe navigation, reduced-motion protection, and responsive one-column mobile rendering.
+* No latest-content, popularity, taxonomy, random, or automatic-backfill selection paths.
+* Homepage shortcode `[sc_homepage_spotlight]`.
 
 = Unified Living Knowledge System =
 
@@ -77,15 +89,16 @@ Sustainable Catalyst Library v2.0.1 repairs the plugin-owned topics, relationshi
 
 1. Upload and activate the plugin, choosing **Replace current with uploaded** during an upgrade.
 2. Clear WordPress, page-builder, Cloudflare, and browser caches.
-3. Open SC Library → Living Knowledge System.
-4. Create or locate the draft portal page, review it, and publish it manually.
-5. Create the first checksummed system manifest.
-6. Open SC Library → Production Readiness and run the complete readiness report.
-7. Confirm Index Tools, Knowledge Graph, Foundation Documents, archive, API, and workspace status.
-8. An index rebuild is not required solely for this upgrade.
+3. Open **SC Library → Homepage Spotlight**.
+4. Create your own category pages or add the optional five-page starter set.
+5. Assign four or five selected cards to each category and enable them.
+6. Place `[sc_homepage_spotlight]` directly below the homepage hero.
+7. Review desktop, mobile, keyboard, and reduced-motion behavior.
+8. Existing Knowledge Library indexes do not need to be rebuilt solely for this upgrade.
 
 == Shortcodes ==
 
+* `[sc_homepage_spotlight]`
 * `[sc_library_living_system]`
 * `[sc_library_unified_workspace]`
 * `[sc_library_system_status]`
