@@ -12,6 +12,8 @@
     --sc-kl-gray-700: #3f3f3c;
     --sc-kl-red: #e00000;
     --sc-kl-green: #168a4a;
+    --sc-kl-progress-track: #8f8f8a;
+    --sc-kl-progress-fill: #e00000;
     position: relative;
     width: 100%;
     margin: 0;
@@ -138,7 +140,7 @@
 .sc-homepage-spotlight__progress {
     height: 3px;
     overflow: hidden;
-    background: #2b2b2b;
+    background: var(--sc-kl-progress-track);
 }
 
 .sc-homepage-spotlight__progress span {
@@ -147,7 +149,7 @@
     height: 100%;
     transform: scaleX(0);
     transform-origin: left center;
-    background: linear-gradient(90deg, var(--sc-kl-red) 0 58%, var(--sc-kl-green) 58% 100%);
+    background: var(--sc-kl-progress-fill);
 }
 
 .sc-homepage-spotlight[data-playback-state="auto"] .sc-homepage-spotlight__progress span.is-running {

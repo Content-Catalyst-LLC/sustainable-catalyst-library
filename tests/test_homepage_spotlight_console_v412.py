@@ -12,10 +12,10 @@ JS = (PLUGIN / "assets/js/sc-library-homepage-spotlight.js").read_text(encoding=
 
 
 def test_v412_release_markers():
-    assert "Version: 4.1.3" in MAIN
-    assert "SC_LIBRARY_VERSION', '4.1.3" in MAIN
-    assert "Stable tag: 4.1.3" in README
-    assert "public const VERSION = '4.1.3'" in MODULE
+    assert "Version: 4.1.4" in MAIN
+    assert "SC_LIBRARY_VERSION', '4.1.4" in MAIN
+    assert "Stable tag: 4.1.4" in README
+    assert "public const VERSION = '4.1.4'" in MODULE
 
 
 def test_console_default_rotation_contract():
@@ -54,7 +54,8 @@ def test_airport_board_rows_and_status_telemetry():
     ]:
         assert fragment.lower() in (TEMPLATE + README).lower()
     assert "grid-template-columns: 44px 90px minmax(0, 1fr) auto" in CSS
-    assert "linear-gradient(90deg, var(--sc-kl-red) 0 58%, var(--sc-kl-green) 58% 100%)" in CSS
+    assert "background: var(--sc-kl-progress-fill)" in CSS
+    assert "background: var(--sc-kl-progress-track)" in CSS
 
 
 def test_rotation_pause_and_screen_refresh_behavior():

@@ -1,8 +1,8 @@
 # Sustainable Catalyst Library
 
-## v4.1.3 — Knowledge Library Contrast and Thumbnail Repair
+## v4.1.4 — Knowledge Library Progress Indicator Refinement
 
-Homepage Spotlight now uses a black structural frame around white, cream, and gray editorial rows, with red Library accents and green operational status. Thumbnail resolution now checks featured images, Library media metadata, PDF previews, attached images, article content, and configured image URLs before showing a neutral Library placeholder. Existing curated categories, cards, schedules, and rotation behavior are preserved.
+Homepage Spotlight now uses a single red rotation-progress fill on a neutral gray track. Green remains reserved for the small AUTO operational status indicator. The v4.1.3 thumbnail repair, black structural frame, white/cream/gray editorial rows, red Library accents, automatic 14-second rotation, and all manual curation rules are preserved.
 
 Primary homepage shortcode:
 
@@ -10,7 +10,8 @@ Primary homepage shortcode:
 [sc_homepage_spotlight]
 ```
 
-See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_4.1.3.md` and `KNOWLEDGE_LIBRARY_CONTRAST_THUMBNAIL_GUIDE_v4.1.3.md`.
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_4.1.4.md` and `KNOWLEDGE_LIBRARY_PROGRESS_INDICATOR_GUIDE_v4.1.4.md`.
+
 
 ## v2.1.0 — Foundation Document Pages
 

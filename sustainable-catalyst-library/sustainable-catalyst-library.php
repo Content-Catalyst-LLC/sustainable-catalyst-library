@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.1.3 presents manually curated Knowledge Library records in a high-contrast, automatically rotating editorial console with repaired thumbnail discovery while preserving configurable categories, repaired source discovery, public research interfaces, institutional operations, evidence provenance, accessibility, APIs, preservation, and the broader unified living knowledge system.
- * Version: 4.1.3
+ * Description: Sustainable Catalyst Library v4.1.4 refines the curated Knowledge Library console with a red-on-gray rotation progress indicator while preserving repaired thumbnails, the black-framed white/cream/gray editorial presentation, configurable categories, manual selection, source discovery, accessibility, institutional operations, APIs, preservation, and the broader unified living knowledge system.
+ * Version: 4.1.4
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.1.3');
+define('SC_LIBRARY_VERSION', '4.1.4');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

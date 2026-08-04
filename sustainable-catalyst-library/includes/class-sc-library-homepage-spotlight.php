@@ -14,11 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Homepage_Spotlight {
-    public const VERSION = '4.1.3';
+    public const VERSION = '4.1.4';
     public const ITEM_POST_TYPE = 'sc_home_spotlight';
     public const PAGE_POST_TYPE = 'sc_spot_page';
     public const SHORTCODE = 'sc_homepage_spotlight';
-    public const CACHE_KEY = 'sc_library_homepage_spotlight_pages_v413';
+    public const CACHE_KEY = 'sc_library_homepage_spotlight_pages_v414';
     public const CAPABILITY = 'manage_options';
 
     private const META_PAGE_DESCRIPTION = '_sc_spotlight_page_description';
@@ -90,6 +90,9 @@ final class SC_Library_Homepage_Spotlight {
             'automatic_backfill' => false,
             'empty_queue_behavior' => 'hide',
             'autoplay_default' => true,
+            'progress_indicator' => 'red_fill_gray_track',
+            'progress_green_reserved_for_status' => true,
+            'progress_gradient' => false,
             'interval_default_ms' => 14000,
             'airport_board_rotation' => true,
             'presentation' => 'knowledge_library_console',

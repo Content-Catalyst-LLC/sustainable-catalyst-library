@@ -13,9 +13,9 @@ portal = (plugin / "includes/class-sc-library-connected-institutional-platform.p
 readme = (plugin / "readme.txt").read_text(encoding="utf-8")
 
 checks = {
-    "plugin header current release": "Version: 4.1.3" in main,
-    "plugin constant current release": "SC_LIBRARY_VERSION', '4.1.3" in main,
-    "stable tag current release": "Stable tag: 4.1.3" in readme,
+    "plugin header current release": "Version: 4.1.4" in main,
+    "plugin constant current release": "SC_LIBRARY_VERSION', '4.1.4" in main,
+    "stable tag current release": "Stable tag: 4.1.4" in readme,
     "project compatibility alias": "public const PROJECT_POST_TYPE = 'sc_research_project';" in connected,
     "canonical project owner used twice": exporter.count("SC_Library_Citation_Source_Manager::PROJECT_POST_TYPE") >= 2,
     "broken project owner removed": "SC_Library_Connected_Research_Environment::PROJECT_POST_TYPE" not in exporter,

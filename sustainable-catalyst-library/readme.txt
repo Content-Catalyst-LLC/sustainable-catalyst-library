@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.1.3
+Stable tag: 4.1.4
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.1.3 presents a configurable, manually curated Homepage Spotlight with repaired source discovery, durable thumbnail resolution, a black-framed white/cream/gray editorial console, and automatic airport-board rotation. The broader plugin remains a unified Living Knowledge System spanning Public Knowledge, Research Workspace, Institutional Operations, preservation, APIs, and portable evidence records.
+Sustainable Catalyst Library v4.1.4 presents a configurable, manually curated Homepage Spotlight with repaired source discovery, durable thumbnail resolution, a black-framed white/cream/gray editorial console, automatic airport-board rotation, and a refined red-on-gray progress indicator. The broader plugin remains a unified Living Knowledge System spanning Public Knowledge, Research Workspace, Institutional Operations, preservation, APIs, and portable evidence records.
 
 
 
@@ -21,7 +21,7 @@ Sustainable Catalyst Library v4.1.3 presents a configurable, manually curated Ho
 * Compact four- or five-record airport-board pages with featured treatment for position 1 on five-record pages and durable source thumbnails or neutral Library placeholders.
 * Manual selection, assignment, ordering, scheduling, and activation for every Library record and announcement.
 * Optional starter set for Sustainable Development, Planetary Boundaries, International Law, Biology, and Systems Thinking; all starter pages remain editable.
-* Black structural frame with white, cream, and gray editorial record surfaces, red Library accents, and restrained green playback status.
+* Black structural frame with white, cream, and gray editorial record surfaces, red Library accents, restrained green playback status, and a red progress fill on a neutral gray track.
 * Category tabs plus previous, pause/play, and next controls; automatic rotation is enabled by default at a 14-second interval and can be disabled by shortcode.
 * Pause on hover and keyboard focus, swipe navigation, reduced-motion protection, and responsive one-column mobile rendering.
 * No latest-content, popularity, taxonomy, random, or automatic-backfill selection paths.
@@ -145,6 +145,13 @@ Sustainable Catalyst Library v4.1.3 presents a configurable, manually curated Ho
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.1.4 =
+
+* Replaces the mixed red-and-green rotation progress line with a single red fill on a neutral gray track.
+* Removes the progress gradient so the timer no longer resembles a changing health or performance score.
+* Reserves green for the small AUTO operational status indicator and related accessibility states.
+* Preserves the 14-second rotation timing, category transitions, thumbnail repair, light editorial rows, manual curation, and no-backfill rules from v4.1.3.
 
 = 4.1.3 =
 
