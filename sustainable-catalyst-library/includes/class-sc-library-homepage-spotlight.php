@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Homepage_Spotlight {
-    public const VERSION = '4.1.0';
+    public const VERSION = '4.1.1';
     public const ITEM_POST_TYPE = 'sc_home_spotlight';
     public const PAGE_POST_TYPE = 'sc_spot_page';
     public const SHORTCODE = 'sc_homepage_spotlight';
@@ -439,9 +439,9 @@ final class SC_Library_Homepage_Spotlight {
             <div class="sc-library-spotlight-source-picker" data-source-section="library">
                 <label for="sc-library-spotlight-source-search"><strong><?php esc_html_e( 'Selected Library record', 'sustainable-catalyst-library' ); ?></strong></label>
                 <input type="hidden" id="sc-library-spotlight-source-id" name="source_id" value="<?php echo esc_attr( $values['source_id'] ); ?>">
-                <input type="search" id="sc-library-spotlight-source-search" value="<?php echo esc_attr( $source ? get_the_title( $source ) : '' ); ?>" placeholder="<?php esc_attr_e( 'Search published Library content', 'sustainable-catalyst-library' ); ?>" autocomplete="off">
+                <input type="search" id="sc-library-spotlight-source-search" value="<?php echo esc_attr( $source ? get_the_title( $source ) : '' ); ?>" placeholder="<?php esc_attr_e( 'Search by title or paste a published article URL', 'sustainable-catalyst-library' ); ?>" autocomplete="off">
                 <div id="sc-library-spotlight-source-results" class="sc-library-spotlight-source-results" aria-live="polite"></div>
-                <p class="description"><?php esc_html_e( 'Search may use existing Library metadata, but only your click selects the record.', 'sustainable-catalyst-library' ); ?></p>
+                <p class="description"><?php esc_html_e( 'Search by title, post ID, slug, or canonical URL. Only your click selects the record.', 'sustainable-catalyst-library' ); ?></p>
             </div>
 
             <label for="sc-library-spotlight-label"><strong><?php esc_html_e( 'Card label', 'sustainable-catalyst-library' ); ?></strong></label>
@@ -732,7 +732,7 @@ final class SC_Library_Homepage_Spotlight {
         $source_id = isset( $_POST['source_id'] ) ? absint( $_POST['source_id'] ) : 0;
         if ( 'library' === $source_type ) {
             $source = $source_id ? get_post( $source_id ) : null;
-            if ( ! $source || 'publish' !== $source->post_status || ! in_array( $source->post_type, $this->eligible_source_post_types(), true ) ) {
+            if ( ! $this->is_valid_source_record( $source ) ) {
                 $this->redirect_notice( 'source-required' );
             }
         }
@@ -862,20 +862,11 @@ final class SC_Library_Homepage_Spotlight {
             wp_send_json_error( array( 'message' => __( 'Permission denied.', 'sustainable-catalyst-library' ) ), 403 );
         }
         $query = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
-        if ( strlen( $query ) < 2 ) {
+        if ( strlen( trim( $query ) ) < 2 ) {
             wp_send_json_success( array( 'items' => array() ) );
         }
-        $posts = get_posts(
-            array(
-                'post_type' => $this->eligible_source_post_types(),
-                'post_status' => 'publish',
-                'posts_per_page' => 20,
-                's' => $query,
-                'orderby' => 'relevance date',
-                'order' => 'DESC',
-                'suppress_filters' => false,
-            )
-        );
+
+        $posts = $this->search_source_posts( $query, 20 );
         $items = array();
         foreach ( $posts as $post ) {
             $type = get_post_type_object( $post->post_type );
@@ -884,9 +875,99 @@ final class SC_Library_Homepage_Spotlight {
                 'title' => html_entity_decode( get_the_title( $post ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
                 'excerpt' => $this->source_summary( $post ),
                 'type' => $type ? $type->labels->singular_name : $post->post_type,
+                'url' => get_permalink( $post ),
             );
         }
         wp_send_json_success( array( 'items' => $items ) );
+    }
+
+    /**
+     * Search published source records without allowing front-end search filters
+     * to hide valid Library content. Canonical URLs, numeric IDs, slugs, and
+     * ordinary title/content searches are all supported.
+     *
+     * @return WP_Post[]
+     */
+    private function search_source_posts( string $query, int $limit = 20 ): array {
+        global $wpdb;
+
+        $query = trim( $query );
+        $limit = max( 1, min( 50, $limit ) );
+        $post_types = $this->eligible_source_post_types();
+        $posts_by_id = array();
+
+        $add_post = function ( $candidate ) use ( &$posts_by_id ): void {
+            $post = $candidate instanceof WP_Post ? $candidate : get_post( absint( $candidate ) );
+            if ( $this->is_valid_source_record( $post ) ) {
+                $posts_by_id[ $post->ID ] = $post;
+            }
+        };
+
+        if ( ctype_digit( $query ) ) {
+            $add_post( absint( $query ) );
+        }
+
+        if ( wp_http_validate_url( $query ) ) {
+            $add_post( url_to_postid( $query ) );
+            $path = (string) wp_parse_url( $query, PHP_URL_PATH );
+            $slug = sanitize_title( basename( untrailingslashit( $path ) ) );
+            if ( $slug ) {
+                foreach ( get_posts(
+                    array(
+                        'name' => $slug,
+                        'post_type' => $post_types,
+                        'post_status' => 'publish',
+                        'posts_per_page' => $limit,
+                        'suppress_filters' => true,
+                    )
+                ) as $post ) {
+                    $add_post( $post );
+                }
+            }
+        }
+
+        foreach ( get_posts(
+            array(
+                'post_type' => $post_types,
+                'post_status' => 'publish',
+                'posts_per_page' => $limit,
+                's' => $query,
+                'orderby' => 'relevance date',
+                'order' => 'DESC',
+                'suppress_filters' => true,
+            )
+        ) as $post ) {
+            $add_post( $post );
+        }
+
+        if ( count( $posts_by_id ) < $limit && ! empty( $post_types ) ) {
+            $type_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+            $title_like = '%' . $wpdb->esc_like( $query ) . '%';
+            $slug_like = '%' . $wpdb->esc_like( sanitize_title( $query ) ) . '%';
+            $sql = "SELECT ID FROM {$wpdb->posts}
+                WHERE post_status = 'publish'
+                AND post_type IN ({$type_placeholders})
+                AND (post_title LIKE %s OR post_name LIKE %s)
+                ORDER BY CASE WHEN post_title = %s THEN 0 ELSE 1 END, post_modified_gmt DESC
+                LIMIT %d";
+            $params = array_merge( $post_types, array( $title_like, $slug_like, $query, $limit * 2 ) );
+            $candidate_ids = $wpdb->get_col( $wpdb->prepare( $sql, $params ) );
+            foreach ( $candidate_ids as $candidate_id ) {
+                $add_post( $candidate_id );
+                if ( count( $posts_by_id ) >= $limit ) {
+                    break;
+                }
+            }
+        }
+
+        return array_slice( array_values( $posts_by_id ), 0, $limit );
+    }
+
+    private function is_valid_source_record( $post ): bool {
+        return $post instanceof WP_Post
+            && 'publish' === $post->post_status
+            && empty( $post->post_password )
+            && in_array( $post->post_type, $this->eligible_source_post_types(), true );
     }
 
     /** @param array<string,mixed>|string $atts */

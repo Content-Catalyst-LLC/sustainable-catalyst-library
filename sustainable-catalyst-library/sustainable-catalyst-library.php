@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.1.0 adds a fully curated, configurable Homepage Spotlight console to the unified living knowledge system with a repaired plugin-owned discovery interface with a public discovery layer, authenticated research workspace, institutional operations, cross-system manifests and activity, a database-inventory-aware large-library index scanner, structured indexing, relationships, research notebooks, sources, Technical Translation Matrices, Whiteboards, Chalkboards, Annotation Studio handwriting, custom books, a Foundations Documentation Library, content planner, complete public registry, roadmap tracker, PostgreSQL and portable research-data exports, planning analytics, dependency intelligence, release coordination, persistent account workspaces, Render synchronization, server-side book and PDF production, Multimedia Studio and video snippet production, evidence reels, collaboration, invited review participants, suggested edits, comments, approvals, record locks, attribution history, a provenance-aware knowledge graph, relationship confidence, orphan and duplicate-concept diagnostics, timeline and place views, Whiteboard graph promotion, Research Librarian workspace orchestration, transparent retrieval reasons, user-confirmed action packets, controlled tool routing, optional site-scoped synthesis, a versioned public API, scoped service keys, signed webhooks, OpenAPI and JSON Schema documentation, a developer portal, embedded Foundation Document records, bundled PDF.js viewing, page-aware full-text PDF extraction, citation exports, PDF migration diagnostics, institutional preservation snapshots, integrity audits, checksums, authority history, supersession chains, archival browsing, retention controls, accessibility and mobile hardening, bounded public-response caching, anonymous REST rate limiting, production-readiness diagnostics, security headers, public record-card layout repair, responsive rendering, frozen editions, authority and version controls, search, filters, and public REST endpoints.
- * Version: 4.1.0
+ * Description: Sustainable Catalyst Library v4.1.1 repairs Homepage Spotlight source discovery and adds a fully curated, configurable Homepage Spotlight console to the unified living knowledge system with a repaired plugin-owned discovery interface with a public discovery layer, authenticated research workspace, institutional operations, cross-system manifests and activity, a database-inventory-aware large-library index scanner, structured indexing, relationships, research notebooks, sources, Technical Translation Matrices, Whiteboards, Chalkboards, Annotation Studio handwriting, custom books, a Foundations Documentation Library, content planner, complete public registry, roadmap tracker, PostgreSQL and portable research-data exports, planning analytics, dependency intelligence, release coordination, persistent account workspaces, Render synchronization, server-side book and PDF production, Multimedia Studio and video snippet production, evidence reels, collaboration, invited review participants, suggested edits, comments, approvals, record locks, attribution history, a provenance-aware knowledge graph, relationship confidence, orphan and duplicate-concept diagnostics, timeline and place views, Whiteboard graph promotion, Research Librarian workspace orchestration, transparent retrieval reasons, user-confirmed action packets, controlled tool routing, optional site-scoped synthesis, a versioned public API, scoped service keys, signed webhooks, OpenAPI and JSON Schema documentation, a developer portal, embedded Foundation Document records, bundled PDF.js viewing, page-aware full-text PDF extraction, citation exports, PDF migration diagnostics, institutional preservation snapshots, integrity audits, checksums, authority history, supersession chains, archival browsing, retention controls, accessibility and mobile hardening, bounded public-response caching, anonymous REST rate limiting, production-readiness diagnostics, security headers, public record-card layout repair, responsive rendering, frozen editions, authority and version controls, search, filters, and public REST endpoints.
+ * Version: 4.1.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.1.0');
+define('SC_LIBRARY_VERSION', '4.1.1');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -105,7 +105,7 @@ final class SC_Library_Plugin {
         $unified_system = new SC_Library_Unified_System($indexer, $relationships);
         $shortcodes = new SC_Library_Shortcodes();
 
-        // v4.1.0 is an optional, contained editorial surface. A Spotlight
+        // v4.1.1 is an optional, contained editorial surface. A Spotlight
         // startup failure must not terminate the public Research Library.
         try {
             $spotlight_path = SC_LIBRARY_DIR . 'includes/class-sc-library-homepage-spotlight.php';
@@ -119,7 +119,7 @@ final class SC_Library_Plugin {
             new SC_Library_Homepage_Spotlight();
             update_option('sc_library_homepage_spotlight_v410_status', [
                 'active' => true,
-                'version' => '4.1.0',
+                'version' => '4.1.1',
                 'error' => '',
                 'timestamp' => current_time('mysql', true),
             ], false);
@@ -127,7 +127,7 @@ final class SC_Library_Plugin {
             error_log('[Sustainable Catalyst Library] Homepage Spotlight startup failure: ' . $error->getMessage());
             update_option('sc_library_homepage_spotlight_v410_status', [
                 'active' => false,
-                'version' => '4.1.0',
+                'version' => '4.1.1',
                 'error' => $error->getMessage(),
                 'timestamp' => current_time('mysql', true),
             ], false);

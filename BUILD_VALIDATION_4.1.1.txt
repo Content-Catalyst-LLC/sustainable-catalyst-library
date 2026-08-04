@@ -1,0 +1,17 @@
+Sustainable Catalyst Library v4.1.1 — Build Validation
+Date: 2026-08-04
+
+PASS: Plugin header, constant, module version, and stable tag report 4.1.1.
+PASS: Homepage Spotlight search uses suppress_filters=true.
+PASS: Canonical URL lookup uses url_to_postid with slug fallback.
+PASS: Numeric post ID, slug, title/content, and direct title fallback paths are present.
+PASS: Explicit click-to-select behavior remains intact.
+PASS: Unpublished and password-protected source records are rejected.
+PASS: 12 Homepage Spotlight tests passed.
+PASS: Recent v4.0.2-v4.0.6 inherited regression contracts passed.
+PASS: Package-wide PHP syntax validation passed.
+PASS: Homepage Spotlight public and administrator JavaScript syntax validation passed.
+PASS: Validation runner includes a no-pytest fallback for macOS installations.
+
+Environment limitation:
+Live execution inside the production WordPress database was not available. Final deployment validation is to confirm the reported article appears when searched by title or canonical URL after installing v4.1.1 and refreshing the admin page.

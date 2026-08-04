@@ -46,7 +46,7 @@
             const title = document.createElement('strong');
             title.textContent = item.title;
             const meta = document.createElement('small');
-            meta.textContent = item.type;
+            meta.textContent = item.url ? `${item.type} · ${item.url}` : item.type;
             button.append(title, meta);
             button.addEventListener('click', () => {
                 sourceId.value = String(item.id);

@@ -15,9 +15,9 @@ ADMIN_CSS = (PLUGIN / "assets/css/sc-library-homepage-spotlight-admin.css").read
 
 
 def test_release_markers_and_contained_bootstrap():
-    assert "Version: 4.1.0" in MAIN
-    assert "SC_LIBRARY_VERSION', '4.1.0" in MAIN
-    assert "Stable tag: 4.1.0" in README
+    assert "Version: 4.1.1" in MAIN
+    assert "SC_LIBRARY_VERSION', '4.1.1" in MAIN
+    assert "Stable tag: 4.1.1" in README
     assert "class-sc-library-homepage-spotlight.php" in MAIN
     assert "new SC_Library_Homepage_Spotlight" in MAIN
     assert "Homepage Spotlight startup failure" in MAIN
