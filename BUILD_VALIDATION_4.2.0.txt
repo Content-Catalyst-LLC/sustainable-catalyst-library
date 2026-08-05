@@ -1,0 +1,57 @@
+Sustainable Catalyst Library v4.2.0
+Twelve-Topic Two-Tier Homepage Spotlight
+Build validation report
+
+RELEASE CONTRACT
+PASS  Plugin header version: 4.2.0
+PASS  SC_LIBRARY_VERSION constant: 4.2.0
+PASS  WordPress stable tag: 4.2.0
+PASS  Homepage Spotlight module version: 4.2.0
+PASS  Spotlight cache boundary: sc_library_homepage_spotlight_pages_v420
+
+FEATURE VALIDATION
+PASS  Twelve recommended topics are declared.
+PASS  Eight topics are assigned to the recommended Primary tier.
+PASS  Four topics are assigned to the recommended Secondary tier.
+PASS  Existing pages without tier metadata default safely to Primary.
+PASS  Administrator can edit topic tier and order within tier.
+PASS  One-click starter action creates only missing topic pages.
+PASS  Starter action aligns matching pages without replacing selected articles.
+PASS  Five article positions remain the recommended per-topic configuration.
+PASS  Secondary topics are collapsed initially by default.
+PASS  Secondary control exposes aria-expanded and aria-controls.
+PASS  Automatic rotation excludes Secondary topics until the tier is opened.
+PASS  Previous/next and swipe navigation use the same tier-aware sequence.
+PASS  Closing the Secondary tier while a Secondary topic is active returns to Primary.
+PASS  Desktop navigation uses four columns; tablet uses two; small mobile uses one.
+PASS  Shortcode remains backward compatible and adds secondary_topics, secondary_open, and secondary_label.
+
+FOCUSED RELEASE SUITE
+PASS  41 pytest assertions across v4.1.0-v4.1.4 preserved contracts and v4.2.0 tier behavior.
+PASS  86 Research Library fatal-recovery contract checks.
+PASS  8 PDF source compatibility checks.
+PASS  12 institutional portal fatal-containment checks.
+PASS  13 compact institutional portal checks.
+PASS  PHP syntax validation across 96 plugin PHP files.
+PASS  JavaScript syntax validation across 47 plugin JavaScript files.
+PASS  JSON parsing across 19 repository JSON files.
+PASS  macOS installer shell syntax validation.
+
+HISTORICAL TEST PROFILE
+The repository contains historical standalone release scripts that intentionally assert old component versions and are not a single current-release pytest suite. Running every historical Python file as an executable produced the same inherited profile as the supplied v4.1.4 repository:
+
+- Supplied v4.1.4 baseline: 24 passed, 34 failed.
+- v4.2.0 release: 25 passed, 34 failed.
+- Difference: one added passing v4.2.0 test; no inherited script changed from pass to fail.
+
+A raw `pytest -q` across the entire tests directory is not a valid repository command because several historical files execute `sys.exit()` during collection. The release-specific command is:
+
+    bash tests/run_v420_validation.sh
+
+LIMITATIONS
+- No live WordPress installation, database migration, page-builder cache, CDN, or production browser session was available in this build environment.
+- Public topics still require at least four valid manually selected cards before they render; the intended presentation uses five.
+- The starter action creates and aligns topic pages but deliberately does not auto-select articles.
+
+RESULT
+PASS  Sustainable Catalyst Library v4.2.0 is packaged for installation and repository deployment.

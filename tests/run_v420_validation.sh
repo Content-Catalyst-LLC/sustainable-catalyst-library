@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-printf 'Sustainable Catalyst Library v4.2.0 compatibility validation\n\n'
+printf 'Sustainable Catalyst Library v4.2.0 validation\n\n'
 grep -q 'Version: 4.2.0' sustainable-catalyst-library/sustainable-catalyst-library.php
 grep -q "SC_LIBRARY_VERSION', '4.2.0" sustainable-catalyst-library/sustainable-catalyst-library.php
 grep -q 'Stable tag: 4.2.0' sustainable-catalyst-library/readme.txt
@@ -12,6 +12,7 @@ FILES=(
   tests/test_homepage_spotlight_console_v412.py
   tests/test_homepage_spotlight_contrast_thumbnail_v413.py
   tests/test_homepage_spotlight_progress_v414.py
+  tests/test_homepage_spotlight_two_tier_v420.py
 )
 if python3 -c 'import pytest' >/dev/null 2>&1; then
   python3 -m pytest -q "${FILES[@]}"
@@ -26,6 +27,7 @@ for filename in [
     Path('tests/test_homepage_spotlight_console_v412.py'),
     Path('tests/test_homepage_spotlight_contrast_thumbnail_v413.py'),
     Path('tests/test_homepage_spotlight_progress_v414.py'),
+    Path('tests/test_homepage_spotlight_two_tier_v420.py'),
 ]:
     namespace = runpy.run_path(str(filename))
     tests = sorted((name, value) for name, value in namespace.items() if name.startswith('test_') and callable(value))
@@ -41,4 +43,4 @@ python3 tests/test_institutional_portal_compact_layout_v406.py
 find sustainable-catalyst-library -name '*.php' -print0 | xargs -0 -n1 php -l >/dev/null
 node --check sustainable-catalyst-library/assets/js/sc-library-homepage-spotlight-admin.js
 node --check sustainable-catalyst-library/assets/js/sc-library-homepage-spotlight.js
-printf '\nPASS: v4.2.0 compatibility validation preserved the v4.1.4 progress indicator contract.\n'
+printf '\nPASS: v4.2.0 twelve-topic two-tier Homepage Spotlight validation completed.\n'

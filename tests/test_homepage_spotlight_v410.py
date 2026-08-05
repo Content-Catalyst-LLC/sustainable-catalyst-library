@@ -15,9 +15,9 @@ ADMIN_CSS = (PLUGIN / "assets/css/sc-library-homepage-spotlight-admin.css").read
 
 
 def test_release_markers_and_contained_bootstrap():
-    assert "Version: 4.1.4" in MAIN
-    assert "SC_LIBRARY_VERSION', '4.1.4" in MAIN
-    assert "Stable tag: 4.1.4" in README
+    assert "Version: 4.2.0" in MAIN
+    assert "SC_LIBRARY_VERSION', '4.2.0" in MAIN
+    assert "Stable tag: 4.2.0" in README
     assert "class-sc-library-homepage-spotlight.php" in MAIN
     assert "new SC_Library_Homepage_Spotlight" in MAIN
     assert "Homepage Spotlight startup failure" in MAIN
@@ -155,7 +155,7 @@ def test_source_validation_and_no_backfill_runtime():
 
 
 def test_cache_boundaries_and_empty_behavior():
-    assert "CACHE_KEY = 'sc_library_homepage_spotlight_pages_v414'" in MODULE
+    assert "CACHE_KEY = 'sc_library_homepage_spotlight_pages_v420'" in MODULE
     assert "next_boundary" in MODULE
     assert "delete_transient( self::CACHE_KEY )" in MODULE
     assert "'empty_queue_behavior' => 'hide'" in MODULE

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.1.4 refines the curated Knowledge Library console with a red-on-gray rotation progress indicator while preserving repaired thumbnails, the black-framed white/cream/gray editorial presentation, configurable categories, manual selection, source discovery, accessibility, institutional operations, APIs, preservation, and the broader unified living knowledge system.
- * Version: 4.1.4
+ * Description: Sustainable Catalyst Library v4.2.0 expands the curated Knowledge Library Homepage Spotlight to a twelve-topic, two-tier editorial console with eight primary subjects, four additional fields, five article positions per topic, accessible progressive disclosure, and preserved manual curation, source discovery, thumbnails, rotation, institutional operations, APIs, preservation, and living knowledge system capabilities.
+ * Version: 4.2.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.1.4');
+define('SC_LIBRARY_VERSION', '4.2.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -105,7 +105,7 @@ final class SC_Library_Plugin {
         $unified_system = new SC_Library_Unified_System($indexer, $relationships);
         $shortcodes = new SC_Library_Shortcodes();
 
-        // v4.1.3 is an optional, contained editorial surface. A Spotlight
+        // v4.2.0 is an optional, contained editorial surface. A Spotlight
         // startup failure must not terminate the public Research Library.
         try {
             $spotlight_path = SC_LIBRARY_DIR . 'includes/class-sc-library-homepage-spotlight.php';
@@ -119,7 +119,7 @@ final class SC_Library_Plugin {
             new SC_Library_Homepage_Spotlight();
             update_option('sc_library_homepage_spotlight_v410_status', [
                 'active' => true,
-                'version' => '4.1.3',
+                'version' => '4.2.0',
                 'error' => '',
                 'timestamp' => current_time('mysql', true),
             ], false);
@@ -127,7 +127,7 @@ final class SC_Library_Plugin {
             error_log('[Sustainable Catalyst Library] Homepage Spotlight startup failure: ' . $error->getMessage());
             update_option('sc_library_homepage_spotlight_v410_status', [
                 'active' => false,
-                'version' => '4.1.3',
+                'version' => '4.2.0',
                 'error' => $error->getMessage(),
                 'timestamp' => current_time('mysql', true),
             ], false);

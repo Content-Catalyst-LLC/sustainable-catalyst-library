@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.1.4
+Stable tag: 4.2.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.1.4 presents a configurable, manually curated Homepage Spotlight with repaired source discovery, durable thumbnail resolution, a black-framed white/cream/gray editorial console, automatic airport-board rotation, and a refined red-on-gray progress indicator. The broader plugin remains a unified Living Knowledge System spanning Public Knowledge, Research Workspace, Institutional Operations, preservation, APIs, and portable evidence records.
+Sustainable Catalyst Library v4.2.0 presents a configurable, manually curated twelve-topic Homepage Spotlight with eight primary subjects, four progressively disclosed additional fields, five article positions per topic, repaired source discovery, durable thumbnails, accessible rotation controls, and the established black-framed editorial console. The broader plugin remains a unified Living Knowledge System spanning Public Knowledge, Research Workspace, Institutional Operations, preservation, APIs, and portable evidence records.
 
 
 
@@ -145,6 +145,17 @@ Sustainable Catalyst Library v4.1.4 presents a configurable, manually curated Ho
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.2.0 =
+
+* Expands the recommended Homepage Spotlight structure from five subjects to twelve topics.
+* Adds Economics, Artificial Intelligence, Physics, Embedded & Edge Systems, Psychology, Decision Science, and Data Systems & Analytics.
+* Introduces an eight-topic primary tier and a four-topic secondary tier within the same widget.
+* Keeps the secondary tier collapsed initially behind an accessible “Explore additional topics” control.
+* Limits automatic rotation to primary topics until the secondary tier is opened, preventing hidden-topic navigation.
+* Preserves five article positions per topic, manual selection, manual ordering, scheduling, source validation, thumbnail recovery, and no automatic backfill.
+* Adds topic-tier controls and status labels to the Homepage Spotlight administrator.
+* Adds shortcode controls for `secondary_topics`, `secondary_open`, and `secondary_label`.
 
 = 4.1.4 =
 

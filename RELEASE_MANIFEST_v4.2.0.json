@@ -1,0 +1,45 @@
+{
+  "product": "Sustainable Catalyst Library",
+  "version": "4.2.0",
+  "release_name": "Twelve-Topic Two-Tier Homepage Spotlight",
+  "plugin_directory": "sustainable-catalyst-library",
+  "shortcode": "[sc_homepage_spotlight]",
+  "topic_structure": {
+    "primary": [
+      "Sustainable Development",
+      "Planetary Boundaries",
+      "International Law",
+      "Biology",
+      "Systems Thinking",
+      "Economics",
+      "Artificial Intelligence",
+      "Physics"
+    ],
+    "secondary": [
+      "Embedded & Edge Systems",
+      "Psychology",
+      "Decision Science",
+      "Data Systems & Analytics"
+    ],
+    "recommended_cards_per_topic": 5
+  },
+  "public_defaults": {
+    "secondary_topics": true,
+    "secondary_open": false,
+    "autoplay": true,
+    "interval_ms": 14000,
+    "minimum_valid_cards": 4,
+    "automatic_backfill": false
+  },
+  "validation": {
+    "release_pytest_assertions": 41,
+    "php_files_linted": 96,
+    "javascript_files_checked": 47,
+    "json_files_parsed": 19,
+    "historical_baseline_pass": 24,
+    "historical_baseline_fail": 34,
+    "release_historical_pass": 25,
+    "release_historical_fail": 34,
+    "inherited_regressions": 0
+  }
+}

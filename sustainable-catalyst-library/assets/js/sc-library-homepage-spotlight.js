@@ -26,6 +26,10 @@
         const toggle = root.querySelector('[data-sc-spotlight-toggle]');
         const toggleIcon = root.querySelector('[data-sc-spotlight-toggle-icon]');
         const toggleText = root.querySelector('[data-sc-spotlight-toggle-text]');
+        const tierToggle = root.querySelector('[data-sc-spotlight-tier-toggle]');
+        const tierToggleLabel = root.querySelector('[data-sc-spotlight-tier-toggle-label]');
+        const tierIcon = root.querySelector('[data-sc-spotlight-tier-icon]');
+        const secondaryPanel = root.querySelector('[data-sc-spotlight-secondary-panel]');
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
         const interval = Math.max(8000, Number.parseInt(root.dataset.interval || '14000', 10) || 14000);
         const loop = root.dataset.loop !== 'false';
@@ -33,6 +37,7 @@
         let current = Math.min(Number.parseInt(root.dataset.current || '0', 10) || 0, Math.max(0, pages.length - 1));
         let userPaused = root.dataset.autoplay !== 'true';
         let interactionPaused = false;
+        let secondaryExpanded = Boolean(secondaryPanel) && root.dataset.secondaryOpen === 'true';
         let timer = null;
         let touchStartX = null;
 
@@ -92,6 +97,45 @@
                 root.hidden = true;
             }
             current = Math.min(current, Math.max(0, pages.length - 1));
+            if (secondaryPanel && !secondaryPanel.querySelector('[data-sc-spotlight-tab]')) {
+                const tierContainer = tierToggle?.closest('[data-sc-spotlight-secondary-tier]');
+                if (tierContainer) {
+                    tierContainer.remove();
+                } else {
+                    tierToggle?.remove();
+                    secondaryPanel.remove();
+                }
+                secondaryExpanded = false;
+            }
+        };
+
+        const pageTier = (page) => page?.dataset.scSpotlightTier || 'primary';
+
+        const navigableIndexes = () => {
+            const allIndexes = pages.map((page, index) => ({ page, index }));
+            if (!secondaryPanel || secondaryExpanded) {
+                return allIndexes.map(({ index }) => index);
+            }
+            const primary = allIndexes
+                .filter(({ page }) => pageTier(page) !== 'secondary')
+                .map(({ index }) => index);
+            return primary.length ? primary : allIndexes.map(({ index }) => index);
+        };
+
+        const adjacentIndex = (direction) => {
+            const indexes = navigableIndexes();
+            if (!indexes.length) {
+                return 0;
+            }
+            let position = indexes.indexOf(current);
+            if (position < 0) {
+                position = 0;
+            }
+            const requested = position + direction;
+            if (loop) {
+                return indexes[(requested + indexes.length) % indexes.length];
+            }
+            return indexes[Math.max(0, Math.min(indexes.length - 1, requested))];
         };
 
         const playbackState = () => {
@@ -149,6 +193,23 @@
             updatePlaybackState();
         };
 
+        const updateSecondaryTier = () => {
+            if (!secondaryPanel || !tierToggle) {
+                return;
+            }
+            secondaryPanel.hidden = !secondaryExpanded;
+            tierToggle.setAttribute('aria-expanded', secondaryExpanded ? 'true' : 'false');
+            if (tierToggleLabel) {
+                tierToggleLabel.textContent = secondaryExpanded
+                    ? label('labelFewerTopics', 'Hide additional topics')
+                    : label('labelMoreTopics', 'Explore additional topics');
+            }
+            if (tierIcon) {
+                tierIcon.textContent = secondaryExpanded ? '−' : '+';
+            }
+            root.dataset.secondaryExpanded = secondaryExpanded ? 'true' : 'false';
+        };
+
         const clearTimer = () => {
             window.clearTimeout(timer);
             timer = null;
@@ -172,15 +233,12 @@
             if (state !== 'auto') {
                 return;
             }
-            timer = window.setTimeout(() => show(current + 1, false), interval);
+            timer = window.setTimeout(() => show(adjacentIndex(1), false), interval);
         };
 
         const normalizedIndex = (requested) => {
             if (!pages.length) {
                 return 0;
-            }
-            if (loop) {
-                return (requested + pages.length) % pages.length;
             }
             return Math.max(0, Math.min(pages.length - 1, requested));
         };
@@ -227,6 +285,7 @@
         if (!pages.length) {
             return;
         }
+        updateSecondaryTier();
 
         root.addEventListener('click', (event) => {
             const tab = event.target.closest('[data-sc-spotlight-tab]');
@@ -255,17 +314,24 @@
                 return;
             }
             event.preventDefault();
-            let requested = current;
-            if (event.key === 'ArrowLeft') requested = current - 1;
-            if (event.key === 'ArrowRight') requested = current + 1;
-            if (event.key === 'Home') requested = 0;
-            if (event.key === 'End') requested = pages.length - 1;
-            show(requested, false);
-            tabs[current]?.focus({ preventScroll: true });
+            const tablist = tab.closest('[role="tablist"]');
+            const navigableTabs = tablist
+                ? Array.from(tablist.querySelectorAll('[data-sc-spotlight-tab]'))
+                : tabs;
+            const tabPosition = Math.max(0, navigableTabs.indexOf(tab));
+            let requestedPosition = tabPosition;
+            if (event.key === 'ArrowLeft') requestedPosition = tabPosition - 1;
+            if (event.key === 'ArrowRight') requestedPosition = tabPosition + 1;
+            if (event.key === 'Home') requestedPosition = 0;
+            if (event.key === 'End') requestedPosition = navigableTabs.length - 1;
+            requestedPosition = (requestedPosition + navigableTabs.length) % navigableTabs.length;
+            const requestedTab = navigableTabs[requestedPosition];
+            show(Number.parseInt(requestedTab?.dataset.scSpotlightTab || '0', 10) || 0, false);
+            requestedTab?.focus({ preventScroll: true });
         });
 
-        root.querySelector('[data-sc-spotlight-prev]')?.addEventListener('click', () => show(current - 1, false));
-        root.querySelector('[data-sc-spotlight-next]')?.addEventListener('click', () => show(current + 1, false));
+        root.querySelector('[data-sc-spotlight-prev]')?.addEventListener('click', () => show(adjacentIndex(-1), false));
+        root.querySelector('[data-sc-spotlight-next]')?.addEventListener('click', () => show(adjacentIndex(1), false));
         toggle?.addEventListener('click', () => {
             if (prefersReducedMotion.matches) {
                 return;
@@ -273,6 +339,16 @@
             userPaused = !userPaused;
             updateToggle();
             schedule();
+        });
+        tierToggle?.addEventListener('click', () => {
+            secondaryExpanded = !secondaryExpanded;
+            updateSecondaryTier();
+            if (!secondaryExpanded && pageTier(pages[current]) === 'secondary') {
+                const firstPrimary = pages.findIndex((page) => pageTier(page) !== 'secondary');
+                show(Math.max(0, firstPrimary), false);
+            } else {
+                schedule();
+            }
         });
 
         if (pauseOnHover) {
@@ -316,7 +392,7 @@
             touchStartX = null;
             interactionPaused = false;
             if (Math.abs(delta) >= 50) {
-                show(delta > 0 ? current - 1 : current + 1, false);
+                show(delta > 0 ? adjacentIndex(-1) : adjacentIndex(1), false);
                 return;
             }
             schedule();

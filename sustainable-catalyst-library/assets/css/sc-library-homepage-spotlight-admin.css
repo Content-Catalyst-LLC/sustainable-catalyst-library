@@ -245,3 +245,47 @@
         display: block;
     }
 }
+
+/* v4.2.0 topic-tier administration. */
+.sc-library-spotlight-metrics {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.sc-library-spotlight-three-column {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+    margin: 0 0 1rem;
+}
+
+.sc-library-spotlight-tier {
+    display: inline-block;
+    padding: .18rem .42rem;
+    border-radius: 999px;
+    font-size: .66rem;
+    font-weight: 750;
+    letter-spacing: .04em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.sc-library-spotlight-tier--primary {
+    background: #e7eef7;
+    color: #183f69;
+}
+
+.sc-library-spotlight-tier--secondary {
+    background: #eee8f2;
+    color: #56356a;
+}
+
+.sc-library-spotlight-category-heading h3 .sc-library-spotlight-tier {
+    margin-left: .4rem;
+}
+
+@media (max-width: 900px) {
+    .sc-library-spotlight-three-column {
+        grid-template-columns: 1fr;
+    }
+}

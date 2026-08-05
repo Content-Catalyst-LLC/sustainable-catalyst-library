@@ -9,9 +9,9 @@ portal = (plugin / "includes/class-sc-library-connected-institutional-platform.p
 css = (plugin / "assets/css/sc-library-connected-institutional-platform.css").read_text(encoding="utf-8")
 
 checks = {
-    "plugin header current release": "Version: 4.1.4" in main,
-    "plugin constant current release": "SC_LIBRARY_VERSION', '4.1.4" in main,
-    "stable tag current release": "Stable tag: 4.1.4" in readme,
+    "plugin header current release": "Version: 4.2.0" in main,
+    "plugin constant current release": "SC_LIBRARY_VERSION', '4.2.0" in main,
+    "stable tag current release": "Stable tag: 4.2.0" in readme,
     "compact attribute": "'compact'   => 'false'" in portal,
     "featured attribute": "'featured'  => 6" in portal,
     "fallback receives attributes": "render_public_portal_fallback( $atts )" in portal,

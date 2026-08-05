@@ -3,12 +3,26 @@
  * Public Knowledge Library Console template.
  *
  * Available variables: $pages, $controls, $tabs, $instance_id, $autoplay,
- * $interval, $loop, $pause_on_hover, $show_thumbnail_override,
- * $show_metadata_override, $heading, $intro.
+ * $interval, $loop, $pause_on_hover, $secondary_topics, $secondary_open,
+ * $secondary_label, $show_thumbnail_override, $show_metadata_override,
+ * $heading, $intro.
  */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+$primary_pages = array_values( array_filter( $pages, static fn( array $page ): bool => 'secondary' !== ( $page['tier'] ?? 'primary' ) ) );
+$secondary_pages = array_values( array_filter( $pages, static fn( array $page ): bool => 'secondary' === ( $page['tier'] ?? 'primary' ) ) );
+if ( empty( $primary_pages ) && ! empty( $secondary_pages ) ) {
+    $primary_pages = $secondary_pages;
+    $secondary_pages = array();
+}
+$use_secondary_tier = $tabs && $secondary_topics && ! empty( $secondary_pages );
+if ( ! $use_secondary_tier ) {
+    $primary_pages = $pages;
+    $secondary_pages = array();
+}
+$secondary_panel_id = $instance_id . '-secondary-topics';
 ?>
 <section
     id="<?php echo esc_attr( $instance_id ); ?>"
@@ -19,8 +33,11 @@ if ( ! defined( 'ABSPATH' ) ) {
     data-interval="<?php echo esc_attr( $interval ); ?>"
     data-loop="<?php echo $loop ? 'true' : 'false'; ?>"
     data-pause-on-hover="<?php echo $pause_on_hover ? 'true' : 'false'; ?>"
+    data-secondary-open="<?php echo $secondary_open ? 'true' : 'false'; ?>"
     data-label-pause="<?php esc_attr_e( 'Pause automatic rotation', 'sustainable-catalyst-library' ); ?>"
     data-label-play="<?php esc_attr_e( 'Play automatic rotation', 'sustainable-catalyst-library' ); ?>"
+    data-label-more-topics="<?php echo esc_attr( $secondary_label ); ?>"
+    data-label-fewer-topics="<?php esc_attr_e( 'Hide additional topics', 'sustainable-catalyst-library' ); ?>"
     data-status-auto="<?php esc_attr_e( 'Auto', 'sustainable-catalyst-library' ); ?>"
     data-status-paused="<?php esc_attr_e( 'Paused', 'sustainable-catalyst-library' ); ?>"
     data-status-hold="<?php esc_attr_e( 'Hold', 'sustainable-catalyst-library' ); ?>"
@@ -44,19 +61,63 @@ if ( ! defined( 'ABSPATH' ) ) {
     <div class="sc-homepage-spotlight__progress" aria-hidden="true"><span data-sc-spotlight-progress></span></div>
 
     <?php if ( $tabs ) : ?>
-        <div class="sc-homepage-spotlight__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Featured subjects', 'sustainable-catalyst-library' ); ?>">
-            <?php foreach ( $pages as $page_index => $page ) : ?>
-                <button
-                    type="button"
-                    role="tab"
-                    id="<?php echo esc_attr( $instance_id . '-tab-' . $page['id'] ); ?>"
-                    aria-controls="<?php echo esc_attr( $instance_id . '-page-' . $page['id'] ); ?>"
-                    aria-selected="<?php echo 0 === $page_index ? 'true' : 'false'; ?>"
-                    tabindex="<?php echo 0 === $page_index ? '0' : '-1'; ?>"
-                    data-sc-spotlight-tab="<?php echo esc_attr( $page_index ); ?>"
-                ><span><?php echo esc_html( str_pad( (string) ( $page_index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span><?php echo esc_html( $page['title'] ); ?></button>
-            <?php endforeach; ?>
-        </div>
+        <nav class="sc-homepage-spotlight__topic-navigation" aria-label="<?php esc_attr_e( 'Knowledge Library subjects', 'sustainable-catalyst-library' ); ?>">
+            <div class="sc-homepage-spotlight__tabs sc-homepage-spotlight__tabs--primary" role="tablist" aria-label="<?php esc_attr_e( 'Primary subjects', 'sustainable-catalyst-library' ); ?>">
+                <?php foreach ( $primary_pages as $page ) :
+                    $page_index = (int) $page['index'];
+                    ?>
+                    <button
+                        type="button"
+                        role="tab"
+                        id="<?php echo esc_attr( $instance_id . '-tab-' . $page['id'] ); ?>"
+                        aria-controls="<?php echo esc_attr( $instance_id . '-page-' . $page['id'] ); ?>"
+                        aria-selected="<?php echo 0 === $page_index ? 'true' : 'false'; ?>"
+                        tabindex="<?php echo 0 === $page_index ? '0' : '-1'; ?>"
+                        data-sc-spotlight-tab="<?php echo esc_attr( $page_index ); ?>"
+                        data-sc-spotlight-tier="primary"
+                    ><span><?php echo esc_html( str_pad( (string) ( $page_index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span><?php echo esc_html( $page['title'] ); ?></button>
+                <?php endforeach; ?>
+            </div>
+
+            <?php if ( $use_secondary_tier ) : ?>
+                <div class="sc-homepage-spotlight__secondary-tier" data-sc-spotlight-secondary-tier>
+                    <button
+                        type="button"
+                        class="sc-homepage-spotlight__tier-toggle"
+                        data-sc-spotlight-tier-toggle
+                        aria-expanded="<?php echo $secondary_open ? 'true' : 'false'; ?>"
+                        aria-controls="<?php echo esc_attr( $secondary_panel_id ); ?>"
+                    >
+                        <span data-sc-spotlight-tier-toggle-label><?php echo esc_html( $secondary_open ? __( 'Hide additional topics', 'sustainable-catalyst-library' ) : $secondary_label ); ?></span>
+                        <span class="sc-homepage-spotlight__tier-count"><?php echo esc_html( sprintf( _n( '%d field', '%d fields', count( $secondary_pages ), 'sustainable-catalyst-library' ), count( $secondary_pages ) ) ); ?></span>
+                        <span class="sc-homepage-spotlight__tier-icon" data-sc-spotlight-tier-icon aria-hidden="true"><?php echo $secondary_open ? '−' : '+'; ?></span>
+                    </button>
+                    <div
+                        id="<?php echo esc_attr( $secondary_panel_id ); ?>"
+                        class="sc-homepage-spotlight__tabs sc-homepage-spotlight__tabs--secondary"
+                        role="tablist"
+                        aria-label="<?php esc_attr_e( 'Additional subjects', 'sustainable-catalyst-library' ); ?>"
+                        data-sc-spotlight-secondary-panel
+                        <?php echo $secondary_open ? '' : 'hidden'; ?>
+                    >
+                        <?php foreach ( $secondary_pages as $page ) :
+                            $page_index = (int) $page['index'];
+                            ?>
+                            <button
+                                type="button"
+                                role="tab"
+                                id="<?php echo esc_attr( $instance_id . '-tab-' . $page['id'] ); ?>"
+                                aria-controls="<?php echo esc_attr( $instance_id . '-page-' . $page['id'] ); ?>"
+                                aria-selected="false"
+                                tabindex="-1"
+                                data-sc-spotlight-tab="<?php echo esc_attr( $page_index ); ?>"
+                                data-sc-spotlight-tier="secondary"
+                            ><span><?php echo esc_html( str_pad( (string) ( $page_index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span><?php echo esc_html( $page['title'] ); ?></button>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </nav>
     <?php endif; ?>
 
     <div class="sc-homepage-spotlight__viewport" data-sc-spotlight-viewport>
@@ -69,12 +130,13 @@ if ( ! defined( 'ABSPATH' ) ) {
                 class="sc-homepage-spotlight__page sc-homepage-spotlight__page--<?php echo esc_attr( $card_count ); ?>"
                 data-sc-spotlight-page
                 data-page-index="<?php echo esc_attr( $page_index ); ?>"
+                data-sc-spotlight-tier="<?php echo esc_attr( $page['tier'] ?? 'primary' ); ?>"
                 <?php if ( $tabs ) : ?>role="tabpanel" aria-labelledby="<?php echo esc_attr( $instance_id . '-tab-' . $page['id'] ); ?>"<?php else : ?>role="group" aria-label="<?php echo esc_attr( $page['title'] ); ?>"<?php endif; ?>
                 <?php echo 0 === $page_index ? '' : 'hidden'; ?>
             >
                 <header class="sc-homepage-spotlight__page-header">
                     <div>
-                        <p class="sc-homepage-spotlight__eyebrow"><?php esc_html_e( 'Current subject', 'sustainable-catalyst-library' ); ?></p>
+                        <p class="sc-homepage-spotlight__eyebrow"><?php echo esc_html( 'secondary' === ( $page['tier'] ?? 'primary' ) ? __( 'Additional field', 'sustainable-catalyst-library' ) : __( 'Current subject', 'sustainable-catalyst-library' ) ); ?></p>
                         <h3 tabindex="-1" data-sc-spotlight-page-heading><?php echo esc_html( $page['title'] ); ?></h3>
                     </div>
                     <?php if ( $page['description'] ) : ?><p><?php echo esc_html( $page['description'] ); ?></p><?php endif; ?>

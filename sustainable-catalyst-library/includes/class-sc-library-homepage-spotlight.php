@@ -14,16 +14,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Homepage_Spotlight {
-    public const VERSION = '4.1.4';
+    public const VERSION = '4.2.0';
     public const ITEM_POST_TYPE = 'sc_home_spotlight';
     public const PAGE_POST_TYPE = 'sc_spot_page';
     public const SHORTCODE = 'sc_homepage_spotlight';
-    public const CACHE_KEY = 'sc_library_homepage_spotlight_pages_v414';
+    public const CACHE_KEY = 'sc_library_homepage_spotlight_pages_v420';
     public const CAPABILITY = 'manage_options';
 
     private const META_PAGE_DESCRIPTION = '_sc_spotlight_page_description';
     private const META_PAGE_ENABLED = '_sc_spotlight_page_enabled';
     private const META_PAGE_ITEM_LIMIT = '_sc_spotlight_page_item_limit';
+    private const META_PAGE_TIER = '_sc_spotlight_page_tier';
 
     private const META_PAGE_ID = '_sc_spotlight_page_id';
     private const META_SOURCE_TYPE = '_sc_spotlight_source_type';
@@ -79,6 +80,10 @@ final class SC_Library_Homepage_Spotlight {
             'manual_card_order' => true,
             'category_names_configurable' => true,
             'category_count_configurable' => true,
+            'topic_tiers' => array( 'primary' => 8, 'secondary' => 4 ),
+            'primary_topics_initial' => 8,
+            'secondary_topics_collapsible' => true,
+            'secondary_topics_rotation_requires_expansion' => true,
             'cards_per_page' => array( 4, 5 ),
             'minimum_valid_cards_per_page' => 4,
             'taxonomy_assisted_search_only' => true,
@@ -110,6 +115,31 @@ final class SC_Library_Homepage_Spotlight {
             'International Law',
             'Biology',
             'Systems Thinking',
+            'Economics',
+            'Artificial Intelligence',
+            'Physics',
+            'Embedded & Edge Systems',
+            'Psychology',
+            'Decision Science',
+            'Data Systems & Analytics',
+        );
+    }
+
+    /** @return array<string,string> */
+    public static function suggested_topic_tiers(): array {
+        return array(
+            'sustainable development' => 'primary',
+            'planetary boundaries' => 'primary',
+            'international law' => 'primary',
+            'biology' => 'primary',
+            'systems thinking' => 'primary',
+            'economics' => 'primary',
+            'artificial intelligence' => 'primary',
+            'physics' => 'primary',
+            'embedded & edge systems' => 'secondary',
+            'psychology' => 'secondary',
+            'decision science' => 'secondary',
+            'data systems & analytics' => 'secondary',
         );
     }
 
@@ -289,13 +319,18 @@ final class SC_Library_Homepage_Spotlight {
         $pages = $this->all_pages();
         $items = $this->all_items();
         $counts = array(
-            'categories' => count( $pages ),
+            'topics' => count( $pages ),
+            'primary topics' => 0,
+            'secondary topics' => 0,
             'selected cards' => count( $items ),
             'active cards' => 0,
             'scheduled' => 0,
             'invalid' => 0,
             'disabled' => 0,
         );
+        foreach ( $pages as $page ) {
+            $counts[ $this->page_tier( $page->ID ) . ' topics' ]++;
+        }
         foreach ( $items as $item ) {
             $status = $this->item_status( $item );
             if ( 'active' === $status['key'] ) {
@@ -307,12 +342,12 @@ final class SC_Library_Homepage_Spotlight {
         ?>
         <div class="wrap sc-library-spotlight-admin">
             <h1><?php esc_html_e( 'Homepage Spotlight', 'sustainable-catalyst-library' ); ?></h1>
-            <p class="sc-library-spotlight-lede"><?php esc_html_e( 'Create the subject pages you want, then choose every Library record or announcement placed on them. Category names, category count, order, and every card remain under editorial control.', 'sustainable-catalyst-library' ); ?></p>
+            <p class="sc-library-spotlight-lede"><?php esc_html_e( 'Create the subject pages you want, then choose every Library record or announcement placed on them. The recommended structure presents eight primary topics and four secondary topics while keeping names, tier, order, and every card under editorial control.', 'sustainable-catalyst-library' ); ?></p>
             <?php $this->render_admin_notice(); ?>
 
             <div class="sc-library-spotlight-contract" role="note">
                 <strong><?php esc_html_e( 'Editorial contract:', 'sustainable-catalyst-library' ); ?></strong>
-                <?php esc_html_e( 'Taxonomies can help you find records, but they never create a category page or add an article. Invalid and expired cards are never replaced automatically.', 'sustainable-catalyst-library' ); ?>
+                <?php esc_html_e( 'Taxonomies can help you find records, but they never create a topic page or add an article. Each topic retains five deliberate article positions, and invalid or expired cards are never replaced automatically.', 'sustainable-catalyst-library' ); ?>
             </div>
 
             <div class="sc-library-spotlight-metrics" aria-label="<?php esc_attr_e( 'Spotlight status summary', 'sustainable-catalyst-library' ); ?>">
@@ -325,12 +360,12 @@ final class SC_Library_Homepage_Spotlight {
                 <div class="sc-library-spotlight-section-heading">
                     <div>
                         <h2><?php esc_html_e( '1. Configure category pages', 'sustainable-catalyst-library' ); ?></h2>
-                        <p><?php esc_html_e( 'Create, rename, reorder, enable, or replace the subject pages shown in the widget.', 'sustainable-catalyst-library' ); ?></p>
+                        <p><?php esc_html_e( 'Create, rename, reorder, enable, or replace the topic pages shown in the primary and secondary tiers.', 'sustainable-catalyst-library' ); ?></p>
                     </div>
                     <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
                         <input type="hidden" name="action" value="sc_library_spotlight_starter_pages">
                         <?php wp_nonce_field( 'sc_library_spotlight_starter_pages' ); ?>
-                        <button class="button" type="submit"><?php esc_html_e( 'Add suggested five-page starter set', 'sustainable-catalyst-library' ); ?></button>
+                        <button class="button" type="submit"><?php esc_html_e( 'Add or align the 12-topic library set', 'sustainable-catalyst-library' ); ?></button>
                     </form>
                 </div>
                 <div class="sc-library-spotlight-admin-grid sc-library-spotlight-admin-grid--pages">
@@ -348,7 +383,7 @@ final class SC_Library_Homepage_Spotlight {
                 <div class="sc-library-spotlight-section-heading">
                     <div>
                         <h2><?php esc_html_e( '2. Curate the cards', 'sustainable-catalyst-library' ); ?></h2>
-                        <p><?php esc_html_e( 'Each category supports four or five deliberately selected records. Position 1 receives featured console treatment when a page contains five.', 'sustainable-catalyst-library' ); ?></p>
+                        <p><?php esc_html_e( 'Each topic supports four or five deliberately selected records. The recommended configuration keeps five articles per topic, with position 1 receiving featured console treatment.', 'sustainable-catalyst-library' ); ?></p>
                     </div>
                     <code>[sc_homepage_spotlight autoplay="true" interval="14000"]</code>
                 </div>
@@ -380,7 +415,14 @@ final class SC_Library_Homepage_Spotlight {
             <label for="sc-library-spotlight-page-description"><strong><?php esc_html_e( 'Short category description', 'sustainable-catalyst-library' ); ?></strong></label>
             <textarea class="widefat" id="sc-library-spotlight-page-description" name="page_description" rows="3" maxlength="280"><?php echo esc_textarea( $values['description'] ); ?></textarea>
 
-            <div class="sc-library-spotlight-two-column">
+            <div class="sc-library-spotlight-three-column">
+                <div>
+                    <label for="sc-library-spotlight-page-tier"><strong><?php esc_html_e( 'Topic tier', 'sustainable-catalyst-library' ); ?></strong></label>
+                    <select class="widefat" id="sc-library-spotlight-page-tier" name="page_tier">
+                        <option value="primary" <?php selected( $values['tier'], 'primary' ); ?>><?php esc_html_e( 'Primary — visible initially', 'sustainable-catalyst-library' ); ?></option>
+                        <option value="secondary" <?php selected( $values['tier'], 'secondary' ); ?>><?php esc_html_e( 'Secondary — additional topics', 'sustainable-catalyst-library' ); ?></option>
+                    </select>
+                </div>
                 <div>
                     <label for="sc-library-spotlight-page-limit"><strong><?php esc_html_e( 'Cards on this page', 'sustainable-catalyst-library' ); ?></strong></label>
                     <select class="widefat" id="sc-library-spotlight-page-limit" name="item_limit">
@@ -389,7 +431,7 @@ final class SC_Library_Homepage_Spotlight {
                     </select>
                 </div>
                 <div>
-                    <label for="sc-library-spotlight-page-order"><strong><?php esc_html_e( 'Category order', 'sustainable-catalyst-library' ); ?></strong></label>
+                    <label for="sc-library-spotlight-page-order"><strong><?php esc_html_e( 'Category order within tier', 'sustainable-catalyst-library' ); ?></strong></label>
                     <input class="widefat" id="sc-library-spotlight-page-order" name="menu_order" type="number" min="0" step="1" value="<?php echo esc_attr( $values['menu_order'] ); ?>">
                 </div>
             </div>
@@ -515,7 +557,7 @@ final class SC_Library_Homepage_Spotlight {
             <?php wp_nonce_field( 'sc_library_spotlight_orders', 'sc_library_spotlight_nonce' ); ?>
             <div class="sc-library-spotlight-table-wrap">
                 <table class="widefat striped sc-library-spotlight-queue">
-                    <thead><tr><th></th><th><?php esc_html_e( 'Category page', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'Cards', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'Limit', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'State', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'Order', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'Actions', 'sustainable-catalyst-library' ); ?></th></tr></thead>
+                    <thead><tr><th></th><th><?php esc_html_e( 'Topic page', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'Tier', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'Cards', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'Limit', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'State', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'Order', 'sustainable-catalyst-library' ); ?></th><th><?php esc_html_e( 'Actions', 'sustainable-catalyst-library' ); ?></th></tr></thead>
                     <tbody data-spotlight-sortable data-order-step="10">
                     <?php foreach ( $pages as $page ) :
                         $enabled = (bool) get_post_meta( $page->ID, self::META_PAGE_ENABLED, true );
@@ -525,6 +567,7 @@ final class SC_Library_Homepage_Spotlight {
                         <tr data-spotlight-row>
                             <td class="sc-library-spotlight-drag" aria-hidden="true">⋮⋮</td>
                             <td><strong><?php echo esc_html( $page->post_title ); ?></strong><?php if ( get_post_meta( $page->ID, self::META_PAGE_DESCRIPTION, true ) ) : ?><br><small><?php echo esc_html( wp_trim_words( get_post_meta( $page->ID, self::META_PAGE_DESCRIPTION, true ), 16, '…' ) ); ?></small><?php endif; ?></td>
+                            <td><span class="sc-library-spotlight-tier sc-library-spotlight-tier--<?php echo esc_attr( $this->page_tier( $page->ID ) ); ?>"><?php echo esc_html( ucfirst( $this->page_tier( $page->ID ) ) ); ?></span></td>
                             <td><?php echo esc_html( number_format_i18n( $count ) ); ?></td>
                             <td><?php echo esc_html( $limit ); ?></td>
                             <td><span class="sc-library-spotlight-status sc-library-spotlight-status--<?php echo esc_attr( $enabled && 'publish' === $page->post_status ? 'active' : 'disabled' ); ?>"><?php echo esc_html( $enabled && 'publish' === $page->post_status ? __( 'Enabled', 'sustainable-catalyst-library' ) : __( 'Disabled', 'sustainable-catalyst-library' ) ); ?></span></td>
@@ -556,8 +599,8 @@ final class SC_Library_Homepage_Spotlight {
                 ?>
                 <section class="sc-library-spotlight-category-queue">
                     <div class="sc-library-spotlight-category-heading">
-                        <h3><?php echo esc_html( $page->post_title ); ?></h3>
-                        <span><?php echo esc_html( sprintf( _n( '%1$d selected card · %2$d-card page', '%1$d selected cards · %2$d-card page', count( $items ), 'sustainable-catalyst-library' ), count( $items ), $limit ) ); ?></span>
+                        <h3><?php echo esc_html( $page->post_title ); ?> <span class="sc-library-spotlight-tier sc-library-spotlight-tier--<?php echo esc_attr( $this->page_tier( $page->ID ) ); ?>"><?php echo esc_html( ucfirst( $this->page_tier( $page->ID ) ) ); ?></span></h3>
+                        <span><?php echo esc_html( sprintf( _n( '%1$d selected card · %2$d-card topic', '%1$d selected cards · %2$d-card topic', count( $items ), 'sustainable-catalyst-library' ), count( $items ), $limit ) ); ?></span>
                     </div>
                     <?php if ( empty( $items ) ) : ?>
                         <p class="sc-library-spotlight-empty-row"><?php esc_html_e( 'No cards selected for this category.', 'sustainable-catalyst-library' ); ?></p>
@@ -648,8 +691,10 @@ final class SC_Library_Homepage_Spotlight {
         }
         $page_id = (int) $result;
         $limit = isset( $_POST['item_limit'] ) && 4 === absint( $_POST['item_limit'] ) ? 4 : 5;
+        $tier = isset( $_POST['page_tier'] ) && 'secondary' === sanitize_key( wp_unslash( $_POST['page_tier'] ) ) ? 'secondary' : 'primary';
         update_post_meta( $page_id, self::META_PAGE_DESCRIPTION, isset( $_POST['page_description'] ) ? sanitize_textarea_field( wp_unslash( $_POST['page_description'] ) ) : '' );
         update_post_meta( $page_id, self::META_PAGE_ITEM_LIMIT, $limit );
+        update_post_meta( $page_id, self::META_PAGE_TIER, $tier );
         update_post_meta( $page_id, self::META_PAGE_ENABLED, 'publish' === $status && isset( $_POST['enabled'] ) ? 1 : 0 );
         $this->invalidate_cache();
         $this->redirect_notice( 'category-saved', 0, $page_id );
@@ -690,14 +735,22 @@ final class SC_Library_Homepage_Spotlight {
 
     public function handle_starter_pages(): void {
         $this->require_admin_action( 'sc_library_spotlight_starter_pages', '_wpnonce' );
-        $existing_titles = array_map(
-            static fn( WP_Post $page ): string => strtolower( trim( $page->post_title ) ),
-            $this->all_pages()
-        );
+        $existing_by_title = array();
+        foreach ( $this->all_pages() as $page ) {
+            $existing_by_title[ strtolower( trim( $page->post_title ) ) ] = $page;
+        }
+        $tiers = self::suggested_topic_tiers();
         $order = $this->next_page_order();
         $created = 0;
+        $aligned = 0;
         foreach ( self::suggested_starter_pages() as $title ) {
-            if ( in_array( strtolower( $title ), $existing_titles, true ) ) {
+            $normalized = strtolower( trim( $title ) );
+            $tier = $tiers[ $normalized ] ?? 'primary';
+            if ( isset( $existing_by_title[ $normalized ] ) ) {
+                $page_id = $existing_by_title[ $normalized ]->ID;
+                update_post_meta( $page_id, self::META_PAGE_TIER, $tier );
+                update_post_meta( $page_id, self::META_PAGE_ITEM_LIMIT, 5 );
+                $aligned++;
                 continue;
             }
             self::$saving = true;
@@ -713,13 +766,14 @@ final class SC_Library_Homepage_Spotlight {
             if ( $page_id ) {
                 update_post_meta( $page_id, self::META_PAGE_ENABLED, 1 );
                 update_post_meta( $page_id, self::META_PAGE_ITEM_LIMIT, 5 );
+                update_post_meta( $page_id, self::META_PAGE_TIER, $tier );
                 update_post_meta( $page_id, self::META_PAGE_DESCRIPTION, '' );
                 $created++;
                 $order += 10;
             }
         }
         $this->invalidate_cache();
-        $this->redirect_notice( $created ? 'starter-added' : 'starter-exists' );
+        $this->redirect_notice( $created ? 'starter-added' : ( $aligned ? 'starter-aligned' : 'starter-exists' ) );
     }
 
     public function handle_save_item(): void {
@@ -991,6 +1045,9 @@ final class SC_Library_Homepage_Spotlight {
                 'loop' => 'true',
                 'pause_on_hover' => 'true',
                 'category_limit' => '0',
+                'secondary_topics' => 'true',
+                'secondary_open' => 'false',
+                'secondary_label' => __( 'Explore additional topics', 'sustainable-catalyst-library' ),
                 'show_thumbnail' => '',
                 'show_metadata' => '',
                 'title' => __( 'Explore the Knowledge Library', 'sustainable-catalyst-library' ),
@@ -1026,6 +1083,9 @@ final class SC_Library_Homepage_Spotlight {
         $tabs = $this->truthy( $atts['tabs'] ) && count( $pages ) > 1;
         $loop = $this->truthy( $atts['loop'] );
         $pause_on_hover = $this->truthy( $atts['pause_on_hover'] );
+        $secondary_topics = $this->truthy( $atts['secondary_topics'] );
+        $secondary_open = $this->truthy( $atts['secondary_open'] );
+        $secondary_label = sanitize_text_field( (string) $atts['secondary_label'] );
         $interval = max( 8000, min( 60000, absint( $atts['interval'] ) ) );
         $show_thumbnail_override = '' === (string) $atts['show_thumbnail'] ? null : $this->truthy( $atts['show_thumbnail'] );
         $show_metadata_override = '' === (string) $atts['show_metadata'] ? null : $this->truthy( $atts['show_metadata'] );
@@ -1050,7 +1110,14 @@ final class SC_Library_Homepage_Spotlight {
             set_transient( self::CACHE_KEY, $cached, max( 30, (int) $cached['ttl'] ) );
         }
         $pages = $cached['pages'];
-        return $category_limit > 0 ? array_slice( $pages, 0, $category_limit ) : $pages;
+        if ( $category_limit > 0 ) {
+            $pages = array_slice( $pages, 0, $category_limit );
+        }
+        foreach ( $pages as $index => &$page ) {
+            $page['index'] = $index;
+        }
+        unset( $page );
+        return $pages;
     }
 
     /** @return array{pages:array<int,array<string,mixed>>,ttl:int} */
@@ -1134,10 +1201,15 @@ final class SC_Library_Homepage_Spotlight {
                 'id' => $page->ID,
                 'title' => $page->post_title,
                 'description' => sanitize_text_field( get_post_meta( $page->ID, self::META_PAGE_DESCRIPTION, true ) ),
+                'tier' => $this->page_tier( $page->ID ),
                 'item_limit' => $limit,
                 'cards' => $cards,
             );
         }
+
+        $primary_pages = array_values( array_filter( $public_pages, static fn( array $page ): bool => 'secondary' !== $page['tier'] ) );
+        $secondary_pages = array_values( array_filter( $public_pages, static fn( array $page ): bool => 'secondary' === $page['tier'] ) );
+        $public_pages = array_merge( $primary_pages, $secondary_pages );
 
         $ttl = 300;
         if ( $next_boundary ) {
@@ -1311,6 +1383,7 @@ final class SC_Library_Homepage_Spotlight {
                 'title' => $page->post_title,
                 'description' => get_post_meta( $page->ID, self::META_PAGE_DESCRIPTION, true ),
                 'enabled' => (int) get_post_meta( $page->ID, self::META_PAGE_ENABLED, true ),
+                'tier' => $this->page_tier( $page->ID ),
                 'item_limit' => $this->page_item_limit( $page->ID ),
                 'menu_order' => (int) $page->menu_order,
             );
@@ -1319,6 +1392,7 @@ final class SC_Library_Homepage_Spotlight {
             'title' => '',
             'description' => '',
             'enabled' => 1,
+            'tier' => 'primary',
             'item_limit' => 5,
             'menu_order' => $this->next_page_order(),
         );
@@ -1370,6 +1444,10 @@ final class SC_Library_Homepage_Spotlight {
 
     private function page_item_limit( int $page_id ): int {
         return 4 === absint( get_post_meta( $page_id, self::META_PAGE_ITEM_LIMIT, true ) ) ? 4 : 5;
+    }
+
+    private function page_tier( int $page_id ): string {
+        return 'secondary' === sanitize_key( (string) get_post_meta( $page_id, self::META_PAGE_TIER, true ) ) ? 'secondary' : 'primary';
     }
 
     /**
@@ -1716,8 +1794,9 @@ final class SC_Library_Homepage_Spotlight {
             'category-enabled' => __( 'The category page was enabled.', 'sustainable-catalyst-library' ),
             'category-disabled' => __( 'The category page was removed from public display.', 'sustainable-catalyst-library' ),
             'category-trashed' => __( 'The category page was moved to Trash. Its cards were preserved.', 'sustainable-catalyst-library' ),
-            'starter-added' => __( 'The suggested starter pages were added. They remain fully editable.', 'sustainable-catalyst-library' ),
-            'starter-exists' => __( 'The suggested starter pages already exist; no duplicates were created.', 'sustainable-catalyst-library' ),
+            'starter-added' => __( 'The suggested starter pages were added. They remain fully editable. The 12-topic structure uses eight primary topics, four secondary topics, and five article positions per topic.', 'sustainable-catalyst-library' ),
+            'starter-aligned' => __( 'The existing 12-topic pages were aligned to the primary and secondary tiers without changing their selected articles.', 'sustainable-catalyst-library' ),
+            'starter-exists' => __( 'The suggested topic pages already exist; no duplicates were created.', 'sustainable-catalyst-library' ),
             'card-saved' => __( 'The selected Spotlight card was saved.', 'sustainable-catalyst-library' ),
             'card-enabled' => __( 'The selected card was enabled.', 'sustainable-catalyst-library' ),
             'card-disabled' => __( 'The selected card was removed from public display.', 'sustainable-catalyst-library' ),

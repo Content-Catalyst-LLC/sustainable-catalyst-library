@@ -11,11 +11,11 @@ JS = (PLUGIN / "assets/js/sc-library-homepage-spotlight.js").read_text(encoding=
 
 
 def test_v414_release_markers_and_cache_boundary():
-    assert "Version: 4.1.4" in MAIN
-    assert "SC_LIBRARY_VERSION', '4.1.4" in MAIN
-    assert "Stable tag: 4.1.4" in README
-    assert "public const VERSION = '4.1.4'" in MODULE
-    assert "sc_library_homepage_spotlight_pages_v414" in MODULE
+    assert "Version: 4.2.0" in MAIN
+    assert "SC_LIBRARY_VERSION', '4.2.0" in MAIN
+    assert "Stable tag: 4.2.0" in README
+    assert "public const VERSION = '4.2.0'" in MODULE
+    assert "sc_library_homepage_spotlight_pages_v420" in MODULE
 
 
 def test_progress_uses_single_red_fill_on_neutral_gray_track():

@@ -12,10 +12,10 @@ JS = (PLUGIN / "assets/js/sc-library-homepage-spotlight.js").read_text(encoding=
 
 
 def test_v412_release_markers():
-    assert "Version: 4.1.4" in MAIN
-    assert "SC_LIBRARY_VERSION', '4.1.4" in MAIN
-    assert "Stable tag: 4.1.4" in README
-    assert "public const VERSION = '4.1.4'" in MODULE
+    assert "Version: 4.2.0" in MAIN
+    assert "SC_LIBRARY_VERSION', '4.2.0" in MAIN
+    assert "Stable tag: 4.2.0" in README
+    assert "public const VERSION = '4.2.0'" in MODULE
 
 
 def test_console_default_rotation_contract():
