@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.2.0 expands the curated Knowledge Library Homepage Spotlight to a twelve-topic, two-tier editorial console with eight primary subjects, four additional fields, five article positions per topic, accessible progressive disclosure, and preserved manual curation, source discovery, thumbnails, rotation, institutional operations, APIs, preservation, and living knowledge system capabilities.
- * Version: 4.2.0
+ * Description: Sustainable Catalyst Library v4.3.0 adds a Publications editorial surface that extends the Homepage Spotlight visual system into Article Map-led topic sections: one Article Map hero followed by four curated articles, organized for calm institutional browsing with no blog-roll mode.
+ * Version: 4.3.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.2.0');
+define('SC_LIBRARY_VERSION', '4.3.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -53,6 +53,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-preservation.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-hardening.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-unified-system.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-shortcodes.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-publications.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
 register_deactivation_hook(__FILE__, ['SC_Library_Activator', 'deactivate']);
@@ -104,6 +105,7 @@ final class SC_Library_Plugin {
         $hardening = new SC_Library_Hardening($indexer, $relationships);
         $unified_system = new SC_Library_Unified_System($indexer, $relationships);
         $shortcodes = new SC_Library_Shortcodes();
+        $publications = new SC_Library_Publications();
 
         // v4.2.0 is an optional, contained editorial surface. A Spotlight
         // startup failure must not terminate the public Research Library.
@@ -161,6 +163,7 @@ final class SC_Library_Plugin {
         $hardening->register_hooks();
         $unified_system->register_hooks();
         $shortcodes->register_hooks();
+        $publications->register_hooks();
     }
 }
 

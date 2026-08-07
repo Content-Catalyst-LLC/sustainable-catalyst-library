@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.2.0
+Stable tag: 4.3.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -145,6 +145,15 @@ Sustainable Catalyst Library v4.2.0 presents a configurable, manually curated tw
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+
+= 4.3.0 =
+* Adds `[sc_publications]`, a native Publications surface inside the Knowledge Library.
+* Uses one Article Map hero followed by four curated articles per topic.
+* Reuses current Homepage Spotlight curation for the four article selections without altering the homepage widget.
+* Adds a canonical Article Map resolver for Spotlight subjects and filter hooks for later registry expansion.
+* Preserves the Spotlight visual language: black institutional frame, cream editorial field, restrained red identifiers, thin rules, generous spacing, and lightweight article rows.
+* Intentionally excludes Blog Roll mode, chronological feeds, reading-time labels, and dense post-card grids.
 
 = 4.2.0 =
 

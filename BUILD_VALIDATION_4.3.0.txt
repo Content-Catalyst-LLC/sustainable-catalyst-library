@@ -1,0 +1,20 @@
+Sustainable Catalyst Library v4.3.0
+Publications Foundation & Article Map Editorial System
+
+PASS - plugin version 4.3.0
+PASS - WordPress stable tag 4.3.0
+PASS - [sc_publications] shortcode registered
+PASS - Article Map hero is first editorial object
+PASS - exactly four curated article selections requested per rendered topic
+PASS - no Blog Roll mode
+PASS - no reading-time metadata
+PASS - Homepage Spotlight remains v4.2.0 and isolated
+PASS - Spotlight two-tier regression tests
+PASS - Publications release tests
+PASS - PHP syntax
+
+Public shortcode:
+[sc_publications]
+
+Editorial contract:
+1 Article Map hero + 4 curated articles per topic.
