@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 $instance_id = wp_unique_id( 'sc-field-spotlights-' );
 ?>
-<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights" data-sc-field-spotlights="v4.3.8">
+<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights" data-sc-field-spotlights="v4.3.9">
 <?php $field_number = 0; foreach ( $fields as $field_index => $field ) : $field_number++;
     $panels = array_values( $field['panels'] );
     if ( ! $panels ) { continue; }
@@ -11,6 +11,7 @@ $instance_id = wp_unique_id( 'sc-field-spotlights-' );
     $primary = array_slice( $panels, 0, $limit );
     $additional = array_slice( $panels, $limit );
     $field_id = $instance_id . '-' . sanitize_html_class( (string) $field['key'] );
+    $additional_id = $field_id . '-additional-fields';
 ?>
 <section id="<?php echo esc_attr( $field_id ); ?>" class="sc-field-spotlight" data-field-key="<?php echo esc_attr( (string) $field['key'] ); ?>" data-autoplay="<?php echo $autoplay ? 'true' : 'false'; ?>" data-interval="<?php echo esc_attr( (string) $interval ); ?>" data-pause-on-hover="<?php echo $pause_on_hover ? 'true' : 'false'; ?>" data-secondary-open="false" data-label-pause="Pause automatic rotation" data-label-play="Play automatic rotation" data-status-auto="Auto" data-status-paused="Paused" data-status-hold="Hold" data-status-static="Static" data-status-reduced="Reduced motion" style="--sc-field-spotlight-interval: <?php echo esc_attr( (string) $interval ); ?>ms;" aria-labelledby="<?php echo esc_attr( $field_id . '-title' ); ?>">
     <header class="sc-field-spotlight__masthead">
@@ -36,12 +37,12 @@ $instance_id = wp_unique_id( 'sc-field-spotlights-' );
             <?php endforeach; ?>
         </div>
         <?php if ( $additional ) : ?>
-            <button type="button" class="sc-field-spotlight__more" aria-expanded="false" data-more-toggle>
+            <button type="button" class="sc-field-spotlight__more" aria-expanded="false" aria-controls="<?php echo esc_attr( $additional_id ); ?>" data-more-toggle>
                 <span class="sc-field-spotlight__more-icon" aria-hidden="true">+</span>
                 <span data-more-label><?php echo esc_html( (string) $labels['additional_label'] ); ?></span>
                 <small><?php echo esc_html( (string) count( $additional ) ); ?></small>
             </button>
-            <div class="sc-field-spotlight__additional-tabs" data-additional-tabs hidden role="tablist" aria-label="Additional panels">
+            <div id="<?php echo esc_attr( $additional_id ); ?>" class="sc-field-spotlight__additional-tabs" data-additional-tabs hidden aria-hidden="true" role="tablist" aria-label="Additional panels">
                 <?php foreach ( $additional as $extra_index => $panel ) : $index = $limit + $extra_index; ?>
                     <button type="button" role="tab" class="sc-field-spotlight__tab" data-panel-key="<?php echo esc_attr( (string) $panel['key'] ); ?>" aria-selected="false">
                         <span><?php echo esc_html( str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span><strong><?php echo esc_html( (string) $panel['title'] ); ?></strong>

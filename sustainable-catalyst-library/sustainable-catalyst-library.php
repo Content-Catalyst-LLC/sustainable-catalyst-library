@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.8 refines Major Field Spotlights with flatter navigation, lighter editorial surfaces, quieter telemetry and transport controls, and integrated progressive disclosure while preserving Spotlight-parity hero scale, autoplay, thumbnails, and manual curation.
- * Version: 4.3.8
+ * Description: Sustainable Catalyst Library v4.3.9 restores Homepage Spotlight interaction parity to Major Field Spotlights with a true additional-fields accordion, white active-panel states, and sharp square geometry while preserving autoplay, Article Map heroes, thumbnails, manual curation, and the eight-panel opening tier.
+ * Version: 4.3.9
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.8');
+define('SC_LIBRARY_VERSION', '4.3.9');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

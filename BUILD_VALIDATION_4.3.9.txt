@@ -1,0 +1,71 @@
+Sustainable Catalyst Library v4.3.9
+Field Spotlight Interaction Parity, White Active State & Sharp-Edge Refinement
+Build validation date: 2026-08-07
+
+RELEASE CONTRACT
+PASS  Plugin header version: 4.3.9
+PASS  SC_LIBRARY_VERSION constant: 4.3.9
+PASS  WordPress stable tag: 4.3.9
+PASS  Field Spotlight module version: 4.3.9
+PASS  Durable Field Spotlight settings option retained: sc_library_field_spotlights_settings_v434
+PASS  Field Spotlight settings group/cache boundaries advanced to v4.3.9
+PASS  Publications module remains v4.3.3
+PASS  Homepage Spotlight module remains v4.2.0
+
+ADDITIONAL-FIELDS DISCLOSURE
+PASS  panel 9+ begins genuinely collapsed
+PASS  explicit author-level [hidden] rule defeats legacy display:grid cascade
+PASS  disclosure button exposes aria-controls and aria-expanded
+PASS  additional panel rail exposes synchronized aria-hidden state
+PASS  + changes to minus and Explore additional fields changes to Hide additional fields
+PASS  collapsed autoplay/Previous/Next remain restricted to first eight panels
+PASS  expanded disclosure joins all visible panels to playback/navigation
+PASS  collapsing an active additional panel returns safely to the primary tier
+
+ACTIVE PANEL PARITY
+PASS  currently playing selector uses white background
+PASS  active selector text uses black
+PASS  active numeric position uses red
+PASS  active two-pixel red selection rule remains
+PASS  active selector remains white on hover
+PASS  primary and additional tiers share the same active treatment
+
+SHARP-EDGE REFINEMENT
+PASS  outer Field Spotlight shell radius removed
+PASS  Article Map hero radius explicitly zero
+PASS  selected-publication surface radius explicitly zero
+PASS  Article Map media radius explicitly zero
+PASS  hero CTA and transport control radius explicitly zero
+PASS  additional-fields +/- indicator is square
+PASS  outer shadow reduced while retaining page separation
+
+PRESERVED BEHAVIOR
+PASS  canonical fourteen-field / Article Map registry unchanged
+PASS  first-eight opening tier unchanged
+PASS  default autoplay remains 14,000 ms
+PASS  pause/play, progress, previous/next, hover/focus hold, swipe, visibility, and reduced-motion behavior retained
+PASS  Article Map hero sizing and thumbnails retained
+PASS  manual supporting-article curation retained
+PASS  no automatic article backfill introduced
+
+TEST RESULTS
+PASS  7 v4.3.9 targeted tests
+PASS  8 inherited v4.3.8 tests (superseded release-marker assertion excluded)
+PASS  7 inherited v4.3.7 behavioral tests (superseded release-marker assertion excluded)
+PASS  8 inherited v4.3.3 Publications behavior tests (release-marker assertion excluded)
+PASS  8 inherited v4.2.0 Homepage Spotlight behavior tests (release-marker assertion excluded)
+PASS  PHP syntax validation across WordPress plugin PHP files
+PASS  public Field Spotlight JavaScript syntax validation
+PASS  Field Spotlight administration JavaScript syntax validation
+
+DEPLOYMENT CHECKS STILL REQUIRED
+- Upload/install the v4.3.9 WordPress plugin release.
+- Purge WordPress, Astra/page-builder, hosting, CDN, and browser caches as appropriate.
+- Confirm Explore additional fields initially shows only its collapsed row for fields with more than eight panels.
+- Confirm clicking the row reveals panel 9+ and clicking again collapses them.
+- Confirm the currently playing panel selector is white during autoplay and manual navigation.
+- Confirm field shell, Article Map hero, selected-publication surface, and transport controls present with sharp square edges.
+- Compare desktop/mobile behavior against the Homepage Knowledge Library Spotlight.
+
+RESULT
+PASS  Sustainable Catalyst Library v4.3.9 release-contract validation completed.

@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.8
+Stable tag: 4.3.9
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.4 adds the Field Spotlight data architecture on top of the v4.3.3 Publications baseline. Fourteen major fields now expose 170 flattened Article Map series panels as a durable editorial model: taxonomy groups remain metadata, each panel has a permanent Article Map hero identity, supporting article slots default to four and can be configured from two through eight, and panel 9+ is marked for progressive disclosure after the default eight-panel opening tier. The v4.3.3 Publications shortcode and v4.2.0 Homepage Spotlight remain unchanged.
+Sustainable Catalyst Library v4.3.9 sharpens the Field Spotlight presentation and restores Homepage Spotlight interaction parity. The first eight panels remain visible initially; panel 9+ is now genuinely collapsed behind an accessible additional-fields disclosure, the currently playing panel is white with black text and a red position cue, and the field surface uses square institutional geometry. The underlying Field Spotlight data architecture remains unchanged. Fourteen major fields now expose 170 flattened Article Map series panels as a durable editorial model: taxonomy groups remain metadata, each panel has a permanent Article Map hero identity, supporting article slots default to four and can be configured from two through eight, and panel 9+ is marked for progressive disclosure after the default eight-panel opening tier. The v4.3.3 Publications shortcode and v4.2.0 Homepage Spotlight remain unchanged.
 
 
 

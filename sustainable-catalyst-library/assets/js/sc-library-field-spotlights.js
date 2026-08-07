@@ -123,6 +123,7 @@
     const updateAdditional = () => {
       if (!additional || !more) return;
       additional.hidden = !secondaryExpanded;
+      additional.setAttribute('aria-hidden', secondaryExpanded ? 'false' : 'true');
       more.setAttribute('aria-expanded', secondaryExpanded ? 'true' : 'false');
       q(more, '.sc-field-spotlight__more-icon').textContent = secondaryExpanded ? '−' : '+';
       q(more, '[data-more-label]').textContent = secondaryExpanded ? (labels.hide_additional_label || 'Hide additional fields') : (labels.additional_label || 'Explore additional fields');
@@ -224,6 +225,6 @@
     activate(0);
   };
 
-  const boot = () => document.querySelectorAll('[data-sc-field-spotlights="v4.3.8"] .sc-field-spotlight').forEach(initialize);
+  const boot = () => document.querySelectorAll('[data-sc-field-spotlights="v4.3.9"] .sc-field-spotlight').forEach(initialize);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
