@@ -1,0 +1,89 @@
+Sustainable Catalyst Library v4.3.7
+Spotlight-Parity Hero Scale, Autoplay & Eight-Panel Disclosure
+Build validation date: 2026-08-07
+
+RELEASE CONTRACT
+PASS  Plugin header version: 4.3.7
+PASS  SC_LIBRARY_VERSION constant: 4.3.7
+PASS  WordPress stable tag: 4.3.7
+PASS  Field Spotlight module version: 4.3.7
+PASS  Existing Field Spotlight settings option retained: sc_library_field_spotlights_settings_v434
+PASS  Publications module remains v4.3.3
+PASS  Homepage Spotlight module remains v4.2.0
+
+ARTICLE MAP HERO PARITY
+PASS  Article Map remains permanent hero position 0
+PASS  desktop hero lead minimum height reduced from 330 px to 132 px
+PASS  desktop hero thumbnail aligned to Homepage Spotlight lead size: 138 x 94 px
+PASS  tablet hero thumbnail: 82 x 62 px
+PASS  mobile hero thumbnail: 68 x 54 px
+PASS  red lead-record inset treatment retained
+PASS  hero summary constrained to a compact three-line editorial treatment
+PASS  supporting-article thumbnails, metadata, summaries, and KL fallbacks retained
+
+AUTOMATIC ROTATION
+PASS  autoplay enabled by default
+PASS  default interval: 14,000 ms
+PASS  Previous, Pause/Play, position, and Next controls
+PASS  AUTO, HOLD, PAUSED, STATIC, and REDUCED MOTION states
+PASS  red progress line synchronized to panel interval
+PASS  pause on hover
+PASS  pause on keyboard focus
+PASS  pause during touch interaction
+PASS  browser visibility hold
+PASS  reduced-motion autoplay suppression
+PASS  swipe navigation
+PASS  manual panel selection resets the playback interval
+
+EIGHT-PANEL PROGRESSIVE DISCLOSURE
+PASS  exactly the first eight visible panels render in the primary tier
+PASS  panel 9+ is hidden behind + Explore additional fields
+PASS  collapsed autoplay cycles only through panels 1-8
+PASS  collapsed Previous/Next cycles only through panels 1-8
+PASS  expanded navigation includes all visible panels
+PASS  collapsing while an additional panel is active returns to the primary tier
+PASS  disclosure threshold is fixed to 8 in public model and administration
+
+SHORTCODE COMPATIBILITY
+PASS  [sc_field_spotlights] retained
+PASS  [sc_field_spotlight field="global-governance"] retained
+PASS  autoplay, interval, and pause_on_hover optional overrides supported
+
+EDITORIAL INTEGRITY
+PASS  Article Map canonical destination remains registry-owned
+PASS  supporting articles remain manual-only
+PASS  empty slots remain empty
+PASS  no latest/popular/taxonomy/random/automatic backfill
+PASS  v4.3.6 Field Spotlight Administration Console retained
+
+TEST RESULTS
+PASS  8 v4.3.7 targeted tests
+PASS  5 inherited v4.3.6 administration/editorial tests (superseded release/public assertions excluded)
+PASS  6 inherited v4.3.5 Field Spotlight tests (superseded no-autoplay/hero-size assertions excluded)
+PASS  8 inherited v4.3.3 Publications behavior tests (release-marker assertion excluded)
+PASS  8 inherited v4.2.0 Homepage Spotlight behavior tests (release-marker assertion excluded)
+PASS  PHP syntax validation across the complete WordPress plugin
+PASS  public Field Spotlight JavaScript syntax validation
+PASS  Field Spotlight administration JavaScript syntax validation
+
+DEPLOYMENT CHECKS STILL REQUIRED
+- Upload the WordPress plugin ZIP to production.
+- Purge WordPress, Astra/page-builder, hosting, CDN, and browser caches as appropriate.
+- Verify Article Map lead height and thumbnail scale beside the homepage Spotlight on desktop and mobile.
+- Verify automatic rotation every 14 seconds and progress-line synchronization.
+- Verify hover/focus/touch/reduced-motion hold behavior.
+- Verify only the first eight panel controls are visible before expanding additional fields.
+- Verify panel 9+ joins rotation only while the additional tier is open.
+
+RESULT
+PASS  Sustainable Catalyst Library v4.3.7 is packaged for release validation and installer simulation.
+
+INSTALLER SIMULATION
+PASS  clean v4.3.6 repository baseline initialized as Git working copy
+PASS  v4.3.7 repository checksum verification
+PASS  safety backup creation
+PASS  rsync upgrade into existing repository
+PASS  v4.3.7 release validation after install
+PASS  release commit creation
+PASS  final plugin version 4.3.7
+PASS  final Git working tree clean

@@ -1,6 +1,6 @@
 <?php
 /**
- * Major Field Spotlight system for Sustainable Catalyst Library v4.3.6.
+ * Major Field Spotlight system for Sustainable Catalyst Library v4.3.7.
  *
  * Administration: SC Library -> Field Spotlights.
  * This release renders that durable editorial model as Spotlight-parity public
@@ -18,18 +18,19 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.6';
+    public const VERSION = '4.3.7';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
-    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v436';
-    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v436';
+    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v437';
+    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v437';
     public const MODEL_CACHE_TTL = 600;
     public const DEFAULT_PANEL_LIMIT = 8;
     public const DEFAULT_SLOT_COUNT = 4;
+    public const DEFAULT_INTERVAL = 14000;
     public const MIN_SLOT_COUNT = 2;
     public const MAX_SLOT_COUNT = 8;
     public const SHORTCODE_STACK = 'sc_field_spotlights';
     public const SHORTCODE_SINGLE = 'sc_field_spotlight';
-    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v436';
+    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v437';
 
     public function register_hooks(): void {
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 41 );
@@ -97,6 +98,9 @@ final class SC_Library_Field_Spotlights {
             'general' => array(
                 'panel_limit' => self::DEFAULT_PANEL_LIMIT,
                 'slot_count' => self::DEFAULT_SLOT_COUNT,
+                'autoplay' => 1,
+                'interval' => self::DEFAULT_INTERVAL,
+                'pause_on_hover' => 1,
                 'additional_label' => 'Explore additional fields',
                 'hide_additional_label' => 'Hide additional fields',
                 'hero_label' => 'Article Map',
@@ -150,7 +154,7 @@ final class SC_Library_Field_Spotlights {
                     'description' => sanitize_textarea_field( (string) ( $raw_field['description'] ?? '' ) ),
                     'order' => max( 1, min( 99, absint( $raw_field['order'] ?? $fields[ $field_slug ]['order'] ?? 99 ) ) ),
                     'visible' => empty( $raw_field['visible'] ) ? 0 : 1,
-                    'panel_limit' => max( 1, min( 24, absint( $raw_field['panel_limit'] ?? self::DEFAULT_PANEL_LIMIT ) ) ),
+                    'panel_limit' => self::DEFAULT_PANEL_LIMIT,
                 );
 
                 $series = self::series_registry();
@@ -195,7 +199,10 @@ final class SC_Library_Field_Spotlights {
         }
 
         $raw_general = is_array( $incoming['general'] ?? null ) ? $incoming['general'] : array();
-        $existing['general']['panel_limit'] = max( 1, min( 24, absint( $raw_general['panel_limit'] ?? $existing['general']['panel_limit'] ?? self::DEFAULT_PANEL_LIMIT ) ) );
+        $existing['general']['panel_limit'] = self::DEFAULT_PANEL_LIMIT;
+        $existing['general']['autoplay'] = empty( $raw_general['autoplay'] ) ? 0 : 1;
+        $existing['general']['pause_on_hover'] = empty( $raw_general['pause_on_hover'] ) ? 0 : 1;
+        $existing['general']['interval'] = max( 8000, min( 60000, absint( $raw_general['interval'] ?? $existing['general']['interval'] ?? self::DEFAULT_INTERVAL ) ) );
         $existing['general']['slot_count'] = max( self::MIN_SLOT_COUNT, min( self::MAX_SLOT_COUNT, absint( $raw_general['slot_count'] ?? $existing['general']['slot_count'] ?? self::DEFAULT_SLOT_COUNT ) ) );
         foreach ( array( 'additional_label', 'hide_additional_label', 'hero_label', 'hero_cta', 'selected_label' ) as $key ) {
             $existing['general'][ $key ] = sanitize_text_field( (string) ( $raw_general[ $key ] ?? $existing['general'][ $key ] ?? '' ) );
@@ -248,7 +255,7 @@ final class SC_Library_Field_Spotlights {
                 'browse_url' => (string) ( $definition['browse_url'] ?? '' ),
                 'order' => absint( $saved_field['order'] ?? $definition['order'] ?? 99 ),
                 'visible' => array_key_exists( 'visible', $saved_field ) ? ! empty( $saved_field['visible'] ) : true,
-                'panel_limit' => max( 1, min( 24, absint( $saved_field['panel_limit'] ?? $settings['general']['panel_limit'] ?? self::DEFAULT_PANEL_LIMIT ) ) ),
+                'panel_limit' => self::DEFAULT_PANEL_LIMIT,
                 'panels' => array(),
             );
         }
@@ -485,15 +492,26 @@ final class SC_Library_Field_Spotlights {
     }
 
     public function shortcode_stack( $atts = array() ): string {
-        return $this->render_public( '' );
+        $atts = shortcode_atts( array( 'autoplay' => 'true', 'interval' => (string) self::DEFAULT_INTERVAL, 'pause_on_hover' => 'true' ), $atts, self::SHORTCODE_STACK );
+        return $this->render_public( '', $atts );
     }
 
     public function shortcode_single( $atts = array() ): string {
-        $atts = shortcode_atts( array( 'field' => '' ), $atts, self::SHORTCODE_SINGLE );
-        return $this->render_public( sanitize_title( (string) $atts['field'] ) );
+        $atts = shortcode_atts( array( 'field' => '', 'autoplay' => 'true', 'interval' => (string) self::DEFAULT_INTERVAL, 'pause_on_hover' => 'true' ), $atts, self::SHORTCODE_SINGLE );
+        $field = sanitize_title( (string) $atts['field'] );
+        unset( $atts['field'] );
+        return $this->render_public( $field, $atts );
     }
 
-    private function render_public( string $only_field = '' ): string {
+    private function shortcode_bool( $value, bool $default = true ): bool {
+        if ( is_bool( $value ) ) { return $value; }
+        $value = strtolower( trim( (string) $value ) );
+        if ( in_array( $value, array( '1', 'true', 'yes', 'on' ), true ) ) { return true; }
+        if ( in_array( $value, array( '0', 'false', 'no', 'off' ), true ) ) { return false; }
+        return $default;
+    }
+
+    private function render_public( string $only_field = '', array $display = array() ): string {
         $fields = $this->public_model();
         if ( $only_field ) {
             if ( ! isset( $fields[ $only_field ] ) ) { return ''; }
@@ -504,6 +522,9 @@ final class SC_Library_Field_Spotlights {
         wp_enqueue_script( 'sc-library-field-spotlights', SC_LIBRARY_URL . 'assets/js/sc-library-field-spotlights.js', array(), self::VERSION, true );
         $settings = $this->settings();
         $labels = $settings['general'];
+        $autoplay = $this->shortcode_bool( $display['autoplay'] ?? $settings['general']['autoplay'] ?? true, true );
+        $pause_on_hover = $this->shortcode_bool( $display['pause_on_hover'] ?? $settings['general']['pause_on_hover'] ?? true, true );
+        $interval = max( 8000, min( 60000, absint( $display['interval'] ?? $settings['general']['interval'] ?? self::DEFAULT_INTERVAL ) ) );
         ob_start();
         include SC_LIBRARY_DIR . 'templates/field-spotlights.php';
         return (string) ob_get_clean();
@@ -676,12 +697,15 @@ final class SC_Library_Field_Spotlights {
             </section>
 
             <details class="sc-fs-admin__global-rules">
-                <summary><span><strong>Global presentation rules</strong><small>Default panel threshold, slot count, and public labels</small></span><span aria-hidden="true">+</span></summary>
+                <summary><span><strong>Global presentation rules</strong><small>Spotlight playback, fixed eight-panel disclosure, slot count, and public labels</small></span><span aria-hidden="true">+</span></summary>
                 <form method="post" action="options.php">
                     <?php settings_fields( self::SETTINGS_GROUP ); ?>
                     <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="general">
                     <div class="sc-fs-admin__rule-grid">
-                        <label><span>Visible panels before expansion</span><input type="number" min="1" max="24" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][panel_limit]" value="<?php echo esc_attr( (string) $settings['general']['panel_limit'] ); ?>"><small>Default 8. Panel 9+ remains available through progressive disclosure.</small></label>
+                        <label><span>Visible panels before expansion</span><input type="number" value="8" readonly><input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][panel_limit]" value="8"><small>Fixed at 8. Panel 9+ remains behind progressive disclosure.</small></label>
+                        <label><span>Automatic rotation</span><select name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][autoplay]"><option value="1" <?php selected( ! empty( $settings['general']['autoplay'] ) ); ?>>On</option><option value="0" <?php selected( empty( $settings['general']['autoplay'] ) ); ?>>Off</option></select><small>Defaults to the Homepage Spotlight behavior.</small></label>
+                        <label><span>Rotation interval (ms)</span><input type="number" min="8000" max="60000" step="1000" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][interval]" value="<?php echo esc_attr( (string) ( $settings['general']['interval'] ?? self::DEFAULT_INTERVAL ) ); ?>"><small>Homepage Spotlight parity default: 14000.</small></label>
+                        <label><span>Pause on hover</span><select name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][pause_on_hover]"><option value="1" <?php selected( ! empty( $settings['general']['pause_on_hover'] ) ); ?>>On</option><option value="0" <?php selected( empty( $settings['general']['pause_on_hover'] ) ); ?>>Off</option></select><small>Keyboard focus, touch interaction, hidden tabs, and reduced motion also hold playback.</small></label>
                         <label><span>Default supporting article slots</span><input type="number" min="2" max="8" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][slot_count]" value="<?php echo esc_attr( (string) $settings['general']['slot_count'] ); ?>"><small>Article Map remains permanent hero position 0.</small></label>
                         <?php foreach ( array( 'additional_label' => 'Additional panels label', 'hide_additional_label' => 'Hide label', 'hero_label' => 'Article Map label', 'hero_cta' => 'Article Map CTA', 'selected_label' => 'Selected articles label' ) as $key => $label ) : ?>
                             <label><span><?php echo esc_html( $label ); ?></span><input type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( (string) $settings['general'][ $key ] ); ?>"></label>
@@ -725,7 +749,7 @@ final class SC_Library_Field_Spotlights {
                                 <div class="sc-fs-admin__field-settings-grid">
                                     <label><span>Display title</span><input type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][title]" value="<?php echo esc_attr( (string) ( $field_settings['title'] ?? $field['title'] ) ); ?>"></label>
                                     <label><span>Order</span><input type="number" min="1" max="99" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][order]" value="<?php echo esc_attr( (string) $field['order'] ); ?>"></label>
-                                    <label><span>Disclosure threshold</span><input type="number" min="1" max="24" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][panel_limit]" value="<?php echo esc_attr( (string) $field['panel_limit'] ); ?>"></label>
+                                    <label><span>Disclosure threshold</span><input type="number" value="8" readonly><input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][panel_limit]" value="8"><small>Public Field Spotlights always expose only the first eight panels before expansion.</small></label>
                                     <label class="sc-fs-admin__check"><input type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][visible]" value="1" <?php checked( ! empty( $field['visible'] ) ); ?>><span>Enable this Field Spotlight</span></label>
                                     <label class="sc-fs-admin__wide"><span>Description</span><textarea rows="3" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][description]"><?php echo esc_textarea( (string) ( $field_settings['description'] ?? $field['description'] ) ); ?></textarea></label>
                                 </div>
