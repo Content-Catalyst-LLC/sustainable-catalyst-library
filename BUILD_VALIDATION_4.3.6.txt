@@ -1,0 +1,85 @@
+Sustainable Catalyst Library v4.3.6
+Field Spotlight Administration Console & Panel Curation Workflow
+Build validation date: 2026-08-07
+
+RELEASE CONTRACT
+PASS  Plugin header version: 4.3.6
+PASS  SC_LIBRARY_VERSION constant: 4.3.6
+PASS  WordPress stable tag: 4.3.6
+PASS  Field Spotlight module version: 4.3.6
+PASS  Existing Field Spotlight settings option retained: sc_library_field_spotlights_settings_v434
+PASS  Public v4.3.5 Field Spotlight shell preserved
+PASS  Publications module remains v4.3.3
+PASS  Homepage Spotlight module remains v4.2.0
+
+ADMINISTRATION CONSOLE
+PASS  Field Spotlight Console replaces dense administrative table presentation
+PASS  14-major-field index with completion progress
+PASS  170 canonical Article Map panel inventory
+PASS  global readiness metrics for ready, partial, empty, and curated supporting content
+PASS  per-field completion percentages
+PASS  panel readiness states: Ready, Partial, Empty, Hidden
+PASS  panel search by title and source group
+PASS  filters for Primary, Additional, Ready, Partial, Empty, and Hidden
+PASS  thumbnail-backed panel rows
+PASS  canonical Article Map destination visible and immutable
+PASS  panel order, visibility, slot count, and disclosure state remain editable
+PASS  sticky save controls for long field inventories
+
+SUPPORTING ARTICLE CURATION
+PASS  AJAX Library search inside every supporting article slot
+PASS  title search
+PASS  canonical URL lookup
+PASS  numeric WordPress ID lookup
+PASS  slug/title fallback search
+PASS  published-record and password validation
+PASS  front-end search filters suppressed for administrator source discovery
+PASS  result thumbnail, metadata, and excerpt preview
+PASS  selected source ID and canonical URL persistence
+PASS  optional display-title override retained
+PASS  slot enable/disable retained
+PASS  Clear Slot removes selection without substitution
+PASS  manual-only selection contract retained
+PASS  empty slots remain empty
+PASS  no latest/popular/taxonomy/random/automatic backfill
+
+PUBLIC CONTRACT PRESERVATION
+PASS  [sc_field_spotlights] retained
+PASS  [sc_field_spotlight field="global-governance"] retained
+PASS  Article Map remains permanent hero position 0
+PASS  v4.3.5 public thumbnail cascade retained
+PASS  first eight panels remain immediately visible
+PASS  panel 9+ remains behind accessible progressive disclosure
+PASS  Previous/Next and keyboard panel navigation retained
+PASS  no Field Spotlight autoplay
+
+TEST RESULTS
+PASS  7 v4.3.6 targeted tests
+PASS  7 inherited v4.3.5 Field Spotlight behavior tests (release-marker assertion excluded)
+PASS  8 inherited v4.3.3 Publications behavior tests (release-marker assertion excluded)
+PASS  8 inherited v4.2.0 Homepage Spotlight behavior tests (release-marker assertion excluded)
+PASS  PHP syntax validation across the complete WordPress plugin
+PASS  public Field Spotlight JavaScript syntax validation
+PASS  Field Spotlight administration JavaScript syntax validation
+
+DEPLOYMENT CHECKS STILL REQUIRED
+- Upload the WordPress plugin ZIP to the production WordPress environment.
+- Purge WordPress, Astra/page-builder, hosting, CDN, and browser caches as appropriate.
+- Open SC Library -> Field Spotlights and confirm the console loads without admin-theme conflicts.
+- Test Library source search against real production content and thumbnail metadata.
+- Confirm save/redirect behavior for global rules, field model, and per-panel content.
+- Confirm desktop, narrow desktop, tablet, and mobile administration layouts.
+- Confirm the v4.3.5 public Spotlight appearance remains unchanged.
+
+RESULT
+PASS  Sustainable Catalyst Library v4.3.6 is release-ready for repository installation and WordPress deployment.
+
+INSTALLER SIMULATION
+PASS  clean v4.3.5 repository baseline initialized as Git working copy
+PASS  v4.3.6 repository checksum verification
+PASS  safety backup creation
+PASS  rsync upgrade into existing repository
+PASS  v4.3.6 release validation after install
+PASS  release commit creation
+PASS  final plugin version 4.3.6
+PASS  final Git working tree clean

@@ -1,6 +1,6 @@
 <?php
 /**
- * Major Field Spotlight public shell for Sustainable Catalyst Library v4.3.5.
+ * Major Field Spotlight system for Sustainable Catalyst Library v4.3.6.
  *
  * Administration: SC Library -> Field Spotlights.
  * This release renders that durable editorial model as Spotlight-parity public
@@ -13,14 +13,15 @@
  *
  * Taxonomy groups such as Legal Traditions remain available as source_group
  * metadata, but their child Article Maps are first-class peer panels publicly.
+ * Inherited v4.3.5 contract: Article Map hero: canonical hero destination cannot be replaced. No automatic article backfill.
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.5';
+    public const VERSION = '4.3.6';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
-    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v435';
-    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v435';
+    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v436';
+    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v436';
     public const MODEL_CACHE_TTL = 600;
     public const DEFAULT_PANEL_LIMIT = 8;
     public const DEFAULT_SLOT_COUNT = 4;
@@ -28,11 +29,13 @@ final class SC_Library_Field_Spotlights {
     public const MAX_SLOT_COUNT = 8;
     public const SHORTCODE_STACK = 'sc_field_spotlights';
     public const SHORTCODE_SINGLE = 'sc_field_spotlight';
-    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v435';
+    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v436';
 
     public function register_hooks(): void {
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 41 );
         add_action( 'admin_init', array( $this, 'register_settings' ) );
+        add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue' ) );
+        add_action( 'wp_ajax_sc_library_field_spotlight_search_sources', array( $this, 'ajax_search_sources' ) );
         add_action( 'update_option_' . self::SETTINGS_OPTION, array( $this, 'invalidate_model' ), 10, 2 );
         add_action( 'save_post', array( $this, 'invalidate_for_saved_post' ), 999, 3 );
         add_action( 'transition_post_status', array( $this, 'invalidate_for_status_change' ), 999, 3 );
@@ -259,6 +262,11 @@ final class SC_Library_Field_Spotlights {
             while ( count( $slots ) < $slot_count ) {
                 $slots[] = array( 'source_id' => 0, 'title' => '', 'url' => '', 'enabled' => 0 );
             }
+            $configured_count = 0;
+            foreach ( $slots as $slot ) {
+                if ( ! empty( $slot['enabled'] ) && ( ! empty( $slot['source_id'] ) || ! empty( $slot['url'] ) ) ) { $configured_count++; }
+            }
+            $readiness = 0 === $configured_count ? 'empty' : ( $configured_count >= $slot_count ? 'ready' : 'partial' );
             $fields[ $field_slug ]['panels'][] = array(
                 'key' => $panel_key,
                 'title' => (string) ( $saved_panel['title'] ?: $canonical['title'] ),
@@ -276,6 +284,8 @@ final class SC_Library_Field_Spotlights {
                     'cta' => (string) ( $saved_panel['hero_cta'] ?: $settings['general']['hero_cta'] ),
                 ),
                 'slot_count' => $slot_count,
+                'configured_article_count' => $configured_count,
+                'readiness' => $readiness,
                 'articles' => $slots,
                 'selection_mode' => 'manual_only',
             );
@@ -286,17 +296,36 @@ final class SC_Library_Field_Spotlights {
                 return ( $a['order'] <=> $b['order'] ) ?: ( $a['canonical_order'] <=> $b['canonical_order'] );
             } );
             $visible_index = 0;
+            $ready_count = 0;
+            $partial_count = 0;
+            $empty_count = 0;
+            $hidden_count = 0;
+            $configured_articles = 0;
+            $supporting_slots = 0;
             foreach ( $field['panels'] as &$panel ) {
                 if ( ! $panel['visible'] ) {
                     $panel['disclosure'] = 'hidden';
+                    $hidden_count++;
                     continue;
                 }
                 $panel['disclosure'] = $visible_index < $field['panel_limit'] ? 'primary' : 'additional';
                 $visible_index++;
+                $configured_articles += absint( $panel['configured_article_count'] ?? 0 );
+                $supporting_slots += absint( $panel['slot_count'] ?? 0 );
+                if ( 'ready' === $panel['readiness'] ) { $ready_count++; }
+                elseif ( 'partial' === $panel['readiness'] ) { $partial_count++; }
+                else { $empty_count++; }
             }
             unset( $panel );
             $field['panel_count'] = $visible_index;
             $field['additional_panel_count'] = max( 0, $visible_index - $field['panel_limit'] );
+            $field['ready_panel_count'] = $ready_count;
+            $field['partial_panel_count'] = $partial_count;
+            $field['empty_panel_count'] = $empty_count;
+            $field['hidden_panel_count'] = $hidden_count;
+            $field['configured_article_count'] = $configured_articles;
+            $field['supporting_slot_count'] = $supporting_slots;
+            $field['completion_percent'] = $supporting_slots ? min( 100, (int) round( ( $configured_articles / $supporting_slots ) * 100 ) ) : 0;
         }
         unset( $field );
 
@@ -480,6 +509,109 @@ final class SC_Library_Field_Spotlights {
         return (string) ob_get_clean();
     }
 
+    public function admin_enqueue( string $hook_suffix = '' ): void {
+        $page = isset( $_GET['page'] ) ? sanitize_key( (string) wp_unslash( $_GET['page'] ) ) : '';
+        if ( 'sc-library-field-spotlights' !== $page ) { return; }
+        wp_enqueue_style( 'sc-library-field-spotlights-admin', SC_LIBRARY_URL . 'assets/css/sc-library-field-spotlights-admin.css', array(), self::VERSION );
+        wp_enqueue_script( 'sc-library-field-spotlights-admin', SC_LIBRARY_URL . 'assets/js/sc-library-field-spotlights-admin.js', array(), self::VERSION, true );
+        wp_localize_script(
+            'sc-library-field-spotlights-admin',
+            'SCFieldSpotlightsAdmin',
+            array(
+                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+                'nonce' => wp_create_nonce( 'sc_library_field_spotlight_search' ),
+                'searching' => __( 'Searching…', 'sustainable-catalyst-library' ),
+                'noResults' => __( 'No published Library records found.', 'sustainable-catalyst-library' ),
+                'select' => __( 'Select article', 'sustainable-catalyst-library' ),
+                'configured' => __( 'Configured', 'sustainable-catalyst-library' ),
+                'empty' => __( 'Empty slot', 'sustainable-catalyst-library' ),
+            )
+        );
+    }
+
+    public function ajax_search_sources(): void {
+        if ( ! current_user_can( 'manage_options' ) || ! check_ajax_referer( 'sc_library_field_spotlight_search', 'nonce', false ) ) {
+            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'sustainable-catalyst-library' ) ), 403 );
+        }
+        $query = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
+        if ( strlen( trim( $query ) ) < 2 ) { wp_send_json_success( array( 'items' => array() ) ); }
+        $items = array();
+        foreach ( $this->search_source_posts( $query, 20 ) as $post ) {
+            $type = get_post_type_object( $post->post_type );
+            $thumbnail = $this->resolve_source_thumbnail( $post );
+            $items[] = array(
+                'id' => $post->ID,
+                'title' => html_entity_decode( get_the_title( $post ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
+                'excerpt' => $this->source_summary( $post, 20 ),
+                'type' => $type ? $type->labels->singular_name : $post->post_type,
+                'metadata' => $this->source_metadata( $post ),
+                'url' => get_permalink( $post ),
+                'thumbnailUrl' => (string) ( $thumbnail['url'] ?? '' ),
+                'thumbnailAlt' => (string) ( $thumbnail['alt'] ?? get_the_title( $post ) ),
+            );
+        }
+        wp_send_json_success( array( 'items' => $items ) );
+    }
+
+    /** @return string[] */
+    private function eligible_source_post_types(): array {
+        $post_types = get_post_types( array( 'public' => true ), 'names' );
+        foreach ( array( 'post', 'page', 'sc_foundation_doc', 'sc_pdf_document', 'sc_research_source', 'sc_knowledge_pathway', 'sc_document_repository' ) as $known_type ) {
+            if ( post_type_exists( $known_type ) ) { $post_types[] = $known_type; }
+        }
+        return array_values( array_diff( array_values( array_unique( array_filter( $post_types ) ) ), array( 'attachment' ) ) );
+    }
+
+    private function is_valid_source_record( $post ): bool {
+        return $post instanceof WP_Post
+            && 'publish' === $post->post_status
+            && empty( $post->post_password )
+            && in_array( $post->post_type, $this->eligible_source_post_types(), true );
+    }
+
+    /** @return WP_Post[] */
+    private function search_source_posts( string $query, int $limit = 20 ): array {
+        global $wpdb;
+        $query = trim( $query );
+        $limit = max( 1, min( 50, $limit ) );
+        $post_types = $this->eligible_source_post_types();
+        $posts_by_id = array();
+        $add_post = function ( $candidate ) use ( &$posts_by_id ): void {
+            $post = $candidate instanceof WP_Post ? $candidate : get_post( absint( $candidate ) );
+            if ( $this->is_valid_source_record( $post ) ) { $posts_by_id[ $post->ID ] = $post; }
+        };
+        if ( ctype_digit( $query ) ) { $add_post( absint( $query ) ); }
+        if ( wp_http_validate_url( $query ) ) {
+            $add_post( url_to_postid( $query ) );
+            $path = (string) wp_parse_url( $query, PHP_URL_PATH );
+            $slug = sanitize_title( basename( untrailingslashit( $path ) ) );
+            if ( $slug ) {
+                foreach ( get_posts( array( 'name' => $slug, 'post_type' => $post_types, 'post_status' => 'publish', 'posts_per_page' => $limit, 'suppress_filters' => true ) ) as $post ) { $add_post( $post ); }
+            }
+        }
+        foreach ( get_posts( array( 'post_type' => $post_types, 'post_status' => 'publish', 'posts_per_page' => $limit, 's' => $query, 'orderby' => 'relevance date', 'order' => 'DESC', 'suppress_filters' => true ) ) as $post ) { $add_post( $post ); }
+        if ( count( $posts_by_id ) < $limit && $post_types ) {
+            $type_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
+            $title_like = '%' . $wpdb->esc_like( $query ) . '%';
+            $slug_like = '%' . $wpdb->esc_like( sanitize_title( $query ) ) . '%';
+            $sql = "SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ({$type_placeholders}) AND (post_title LIKE %s OR post_name LIKE %s) ORDER BY CASE WHEN post_title = %s THEN 0 ELSE 1 END, post_modified_gmt DESC LIMIT %d";
+            $params = array_merge( $post_types, array( $title_like, $slug_like, $query, $limit * 2 ) );
+            foreach ( $wpdb->get_col( $wpdb->prepare( $sql, $params ) ) as $candidate_id ) {
+                $add_post( $candidate_id );
+                if ( count( $posts_by_id ) >= $limit ) { break; }
+            }
+        }
+        return array_slice( array_values( $posts_by_id ), 0, $limit );
+    }
+
+    /** @param array<string,mixed> $panel */
+    private function panel_status_label( array $panel ): string {
+        if ( empty( $panel['visible'] ) ) { return __( 'Hidden', 'sustainable-catalyst-library' ); }
+        if ( 'ready' === ( $panel['readiness'] ?? '' ) ) { return __( 'Ready', 'sustainable-catalyst-library' ); }
+        if ( 'partial' === ( $panel['readiness'] ?? '' ) ) { return __( 'Partial', 'sustainable-catalyst-library' ); }
+        return __( 'Empty', 'sustainable-catalyst-library' );
+    }
+
     public function admin_menu(): void {
         add_submenu_page(
             'sc-library',
@@ -499,122 +631,198 @@ final class SC_Library_Field_Spotlights {
         if ( ! isset( $model[ $selected_field ] ) ) { $selected_field = (string) array_key_first( $model ); }
         $field = $model[ $selected_field ] ?? array();
         $field_settings = is_array( $settings['fields'][ $selected_field ] ?? null ) ? $settings['fields'][ $selected_field ] : array();
+        $selected_panel_key = sanitize_title( (string) ( $_GET['panel'] ?? '' ) );
+        $selected_panel = null;
+        if ( $selected_panel_key && $field ) {
+            foreach ( $field['panels'] as $candidate_panel ) {
+                if ( $candidate_panel['key'] === $selected_panel_key ) { $selected_panel = $candidate_panel; break; }
+            }
+        }
+
+        $total_panels = 0;
+        $total_ready = 0;
+        $total_partial = 0;
+        $total_empty = 0;
+        $total_hidden = 0;
+        $total_configured = 0;
+        $total_slots = 0;
+        foreach ( $model as $item ) {
+            $total_panels += count( $item['panels'] );
+            $total_ready += absint( $item['ready_panel_count'] ?? 0 );
+            $total_partial += absint( $item['partial_panel_count'] ?? 0 );
+            $total_empty += absint( $item['empty_panel_count'] ?? 0 );
+            $total_hidden += absint( $item['hidden_panel_count'] ?? 0 );
+            $total_configured += absint( $item['configured_article_count'] ?? 0 );
+            $total_slots += absint( $item['supporting_slot_count'] ?? 0 );
+        }
+        $overall_completion = $total_slots ? min( 100, (int) round( ( $total_configured / $total_slots ) * 100 ) ) : 0;
         ?>
-        <div class="wrap sc-field-spotlights-admin">
-            <h1><?php esc_html_e( 'Field Spotlights', 'sustainable-catalyst-library' ); ?></h1>
-            <p><?php esc_html_e( 'Configure the Field Spotlight model and the public Spotlight presentation. Publications and Homepage Spotlight remain separate surfaces.', 'sustainable-catalyst-library' ); ?></p>
+        <div class="wrap sc-fs-admin" data-sc-field-spotlights-admin="v4.3.6">
+            <header class="sc-fs-admin__hero">
+                <div>
+                    <p class="sc-fs-admin__eyebrow">KNOWLEDGE LIBRARY · FIELD SPOTLIGHTS</p>
+                    <h1><?php esc_html_e( 'Field Spotlight Console', 'sustainable-catalyst-library' ); ?></h1>
+                    <p><?php esc_html_e( 'Curate Article Map-led field panels, supporting articles, panel visibility, and progressive disclosure from one editorial workspace.', 'sustainable-catalyst-library' ); ?></p>
+                </div>
+                <div class="sc-fs-admin__shortcodes"><span><code>[sc_field_spotlights]</code></span><span><code>[sc_field_spotlight field=&quot;global-governance&quot;]</code></span></div>
+            </header>
             <?php settings_errors(); ?>
 
-            <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.8fr);gap:24px;align-items:start;max-width:1480px">
-                <div>
-                    <form method="post" action="options.php" style="background:#fff;border:1px solid #c3c4c7;padding:22px;margin-bottom:24px">
-                        <?php settings_fields( self::SETTINGS_GROUP ); ?>
-                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="general">
-                        <h2><?php esc_html_e( 'Global Field Spotlight rules', 'sustainable-catalyst-library' ); ?></h2>
-                        <table class="form-table" role="presentation">
-                            <tr><th><label for="sc-fs-limit">Visible panels before expansion</label></th><td><input id="sc-fs-limit" type="number" min="1" max="24" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][panel_limit]" value="<?php echo esc_attr( (string) $settings['general']['panel_limit'] ); ?>"><p class="description">Default: 8. Remaining panels are marked Additional rather than removed.</p></td></tr>
-                            <tr><th><label for="sc-fs-slots">Default supporting article slots</label></th><td><input id="sc-fs-slots" type="number" min="2" max="8" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][slot_count]" value="<?php echo esc_attr( (string) $settings['general']['slot_count'] ); ?>"><p class="description">Article Map is permanent position 0; supporting slots are positions 1-N.</p></td></tr>
-                            <?php foreach ( array( 'additional_label' => 'Additional panels label', 'hide_additional_label' => 'Hide label', 'hero_label' => 'Article Map label', 'hero_cta' => 'Article Map CTA', 'selected_label' => 'Selected articles label' ) as $key => $label ) : ?>
-                                <tr><th><label for="sc-fs-<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></label></th><td><input class="regular-text" id="sc-fs-<?php echo esc_attr( $key ); ?>" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( (string) $settings['general'][ $key ] ); ?>"></td></tr>
-                            <?php endforeach; ?>
-                        </table>
-                        <?php submit_button( __( 'Save global rules', 'sustainable-catalyst-library' ) ); ?>
-                    </form>
+            <section class="sc-fs-admin__metrics" aria-label="Field Spotlight readiness">
+                <article><span>MAJOR FIELDS</span><strong><?php echo esc_html( (string) count( $model ) ); ?></strong><small>Independent Spotlights</small></article>
+                <article><span>ARTICLE MAP PANELS</span><strong><?php echo esc_html( (string) $total_panels ); ?></strong><small>Canonical hero panels</small></article>
+                <article><span>READY PANELS</span><strong><?php echo esc_html( (string) $total_ready ); ?></strong><small><?php echo esc_html( sprintf( '%d partial · %d empty', $total_partial, $total_empty ) ); ?></small></article>
+                <article><span>CURATED ARTICLES</span><strong><?php echo esc_html( sprintf( '%d / %d', $total_configured, $total_slots ) ); ?></strong><small><?php echo esc_html( sprintf( '%d%% configured', $overall_completion ) ); ?></small></article>
+            </section>
 
-                    <?php if ( $field ) : ?>
-                    <form method="post" action="options.php" style="background:#fff;border:1px solid #c3c4c7;padding:22px">
-                        <?php settings_fields( self::SETTINGS_GROUP ); ?>
-                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="field">
-                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_field_slug]" value="<?php echo esc_attr( $selected_field ); ?>">
-                        <h2><?php echo esc_html( (string) $field['title'] ); ?></h2>
-                        <table class="form-table" role="presentation">
-                            <tr><th>Display title</th><td><input class="regular-text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][title]" value="<?php echo esc_attr( (string) ( $field_settings['title'] ?? $field['title'] ) ); ?>"></td></tr>
-                            <tr><th>Description</th><td><textarea class="large-text" rows="3" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][description]"><?php echo esc_textarea( (string) ( $field_settings['description'] ?? $field['description'] ) ); ?></textarea></td></tr>
-                            <tr><th>Order</th><td><input type="number" min="1" max="99" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][order]" value="<?php echo esc_attr( (string) $field['order'] ); ?>"></td></tr>
-                            <tr><th>Visible</th><td><label><input type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][visible]" value="1" <?php checked( ! empty( $field['visible'] ) ); ?>> Enable this Field Spotlight</label></td></tr>
-                            <tr><th>Panel disclosure threshold</th><td><input type="number" min="1" max="24" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][panel_limit]" value="<?php echo esc_attr( (string) $field['panel_limit'] ); ?>"><p class="description">Panels after this position are revealed through the + additional-fields disclosure control on the public Spotlight.</p></td></tr>
-                        </table>
+            <details class="sc-fs-admin__global-rules">
+                <summary><span><strong>Global presentation rules</strong><small>Default panel threshold, slot count, and public labels</small></span><span aria-hidden="true">+</span></summary>
+                <form method="post" action="options.php">
+                    <?php settings_fields( self::SETTINGS_GROUP ); ?>
+                    <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="general">
+                    <div class="sc-fs-admin__rule-grid">
+                        <label><span>Visible panels before expansion</span><input type="number" min="1" max="24" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][panel_limit]" value="<?php echo esc_attr( (string) $settings['general']['panel_limit'] ); ?>"><small>Default 8. Panel 9+ remains available through progressive disclosure.</small></label>
+                        <label><span>Default supporting article slots</span><input type="number" min="2" max="8" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][slot_count]" value="<?php echo esc_attr( (string) $settings['general']['slot_count'] ); ?>"><small>Article Map remains permanent hero position 0.</small></label>
+                        <?php foreach ( array( 'additional_label' => 'Additional panels label', 'hide_additional_label' => 'Hide label', 'hero_label' => 'Article Map label', 'hero_cta' => 'Article Map CTA', 'selected_label' => 'Selected articles label' ) as $key => $label ) : ?>
+                            <label><span><?php echo esc_html( $label ); ?></span><input type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( (string) $settings['general'][ $key ] ); ?>"></label>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php submit_button( __( 'Save global rules', 'sustainable-catalyst-library' ) ); ?>
+                </form>
+            </details>
 
-                        <h3><?php esc_html_e( 'Flattened series panels', 'sustainable-catalyst-library' ); ?></h3>
-                        <p><?php esc_html_e( 'Source groups are retained for knowledge architecture, but every Article Map below is a peer panel in this Field Spotlight.', 'sustainable-catalyst-library' ); ?></p>
-                        <table class="widefat striped">
-                            <thead><tr><th style="width:80px">Order</th><th>Panel</th><th>Source group</th><th>Canonical Article Map</th><th style="width:90px">Visible</th><th style="width:110px">Slots</th><th style="width:90px">Tier</th><th style="width:100px">Content</th></tr></thead>
-                            <tbody>
-                            <?php foreach ( $field['panels'] as $panel ) : ?>
-                                <tr>
-                                    <td><input style="width:70px" type="number" min="1" max="999" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $panel['key'] ); ?>][order]" value="<?php echo esc_attr( (string) $panel['order'] ); ?>"></td>
-                                    <td><input class="regular-text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $panel['key'] ); ?>][title]" value="<?php echo esc_attr( (string) $panel['title'] ); ?>"></td>
-                                    <td><?php echo esc_html( $panel['source_group'] ?: '—' ); ?></td>
-                                    <td><a href="<?php echo esc_url( home_url( $panel['canonical_url'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( (string) $panel['canonical_url'] ); ?></a><br><small>Permanent hero source</small></td>
-                                    <td><label><input type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $panel['key'] ); ?>][visible]" value="1" <?php checked( ! empty( $panel['visible'] ) ); ?>> Yes</label></td>
-                                    <td><input style="width:72px" type="number" min="2" max="8" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $panel['key'] ); ?>][slot_count]" value="<?php echo esc_attr( (string) $panel['slot_count'] ); ?>"></td>
-                                    <td><?php echo esc_html( ucfirst( (string) $panel['disclosure'] ) ); ?></td>
-                                    <td><a class="button button-small" href="<?php echo esc_url( admin_url( 'admin.php?page=sc-library-field-spotlights&field=' . rawurlencode( $selected_field ) . '&panel=' . rawurlencode( $panel['key'] ) ) ); ?>">Edit content</a></td>
-                                </tr>
-                            <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                        <?php submit_button( __( 'Save field and panel model', 'sustainable-catalyst-library' ) ); ?>
-                    </form>
-                    <?php endif; ?>
-
-                    <?php
-                    $selected_panel_key = sanitize_title( (string) ( $_GET['panel'] ?? '' ) );
-                    $selected_panel = null;
-                    if ( $selected_panel_key && $field ) {
-                        foreach ( $field['panels'] as $candidate_panel ) {
-                            if ( $candidate_panel['key'] === $selected_panel_key ) { $selected_panel = $candidate_panel; break; }
-                        }
-                    }
-                    if ( $selected_panel ) :
-                        $panel_saved = is_array( $settings['panels'][ $selected_panel_key ] ?? null ) ? $settings['panels'][ $selected_panel_key ] : array();
+            <div class="sc-fs-admin__workspace">
+                <aside class="sc-fs-admin__fields">
+                    <div class="sc-fs-admin__section-head"><div><p>FIELD INDEX</p><h2>Major fields</h2></div><span><?php echo esc_html( (string) count( $model ) ); ?></span></div>
+                    <div class="sc-fs-admin__field-list">
+                    <?php foreach ( $model as $field_slug => $item ) :
+                        $completion = absint( $item['completion_percent'] ?? 0 );
+                        $active_class = $field_slug === $selected_field ? ' is-active' : '';
                     ?>
-                    <form method="post" action="options.php" style="background:#fff;border:1px solid #c3c4c7;padding:22px;margin-top:24px">
-                        <?php settings_fields( self::SETTINGS_GROUP ); ?>
-                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="panel">
-                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_panel_key]" value="<?php echo esc_attr( $selected_panel_key ); ?>">
-                        <h2><?php echo esc_html( (string) $selected_panel['title'] ); ?> — Spotlight content</h2>
-                        <p class="description"><strong>Article Map hero:</strong> <a href="<?php echo esc_url( home_url( $selected_panel['canonical_url'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( (string) $selected_panel['canonical_url'] ); ?></a>. This canonical hero destination cannot be replaced.</p>
-                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][title]" value="<?php echo esc_attr( (string) $selected_panel['title'] ); ?>">
-                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][order]" value="<?php echo esc_attr( (string) $selected_panel['order'] ); ?>">
-                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][visible]" value="<?php echo ! empty( $selected_panel['visible'] ) ? '1' : '0'; ?>">
-                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][slot_count]" value="<?php echo esc_attr( (string) $selected_panel['slot_count'] ); ?>">
-                        <table class="form-table" role="presentation">
-                            <tr><th>Hero display title</th><td><input class="regular-text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][hero_title]" value="<?php echo esc_attr( (string) ( $panel_saved['hero_title'] ?? '' ) ); ?>" placeholder="<?php echo esc_attr( (string) $selected_panel['canonical_title'] ); ?>"></td></tr>
-                            <tr><th>Hero description</th><td><textarea class="large-text" rows="4" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][hero_description]"><?php echo esc_textarea( (string) ( $panel_saved['hero_description'] ?? '' ) ); ?></textarea><p class="description">Leave blank to use the published Article Map excerpt/content summary.</p></td></tr>
-                            <tr><th>Hero CTA</th><td><input class="regular-text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][hero_cta]" value="<?php echo esc_attr( (string) ( $panel_saved['hero_cta'] ?? '' ) ); ?>" placeholder="Explore Article Map"></td></tr>
-                        </table>
-                        <h3>Selected articles</h3>
-                        <p class="description">Paste the canonical URL of each article you want beneath this Article Map. Thumbnails, summaries, and metadata are resolved from the Library record automatically. Empty slots remain empty.</p>
-                        <?php for ( $i = 0; $i < absint( $selected_panel['slot_count'] ); $i++ ) : $article = is_array( $panel_saved['articles'][ $i ] ?? null ) ? $panel_saved['articles'][ $i ] : array(); ?>
-                            <fieldset style="border-top:1px solid #dcdcde;padding:14px 0 4px;margin-top:12px">
-                                <legend><strong><?php echo esc_html( sprintf( 'Slot %02d', $i + 1 ) ); ?></strong></legend>
-                                <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][source_id]" value="<?php echo esc_attr( (string) absint( $article['source_id'] ?? 0 ) ); ?>">
-                                <p><label>Article URL<br><input class="widefat" type="url" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][url]" value="<?php echo esc_attr( (string) ( $article['url'] ?? '' ) ); ?>" placeholder="https://sustainablecatalyst.com/..."></label></p>
-                                <p><label>Optional display title<br><input class="widefat" type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][title]" value="<?php echo esc_attr( (string) ( $article['title'] ?? '' ) ); ?>"></label></p>
-                                <p><label><input type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][enabled]" value="1" <?php checked( ! empty( $article['enabled'] ) ); ?>> Enable this slot</label></p>
-                            </fieldset>
-                        <?php endfor; ?>
-                        <?php submit_button( __( 'Save Spotlight content', 'sustainable-catalyst-library' ) ); ?>
-                    </form>
-                    <?php endif; ?>
-                </div>
-
-                <aside style="background:#fff;border:1px solid #c3c4c7;padding:22px;position:sticky;top:42px">
-                    <h2><?php esc_html_e( 'Major fields', 'sustainable-catalyst-library' ); ?></h2>
-                    <p><?php echo esc_html( sprintf( '%d fields · %d canonical Article Map panels', count( $model ), array_sum( array_map( static fn( $item ) => count( $item['panels'] ), $model ) ) ) ); ?></p>
-                    <table class="widefat striped"><thead><tr><th>Field</th><th>Panels</th><th>Additional</th></tr></thead><tbody>
-                    <?php foreach ( $model as $field_slug => $item ) : ?>
-                        <tr<?php echo $field_slug === $selected_field ? ' style="box-shadow:inset 4px 0 #d63638"' : ''; ?>><td><a href="<?php echo esc_url( admin_url( 'admin.php?page=sc-library-field-spotlights&field=' . rawurlencode( $field_slug ) ) ); ?>"><strong><?php echo esc_html( (string) $item['title'] ); ?></strong></a></td><td><?php echo esc_html( (string) $item['panel_count'] ); ?></td><td><?php echo esc_html( (string) $item['additional_panel_count'] ); ?></td></tr>
+                        <a class="sc-fs-admin__field<?php echo esc_attr( $active_class ); ?>" href="<?php echo esc_url( admin_url( 'admin.php?page=sc-library-field-spotlights&field=' . rawurlencode( $field_slug ) ) ); ?>">
+                            <span class="sc-fs-admin__field-order"><?php echo esc_html( str_pad( (string) absint( $item['order'] ), 2, '0', STR_PAD_LEFT ) ); ?></span>
+                            <span class="sc-fs-admin__field-copy"><strong><?php echo esc_html( (string) $item['title'] ); ?></strong><small><?php echo esc_html( sprintf( '%d panels · %d ready', absint( $item['panel_count'] ), absint( $item['ready_panel_count'] ?? 0 ) ) ); ?></small><span class="sc-fs-admin__progress"><i style="width:<?php echo esc_attr( (string) $completion ); ?>%"></i></span></span>
+                            <span class="sc-fs-admin__field-percent"><?php echo esc_html( (string) $completion ); ?>%</span>
+                        </a>
                     <?php endforeach; ?>
-                    </tbody></table>
-                    <hr>
-                    <p><strong>v4.3.5 public presentation</strong></p>
-                    <p class="description">Use <code>[sc_field_spotlights]</code> for the complete major-field stack or <code>[sc_field_spotlight field=&quot;global-governance&quot;]</code> for one field.</p>
-                    <p class="description">Article Map is always the hero. Supporting articles remain manual-only. No automatic article backfill is defined; no latest, popular, taxonomy, random, or automatic substitution path is used.</p>
+                    </div>
                 </aside>
+
+                <main class="sc-fs-admin__main">
+                    <?php if ( $field ) : ?>
+                    <section class="sc-fs-admin__field-editor">
+                        <header class="sc-fs-admin__field-header">
+                            <div><p>ACTIVE FIELD</p><h2><?php echo esc_html( (string) $field['title'] ); ?></h2><span><?php echo esc_html( sprintf( '%d panels · %d additional · %d%% supporting content configured', absint( $field['panel_count'] ), absint( $field['additional_panel_count'] ), absint( $field['completion_percent'] ?? 0 ) ) ); ?></span></div>
+                            <a class="button" href="<?php echo esc_url( home_url( (string) $field['browse_url'] ) ); ?>" target="_blank" rel="noopener">Browse field ↗</a>
+                        </header>
+
+                        <form method="post" action="options.php" class="sc-fs-admin__field-form">
+                            <?php settings_fields( self::SETTINGS_GROUP ); ?>
+                            <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="field">
+                            <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_field_slug]" value="<?php echo esc_attr( $selected_field ); ?>">
+                            <details class="sc-fs-admin__field-settings">
+                                <summary><strong>Field settings</strong><span>Edit title, description, order and disclosure threshold</span></summary>
+                                <div class="sc-fs-admin__field-settings-grid">
+                                    <label><span>Display title</span><input type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][title]" value="<?php echo esc_attr( (string) ( $field_settings['title'] ?? $field['title'] ) ); ?>"></label>
+                                    <label><span>Order</span><input type="number" min="1" max="99" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][order]" value="<?php echo esc_attr( (string) $field['order'] ); ?>"></label>
+                                    <label><span>Disclosure threshold</span><input type="number" min="1" max="24" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][panel_limit]" value="<?php echo esc_attr( (string) $field['panel_limit'] ); ?>"></label>
+                                    <label class="sc-fs-admin__check"><input type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][visible]" value="1" <?php checked( ! empty( $field['visible'] ) ); ?>><span>Enable this Field Spotlight</span></label>
+                                    <label class="sc-fs-admin__wide"><span>Description</span><textarea rows="3" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][description]"><?php echo esc_textarea( (string) ( $field_settings['description'] ?? $field['description'] ) ); ?></textarea></label>
+                                </div>
+                            </details>
+
+                            <div class="sc-fs-admin__panel-toolbar">
+                                <label><span class="screen-reader-text">Search panels</span><input type="search" id="sc-fs-panel-search" placeholder="Search panels or source groups"></label>
+                                <label><span class="screen-reader-text">Filter panels</span><select id="sc-fs-panel-filter"><option value="all">All panels</option><option value="primary">Primary</option><option value="additional">Additional</option><option value="ready">Ready</option><option value="partial">Partial</option><option value="empty">Empty</option><option value="hidden">Hidden</option></select></label>
+                                <span id="sc-fs-panel-result-count"><?php echo esc_html( sprintf( '%d panels', count( $field['panels'] ) ) ); ?></span>
+                            </div>
+
+                            <div class="sc-fs-admin__panel-list" data-panel-list>
+                            <?php foreach ( $field['panels'] as $panel ) :
+                                $hero_preview = $this->enrich_hero( $panel['hero'] );
+                                $status = $this->panel_status_label( $panel );
+                                $configured = absint( $panel['configured_article_count'] ?? 0 );
+                                $slot_count = absint( $panel['slot_count'] );
+                            ?>
+                                <article class="sc-fs-admin__panel" data-panel-row data-title="<?php echo esc_attr( strtolower( $panel['title'] . ' ' . $panel['source_group'] ) ); ?>" data-tier="<?php echo esc_attr( (string) $panel['disclosure'] ); ?>" data-readiness="<?php echo esc_attr( empty( $panel['visible'] ) ? 'hidden' : (string) $panel['readiness'] ); ?>">
+                                    <div class="sc-fs-admin__panel-media">
+                                        <?php if ( ! empty( $hero_preview['thumbnail']['url'] ) ) : ?><img src="<?php echo esc_url( (string) $hero_preview['thumbnail']['url'] ); ?>" alt=""><?php else : ?><span><strong>KL</strong><small>MAP</small></span><?php endif; ?>
+                                    </div>
+                                    <div class="sc-fs-admin__panel-copy">
+                                        <div class="sc-fs-admin__panel-kicker"><span><?php echo esc_html( ucfirst( (string) $panel['disclosure'] ) ); ?></span><?php if ( $panel['source_group'] ) : ?><span><?php echo esc_html( (string) $panel['source_group'] ); ?></span><?php endif; ?></div>
+                                        <input class="sc-fs-admin__panel-title" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $panel['key'] ); ?>][title]" value="<?php echo esc_attr( (string) $panel['title'] ); ?>" aria-label="Panel display title">
+                                        <a class="sc-fs-admin__map-link" href="<?php echo esc_url( home_url( $panel['canonical_url'] ) ); ?>" target="_blank" rel="noopener">Article Map ↗ <small><?php echo esc_html( (string) $panel['canonical_url'] ); ?></small></a>
+                                    </div>
+                                    <div class="sc-fs-admin__panel-readiness">
+                                        <span class="sc-fs-admin__status sc-fs-admin__status--<?php echo esc_attr( empty( $panel['visible'] ) ? 'hidden' : (string) $panel['readiness'] ); ?>"><?php echo esc_html( $status ); ?></span>
+                                        <strong><?php echo esc_html( sprintf( '%d / %d', $configured, $slot_count ) ); ?></strong><small>articles selected</small>
+                                        <span class="sc-fs-admin__mini-progress"><i style="width:<?php echo esc_attr( (string) ( $slot_count ? min( 100, (int) round( $configured / $slot_count * 100 ) ) : 0 ) ); ?>%"></i></span>
+                                    </div>
+                                    <div class="sc-fs-admin__panel-controls">
+                                        <label><span>Order</span><input type="number" min="1" max="999" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $panel['key'] ); ?>][order]" value="<?php echo esc_attr( (string) $panel['order'] ); ?>"></label>
+                                        <label><span>Slots</span><input type="number" min="2" max="8" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $panel['key'] ); ?>][slot_count]" value="<?php echo esc_attr( (string) $panel['slot_count'] ); ?>"></label>
+                                        <label class="sc-fs-admin__check"><input type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $panel['key'] ); ?>][visible]" value="1" <?php checked( ! empty( $panel['visible'] ) ); ?>><span>Visible</span></label>
+                                        <a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=sc-library-field-spotlights&field=' . rawurlencode( $selected_field ) . '&panel=' . rawurlencode( $panel['key'] ) . '#sc-fs-panel-editor' ) ); ?>">Edit content</a>
+                                    </div>
+                                </article>
+                            <?php endforeach; ?>
+                            </div>
+                            <div class="sc-fs-admin__savebar"><?php submit_button( __( 'Save field and panel model', 'sustainable-catalyst-library' ), 'primary', 'submit', false ); ?><span>Article Map destinations remain canonical and cannot be replaced here.</span></div>
+                        </form>
+                    </section>
+                    <?php endif; ?>
+
+                    <?php if ( $selected_panel ) :
+                        $panel_saved = is_array( $settings['panels'][ $selected_panel_key ] ?? null ) ? $settings['panels'][ $selected_panel_key ] : array();
+                        $hero_preview = $this->enrich_hero( $selected_panel['hero'] );
+                    ?>
+                    <section class="sc-fs-admin__content-editor" id="sc-fs-panel-editor">
+                        <header>
+                            <div class="sc-fs-admin__editor-hero-media"><?php if ( ! empty( $hero_preview['thumbnail']['url'] ) ) : ?><img src="<?php echo esc_url( (string) $hero_preview['thumbnail']['url'] ); ?>" alt=""><?php else : ?><span><strong>KL</strong><small>ARTICLE MAP</small></span><?php endif; ?></div>
+                            <div><p>ARTICLE MAP HERO · PERMANENT POSITION 0</p><h2><?php echo esc_html( (string) $selected_panel['title'] ); ?></h2><a href="<?php echo esc_url( home_url( $selected_panel['canonical_url'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( (string) $selected_panel['canonical_url'] ); ?> ↗</a><small>The canonical hero destination is registry-owned and cannot be replaced.</small></div>
+                        </header>
+                        <form method="post" action="options.php">
+                            <?php settings_fields( self::SETTINGS_GROUP ); ?>
+                            <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="panel">
+                            <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_panel_key]" value="<?php echo esc_attr( $selected_panel_key ); ?>">
+                            <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][title]" value="<?php echo esc_attr( (string) $selected_panel['title'] ); ?>">
+                            <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][order]" value="<?php echo esc_attr( (string) $selected_panel['order'] ); ?>">
+                            <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][visible]" value="<?php echo ! empty( $selected_panel['visible'] ) ? '1' : '0'; ?>">
+                            <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][slot_count]" value="<?php echo esc_attr( (string) $selected_panel['slot_count'] ); ?>">
+                            <div class="sc-fs-admin__hero-fields">
+                                <label><span>Hero display title</span><input type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][hero_title]" value="<?php echo esc_attr( (string) ( $panel_saved['hero_title'] ?? '' ) ); ?>" placeholder="<?php echo esc_attr( (string) $selected_panel['canonical_title'] ); ?>"></label>
+                                <label><span>Hero CTA</span><input type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][hero_cta]" value="<?php echo esc_attr( (string) ( $panel_saved['hero_cta'] ?? '' ) ); ?>" placeholder="Explore Article Map"></label>
+                                <label class="sc-fs-admin__wide"><span>Hero description</span><textarea rows="4" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][hero_description]" placeholder="Leave blank to use the published Article Map summary."><?php echo esc_textarea( (string) ( $panel_saved['hero_description'] ?? '' ) ); ?></textarea></label>
+                            </div>
+
+                            <div class="sc-fs-admin__slot-head"><div><p>CURATED FROM THIS SERIES</p><h3>Supporting articles</h3></div><span><?php echo esc_html( sprintf( '%d slots', absint( $selected_panel['slot_count'] ) ) ); ?></span></div>
+                            <div class="sc-fs-admin__slots">
+                            <?php for ( $i = 0; $i < absint( $selected_panel['slot_count'] ); $i++ ) :
+                                $article = is_array( $panel_saved['articles'][ $i ] ?? null ) ? $panel_saved['articles'][ $i ] : array();
+                                $resolved = ( ! empty( $article['source_id'] ) || ! empty( $article['url'] ) ) ? $this->enrich_article( $article ) : null;
+                            ?>
+                                <fieldset class="sc-fs-admin__slot" data-source-slot>
+                                    <legend>POSITION <?php echo esc_html( str_pad( (string) ( $i + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></legend>
+                                    <div class="sc-fs-admin__selected-record" data-selected-record>
+                                        <div class="sc-fs-admin__selected-thumb" data-selected-thumb><?php if ( $resolved && ! empty( $resolved['thumbnail']['url'] ) ) : ?><img src="<?php echo esc_url( (string) $resolved['thumbnail']['url'] ); ?>" alt=""><?php else : ?><span>KL</span><?php endif; ?></div>
+                                        <div><strong data-selected-title><?php echo esc_html( $resolved ? (string) $resolved['title'] : 'Empty slot' ); ?></strong><small data-selected-meta><?php echo esc_html( $resolved ? (string) $resolved['metadata'] : 'Search the Library to select a published article.' ); ?></small></div>
+                                    </div>
+                                    <label class="sc-fs-admin__source-search"><span>Search Library</span><input type="search" data-source-search placeholder="Type a title or paste a canonical URL" autocomplete="off"><div class="sc-fs-admin__search-results" data-search-results hidden></div></label>
+                                    <input type="hidden" data-source-id name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][source_id]" value="<?php echo esc_attr( (string) absint( $article['source_id'] ?? 0 ) ); ?>">
+                                    <label><span>Article URL</span><input data-source-url type="url" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][url]" value="<?php echo esc_attr( (string) ( $article['url'] ?? '' ) ); ?>" placeholder="https://sustainablecatalyst.com/..."></label>
+                                    <label><span>Optional display title</span><input data-source-title type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][title]" value="<?php echo esc_attr( (string) ( $article['title'] ?? '' ) ); ?>"></label>
+                                    <div class="sc-fs-admin__slot-actions"><label class="sc-fs-admin__check"><input data-source-enabled type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][enabled]" value="1" <?php checked( ! empty( $article['enabled'] ) ); ?>><span>Enable this slot</span></label><button type="button" class="button-link-delete" data-clear-slot>Clear slot</button></div>
+                                </fieldset>
+                            <?php endfor; ?>
+                            </div>
+                            <div class="sc-fs-admin__savebar"><?php submit_button( __( 'Save Spotlight content', 'sustainable-catalyst-library' ), 'primary', 'submit', false ); ?><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sc-library-field-spotlights&field=' . rawurlencode( $selected_field ) ) ); ?>">Close editor</a><span>Selections are manual-only. Empty slots remain empty; no automatic backfill occurs.</span></div>
+                        </form>
+                    </section>
+                    <?php endif; ?>
+                </main>
             </div>
         </div>
         <?php
     }
+
 }
