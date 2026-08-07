@@ -1,21 +1,21 @@
 <?php
 /**
- * Publications editorial surface for Knowledge Library v4.3.1.
+ * Publications editorial surface for Knowledge Library v4.3.2.
  *
  * Public composition: one canonical Article Map hero followed by up to four
  * publication links. There is intentionally no Blog Roll mode.
  *
- * v4.3.1 expands Publications from the current Homepage Spotlight subjects to
- * the complete approved Article Map registry. Article resolution is read-only:
+ * v4.3.2 hardens the public presentation of the complete approved Article Map
+ * registry into Spotlight-parity five-row editorial boards. Article resolution is read-only:
  * Spotlight curation is preferred where available, then the canonical Article
  * Map page order, then Knowledge Pathway steps, then same-slug category content.
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Publications {
-    public const VERSION = '4.3.1';
+    public const VERSION = '4.3.2';
     public const SHORTCODE = 'sc_publications';
-    public const CACHE_KEY = 'sc_library_publications_topics_v431';
+    public const CACHE_KEY = 'sc_library_publications_topics_v432';
     public const CACHE_TTL = 600;
 
     private const PAGE_POST_TYPE = 'sc_spot_page';

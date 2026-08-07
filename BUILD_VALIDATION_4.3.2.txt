@@ -1,0 +1,18 @@
+Sustainable Catalyst Library v4.3.2 — Build Validation
+
+PASS - plugin version 4.3.2
+PASS - WordPress stable tag 4.3.2
+PASS - Publications shortcode preserved: [sc_publications]
+PASS - canonical 14-field / 170-Article-Map registry preserved
+PASS - Article Map is the first/lead row in every topic board
+PASS - up to four real companion publication rows follow the map
+PASS - dense 2x2 article grid removed
+PASS - Spotlight-parity light lead treatment and alternating article rows
+PASS - responsive linear row layout
+PASS - no reading-time metadata
+PASS - no Blog Roll mode
+PASS - v4.2.0 Homepage Spotlight module byte-for-byte unchanged from v4.3.1 source
+PASS - 7 v4.3.2 Publications tests
+PASS - 4 compatible v4.3.1 registry/presentation tests
+PASS - 8 v4.2.0 Homepage Spotlight regression tests
+PASS - PHP syntax validation

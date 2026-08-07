@@ -1,5 +1,5 @@
 <?php
-/** Publications v4.3.1 public template. Variables: $topics, $heading, $intro, $instance_id. */
+/** Publications v4.3.2 public template. Variables: $topics, $heading, $intro, $instance_id. */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 $fields = array();
@@ -54,27 +54,29 @@ foreach ( $topics as $topic ) {
                             <?php if ( $topic['description'] ) : ?><p><?php echo esc_html( $topic['description'] ); ?></p><?php endif; ?>
                         </header>
 
-                        <a class="sc-publications__map-hero" href="<?php echo esc_url( home_url( $topic['map_url'] ) ); ?>">
-                            <span class="sc-publications__map-index"><?php echo esc_html( str_pad( (string) $topic_number, 3, '0', STR_PAD_LEFT ) ); ?></span>
-                            <span class="sc-publications__map-copy">
-                                <span class="sc-publications__map-label"><?php esc_html_e( 'Article Map', 'sustainable-catalyst-library' ); ?></span>
-                                <strong><?php echo esc_html( $topic['map_title'] ); ?></strong>
-                                <span><?php esc_html_e( 'Explore the complete structured pathway for this subject.', 'sustainable-catalyst-library' ); ?></span>
-                            </span>
-                            <span class="sc-publications__map-action"><?php esc_html_e( 'Explore map', 'sustainable-catalyst-library' ); ?> <span aria-hidden="true">→</span></span>
-                        </a>
+                        <div class="sc-publications__board">
+                            <a class="sc-publications__map-hero" href="<?php echo esc_url( home_url( $topic['map_url'] ) ); ?>">
+                                <span class="sc-publications__row-number sc-publications__row-number--map" aria-hidden="true">MAP</span>
+                                <span class="sc-publications__map-copy">
+                                    <span class="sc-publications__map-label"><?php esc_html_e( 'Article Map', 'sustainable-catalyst-library' ); ?></span>
+                                    <strong><?php echo esc_html( $topic['map_title'] ); ?></strong>
+                                    <span><?php esc_html_e( 'Explore the complete structured pathway for this subject.', 'sustainable-catalyst-library' ); ?></span>
+                                </span>
+                                <span class="sc-publications__row-action"><?php esc_html_e( 'Explore map', 'sustainable-catalyst-library' ); ?> <span aria-hidden="true">↗</span></span>
+                            </a>
 
-                        <?php if ( $topic['articles'] ) : ?>
-                            <ol class="sc-publications__articles" aria-label="<?php echo esc_attr( sprintf( __( 'Selected publications for %s', 'sustainable-catalyst-library' ), $topic['title'] ) ); ?>">
-                                <?php foreach ( $topic['articles'] as $index => $article ) : ?>
-                                    <li>
-                                        <span><?php echo esc_html( str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span>
-                                        <a href="<?php echo esc_url( $article['url'] ); ?>"><?php echo esc_html( $article['title'] ); ?></a>
-                                        <span class="sc-publications__article-arrow" aria-hidden="true">↗</span>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ol>
-                        <?php endif; ?>
+                            <?php if ( $topic['articles'] ) : ?>
+                                <ol class="sc-publications__articles" aria-label="<?php echo esc_attr( sprintf( __( 'Selected publications for %s', 'sustainable-catalyst-library' ), $topic['title'] ) ); ?>">
+                                    <?php foreach ( $topic['articles'] as $index => $article ) : ?>
+                                        <li>
+                                            <span class="sc-publications__row-number" aria-hidden="true"><?php echo esc_html( str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span>
+                                            <h5><a href="<?php echo esc_url( $article['url'] ); ?>"><?php echo esc_html( $article['title'] ); ?></a></h5>
+                                            <a class="sc-publications__row-action" href="<?php echo esc_url( $article['url'] ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Read %s', 'sustainable-catalyst-library' ), $article['title'] ) ); ?>"><?php esc_html_e( 'Read', 'sustainable-catalyst-library' ); ?> <span aria-hidden="true">↗</span></a>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ol>
+                            <?php endif; ?>
+                        </div>
                     </article>
                 <?php endforeach; ?>
                 <a class="sc-publications__back" href="#<?php echo esc_attr( $instance_id ); ?>"><?php esc_html_e( 'Back to fields', 'sustainable-catalyst-library' ); ?> ↑</a>
