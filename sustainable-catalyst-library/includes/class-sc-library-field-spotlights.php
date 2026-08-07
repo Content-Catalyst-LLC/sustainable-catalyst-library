@@ -1,6 +1,6 @@
 <?php
 /**
- * Major Field Spotlight system for Sustainable Catalyst Library v4.3.7.
+ * Major Field Spotlight system for Sustainable Catalyst Library v4.3.8.
  *
  * Administration: SC Library -> Field Spotlights.
  * This release renders that durable editorial model as Spotlight-parity public
@@ -18,10 +18,10 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.7';
+    public const VERSION = '4.3.8';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
-    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v437';
-    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v437';
+    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v438';
+    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v438';
     public const MODEL_CACHE_TTL = 600;
     public const DEFAULT_PANEL_LIMIT = 8;
     public const DEFAULT_SLOT_COUNT = 4;
@@ -30,7 +30,7 @@ final class SC_Library_Field_Spotlights {
     public const MAX_SLOT_COUNT = 8;
     public const SHORTCODE_STACK = 'sc_field_spotlights';
     public const SHORTCODE_SINGLE = 'sc_field_spotlight';
-    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v437';
+    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v438';
 
     public function register_hooks(): void {
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 41 );

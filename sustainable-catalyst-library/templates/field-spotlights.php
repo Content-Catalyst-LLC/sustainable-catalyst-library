@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 $instance_id = wp_unique_id( 'sc-field-spotlights-' );
 ?>
-<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights" data-sc-field-spotlights="v4.3.7">
+<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights" data-sc-field-spotlights="v4.3.8">
 <?php $field_number = 0; foreach ( $fields as $field_index => $field ) : $field_number++;
     $panels = array_values( $field['panels'] );
     if ( ! $panels ) { continue; }
@@ -21,8 +21,8 @@ $instance_id = wp_unique_id( 'sc-field-spotlights-' );
         </div>
         <div class="sc-field-spotlight__telemetry">
             <span class="sc-field-spotlight__status"><i aria-hidden="true"></i><span data-playback-status><?php echo $autoplay ? 'AUTO' : 'PAUSED'; ?></span></span>
-            <span><?php echo esc_html( (string) count( $panels ) ); ?> PANELS</span>
-            <a href="<?php echo esc_url( home_url( (string) $field['browse_url'] ) ); ?>">Browse field ↗</a>
+            <span class="sc-field-spotlight__panel-count"><?php echo esc_html( (string) count( $panels ) ); ?> PANELS</span>
+            <a class="sc-field-spotlight__browse-link" href="<?php echo esc_url( home_url( (string) $field['browse_url'] ) ); ?>">Browse field ↗</a>
         </div>
     </header>
     <div class="sc-field-spotlight__progress" aria-hidden="true"><span data-panel-progress></span></div>
@@ -66,7 +66,7 @@ $instance_id = wp_unique_id( 'sc-field-spotlights-' );
                 <?php endif; ?>
             </a>
             <div class="sc-field-spotlight__hero-copy">
-                <p class="sc-field-spotlight__hero-label"><?php echo esc_html( (string) $labels['hero_label'] ); ?> · HERO</p>
+                <p class="sc-field-spotlight__hero-label"><?php echo esc_html( (string) $labels['hero_label'] ); ?></p>
                 <h3><?php echo esc_html( (string) $initial['hero']['title'] ); ?></h3>
                 <?php if ( ! empty( $initial['hero']['metadata'] ) ) : ?><p class="sc-field-spotlight__hero-meta"><?php echo esc_html( (string) $initial['hero']['metadata'] ); ?></p><?php endif; ?>
                 <p class="sc-field-spotlight__hero-description"><?php echo esc_html( (string) ( $initial['hero']['description'] ?: 'Use the Article Map to move through the complete series, its structure, and related research pathways.' ) ); ?></p>
@@ -75,7 +75,7 @@ $instance_id = wp_unique_id( 'sc-field-spotlights-' );
         </article>
 
         <section class="sc-field-spotlight__selected" aria-label="<?php echo esc_attr( (string) $labels['selected_label'] ); ?>">
-            <header class="sc-field-spotlight__selected-head"><div><p>CURATED FROM THIS SERIES</p><h4><?php echo esc_html( (string) $labels['selected_label'] ); ?></h4></div><span data-slot-count><?php echo esc_html( (string) $initial['slot_count'] ); ?> SLOTS</span></header>
+            <header class="sc-field-spotlight__selected-head"><div><h4><?php echo esc_html( (string) $labels['selected_label'] ); ?></h4></div><span data-slot-count><?php echo esc_html( (string) $initial['slot_count'] ); ?> SLOTS</span></header>
             <div class="sc-field-spotlight__cards" data-supporting-cards>
                 <?php foreach ( $initial['articles'] as $index => $article ) : ?>
                     <article class="sc-field-spotlight__card">

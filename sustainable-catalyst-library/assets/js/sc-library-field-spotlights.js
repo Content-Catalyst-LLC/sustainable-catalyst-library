@@ -153,7 +153,7 @@
       tabs.forEach((tab) => { const selected = tab.dataset.panelKey === panel.key; tab.classList.toggle('is-active', selected); tab.setAttribute('aria-selected', selected ? 'true' : 'false'); tab.tabIndex = selected ? 0 : -1; });
       const h = panel.hero || {};
       if (heroMedia) { heroMedia.href = h.url || '#'; media(heroMedia, h.thumbnail, false); }
-      if (heroLabel) heroLabel.textContent = `${labels.hero_label || 'Article Map'} · HERO`;
+      if (heroLabel) heroLabel.textContent = `${labels.hero_label || 'Article Map'}`;
       if (heroTitle) heroTitle.textContent = esc(h.title || panel.title);
       if (heroMeta) { heroMeta.textContent = esc(h.metadata || 'Article Map'); heroMeta.hidden = !heroMeta.textContent; }
       if (heroDescription) heroDescription.textContent = esc(h.description || 'Use the Article Map to move through the complete series, its structure, and related research pathways.');
@@ -224,6 +224,6 @@
     activate(0);
   };
 
-  const boot = () => document.querySelectorAll('[data-sc-field-spotlights="v4.3.7"] .sc-field-spotlight').forEach(initialize);
+  const boot = () => document.querySelectorAll('[data-sc-field-spotlights="v4.3.8"] .sc-field-spotlight').forEach(initialize);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

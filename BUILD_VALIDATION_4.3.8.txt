@@ -1,0 +1,91 @@
+Sustainable Catalyst Library v4.3.8
+Field Spotlight Visual Refinement, Editorial Density & Control Simplification
+Build validation date: 2026-08-07
+
+RELEASE CONTRACT
+PASS  Plugin header version: 4.3.8
+PASS  SC_LIBRARY_VERSION constant: 4.3.8
+PASS  WordPress stable tag: 4.3.8
+PASS  Field Spotlight module version: 4.3.8
+PASS  Existing Field Spotlight settings option retained: sc_library_field_spotlights_settings_v434
+PASS  Field Spotlight cache boundaries advanced to v4.3.8
+PASS  Publications module remains v4.3.3
+PASS  Homepage Spotlight module remains v4.2.0
+
+VISUAL REFINEMENT
+PASS  field shell radius reduced to 12 px
+PASS  field shell shadow reduced
+PASS  masthead gradient removed
+PASS  telemetry pills replaced by quiet inline presentation
+PASS  field panel count and Browse field link receive dedicated styling hooks
+PASS  panel selector grid retains eight visible controls but removes card-like gaps/radii
+PASS  active selector uses restrained 2 px red rule
+PASS  additional-fields disclosure is integrated into the navigation rail
+PASS  additional panel rail shares the same flat visual language
+
+ARTICLE MAP HERO
+PASS  Article Map remains permanent hero position 0
+PASS  desktop hero thumbnail remains 138 x 94 px
+PASS  tablet hero thumbnail remains 82 x 62 px
+PASS  mobile hero thumbnail remains 68 x 54 px
+PASS  desktop hero lead minimum height remains 132 px
+PASS  hero frame becomes continuous editorial surface with square edges
+PASS  red lead treatment reduced from 4 px to 3 px
+PASS  redundant HERO label removed; Article Map label retained
+PASS  canonical Article Map destination remains registry-owned
+
+SUPPORTING ARTICLES
+PASS  thumbnails remain visible
+PASS  KL thumbnail fallback retained
+PASS  supporting records use clean white editorial rows and thin dividers
+PASS  desktop supporting thumbnail column refined to 124 px
+PASS  metadata and summary typography reduced slightly
+PASS  green hover/focus confirmation remains restrained
+PASS  redundant CURATED FROM THIS SERIES kicker removed
+PASS  Selected from this series heading retained
+PASS  2-8 configurable manual supporting slots retained
+PASS  no automatic backfill introduced
+
+PLAYBACK & DISCLOSURE
+PASS  default autoplay remains 14,000 ms
+PASS  Previous, Pause/Play, position, and Next retained
+PASS  progress line retained
+PASS  AUTO, HOLD, PAUSED, STATIC, REDUCED MOTION state handling retained
+PASS  hover/focus/touch/visibility/reduced-motion holds retained
+PASS  first-eight public disclosure threshold retained
+PASS  panel 9+ remains hidden until additional-fields disclosure opens
+PASS  collapsed autoplay and Previous/Next remain restricted to panels 1-8
+PASS  expanded tier joins rotation/navigation
+
+TEST RESULTS
+PASS  9 v4.3.8 targeted tests
+PASS  7 inherited v4.3.7 behavioral tests (superseded release-marker assertion excluded)
+PASS  5 inherited v4.3.6 administration/editorial tests (superseded release/public assertions excluded)
+PASS  6 inherited v4.3.5 Field Spotlight tests (superseded structural assertions excluded)
+PASS  8 inherited v4.3.3 Publications behavior tests (release-marker assertion excluded)
+PASS  8 inherited v4.2.0 Homepage Spotlight behavior tests (release-marker assertion excluded)
+PASS  PHP syntax validation across 102 WordPress plugin PHP files
+PASS  public Field Spotlight JavaScript syntax validation
+PASS  Field Spotlight administration JavaScript syntax validation
+
+DEPLOYMENT CHECKS STILL REQUIRED
+- Upload the WordPress plugin ZIP to production.
+- Purge WordPress, Astra/page-builder, hosting, CDN, and browser caches as appropriate.
+- Compare the Field Spotlight with the Homepage Spotlight on desktop and mobile.
+- Confirm the Article Map lead remains the approved Homepage Spotlight scale.
+- Confirm only eight panel selectors are visible before opening additional fields.
+- Confirm autoplay remains synchronized at 14 seconds and holds correctly on interaction.
+- Confirm supporting thumbnails resolve correctly against production Media Library data.
+
+RESULT
+PASS  Sustainable Catalyst Library v4.3.8 release-contract validation completed.
+
+INSTALLER SIMULATION
+PASS  clean v4.3.7 repository baseline initialized as Git working copy
+PASS  v4.3.8 repository checksum verification
+PASS  safety backup creation
+PASS  rsync upgrade into existing repository
+PASS  v4.3.8 release validation after install
+PASS  release commit creation
+PASS  final plugin version 4.3.8
+PASS  final Git working tree clean
