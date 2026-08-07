@@ -1,0 +1,17 @@
+Sustainable Catalyst Library v4.3.1
+Full Article Map Registry & Publications Topic Coverage
+
+PASS - plugin version 4.3.1
+PASS - WordPress stable tag 4.3.1
+PASS - 14 canonical publication fields
+PASS - 170 canonical Article Map destinations
+PASS - canonical map registry data file
+PASS - Spotlight-first publication resolver
+PASS - Article Map page ordered-link resolver
+PASS - Knowledge Pathway resolver
+PASS - same-slug category fallback
+PASS - no invented filler publications
+PASS - no Blog Roll mode
+PASS - no reading-time metadata
+PASS - Homepage Spotlight v4.2.0 regression contract preserved
+PASS - PHP syntax validation
