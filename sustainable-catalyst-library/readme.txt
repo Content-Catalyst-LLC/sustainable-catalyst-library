@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.10
+Stable tag: 4.3.11
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.10 repairs supporting-article slot persistence and public binding while preserving the v4.3.9 Field Spotlight presentation and Homepage Spotlight interaction parity. The first eight panels remain visible initially; panel 9+ is now genuinely collapsed behind an accessible additional-fields disclosure, the currently playing panel is white with black text and a red position cue, and the field surface uses square institutional geometry. The underlying Field Spotlight data architecture remains unchanged. Fourteen major fields now expose 170 flattened Article Map series panels as a durable editorial model: taxonomy groups remain metadata, each panel has a permanent Article Map hero identity, supporting article slots default to four and can be configured from two through eight, and panel 9+ is marked for progressive disclosure after the default eight-panel opening tier. The v4.3.3 Publications shortcode and v4.2.0 Homepage Spotlight remain unchanged.
+Sustainable Catalyst Library v4.3.11 repairs Field Spotlight admin persistence with a verified save transaction routed through admin-post.php, preserving panel/field context, confirming the stored option after write, and clearing public/model caches immediately. It also preserves the v4.3.10 supporting-article binding repair and the v4.3.9 Field Spotlight presentation and Homepage Spotlight interaction parity. The first eight panels remain visible initially; panel 9+ is now genuinely collapsed behind an accessible additional-fields disclosure, the currently playing panel is white with black text and a red position cue, and the field surface uses square institutional geometry. The underlying Field Spotlight data architecture remains unchanged. Fourteen major fields now expose 170 flattened Article Map series panels as a durable editorial model: taxonomy groups remain metadata, each panel has a permanent Article Map hero identity, supporting article slots default to four and can be configured from two through eight, and panel 9+ is marked for progressive disclosure after the default eight-panel opening tier. The v4.3.3 Publications shortcode and v4.2.0 Homepage Spotlight remain unchanged.
 
 
 
@@ -158,6 +158,13 @@ Sustainable Catalyst Library v4.3.10 repairs supporting-article slot persistence
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.11 =
+* Repairs Field Spotlight content persistence by replacing the fragile Settings API form submission path with an explicit authenticated admin-post save transaction.
+* Preserves panel and field context during sanitization so partial editor forms cannot silently lose supporting article or hero-copy changes.
+* Verifies the stored option after each save and shows a success/error notice in the Field Spotlight Console.
+* Clears both Field Spotlight model and public caches after every intentional save.
+* Preserves v4.3.10 supporting article binding and v4.3.9 accordion/white-active/sharp-edge behavior.
 
 = 4.3.10 =
 * Repairs the four supporting article positions beneath every Field Spotlight Article Map hero.

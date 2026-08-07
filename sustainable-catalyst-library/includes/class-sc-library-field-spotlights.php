@@ -1,6 +1,6 @@
 <?php
 /**
- * Major Field Spotlight system for Sustainable Catalyst Library v4.3.10.
+ * Major Field Spotlight system for Sustainable Catalyst Library v4.3.11.
  *
  * Administration: SC Library -> Field Spotlights.
  * This release renders that durable editorial model as Spotlight-parity public
@@ -18,10 +18,10 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.10';
+    public const VERSION = '4.3.11';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
-    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v4310';
-    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v4310';
+    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v4311';
+    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v4311';
     public const MODEL_CACHE_TTL = 600;
     public const DEFAULT_PANEL_LIMIT = 8;
     public const DEFAULT_SLOT_COUNT = 4;
@@ -30,11 +30,12 @@ final class SC_Library_Field_Spotlights {
     public const MAX_SLOT_COUNT = 8;
     public const SHORTCODE_STACK = 'sc_field_spotlights';
     public const SHORTCODE_SINGLE = 'sc_field_spotlight';
-    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v4310';
+    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v4311';
 
     public function register_hooks(): void {
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 41 );
         add_action( 'admin_init', array( $this, 'register_settings' ) );
+        add_action( 'admin_post_sc_library_save_field_spotlights', array( $this, 'save_settings_transaction' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue' ) );
         add_action( 'wp_ajax_sc_library_field_spotlight_search_sources', array( $this, 'ajax_search_sources' ) );
         add_action( 'update_option_' . self::SETTINGS_OPTION, array( $this, 'invalidate_model' ), 10, 2 );
@@ -136,6 +137,70 @@ final class SC_Library_Field_Spotlights {
                 'default' => $this->default_settings(),
             )
         );
+    }
+
+    private function save_form_fields(): void {
+        ?>
+        <input type="hidden" name="action" value="sc_library_save_field_spotlights">
+        <?php wp_nonce_field( 'sc_library_save_field_spotlights', '_sc_library_field_spotlight_nonce' ); ?>
+        <?php
+    }
+
+    public function save_settings_transaction(): void {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'You are not allowed to manage Field Spotlights.', 'sustainable-catalyst-library' ) );
+        }
+        check_admin_referer( 'sc_library_save_field_spotlights', '_sc_library_field_spotlight_nonce' );
+
+        $posted = isset( $_POST[ self::SETTINGS_OPTION ] ) ? wp_unslash( $_POST[ self::SETTINGS_OPTION ] ) : array();
+        $incoming = is_array( $posted ) ? $posted : array();
+        $context = sanitize_key( (string) ( $incoming['_context'] ?? 'general' ) );
+        if ( ! in_array( $context, array( 'general', 'field', 'panel' ), true ) ) {
+            $context = 'general';
+            $incoming['_context'] = 'general';
+        }
+
+        // Build the expected normalized value for read-after-write verification,
+        // but pass the original submitted payload to update_option(). WordPress
+        // applies the registered sanitize callback to update_option(), so passing
+        // the already-sanitized value would sanitize a second time and lose the
+        // panel/field context carried by the partial editor form.
+        $expected = $this->sanitize_settings( $incoming );
+        $before = get_option( self::SETTINGS_OPTION, array() );
+        $changed = $before !== $expected;
+        update_option( self::SETTINGS_OPTION, $incoming, false );
+
+        // Always clear both model layers after an intentional save. This makes the
+        // public Spotlight reflect content changes immediately even when the option
+        // payload is identical after WordPress normalization.
+        $this->invalidate_model();
+
+        $persisted = get_option( self::SETTINGS_OPTION, array() );
+        $verified = is_array( $persisted ) && $persisted === $expected;
+        $saved = $verified;
+
+        $field_slug = sanitize_title( (string) ( $incoming['_field_slug'] ?? '' ) );
+        $panel_key = sanitize_title( (string) ( $incoming['_panel_key'] ?? '' ) );
+        if ( 'panel' === $context && $panel_key ) {
+            $series = self::series_registry();
+            if ( isset( $series[ $panel_key ] ) ) {
+                $field_slug = sanitize_title( (string) ( $series[ $panel_key ]['field_slug'] ?? $field_slug ) );
+            }
+        }
+
+        $args = array(
+            'page' => 'sc-library-field-spotlights',
+            'sc_fs_saved' => $saved ? '1' : '0',
+            'sc_fs_changed' => $changed ? '1' : '0',
+            'sc_fs_context' => $context,
+        );
+        if ( $field_slug ) { $args['field'] = $field_slug; }
+        if ( $panel_key ) { $args['panel'] = $panel_key; }
+
+        $redirect = add_query_arg( $args, admin_url( 'admin.php' ) );
+        if ( $panel_key ) { $redirect .= '#sc-fs-panel-editor'; }
+        wp_safe_redirect( $redirect );
+        exit;
     }
 
     /** @param mixed $value @return array<string,mixed> */
@@ -708,7 +773,7 @@ final class SC_Library_Field_Spotlights {
         }
         $overall_completion = $total_slots ? min( 100, (int) round( ( $total_configured / $total_slots ) * 100 ) ) : 0;
         ?>
-        <div class="wrap sc-fs-admin" data-sc-field-spotlights-admin="v4.3.6">
+        <div class="wrap sc-fs-admin" data-sc-field-spotlights-admin="v4.3.11">
             <header class="sc-fs-admin__hero">
                 <div>
                     <p class="sc-fs-admin__eyebrow">KNOWLEDGE LIBRARY · FIELD SPOTLIGHTS</p>
@@ -717,6 +782,14 @@ final class SC_Library_Field_Spotlights {
                 </div>
                 <div class="sc-fs-admin__shortcodes"><span><code>[sc_field_spotlights]</code></span><span><code>[sc_field_spotlight field=&quot;global-governance&quot;]</code></span></div>
             </header>
+            <?php
+            $save_notice = isset( $_GET['sc_fs_saved'] ) ? sanitize_key( (string) wp_unslash( $_GET['sc_fs_saved'] ) ) : '';
+            if ( '1' === $save_notice ) :
+            ?>
+                <div class="notice notice-success is-dismissible"><p><strong><?php esc_html_e( 'Field Spotlight content saved.', 'sustainable-catalyst-library' ); ?></strong> <?php esc_html_e( 'The public Spotlight cache was cleared and the saved values were verified.', 'sustainable-catalyst-library' ); ?></p></div>
+            <?php elseif ( '0' === $save_notice ) : ?>
+                <div class="notice notice-error"><p><strong><?php esc_html_e( 'Field Spotlight content could not be verified after saving.', 'sustainable-catalyst-library' ); ?></strong> <?php esc_html_e( 'No public cache was retained. Please retry the save.', 'sustainable-catalyst-library' ); ?></p></div>
+            <?php endif; ?>
             <?php settings_errors(); ?>
 
             <section class="sc-fs-admin__metrics" aria-label="Field Spotlight readiness">
@@ -728,8 +801,8 @@ final class SC_Library_Field_Spotlights {
 
             <details class="sc-fs-admin__global-rules">
                 <summary><span><strong>Global presentation rules</strong><small>Spotlight playback, fixed eight-panel disclosure, slot count, and public labels</small></span><span aria-hidden="true">+</span></summary>
-                <form method="post" action="options.php">
-                    <?php settings_fields( self::SETTINGS_GROUP ); ?>
+                <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                    <?php $this->save_form_fields(); ?>
                     <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="general">
                     <div class="sc-fs-admin__rule-grid">
                         <label><span>Visible panels before expansion</span><input type="number" value="8" readonly><input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][panel_limit]" value="8"><small>Fixed at 8. Panel 9+ remains behind progressive disclosure.</small></label>
@@ -770,8 +843,8 @@ final class SC_Library_Field_Spotlights {
                             <a class="button" href="<?php echo esc_url( home_url( (string) $field['browse_url'] ) ); ?>" target="_blank" rel="noopener">Browse field ↗</a>
                         </header>
 
-                        <form method="post" action="options.php" class="sc-fs-admin__field-form">
-                            <?php settings_fields( self::SETTINGS_GROUP ); ?>
+                        <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sc-fs-admin__field-form">
+                            <?php $this->save_form_fields(); ?>
                             <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="field">
                             <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_field_slug]" value="<?php echo esc_attr( $selected_field ); ?>">
                             <details class="sc-fs-admin__field-settings">
@@ -835,8 +908,8 @@ final class SC_Library_Field_Spotlights {
                             <div class="sc-fs-admin__editor-hero-media"><?php if ( ! empty( $hero_preview['thumbnail']['url'] ) ) : ?><img src="<?php echo esc_url( (string) $hero_preview['thumbnail']['url'] ); ?>" alt=""><?php else : ?><span><strong>KL</strong><small>ARTICLE MAP</small></span><?php endif; ?></div>
                             <div><p>ARTICLE MAP HERO · PERMANENT POSITION 0</p><h2><?php echo esc_html( (string) $selected_panel['title'] ); ?></h2><a href="<?php echo esc_url( home_url( $selected_panel['canonical_url'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( (string) $selected_panel['canonical_url'] ); ?> ↗</a><small>The canonical hero destination is registry-owned and cannot be replaced.</small></div>
                         </header>
-                        <form method="post" action="options.php">
-                            <?php settings_fields( self::SETTINGS_GROUP ); ?>
+                        <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+                            <?php $this->save_form_fields(); ?>
                             <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="panel">
                             <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_panel_key]" value="<?php echo esc_attr( $selected_panel_key ); ?>">
                             <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][title]" value="<?php echo esc_attr( (string) $selected_panel['title'] ); ?>">
