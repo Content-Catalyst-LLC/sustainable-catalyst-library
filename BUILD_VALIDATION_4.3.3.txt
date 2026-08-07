@@ -1,0 +1,29 @@
+Sustainable Catalyst Library v4.3.3 — Build Validation
+
+PASS - plugin version 4.3.3
+PASS - WordPress stable tag 4.3.3
+PASS - Publications shortcode preserved: [sc_publications]
+PASS - canonical 14-field / 170-Article-Map registry preserved
+PASS - public Publications page uses one shared dynamic stage rather than 170 visible boards
+PASS - fourteen-field selector with canonical field counts preserved
+PASS - previous/next Article Map navigation
+PASS - direct Article Map jump rail
+PASS - responsive mobile Article Map selector
+PASS - keyboard left/right navigation
+PASS - touch swipe navigation
+PASS - no autoplay
+PASS - Article Map hero + up to four publication rows
+PASS - no reading-time metadata
+PASS - no Blog Roll mode
+PASS - SC Library → Publications customization surface
+PASS - editable global copy and labels
+PASS - editable field title, description, order, visibility, and default map
+PASS - editable Article Map hero title, description, CTA, visibility, and optional manual publication overrides
+PASS - partial manual curation fills remaining positions from the existing resolver cascade
+PASS - canonical Article Map routes remain registry-owned
+PASS - 9 v4.3.3 Publications tests
+PASS - 2 v4.3.1 canonical registry compatibility tests
+PASS - 8 v4.2.0 Homepage Spotlight regression tests
+PASS - Publications JavaScript syntax validation
+PASS - PHP syntax validation
+PASS - Homepage Spotlight module remains v4.2.0

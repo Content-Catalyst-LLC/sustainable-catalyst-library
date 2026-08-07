@@ -1,22 +1,25 @@
 <?php
 /**
- * Publications editorial surface for Knowledge Library v4.3.2.
+ * Dynamic Publications Spotlight for Knowledge Library v4.3.3.
  *
- * Public composition: one canonical Article Map hero followed by up to four
- * publication links. There is intentionally no Blog Roll mode.
+ * Public composition: fourteen major fields control one shared editorial stage.
+ * Each field exposes one active Article Map hero followed by up to four curated
+ * publication rows. Users can flip or jump between Article Maps without growing
+ * the page. There is intentionally no Blog Roll mode and no reading-time metadata.
  *
- * v4.3.2 hardens the public presentation of the complete approved Article Map
- * registry into Spotlight-parity five-row editorial boards. Article resolution is read-only:
- * Spotlight curation is preferred where available, then the canonical Article
- * Map page order, then Knowledge Pathway steps, then same-slug category content.
+ * v4.3.3 also adds a WordPress editorial customization surface for global labels,
+ * field titles/descriptions/order/visibility/default maps, Article Map hero copy,
+ * CTA labels, visibility, and optional four-slot manual publication overrides.
  */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Publications {
-    public const VERSION = '4.3.2';
+    public const VERSION = '4.3.3';
     public const SHORTCODE = 'sc_publications';
-    public const CACHE_KEY = 'sc_library_publications_topics_v432';
+    public const CACHE_KEY = 'sc_library_publications_topics_v433';
     public const CACHE_TTL = 600;
+    public const SETTINGS_OPTION = 'sc_library_publications_settings_v433';
+    public const SETTINGS_GROUP = 'sc_library_publications_v433';
 
     private const PAGE_POST_TYPE = 'sc_spot_page';
     private const ITEM_POST_TYPE = 'sc_home_spotlight';
@@ -35,123 +38,391 @@ final class SC_Library_Publications {
 
     public function register_hooks(): void {
         add_shortcode( self::SHORTCODE, array( $this, 'shortcode' ) );
+        add_action( 'admin_menu', array( $this, 'admin_menu' ), 40 );
+        add_action( 'admin_init', array( $this, 'register_settings' ) );
         add_action( 'save_post', array( $this, 'invalidate_cache' ), 120, 3 );
         add_action( 'deleted_post', array( $this, 'invalidate_cache_for_deleted_post' ), 120, 1 );
         add_action( 'transition_post_status', array( $this, 'invalidate_cache_for_status' ), 120, 3 );
+        add_action( 'update_option_' . self::SETTINGS_OPTION, array( $this, 'invalidate_cache_for_settings' ), 10, 2 );
     }
 
-    /**
-     * Full canonical Article Map registry.
-     *
-     * @return array<string,array<string,mixed>>
-     */
+    /** @return array<string,array<string,mixed>> */
     public static function article_map_registry(): array {
         $file = SC_LIBRARY_DIR . 'includes/data/publications-article-map-registry-v431.php';
         $maps = is_readable( $file ) ? include $file : array();
         if ( ! is_array( $maps ) ) { $maps = array(); }
-
-        // Preserve the v4.3.0 extension point while exposing richer v4.3.1 data.
         $maps = apply_filters( 'sc_library_publications_article_maps', $maps );
         return apply_filters( 'sc_library_publications_registry', $maps );
     }
 
+    /** @return array<string,mixed> */
+    private function default_settings(): array {
+        return array(
+            'general' => array(
+                'eyebrow' => 'KL · Knowledge Library',
+                'title' => 'Publications',
+                'intro' => 'Explore structured research across the Sustainable Catalyst Knowledge Library.',
+                'fields_label' => 'Fields',
+                'areas_label' => 'Areas',
+                'map_label' => 'Article Map',
+                'map_cta' => 'Explore Article Map',
+                'previous_label' => 'Previous Area',
+                'next_label' => 'Next Area',
+                'select_label' => 'Jump to area',
+                'hero_description' => 'Explore the complete structured pathway for this subject.',
+            ),
+            'fields' => array(),
+            'maps' => array(),
+        );
+    }
+
+    /** @return array<string,mixed> */
+    private function settings(): array {
+        $defaults = $this->default_settings();
+        $saved = get_option( self::SETTINGS_OPTION, array() );
+        if ( ! is_array( $saved ) ) { return $defaults; }
+        $defaults['general'] = array_merge( $defaults['general'], is_array( $saved['general'] ?? null ) ? $saved['general'] : array() );
+        $defaults['fields'] = is_array( $saved['fields'] ?? null ) ? $saved['fields'] : array();
+        $defaults['maps'] = is_array( $saved['maps'] ?? null ) ? $saved['maps'] : array();
+        return $defaults;
+    }
+
+    public function register_settings(): void {
+        register_setting(
+            self::SETTINGS_GROUP,
+            self::SETTINGS_OPTION,
+            array(
+                'type' => 'array',
+                'sanitize_callback' => array( $this, 'sanitize_settings' ),
+                'default' => $this->default_settings(),
+            )
+        );
+    }
+
+    /** @param mixed $value @return array<string,mixed> */
+    public function sanitize_settings( $value ): array {
+        $incoming = is_array( $value ) ? $value : array();
+        $existing = $this->settings();
+        $context = sanitize_key( (string) ( $incoming['_context'] ?? 'general' ) );
+
+        if ( 'map' === $context ) {
+            $map_key = sanitize_title( (string) ( $incoming['_map_key'] ?? '' ) );
+            if ( $map_key && isset( $incoming['maps'][ $map_key ] ) && is_array( $incoming['maps'][ $map_key ] ) ) {
+                $raw = $incoming['maps'][ $map_key ];
+                $clean = array(
+                    'title' => sanitize_text_field( (string) ( $raw['title'] ?? '' ) ),
+                    'description' => sanitize_textarea_field( (string) ( $raw['description'] ?? '' ) ),
+                    'cta' => sanitize_text_field( (string) ( $raw['cta'] ?? '' ) ),
+                    'visible' => empty( $raw['visible'] ) ? 0 : 1,
+                    'articles' => array(),
+                );
+                for ( $i = 0; $i < 4; $i++ ) {
+                    $article = is_array( $raw['articles'][ $i ] ?? null ) ? $raw['articles'][ $i ] : array();
+                    $clean['articles'][] = array(
+                        'title' => sanitize_text_field( (string) ( $article['title'] ?? '' ) ),
+                        'url' => esc_url_raw( (string) ( $article['url'] ?? '' ) ),
+                    );
+                }
+                $existing['maps'][ $map_key ] = $clean;
+            }
+            return $existing;
+        }
+
+        $general_defaults = $this->default_settings()['general'];
+        $general_raw = is_array( $incoming['general'] ?? null ) ? $incoming['general'] : array();
+        foreach ( $general_defaults as $key => $default ) {
+            $raw = (string) ( $general_raw[ $key ] ?? $existing['general'][ $key ] ?? $default );
+            $existing['general'][ $key ] = 'intro' === $key || 'hero_description' === $key ? sanitize_textarea_field( $raw ) : sanitize_text_field( $raw );
+        }
+
+        if ( is_array( $incoming['fields'] ?? null ) ) {
+            foreach ( $incoming['fields'] as $field_key => $raw ) {
+                $field_key = sanitize_title( (string) $field_key );
+                if ( ! $field_key || ! is_array( $raw ) ) { continue; }
+                $existing['fields'][ $field_key ] = array(
+                    'title' => sanitize_text_field( (string) ( $raw['title'] ?? '' ) ),
+                    'description' => sanitize_textarea_field( (string) ( $raw['description'] ?? '' ) ),
+                    'order' => max( 1, min( 99, absint( $raw['order'] ?? 99 ) ) ),
+                    'visible' => empty( $raw['visible'] ) ? 0 : 1,
+                    'default_map' => sanitize_title( (string) ( $raw['default_map'] ?? '' ) ),
+                );
+            }
+        }
+        return $existing;
+    }
+
+    public function admin_menu(): void {
+        add_submenu_page(
+            'sc-library',
+            __( 'Publications', 'sustainable-catalyst-library' ),
+            __( 'Publications', 'sustainable-catalyst-library' ),
+            'manage_options',
+            'sc-library-publications',
+            array( $this, 'render_admin_page' )
+        );
+    }
+
+    public function render_admin_page(): void {
+        if ( ! current_user_can( 'manage_options' ) ) { return; }
+        $settings = $this->settings();
+        $registry = self::article_map_registry();
+        $fields = $this->registry_fields( $registry );
+        $selected_map = sanitize_title( (string) ( $_GET['map'] ?? '' ) );
+        if ( ! $selected_map || ! isset( $registry[ $selected_map ] ) ) {
+            $selected_map = sanitize_title( (string) array_key_first( $registry ) );
+        }
+        $map = $registry[ $selected_map ] ?? array();
+        $map_settings = is_array( $settings['maps'][ $selected_map ] ?? null ) ? $settings['maps'][ $selected_map ] : array();
+        ?>
+        <div class="wrap sc-publications-admin">
+            <h1><?php esc_html_e( 'Publications', 'sustainable-catalyst-library' ); ?></h1>
+            <p><?php esc_html_e( 'Customize the dynamic Publications Spotlight without editing PHP. Canonical Article Map URLs and Knowledge Library structure remain protected.', 'sustainable-catalyst-library' ); ?></p>
+            <?php settings_errors(); ?>
+
+            <div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,.85fr);gap:24px;align-items:start;max-width:1400px">
+                <form method="post" action="options.php" style="background:#fff;border:1px solid #c3c4c7;padding:22px">
+                    <?php settings_fields( self::SETTINGS_GROUP ); ?>
+                    <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="general">
+                    <h2><?php esc_html_e( 'Public interface copy', 'sustainable-catalyst-library' ); ?></h2>
+                    <table class="form-table" role="presentation">
+                        <?php
+                        $labels = array(
+                            'eyebrow' => 'Eyebrow', 'title' => 'Title', 'intro' => 'Intro', 'fields_label' => 'Fields label',
+                            'areas_label' => 'Areas label', 'map_label' => 'Article Map label', 'map_cta' => 'Article Map CTA',
+                            'previous_label' => 'Previous control', 'next_label' => 'Next control', 'select_label' => 'Jump control',
+                            'hero_description' => 'Default Article Map description',
+                        );
+                        foreach ( $labels as $key => $label ) : $is_area = in_array( $key, array( 'intro', 'hero_description' ), true ); ?>
+                            <tr><th scope="row"><label for="sc-pub-<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></label></th><td>
+                                <?php if ( $is_area ) : ?>
+                                    <textarea id="sc-pub-<?php echo esc_attr( $key ); ?>" class="large-text" rows="3" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][<?php echo esc_attr( $key ); ?>]"><?php echo esc_textarea( (string) $settings['general'][ $key ] ); ?></textarea>
+                                <?php else : ?>
+                                    <input id="sc-pub-<?php echo esc_attr( $key ); ?>" class="regular-text" type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[general][<?php echo esc_attr( $key ); ?>]" value="<?php echo esc_attr( (string) $settings['general'][ $key ] ); ?>">
+                                <?php endif; ?>
+                            </td></tr>
+                        <?php endforeach; ?>
+                    </table>
+
+                    <h2><?php esc_html_e( 'Field presentation', 'sustainable-catalyst-library' ); ?></h2>
+                    <p><?php esc_html_e( 'Rename, describe, reorder, hide, or choose the default Article Map for each of the fourteen major fields.', 'sustainable-catalyst-library' ); ?></p>
+                    <?php foreach ( $fields as $field ) :
+                        $field_key = sanitize_title( $field['name'] );
+                        $cfg = is_array( $settings['fields'][ $field_key ] ?? null ) ? $settings['fields'][ $field_key ] : array();
+                        $visible = array_key_exists( 'visible', $cfg ) ? ! empty( $cfg['visible'] ) : true;
+                        ?>
+                        <details style="border-top:1px solid #dcdcde;padding:12px 0" <?php echo 1 === (int) $field['order'] ? 'open' : ''; ?>>
+                            <summary style="cursor:pointer;font-weight:700"><?php echo esc_html( str_pad( (string) $field['order'], 2, '0', STR_PAD_LEFT ) . ' · ' . $field['name'] . ' · ' . count( $field['maps'] ) ); ?></summary>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
+                                <p><label><strong><?php esc_html_e( 'Display title', 'sustainable-catalyst-library' ); ?></strong><br><input class="widefat" type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $field_key ); ?>][title]" value="<?php echo esc_attr( (string) ( $cfg['title'] ?? '' ) ); ?>" placeholder="<?php echo esc_attr( $field['name'] ); ?>"></label></p>
+                                <p><label><strong><?php esc_html_e( 'Order', 'sustainable-catalyst-library' ); ?></strong><br><input type="number" min="1" max="99" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $field_key ); ?>][order]" value="<?php echo esc_attr( (string) ( $cfg['order'] ?? $field['order'] ) ); ?>"></label></p>
+                                <p style="grid-column:1/-1"><label><strong><?php esc_html_e( 'Description', 'sustainable-catalyst-library' ); ?></strong><br><textarea class="widefat" rows="2" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $field_key ); ?>][description]"><?php echo esc_textarea( (string) ( $cfg['description'] ?? '' ) ); ?></textarea></label></p>
+                                <p><label><strong><?php esc_html_e( 'Default Article Map', 'sustainable-catalyst-library' ); ?></strong><br><select name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $field_key ); ?>][default_map]">
+                                    <?php foreach ( $field['maps'] as $map_key => $field_map ) : ?><option value="<?php echo esc_attr( $map_key ); ?>" <?php selected( (string) ( $cfg['default_map'] ?? '' ), $map_key ); ?>><?php echo esc_html( $field_map['title'] ); ?></option><?php endforeach; ?>
+                                </select></label></p>
+                                <p><input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $field_key ); ?>][visible]" value="0"><label><input type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $field_key ); ?>][visible]" value="1" <?php checked( $visible ); ?>> <?php esc_html_e( 'Visible in Publications', 'sustainable-catalyst-library' ); ?></label></p>
+                            </div>
+                        </details>
+                    <?php endforeach; ?>
+                    <?php submit_button( __( 'Save Publications settings', 'sustainable-catalyst-library' ) ); ?>
+                </form>
+
+                <div style="background:#fff;border:1px solid #c3c4c7;padding:22px;position:sticky;top:48px">
+                    <h2><?php esc_html_e( 'Article Map hero editor', 'sustainable-catalyst-library' ); ?></h2>
+                    <form method="get" style="margin-bottom:18px">
+                        <input type="hidden" name="page" value="sc-library-publications">
+                        <label><strong><?php esc_html_e( 'Choose Article Map', 'sustainable-catalyst-library' ); ?></strong><br>
+                        <select name="map" onchange="this.form.submit()" style="width:100%;max-width:100%">
+                            <?php foreach ( $registry as $map_key => $candidate ) : ?><option value="<?php echo esc_attr( $map_key ); ?>" <?php selected( $selected_map, $map_key ); ?>><?php echo esc_html( $candidate['field'] . ' · ' . $candidate['title'] ); ?></option><?php endforeach; ?>
+                        </select></label>
+                        <noscript><?php submit_button( __( 'Load map', 'sustainable-catalyst-library' ), 'secondary', '', false ); ?></noscript>
+                    </form>
+
+                    <?php if ( $map ) : ?>
+                    <form method="post" action="options.php">
+                        <?php settings_fields( self::SETTINGS_GROUP ); ?>
+                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="map">
+                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_map_key]" value="<?php echo esc_attr( $selected_map ); ?>">
+                        <p><strong><?php echo esc_html( $map['title'] ); ?></strong><br><code><?php echo esc_html( $map['url'] ); ?></code></p>
+                        <p><label><?php esc_html_e( 'Hero display title', 'sustainable-catalyst-library' ); ?><br><input class="widefat" type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[maps][<?php echo esc_attr( $selected_map ); ?>][title]" value="<?php echo esc_attr( (string) ( $map_settings['title'] ?? '' ) ); ?>" placeholder="<?php echo esc_attr( $map['title'] ); ?>"></label></p>
+                        <p><label><?php esc_html_e( 'Hero description', 'sustainable-catalyst-library' ); ?><br><textarea class="widefat" rows="4" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[maps][<?php echo esc_attr( $selected_map ); ?>][description]"><?php echo esc_textarea( (string) ( $map_settings['description'] ?? '' ) ); ?></textarea></label></p>
+                        <p><label><?php esc_html_e( 'CTA label', 'sustainable-catalyst-library' ); ?><br><input class="widefat" type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[maps][<?php echo esc_attr( $selected_map ); ?>][cta]" value="<?php echo esc_attr( (string) ( $map_settings['cta'] ?? '' ) ); ?>" placeholder="<?php echo esc_attr( (string) $settings['general']['map_cta'] ); ?>"></label></p>
+                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[maps][<?php echo esc_attr( $selected_map ); ?>][visible]" value="0">
+                        <p><label><input type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[maps][<?php echo esc_attr( $selected_map ); ?>][visible]" value="1" <?php checked( ! array_key_exists( 'visible', $map_settings ) || ! empty( $map_settings['visible'] ) ); ?>> <?php esc_html_e( 'Visible in Publications', 'sustainable-catalyst-library' ); ?></label></p>
+                        <h3><?php esc_html_e( 'Optional manual four', 'sustainable-catalyst-library' ); ?></h3>
+                        <p class="description"><?php esc_html_e( 'Leave URLs empty to use the automatic resolver. Manual entries are placed first and any remaining positions are filled from the automatic resolver.', 'sustainable-catalyst-library' ); ?></p>
+                        <?php for ( $i = 0; $i < 4; $i++ ) : $article = is_array( $map_settings['articles'][ $i ] ?? null ) ? $map_settings['articles'][ $i ] : array(); ?>
+                            <fieldset style="border-top:1px solid #dcdcde;padding-top:10px;margin-top:10px">
+                                <legend><strong><?php echo esc_html( sprintf( __( 'Article %d', 'sustainable-catalyst-library' ), $i + 1 ) ); ?></strong></legend>
+                                <p><input class="widefat" type="url" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[maps][<?php echo esc_attr( $selected_map ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][url]" value="<?php echo esc_attr( (string) ( $article['url'] ?? '' ) ); ?>" placeholder="https://sustainablecatalyst.com/..."></p>
+                                <p><input class="widefat" type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[maps][<?php echo esc_attr( $selected_map ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][title]" value="<?php echo esc_attr( (string) ( $article['title'] ?? '' ) ); ?>" placeholder="<?php esc_attr_e( 'Optional display title', 'sustainable-catalyst-library' ); ?>"></p>
+                            </fieldset>
+                        <?php endfor; ?>
+                        <?php submit_button( __( 'Save Article Map presentation', 'sustainable-catalyst-library' ) ); ?>
+                    </form>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    /** @param array<string,array<string,mixed>> $registry @return array<int,array<string,mixed>> */
+    private function registry_fields( array $registry ): array {
+        $fields = array();
+        foreach ( $registry as $key => $map ) {
+            $name = sanitize_text_field( (string) ( $map['field'] ?? '' ) );
+            if ( ! $name ) { continue; }
+            if ( ! isset( $fields[ $name ] ) ) {
+                $fields[ $name ] = array( 'name' => $name, 'order' => absint( $map['field_order'] ?? 999 ), 'maps' => array() );
+            }
+            $fields[ $name ]['maps'][ sanitize_title( (string) $key ) ] = $map;
+        }
+        uasort( $fields, static fn( $a, $b ) => absint( $a['order'] ) <=> absint( $b['order'] ) );
+        return array_values( $fields );
+    }
+
     /** @param array<string,mixed>|string $atts */
     public function shortcode( $atts = array() ): string {
-        $atts = shortcode_atts(
-            array(
-                'title' => __( 'Publications', 'sustainable-catalyst-library' ),
-                'intro' => __( 'Structured research and analysis across the Sustainable Catalyst Knowledge Library.', 'sustainable-catalyst-library' ),
-                'empty' => 'hide',
-            ),
-            is_array( $atts ) ? $atts : array(),
-            self::SHORTCODE
-        );
-
-        $topics = $this->topics();
-        if ( empty( $topics ) ) {
+        $atts = shortcode_atts( array( 'title' => '', 'intro' => '', 'empty' => 'hide' ), is_array( $atts ) ? $atts : array(), self::SHORTCODE );
+        $settings = $this->settings();
+        $fields = $this->fields();
+        if ( empty( $fields ) ) {
             return 'hide' === sanitize_key( (string) $atts['empty'] ) ? '' : '<div class="sc-publications-empty"></div>';
         }
 
-        wp_enqueue_style(
-            'sc-library-publications',
-            SC_LIBRARY_URL . 'assets/css/sc-library-publications.css',
-            array(),
-            self::VERSION
-        );
-
-        $heading = sanitize_text_field( (string) $atts['title'] );
-        $intro = sanitize_textarea_field( (string) $atts['intro'] );
+        wp_enqueue_style( 'sc-library-publications', SC_LIBRARY_URL . 'assets/css/sc-library-publications.css', array(), self::VERSION );
+        wp_enqueue_script( 'sc-library-publications', SC_LIBRARY_URL . 'assets/js/sc-library-publications.js', array(), self::VERSION, true );
+        $heading = sanitize_text_field( (string) ( $atts['title'] ?: $settings['general']['title'] ) );
+        $intro = sanitize_textarea_field( (string) ( $atts['intro'] ?: $settings['general']['intro'] ) );
+        $labels = $settings['general'];
         $instance_id = wp_unique_id( 'sc-publications-' );
         $template = SC_LIBRARY_DIR . 'templates/publications.php';
         if ( ! is_readable( $template ) ) { return ''; }
-
         ob_start();
         include $template;
         return (string) ob_get_clean();
     }
 
+    /** @return array<int,array<string,mixed>> */
+    private function fields(): array {
+        $topics = $this->topics();
+        $settings = $this->settings();
+        $fields = array();
+        foreach ( $topics as $topic ) {
+            $canonical = (string) $topic['field'];
+            $field_key = sanitize_title( $canonical );
+            $field_cfg = is_array( $settings['fields'][ $field_key ] ?? null ) ? $settings['fields'][ $field_key ] : array();
+            if ( array_key_exists( 'visible', $field_cfg ) && empty( $field_cfg['visible'] ) ) { continue; }
+            if ( ! isset( $fields[ $field_key ] ) ) {
+                $fields[ $field_key ] = array(
+                    'key' => $field_key,
+                    'canonical_title' => $canonical,
+                    'title' => sanitize_text_field( (string) ( $field_cfg['title'] ?? '' ) ) ?: $canonical,
+                    'description' => sanitize_textarea_field( (string) ( $field_cfg['description'] ?? '' ) ),
+                    'order' => absint( $field_cfg['order'] ?? $topic['field_order'] ),
+                    'default_map' => sanitize_title( (string) ( $field_cfg['default_map'] ?? '' ) ),
+                    'topics' => array(),
+                );
+            }
+            $fields[ $field_key ]['topics'][] = $topic;
+        }
+        uasort( $fields, static fn( $a, $b ) => absint( $a['order'] ) <=> absint( $b['order'] ) );
+        foreach ( $fields as &$field ) {
+            $default_index = 0;
+            foreach ( $field['topics'] as $index => $topic ) {
+                if ( $field['default_map'] && $field['default_map'] === $topic['key'] ) { $default_index = $index; break; }
+            }
+            $field['default_index'] = $default_index;
+            $field['count'] = count( $field['topics'] );
+        }
+        unset( $field );
+        return array_values( $fields );
+    }
+
+    /** @param mixed $articles @return array<int,array{title:string,url:string}> */
+    private function manual_articles( $articles, int $limit ): array {
+        if ( ! is_array( $articles ) ) { return array(); }
+        $normalized = array();
+        $seen = array();
+        foreach ( $articles as $article ) {
+            if ( ! is_array( $article ) ) { continue; }
+            $url = esc_url_raw( (string) ( $article['url'] ?? '' ) );
+            if ( ! $url || isset( $seen[ $url ] ) ) { continue; }
+            $title = sanitize_text_field( (string) ( $article['title'] ?? '' ) );
+            if ( ! $title ) {
+                $post_id = url_to_postid( $url );
+                if ( $post_id ) { $title = sanitize_text_field( (string) get_the_title( $post_id ) ); }
+            }
+            if ( ! $title ) { continue; }
+            $seen[ $url ] = true;
+            $normalized[] = array( 'title' => $title, 'url' => $url );
+            if ( count( $normalized ) >= $limit ) { break; }
+        }
+        return $normalized;
+    }
+
     /**
-     * Build all registered publication topics in canonical field/topic order.
-     *
-     * Every Article Map remains visible even when fewer than four companion
-     * articles can be resolved; no filler or invented publication is emitted.
-     *
+     * Build all registered publication topics in canonical field/topic order,
+     * then apply map-level editorial presentation overrides.
      * @return array<int,array<string,mixed>>
      */
     private function topics(): array {
         $cached = get_transient( self::CACHE_KEY );
-        if ( is_array( $cached ) ) {
-            return $cached;
-        }
-
+        if ( is_array( $cached ) ) { return $cached; }
+        $settings = $this->settings();
         $registry = self::article_map_registry();
-        uasort(
-            $registry,
-            static function ( $left, $right ) {
-                $field_cmp = absint( $left['field_order'] ?? 999 ) <=> absint( $right['field_order'] ?? 999 );
-                if ( 0 !== $field_cmp ) { return $field_cmp; }
-                return absint( $left['order'] ?? 9999 ) <=> absint( $right['order'] ?? 9999 );
-            }
-        );
+        uasort( $registry, static function ( $left, $right ) {
+            $field_cmp = absint( $left['field_order'] ?? 999 ) <=> absint( $right['field_order'] ?? 999 );
+            return 0 !== $field_cmp ? $field_cmp : absint( $left['order'] ?? 9999 ) <=> absint( $right['order'] ?? 9999 );
+        } );
 
         $topics = array();
         foreach ( $registry as $key => $map ) {
-            if ( empty( $map['title'] ) || empty( $map['url'] ) || empty( $map['field'] ) ) {
-                continue;
-            }
-
+            if ( empty( $map['title'] ) || empty( $map['url'] ) || empty( $map['field'] ) ) { continue; }
+            $topic_key = sanitize_title( (string) $key );
+            $map_cfg = is_array( $settings['maps'][ $topic_key ] ?? null ) ? $settings['maps'][ $topic_key ] : array();
+            if ( array_key_exists( 'visible', $map_cfg ) && empty( $map_cfg['visible'] ) ) { continue; }
             $topic = array(
-                'key' => sanitize_title( (string) $key ),
-                'title' => sanitize_text_field( (string) $map['title'] ),
+                'key' => $topic_key,
+                'title' => sanitize_text_field( (string) ( $map_cfg['title'] ?? '' ) ) ?: sanitize_text_field( (string) $map['title'] ),
+                'canonical_title' => sanitize_text_field( (string) $map['title'] ),
                 'description' => '',
                 'field' => sanitize_text_field( (string) $map['field'] ),
                 'field_order' => absint( $map['field_order'] ?? 999 ),
                 'group' => sanitize_text_field( (string) ( $map['group'] ?? '' ) ),
                 'order' => absint( $map['order'] ?? 9999 ),
-                'map_title' => sanitize_text_field( (string) $map['title'] ),
+                'map_title' => sanitize_text_field( (string) ( $map_cfg['title'] ?? '' ) ) ?: sanitize_text_field( (string) $map['title'] ),
                 'map_url' => esc_url_raw( (string) $map['url'] ),
+                'map_cta' => sanitize_text_field( (string) ( $map_cfg['cta'] ?? '' ) ),
                 'aliases' => array_values( array_filter( array_map( 'sanitize_title', (array) ( $map['aliases'] ?? array() ) ) ) ),
                 'articles' => array(),
                 'article_source' => '',
             );
-
             $resolved = $this->articles_for_topic( $topic, 4 );
-            $topic['articles'] = $resolved['articles'];
-            $topic['article_source'] = $resolved['source'];
-            $topic['description'] = $resolved['description'];
-
+            $manual = $this->manual_articles( $map_cfg['articles'] ?? array(), 4 );
+            if ( $manual ) {
+                $combined = $manual;
+                $seen_urls = array_fill_keys( array_column( $combined, 'url' ), true );
+                foreach ( $resolved['articles'] as $article ) {
+                    if ( isset( $seen_urls[ $article['url'] ] ) ) { continue; }
+                    $seen_urls[ $article['url'] ] = true;
+                    $combined[] = $article;
+                    if ( count( $combined ) >= 4 ) { break; }
+                }
+                $topic['articles'] = array_slice( $combined, 0, 4 );
+                $topic['article_source'] = $resolved['source'] ? 'manual+' . $resolved['source'] : 'manual';
+            } else {
+                $topic['articles'] = $resolved['articles'];
+                $topic['article_source'] = $resolved['source'];
+            }
+            $topic['description'] = sanitize_textarea_field( (string) ( $map_cfg['description'] ?? '' ) ) ?: $resolved['description'];
             $topics[] = $topic;
         }
-
         $topics = apply_filters( 'sc_library_publications_topics', $topics );
         set_transient( self::CACHE_KEY, $topics, self::CACHE_TTL );
         return $topics;
     }
 
-    /**
-     * @param array<string,mixed> $topic
-     * @return array{articles:array<int,array{title:string,url:string}>,source:string,description:string}
-     */
     private function articles_for_topic( array $topic, int $limit ): array {
         $limit = max( 1, min( 4, $limit ) );
         $description = '';
@@ -517,15 +788,9 @@ final class SC_Library_Publications {
         return sanitize_text_field( wp_trim_words( $summary, 28, '…' ) );
     }
 
-    public function invalidate_cache( int $post_id = 0, $post = null, bool $update = false ): void {
-        delete_transient( self::CACHE_KEY );
-    }
 
-    public function invalidate_cache_for_deleted_post( int $post_id ): void {
-        delete_transient( self::CACHE_KEY );
-    }
-
-    public function invalidate_cache_for_status( string $new_status, string $old_status, $post ): void {
-        if ( $new_status !== $old_status ) { delete_transient( self::CACHE_KEY ); }
-    }
+    public function invalidate_cache( int $post_id = 0, $post = null, bool $update = false ): void { delete_transient( self::CACHE_KEY ); }
+    public function invalidate_cache_for_deleted_post( int $post_id ): void { delete_transient( self::CACHE_KEY ); }
+    public function invalidate_cache_for_status( string $new_status, string $old_status, $post ): void { if ( $new_status !== $old_status ) { delete_transient( self::CACHE_KEY ); } }
+    public function invalidate_cache_for_settings( $old_value = null, $value = null ): void { delete_transient( self::CACHE_KEY ); }
 }

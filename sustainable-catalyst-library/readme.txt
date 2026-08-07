@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.2
+Stable tag: 4.3.3
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.2.0 presents a configurable, manually curated twelve-topic Homepage Spotlight with eight primary subjects, four progressively disclosed additional fields, five article positions per topic, repaired source discovery, durable thumbnails, accessible rotation controls, and the established black-framed editorial console. The broader plugin remains a unified Living Knowledge System spanning Public Knowledge, Research Workspace, Institutional Operations, preservation, APIs, and portable evidence records.
+Sustainable Catalyst Library v4.3.3 adds a dynamic Publications Spotlight inside the existing Knowledge Library: fourteen major fields control one compact shared stage, each active area presents an Article Map hero plus up to four publications, and visible editorial copy and curation can be changed from WordPress without editing PHP. The Homepage Knowledge Library Spotlight remains isolated at v4.2.0 and unchanged.
 
 
 
@@ -145,6 +145,15 @@ Sustainable Catalyst Library v4.2.0 presents a configurable, manually curated tw
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+
+= 4.3.3 =
+* Replaces the long Publications landing page with a compact dynamic Spotlight-style console: fourteen major fields control one shared editorial stage.
+* Keeps one field and one Article Map active at a time, so Philosophy with 27 areas occupies the same page height as Sustainable Systems with 5.
+* Adds previous/next, direct area jump, keyboard arrow, touch-swipe, and responsive mobile select navigation without autoplay.
+* Keeps the Article Map as the hero followed by up to four full-width publication rows; no reading-time metadata and no Blog Roll.
+* Adds SC Library → Publications customization for masthead copy, public labels, field display titles/descriptions/order/visibility/default maps, Article Map hero copy/CTA/visibility, and optional four-slot manual curation.
+* Preserves the canonical 14-field / 170-map registry, automatic resolver cascade, and the isolated Homepage Spotlight v4.2.0 module.
 
 
 = 4.3.2 =

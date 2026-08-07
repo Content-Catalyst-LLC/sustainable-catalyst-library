@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.2 presents the full Publications registry as Spotlight-parity editorial boards: one Article Map lead row followed by up to four calm full-width publication rows per topic, with no blog-roll mode.
- * Version: 4.3.2
+ * Description: Sustainable Catalyst Library v4.3.3 presents Publications as a dynamic Spotlight-style field deck: fourteen major fields control one shared Article Map hero plus four-publication stage, with editable editorial copy and curation and no blog-roll mode.
+ * Version: 4.3.3
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.2');
+define('SC_LIBRARY_VERSION', '4.3.3');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
