@@ -1,6 +1,6 @@
 <?php
 /**
- * Major Field Spotlight system for Sustainable Catalyst Library v4.3.11.
+ * Major Field Spotlight system for Sustainable Catalyst Library v4.3.12.
  *
  * Administration: SC Library -> Field Spotlights.
  * This release renders that durable editorial model as Spotlight-parity public
@@ -18,10 +18,11 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.11';
+    public const VERSION = '4.3.12';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
-    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v4311';
-    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v4311';
+    public const PANEL_CONTENT_OPTION = 'sc_library_field_spotlight_panel_content_v4312';
+    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v4312';
+    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v4312';
     public const MODEL_CACHE_TTL = 600;
     public const DEFAULT_PANEL_LIMIT = 8;
     public const DEFAULT_SLOT_COUNT = 4;
@@ -30,7 +31,7 @@ final class SC_Library_Field_Spotlights {
     public const MAX_SLOT_COUNT = 8;
     public const SHORTCODE_STACK = 'sc_field_spotlights';
     public const SHORTCODE_SINGLE = 'sc_field_spotlight';
-    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v4311';
+    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v4312';
 
     public function register_hooks(): void {
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 41 );
@@ -39,6 +40,7 @@ final class SC_Library_Field_Spotlights {
         add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue' ) );
         add_action( 'wp_ajax_sc_library_field_spotlight_search_sources', array( $this, 'ajax_search_sources' ) );
         add_action( 'update_option_' . self::SETTINGS_OPTION, array( $this, 'invalidate_model' ), 10, 2 );
+        add_action( 'update_option_' . self::PANEL_CONTENT_OPTION, array( $this, 'invalidate_model' ), 10, 2 );
         add_action( 'save_post', array( $this, 'invalidate_for_saved_post' ), 999, 3 );
         add_action( 'transition_post_status', array( $this, 'invalidate_for_status_change' ), 999, 3 );
         add_action( 'before_delete_post', array( $this, 'invalidate_model' ) );
@@ -117,14 +119,46 @@ final class SC_Library_Field_Spotlights {
     private function settings(): array {
         $defaults = $this->default_settings();
         $saved = get_option( self::SETTINGS_OPTION, array() );
-        if ( ! is_array( $saved ) ) { return $defaults; }
-        $defaults['general'] = array_merge(
-            $defaults['general'],
-            is_array( $saved['general'] ?? null ) ? $saved['general'] : array()
-        );
-        $defaults['fields'] = is_array( $saved['fields'] ?? null ) ? $saved['fields'] : array();
-        $defaults['panels'] = is_array( $saved['panels'] ?? null ) ? $saved['panels'] : array();
+        if ( is_array( $saved ) ) {
+            $defaults['general'] = array_merge(
+                $defaults['general'],
+                is_array( $saved['general'] ?? null ) ? $saved['general'] : array()
+            );
+            $defaults['fields'] = is_array( $saved['fields'] ?? null ) ? $saved['fields'] : array();
+            $defaults['panels'] = is_array( $saved['panels'] ?? null ) ? $saved['panels'] : array();
+        }
+
+        // v4.3.12: panel editorial content has its own durable store. This keeps
+        // hero copy and supporting article selections out of the large partial
+        // settings transaction used for field order/visibility configuration.
+        $content_store = $this->panel_content_store();
+        foreach ( $content_store as $panel_key => $content ) {
+            if ( ! is_array( $content ) ) { continue; }
+            $panel_key = sanitize_title( (string) $panel_key );
+            if ( ! $panel_key ) { continue; }
+            $current = is_array( $defaults['panels'][ $panel_key ] ?? null ) ? $defaults['panels'][ $panel_key ] : array();
+            foreach ( array( 'hero_title', 'hero_description', 'hero_cta', 'articles' ) as $key ) {
+                if ( array_key_exists( $key, $content ) ) { $current[ $key ] = $content[ $key ]; }
+            }
+            $defaults['panels'][ $panel_key ] = $current;
+        }
         return $defaults;
+    }
+
+    /** @return array<string,array<string,mixed>> */
+    private function panel_content_store(): array {
+        $saved = get_option( self::PANEL_CONTENT_OPTION, array() );
+        return is_array( $saved ) ? $saved : array();
+    }
+
+    /** @param array<string,mixed> $raw @return array<string,mixed> */
+    private function sanitize_panel_content( array $raw ): array {
+        return array(
+            'hero_title' => sanitize_text_field( (string) ( $raw['hero_title'] ?? '' ) ),
+            'hero_description' => sanitize_textarea_field( (string) ( $raw['hero_description'] ?? '' ) ),
+            'hero_cta' => sanitize_text_field( (string) ( $raw['hero_cta'] ?? '' ) ),
+            'articles' => $this->sanitize_article_slots( is_array( $raw['articles'] ?? null ) ? $raw['articles'] : array() ),
+        );
     }
 
     public function register_settings(): void {
@@ -160,33 +194,47 @@ final class SC_Library_Field_Spotlights {
             $incoming['_context'] = 'general';
         }
 
-        // Build the expected normalized value for read-after-write verification,
-        // but pass the original submitted payload to update_option(). WordPress
-        // applies the registered sanitize callback to update_option(), so passing
-        // the already-sanitized value would sanitize a second time and lose the
-        // panel/field context carried by the partial editor form.
-        $expected = $this->sanitize_settings( $incoming );
-        $before = get_option( self::SETTINGS_OPTION, array() );
-        $changed = $before !== $expected;
-        update_option( self::SETTINGS_OPTION, $incoming, false );
-
-        // Always clear both model layers after an intentional save. This makes the
-        // public Spotlight reflect content changes immediately even when the option
-        // payload is identical after WordPress normalization.
-        $this->invalidate_model();
-
-        $persisted = get_option( self::SETTINGS_OPTION, array() );
-        $verified = is_array( $persisted ) && $persisted === $expected;
-        $saved = $verified;
-
         $field_slug = sanitize_title( (string) ( $incoming['_field_slug'] ?? '' ) );
         $panel_key = sanitize_title( (string) ( $incoming['_panel_key'] ?? '' ) );
-        if ( 'panel' === $context && $panel_key ) {
+        $saved_slots = null;
+
+        if ( 'panel' === $context ) {
             $series = self::series_registry();
-            if ( isset( $series[ $panel_key ] ) ) {
-                $field_slug = sanitize_title( (string) ( $series[ $panel_key ]['field_slug'] ?? $field_slug ) );
+            if ( ! $panel_key || ! isset( $series[ $panel_key ] ) ) {
+                wp_die( esc_html__( 'The requested Field Spotlight panel is not registered.', 'sustainable-catalyst-library' ) );
             }
+            $field_slug = sanitize_title( (string) ( $series[ $panel_key ]['field_slug'] ?? $field_slug ) );
+            $raw_panel = is_array( $incoming['panels'][ $panel_key ] ?? null ) ? $incoming['panels'][ $panel_key ] : array();
+            $normalized = $this->sanitize_panel_content( $raw_panel );
+            $store = $this->panel_content_store();
+            $before_panel = is_array( $store[ $panel_key ] ?? null ) ? $store[ $panel_key ] : array();
+            $changed = $before_panel !== $normalized;
+
+            // Dedicated v4.3.12 content write. PANEL_CONTENT_OPTION is deliberately
+            // not registered through register_setting(), so no second sanitizer or
+            // partial settings merge can discard supporting article selections.
+            $store[ $panel_key ] = $normalized;
+            update_option( self::PANEL_CONTENT_OPTION, $store, false );
+            $persisted_store = $this->panel_content_store();
+            $persisted_panel = is_array( $persisted_store[ $panel_key ] ?? null ) ? $persisted_store[ $panel_key ] : array();
+            $saved = $persisted_panel === $normalized;
+            $saved_slots = 0;
+            foreach ( $persisted_panel['articles'] ?? array() as $article ) {
+                if ( is_array( $article ) && ( ! empty( $article['source_id'] ) || ! empty( $article['url'] ) ) ) { $saved_slots++; }
+            }
+        } else {
+            // General and field structure continue using the legacy durable option.
+            // The panel content store remains authoritative for hero copy/articles.
+            $expected = $this->sanitize_settings( $incoming );
+            $before = get_option( self::SETTINGS_OPTION, array() );
+            $changed = $before !== $expected;
+            update_option( self::SETTINGS_OPTION, $incoming, false );
+            $persisted = get_option( self::SETTINGS_OPTION, array() );
+            $saved = is_array( $persisted ) && $persisted === $expected;
         }
+
+        // Always clear both model layers after an intentional save.
+        $this->invalidate_model();
 
         $args = array(
             'page' => 'sc-library-field-spotlights',
@@ -196,6 +244,7 @@ final class SC_Library_Field_Spotlights {
         );
         if ( $field_slug ) { $args['field'] = $field_slug; }
         if ( $panel_key ) { $args['panel'] = $panel_key; }
+        if ( null !== $saved_slots ) { $args['sc_fs_slots'] = absint( $saved_slots ); }
 
         $redirect = add_query_arg( $args, admin_url( 'admin.php' ) );
         if ( $panel_key ) { $redirect .= '#sc-fs-panel-editor'; }
@@ -773,7 +822,7 @@ final class SC_Library_Field_Spotlights {
         }
         $overall_completion = $total_slots ? min( 100, (int) round( ( $total_configured / $total_slots ) * 100 ) ) : 0;
         ?>
-        <div class="wrap sc-fs-admin" data-sc-field-spotlights-admin="v4.3.11">
+        <div class="wrap sc-fs-admin" data-sc-field-spotlights-admin="v4.3.12">
             <header class="sc-fs-admin__hero">
                 <div>
                     <p class="sc-fs-admin__eyebrow">KNOWLEDGE LIBRARY · FIELD SPOTLIGHTS</p>
@@ -785,8 +834,9 @@ final class SC_Library_Field_Spotlights {
             <?php
             $save_notice = isset( $_GET['sc_fs_saved'] ) ? sanitize_key( (string) wp_unslash( $_GET['sc_fs_saved'] ) ) : '';
             if ( '1' === $save_notice ) :
+                $saved_slot_notice = isset( $_GET['sc_fs_slots'] ) ? absint( $_GET['sc_fs_slots'] ) : null;
             ?>
-                <div class="notice notice-success is-dismissible"><p><strong><?php esc_html_e( 'Field Spotlight content saved.', 'sustainable-catalyst-library' ); ?></strong> <?php esc_html_e( 'The public Spotlight cache was cleared and the saved values were verified.', 'sustainable-catalyst-library' ); ?></p></div>
+                <div class="notice notice-success is-dismissible"><p><strong><?php esc_html_e( 'Field Spotlight content saved.', 'sustainable-catalyst-library' ); ?></strong> <?php if ( null !== $saved_slot_notice ) { echo esc_html( sprintf( _n( '%d supporting article persisted.', '%d supporting articles persisted.', $saved_slot_notice, 'sustainable-catalyst-library' ), $saved_slot_notice ) ); } else { esc_html_e( 'The public Spotlight cache was cleared and the saved values were verified.', 'sustainable-catalyst-library' ); } ?></p></div>
             <?php elseif ( '0' === $save_notice ) : ?>
                 <div class="notice notice-error"><p><strong><?php esc_html_e( 'Field Spotlight content could not be verified after saving.', 'sustainable-catalyst-library' ); ?></strong> <?php esc_html_e( 'No public cache was retained. Please retry the save.', 'sustainable-catalyst-library' ); ?></p></div>
             <?php endif; ?>

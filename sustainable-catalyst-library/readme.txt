@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.11
+Stable tag: 4.3.12
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.11 repairs Field Spotlight admin persistence with a verified save transaction routed through admin-post.php, preserving panel/field context, confirming the stored option after write, and clearing public/model caches immediately. It also preserves the v4.3.10 supporting-article binding repair and the v4.3.9 Field Spotlight presentation and Homepage Spotlight interaction parity. The first eight panels remain visible initially; panel 9+ is now genuinely collapsed behind an accessible additional-fields disclosure, the currently playing panel is white with black text and a red position cue, and the field surface uses square institutional geometry. The underlying Field Spotlight data architecture remains unchanged. Fourteen major fields now expose 170 flattened Article Map series panels as a durable editorial model: taxonomy groups remain metadata, each panel has a permanent Article Map hero identity, supporting article slots default to four and can be configured from two through eight, and panel 9+ is marked for progressive disclosure after the default eight-panel opening tier. The v4.3.3 Publications shortcode and v4.2.0 Homepage Spotlight remain unchanged.
+Sustainable Catalyst Library v4.3.12 repairs persistent Field Spotlight content saving by separating Article Map hero copy and supporting-article selections from the large Field Spotlight configuration option. Panel content is now written to a dedicated durable store, read back immediately, counted, and surfaced in the save confirmation. Legacy saved content remains readable, while new panel saves no longer pass through the partial settings merge/sanitize path. The v4.3.9 public presentation remains intact: first eight panels visible, panel 9+ behind an accessible disclosure, white active panel state, square institutional geometry, Article Map hero plus supporting articles, and Homepage Spotlight-style playback. The v4.3.3 Publications shortcode and v4.2.0 Homepage Spotlight remain unchanged.
 
 
 
@@ -159,7 +159,7 @@ Sustainable Catalyst Library v4.3.11 repairs Field Spotlight admin persistence w
 
 == Changelog ==
 
-= 4.3.11 =
+= 4.3.12 =
 * Repairs Field Spotlight content persistence by replacing the fragile Settings API form submission path with an explicit authenticated admin-post save transaction.
 * Preserves panel and field context during sanitization so partial editor forms cannot silently lose supporting article or hero-copy changes.
 * Verifies the stored option after each save and shows a success/error notice in the Field Spotlight Console.

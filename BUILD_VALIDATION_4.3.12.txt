@@ -1,0 +1,18 @@
+Sustainable Catalyst Knowledge Library v4.3.12 validation
+
+PASS - dedicated panel-content option contract
+PASS - panel content bypasses generic Field Spotlight settings write
+PASS - International Law runtime supporting-article persistence
+PASS - persisted supporting-article count returned in admin redirect
+PASS - dedicated content overlays legacy panel content
+PASS - v4.3.11 compatibility checks retained where applicable
+PASS - v4.3.10 slot binding checks
+PASS - v4.3.9 public interaction regression checks
+PASS - v4.3.8 compatibility checks
+PASS - v4.3.3 Publications regression checks
+PASS - v4.2.0 Homepage Spotlight regression checks
+PASS - PHP syntax
+PASS - JavaScript syntax
+
+Primary repair:
+Field Spotlight hero copy and supporting articles are now stored independently from the large field/panel structural settings option.

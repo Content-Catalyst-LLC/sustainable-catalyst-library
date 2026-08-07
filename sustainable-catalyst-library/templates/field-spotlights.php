@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 $instance_id = wp_unique_id( 'sc-field-spotlights-' );
 ?>
-<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights" data-sc-field-spotlights="v4.3.11">
+<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights" data-sc-field-spotlights="v4.3.12">
 <?php $field_number = 0; foreach ( $fields as $field_index => $field ) : $field_number++;
     $panels = array_values( $field['panels'] );
     if ( ! $panels ) { continue; }

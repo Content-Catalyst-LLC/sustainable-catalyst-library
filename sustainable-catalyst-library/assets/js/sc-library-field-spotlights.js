@@ -225,6 +225,6 @@
     activate(0);
   };
 
-  const boot = () => document.querySelectorAll('[data-sc-field-spotlights="v4.3.11"] .sc-field-spotlight').forEach(initialize);
+  const boot = () => document.querySelectorAll('[data-sc-field-spotlights="v4.3.12"] .sc-field-spotlight').forEach(initialize);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
