@@ -4,16 +4,29 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.3
+Stable tag: 4.3.4
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.3 adds a dynamic Publications Spotlight inside the existing Knowledge Library: fourteen major fields control one compact shared stage, each active area presents an Article Map hero plus up to four publications, and visible editorial copy and curation can be changed from WordPress without editing PHP. The Homepage Knowledge Library Spotlight remains isolated at v4.2.0 and unchanged.
+Sustainable Catalyst Library v4.3.4 adds the Field Spotlight data architecture on top of the v4.3.3 Publications baseline. Fourteen major fields now expose 170 flattened Article Map series panels as a durable editorial model: taxonomy groups remain metadata, each panel has a permanent Article Map hero identity, supporting article slots default to four and can be configured from two through eight, and panel 9+ is marked for progressive disclosure after the default eight-panel opening tier. The v4.3.3 Publications shortcode and v4.2.0 Homepage Spotlight remain unchanged.
 
 
+
+
+= Field Spotlight data architecture =
+
+* New SC Library → Field Spotlights administration surface.
+* Fourteen major fields are derived from the existing canonical 170-Article-Map registry.
+* Nested taxonomy groups are preserved as `source_group` metadata while child Article Maps become peer series panels.
+* Every series panel owns a permanent Article Map hero role and canonical route.
+* Supporting article slots default to four and are configurable from two through eight per panel.
+* Supporting selection mode is manual-only; no latest, popular, taxonomy, random, or automatic backfill path is defined.
+* The first eight visible panels are marked Primary by default; remaining panels are marked Additional for the later `+ Explore additional fields` presentation.
+* Field-level panel disclosure threshold is globally configurable and individually overridable.
+* This release establishes data and administration only; the public Field Spotlight shell follows in the next presentation build.
 
 = Curated Homepage Spotlight =
 

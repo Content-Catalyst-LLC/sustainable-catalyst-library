@@ -1,0 +1,19 @@
+{
+  "release": "Sustainable Catalyst Library v4.3.4",
+  "name": "Field Spotlight Data Architecture & Series Panel Registry",
+  "baseline": "4.3.3",
+  "field_count": 14,
+  "series_panel_count": 170,
+  "default_panel_limit": 8,
+  "default_supporting_article_slots": 4,
+  "supporting_article_slot_range": [2, 8],
+  "article_map_hero_position": 0,
+  "supporting_selection_mode": "manual_only",
+  "public_field_spotlight_shortcode": null,
+  "preserved": {
+    "publications_version": "4.3.3",
+    "publications_shortcode": "[sc_publications]",
+    "homepage_spotlight_version": "4.2.0",
+    "homepage_spotlight_shortcode": "[sc_homepage_spotlight]"
+  }
+}

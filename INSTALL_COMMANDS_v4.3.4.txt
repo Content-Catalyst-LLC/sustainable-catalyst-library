@@ -1,0 +1,13 @@
+cd ~/Downloads
+chmod +x install_and_push_sustainable_catalyst_library_v4_3_4_macos.sh
+./install_and_push_sustainable_catalyst_library_v4_3_4_macos.sh
+
+WordPress upload file:
+sustainable-catalyst-library-v4.3.4.zip
+
+After installation:
+SC Library -> Field Spotlights
+
+Existing public shortcodes remain unchanged:
+[sc_publications]
+[sc_homepage_spotlight]

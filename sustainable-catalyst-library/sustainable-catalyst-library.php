@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.3 presents Publications as a dynamic Spotlight-style field deck: fourteen major fields control one shared Article Map hero plus four-publication stage, with editable editorial copy and curation and no blog-roll mode.
- * Version: 4.3.3
+ * Description: Sustainable Catalyst Library v4.3.4 adds the Field Spotlight data architecture: fourteen major fields, 170 flattened Article Map series panels, permanent Article Map hero identity, configurable supporting-article slots, and eight-panel progressive-disclosure metadata while preserving Publications and Homepage Spotlight.
+ * Version: 4.3.4
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.3');
+define('SC_LIBRARY_VERSION', '4.3.4');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -54,6 +54,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-hardening.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-unified-system.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-shortcodes.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-publications.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-field-spotlights.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
 register_deactivation_hook(__FILE__, ['SC_Library_Activator', 'deactivate']);
@@ -106,6 +107,7 @@ final class SC_Library_Plugin {
         $unified_system = new SC_Library_Unified_System($indexer, $relationships);
         $shortcodes = new SC_Library_Shortcodes();
         $publications = new SC_Library_Publications();
+        $field_spotlights = new SC_Library_Field_Spotlights();
 
         // v4.2.0 is an optional, contained editorial surface. A Spotlight
         // startup failure must not terminate the public Research Library.
@@ -164,6 +166,7 @@ final class SC_Library_Plugin {
         $unified_system->register_hooks();
         $shortcodes->register_hooks();
         $publications->register_hooks();
+        $field_spotlights->register_hooks();
     }
 }
 

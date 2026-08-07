@@ -1,0 +1,29 @@
+Sustainable Catalyst Library v4.3.4 — Build Validation
+
+PASS - plugin version 4.3.4
+PASS - WordPress stable tag 4.3.4
+PASS - Field Spotlight module bootstrapped from main plugin
+PASS - new SC Library -> Field Spotlights administration surface
+PASS - 14 explicit major-field definitions
+PASS - canonical 170-Article-Map Publications registry reused rather than duplicated
+PASS - nested taxonomy groups preserved as source_group metadata
+PASS - Roman Law / Common Law / other nested maps become peer panels in the normalized field model
+PASS - Article Map hero is permanent position 0
+PASS - canonical Article Map route remains registry-owned
+PASS - supporting slots default to 4
+PASS - supporting slot range is configurable from 2 through 8
+PASS - supporting article selection mode is manual_only
+PASS - no automatic Field Spotlight article backfill resolver
+PASS - first 8 visible panels classified Primary by default
+PASS - panel 9+ classified Additional rather than removed
+PASS - field disclosure threshold globally configurable and field-overridable
+PASS - Global Governance resolves to 13 panels / 5 additional at default threshold
+PASS - Philosophy resolves to 27 panels / 19 additional at default threshold
+PASS - 9 v4.3.4 Field Spotlight contract tests
+PASS - 8 inherited v4.3.3 Publications tests (release-marker assertion excluded)
+PASS - 2 v4.3.1 canonical registry compatibility tests
+PASS - 8 v4.2.0 Homepage Spotlight regression tests
+PASS - PHP syntax validation across plugin PHP files
+PASS - v4.3.3 Publications class/cache/shortcode preserved
+PASS - v4.2.0 Homepage Spotlight class/cache preserved
+PASS - no public Field Spotlight shortcode introduced in this foundation release
