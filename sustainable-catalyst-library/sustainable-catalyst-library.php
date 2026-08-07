@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.4 adds the Field Spotlight data architecture: fourteen major fields, 170 flattened Article Map series panels, permanent Article Map hero identity, configurable supporting-article slots, and eight-panel progressive-disclosure metadata while preserving Publications and Homepage Spotlight.
- * Version: 4.3.4
+ * Description: Sustainable Catalyst Library v4.3.5 adds the public Major Field Spotlight shell with Spotlight-parity thumbnail presentation, Article Map heroes, curated supporting article cards, and eight-panel progressive disclosure while preserving Publications and Homepage Spotlight.
+ * Version: 4.3.5
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.4');
+define('SC_LIBRARY_VERSION', '4.3.5');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

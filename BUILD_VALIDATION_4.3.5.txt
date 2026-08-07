@@ -1,0 +1,85 @@
+Sustainable Catalyst Library v4.3.5
+Major Field Spotlight Shell, Thumbnail Presentation & Progressive Disclosure
+Build validation date: 2026-08-07
+
+RELEASE CONTRACT
+PASS  Plugin header version: 4.3.5
+PASS  SC_LIBRARY_VERSION constant: 4.3.5
+PASS  WordPress stable tag: 4.3.5
+PASS  Field Spotlight module version: 4.3.5
+PASS  Existing Field Spotlight settings option preserved from v4.3.4
+PASS  Publications module remains v4.3.3
+PASS  Homepage Spotlight module remains v4.2.0
+
+PUBLIC FIELD SPOTLIGHT
+PASS  [sc_field_spotlights] complete field-stack shortcode
+PASS  [sc_field_spotlight field="global-governance"] single-field shortcode
+PASS  14 major field definitions retained
+PASS  170 canonical Article Map panels retained
+PASS  flattened peer-panel presentation retained
+PASS  Article Map remains permanent hero position 0
+PASS  canonical Article Map destination cannot be replaced in Field Spotlight administration
+PASS  hero image resolves from published Article Map record
+PASS  supporting article thumbnails resolve from published Library records
+PASS  Spotlight thumbnail cascade: featured, Library metadata, PDF preview, attached image, content image, image URL, KL placeholder
+PASS  supporting article summary and metadata resolution
+PASS  manual-only supporting article selection
+PASS  no latest/popular/taxonomy/random/automatic backfill path
+PASS  default four supporting slots; per-panel range 2-8 retained
+
+PROGRESSIVE DISCLOSURE
+PASS  default opening tier is first 8 panels
+PASS  panel 9+ remains available as Additional rather than removed
+PASS  + Explore additional fields control
+PASS  expanded - Hide additional fields state
+PASS  active Additional panel automatically reveals the secondary tier
+PASS  Previous/Next panel controls
+PASS  keyboard Left/Right/Home/End panel navigation
+PASS  no Field Spotlight autoplay
+PASS  reduced-motion styling
+
+PRESENTATION
+PASS  black structural masthead and panel navigation
+PASS  white/cream editorial hero and article surfaces
+PASS  red Library, selected-panel, and action accents
+PASS  green focus treatment
+PASS  large Article Map thumbnail hero
+PASS  thumbnail-based supporting article cards
+PASS  responsive 4/2/1-column panel navigation
+PASS  responsive 2/1-column supporting article deck
+PASS  mobile hero stacking and retained thumbnails
+
+ADMINISTRATION
+PASS  SC Library -> Field Spotlights retained
+PASS  Edit content action added for every series panel
+PASS  hero title, description, and CTA overrides
+PASS  canonical supporting-article URL entry
+PASS  optional supporting title override
+PASS  per-slot enable/disable
+PASS  URL-to-post resolution records source ID when possible
+PASS  empty slots remain empty publicly
+
+AUTOMATED VALIDATION
+PASS  8 v4.3.5 targeted tests
+PASS  8 v4.3.3 Publications behavioral regressions (historical whole-plugin version assertion excluded)
+PASS  8 v4.2.0 Homepage Spotlight behavioral regressions (historical whole-plugin version assertion excluded)
+PASS  PHP syntax validation across 102 plugin PHP files
+PASS  JavaScript syntax validation for Field Spotlight public runtime
+PASS  macOS installer shell syntax validation
+PASS  fresh repository ZIP extraction and v4.3.5 release validation
+PASS  clean v4.3.4 -> v4.3.5 installer simulation
+PASS  installer simulation created release commit and left clean Git status
+
+PACKAGE PROFILE
+Plugin PHP files: 102
+Plugin JavaScript files: 54
+Plugin CSS files: 47
+
+DEPLOYMENT CHECKS STILL REQUIRED
+- Upload the WordPress plugin ZIP or run the macOS repository installer.
+- Purge WordPress, Astra/page-builder, hosting, CDN, and browser caches.
+- Open SC Library -> Field Spotlights and curate supporting article URLs for desired panels.
+- Add [sc_field_spotlights] or a single-field shortcode to the intended Library surface.
+- Confirm production Article Map thumbnails resolve against live Media Library records.
+- Verify Global Governance first 8 panels and + additional-fields disclosure against production content.
+- Check desktop, tablet, mobile, keyboard, reduced-motion, and cached anonymous sessions.

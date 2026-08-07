@@ -1,11 +1,11 @@
 <?php
 /**
- * Field Spotlight data architecture for Sustainable Catalyst Library v4.3.4.
+ * Major Field Spotlight public shell for Sustainable Catalyst Library v4.3.5.
  *
  * Administration: SC Library -> Field Spotlights.
- * This release establishes the durable editorial model used by later public
- * Field Spotlight presentation releases. It intentionally does not replace the
- * v4.3.3 Publications shortcode or the v4.2.0 Homepage Spotlight.
+ * This release renders that durable editorial model as Spotlight-parity public
+ * field surfaces with thumbnail Article Map heroes, curated article cards, and
+ * progressive disclosure while preserving v4.3.3 Publications and v4.2.0 Homepage Spotlight.
  *
  * Model:
  * Major Field -> flattened Series Panels -> permanent Article Map hero ->
@@ -17,20 +17,30 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.4';
+    public const VERSION = '4.3.5';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
-    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v434';
-    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v434';
+    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v435';
+    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v435';
     public const MODEL_CACHE_TTL = 600;
     public const DEFAULT_PANEL_LIMIT = 8;
     public const DEFAULT_SLOT_COUNT = 4;
     public const MIN_SLOT_COUNT = 2;
     public const MAX_SLOT_COUNT = 8;
+    public const SHORTCODE_STACK = 'sc_field_spotlights';
+    public const SHORTCODE_SINGLE = 'sc_field_spotlight';
+    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v435';
 
     public function register_hooks(): void {
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 41 );
         add_action( 'admin_init', array( $this, 'register_settings' ) );
         add_action( 'update_option_' . self::SETTINGS_OPTION, array( $this, 'invalidate_model' ), 10, 2 );
+        add_action( 'save_post', array( $this, 'invalidate_for_saved_post' ), 999, 3 );
+        add_action( 'transition_post_status', array( $this, 'invalidate_for_status_change' ), 999, 3 );
+        add_action( 'before_delete_post', array( $this, 'invalidate_model' ) );
+        add_action( 'trashed_post', array( $this, 'invalidate_model' ) );
+        add_action( 'untrashed_post', array( $this, 'invalidate_model' ) );
+        add_shortcode( self::SHORTCODE_STACK, array( $this, 'shortcode_stack' ) );
+        add_shortcode( self::SHORTCODE_SINGLE, array( $this, 'shortcode_single' ) );
     }
 
     /** @return array<string,array<string,mixed>> */
@@ -195,10 +205,17 @@ final class SC_Library_Field_Spotlights {
         $clean = array();
         foreach ( array_slice( $articles, 0, self::MAX_SLOT_COUNT ) as $article ) {
             if ( ! is_array( $article ) ) { continue; }
+            $url = esc_url_raw( (string) ( $article['url'] ?? '' ) );
+            $source_id = absint( $article['source_id'] ?? 0 );
+            if ( ! $source_id && $url ) { $source_id = absint( url_to_postid( $url ) ); }
+            $source = $source_id ? get_post( $source_id ) : null;
+            $title = sanitize_text_field( (string) ( $article['title'] ?? '' ) );
+            if ( ! $title && $source instanceof WP_Post ) { $title = sanitize_text_field( get_the_title( $source ) ); }
+            if ( ! $url && $source instanceof WP_Post ) { $url = esc_url_raw( get_permalink( $source ) ); }
             $clean[] = array(
-                'source_id' => absint( $article['source_id'] ?? 0 ),
-                'title' => sanitize_text_field( (string) ( $article['title'] ?? '' ) ),
-                'url' => esc_url_raw( (string) ( $article['url'] ?? '' ) ),
+                'source_id' => $source_id,
+                'title' => $title,
+                'url' => $url,
                 'enabled' => empty( $article['enabled'] ) ? 0 : 1,
             );
         }
@@ -295,6 +312,172 @@ final class SC_Library_Field_Spotlights {
     /** @param mixed $old_value @param mixed $value */
     public function invalidate_model( $old_value = null, $value = null ): void {
         delete_transient( self::MODEL_CACHE_KEY );
+        delete_transient( self::PUBLIC_CACHE_KEY );
+    }
+
+    public function invalidate_for_saved_post( int $post_id = 0, $post = null, bool $update = false ): void {
+        if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) { return; }
+        delete_transient( self::PUBLIC_CACHE_KEY );
+    }
+
+    public function invalidate_for_status_change( string $new_status, string $old_status, $post ): void {
+        if ( $new_status !== $old_status ) { delete_transient( self::PUBLIC_CACHE_KEY ); }
+    }
+
+    /** @return array<string,array<string,mixed>> */
+    public function public_model(): array {
+        $cached = get_transient( self::PUBLIC_CACHE_KEY );
+        if ( is_array( $cached ) ) { return $cached; }
+        $fields = $this->model();
+        foreach ( $fields as &$field ) {
+            $field['panels'] = array_values( array_filter( $field['panels'], static fn( $panel ) => ! empty( $panel['visible'] ) ) );
+            foreach ( $field['panels'] as &$panel ) {
+                $panel['hero'] = $this->enrich_hero( $panel['hero'] );
+                $public_articles = array();
+                foreach ( array_slice( $panel['articles'], 0, absint( $panel['slot_count'] ) ) as $article ) {
+                    if ( empty( $article['enabled'] ) || ( empty( $article['source_id'] ) && empty( $article['url'] ) ) ) { continue; }
+                    $resolved = $this->enrich_article( $article );
+                    if ( $resolved ) { $public_articles[] = $resolved; }
+                }
+                $panel['articles'] = $public_articles;
+                $panel['configured_article_count'] = count( $public_articles );
+            }
+            unset( $panel );
+            $field['panel_count'] = count( $field['panels'] );
+            $field['additional_panel_count'] = max( 0, $field['panel_count'] - absint( $field['panel_limit'] ) );
+        }
+        unset( $field );
+        $fields = array_filter( $fields, static fn( $field ) => ! empty( $field['visible'] ) && ! empty( $field['panels'] ) );
+        set_transient( self::PUBLIC_CACHE_KEY, $fields, self::MODEL_CACHE_TTL );
+        return $fields;
+    }
+
+    /** @param array<string,mixed> $hero @return array<string,mixed> */
+    private function enrich_hero( array $hero ): array {
+        $url = (string) ( $hero['canonical_url'] ?? '' );
+        $absolute = $url && 0 !== strpos( $url, 'http' ) ? home_url( $url ) : $url;
+        $post_id = $absolute ? absint( url_to_postid( $absolute ) ) : 0;
+        $post = $post_id ? get_post( $post_id ) : null;
+        if ( $post instanceof WP_Post && 'publish' === $post->post_status ) {
+            if ( empty( $hero['description'] ) ) { $hero['description'] = $this->source_summary( $post, 42 ); }
+            $hero['thumbnail'] = $this->resolve_source_thumbnail( $post );
+            $hero['metadata'] = $this->source_metadata( $post );
+        } else {
+            $hero['thumbnail'] = $this->thumbnail_placeholder( (string) ( $hero['title'] ?? 'Article Map' ) );
+            $hero['metadata'] = 'Article Map';
+        }
+        $hero['url'] = $absolute ?: home_url( '/' );
+        return $hero;
+    }
+
+    /** @param array<string,mixed> $article @return array<string,mixed>|null */
+    private function enrich_article( array $article ): ?array {
+        $source_id = absint( $article['source_id'] ?? 0 );
+        $url = esc_url_raw( (string) ( $article['url'] ?? '' ) );
+        if ( ! $source_id && $url ) { $source_id = absint( url_to_postid( $url ) ); }
+        $post = $source_id ? get_post( $source_id ) : null;
+        if ( $post instanceof WP_Post ) {
+            if ( 'publish' !== $post->post_status || post_password_required( $post ) ) { return null; }
+            return array(
+                'source_id' => $post->ID,
+                'title' => sanitize_text_field( (string) ( $article['title'] ?: get_the_title( $post ) ) ),
+                'url' => esc_url_raw( $url ?: get_permalink( $post ) ),
+                'summary' => $this->source_summary( $post, 25 ),
+                'metadata' => $this->source_metadata( $post ),
+                'thumbnail' => $this->resolve_source_thumbnail( $post ),
+            );
+        }
+        if ( ! $url ) { return null; }
+        return array(
+            'source_id' => 0,
+            'title' => sanitize_text_field( (string) ( $article['title'] ?: __( 'Selected article', 'sustainable-catalyst-library' ) ) ),
+            'url' => $url,
+            'summary' => '',
+            'metadata' => __( 'Knowledge Library', 'sustainable-catalyst-library' ),
+            'thumbnail' => $this->thumbnail_placeholder( (string) ( $article['title'] ?? 'KL' ) ),
+        );
+    }
+
+    /** @return array{attachment_id:int,url:string,alt:string,source:string,placeholder:bool} */
+    private function resolve_source_thumbnail( WP_Post $source ): array {
+        $empty = array( 'attachment_id' => 0, 'url' => '', 'alt' => get_the_title( $source ), 'source' => 'none', 'placeholder' => false );
+        $from_attachment = static function ( int $attachment_id, string $kind ) use ( $source, $empty ): array {
+            if ( $attachment_id <= 0 || 'attachment' !== get_post_type( $attachment_id ) ) { return $empty; }
+            $url = wp_get_attachment_image_url( $attachment_id, 'medium_large' );
+            if ( ! $url ) { return $empty; }
+            $alt = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+            return array( 'attachment_id' => $attachment_id, 'url' => esc_url_raw( $url ), 'alt' => sanitize_text_field( $alt ?: get_the_title( $source ) ), 'source' => sanitize_key( $kind ), 'placeholder' => false );
+        };
+        $featured_id = get_post_thumbnail_id( $source );
+        if ( $featured_id ) { $featured = $from_attachment( $featured_id, 'featured' ); if ( $featured['url'] ) { return $featured; } }
+        foreach ( array( '_sc_library_thumbnail_id','_sc_library_cover_attachment_id','_sc_library_cover_image_id','_sc_library_pdf_cover_attachment_id','_sc_library_pdf_attachment_id','_sc_library_foundation_pdf_attachment_id','_sc_library_foundation_attachment_id','_sc_foundation_pdf_attachment_id','sc_library_pdf_attachment_id','_sc_library_source_attachment_id' ) as $meta_key ) {
+            $attachment_id = absint( get_post_meta( $source->ID, $meta_key, true ) );
+            if ( ! $attachment_id ) { continue; }
+            $resolved = $from_attachment( $attachment_id, false !== strpos( $meta_key, 'pdf' ) ? 'pdf_preview' : 'library_meta' );
+            if ( $resolved['url'] ) { return $resolved; }
+        }
+        $attached_images = get_children( array( 'post_parent' => $source->ID, 'post_type' => 'attachment', 'post_mime_type' => 'image', 'post_status' => 'inherit', 'numberposts' => 1, 'orderby' => 'menu_order ID', 'order' => 'ASC' ) );
+        if ( $attached_images ) { $attached = reset( $attached_images ); if ( $attached instanceof WP_Post ) { $resolved = $from_attachment( $attached->ID, 'attached_image' ); if ( $resolved['url'] ) { return $resolved; } } }
+        $content = (string) $source->post_content;
+        if ( preg_match( '/\bwp-image-(\d+)\b/', $content, $matches ) ) { $resolved = $from_attachment( absint( $matches[1] ), 'content_image' ); if ( $resolved['url'] ) { return $resolved; } }
+        if ( preg_match( '/<img[^>]+src=["\']([^"\']+)["\']/i', $content, $matches ) ) {
+            $content_url = esc_url_raw( html_entity_decode( $matches[1], ENT_QUOTES, get_bloginfo( 'charset' ) ) );
+            if ( $content_url ) { return array( 'attachment_id' => 0, 'url' => $content_url, 'alt' => get_the_title( $source ), 'source' => 'content_image', 'placeholder' => false ); }
+        }
+        foreach ( array( '_sc_library_thumbnail_url','_sc_library_cover_image_url','_sc_library_pdf_cover_url','_sc_library_document_thumbnail_url','_thumbnail_url' ) as $meta_key ) {
+            $url = esc_url_raw( get_post_meta( $source->ID, $meta_key, true ) );
+            if ( $url ) { return array( 'attachment_id' => 0, 'url' => $url, 'alt' => get_the_title( $source ), 'source' => 'image_url', 'placeholder' => false ); }
+        }
+        $placeholder = $this->thumbnail_placeholder( get_the_title( $source ) );
+        $filtered = apply_filters( 'sc_library_field_spotlight_thumbnail', $placeholder, $source );
+        return is_array( $filtered ) ? wp_parse_args( $filtered, $placeholder ) : $placeholder;
+    }
+
+    /** @return array{attachment_id:int,url:string,alt:string,source:string,placeholder:bool} */
+    private function thumbnail_placeholder( string $alt = '' ): array {
+        return array( 'attachment_id' => 0, 'url' => '', 'alt' => sanitize_text_field( $alt ), 'source' => 'placeholder', 'placeholder' => true );
+    }
+
+    private function source_summary( WP_Post $post, int $words = 30 ): string {
+        $summary = has_excerpt( $post ) ? get_the_excerpt( $post ) : wp_strip_all_tags( strip_shortcodes( $post->post_content ) );
+        return wp_trim_words( $summary, max( 10, min( 60, $words ) ), '…' );
+    }
+
+    private function source_metadata( WP_Post $post ): string {
+        $parts = array();
+        $type = get_post_type_object( $post->post_type );
+        if ( $type ) { $parts[] = $type->labels->singular_name; }
+        foreach ( array( 'sc_document_family', 'sc_document_type', 'category' ) as $taxonomy ) {
+            if ( ! taxonomy_exists( $taxonomy ) || ! is_object_in_taxonomy( $post->post_type, $taxonomy ) ) { continue; }
+            $terms = wp_get_post_terms( $post->ID, $taxonomy, array( 'fields' => 'names' ) );
+            if ( ! is_wp_error( $terms ) && $terms ) { $parts[] = (string) $terms[0]; break; }
+        }
+        return implode( ' · ', array_values( array_unique( array_filter( $parts ) ) ) );
+    }
+
+    public function shortcode_stack( $atts = array() ): string {
+        return $this->render_public( '' );
+    }
+
+    public function shortcode_single( $atts = array() ): string {
+        $atts = shortcode_atts( array( 'field' => '' ), $atts, self::SHORTCODE_SINGLE );
+        return $this->render_public( sanitize_title( (string) $atts['field'] ) );
+    }
+
+    private function render_public( string $only_field = '' ): string {
+        $fields = $this->public_model();
+        if ( $only_field ) {
+            if ( ! isset( $fields[ $only_field ] ) ) { return ''; }
+            $fields = array( $only_field => $fields[ $only_field ] );
+        }
+        if ( ! $fields ) { return ''; }
+        wp_enqueue_style( 'sc-library-field-spotlights', SC_LIBRARY_URL . 'assets/css/sc-library-field-spotlights.css', array(), self::VERSION );
+        wp_enqueue_script( 'sc-library-field-spotlights', SC_LIBRARY_URL . 'assets/js/sc-library-field-spotlights.js', array(), self::VERSION, true );
+        $settings = $this->settings();
+        $labels = $settings['general'];
+        ob_start();
+        include SC_LIBRARY_DIR . 'templates/field-spotlights.php';
+        return (string) ob_get_clean();
     }
 
     public function admin_menu(): void {
@@ -319,7 +502,7 @@ final class SC_Library_Field_Spotlights {
         ?>
         <div class="wrap sc-field-spotlights-admin">
             <h1><?php esc_html_e( 'Field Spotlights', 'sustainable-catalyst-library' ); ?></h1>
-            <p><?php esc_html_e( 'Configure the Field Spotlight data model. This release does not replace the public Publications or Homepage Spotlight interfaces.', 'sustainable-catalyst-library' ); ?></p>
+            <p><?php esc_html_e( 'Configure the Field Spotlight model and the public Spotlight presentation. Publications and Homepage Spotlight remain separate surfaces.', 'sustainable-catalyst-library' ); ?></p>
             <?php settings_errors(); ?>
 
             <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.8fr);gap:24px;align-items:start;max-width:1480px">
@@ -349,13 +532,13 @@ final class SC_Library_Field_Spotlights {
                             <tr><th>Description</th><td><textarea class="large-text" rows="3" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][description]"><?php echo esc_textarea( (string) ( $field_settings['description'] ?? $field['description'] ) ); ?></textarea></td></tr>
                             <tr><th>Order</th><td><input type="number" min="1" max="99" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][order]" value="<?php echo esc_attr( (string) $field['order'] ); ?>"></td></tr>
                             <tr><th>Visible</th><td><label><input type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][visible]" value="1" <?php checked( ! empty( $field['visible'] ) ); ?>> Enable this Field Spotlight</label></td></tr>
-                            <tr><th>Panel disclosure threshold</th><td><input type="number" min="1" max="24" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][panel_limit]" value="<?php echo esc_attr( (string) $field['panel_limit'] ); ?>"><p class="description">Panels after this position are marked Additional and will use the + disclosure control in the public presentation release.</p></td></tr>
+                            <tr><th>Panel disclosure threshold</th><td><input type="number" min="1" max="24" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[fields][<?php echo esc_attr( $selected_field ); ?>][panel_limit]" value="<?php echo esc_attr( (string) $field['panel_limit'] ); ?>"><p class="description">Panels after this position are revealed through the + additional-fields disclosure control on the public Spotlight.</p></td></tr>
                         </table>
 
                         <h3><?php esc_html_e( 'Flattened series panels', 'sustainable-catalyst-library' ); ?></h3>
                         <p><?php esc_html_e( 'Source groups are retained for knowledge architecture, but every Article Map below is a peer panel in this Field Spotlight.', 'sustainable-catalyst-library' ); ?></p>
                         <table class="widefat striped">
-                            <thead><tr><th style="width:80px">Order</th><th>Panel</th><th>Source group</th><th>Canonical Article Map</th><th style="width:90px">Visible</th><th style="width:110px">Slots</th><th style="width:90px">Tier</th></tr></thead>
+                            <thead><tr><th style="width:80px">Order</th><th>Panel</th><th>Source group</th><th>Canonical Article Map</th><th style="width:90px">Visible</th><th style="width:110px">Slots</th><th style="width:90px">Tier</th><th style="width:100px">Content</th></tr></thead>
                             <tbody>
                             <?php foreach ( $field['panels'] as $panel ) : ?>
                                 <tr>
@@ -366,11 +549,53 @@ final class SC_Library_Field_Spotlights {
                                     <td><label><input type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $panel['key'] ); ?>][visible]" value="1" <?php checked( ! empty( $panel['visible'] ) ); ?>> Yes</label></td>
                                     <td><input style="width:72px" type="number" min="2" max="8" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $panel['key'] ); ?>][slot_count]" value="<?php echo esc_attr( (string) $panel['slot_count'] ); ?>"></td>
                                     <td><?php echo esc_html( ucfirst( (string) $panel['disclosure'] ) ); ?></td>
+                                    <td><a class="button button-small" href="<?php echo esc_url( admin_url( 'admin.php?page=sc-library-field-spotlights&field=' . rawurlencode( $selected_field ) . '&panel=' . rawurlencode( $panel['key'] ) ) ); ?>">Edit content</a></td>
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
                         </table>
                         <?php submit_button( __( 'Save field and panel model', 'sustainable-catalyst-library' ) ); ?>
+                    </form>
+                    <?php endif; ?>
+
+                    <?php
+                    $selected_panel_key = sanitize_title( (string) ( $_GET['panel'] ?? '' ) );
+                    $selected_panel = null;
+                    if ( $selected_panel_key && $field ) {
+                        foreach ( $field['panels'] as $candidate_panel ) {
+                            if ( $candidate_panel['key'] === $selected_panel_key ) { $selected_panel = $candidate_panel; break; }
+                        }
+                    }
+                    if ( $selected_panel ) :
+                        $panel_saved = is_array( $settings['panels'][ $selected_panel_key ] ?? null ) ? $settings['panels'][ $selected_panel_key ] : array();
+                    ?>
+                    <form method="post" action="options.php" style="background:#fff;border:1px solid #c3c4c7;padding:22px;margin-top:24px">
+                        <?php settings_fields( self::SETTINGS_GROUP ); ?>
+                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_context]" value="panel">
+                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[_panel_key]" value="<?php echo esc_attr( $selected_panel_key ); ?>">
+                        <h2><?php echo esc_html( (string) $selected_panel['title'] ); ?> — Spotlight content</h2>
+                        <p class="description"><strong>Article Map hero:</strong> <a href="<?php echo esc_url( home_url( $selected_panel['canonical_url'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( (string) $selected_panel['canonical_url'] ); ?></a>. This canonical hero destination cannot be replaced.</p>
+                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][title]" value="<?php echo esc_attr( (string) $selected_panel['title'] ); ?>">
+                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][order]" value="<?php echo esc_attr( (string) $selected_panel['order'] ); ?>">
+                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][visible]" value="<?php echo ! empty( $selected_panel['visible'] ) ? '1' : '0'; ?>">
+                        <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][slot_count]" value="<?php echo esc_attr( (string) $selected_panel['slot_count'] ); ?>">
+                        <table class="form-table" role="presentation">
+                            <tr><th>Hero display title</th><td><input class="regular-text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][hero_title]" value="<?php echo esc_attr( (string) ( $panel_saved['hero_title'] ?? '' ) ); ?>" placeholder="<?php echo esc_attr( (string) $selected_panel['canonical_title'] ); ?>"></td></tr>
+                            <tr><th>Hero description</th><td><textarea class="large-text" rows="4" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][hero_description]"><?php echo esc_textarea( (string) ( $panel_saved['hero_description'] ?? '' ) ); ?></textarea><p class="description">Leave blank to use the published Article Map excerpt/content summary.</p></td></tr>
+                            <tr><th>Hero CTA</th><td><input class="regular-text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][hero_cta]" value="<?php echo esc_attr( (string) ( $panel_saved['hero_cta'] ?? '' ) ); ?>" placeholder="Explore Article Map"></td></tr>
+                        </table>
+                        <h3>Selected articles</h3>
+                        <p class="description">Paste the canonical URL of each article you want beneath this Article Map. Thumbnails, summaries, and metadata are resolved from the Library record automatically. Empty slots remain empty.</p>
+                        <?php for ( $i = 0; $i < absint( $selected_panel['slot_count'] ); $i++ ) : $article = is_array( $panel_saved['articles'][ $i ] ?? null ) ? $panel_saved['articles'][ $i ] : array(); ?>
+                            <fieldset style="border-top:1px solid #dcdcde;padding:14px 0 4px;margin-top:12px">
+                                <legend><strong><?php echo esc_html( sprintf( 'Slot %02d', $i + 1 ) ); ?></strong></legend>
+                                <input type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][source_id]" value="<?php echo esc_attr( (string) absint( $article['source_id'] ?? 0 ) ); ?>">
+                                <p><label>Article URL<br><input class="widefat" type="url" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][url]" value="<?php echo esc_attr( (string) ( $article['url'] ?? '' ) ); ?>" placeholder="https://sustainablecatalyst.com/..."></label></p>
+                                <p><label>Optional display title<br><input class="widefat" type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][title]" value="<?php echo esc_attr( (string) ( $article['title'] ?? '' ) ); ?>"></label></p>
+                                <p><label><input type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][enabled]" value="1" <?php checked( ! empty( $article['enabled'] ) ); ?>> Enable this slot</label></p>
+                            </fieldset>
+                        <?php endfor; ?>
+                        <?php submit_button( __( 'Save Spotlight content', 'sustainable-catalyst-library' ) ); ?>
                     </form>
                     <?php endif; ?>
                 </div>
@@ -384,9 +609,9 @@ final class SC_Library_Field_Spotlights {
                     <?php endforeach; ?>
                     </tbody></table>
                     <hr>
-                    <p><strong>v4.3.4 boundary</strong></p>
-                    <p class="description">Data architecture and administration only. Public Field Spotlight rendering, panel hero presentation, + disclosure interaction, and visual article curation are scheduled for subsequent builds.</p>
-                    <p class="description">No automatic article backfill is defined for Field Spotlight supporting slots. Selection mode is manual only.</p>
+                    <p><strong>v4.3.5 public presentation</strong></p>
+                    <p class="description">Use <code>[sc_field_spotlights]</code> for the complete major-field stack or <code>[sc_field_spotlight field=&quot;global-governance&quot;]</code> for one field.</p>
+                    <p class="description">Article Map is always the hero. Supporting articles remain manual-only. No automatic article backfill is defined; no latest, popular, taxonomy, random, or automatic substitution path is used.</p>
                 </aside>
             </div>
         </div>
