@@ -54,6 +54,7 @@
     const sourceUrl = slot.querySelector('[data-source-url]');
     const sourceTitle = slot.querySelector('[data-source-title]');
     const enabled = slot.querySelector('[data-source-enabled]');
+    const publishState = slot.querySelector('[data-slot-publish-state]');
     const selectedTitle = slot.querySelector('[data-selected-title]');
     const selectedMeta = slot.querySelector('[data-selected-meta]');
     const thumb = slot.querySelector('[data-selected-thumb]');
@@ -86,7 +87,8 @@
       if (sourceId) sourceId.value = button.dataset.resultId || '0';
       if (sourceUrl) sourceUrl.value = button.dataset.resultUrl || '';
       if (sourceTitle) sourceTitle.value = '';
-      if (enabled) enabled.checked = true;
+      if (enabled) enabled.value = '1';
+      if (publishState) publishState.textContent = 'Publishes on save';
       if (selectedTitle) selectedTitle.textContent = button.dataset.resultTitle || cfg.configured || 'Configured';
       if (selectedMeta) selectedMeta.textContent = button.dataset.resultMeta || 'Knowledge Library';
       if (thumb) {
@@ -101,7 +103,8 @@
       if (sourceId) sourceId.value = '0';
       if (sourceUrl) sourceUrl.value = '';
       if (sourceTitle) sourceTitle.value = '';
-      if (enabled) enabled.checked = false;
+      if (enabled) enabled.value = '0';
+      if (publishState) publishState.textContent = cfg.empty || 'Empty slot';
       if (search) search.value = '';
       if (selectedTitle) selectedTitle.textContent = cfg.empty || 'Empty slot';
       if (selectedMeta) selectedMeta.textContent = 'Search the Library to select a published article.';

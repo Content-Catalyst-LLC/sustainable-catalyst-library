@@ -1,6 +1,6 @@
 <?php
 /**
- * Major Field Spotlight system for Sustainable Catalyst Library v4.3.9.
+ * Major Field Spotlight system for Sustainable Catalyst Library v4.3.10.
  *
  * Administration: SC Library -> Field Spotlights.
  * This release renders that durable editorial model as Spotlight-parity public
@@ -18,10 +18,10 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.9';
+    public const VERSION = '4.3.10';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
-    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v439';
-    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v439';
+    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v4310';
+    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v4310';
     public const MODEL_CACHE_TTL = 600;
     public const DEFAULT_PANEL_LIMIT = 8;
     public const DEFAULT_SLOT_COUNT = 4;
@@ -30,7 +30,7 @@ final class SC_Library_Field_Spotlights {
     public const MAX_SLOT_COUNT = 8;
     public const SHORTCODE_STACK = 'sc_field_spotlights';
     public const SHORTCODE_SINGLE = 'sc_field_spotlight';
-    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v439';
+    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v4310';
 
     public function register_hooks(): void {
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 41 );
@@ -213,23 +213,53 @@ final class SC_Library_Field_Spotlights {
     /** @param array<int,mixed> $articles @return array<int,array<string,mixed>> */
     private function sanitize_article_slots( array $articles ): array {
         $clean = array();
-        foreach ( array_slice( $articles, 0, self::MAX_SLOT_COUNT ) as $article ) {
+        for ( $position = 0; $position < self::MAX_SLOT_COUNT; $position++ ) {
+            if ( ! array_key_exists( $position, $articles ) ) { continue; }
+            $article = $articles[ $position ];
             if ( ! is_array( $article ) ) { continue; }
             $url = esc_url_raw( (string) ( $article['url'] ?? '' ) );
             $source_id = absint( $article['source_id'] ?? 0 );
-            if ( ! $source_id && $url ) { $source_id = absint( url_to_postid( $url ) ); }
+            $source_id = $this->resolve_article_source_id( $source_id, $url );
             $source = $source_id ? get_post( $source_id ) : null;
             $title = sanitize_text_field( (string) ( $article['title'] ?? '' ) );
             if ( ! $title && $source instanceof WP_Post ) { $title = sanitize_text_field( get_the_title( $source ) ); }
             if ( ! $url && $source instanceof WP_Post ) { $url = esc_url_raw( get_permalink( $source ) ); }
-            $clean[] = array(
+            $has_selection = $source_id > 0 || '' !== $url;
+            $clean[ $position ] = array(
                 'source_id' => $source_id,
                 'title' => $title,
                 'url' => $url,
-                'enabled' => empty( $article['enabled'] ) ? 0 : 1,
+                // A populated slot is active by definition. Clearing the slot is the
+                // deliberate way to remove it from the public Field Spotlight.
+                'enabled' => $has_selection ? 1 : 0,
             );
         }
+        ksort( $clean, SORT_NUMERIC );
         return $clean;
+    }
+
+    private function resolve_article_source_id( int $source_id, string $url = '' ): int {
+        if ( $source_id > 0 ) {
+            $source = get_post( $source_id );
+            if ( $source instanceof WP_Post ) { return $source_id; }
+        }
+        if ( ! $url ) { return 0; }
+        $resolved = absint( url_to_postid( $url ) );
+        if ( $resolved > 0 ) { return $resolved; }
+        $path = trim( (string) wp_parse_url( $url, PHP_URL_PATH ), '/' );
+        if ( ! $path ) { return 0; }
+        $slug = sanitize_title( basename( $path ) );
+        if ( ! $slug ) { return 0; }
+        $matches = get_posts(
+            array(
+                'name' => $slug,
+                'post_type' => $this->eligible_source_post_types(),
+                'post_status' => 'publish',
+                'posts_per_page' => 1,
+                'suppress_filters' => true,
+            )
+        );
+        return ! empty( $matches[0] ) && $matches[0] instanceof WP_Post ? absint( $matches[0]->ID ) : 0;
     }
 
     /**
@@ -271,7 +301,7 @@ final class SC_Library_Field_Spotlights {
             }
             $configured_count = 0;
             foreach ( $slots as $slot ) {
-                if ( ! empty( $slot['enabled'] ) && ( ! empty( $slot['source_id'] ) || ! empty( $slot['url'] ) ) ) { $configured_count++; }
+                if ( ! empty( $slot['source_id'] ) || ! empty( $slot['url'] ) ) { $configured_count++; }
             }
             $readiness = 0 === $configured_count ? 'empty' : ( $configured_count >= $slot_count ? 'ready' : 'partial' );
             $fields[ $field_slug ]['panels'][] = array(
@@ -371,7 +401,7 @@ final class SC_Library_Field_Spotlights {
                 $panel['hero'] = $this->enrich_hero( $panel['hero'] );
                 $public_articles = array();
                 foreach ( array_slice( $panel['articles'], 0, absint( $panel['slot_count'] ) ) as $article ) {
-                    if ( empty( $article['enabled'] ) || ( empty( $article['source_id'] ) && empty( $article['url'] ) ) ) { continue; }
+                    if ( empty( $article['source_id'] ) && empty( $article['url'] ) ) { continue; }
                     $resolved = $this->enrich_article( $article );
                     if ( $resolved ) { $public_articles[] = $resolved; }
                 }
@@ -410,7 +440,7 @@ final class SC_Library_Field_Spotlights {
     private function enrich_article( array $article ): ?array {
         $source_id = absint( $article['source_id'] ?? 0 );
         $url = esc_url_raw( (string) ( $article['url'] ?? '' ) );
-        if ( ! $source_id && $url ) { $source_id = absint( url_to_postid( $url ) ); }
+        $source_id = $this->resolve_article_source_id( $source_id, $url );
         $post = $source_id ? get_post( $source_id ) : null;
         if ( $post instanceof WP_Post ) {
             if ( 'publish' !== $post->post_status || post_password_required( $post ) ) { return null; }
@@ -835,11 +865,12 @@ final class SC_Library_Field_Spotlights {
                                     <input type="hidden" data-source-id name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][source_id]" value="<?php echo esc_attr( (string) absint( $article['source_id'] ?? 0 ) ); ?>">
                                     <label><span>Article URL</span><input data-source-url type="url" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][url]" value="<?php echo esc_attr( (string) ( $article['url'] ?? '' ) ); ?>" placeholder="https://sustainablecatalyst.com/..."></label>
                                     <label><span>Optional display title</span><input data-source-title type="text" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][title]" value="<?php echo esc_attr( (string) ( $article['title'] ?? '' ) ); ?>"></label>
-                                    <div class="sc-fs-admin__slot-actions"><label class="sc-fs-admin__check"><input data-source-enabled type="checkbox" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][enabled]" value="1" <?php checked( ! empty( $article['enabled'] ) ); ?>><span>Enable this slot</span></label><button type="button" class="button-link-delete" data-clear-slot>Clear slot</button></div>
+                                    <input data-source-enabled type="hidden" name="<?php echo esc_attr( self::SETTINGS_OPTION ); ?>[panels][<?php echo esc_attr( $selected_panel_key ); ?>][articles][<?php echo esc_attr( (string) $i ); ?>][enabled]" value="<?php echo ( ! empty( $article['source_id'] ) || ! empty( $article['url'] ) ) ? '1' : '0'; ?>">
+                                    <div class="sc-fs-admin__slot-actions"><span class="sc-fs-admin__slot-publish-state" data-slot-publish-state><?php echo ( ! empty( $article['source_id'] ) || ! empty( $article['url'] ) ) ? 'Publishes on save' : 'Empty slot'; ?></span><button type="button" class="button-link-delete" data-clear-slot>Clear slot</button></div>
                                 </fieldset>
                             <?php endfor; ?>
                             </div>
-                            <div class="sc-fs-admin__savebar"><?php submit_button( __( 'Save Spotlight content', 'sustainable-catalyst-library' ), 'primary', 'submit', false ); ?><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sc-library-field-spotlights&field=' . rawurlencode( $selected_field ) ) ); ?>">Close editor</a><span>Selections are manual-only. Empty slots remain empty; no automatic backfill occurs.</span></div>
+                            <div class="sc-fs-admin__savebar"><?php submit_button( __( 'Save Spotlight content', 'sustainable-catalyst-library' ), 'primary', 'submit', false ); ?><a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=sc-library-field-spotlights&field=' . rawurlencode( $selected_field ) ) ); ?>">Close editor</a><span>Selecting an article activates that slot automatically. Empty slots remain empty; no automatic backfill occurs.</span></div>
                         </form>
                     </section>
                     <?php endif; ?>

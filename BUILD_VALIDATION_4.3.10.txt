@@ -1,0 +1,23 @@
+Sustainable Catalyst Library v4.3.10
+Supporting Article Slot Persistence & Public Binding Repair
+
+PASS  Plugin header version: 4.3.10
+PASS  SC_LIBRARY_VERSION constant: 4.3.10
+PASS  WordPress stable tag: 4.3.10
+PASS  Field Spotlight module version: 4.3.10
+PASS  Durable Field Spotlight option remains sc_library_field_spotlights_settings_v434
+PASS  v4.3.10 settings-group and transient cache boundaries advanced
+PASS  Populated supporting slots activate automatically
+PASS  Legacy populated slots no longer disappear because enabled=0
+PASS  Post-ID, canonical-URL, and slug fallback resolver present
+PASS  Admin selection state reports Publishes on save
+PASS  Explicit Clear slot behavior preserved
+PASS  v4.3.9 accordion / white active panel / sharp-edge behavior preserved
+PASS  Homepage Spotlight regression contract preserved
+PASS  Publications regression contract preserved
+PASS  PHP supporting-slot runtime fixture passed
+PASS  PHP syntax validation passed
+PASS  JavaScript syntax validation passed
+
+Targeted validation command:
+  bash tests/run_v4310_validation.sh

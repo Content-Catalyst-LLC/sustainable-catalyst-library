@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.9
+Stable tag: 4.3.10
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.9 sharpens the Field Spotlight presentation and restores Homepage Spotlight interaction parity. The first eight panels remain visible initially; panel 9+ is now genuinely collapsed behind an accessible additional-fields disclosure, the currently playing panel is white with black text and a red position cue, and the field surface uses square institutional geometry. The underlying Field Spotlight data architecture remains unchanged. Fourteen major fields now expose 170 flattened Article Map series panels as a durable editorial model: taxonomy groups remain metadata, each panel has a permanent Article Map hero identity, supporting article slots default to four and can be configured from two through eight, and panel 9+ is marked for progressive disclosure after the default eight-panel opening tier. The v4.3.3 Publications shortcode and v4.2.0 Homepage Spotlight remain unchanged.
+Sustainable Catalyst Library v4.3.10 repairs supporting-article slot persistence and public binding while preserving the v4.3.9 Field Spotlight presentation and Homepage Spotlight interaction parity. The first eight panels remain visible initially; panel 9+ is now genuinely collapsed behind an accessible additional-fields disclosure, the currently playing panel is white with black text and a red position cue, and the field surface uses square institutional geometry. The underlying Field Spotlight data architecture remains unchanged. Fourteen major fields now expose 170 flattened Article Map series panels as a durable editorial model: taxonomy groups remain metadata, each panel has a permanent Article Map hero identity, supporting article slots default to four and can be configured from two through eight, and panel 9+ is marked for progressive disclosure after the default eight-panel opening tier. The v4.3.3 Publications shortcode and v4.2.0 Homepage Spotlight remain unchanged.
 
 
 
@@ -158,6 +158,14 @@ Sustainable Catalyst Library v4.3.9 sharpens the Field Spotlight presentation an
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.10 =
+* Repairs the four supporting article positions beneath every Field Spotlight Article Map hero.
+* Selecting a Library article now activates its slot automatically; no separate enable-checkbox state can suppress a saved selection.
+* Preserves exact slot positions and resolves selected records by saved post ID, canonical URL, or URL slug fallback.
+* Public rendering now treats a populated slot as configured even when an older v4.3.9 option record contains a stale disabled flag.
+* Saving Field Spotlight content continues to invalidate both normalized-model and public-render transients immediately.
+
 
 
 = 4.3.3 =
