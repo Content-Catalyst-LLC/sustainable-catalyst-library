@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const root = document.querySelector('[data-sc-field-spotlights-admin="v4.3.12"]');
+  const root = document.querySelector('[data-sc-field-spotlights-admin="v4.3.13"]');
   if (!root) return;
   const cfg = window.SCFieldSpotlightsAdmin || {};
   const panelSearch = root.querySelector('#sc-fs-panel-search');

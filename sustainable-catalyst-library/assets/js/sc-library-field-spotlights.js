@@ -1,37 +1,62 @@
 (() => {
   'use strict';
+
   const q = (root, sel) => root.querySelector(sel);
   const qa = (root, sel) => Array.from(root.querySelectorAll(sel));
   const esc = (value) => String(value ?? '');
   const two = (n) => String(n).padStart(2, '0');
+  const absoluteUrl = (value) => {
+    try { return new URL(String(value || '/'), window.location.origin).href; }
+    catch { return String(value || '#'); }
+  };
 
   const placeholder = (small = false) => {
     const span = document.createElement('span');
     span.className = `sc-field-spotlight__placeholder${small ? ' sc-field-spotlight__placeholder--small' : ''}`;
     const strong = document.createElement('strong'); strong.textContent = 'KL'; span.append(strong);
-    if (!small) { const smallEl = document.createElement('small'); smallEl.textContent = 'ARTICLE MAP'; span.append(smallEl); }
+    if (!small) {
+      const smallEl = document.createElement('small');
+      smallEl.textContent = 'ARTICLE MAP';
+      span.append(smallEl);
+    }
     return span;
   };
 
   const media = (root, thumb, small = false) => {
+    if (!root) return;
     root.replaceChildren();
     if (thumb?.url) {
-      const img = document.createElement('img'); img.src = thumb.url; img.alt = thumb.alt || ''; img.loading = small ? 'lazy' : 'eager';
+      const img = document.createElement('img');
+      img.src = thumb.url;
+      img.alt = thumb.alt || '';
+      img.loading = small ? 'lazy' : 'eager';
       img.addEventListener('error', () => root.replaceChildren(placeholder(small)), { once: true });
       root.append(img);
-    } else root.append(placeholder(small));
+    } else {
+      root.append(placeholder(small));
+    }
   };
 
-  const initialize = (spotlight) => {
-    const dataNode = q(spotlight, '.sc-field-spotlight__data');
-    let payload;
-    try { payload = JSON.parse(dataNode?.textContent || '{}'); } catch { return; }
-    const field = payload.field || {};
-    const labels = payload.labels || {};
-    const panels = Array.isArray(field.panels) ? field.panels : [];
-    if (!panels.length) return;
+  const createPanelTab = (panel, index, selected = false) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.setAttribute('role', 'tab');
+    button.className = `sc-field-spotlight__tab${selected ? ' is-active' : ''}`;
+    button.dataset.panelKey = panel.key || '';
+    button.setAttribute('aria-selected', selected ? 'true' : 'false');
+    button.tabIndex = selected ? 0 : -1;
 
-    const tabs = qa(spotlight, '[data-panel-key]');
+    const number = document.createElement('span');
+    number.textContent = two(index + 1);
+    const title = document.createElement('strong');
+    title.textContent = esc(panel.title);
+    button.append(number, title);
+    return button;
+  };
+
+  const initializeStage = (spotlight, initialField, labels = {}, options = {}) => {
+    if (!spotlight || !initialField) return null;
+
     const heroMedia = q(spotlight, '.sc-field-spotlight__hero-media');
     const heroLabel = q(spotlight, '.sc-field-spotlight__hero-label');
     const heroTitle = q(spotlight, '.sc-field-spotlight__hero h3');
@@ -45,30 +70,45 @@
     const slotCount = q(spotlight, '[data-slot-count]');
     const index = q(spotlight, '[data-panel-index]');
     const more = q(spotlight, '[data-more-toggle]');
+    const moreLabel = q(spotlight, '[data-more-label]');
+    const moreCount = q(spotlight, '[data-more-count]');
     const additional = q(spotlight, '[data-additional-tabs]');
+    const primaryTabs = q(spotlight, '[data-primary-tabs]');
+    const panelNav = q(spotlight, '[data-panel-nav]');
     const status = q(spotlight, '[data-playback-status]');
     const progress = q(spotlight, '[data-panel-progress]');
     const toggle = q(spotlight, '[data-panel-toggle]');
     const toggleIcon = q(spotlight, '[data-panel-toggle-icon]');
     const toggleText = q(spotlight, '[data-panel-toggle-text]');
+    const fieldEyebrow = q(spotlight, '[data-field-eyebrow]');
+    const fieldTitle = q(spotlight, '[data-field-title]');
+    const fieldDescription = q(spotlight, '[data-field-description]');
+    const fieldPanelCount = q(spotlight, '[data-field-panel-count]');
+    const fieldBrowse = q(spotlight, '[data-field-browse]');
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const interval = Math.max(8000, Number.parseInt(spotlight.dataset.interval || '14000', 10) || 14000);
-    const pauseOnHover = spotlight.dataset.pauseOnHover !== 'false';
+
+    const configuredInterval = options.interval ?? spotlight.dataset.interval ?? '14000';
+    const interval = Math.max(8000, Number.parseInt(configuredInterval, 10) || 14000);
+    const pauseOnHover = String(options.pauseOnHover ?? spotlight.dataset.pauseOnHover ?? 'true') !== 'false';
+    const autoplay = String(options.autoplay ?? spotlight.dataset.autoplay ?? 'true') === 'true';
+
+    let field = initialField;
+    let fieldNumber = Number.parseInt(options.fieldNumber || '1', 10) || 1;
+    let panels = Array.isArray(field.panels) ? field.panels : [];
     let active = 0;
-    let userPaused = spotlight.dataset.autoplay !== 'true';
+    let userPaused = !autoplay;
     let interactionPaused = false;
-    let secondaryExpanded = Boolean(additional) && spotlight.dataset.secondaryOpen === 'true';
+    let secondaryExpanded = false;
     let timer = null;
     let touchStartX = null;
 
     const label = (name, fallback) => spotlight.dataset[name] || fallback;
+    const panelTabs = () => qa(spotlight, '[data-panel-key]');
     const panelIndexByKey = (key) => panels.findIndex((panel) => panel.key === key);
-    const panelTier = (panel) => panel?.disclosure === 'additional' ? 'additional' : 'primary';
     const navigableIndexes = () => {
       const all = panels.map((panel, idx) => ({ panel, idx }));
-      if (!additional || secondaryExpanded) return all.map(({idx}) => idx);
-      const primary = all.filter(({panel}) => panelTier(panel) === 'primary').map(({idx}) => idx);
-      return primary.length ? primary : all.map(({idx}) => idx);
+      if (!additional || secondaryExpanded || panels.length <= 8) return all.map(({ idx }) => idx);
+      return all.slice(0, 8).map(({ idx }) => idx);
     };
     const adjacentIndex = (direction) => {
       const indexes = navigableIndexes();
@@ -88,7 +128,13 @@
       const state = playbackState();
       spotlight.dataset.playbackState = state;
       if (status) {
-        const names = {auto:label('statusAuto','Auto'),paused:label('statusPaused','Paused'),hold:label('statusHold','Hold'),static:label('statusStatic','Static'),reduced:label('statusReduced','Reduced motion')};
+        const names = {
+          auto: label('statusAuto', 'Auto'),
+          paused: label('statusPaused', 'Paused'),
+          hold: label('statusHold', 'Hold'),
+          static: label('statusStatic', 'Static'),
+          reduced: label('statusReduced', 'Reduced motion')
+        };
         status.textContent = (names[state] || names.paused).toUpperCase();
       }
       return state;
@@ -97,7 +143,7 @@
       const paused = userPaused || prefersReducedMotion.matches;
       if (toggle) {
         toggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
-        toggle.setAttribute('aria-label', paused ? label('labelPlay','Play automatic rotation') : label('labelPause','Pause automatic rotation'));
+        toggle.setAttribute('aria-label', paused ? label('labelPlay', 'Play automatic rotation') : label('labelPause', 'Pause automatic rotation'));
         toggle.disabled = prefersReducedMotion.matches;
         if (prefersReducedMotion.matches) toggle.title = 'Automatic rotation is disabled by your reduced-motion preference.';
         else toggle.removeAttribute('title');
@@ -120,14 +166,32 @@
       if (state !== 'auto') return;
       timer = window.setTimeout(() => activate(adjacentIndex(1), false), interval);
     };
+
     const updateAdditional = () => {
       if (!additional || !more) return;
-      additional.hidden = !secondaryExpanded;
-      additional.setAttribute('aria-hidden', secondaryExpanded ? 'false' : 'true');
-      more.setAttribute('aria-expanded', secondaryExpanded ? 'true' : 'false');
-      q(more, '.sc-field-spotlight__more-icon').textContent = secondaryExpanded ? '−' : '+';
-      q(more, '[data-more-label]').textContent = secondaryExpanded ? (labels.hide_additional_label || 'Hide additional fields') : (labels.additional_label || 'Explore additional fields');
+      const extraCount = Math.max(0, panels.length - 8);
+      more.hidden = extraCount === 0;
+      additional.hidden = extraCount === 0 || !secondaryExpanded;
+      additional.setAttribute('aria-hidden', extraCount > 0 && secondaryExpanded ? 'false' : 'true');
+      more.setAttribute('aria-expanded', extraCount > 0 && secondaryExpanded ? 'true' : 'false');
+      const icon = q(more, '.sc-field-spotlight__more-icon');
+      if (icon) icon.textContent = secondaryExpanded ? '−' : '+';
+      if (moreLabel) moreLabel.textContent = secondaryExpanded ? (labels.hide_additional_label || 'Hide additional fields') : (labels.additional_label || 'Explore additional fields');
+      if (moreCount) moreCount.textContent = String(extraCount);
       spotlight.dataset.secondaryExpanded = secondaryExpanded ? 'true' : 'false';
+    };
+
+    const buildPanelNavigation = () => {
+      if (!primaryTabs || !additional) return;
+      primaryTabs.replaceChildren();
+      additional.replaceChildren();
+      panels.forEach((panel, idx) => {
+        const button = createPanelTab(panel, idx, idx === 0);
+        if (idx < 8) primaryTabs.append(button);
+        else additional.append(button);
+      });
+      if (panelNav) panelNav.setAttribute('aria-label', `${field.title || 'Field'} series panels`);
+      updateAdditional();
     };
 
     const renderCards = (panel) => {
@@ -136,56 +200,137 @@
       if (slotCount) slotCount.textContent = `${panel.slot_count || 0} SLOTS`;
       if (empty) empty.hidden = articles.length > 0;
       articles.forEach((article, i) => {
-        const card = document.createElement('article'); card.className = 'sc-field-spotlight__card';
-        const mediaLink = document.createElement('a'); mediaLink.className = 'sc-field-spotlight__card-media'; mediaLink.href = article.url || '#'; media(mediaLink, article.thumbnail, true);
-        const copy = document.createElement('div'); copy.className = 'sc-field-spotlight__card-copy';
-        const num = document.createElement('p'); num.className = 'sc-field-spotlight__card-number'; num.textContent = `SELECTED ARTICLE ${two(i + 1)}`;
-        const h5 = document.createElement('h5'); const a = document.createElement('a'); a.href = article.url || '#'; a.textContent = esc(article.title); h5.append(a);
+        const card = document.createElement('article');
+        card.className = 'sc-field-spotlight__card';
+        const mediaLink = document.createElement('a');
+        mediaLink.className = 'sc-field-spotlight__card-media';
+        mediaLink.href = article.url || '#';
+        media(mediaLink, article.thumbnail, true);
+        const copy = document.createElement('div');
+        copy.className = 'sc-field-spotlight__card-copy';
+        const num = document.createElement('p');
+        num.className = 'sc-field-spotlight__card-number';
+        num.textContent = `SELECTED ARTICLE ${two(i + 1)}`;
+        const h5 = document.createElement('h5');
+        const a = document.createElement('a');
+        a.href = article.url || '#';
+        a.textContent = esc(article.title);
+        h5.append(a);
         copy.append(num, h5);
-        if (article.metadata) { const meta = document.createElement('p'); meta.className = 'sc-field-spotlight__card-meta'; meta.textContent = esc(article.metadata); copy.append(meta); }
-        if (article.summary) { const sum = document.createElement('p'); sum.className = 'sc-field-spotlight__card-summary'; sum.textContent = esc(article.summary); copy.append(sum); }
-        card.append(mediaLink, copy); cards?.append(card);
+        if (article.metadata) {
+          const meta = document.createElement('p');
+          meta.className = 'sc-field-spotlight__card-meta';
+          meta.textContent = esc(article.metadata);
+          copy.append(meta);
+        }
+        if (article.summary) {
+          const sum = document.createElement('p');
+          sum.className = 'sc-field-spotlight__card-summary';
+          sum.textContent = esc(article.summary);
+          copy.append(sum);
+        }
+        card.append(mediaLink, copy);
+        cards?.append(card);
       });
     };
 
     const activate = (next, focusTab = false) => {
+      if (!panels.length) return;
       active = Math.max(0, Math.min(panels.length - 1, next));
       const panel = panels[active];
-      tabs.forEach((tab) => { const selected = tab.dataset.panelKey === panel.key; tab.classList.toggle('is-active', selected); tab.setAttribute('aria-selected', selected ? 'true' : 'false'); tab.tabIndex = selected ? 0 : -1; });
+      panelTabs().forEach((tab) => {
+        const selected = tab.dataset.panelKey === panel.key;
+        tab.classList.toggle('is-active', selected);
+        tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+        tab.tabIndex = selected ? 0 : -1;
+      });
       const h = panel.hero || {};
       if (heroMedia) { heroMedia.href = h.url || '#'; media(heroMedia, h.thumbnail, false); }
       if (heroLabel) heroLabel.textContent = `${labels.hero_label || 'Article Map'}`;
       if (heroTitle) heroTitle.textContent = esc(h.title || panel.title);
-      if (heroMeta) { heroMeta.textContent = esc(h.metadata || 'Article Map'); heroMeta.hidden = !heroMeta.textContent; }
+      if (heroMeta) {
+        heroMeta.textContent = esc(h.metadata || 'Article Map');
+        heroMeta.hidden = !heroMeta.textContent;
+      }
       if (heroDescription) heroDescription.textContent = esc(h.description || 'Use the Article Map to move through the complete series, its structure, and related research pathways.');
-      if (heroAction) { heroAction.href = h.url || '#'; heroAction.firstChild.textContent = `${esc(h.cta || labels.hero_cta || 'Explore Article Map')} `; }
+      if (heroAction) {
+        heroAction.href = h.url || '#';
+        const textNode = heroAction.firstChild;
+        if (textNode) textNode.textContent = `${esc(h.cta || labels.hero_cta || 'Explore Article Map')} `;
+      }
       if (breadcrumb) breadcrumb.textContent = `${field.title || ''}${panel.source_group ? ` / ${panel.source_group}` : ''}`;
       if (position) position.innerHTML = `PANEL <strong>${two(active + 1)}</strong> / ${two(panels.length)}`;
-      if (index) { index.replaceChildren(); const strong = document.createElement('strong'); strong.textContent = esc(panel.title); const span = document.createElement('span'); span.textContent = `${two(active + 1)} / ${two(panels.length)}`; index.append(strong, span); }
+      if (index) {
+        index.replaceChildren();
+        const strong = document.createElement('strong'); strong.textContent = esc(panel.title);
+        const span = document.createElement('span'); span.textContent = `${two(active + 1)} / ${two(panels.length)}`;
+        index.append(strong, span);
+      }
       renderCards(panel);
-      if (focusTab) tabs.find((tab) => tab.dataset.panelKey === panel.key)?.focus({preventScroll:true});
+      if (focusTab) panelTabs().find((tab) => tab.dataset.panelKey === panel.key)?.focus({ preventScroll: true });
       schedule();
     };
 
-    tabs.forEach((tab) => {
-      tab.addEventListener('click', () => { const i = panelIndexByKey(tab.dataset.panelKey); if (i >= 0) activate(i); });
-      tab.addEventListener('keydown', (event) => {
-        if (!['ArrowRight','ArrowLeft','Home','End'].includes(event.key)) return;
-        event.preventDefault();
-        const tablist = tab.closest('[role="tablist"]');
-        const list = tablist ? Array.from(tablist.querySelectorAll('[data-panel-key]')) : tabs;
-        const pos = Math.max(0, list.indexOf(tab));
-        let requested = pos;
-        if (event.key === 'ArrowRight') requested = pos + 1;
-        if (event.key === 'ArrowLeft') requested = pos - 1;
-        if (event.key === 'Home') requested = 0;
-        if (event.key === 'End') requested = list.length - 1;
-        requested = (requested + list.length) % list.length;
-        const nextTab = list[requested];
-        const i = panelIndexByKey(nextTab?.dataset.panelKey);
-        if (i >= 0) activate(i, true);
-      });
+    const updateFieldIdentity = () => {
+      spotlight.dataset.fieldKey = field.key || '';
+      if (fieldEyebrow) fieldEyebrow.innerHTML = `<span aria-hidden="true">KL</span> KNOWLEDGE LIBRARY · FIELD ${two(fieldNumber)}`;
+      if (fieldTitle) fieldTitle.textContent = esc(field.title);
+      if (fieldDescription) {
+        fieldDescription.textContent = esc(field.description);
+        fieldDescription.hidden = !fieldDescription.textContent;
+      }
+      if (fieldPanelCount) fieldPanelCount.textContent = `${panels.length} PANELS`;
+      if (fieldBrowse) fieldBrowse.href = absoluteUrl(field.browse_url || '/library/');
+    };
+
+    const setField = (nextField, nextFieldNumber = 1) => {
+      if (!nextField || !Array.isArray(nextField.panels) || !nextField.panels.length) return;
+      clearTimer();
+      field = nextField;
+      fieldNumber = nextFieldNumber;
+      panels = nextField.panels;
+      active = 0;
+      secondaryExpanded = false;
+      updateFieldIdentity();
+      buildPanelNavigation();
+      activate(0);
+      spotlight.dispatchEvent(new CustomEvent('sc:fieldspotlight:fieldchange', { bubbles: true, detail: { fieldKey: field.key || '', fieldNumber } }));
+    };
+
+    panelNav?.addEventListener('click', (event) => {
+      const tab = event.target.closest('[data-panel-key]');
+      if (tab && panelNav.contains(tab)) {
+        const i = panelIndexByKey(tab.dataset.panelKey);
+        if (i >= 0) activate(i);
+        return;
+      }
+      const disclosure = event.target.closest('[data-more-toggle]');
+      if (disclosure && panelNav.contains(disclosure)) {
+        secondaryExpanded = !secondaryExpanded;
+        updateAdditional();
+        if (!secondaryExpanded && active >= 8) activate(0);
+        else schedule();
+      }
     });
+
+    panelNav?.addEventListener('keydown', (event) => {
+      const tab = event.target.closest('[data-panel-key]');
+      if (!tab || !['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      const tablist = tab.closest('[role="tablist"]');
+      const list = tablist ? Array.from(tablist.querySelectorAll('[data-panel-key]')) : panelTabs();
+      const pos = Math.max(0, list.indexOf(tab));
+      let requested = pos;
+      if (event.key === 'ArrowRight') requested = pos + 1;
+      if (event.key === 'ArrowLeft') requested = pos - 1;
+      if (event.key === 'Home') requested = 0;
+      if (event.key === 'End') requested = list.length - 1;
+      requested = (requested + list.length) % list.length;
+      const nextTab = list[requested];
+      const i = panelIndexByKey(nextTab?.dataset.panelKey);
+      if (i >= 0) activate(i, true);
+    });
+
     qa(spotlight, '[data-panel-prev]').forEach((button) => button.addEventListener('click', () => activate(adjacentIndex(-1))));
     qa(spotlight, '[data-panel-next]').forEach((button) => button.addEventListener('click', () => activate(adjacentIndex(1))));
     toggle?.addEventListener('click', () => {
@@ -194,37 +339,126 @@
       updateToggle();
       schedule();
     });
-    more?.addEventListener('click', () => {
-      secondaryExpanded = !secondaryExpanded;
-      updateAdditional();
-      if (!secondaryExpanded && panelTier(panels[active]) === 'additional') {
-        const firstPrimary = panels.findIndex((panel) => panelTier(panel) === 'primary');
-        activate(Math.max(0, firstPrimary));
-      } else schedule();
-    });
 
     if (pauseOnHover) {
       spotlight.addEventListener('mouseenter', () => { interactionPaused = true; clearTimer(); updatePlaybackState(); restartProgress(); });
       spotlight.addEventListener('mouseleave', () => { interactionPaused = false; schedule(); });
     }
     spotlight.addEventListener('focusin', () => { interactionPaused = true; clearTimer(); updatePlaybackState(); restartProgress(); });
-    spotlight.addEventListener('focusout', (event) => { if (!spotlight.contains(event.relatedTarget)) { interactionPaused = false; schedule(); } });
+    spotlight.addEventListener('focusout', (event) => {
+      if (!spotlight.contains(event.relatedTarget)) { interactionPaused = false; schedule(); }
+    });
     document.addEventListener('visibilitychange', schedule);
-    spotlight.addEventListener('touchstart', (event) => { interactionPaused = true; clearTimer(); updatePlaybackState(); restartProgress(); touchStartX = event.changedTouches[0]?.clientX ?? null; }, {passive:true});
+    spotlight.addEventListener('touchstart', (event) => {
+      interactionPaused = true;
+      clearTimer();
+      updatePlaybackState();
+      restartProgress();
+      touchStartX = event.changedTouches[0]?.clientX ?? null;
+    }, { passive: true });
     spotlight.addEventListener('touchend', (event) => {
       const endX = event.changedTouches[0]?.clientX ?? touchStartX;
       const delta = touchStartX === null ? 0 : endX - touchStartX;
-      touchStartX = null; interactionPaused = false;
+      touchStartX = null;
+      interactionPaused = false;
       if (Math.abs(delta) >= 50) activate(delta > 0 ? adjacentIndex(-1) : adjacentIndex(1));
       else schedule();
-    }, {passive:true});
+    }, { passive: true });
     prefersReducedMotion.addEventListener?.('change', () => { updateToggle(); schedule(); });
 
-    updateAdditional();
+    updateFieldIdentity();
+    buildPanelNavigation();
     updateToggle();
     activate(0);
+
+    return { setField };
   };
 
-  const boot = () => document.querySelectorAll('[data-sc-field-spotlights="v4.3.12"] .sc-field-spotlight').forEach(initialize);
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+  const initializeSingle = (root) => {
+    const spotlight = q(root, '.sc-field-spotlight');
+    const dataNode = q(root, '.sc-field-spotlight__data');
+    let payload;
+    try { payload = JSON.parse(dataNode?.textContent || '{}'); } catch { return; }
+    const field = payload.field || {};
+    if (!Array.isArray(field.panels) || !field.panels.length) return;
+    initializeStage(spotlight, field, payload.labels || {}, {
+      autoplay: spotlight.dataset.autoplay,
+      interval: spotlight.dataset.interval,
+      pauseOnHover: spotlight.dataset.pauseOnHover,
+      fieldNumber: Number.parseInt(field.order || '1', 10) || 1
+    });
+  };
+
+  const initializeMaster = (root) => {
+    const dataNode = q(root, '.sc-field-spotlights__master-data');
+    let payload;
+    try { payload = JSON.parse(dataNode?.textContent || '{}'); } catch { return; }
+    const fields = Array.isArray(payload.fields) ? payload.fields : [];
+    if (!fields.length) return;
+
+    const spotlight = q(root, '.sc-field-spotlight--master-stage');
+    const fieldTabs = qa(root, '[data-field-select-key]');
+    const fieldSelect = q(root, '[data-field-select]');
+    let activeField = 0;
+
+    const stage = initializeStage(spotlight, fields[0], payload.labels || {}, {
+      autoplay: root.dataset.autoplay,
+      interval: root.dataset.interval,
+      pauseOnHover: root.dataset.pauseOnHover,
+      fieldNumber: 1
+    });
+    if (!stage) return;
+
+    const fieldIndexByKey = (key) => fields.findIndex((field) => field.key === key);
+    const activateField = (next, focusTab = false) => {
+      activeField = Math.max(0, Math.min(fields.length - 1, next));
+      const field = fields[activeField];
+      fieldTabs.forEach((tab) => {
+        const selected = tab.dataset.fieldSelectKey === field.key;
+        tab.classList.toggle('is-active', selected);
+        tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+        tab.tabIndex = selected ? 0 : -1;
+      });
+      if (fieldSelect) fieldSelect.value = field.key || '';
+      stage.setField(field, activeField + 1);
+      root.dataset.activeField = field.key || '';
+      if (focusTab) fieldTabs.find((tab) => tab.dataset.fieldSelectKey === field.key)?.focus({ preventScroll: true });
+    };
+
+    fieldTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const i = fieldIndexByKey(tab.dataset.fieldSelectKey);
+        if (i >= 0) activateField(i);
+      });
+      tab.addEventListener('keydown', (event) => {
+        if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        const pos = Math.max(0, fieldTabs.indexOf(tab));
+        let requested = pos;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') requested = pos + 1;
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') requested = pos - 1;
+        if (event.key === 'Home') requested = 0;
+        if (event.key === 'End') requested = fieldTabs.length - 1;
+        requested = (requested + fieldTabs.length) % fieldTabs.length;
+        activateField(requested, true);
+      });
+    });
+
+    fieldSelect?.addEventListener('change', () => {
+      const i = fieldIndexByKey(fieldSelect.value);
+      if (i >= 0) activateField(i);
+    });
+
+    activateField(0);
+  };
+
+  const boot = () => {
+    document.querySelectorAll('[data-sc-field-spotlights="v4.3.13"]').forEach((root) => {
+      if (root.dataset.scFieldSpotlightsMode === 'master') initializeMaster(root);
+      else initializeSingle(root);
+    });
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();

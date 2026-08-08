@@ -1,6 +1,6 @@
 <?php
 /**
- * Major Field Spotlight system for Sustainable Catalyst Library v4.3.12.
+ * Major Field Spotlight system for Sustainable Catalyst Library v4.3.13.
  *
  * Administration: SC Library -> Field Spotlights.
  * This release renders that durable editorial model as Spotlight-parity public
@@ -18,11 +18,11 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.12';
+    public const VERSION = '4.3.13';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
     public const PANEL_CONTENT_OPTION = 'sc_library_field_spotlight_panel_content_v4312';
-    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v4312';
-    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v4312';
+    public const SETTINGS_GROUP = 'sc_library_field_spotlights_v4313';
+    public const MODEL_CACHE_KEY = 'sc_library_field_spotlights_model_v4313';
     public const MODEL_CACHE_TTL = 600;
     public const DEFAULT_PANEL_LIMIT = 8;
     public const DEFAULT_SLOT_COUNT = 4;
@@ -31,7 +31,7 @@ final class SC_Library_Field_Spotlights {
     public const MAX_SLOT_COUNT = 8;
     public const SHORTCODE_STACK = 'sc_field_spotlights';
     public const SHORTCODE_SINGLE = 'sc_field_spotlight';
-    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v4312';
+    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v4313';
 
     public function register_hooks(): void {
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 41 );
@@ -669,8 +669,13 @@ final class SC_Library_Field_Spotlights {
         $autoplay = $this->shortcode_bool( $display['autoplay'] ?? $settings['general']['autoplay'] ?? true, true );
         $pause_on_hover = $this->shortcode_bool( $display['pause_on_hover'] ?? $settings['general']['pause_on_hover'] ?? true, true );
         $interval = max( 8000, min( 60000, absint( $display['interval'] ?? $settings['general']['interval'] ?? self::DEFAULT_INTERVAL ) ) );
+        $master_mode = ! $only_field && count( $fields ) > 1;
         ob_start();
-        include SC_LIBRARY_DIR . 'templates/field-spotlights.php';
+        if ( $master_mode ) {
+            include SC_LIBRARY_DIR . 'templates/field-spotlights.php';
+        } else {
+            include SC_LIBRARY_DIR . 'templates/field-spotlight-single.php';
+        }
         return (string) ob_get_clean();
     }
 
@@ -822,7 +827,7 @@ final class SC_Library_Field_Spotlights {
         }
         $overall_completion = $total_slots ? min( 100, (int) round( ( $total_configured / $total_slots ) * 100 ) ) : 0;
         ?>
-        <div class="wrap sc-fs-admin" data-sc-field-spotlights-admin="v4.3.12">
+        <div class="wrap sc-fs-admin" data-sc-field-spotlights-admin="v4.3.13">
             <header class="sc-fs-admin__hero">
                 <div>
                     <p class="sc-fs-admin__eyebrow">KNOWLEDGE LIBRARY · FIELD SPOTLIGHTS</p>

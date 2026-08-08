@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.12
+Stable tag: 4.3.13
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.12 repairs persistent Field Spotlight content saving by separating Article Map hero copy and supporting-article selections from the large Field Spotlight configuration option. Panel content is now written to a dedicated durable store, read back immediately, counted, and surfaced in the save confirmation. Legacy saved content remains readable, while new panel saves no longer pass through the partial settings merge/sanitize path. The v4.3.9 public presentation remains intact: first eight panels visible, panel 9+ behind an accessible disclosure, white active panel state, square institutional geometry, Article Map hero plus supporting articles, and Homepage Spotlight-style playback. The v4.3.3 Publications shortcode and v4.2.0 Homepage Spotlight remain unchanged.
+Sustainable Catalyst Library v4.3.13 replaces the stacked 14-Field Spotlight output with one master Publications spotlight. All 14 major fields are selectable from a compact field index, and the active field swaps its Article Map panel rail, hero, supporting publications, and playback controls in place. The page no longer grows with 14 complete spotlight modules. Each active field retains the first-eight-panel presentation, progressive disclosure for additional panels, white active panel state, sharp institutional geometry, Article Map hero, supporting article slots, keyboard/touch controls, and autoplay. Durable v4.3.12 panel-content persistence is preserved.
 
 
 
@@ -158,6 +158,12 @@ Sustainable Catalyst Library v4.3.12 repairs persistent Field Spotlight content 
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.13 =
+* Replaced the stacked Field Spotlight shortcode with a single master 14-field Publications surface.
+* Added compact selectable field index with keyboard navigation and mobile field selector.
+* Active field now swaps its panel rail, Article Map hero, supporting publications, telemetry, and playback state in place.
+* Preserved first-eight-panel disclosure, autoplay, supporting-article persistence, and single-field shortcode compatibility.
 
 = 4.3.12 =
 * Repairs Field Spotlight content persistence by replacing the fragile Settings API form submission path with an explicit authenticated admin-post save transaction.
