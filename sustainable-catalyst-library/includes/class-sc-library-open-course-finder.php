@@ -277,6 +277,15 @@ final class SC_Library_Open_Course_Finder {
                 'summary' => 'A zero-prior-experience introduction to essential ideas of computer science and computing.',
             ),
             array(
+                'id' => 'ucph-global-sdgs', 'provider' => 'coursera', 'institution' => 'University of Copenhagen',
+                'title' => 'The Sustainable Development Goals – A global, transdisciplinary vision for the future',
+                'subjects' => array( 'Sustainability', 'SDGs', 'Systems Thinking', 'Governance', 'Environment', 'Climate' ), 'level' => 'Beginner',
+                'access' => 'free-course', 'access_label' => 'Free Course', 'format' => 'Coursera · 3 modules · approx. 10 hours',
+                'url' => 'https://www.coursera.org/learn/global-sustainable-development',
+                'summary' => 'University of Copenhagen introduction to sustainability and the UN Sustainable Development Goals, including progress measurement and the management of global systems supporting humanity.',
+                'access_note' => "Course-level free access verified independently of Coursera's provider-level default.",
+            ),
+            array(
                 'id' => 'sdg-age', 'provider' => 'sdg-academy', 'institution' => 'SDG Academy',
                 'title' => 'The Age of Sustainable Development',
                 'subjects' => array( 'Sustainability', 'Development', 'SDGs' ), 'level' => 'Introductory',
@@ -375,6 +384,7 @@ final class SC_Library_Open_Course_Finder {
                     <select name="access">
                         <option value=""><?php esc_html_e( 'All access models', 'sustainable-catalyst-library' ); ?></option>
                         <option value="free-open"><?php esc_html_e( 'Free & open', 'sustainable-catalyst-library' ); ?></option>
+                        <option value="free-course"><?php esc_html_e( 'Verified free course', 'sustainable-catalyst-library' ); ?></option>
                         <option value="free-certificate"><?php esc_html_e( 'Free + certificate', 'sustainable-catalyst-library' ); ?></option>
                         <option value="free-audit"><?php esc_html_e( 'Free audit', 'sustainable-catalyst-library' ); ?></option>
                         <option value="free-preview"><?php esc_html_e( 'Free preview', 'sustainable-catalyst-library' ); ?></option>
@@ -386,6 +396,7 @@ final class SC_Library_Open_Course_Finder {
 
             <div class="sc-course-finder__access-key" aria-label="Course access labels">
                 <span data-access="free-open"><?php esc_html_e( 'Free & Open', 'sustainable-catalyst-library' ); ?></span>
+                <span data-access="free-course"><?php esc_html_e( 'Verified Free Course', 'sustainable-catalyst-library' ); ?></span>
                 <span data-access="free-audit"><?php esc_html_e( 'Free Audit', 'sustainable-catalyst-library' ); ?></span>
                 <span data-access="free-preview"><?php esc_html_e( 'Free Preview', 'sustainable-catalyst-library' ); ?></span>
                 <span data-access="free-certificate"><?php esc_html_e( 'Free + Certificate', 'sustainable-catalyst-library' ); ?></span>
@@ -407,6 +418,7 @@ final class SC_Library_Open_Course_Finder {
                         </div>
                         <h3><?php echo esc_html( $course['title'] ); ?></h3>
                         <p class="sc-course-card__meta"><?php echo esc_html( $course['level'] . ' · ' . $course['format'] ); ?></p>
+                        <?php if ( ! empty( $course['access_note'] ) ) : ?><p class="sc-course-card__access-note"><?php echo esc_html( $course['access_note'] ); ?></p><?php endif; ?>
                         <p><?php echo esc_html( $course['summary'] ); ?></p>
                         <div class="sc-course-card__subjects">
                             <?php foreach ( $course['subjects'] as $subject ) : ?><span><?php echo esc_html( $subject ); ?></span><?php endforeach; ?>

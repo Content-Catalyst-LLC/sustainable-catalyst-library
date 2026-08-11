@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.20.1 repairs Knowledge Pathways alignment with a stable two-column desktop grid and one-column mobile layout while preserving Open Course Finder, Research Access, My Libraries, Digital Access Resolver, Research Librarian, Workspace, and Publications recovery.
- * Version: 4.3.20.1
+ * Description: Sustainable Catalyst Library v4.3.20.2 replaces the card-heavy Knowledge Pathways block with a restrained editorial index and adds course-level access verification so specific free courses can override provider-level defaults while preserving Research Access, Open Course Finder, My Libraries, Research Librarian, Workspace, and Publications recovery.
+ * Version: 4.3.20.2
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.20.1');
+define('SC_LIBRARY_VERSION', '4.3.20.2');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

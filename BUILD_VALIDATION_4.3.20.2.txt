@@ -1,0 +1,17 @@
+Sustainable Catalyst Library v4.3.20.2 — Knowledge Pathway Editorial Index & Course Catalog Refinement
+
+PASS — 8 v4.3.20.2 release tests
+PASS — editorial Knowledge Pathway index replaces card-heavy grid
+PASS — eight question routes preserved
+PASS — five core field routes preserved
+PASS — mobile single-column reading order
+PASS — University of Copenhagen SDG course added
+PASS — course-level verified-free access can override provider default
+PASS — Coursera provider remains Free Preview
+PASS — retained v4.3.20 Open Course Finder compatibility
+PASS — retained v4.3.19.1 Access-First layout compatibility
+PASS — retained v4.3.19 Global Library Access compatibility
+PASS — retained v4.3.18.1 Publications recovery compatibility
+PASS — retained scholarly, Research Librarian, Field Spotlight, and Publications suites
+PASS — PHP syntax
+PASS — JavaScript syntax
