@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.17
+Stable tag: 4.3.18
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -160,6 +160,16 @@ Sustainable Catalyst Library v4.3.17 makes Research Access the public front door
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.18 =
+* Expands Research Access into scholarly literature and university research discovery.
+* Adds direct public connectors for UCD Research Repository, arXiv, and Europe PMC.
+* Promotes Crossref, DataCite, OpenAlex, PubMed, and PubMed Central into the public Research Access surface.
+* Treats Google Scholar as a compliant browser research gateway; no automated Scholar scraping is performed.
+* Adds a capability-labeled University & Sustainability Research Network featuring MIT, Harvard, Stanford, Yale, Princeton, Columbia, UC Berkeley, UCD Dublin, Copenhagen, Stockholm, Wageningen, Lund, ETH Zurich, Oxford, Cambridge, IIASA, United Nations University, and Stockholm Environment Institute.
+* Makes OpenAlex usable through its free public API without requiring a premium API key; configured keys remain supported.
+* Preserves v4.3.17 federated library search, v4.3.16 pathway-aware guidance, v4.3.15 Search/Librarian bridging, and Workspace confirmation boundaries.
+
 
 = 4.3.17 =
 * Adds Research Access as the first functional Research Library surface.

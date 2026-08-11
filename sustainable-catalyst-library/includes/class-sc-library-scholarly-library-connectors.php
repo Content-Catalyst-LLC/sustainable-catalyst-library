@@ -63,6 +63,9 @@ final class SC_Library_Scholarly_Library_Connectors {
         'mit'                 => 'MIT Libraries',
         'harvard'             => 'Harvard Library',
         'berkeley'            => 'UC Berkeley / eScholarship',
+        'ucd'                 => 'University College Dublin',
+        'arxiv'               => 'arXiv',
+        'europepmc'           => 'Europe PMC',
     );
 
     public function __construct() {
@@ -552,7 +555,7 @@ final class SC_Library_Scholarly_Library_Connectors {
             'ncbi_api_key'        => '',
             'ncbi_tool'           => 'sustainable-catalyst-library',
             'cache_ttl'           => self::DEFAULT_CACHE_TTL,
-            'enabled_providers'   => array( 'crossref', 'datacite', 'pubmed', 'pmc', 'loc', 'openlibrary', 'internetarchive', 'mit', 'harvard', 'berkeley', 'unpaywall', 'google_scholar', 'worldcat' ),
+            'enabled_providers'   => array( 'crossref', 'openalex', 'datacite', 'pubmed', 'pmc', 'europepmc', 'arxiv', 'loc', 'openlibrary', 'internetarchive', 'mit', 'harvard', 'berkeley', 'ucd', 'unpaywall', 'google_scholar', 'worldcat' ),
         );
         $settings = wp_parse_args( $stored, $defaults );
 
@@ -600,9 +603,9 @@ final class SC_Library_Scholarly_Library_Connectors {
                 'search'            => true,
                 'locate'            => true,
                 'testable'          => true,
-                'available'         => (bool) $settings['openalex_api_key'],
+                'available'         => true,
                 'enabled'           => isset( $enabled['openalex'] ),
-                'credential_status' => $settings['openalex_api_key'] ? __( 'API key configured', 'sustainable-catalyst-library' ) : __( 'API key required for production', 'sustainable-catalyst-library' ),
+                'credential_status' => $settings['openalex_api_key'] ? __( 'Premium/API key configured', 'sustainable-catalyst-library' ) : __( 'Free public API tier', 'sustainable-catalyst-library' ),
             ),
             'datacite' => array(
                 'name'              => 'DataCite',
@@ -638,6 +641,46 @@ final class SC_Library_Scholarly_Library_Connectors {
                 'credential_status' => $settings['ncbi_api_key'] ? __( 'API key configured', 'sustainable-catalyst-library' ) : __( 'Lower unauthenticated limits', 'sustainable-catalyst-library' ),
             ),
 
+
+            'ucd' => array(
+                'name'              => 'University College Dublin',
+                'description'       => __( 'Research Repository UCD discovery through its public DSpace REST surface, with open repository records and persistent identifiers.', 'sustainable-catalyst-library' ),
+                'mode'              => __( 'Public DSpace repository search', 'sustainable-catalyst-library' ),
+                'search'            => true,
+                'locate'            => true,
+                'testable'          => true,
+                'available'         => true,
+                'enabled'           => isset( $enabled['ucd'] ),
+                'public_access'     => true,
+                'access_tier'       => 'open-repository',
+                'credential_status' => __( 'Public repository search; UCD authentication remains with UCD for licensed resources', 'sustainable-catalyst-library' ),
+            ),
+            'arxiv' => array(
+                'name'              => 'arXiv',
+                'description'       => __( 'Open scholarly preprints and metadata across physics, mathematics, computer science, quantitative biology, economics, statistics, and related fields.', 'sustainable-catalyst-library' ),
+                'mode'              => __( 'Public arXiv API search', 'sustainable-catalyst-library' ),
+                'search'            => true,
+                'locate'            => true,
+                'testable'          => true,
+                'available'         => true,
+                'enabled'           => isset( $enabled['arxiv'] ),
+                'public_access'     => true,
+                'access_tier'       => 'open-first',
+                'credential_status' => __( 'Public API; no university affiliation required', 'sustainable-catalyst-library' ),
+            ),
+            'europepmc' => array(
+                'name'              => 'Europe PMC',
+                'description'       => __( 'Life-science publications, citations, grants, related data, and open-access full-text signals from Europe PMC.', 'sustainable-catalyst-library' ),
+                'mode'              => __( 'Public Europe PMC REST search', 'sustainable-catalyst-library' ),
+                'search'            => true,
+                'locate'            => true,
+                'testable'          => true,
+                'available'         => true,
+                'enabled'           => isset( $enabled['europepmc'] ),
+                'public_access'     => true,
+                'access_tier'       => 'open-first',
+                'credential_status' => __( 'Public REST API; open full text identified where available', 'sustainable-catalyst-library' ),
+            ),
             'internetarchive' => array(
                 'name'              => 'Internet Archive',
                 'description'       => __( 'Books, texts, audio, video, software, images, and preserved digital collections with item-level access metadata.', 'sustainable-catalyst-library' ),
@@ -958,6 +1001,17 @@ final class SC_Library_Scholarly_Library_Connectors {
         );
     }
 
+
+    private function request_text( $provider_id, $url, $headers = array(), $timeout = self::DEFAULT_TIMEOUT ) {
+        return SC_Library_Connector_Holdings_Reliability::request_text(
+            $provider_id,
+            $url,
+            $headers,
+            $timeout,
+            $this->settings()
+        );
+    }
+
     private function search_crossref( $query, $limit ) {
         $settings = $this->settings();
         $params = array(
@@ -999,7 +1053,7 @@ final class SC_Library_Scholarly_Library_Connectors {
                 array(
                     'title'            => $title,
                     'authors'          => $authors,
-                    'organization'     => '',
+                    'organization'     => implode( '; ', array_slice( $institutions, 0, 4 ) ),
                     'year'             => $year,
                     'publication_date' => self::date_parts_to_iso( $issued ),
                     'source_type'      => $type,
@@ -1034,8 +1088,8 @@ final class SC_Library_Scholarly_Library_Connectors {
         $params = array(
             'search'   => $query,
             'per-page' => $limit,
-            'api_key'  => $settings['openalex_api_key'],
         );
+        if ( ! empty( $settings['openalex_api_key'] ) ) { $params['api_key'] = $settings['openalex_api_key']; }
         $data = $this->request_json( 'openalex', add_query_arg( $params, 'https://api.openalex.org/works' ) );
         if ( is_wp_error( $data ) ) {
             return $data;
@@ -1052,6 +1106,14 @@ final class SC_Library_Scholarly_Library_Connectors {
                 $display = sanitize_text_field( $authorship['author']['display_name'] ?? '' );
                 $authors[] = self::person_from_display_name( $display, $authorship['author']['orcid'] ?? '' );
             }
+            $institutions = array();
+            foreach ( (array) ( $item['authorships'] ?? array() ) as $authorship ) {
+                foreach ( (array) ( $authorship['institutions'] ?? array() ) as $institution ) {
+                    $name = sanitize_text_field( $institution['display_name'] ?? '' );
+                    if ( $name ) { $institutions[] = $name; }
+                }
+            }
+            $institutions = array_values( array_unique( $institutions ) );
             $primary = is_array( $item['primary_location'] ?? null ) ? $item['primary_location'] : array();
             $source = is_array( $primary['source'] ?? null ) ? $primary['source'] : array();
             $best_oa = is_array( $item['best_oa_location'] ?? null ) ? $item['best_oa_location'] : array();
@@ -1312,6 +1374,163 @@ final class SC_Library_Scholarly_Library_Connectors {
         return $results;
     }
 
+
+
+    private function search_ucd( $query, $limit ) {
+        $url = add_query_arg(
+            array( 'query' => $query, 'size' => min( 20, $limit ) ),
+            'https://researchrepository.ucd.ie/server/api/discover/search/objects'
+        );
+        $data = $this->request_json( 'ucd', $url );
+        if ( is_wp_error( $data ) ) { return $data; }
+        $objects = $data['_embedded']['searchResult']['_embedded']['objects'] ?? $data['_embedded']['objects'] ?? array();
+        $results = array();
+        foreach ( array_slice( (array) $objects, 0, $limit ) as $wrapper ) {
+            $item = $wrapper['_embedded']['indexableObject'] ?? $wrapper['indexableObject'] ?? $wrapper;
+            if ( ! is_array( $item ) ) { continue; }
+            $metadata = is_array( $item['metadata'] ?? null ) ? $item['metadata'] : array();
+            $title = self::dspace_first( $metadata, array( 'dc.title', 'dcterms.title' ) );
+            if ( ! $title ) { continue; }
+            $authors = array();
+            foreach ( self::dspace_values( $metadata, array( 'dc.contributor.author', 'dc.creator' ) ) as $author ) { $authors[] = self::person_from_display_name( $author ); }
+            $issued = self::dspace_first( $metadata, array( 'dc.date.issued', 'dc.date.available', 'dcterms.issued' ) );
+            $year = preg_match( '/\\b(1[0-9]{3}|20[0-9]{2}|21[0-9]{2})\\b/', $issued, $match ) ? $match[1] : '';
+            $identifier_urls = array_values( array_filter( self::dspace_values( $metadata, array( 'dc.identifier.uri', 'dc.identifier' ) ), static fn( $v ) => 0 === strpos( $v, 'http' ) ) );
+            $uuid = sanitize_text_field( $item['uuid'] ?? $item['id'] ?? '' );
+            $record_url = self::first_url_matching( $identifier_urls, array( 'researchrepository.ucd.ie', 'hdl.handle.net', 'doi.org' ) );
+            if ( ! $record_url && $uuid ) { $record_url = 'https://researchrepository.ucd.ie/entities/publication/' . rawurlencode( $uuid ); }
+            $doi = '';
+            foreach ( self::dspace_values( $metadata, array( 'dc.identifier.doi', 'dc.identifier' ) ) as $identifier ) {
+                $candidate = self::normalize_doi( $identifier ); if ( $candidate ) { $doi = $candidate; break; }
+            }
+            $results[] = $this->normalized_result(
+                'ucd',
+                $uuid ?: hash( 'sha256', $title . '|' . $issued ),
+                array(
+                    'title'            => $title,
+                    'authors'          => array_values( array_filter( $authors ) ),
+                    'organization'     => 'University College Dublin',
+                    'year'             => $year,
+                    'publication_date' => self::parse_loose_date( $issued ),
+                    'source_type'      => 'research-output',
+                    'container_title'  => 'Research Repository UCD',
+                    'publisher'        => self::dspace_first( $metadata, array( 'dc.publisher' ) ),
+                    'doi'              => $doi,
+                    'url'              => $record_url,
+                    'open_access_url'  => $record_url,
+                    'full_text_status' => 'public-repository-record',
+                    'record_url'       => $record_url,
+                    'abstract'         => self::dspace_first( $metadata, array( 'dc.description.abstract', 'dc.description' ) ),
+                    'language'         => self::dspace_first( $metadata, array( 'dc.language.iso', 'dc.language' ) ),
+                    'topics'           => array_slice( self::dspace_values( $metadata, array( 'dc.subject' ) ), 0, 12 ),
+                    'identifiers'      => array_filter( array( 'doi' => $doi, 'ucd_uuid' => $uuid ) ),
+                    'raw_type'         => self::dspace_first( $metadata, array( 'dc.type' ) ),
+                )
+            );
+        }
+        return $results;
+    }
+
+    private function search_europepmc( $query, $limit ) {
+        $url = add_query_arg( array( 'query' => $query, 'pageSize' => min( 20, $limit ), 'format' => 'json', 'resultType' => 'core' ), 'https://www.ebi.ac.uk/europepmc/webservices/rest/search' );
+        $data = $this->request_json( 'europepmc', $url );
+        if ( is_wp_error( $data ) ) { return $data; }
+        $results = array();
+        foreach ( (array) ( $data['resultList']['result'] ?? array() ) as $item ) {
+            $title = sanitize_text_field( $item['title'] ?? '' ); if ( ! $title ) { continue; }
+            $authors = array();
+            foreach ( (array) ( $item['authorList']['author'] ?? array() ) as $author ) {
+                $display = sanitize_text_field( $author['fullName'] ?? trim( ( $author['firstName'] ?? '' ) . ' ' . ( $author['lastName'] ?? '' ) ) );
+                if ( $display ) { $authors[] = self::person_from_display_name( $display ); }
+            }
+            $doi = self::normalize_doi( $item['doi'] ?? '' );
+            $pmcid = sanitize_text_field( $item['pmcid'] ?? '' );
+            $pmid = sanitize_text_field( $item['pmid'] ?? '' );
+            $record_url = $pmcid ? 'https://europepmc.org/articles/' . rawurlencode( $pmcid ) : ( $pmid ? 'https://europepmc.org/article/MED/' . rawurlencode( $pmid ) : ( $doi ? 'https://doi.org/' . $doi : '' ) );
+            $is_oa = ! empty( $item['isOpenAccess'] ) || ! empty( $item['inEPMC'] );
+            $results[] = $this->normalized_result(
+                'europepmc',
+                $pmcid ?: $pmid ?: $doi ?: md5( wp_json_encode( $item ) ),
+                array(
+                    'title'            => $title,
+                    'authors'          => array_values( array_filter( $authors ) ),
+                    'organization'     => sanitize_text_field( $item['affiliation'] ?? '' ),
+                    'year'             => sanitize_text_field( $item['pubYear'] ?? '' ),
+                    'publication_date' => self::parse_loose_date( $item['firstPublicationDate'] ?? $item['journalInfo']['printPublicationDate'] ?? '' ),
+                    'source_type'      => 'journal-article',
+                    'container_title'  => sanitize_text_field( $item['journalTitle'] ?? $item['journalInfo']['journal']['title'] ?? '' ),
+                    'publisher'        => sanitize_text_field( $item['publisher'] ?? '' ),
+                    'doi'              => $doi,
+                    'pmid'             => $pmid,
+                    'url'              => $record_url,
+                    'open_access_url'  => $is_oa ? $record_url : '',
+                    'full_text_status' => $is_oa ? 'open-access' : 'metadata-only',
+                    'record_url'       => $record_url,
+                    'abstract'         => self::clean_abstract( $item['abstractText'] ?? '' ),
+                    'cited_by_count'   => absint( $item['citedByCount'] ?? 0 ),
+                    'identifiers'      => array_filter( array( 'doi' => $doi, 'pmid' => $pmid, 'pmcid' => $pmcid ) ),
+                    'raw_type'         => sanitize_text_field( $item['pubType'] ?? '' ),
+                )
+            );
+        }
+        return $results;
+    }
+
+    private function search_arxiv( $query, $limit ) {
+        $url = add_query_arg( array( 'search_query' => 'all:' . $query, 'start' => 0, 'max_results' => min( 20, $limit ), 'sortBy' => 'relevance' ), 'https://export.arxiv.org/api/query' );
+        $body = $this->request_text( 'arxiv', $url );
+        if ( is_wp_error( $body ) ) { return $body; }
+        if ( ! function_exists( 'simplexml_load_string' ) ) { return new WP_Error( 'arxiv_xml_unavailable', __( 'XML parsing is not available on this server.', 'sustainable-catalyst-library' ), array( 'status' => 500 ) ); }
+        $xml = simplexml_load_string( $body, 'SimpleXMLElement', LIBXML_NOCDATA );
+        if ( false === $xml ) { return new WP_Error( 'arxiv_invalid_xml', __( 'arXiv returned invalid XML.', 'sustainable-catalyst-library' ), array( 'status' => 502 ) ); }
+        $results = array();
+        foreach ( $xml->entry as $entry ) {
+            $id = trim( (string) $entry->id );
+            $title = sanitize_text_field( preg_replace( '/\\s+/', ' ', trim( (string) $entry->title ) ) ); if ( ! $title ) { continue; }
+            $authors = array(); foreach ( $entry->author as $author ) { $authors[] = self::person_from_display_name( sanitize_text_field( (string) $author->name ) ); }
+            $published = sanitize_text_field( (string) $entry->published );
+            $year = substr( $published, 0, 4 );
+            $pdf = '';
+            foreach ( $entry->link as $link ) { $attr = $link->attributes(); if ( 'application/pdf' === (string) $attr['type'] ) { $pdf = esc_url_raw( (string) $attr['href'] ); break; } }
+            $arxiv_id = preg_replace( '#^https?://arxiv.org/abs/#', '', $id );
+            $results[] = $this->normalized_result(
+                'arxiv',
+                sanitize_text_field( $arxiv_id ?: md5( $id ) ),
+                array(
+                    'title'            => $title,
+                    'authors'          => array_values( array_filter( $authors ) ),
+                    'year'             => $year,
+                    'publication_date' => self::parse_loose_date( $published ),
+                    'source_type'      => 'preprint',
+                    'container_title'  => 'arXiv',
+                    'url'              => esc_url_raw( $id ),
+                    'open_access_url'  => $pdf ?: esc_url_raw( $id ),
+                    'full_text_status' => 'open-access',
+                    'record_url'       => esc_url_raw( $id ),
+                    'abstract'         => self::clean_abstract( (string) $entry->summary ),
+                    'identifiers'      => array( 'arxiv' => sanitize_text_field( $arxiv_id ) ),
+                    'raw_type'         => 'preprint',
+                )
+            );
+        }
+        return $results;
+    }
+
+    private static function dspace_values( $metadata, $keys ) {
+        $out = array();
+        foreach ( (array) $keys as $key ) {
+            foreach ( (array) ( $metadata[ $key ] ?? array() ) as $entry ) {
+                $value = is_array( $entry ) ? ( $entry['value'] ?? '' ) : $entry;
+                $value = sanitize_text_field( $value ); if ( '' !== $value ) { $out[] = $value; }
+            }
+        }
+        return array_values( array_unique( $out ) );
+    }
+
+    private static function dspace_first( $metadata, $keys ) {
+        $values = self::dspace_values( $metadata, $keys );
+        return $values ? $values[0] : '';
+    }
 
     private function search_internetarchive( $query, $limit ) {
         $params = array(
@@ -2742,7 +2961,7 @@ final class SC_Library_Scholarly_Library_Connectors {
         $provider = sanitize_key( wp_unslash( $_POST['provider'] ?? '' ) );
         $query = sanitize_text_field( wp_unslash( $_POST['query'] ?? '' ) );
         $limit = max( 1, min( 10, absint( wp_unslash( $_POST['limit'] ?? 5 ) ) ) );
-        $public_providers = array( 'internetarchive', 'mit', 'harvard', 'loc' );
+        $public_providers = array( 'internetarchive', 'mit', 'harvard', 'loc', 'ucd', 'crossref', 'openalex', 'datacite', 'pubmed', 'pmc', 'europepmc', 'arxiv' );
         if ( ! in_array( $provider, $public_providers, true ) ) {
             wp_send_json_error( array( 'message' => __( 'That provider is not enabled for public Research Access.', 'sustainable-catalyst-library' ) ), 403 );
         }
@@ -2760,55 +2979,86 @@ final class SC_Library_Scholarly_Library_Connectors {
     public function shortcode_research_access( $atts ) {
         $atts = shortcode_atts(
             array(
-                'providers' => 'internetarchive,mit,harvard,loc',
-                'limit'     => 5,
-                'title'     => __( 'Search Libraries, Archives, and Open Research', 'sustainable-catalyst-library' ),
+                'providers'         => 'internetarchive,mit,harvard,loc,ucd,crossref,openalex,datacite,pubmed,pmc,europepmc,arxiv',
+                'default_providers' => 'internetarchive,mit,harvard,ucd,openalex,europepmc,arxiv',
+                'limit'             => 5,
+                'title'             => __( 'Search Libraries, University Research, and Scholarly Sources', 'sustainable-catalyst-library' ),
             ),
             $atts,
             'sc_research_access'
         );
         wp_enqueue_style( 'sc-library-connectors' );
         wp_enqueue_script( 'sc-library-connectors' );
-        $public_ids = array( 'internetarchive', 'mit', 'harvard', 'loc' );
+        $public_ids = array( 'internetarchive', 'mit', 'harvard', 'loc', 'ucd', 'crossref', 'openalex', 'datacite', 'pubmed', 'pmc', 'europepmc', 'arxiv' );
         $requested = array_map( 'sanitize_key', preg_split( '/[\s,]+/', $atts['providers'] ) );
         $allowed = array_values( array_intersect( $requested, $public_ids ) );
+        $defaults = array_map( 'sanitize_key', preg_split( '/[\s,]+/', $atts['default_providers'] ) );
         $providers = array_intersect_key( $this->providers(), array_flip( $allowed ) );
-        $berkeley_query = 'https://escholarship.org/search/?q={query}';
+        $library_ids = array( 'internetarchive', 'mit', 'harvard', 'loc', 'ucd' );
+        $scholarly_ids = array( 'openalex', 'crossref', 'datacite', 'pubmed', 'pmc', 'europepmc', 'arxiv' );
+        $gateways = $this->research_gateway_registry();
         ob_start();
         ?>
-        <section class="sc-research-access" data-sc-research-access data-berkeley-search-template="<?php echo esc_attr( $berkeley_query ); ?>">
+        <section class="sc-research-access" data-sc-research-access data-google-scholar-template="https://scholar.google.com/scholar?q={query}">
             <header class="sc-research-access__header">
                 <p class="sc-connector-kicker"><?php esc_html_e( 'Research Access', 'sustainable-catalyst-library' ); ?></p>
                 <h2><?php echo esc_html( $atts['title'] ); ?></h2>
-                <p><?php esc_html_e( 'Search public library, archive, and university discovery systems from one place. Open resources are prioritized. University affiliation is not required to use this search.', 'sustainable-catalyst-library' ); ?></p>
+                <p><?php esc_html_e( 'Search open libraries, university research repositories, scholarly metadata systems, archives, and legitimate digital copies from one interface. University affiliation is not required for public discovery.', 'sustainable-catalyst-library' ); ?></p>
                 <div class="sc-research-access__principles" aria-label="Research Access principles">
                     <span><?php esc_html_e( 'Open to everyone by default', 'sustainable-catalyst-library' ); ?></span>
-                    <span><?php esc_html_e( 'Legitimate access routes only', 'sustainable-catalyst-library' ); ?></span>
+                    <span><?php esc_html_e( 'Open copy preferred', 'sustainable-catalyst-library' ); ?></span>
+                    <span><?php esc_html_e( 'Capability labels stay explicit', 'sustainable-catalyst-library' ); ?></span>
                     <span><?php esc_html_e( 'Library passwords stay with the library', 'sustainable-catalyst-library' ); ?></span>
                 </div>
             </header>
             <form class="sc-research-access__search" data-sc-research-access-form>
-                <label><span><?php esc_html_e( 'What are you looking for?', 'sustainable-catalyst-library' ); ?></span><input type="search" name="query" required minlength="2" autocomplete="off" placeholder="Books, papers, archives, authors, topics…"></label>
+                <label><span><?php esc_html_e( 'What are you looking for?', 'sustainable-catalyst-library' ); ?></span><input type="search" name="query" required minlength="2" autocomplete="off" placeholder="Books, papers, authors, archives, sustainability topics…"></label>
                 <input type="hidden" name="limit" value="<?php echo esc_attr( max( 1, min( 10, absint( $atts['limit'] ) ) ) ); ?>">
                 <button type="submit"><?php esc_html_e( 'Search Research Access', 'sustainable-catalyst-library' ); ?></button>
             </form>
-            <fieldset class="sc-research-access__sources">
-                <legend><?php esc_html_e( 'Search now', 'sustainable-catalyst-library' ); ?></legend>
-                <?php foreach ( $providers as $provider_id => $provider ) : ?>
-                    <label><input type="checkbox" name="research_access_providers[]" value="<?php echo esc_attr( $provider_id ); ?>" checked><span><strong><?php echo esc_html( $provider['name'] ); ?></strong><small><?php echo esc_html( $provider['credential_status'] ); ?></small></span></label>
-                <?php endforeach; ?>
-            </fieldset>
-            <div class="sc-research-access__network" aria-label="Research Access launch network">
+            <div class="sc-research-access__source-groups">
+                <fieldset class="sc-research-access__sources">
+                    <legend><?php esc_html_e( 'Libraries & open repositories', 'sustainable-catalyst-library' ); ?></legend>
+                    <?php foreach ( $library_ids as $provider_id ) : if ( empty( $providers[ $provider_id ] ) ) { continue; } $provider = $providers[ $provider_id ]; ?>
+                    <label><input type="checkbox" name="research_access_providers[]" value="<?php echo esc_attr( $provider_id ); ?>" <?php checked( in_array( $provider_id, $defaults, true ) ); ?>><span><strong><?php echo esc_html( $provider['name'] ); ?></strong><small><?php echo esc_html( $provider['credential_status'] ); ?></small></span></label>
+                    <?php endforeach; ?>
+                </fieldset>
+                <fieldset class="sc-research-access__sources sc-research-access__sources--scholarly">
+                    <legend><?php esc_html_e( 'Scholarly discovery', 'sustainable-catalyst-library' ); ?></legend>
+                    <?php foreach ( $scholarly_ids as $provider_id ) : if ( empty( $providers[ $provider_id ] ) ) { continue; } $provider = $providers[ $provider_id ]; ?>
+                    <label><input type="checkbox" name="research_access_providers[]" value="<?php echo esc_attr( $provider_id ); ?>" <?php checked( in_array( $provider_id, $defaults, true ) ); ?>><span><strong><?php echo esc_html( $provider['name'] ); ?></strong><small><?php echo esc_html( $provider['credential_status'] ); ?></small></span></label>
+                    <?php endforeach; ?>
+                </fieldset>
+            </div>
+            <div class="sc-research-access__gateway-strip">
+                <div><small><?php esc_html_e( 'Scholarly gateway', 'sustainable-catalyst-library' ); ?></small><strong>Google Scholar</strong><span><?php esc_html_e( 'Human-directed scholarly search and citation discovery. Sustainable Catalyst does not scrape Google Scholar.', 'sustainable-catalyst-library' ); ?></span></div>
+                <a data-sc-google-scholar-handoff href="https://scholar.google.com/" target="_blank" rel="noopener"><?php esc_html_e( 'Search Google Scholar', 'sustainable-catalyst-library' ); ?> →</a>
+            </div>
+            <div class="sc-research-access__network" aria-label="Direct Research Access network">
                 <article class="is-live"><small><?php esc_html_e( 'Direct connector', 'sustainable-catalyst-library' ); ?></small><strong>Internet Archive</strong><span><?php esc_html_e( 'Public digital collections and item access.', 'sustainable-catalyst-library' ); ?></span></article>
                 <article class="is-live"><small><?php esc_html_e( 'Direct connector', 'sustainable-catalyst-library' ); ?></small><strong>MIT Libraries</strong><span><?php esc_html_e( 'TIMDEX catalog, DSpace@MIT, and ArchivesSpace discovery.', 'sustainable-catalyst-library' ); ?></span></article>
-                <article class="is-live"><small><?php esc_html_e( 'Direct connector', 'sustainable-catalyst-library' ); ?></small><strong>Harvard Library</strong><span><?php esc_html_e( 'LibraryCloud open bibliographic metadata and digital-resource signals.', 'sustainable-catalyst-library' ); ?></span></article>
-                <article class="is-live"><small><?php esc_html_e( 'Direct connector', 'sustainable-catalyst-library' ); ?></small><strong>Library of Congress</strong><span><?php esc_html_e( 'Public collections now; SRU/Z39.50 expansion path preserved.', 'sustainable-catalyst-library' ); ?></span></article>
-                <article class="is-next"><small><?php esc_html_e( 'Public repository', 'sustainable-catalyst-library' ); ?></small><strong>UC Berkeley / eScholarship</strong><span><?php esc_html_e( 'Open UC research access now; deeper Berkeley catalog federation follows the connector registry.', 'sustainable-catalyst-library' ); ?></span><a data-sc-berkeley-handoff href="https://escholarship.org/" target="_blank" rel="noopener"><?php esc_html_e( 'Search eScholarship', 'sustainable-catalyst-library' ); ?> →</a></article>
+                <article class="is-live"><small><?php esc_html_e( 'Direct connector', 'sustainable-catalyst-library' ); ?></small><strong>Harvard Library</strong><span><?php esc_html_e( 'LibraryCloud open bibliographic metadata.', 'sustainable-catalyst-library' ); ?></span></article>
+                <article class="is-live"><small><?php esc_html_e( 'Direct repository', 'sustainable-catalyst-library' ); ?></small><strong>UCD Dublin</strong><span><?php esc_html_e( 'Research Repository UCD through public DSpace discovery.', 'sustainable-catalyst-library' ); ?></span></article>
+                <article class="is-live"><small><?php esc_html_e( 'Scholarly federation', 'sustainable-catalyst-library' ); ?></small><strong>OpenAlex + Crossref</strong><span><?php esc_html_e( 'Works, institutions, citations, DOI metadata, and access signals.', 'sustainable-catalyst-library' ); ?></span></article>
+                <article class="is-live"><small><?php esc_html_e( 'Open scholarship', 'sustainable-catalyst-library' ); ?></small><strong>arXiv + Europe PMC</strong><span><?php esc_html_e( 'Open preprints, life-science literature, and full-text signals.', 'sustainable-catalyst-library' ); ?></span></article>
             </div>
+            <section class="sc-research-access__institutions" aria-labelledby="sc-research-access-institution-title">
+                <header><p class="sc-connector-kicker"><?php esc_html_e( 'University & Sustainability Research Network', 'sustainable-catalyst-library' ); ?></p><h3 id="sc-research-access-institution-title"><?php esc_html_e( 'Search beyond the launch connectors', 'sustainable-catalyst-library' ); ?></h3><p><?php esc_html_e( 'These institutions are registered by capability. Direct connectors, open repositories, and compliant gateways are deliberately labeled differently while deeper federation is built.', 'sustainable-catalyst-library' ); ?></p></header>
+                <div class="sc-research-access__institution-grid">
+                    <?php foreach ( $gateways as $gateway ) : ?>
+                    <article>
+                        <small><?php echo esc_html( $gateway['capability'] ); ?></small>
+                        <strong><?php echo esc_html( $gateway['name'] ); ?></strong>
+                        <span><?php echo esc_html( $gateway['focus'] ); ?></span>
+                        <a data-sc-research-gateway data-search-template="<?php echo esc_attr( $gateway['search_template'] ); ?>" href="<?php echo esc_url( $gateway['url'] ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $gateway['action'] ); ?> →</a>
+                    </article>
+                    <?php endforeach; ?>
+                </div>
+            </section>
             <div class="sc-research-access__future">
                 <p class="sc-connector-kicker"><?php esc_html_e( 'Where this is heading', 'sustainable-catalyst-library' ); ?></p>
-                <h3><?php esc_html_e( 'A federated global library network', 'sustainable-catalyst-library' ); ?></h3>
-                <p><?php esc_html_e( 'The connector registry is designed to expand into university, public, national, and special libraries; local-library discovery; holdings; open copies; authenticated digital access; and interlibrary-loan routes without requiring every institution to use the same system.', 'sustainable-catalyst-library' ); ?></p>
+                <h3><?php esc_html_e( 'A federated global research network', 'sustainable-catalyst-library' ); ?></h3>
+                <p><?php esc_html_e( 'The connector registry is designed to expand across university libraries, public libraries, national libraries, institutional repositories, scholarly databases, and sustainability research institutions. Future access resolution will distinguish open copies, connected-library entitlements, institutional login, borrowing, physical holdings, and interlibrary loan.', 'sustainable-catalyst-library' ); ?></p>
             </div>
             <div class="sc-connector-search-status" data-sc-research-access-status aria-live="polite"></div>
             <div class="sc-connector-result-summary" data-sc-research-access-summary></div>
@@ -2816,6 +3066,26 @@ final class SC_Library_Scholarly_Library_Connectors {
         </section>
         <?php
         return ob_get_clean();
+    }
+
+    private function research_gateway_registry() {
+        return array(
+            array( 'name' => 'Stanford University', 'capability' => 'Research gateway', 'focus' => 'Open research, SearchWorks, digital collections, sustainability and engineering.', 'url' => 'https://searchworks.stanford.edu/', 'search_template' => 'https://searchworks.stanford.edu/?q={query}', 'action' => 'Search Stanford' ),
+            array( 'name' => 'Yale University', 'capability' => 'Research gateway', 'focus' => 'Quicksearch, digital collections, open scholarship, environment and public policy.', 'url' => 'https://search.library.yale.edu/', 'search_template' => 'https://search.library.yale.edu/catalog?search_field=all_fields&q={query}', 'action' => 'Search Yale' ),
+            array( 'name' => 'Princeton University', 'capability' => 'Research gateway', 'focus' => 'Library catalog, DataSpace, digital collections, climate and public affairs.', 'url' => 'https://library.princeton.edu/', 'search_template' => 'https://catalog.princeton.edu/?search_field=all_fields&q={query}', 'action' => 'Search Princeton' ),
+            array( 'name' => 'Columbia University', 'capability' => 'Research gateway', 'focus' => 'CLIO, Academic Commons, open catalog data, climate and sustainable development.', 'url' => 'https://clio.columbia.edu/', 'search_template' => 'https://clio.columbia.edu/catalog?q={query}', 'action' => 'Search Columbia' ),
+            array( 'name' => 'UC Berkeley', 'capability' => 'Open repository + gateway', 'focus' => 'eScholarship, UC Library Search, environmental science, energy, policy and development.', 'url' => 'https://escholarship.org/', 'search_template' => 'https://escholarship.org/search/?q={query}', 'action' => 'Search Berkeley / UC' ),
+            array( 'name' => 'University of Copenhagen', 'capability' => 'Research portal gateway', 'focus' => 'Climate, ecology, food, health, governance and sustainability research.', 'url' => 'https://researchprofiles.ku.dk/', 'search_template' => 'https://researchprofiles.ku.dk/en/searchAll/index/?search={query}', 'action' => 'Search Copenhagen' ),
+            array( 'name' => 'Stockholm University', 'capability' => 'Repository + research gateway', 'focus' => 'Stockholm Resilience Centre, planetary systems, governance and DiVA research.', 'url' => 'https://www.su.se/english/research', 'search_template' => 'https://www.su.se/english/research', 'action' => 'Open Stockholm research' ),
+            array( 'name' => 'Wageningen University & Research', 'capability' => 'Research portal gateway', 'focus' => 'Food systems, biodiversity, water, land use, circularity and climate.', 'url' => 'https://research.wur.nl/', 'search_template' => 'https://research.wur.nl/en/searchAll/index/?search={query}', 'action' => 'Search Wageningen' ),
+            array( 'name' => 'Lund University', 'capability' => 'Publications gateway', 'focus' => 'Sustainability science, climate, energy, governance and open research publications.', 'url' => 'https://lup.lub.lu.se/', 'search_template' => 'https://lup.lub.lu.se/search/publication?q={query}', 'action' => 'Search Lund' ),
+            array( 'name' => 'ETH Zurich', 'capability' => 'Open repository gateway', 'focus' => 'Climate, engineering, energy, environmental systems and research data.', 'url' => 'https://www.research-collection.ethz.ch/', 'search_template' => 'https://www.research-collection.ethz.ch/search?query={query}', 'action' => 'Search ETH Zurich' ),
+            array( 'name' => 'University of Oxford', 'capability' => 'Open repository gateway', 'focus' => 'ORA research collections, climate, economics, governance and sustainability.', 'url' => 'https://ora.ox.ac.uk/', 'search_template' => 'https://ora.ox.ac.uk/search?search={query}', 'action' => 'Search Oxford' ),
+            array( 'name' => 'University of Cambridge', 'capability' => 'Repository / API target', 'focus' => 'Apollo repository, climate, engineering, energy and environmental research.', 'url' => 'https://www.repository.cam.ac.uk/', 'search_template' => 'https://www.repository.cam.ac.uk/search?query={query}', 'action' => 'Search Cambridge' ),
+            array( 'name' => 'IIASA', 'capability' => 'Sustainability research gateway', 'focus' => 'Systems analysis, climate, energy, transitions, modeling and sustainable development.', 'url' => 'https://iiasa.ac.at/publications', 'search_template' => 'https://iiasa.ac.at/publications', 'action' => 'Open IIASA research' ),
+            array( 'name' => 'United Nations University', 'capability' => 'Global sustainability gateway', 'focus' => 'SDGs, governance, environment, development policy and global systems.', 'url' => 'https://unu.edu/publications', 'search_template' => 'https://unu.edu/publications', 'action' => 'Open UNU research' ),
+            array( 'name' => 'Stockholm Environment Institute', 'capability' => 'Open sustainability gateway', 'focus' => 'Environment, development, policy, climate, water, energy and transitions.', 'url' => 'https://www.sei.org/publications/', 'search_template' => 'https://www.sei.org/publications/?query={query}', 'action' => 'Search SEI' ),
+        );
     }
 
     public function shortcode_source_discovery( $atts ) {

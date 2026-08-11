@@ -215,6 +215,12 @@
       if (berkeley) {
         berkeley.href = String(root.dataset.berkeleySearchTemplate || 'https://escholarship.org/').replace('{query}', encodeURIComponent(query));
       }
+      var scholar = root.querySelector('[data-sc-google-scholar-handoff]');
+      if (scholar) { scholar.href = String(root.dataset.googleScholarTemplate || 'https://scholar.google.com/scholar?q={query}').replace('{query}', encodeURIComponent(query)); }
+      root.querySelectorAll('[data-sc-research-gateway]').forEach(function (link) {
+        var template = String(link.dataset.searchTemplate || link.href || '');
+        if (template.indexOf('{query}') !== -1) { link.href = template.replace('{query}', encodeURIComponent(query)); }
+      });
       resultsNode.innerHTML = '';
       if (summaryNode) { summaryNode.textContent = ''; }
       if (statusNode) { statusNode.textContent = 'Searching ' + providers.length + ' public research sources…'; }

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.17 establishes Federated Research Access as the public front door: open library and archive search, normalized digital-access states, Internet Archive/MIT/Harvard/Library of Congress connectors, and an extensible global library network foundation.
- * Version: 4.3.17
+ * Description: Sustainable Catalyst Library v4.3.18 expands the Research Access front door into a scholarly and university research network: UCD Research Repository, arXiv, Europe PMC, OpenAlex, Crossref, DataCite, PubMed/PMC, Google Scholar handoff, and capability-labeled university and sustainability research gateways.
+ * Version: 4.3.18
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.17');
+define('SC_LIBRARY_VERSION', '4.3.18');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
