@@ -336,3 +336,13 @@
 @media(prefers-reduced-motion:reduce){
   .sc-field-master__field-tab{transition:none!important}
 }
+
+/* ============================================================
+   v4.3.18.1 — Publications Field Stack Recovery
+   Restore all 14 major field surfaces while retaining the refined
+   light master-stage presentation inside each independently driven field.
+   ============================================================ */
+.sc-field-spotlights-stack{display:grid;gap:34px;width:100%}
+.sc-field-spotlights--stack-item{min-width:0}
+.sc-field-spotlights--stack-item>.sc-field-spotlight--master-stage{margin:0}
+@media(max-width:720px){.sc-field-spotlights-stack{gap:24px}}

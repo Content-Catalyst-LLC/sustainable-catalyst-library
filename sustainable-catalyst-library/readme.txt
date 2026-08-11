@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.18
+Stable tag: 4.3.18.1
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.17 makes Research Access the public front door. It introduces federated search across open library, archive, and university discovery systems, launches direct connectors for Internet Archive, MIT Libraries, Harvard Library, and the Library of Congress, surfaces UC Berkeley/eScholarship as a public research-access route, and normalizes access states so open digital resources can be distinguished from catalog-only or institution-controlled records. University affiliation is not required for public Research Access, and the v4.3.16 pathway-aware Research Librarian, v4.3.15 Search ↔ Librarian bridge, Workspace confirmation boundaries, Field Spotlight, and persistence contracts remain intact.
+Sustainable Catalyst Library v4.3.18.1 preserves the v4.3.18 scholarly Research Access network—including UCD Research Repository, arXiv, Europe PMC, OpenAlex, Crossref, DataCite, PubMed/PMC, Internet Archive, MIT Libraries, Harvard Library, Library of Congress, and capability-labeled university gateways—while restoring the approved Publications Field Spotlight architecture. All 14 major fields again render on the Publications page, with independent Article Map panel rotation, first-eight disclosure, curated supporting publications, and the durable v4.3.12 panel-content store intact.
 
 
 
@@ -160,6 +160,13 @@ Sustainable Catalyst Library v4.3.17 makes Research Access the public front door
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+
+= 4.3.18.1 =
+* Restores the approved stacked 14-field Publications Field Spotlight.
+* Each major field again renders as its own full Spotlight surface instead of being replaced by a single shared field stage.
+* Preserves first-eight Article Map panel visibility, panel 9+ disclosure, autoplay, thumbnails, supporting-article curation, and all v4.3.18 scholarly Research Access connectors.
+* Keeps the v4.3.12 durable panel-content store unchanged.
 
 = 4.3.18 =
 * Expands Research Access into scholarly literature and university research discovery.
