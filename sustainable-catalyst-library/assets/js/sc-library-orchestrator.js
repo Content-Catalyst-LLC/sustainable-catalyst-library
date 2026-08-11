@@ -89,6 +89,18 @@
   const renderResponse = (root, response) => {
     const output = root.querySelector('[data-orchestrator-output]');
     const provider = response.diagnostics?.provider || {};
+    const frontDoor = root.dataset.orchestratorMode === 'front-door';
+    const fullUrl = root.dataset.fullUrl || '#research-librarian';
+    if (frontDoor) {
+      const records = (response.records || []).slice(0, 3);
+      const routes = (response.routes || []).slice(0, 2);
+      output.innerHTML = `<section class="sc-orchestrator__summary sc-orchestrator__summary--front-door"><div><h3>${esc(response.intent_label || 'Research route')}</h3><p>${esc(response.answer || '')}</p><div class="sc-orchestrator__meta"><span>${esc(response.records?.length || 0)} matching records</span><span>${esc(response.diagnostics?.retrieval_mode || 'site-scoped')}</span></div></div></section>
+      <section class="sc-orchestrator__section"><h3>Recommended starting points</h3><div class="sc-orchestrator__records sc-orchestrator__records--front-door">${records.map((record) => `<article class="sc-orchestrator__record ${record.graph_related ? 'is-graph' : ''}"><small>${record.graph_related ? 'Graph-connected record' : esc(record.post_type || 'Library record')}</small><h4><a href="${esc(record.url)}">${esc(record.title)}</a></h4><ul class="sc-orchestrator__why">${(record.why || []).slice(0,2).map((reason)=>`<li>${esc(reason)}</li>`).join('')}</ul></article>`).join('') || '<p>No matching records were found.</p>'}</div></section>
+      ${routes.length ? `<section class="sc-orchestrator__section"><h3>Continue the route</h3><div class="sc-orchestrator__routes sc-orchestrator__routes--front-door">${routes.map((route)=>`<article class="sc-orchestrator__route"><h4>${esc(route.label)}</h4><p>${esc(route.reason)}</p>${route.url ? `<a class="sc-orchestrator__button" href="${esc(route.url)}">Open ${esc(route.label)}</a>` : ''}</article>`).join('')}</div></section>` : ''}
+      <div class="sc-orchestrator__continue"><a class="sc-orchestrator__button is-primary" href="${esc(fullUrl)}">Continue in the full Research Librarian</a><span>Review deeper recommendations, diagnostics, and user-confirmed workspace actions.</span></div>`;
+      output.dataset.response = JSON.stringify(response);
+      return;
+    }
     output.innerHTML = `<section class="sc-orchestrator__summary"><div><h3>${esc(response.intent_label || 'Research route')}</h3><p>${esc(response.answer || '')}</p><div class="sc-orchestrator__meta"><span>${esc(response.records?.length || 0)} records</span><span>${esc(response.diagnostics?.retrieval_mode || '')}</span><span>${esc(provider.mode || 'deterministic')}</span></div></div><div class="sc-orchestrator__summary-actions">${cfg.signedIn ? '<button type="button" data-save-orchestration>Save session</button>' : ''}<button type="button" data-copy-orchestration>Copy route</button></div></section>
     <section class="sc-orchestrator__section"><h3>Recommended Library records</h3><div class="sc-orchestrator__records">${(response.records || []).map((record) => `<article class="sc-orchestrator__record ${record.graph_related ? 'is-graph' : ''}"><small>${record.graph_related ? 'Graph-connected record' : esc(record.post_type || 'Library record')}</small><h4><a href="${esc(record.url)}">${esc(record.title)}</a></h4><p>${esc(record.excerpt || '')}</p><ul class="sc-orchestrator__why">${(record.why || []).map((reason)=>`<li>${esc(reason)}</li>`).join('')}</ul></article>`).join('') || '<p>No matching records were found.</p>'}</div></section>
     <section class="sc-orchestrator__section"><h3>Recommended route</h3><div class="sc-orchestrator__routes">${(response.routes || []).map((route)=>`<article class="sc-orchestrator__route"><h4>${esc(route.label)}</h4><p>${esc(route.reason)}</p><div class="sc-orchestrator__route-footer">${route.url ? `<a class="sc-orchestrator__button" href="${esc(route.url)}">Open ${esc(route.label)}</a>` : ''}</div></article>`).join('')}</div></section>
@@ -99,7 +111,11 @@
   const notice = (root, message, error = false) => { const node=root.querySelector('[data-orchestrator-notice]'); node.hidden=!message; node.textContent=message || ''; node.classList.toggle('is-error',error); };
   roots.forEach((root) => {
     const form = root.querySelector('[data-orchestrator-form]'); const select=form.elements.intent; const initial=root.dataset.initialIntent || 'auto';
-    select.innerHTML=(cfg.intents || []).map((item)=>`<option value="${esc(item.id)}" ${item.id===initial?'selected':''}>${esc(item.label)}</option>`).join('');
+    if (select && select.tagName === 'SELECT') {
+      select.innerHTML=(cfg.intents || []).map((item)=>`<option value="${esc(item.id)}" ${item.id===initial?'selected':''}>${esc(item.label)}</option>`).join('');
+    } else if (select) {
+      select.value = initial;
+    }
     let current = null;
     form.addEventListener('submit', async (event) => {
       event.preventDefault(); notice(root,cfg.strings?.working || 'Searching…'); form.querySelector('button[type="submit"]').disabled=true;
@@ -111,6 +127,12 @@
       finally { form.querySelector('button[type="submit"]').disabled=false; }
     });
     root.addEventListener('click', async (event) => {
+      const example = event.target.closest('[data-orchestrator-example]');
+      if (example) {
+        form.elements.prompt.value = example.dataset.orchestratorExample || example.textContent || '';
+        form.elements.prompt.focus();
+        return;
+      }
       const apply = event.target.closest('[data-apply-action]');
       if (apply && current) {
         const action=(current.actions || []).find((item)=>item.id===apply.dataset.applyAction); if (!action) return;

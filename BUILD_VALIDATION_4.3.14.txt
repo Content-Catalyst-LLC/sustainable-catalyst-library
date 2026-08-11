@@ -1,0 +1,33 @@
+Sustainable Catalyst Library v4.3.14
+Research Librarian Front Door, Guided Discovery & Research Flow
+
+VALIDATION STATUS: PASS
+
+Release tests:
+- 6 passed: v4.3.14 Research Librarian front-door contract
+- 6 passed, 1 deselected: v4.3.13 Field Spotlight compatibility
+- 3 passed, 1 deselected: v4.3.12 persistence compatibility
+- 8 passed, 1 deselected: v4.3.3 Publications compatibility
+
+Syntax gates:
+- PHP syntax: PASS across Sustainable Catalyst Library plugin PHP files
+- JavaScript syntax: PASS for Research Librarian orchestrator and Field Spotlight runtimes
+
+Validated release behavior:
+- WordPress plugin version advanced to 4.3.14.
+- v4.3.13 Field Spotlight component version remains intentionally unchanged.
+- v4.3.12 dedicated panel-content option remains unchanged.
+- New orchestrator mode="front-door" is additive and backward compatible.
+- Front-door requests are bounded to five records.
+- Front-door result presentation is limited to three starting records and two routes.
+- Front-door presentation does not expose Workspace action controls.
+- Full orchestrator still requires explicit confirmation before Workspace actions.
+- Research Library hero promotes the Research Librarian.
+- Guided Discovery and Research Flow appear before the deeper Library architecture.
+- Full Research Librarian remains on the page.
+- Institutional Research Portal is moved below Documents and Institutional Archive.
+- Existing Search, Pathways, Workspace, connected tools, archive, standards, and principles remain present.
+
+Standalone Research Librarian AI repository:
+- No code changes required for this release.
+- Existing service/backend contract remains untouched.

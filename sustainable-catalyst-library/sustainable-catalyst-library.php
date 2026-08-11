@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.13 turns the Publications Field Spotlight into one master, selectable 14-field editorial surface while preserving durable v4.3.12 panel-content persistence, Article Map playback, progressive disclosure, and supporting-article curation.
- * Version: 4.3.13
+ * Description: Sustainable Catalyst Library v4.3.14 promotes the Research Librarian into a guided front door for public discovery, preserves the full site-scoped research orchestrator, and clarifies the Library → Librarian → Workspace → applied-tools research flow while retaining v4.3.13 Field Spotlight behavior.
+ * Version: 4.3.14
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.13');
+define('SC_LIBRARY_VERSION', '4.3.14');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

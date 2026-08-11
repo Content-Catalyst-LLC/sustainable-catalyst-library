@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.13
+Stable tag: 4.3.14
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.13 replaces the stacked 14-Field Spotlight output with one master Publications spotlight. All 14 major fields are selectable from a compact field index, and the active field swaps its Article Map panel rail, hero, supporting publications, and playback controls in place. The page no longer grows with 14 complete spotlight modules. Each active field retains the first-eight-panel presentation, progressive disclosure for additional panels, white active panel state, sharp institutional geometry, Article Map hero, supporting article slots, keyboard/touch controls, and autoplay. Durable v4.3.12 panel-content persistence is preserved.
+Sustainable Catalyst Library v4.3.14 makes the Research Librarian a primary public discovery route without turning the Research Library into a chatbot page. A new backward-compatible `mode="front-door"` orchestrator presentation provides a restrained first-query surface with example prompts, bounded results, and a direct continuation into the full Research Librarian. The full orchestrator, deterministic site-scoped retrieval, user-confirmed workspace actions, v4.3.13 master Field Spotlight, and durable v4.3.12 panel-content persistence remain intact.
 
 
 
@@ -123,6 +123,7 @@ Sustainable Catalyst Library v4.3.13 replaces the stacked 14-Field Spotlight out
 * `[sc_foundation_document id="123"]`
 * `[sc_library_developer_portal]`
 * `[sc_research_librarian_orchestrator]`
+* `[sc_research_librarian_orchestrator mode="front-door" full_url="#research-librarian"]`
 * `[sc_library_knowledge_graph]`
 * `[sc_library_editorial_workflow]`
 * `[sc_library_multimedia_studio]`

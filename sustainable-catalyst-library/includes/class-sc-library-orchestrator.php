@@ -283,6 +283,11 @@ final class SC_Library_Orchestrator {
             'intent' => 'auto',
             'record' => '0',
             'compact' => 'false',
+            'mode' => 'standard',
+            'placeholder' => 'What are you trying to understand, compare, investigate, or build?',
+            'button_label' => 'Build Research Route',
+            'examples' => 'How do energy systems affect grid resilience?|Where should I start with international law?|Find material on systems thinking and climate adaptation.',
+            'full_url' => '',
         ], $atts, 'sc_research_librarian_orchestrator');
         self::enqueue_assets();
         $orchestrator_title = sanitize_text_field((string) $atts['title']);
@@ -290,7 +295,20 @@ final class SC_Library_Orchestrator {
         $orchestrator_intent = array_key_exists(sanitize_key((string) $atts['intent']), self::intents()) ? sanitize_key((string) $atts['intent']) : 'auto';
         $requested_record = isset($_GET['record']) ? absint(wp_unslash($_GET['record'])) : 0;
         $orchestrator_record = absint($atts['record']) ?: $requested_record;
-        $orchestrator_compact = filter_var($atts['compact'], FILTER_VALIDATE_BOOLEAN);
+        $orchestrator_mode = sanitize_key((string) $atts['mode']);
+        if (!in_array($orchestrator_mode, ['standard', 'compact', 'front-door'], true)) {
+            $orchestrator_mode = 'standard';
+        }
+        $orchestrator_front_door = $orchestrator_mode === 'front-door';
+        $orchestrator_compact = $orchestrator_front_door || $orchestrator_mode === 'compact' || filter_var($atts['compact'], FILTER_VALIDATE_BOOLEAN);
+        $orchestrator_placeholder = sanitize_text_field((string) $atts['placeholder']);
+        $orchestrator_button_label = sanitize_text_field((string) $atts['button_label']);
+        $orchestrator_examples = array_values(array_filter(array_map('sanitize_text_field', explode('|', (string) $atts['examples']))));
+        $orchestrator_full_url = trim((string) $atts['full_url']);
+        if ($orchestrator_full_url === '') {
+            $orchestrator_full_url = (string) get_option('sc_library_orchestrator_page_url', home_url('/research-librarian/'));
+        }
+        $orchestrator_full_url = esc_url($orchestrator_full_url);
         ob_start();
         include SC_LIBRARY_DIR . 'templates/library-orchestrator.php';
         return (string) ob_get_clean();
