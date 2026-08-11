@@ -316,6 +316,65 @@ final class SC_Library_Connector_Holdings_Reliability {
         return $last_error ?: new WP_Error( 'connector_unknown_failure', __( 'The provider request failed.', 'sustainable-catalyst-library' ), array( 'status' => 502 ) );
     }
 
+
+    /**
+     * POST a JSON request to an allowlisted discovery provider.
+     * Used by GraphQL-based public research connectors such as TIMDEX and eScholarship.
+     */
+    public static function request_json_post( $provider_id, $url, $payload, $headers, $timeout, $settings ) {
+        $provider_id = sanitize_key( $provider_id );
+        $validation = self::validate_provider_url( $provider_id, $url );
+        if ( is_wp_error( $validation ) ) {
+            self::record_failure( $provider_id, $validation->get_error_code(), 0, 0, $validation->get_error_message() );
+            return $validation;
+        }
+        $circuit = self::provider_request_state( $provider_id );
+        if ( is_wp_error( $circuit ) ) { return $circuit; }
+
+        $user_agent = 'SustainableCatalystLibrary/' . self::VERSION;
+        if ( ! empty( $settings['contact_email'] ) ) {
+            $user_agent .= ' (mailto:' . sanitize_email( $settings['contact_email'] ) . ')';
+        }
+        $headers = array_merge(
+            array(
+                'Accept'       => 'application/json',
+                'Content-Type' => 'application/json',
+                'User-Agent'   => $user_agent,
+            ),
+            is_array( $headers ) ? $headers : array()
+        );
+        $started = microtime( true );
+        $response = wp_safe_remote_post(
+            $url,
+            array(
+                'timeout'             => max( 5, min( 30, absint( $timeout ) ) ),
+                'redirection'         => 2,
+                'headers'             => $headers,
+                'body'                => wp_json_encode( $payload ),
+                'limit_response_size' => 5 * 1024 * 1024,
+            )
+        );
+        $latency = round( ( microtime( true ) - $started ) * 1000 );
+        if ( is_wp_error( $response ) ) {
+            self::record_failure( $provider_id, 'transport', 0, $latency, $response->get_error_message() );
+            return new WP_Error( 'connector_transport_error', $response->get_error_message(), array( 'status' => 502 ) );
+        }
+        $status = absint( wp_remote_retrieve_response_code( $response ) );
+        if ( $status < 200 || $status >= 300 ) {
+            $message = sprintf( __( '%1$s returned HTTP %2$d.', 'sustainable-catalyst-library' ), $provider_id, $status );
+            self::record_failure( $provider_id, 'http', $status, $latency, $message, self::retry_after_seconds( wp_remote_retrieve_header( $response, 'retry-after' ) ), self::rate_headers( $response ) );
+            return new WP_Error( 'connector_http_error', $message, array( 'status' => 502, 'provider_status' => $status ) );
+        }
+        $decoded = json_decode( wp_remote_retrieve_body( $response ), true );
+        if ( ! is_array( $decoded ) ) {
+            $message = __( 'The provider returned invalid JSON.', 'sustainable-catalyst-library' );
+            self::record_failure( $provider_id, 'invalid-json', $status, $latency, $message );
+            return new WP_Error( 'connector_invalid_json', $message, array( 'status' => 502 ) );
+        }
+        self::record_success( $provider_id, $status, $latency, self::rate_headers( $response ) );
+        return $decoded;
+    }
+
     private static function validate_provider_url( $provider_id, $url ) {
         $host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
         $allowed_hosts = array(
@@ -327,6 +386,10 @@ final class SC_Library_Connector_Holdings_Reliability {
             'openlibrary.org',
             'www.googleapis.com',
             'api.unpaywall.org',
+            'archive.org',
+            'timdex.mit.edu',
+            'api.lib.harvard.edu',
+            'escholarship.org',
         );
         $allowed_hosts = apply_filters( 'sc_library_connector_allowed_hosts', $allowed_hosts, $provider_id );
         if ( 'https' !== strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) ) || ! in_array( $host, $allowed_hosts, true ) ) {

@@ -1,0 +1,22 @@
+Sustainable Catalyst Library v4.3.16 — Build Validation
+
+PASS — 6 v4.3.16 Pathway-Aware Research Guidance tests
+PASS — 3 retained v4.3.15 Unified Search & Guided Discovery tests (release/page identity exclusions only)
+PASS — 5 retained v4.3.14 Research Librarian front-door tests (release identity excluded)
+PASS — 6 retained v4.3.13 Field Spotlight compatibility tests (release marker excluded)
+PASS — 3 retained v4.3.12 persistence compatibility tests (release marker excluded)
+PASS — 8 retained Publications compatibility tests (release marker excluded)
+PASS — PHP syntax across plugin
+PASS — sc-library.js syntax
+PASS — sc-library-orchestrator.js syntax
+PASS — Field Spotlight JavaScript syntax
+
+Release boundaries verified:
+- Research Librarian responses may include bounded public Knowledge Pathway recommendations.
+- Front-door mode renders one strongest pathway and no Workspace action controls.
+- Full mode can render up to four pathway recommendations and five ordered steps per pathway.
+- Search ↔ Librarian bridge remains opt-in.
+- Workspace mutations still require explicit user confirmation.
+- Field Spotlight runtime remains v4.3.13 with v4.3.12 durable panel-content storage.
+PASS — end-to-end macOS installer simulation against disposable v4.3.15 Git checkout
+PASS — checksum verification, safety backup, repository replacement, validation, and commit creation

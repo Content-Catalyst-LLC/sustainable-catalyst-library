@@ -455,11 +455,12 @@ final class SC_Library_Orchestrator {
             if (!$exists) $records[] = $graph_record;
         }
         $records = array_slice($records, 0, $max_records);
+        $pathways = $this->pathway_recommendations($prompt, $records, 4);
         $routes = $this->route_recommendations($intent, $prompt, $records);
         $actions = $this->action_packets($intent, $prompt, $records, $routes);
-        $answer = $this->deterministic_answer($intent, $prompt, $records, $routes);
+        $answer = $this->deterministic_answer($intent, $prompt, $records, $routes, $pathways);
         $provider = ['mode' => 'deterministic', 'provider' => 'sustainable-catalyst-library', 'model' => 'site-scoped-orchestration-rules'];
-        $remote = $this->remote_synthesis($prompt, $intent, $records, $routes, $answer);
+        $remote = $this->remote_synthesis($prompt, $intent, $records, $routes, $pathways, $answer);
         if (is_array($remote) && !empty($remote['answer'])) {
             $answer = sanitize_textarea_field((string) $remote['answer']);
             $provider = [
@@ -477,6 +478,7 @@ final class SC_Library_Orchestrator {
             'intent_label' => self::intents()[$intent] ?? ucfirst($intent),
             'answer' => $answer,
             'records' => $records,
+            'pathways' => $pathways,
             'routes' => $routes,
             'actions' => $actions,
             'diagnostics' => [
@@ -485,6 +487,7 @@ final class SC_Library_Orchestrator {
                 'selected_record_ids' => $record_ids,
                 'recommended_record_count' => count($records),
                 'graph_expansion_count' => count($graph_expansion),
+                'pathway_recommendation_count' => count($pathways),
                 'provider' => $provider,
                 'scope' => 'sustainable-catalyst-library-and-public-knowledge-graph',
             ],
@@ -665,6 +668,52 @@ final class SC_Library_Orchestrator {
         return $names;
     }
 
+    private function pathway_recommendations(string $prompt, array $records, int $limit = 4): array {
+        if (!class_exists('SC_Library_Knowledge_Pathways_Article_Maps')) return [];
+        $node_keys = [];
+        if (class_exists('SC_Library_Topics_Concepts_Relationships')) {
+            foreach ($records as $record) {
+                $kind = SC_Library_Topics_Concepts_Relationships::post_kind((string) ($record['post_type'] ?? ''));
+                if ($kind !== '' && !empty($record['id'])) $node_keys[] = $kind . ':' . absint($record['id']);
+            }
+        }
+        $result = SC_Library_Knowledge_Pathways_Article_Maps::recommend_pathways([
+            'query' => $prompt,
+            'node_keys' => array_values(array_unique($node_keys)),
+        ], false, min(6, max(1, $limit)));
+        $items = [];
+        foreach ((array) ($result['items'] ?? []) as $candidate) {
+            $pathway = is_array($candidate['pathway'] ?? null) ? $candidate['pathway'] : [];
+            if (!$pathway || empty($pathway['id']) || empty($pathway['title'])) continue;
+            $steps = [];
+            foreach (array_slice((array) ($pathway['steps'] ?? []), 0, 5) as $step) {
+                $steps[] = [
+                    'order' => absint($step['order'] ?? 0) + 1,
+                    'label' => sanitize_text_field((string) ($step['label'] ?? '')),
+                    'url' => esc_url_raw((string) ($step['url'] ?? '')),
+                    'stage' => sanitize_key((string) ($step['stage'] ?? 'core')),
+                    'difficulty' => sanitize_key((string) ($step['difficulty'] ?? '')),
+                    'required' => !empty($step['required']),
+                    'minutes' => absint($step['minutes'] ?? 0),
+                ];
+            }
+            $items[] = [
+                'id' => absint($pathway['id']),
+                'title' => sanitize_text_field((string) $pathway['title']),
+                'url' => esc_url_raw((string) ($pathway['url'] ?? '')),
+                'summary' => sanitize_text_field((string) ($pathway['summary'] ?? '')),
+                'level' => sanitize_key((string) ($pathway['level'] ?? 'mixed')),
+                'level_label' => sanitize_text_field((string) ($pathway['level_label'] ?? 'Mixed levels')),
+                'step_count' => absint($pathway['step_count'] ?? count($pathway['steps'] ?? [])),
+                'estimated_minutes' => absint($pathway['estimated_minutes'] ?? 0),
+                'score' => (float) ($candidate['score'] ?? 0),
+                'reasons' => array_values(array_map('sanitize_text_field', (array) ($candidate['reasons'] ?? []))),
+                'steps' => $steps,
+            ];
+        }
+        return $items;
+    }
+
     private function route_recommendations(string $intent, string $prompt, array $records): array {
         $targets = self::target_definitions();
         $route_ids = match ($intent) {
@@ -791,21 +840,26 @@ final class SC_Library_Orchestrator {
         return implode("\n", $lines);
     }
 
-    private function deterministic_answer(string $intent, string $prompt, array $records, array $routes): string {
+    private function deterministic_answer(string $intent, string $prompt, array $records, array $routes, array $pathways = []): string {
         if (!$records) {
             return __('I could not find a strong indexed match. Try a narrower topic, a known article title, or rebuild the Library index if the expected records are missing.', 'sustainable-catalyst-library');
         }
         $titles = array_map(static fn($record) => '“' . $record['title'] . '”', array_slice($records, 0, 3));
         $route = $routes[0]['label'] ?? __('Research Notebook', 'sustainable-catalyst-library');
+        $pathway = $pathways[0]['title'] ?? '';
+        if ($pathway !== '') {
+            return sprintf(
+                __('I found %1$d site records that directly or graphically connect to this request. The strongest starting points are %2$s. A relevant curated route is “%3$s”. The recommended next environment is %4$s. Review the pathway and retrieval reasons below before continuing.', 'sustainable-catalyst-library'),
+                count($records), implode(', ', $titles), $pathway, $route
+            );
+        }
         return sprintf(
             __('I found %1$d site records that directly or graphically connect to this request. The strongest starting points are %2$s. The recommended next environment is %3$s. Review the retrieval reasons below, then apply only the workspace actions that are useful.', 'sustainable-catalyst-library'),
-            count($records),
-            implode(', ', $titles),
-            $route
+            count($records), implode(', ', $titles), $route
         );
     }
 
-    private function remote_synthesis(string $prompt, string $intent, array $records, array $routes, string $fallback): ?array {
+    private function remote_synthesis(string $prompt, string $intent, array $records, array $routes, array $pathways, string $fallback): ?array {
         $url = esc_url_raw((string) get_option('sc_library_orchestrator_service_url', ''));
         if ($url === '') return null;
         $key = (string) get_option('sc_library_orchestrator_service_api_key', '');
@@ -825,6 +879,11 @@ final class SC_Library_Orchestrator {
                     'url' => $record['url'], 'why' => $record['why'], 'concepts' => $record['concepts'],
                 ], $records),
                 'routes' => $routes,
+                'pathways' => array_map(static fn($pathway) => [
+                    'id' => $pathway['id'], 'title' => $pathway['title'], 'url' => $pathway['url'],
+                    'summary' => $pathway['summary'], 'level' => $pathway['level'], 'step_count' => $pathway['step_count'],
+                    'reasons' => $pathway['reasons'], 'steps' => $pathway['steps'],
+                ], $pathways),
                 'fallback_answer' => $fallback,
                 'constraints' => [
                     'use_only_supplied_records' => true,

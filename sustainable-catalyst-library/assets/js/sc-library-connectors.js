@@ -46,6 +46,21 @@
     });
   }
 
+
+  function accessLabel(status) {
+    var labels = {
+      'public-digital': 'Open digital access',
+      'open-access': 'Open access',
+      'public-catalog': 'Public catalog record',
+      'library-holding': 'Library access',
+      'preview-only': 'Preview available',
+      'institutional-auth': 'Institution login required',
+      'physical': 'Physical holding',
+      'metadata-only': 'Metadata only'
+    };
+    return labels[status] || String(status || '').replace(/-/g, ' ');
+  }
+
   function resultAuthors(result) {
     if (result.authors && result.authors.length) {
       return result.authors.map(function (author) {
@@ -73,7 +88,7 @@
     var header = make('header', 'sc-connector-result-card__header');
     header.appendChild(make('span', 'sc-connector-result-card__provider', result.provider_name || result.provider || 'Provider'));
     if (result.full_text_status) {
-      header.appendChild(make('strong', 'sc-connector-result-card__access', result.full_text_status.replace(/-/g, ' ')));
+      header.appendChild(make('strong', 'sc-connector-result-card__access', accessLabel(result.full_text_status)));
     }
     article.appendChild(header);
 
@@ -119,8 +134,8 @@
     }
 
     var links = make('div', 'sc-connector-result-card__links');
-    addLink(links, 'Provider record', result.record_url);
-    addLink(links, 'Open access', result.open_access_url, 'is-open-access');
+    addLink(links, 'View source record', result.record_url);
+    addLink(links, result.full_text_status === 'public-digital' ? 'Open digital resource' : 'Open access', result.open_access_url, 'is-open-access');
     addLink(links, 'Preview', result.preview_url);
     (result.discovery_links || []).forEach(function (link) {
       addLink(links, link.label || 'Open', link.url);
@@ -177,6 +192,59 @@
     section.appendChild(list);
     return section;
   }
+
+
+  document.querySelectorAll('[data-sc-research-access]').forEach(function (root) {
+    var form = root.querySelector('[data-sc-research-access-form]');
+    var resultsNode = root.querySelector('[data-sc-research-access-results]');
+    var statusNode = root.querySelector('[data-sc-research-access-status]');
+    var summaryNode = root.querySelector('[data-sc-research-access-summary]');
+    var berkeley = root.querySelector('[data-sc-berkeley-handoff]');
+    if (!form || !resultsNode) { return; }
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var data = new FormData(form);
+      var query = String(data.get('query') || '').trim();
+      var limit = parseInt(data.get('limit') || '5', 10);
+      var providers = Array.prototype.slice.call(root.querySelectorAll('input[name="research_access_providers[]"]:checked')).map(function (input) { return input.value; });
+      if (query.length < 2 || !providers.length) {
+        if (statusNode) { statusNode.textContent = query.length < 2 ? 'Enter at least two characters.' : 'Select at least one research source.'; }
+        return;
+      }
+      if (berkeley) {
+        berkeley.href = String(root.dataset.berkeleySearchTemplate || 'https://escholarship.org/').replace('{query}', encodeURIComponent(query));
+      }
+      resultsNode.innerHTML = '';
+      if (summaryNode) { summaryNode.textContent = ''; }
+      if (statusNode) { statusNode.textContent = 'Searching ' + providers.length + ' public research sources…'; }
+      var completed = 0, totalResults = 0, failures = 0;
+      Promise.all(providers.map(function (provider) {
+        return request('sc_library_v4317_research_access_search', { provider: provider, query: query, limit: limit })
+          .then(function (payload) {
+            completed += 1;
+            totalResults += parseInt(payload.result_count || 0, 10);
+            resultsNode.appendChild(renderProviderGroup(payload));
+            if (statusNode) { statusNode.textContent = completed + ' of ' + providers.length + ' sources complete.'; }
+            return payload;
+          })
+          .catch(function (error) {
+            completed += 1; failures += 1;
+            var section = make('section', 'sc-connector-provider-results is-error');
+            section.appendChild(make('h2', '', provider));
+            section.appendChild(make('p', '', error.message));
+            resultsNode.appendChild(section);
+            if (statusNode) { statusNode.textContent = completed + ' of ' + providers.length + ' sources complete.'; }
+            return null;
+          });
+      })).then(function () {
+        if (statusNode) { statusNode.textContent = 'Research Access search complete.'; }
+        if (summaryNode) {
+          summaryNode.textContent = totalResults + ' normalized results across ' + providers.length + ' sources' + (failures ? ' · ' + failures + ' source failures' : '') + '. Open resources are shown with explicit access labels.';
+        }
+      });
+    });
+  });
 
   document.querySelectorAll('[data-sc-connector-discovery]').forEach(function (root) {
     var form = root.querySelector('[data-sc-connector-search-form]');

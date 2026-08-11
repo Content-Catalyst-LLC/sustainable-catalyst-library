@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.15
+Stable tag: 4.3.17
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.15 unifies direct Library search and Research Librarian guided discovery without collapsing them into one interface. On explicitly enabled Library embeds, a reader can send a typed query or the current result set to the Research Librarian, preserving up to eight matching record IDs as bounded context. Front-door Librarian results can return the original research question to a populated Library search. v4.3.14 front-door behavior, user-confirmed workspace actions, v4.3.13 master Field Spotlight, and durable v4.3.12 panel-content persistence remain intact.
+Sustainable Catalyst Library v4.3.17 makes Research Access the public front door. It introduces federated search across open library, archive, and university discovery systems, launches direct connectors for Internet Archive, MIT Libraries, Harvard Library, and the Library of Congress, surfaces UC Berkeley/eScholarship as a public research-access route, and normalizes access states so open digital resources can be distinguished from catalog-only or institution-controlled records. University affiliation is not required for public Research Access, and the v4.3.16 pathway-aware Research Librarian, v4.3.15 Search ↔ Librarian bridge, Workspace confirmation boundaries, Field Spotlight, and persistence contracts remain intact.
 
 
 
@@ -160,6 +160,24 @@ Sustainable Catalyst Library v4.3.15 unifies direct Library search and Research 
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.17 =
+* Adds Research Access as the first functional Research Library surface.
+* Adds a public, no-affiliation-required federated search shortcode: [sc_research_access].
+* Adds direct launch connectors for Internet Archive, MIT TIMDEX, Harvard LibraryCloud, and Library of Congress.
+* Adds UC Berkeley/eScholarship as a public repository access route and connector-registry target.
+* Normalizes public/open, institutional, borrowable, physical, and metadata-only access states.
+* Keeps external authentication on the source institution; Sustainable Catalyst does not collect library passwords.
+* Preserves v4.3.16 pathway-aware Research Librarian guidance, the v4.3.15 Search/Librarian bridge, and Workspace confirmation boundaries.
+
+
+= 4.3.16 =
+* Adds curated Knowledge Pathway recommendations to Research Librarian responses using the existing pathway recommendation engine.
+* Uses the research question plus compatible selected-record node context when ranking pathways.
+* Returns pathway title, summary, level, step count, recommendation reasons, and up to five ordered starting steps.
+* Front-door mode surfaces one strongest pathway and a compact ordered route; the full Librarian can show up to four pathways.
+* Optional remote synthesis receives the same bounded pathway context but cannot create actions or expand beyond supplied Library material.
+* Preserves the v4.3.15 Search ↔ Librarian bridge, explicit Workspace confirmation, v4.3.13 Field Spotlight behavior, and v4.3.12 panel-content persistence.
 
 = 4.3.15 =
 * Adds an opt-in Search ↔ Research Librarian discovery bridge to `[sc_library]`; existing Library embeds remain unchanged unless `show_librarian="true"` is supplied.
