@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.19
+Stable tag: 4.3.19.1
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.18.1 is an emergency integrity patch for the Publications and Field Spotlight surfaces. It preserves the v4.3.18 Research Access and scholarly connector work while repairing implausibly collapsed visibility state, clearing stale Publications/Field Spotlight caches on upgrade, and restoring the canonical multi-field presentation without deleting titles, descriptions, curated articles, hero copy, ordering, or other editorial configuration.
+Sustainable Catalyst Library v4.3.19.1 shifts the Research Library to an access-first public experience. It preserves v4.3.19 Global Library Search, My Libraries, Research Libraries, Digital Access Resolver, Research Librarian, Workspace, and Publications recovery while compressing the main page from a long explanatory architecture into a focused research journey.
 
 
 
@@ -160,6 +160,14 @@ Sustainable Catalyst Library v4.3.18.1 is an emergency integrity patch for the P
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.19.1 =
+* Replaces the long-form Research Library page with an access-first layout centered on Research Access, the Research Librarian, direct Library search, Knowledge Pathways, Workspace, applied tools, and compact research infrastructure.
+* Removes the legacy main-page sections What This Library Is Built to Do, How the Library Works, From Symbols to Systems, Signature Learning Formats, Technical Knowledge Systems, Research Layer, Research Library Standards, and Library Principles.
+* Combines Reader Pathways, Featured Knowledge Pathways, and Core Libraries into one Explore Knowledge surface.
+* Compresses Research Flow, Workspace, Connected Platform, documents/methods/standards, and the closing statement without removing their underlying plugin capabilities.
+* Preserves v4.3.19 Research Access, My Libraries, Research Libraries, Digital Access Resolver, scholarly connectors, v4.3.18.1 Publications recovery, and all Research Librarian/Workspace confirmation boundaries.
+
 
 = 4.3.19 =
 * Adds My Libraries and Research Libraries to the public Research Access surface for signed-in Sustainable Catalyst / Workspace users.
