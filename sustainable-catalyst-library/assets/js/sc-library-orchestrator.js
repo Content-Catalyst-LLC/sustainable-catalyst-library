@@ -86,6 +86,26 @@
     saveWorkspace(ws);
   };
   const diagnostics = (response) => JSON.stringify({schema:response.schema,id:response.id,intent:response.intent,diagnostics:response.diagnostics,boundaries:response.boundaries},null,2);
+  const librarySearchHref = (root, query) => {
+    const target = root.dataset.libraryUrl || '#knowledge-explorer';
+    if (target.startsWith('#')) return target;
+    try {
+      const url = new URL(target, window.location.href);
+      if (query) url.searchParams.set('library_search', query);
+      return url.toString();
+    } catch (_) {
+      return target;
+    }
+  };
+  const targetContainsRoot = (selector, root) => {
+    if (!selector || !selector.startsWith('#')) return false;
+    try {
+      const target = document.querySelector(selector);
+      return Boolean(target && target.contains(root));
+    } catch (_) {
+      return false;
+    }
+  };
   const renderResponse = (root, response) => {
     const output = root.querySelector('[data-orchestrator-output]');
     const provider = response.diagnostics?.provider || {};
@@ -97,7 +117,7 @@
       output.innerHTML = `<section class="sc-orchestrator__summary sc-orchestrator__summary--front-door"><div><h3>${esc(response.intent_label || 'Research route')}</h3><p>${esc(response.answer || '')}</p><div class="sc-orchestrator__meta"><span>${esc(response.records?.length || 0)} matching records</span><span>${esc(response.diagnostics?.retrieval_mode || 'site-scoped')}</span></div></div></section>
       <section class="sc-orchestrator__section"><h3>Recommended starting points</h3><div class="sc-orchestrator__records sc-orchestrator__records--front-door">${records.map((record) => `<article class="sc-orchestrator__record ${record.graph_related ? 'is-graph' : ''}"><small>${record.graph_related ? 'Graph-connected record' : esc(record.post_type || 'Library record')}</small><h4><a href="${esc(record.url)}">${esc(record.title)}</a></h4><ul class="sc-orchestrator__why">${(record.why || []).slice(0,2).map((reason)=>`<li>${esc(reason)}</li>`).join('')}</ul></article>`).join('') || '<p>No matching records were found.</p>'}</div></section>
       ${routes.length ? `<section class="sc-orchestrator__section"><h3>Continue the route</h3><div class="sc-orchestrator__routes sc-orchestrator__routes--front-door">${routes.map((route)=>`<article class="sc-orchestrator__route"><h4>${esc(route.label)}</h4><p>${esc(route.reason)}</p>${route.url ? `<a class="sc-orchestrator__button" href="${esc(route.url)}">Open ${esc(route.label)}</a>` : ''}</article>`).join('')}</div></section>` : ''}
-      <div class="sc-orchestrator__continue"><a class="sc-orchestrator__button is-primary" href="${esc(fullUrl)}">Continue in the full Research Librarian</a><span>Review deeper recommendations, diagnostics, and user-confirmed workspace actions.</span></div>`;
+      <div class="sc-orchestrator__continue"><a class="sc-orchestrator__button is-primary" href="${esc(fullUrl)}">Continue in the full Research Librarian</a><a class="sc-orchestrator__button" data-library-search-from-librarian href="${esc(librarySearchHref(root, response.prompt || ''))}">View all matching Library records</a><span>Move between guided recommendations and conventional Library search without losing the research question.</span></div>`;
       output.dataset.response = JSON.stringify(response);
       return;
     }
@@ -111,17 +131,30 @@
   const notice = (root, message, error = false) => { const node=root.querySelector('[data-orchestrator-notice]'); node.hidden=!message; node.textContent=message || ''; node.classList.toggle('is-error',error); };
   roots.forEach((root) => {
     const form = root.querySelector('[data-orchestrator-form]'); const select=form.elements.intent; const initial=root.dataset.initialIntent || 'auto';
+    const initialRecordIds = String(root.dataset.initialRecordIds || '').split(',').map(Number).filter(Boolean);
+    let contextualRecordIds = initialRecordIds.slice(0, 8);
     if (select && select.tagName === 'SELECT') {
       select.innerHTML=(cfg.intents || []).map((item)=>`<option value="${esc(item.id)}" ${item.id===initial?'selected':''}>${esc(item.label)}</option>`).join('');
     } else if (select) {
       select.value = initial;
     }
     let current = null;
+    document.addEventListener('sc-library-librarian-request', (event) => {
+      const detail = event.detail || {};
+      if (detail.target && !targetContainsRoot(detail.target, root)) return;
+      const prompt = String(detail.prompt || '').trim();
+      if (!prompt) return;
+      form.elements.prompt.value = prompt;
+      contextualRecordIds = Array.from(new Set([...(detail.recordIds || []).map(Number).filter(Boolean), ...initialRecordIds])).slice(0, 8);
+      notice(root, cfg.strings?.libraryContextReady || 'Library search context added. Review the question and ask when ready.');
+      form.elements.prompt.focus();
+    });
     form.addEventListener('submit', async (event) => {
       event.preventDefault(); notice(root,cfg.strings?.working || 'Searching…'); form.querySelector('button[type="submit"]').disabled=true;
       try {
         const selectedRecord = Number(root.dataset.initialRecord || 0);
-        current = await fetchJson('query',{method:'POST',body:JSON.stringify({prompt:form.elements.prompt.value,intent:form.elements.intent.value,max_records:Number(form.elements.max_records.value),record_ids:selectedRecord?[selectedRecord]:[]})});
+        const recordIds = Array.from(new Set([...(selectedRecord ? [selectedRecord] : []), ...contextualRecordIds])).slice(0, 8);
+        current = await fetchJson('query',{method:'POST',body:JSON.stringify({prompt:form.elements.prompt.value,intent:form.elements.intent.value,max_records:Number(form.elements.max_records.value),record_ids:recordIds})});
         renderResponse(root,current); notice(root,'');
       } catch (error) { notice(root,error.message || cfg.strings?.error || 'Request failed.',true); }
       finally { form.querySelector('button[type="submit"]').disabled=false; }
@@ -131,6 +164,15 @@
       if (example) {
         form.elements.prompt.value = example.dataset.orchestratorExample || example.textContent || '';
         form.elements.prompt.focus();
+        return;
+      }
+      const librarySearch = event.target.closest('[data-library-search-from-librarian]');
+      if (librarySearch && current) {
+        const target = root.dataset.libraryUrl || '#knowledge-explorer';
+        if (target.startsWith('#') && document.querySelector(target)) {
+          event.preventDefault();
+          document.dispatchEvent(new CustomEvent('sc-library-search-request', {detail:{query:current.prompt || form.elements.prompt.value,target,source:'research-librarian'}}));
+        }
         return;
       }
       const apply = event.target.closest('[data-apply-action]');

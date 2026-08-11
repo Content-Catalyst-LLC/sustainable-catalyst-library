@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.14 promotes the Research Librarian into a guided front door for public discovery, preserves the full site-scoped research orchestrator, and clarifies the Library → Librarian → Workspace → applied-tools research flow while retaining v4.3.13 Field Spotlight behavior.
- * Version: 4.3.14
+ * Description: Sustainable Catalyst Library v4.3.15 unifies direct Library search with Research Librarian guided discovery, preserves query and result context across both interfaces, and retains the v4.3.14 Research Librarian front door plus v4.3.13 Field Spotlight behavior.
+ * Version: 4.3.15
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.14');
+define('SC_LIBRARY_VERSION', '4.3.15');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

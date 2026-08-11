@@ -1,0 +1,20 @@
+Sustainable Catalyst Library v4.3.15 — Build Validation
+Release: Unified Search & Guided Discovery
+
+PASS — 5 v4.3.15 unified discovery tests
+PASS — 5 retained v4.3.14 Research Librarian front-door tests (release identity excluded)
+PASS — 6 retained v4.3.13 Field Spotlight compatibility tests
+PASS — 3 retained v4.3.12 Field Spotlight persistence tests
+PASS — 8 retained Publications compatibility tests
+PASS — PHP syntax validation across plugin source
+PASS — JavaScript syntax: sc-library.js
+PASS — JavaScript syntax: sc-library-orchestrator.js
+PASS — JavaScript syntax: sc-library-field-spotlights.js
+
+Release boundaries:
+- Search ↔ Research Librarian bridge is opt-in per [sc_library] embed.
+- Active handoff context is bounded to 8 record IDs.
+- Front-door results do not expose Workspace action controls.
+- Full Research Librarian Workspace actions still require explicit confirmation.
+- Field Spotlight runtime/data contract remains v4.3.13/v4.3.12.
+- No standalone Research Librarian AI repository change is required.

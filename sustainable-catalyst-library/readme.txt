@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.14
+Stable tag: 4.3.15
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.14 makes the Research Librarian a primary public discovery route without turning the Research Library into a chatbot page. A new backward-compatible `mode="front-door"` orchestrator presentation provides a restrained first-query surface with example prompts, bounded results, and a direct continuation into the full Research Librarian. The full orchestrator, deterministic site-scoped retrieval, user-confirmed workspace actions, v4.3.13 master Field Spotlight, and durable v4.3.12 panel-content persistence remain intact.
+Sustainable Catalyst Library v4.3.15 unifies direct Library search and Research Librarian guided discovery without collapsing them into one interface. On explicitly enabled Library embeds, a reader can send a typed query or the current result set to the Research Librarian, preserving up to eight matching record IDs as bounded context. Front-door Librarian results can return the original research question to a populated Library search. v4.3.14 front-door behavior, user-confirmed workspace actions, v4.3.13 master Field Spotlight, and durable v4.3.12 panel-content persistence remain intact.
 
 
 
@@ -123,7 +123,8 @@ Sustainable Catalyst Library v4.3.14 makes the Research Librarian a primary publ
 * `[sc_foundation_document id="123"]`
 * `[sc_library_developer_portal]`
 * `[sc_research_librarian_orchestrator]`
-* `[sc_research_librarian_orchestrator mode="front-door" full_url="#research-librarian"]`
+* `[sc_research_librarian_orchestrator mode="front-door" full_url="#research-librarian" library_url="#knowledge-explorer"]`
+* `[sc_library show_librarian="true" librarian_target="#research-front-door"]`
 * `[sc_library_knowledge_graph]`
 * `[sc_library_editorial_workflow]`
 * `[sc_library_multimedia_studio]`
@@ -159,6 +160,15 @@ Sustainable Catalyst Library v4.3.14 makes the Research Librarian a primary publ
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.15 =
+* Adds an opt-in Search ↔ Research Librarian discovery bridge to `[sc_library]`; existing Library embeds remain unchanged unless `show_librarian="true"` is supplied.
+* Adds **Ask the Research Librarian** beside direct Library search and **Ask the Research Librarian about these results** once results are available.
+* Preserves the active search question and up to eight current result IDs when moving into the Research Librarian.
+* Adds **View all matching Library records** to front-door Librarian results and restores the original question into Library search.
+* Supports same-page event handoff without reload and cross-page fallback through sanitized query parameters.
+* Corrects v4.3.14 front-door wording from “Ask the Library” to **Ask the Research Librarian**.
+* Preserves user-confirmed Workspace actions, Research Librarian bounded front-door mode, v4.3.13 Field Spotlight behavior, and v4.3.12 panel-content persistence.
 
 = 4.3.13 =
 * Replaced the stacked Field Spotlight shortcode with a single master 14-field Publications surface.

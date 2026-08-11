@@ -69,6 +69,8 @@ final class SC_Library_Shortcodes {
             'mode' => $default_mode,
             'density' => (string) get_option('sc_library_result_density', 'compact'),
             'show_workspace' => (string) (int) get_option('sc_library_enable_notebook', 1),
+            'show_librarian' => 'false',
+            'librarian_target' => '#research-front-door',
         ], $atts, 'sc_library');
 
         $allowed_modes = ['compact', 'full', 'search', 'domains', 'pathways'];
@@ -79,6 +81,17 @@ final class SC_Library_Shortcodes {
         $show_pathways = filter_var($atts['show_pathways'], FILTER_VALIDATE_BOOLEAN);
         $initial_results = filter_var($atts['initial_results'], FILTER_VALIDATE_BOOLEAN);
         $show_workspace = filter_var($atts['show_workspace'], FILTER_VALIDATE_BOOLEAN) && SC_Library_Notebook::enabled();
+        $show_librarian_bridge = filter_var($atts['show_librarian'], FILTER_VALIDATE_BOOLEAN)
+            && class_exists('SC_Library_Orchestrator')
+            && SC_Library_Orchestrator::enabled();
+        $librarian_target = trim((string) $atts['librarian_target']);
+        if ($librarian_target === '') {
+            $librarian_target = '#research-front-door';
+        } elseif (str_starts_with($librarian_target, '#')) {
+            $librarian_target = '#' . sanitize_html_class(substr($librarian_target, 1));
+        } else {
+            $librarian_target = esc_url_raw($librarian_target);
+        }
         $title = sanitize_text_field($atts['title']);
         $intro = sanitize_text_field($atts['intro']);
         $initial_category = sanitize_title($atts['category']);
@@ -142,6 +155,9 @@ final class SC_Library_Shortcodes {
                 'bookRecord' => __('Add to Custom Book', 'sustainable-catalyst-library'),
                 'graphRecord' => __('View Relationship Graph', 'sustainable-catalyst-library'),
                 'orchestrateRecord' => __('Ask Research Librarian', 'sustainable-catalyst-library'),
+                'askLibrarian' => __('Ask the Research Librarian', 'sustainable-catalyst-library'),
+                'askAboutResults' => __('Ask the Research Librarian about these results', 'sustainable-catalyst-library'),
+                'librarianContextReady' => __('Library search context added to the Research Librarian.', 'sustainable-catalyst-library'),
                 'results' => __('results', 'sustainable-catalyst-library'),
                 'result' => __('result', 'sustainable-catalyst-library'),
             ],

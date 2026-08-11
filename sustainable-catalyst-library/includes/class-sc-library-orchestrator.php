@@ -266,6 +266,7 @@ final class SC_Library_Orchestrator {
                 'confirmAction' => __('Apply this action to your local Research Notebook?', 'sustainable-catalyst-library'),
                 'applied' => __('Action applied to the Research Notebook.', 'sustainable-catalyst-library'),
                 'savedSession' => __('Orchestration session saved to your account.', 'sustainable-catalyst-library'),
+                'libraryContextReady' => __('Library search context added. Review the question and ask when ready.', 'sustainable-catalyst-library'),
             ],
         ]);
     }
@@ -282,12 +283,15 @@ final class SC_Library_Orchestrator {
             'intro' => 'Ask a site-scoped research question, review why records were recommended, and choose which actions to apply to your workspace.',
             'intent' => 'auto',
             'record' => '0',
+            'record_ids' => '',
+            'initial_prompt' => '',
             'compact' => 'false',
             'mode' => 'standard',
             'placeholder' => 'What are you trying to understand, compare, investigate, or build?',
             'button_label' => 'Build Research Route',
             'examples' => 'How do energy systems affect grid resilience?|Where should I start with international law?|Find material on systems thinking and climate adaptation.',
             'full_url' => '',
+            'library_url' => '#knowledge-explorer',
         ], $atts, 'sc_research_librarian_orchestrator');
         self::enqueue_assets();
         $orchestrator_title = sanitize_text_field((string) $atts['title']);
@@ -295,6 +299,19 @@ final class SC_Library_Orchestrator {
         $orchestrator_intent = array_key_exists(sanitize_key((string) $atts['intent']), self::intents()) ? sanitize_key((string) $atts['intent']) : 'auto';
         $requested_record = isset($_GET['record']) ? absint(wp_unslash($_GET['record'])) : 0;
         $orchestrator_record = absint($atts['record']) ?: $requested_record;
+        $requested_record_ids = isset($_GET['record_ids']) ? sanitize_text_field(wp_unslash($_GET['record_ids'])) : '';
+        $record_ids_source = trim((string) $atts['record_ids']) !== '' ? (string) $atts['record_ids'] : $requested_record_ids;
+        $orchestrator_record_ids = array_values(array_unique(array_filter(array_map('absint', preg_split('/\s*,\s*/', $record_ids_source)))));
+        if ($orchestrator_record > 0) {
+            array_unshift($orchestrator_record_ids, $orchestrator_record);
+            $orchestrator_record_ids = array_values(array_unique($orchestrator_record_ids));
+        }
+        $orchestrator_record_ids = array_slice($orchestrator_record_ids, 0, 8);
+        $requested_prompt = isset($_GET['librarian_prompt']) ? sanitize_textarea_field(wp_unslash($_GET['librarian_prompt'])) : '';
+        $orchestrator_initial_prompt = sanitize_textarea_field((string) $atts['initial_prompt']);
+        if ($orchestrator_initial_prompt === '' && $requested_prompt !== '') {
+            $orchestrator_initial_prompt = $requested_prompt;
+        }
         $orchestrator_mode = sanitize_key((string) $atts['mode']);
         if (!in_array($orchestrator_mode, ['standard', 'compact', 'front-door'], true)) {
             $orchestrator_mode = 'standard';
@@ -309,6 +326,14 @@ final class SC_Library_Orchestrator {
             $orchestrator_full_url = (string) get_option('sc_library_orchestrator_page_url', home_url('/research-librarian/'));
         }
         $orchestrator_full_url = esc_url($orchestrator_full_url);
+        $orchestrator_library_url = trim((string) $atts['library_url']);
+        if ($orchestrator_library_url === '') {
+            $orchestrator_library_url = '#knowledge-explorer';
+        } elseif (str_starts_with($orchestrator_library_url, '#')) {
+            $orchestrator_library_url = '#' . sanitize_html_class(substr($orchestrator_library_url, 1));
+        } else {
+            $orchestrator_library_url = esc_url($orchestrator_library_url);
+        }
         ob_start();
         include SC_LIBRARY_DIR . 'templates/library-orchestrator.php';
         return (string) ob_get_clean();

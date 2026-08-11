@@ -91,6 +91,10 @@
     const relationshipSummary = root.querySelector('[data-relationship-summary]');
     const pathwayList = root.querySelector('[data-pathway-list]');
     const pathwaySummary = root.querySelector('[data-pathway-summary]');
+    const askLibrarianQuery = root.querySelector('[data-ask-librarian-query]');
+    const askLibrarianResults = root.querySelector('[data-ask-librarian-results]');
+    const librarianBridge = root.dataset.librarianBridge === '1';
+    const librarianTarget = root.dataset.librarianTarget || '#research-front-door';
 
     const state = {
       search: '',
@@ -112,6 +116,52 @@
     let categoryItems = [];
     let lastFocusedElement = null;
     let activeRecordId = 0;
+    let lastResultItems = [];
+
+    const targetContainsRoot = (selector) => {
+      if (!selector || !selector.startsWith('#')) return false;
+      try {
+        const target = document.querySelector(selector);
+        return Boolean(target && target.contains(root));
+      } catch (_) {
+        return false;
+      }
+    };
+
+    const researchPromptForState = () => {
+      if (state.search) return state.search;
+      if (state.seriesName) return `Help me explore the Library series “${state.seriesName}”.`;
+      if (state.conceptName) return `Help me explore the Library concept “${state.conceptName}”.`;
+      if (state.categoryName) return `Help me explore the Library topic “${state.categoryName}”.`;
+      return 'Help me explore these Sustainable Catalyst Library records.';
+    };
+
+    const handoffToLibrarian = (prompt, recordIds = []) => {
+      if (!librarianBridge || !prompt) return;
+      const detail = {
+        prompt,
+        recordIds: Array.from(new Set((recordIds || []).map(Number).filter(Boolean))).slice(0, 8),
+        target: librarianTarget,
+        source: 'library-search',
+      };
+      let localTarget = null;
+      if (librarianTarget.startsWith('#')) {
+        try { localTarget = document.querySelector(librarianTarget); } catch (_) { localTarget = null; }
+      }
+      if (localTarget) {
+        document.dispatchEvent(new CustomEvent('sc-library-librarian-request', { detail }));
+        localTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      try {
+        const url = new URL(librarianTarget || orchestratorPageUrl, window.location.href);
+        url.searchParams.set('librarian_prompt', prompt);
+        if (detail.recordIds.length) url.searchParams.set('record_ids', detail.recordIds.join(','));
+        window.location.href = url.toString();
+      } catch (_) {
+        if (orchestratorPageUrl) window.location.href = orchestratorPageUrl;
+      }
+    };
 
     const showResultsRegion = () => {
       if (resultsRegion) resultsRegion.hidden = false;
@@ -302,12 +352,16 @@
 
       try {
         const data = await api('items', state);
-        renderItems(data.items || []);
+        lastResultItems = Array.isArray(data.items) ? data.items : [];
+        renderItems(lastResultItems);
         renderPagination(data.pagination);
         const total = Number(data.pagination?.total || 0);
+        if (askLibrarianResults) askLibrarianResults.hidden = total === 0;
         if (status) status.textContent = `${total.toLocaleString()} ${total === 1 ? (strings.result || 'result') : (strings.results || 'results')}`;
         updateUrl();
       } catch (error) {
+        lastResultItems = [];
+        if (askLibrarianResults) askLibrarianResults.hidden = true;
         if (results) results.innerHTML = `<p class="sc-library__empty">${escapeHtml(strings.error || 'The knowledge base could not be loaded.')}</p>`;
         if (pagination) pagination.innerHTML = '';
         if (status) status.textContent = '';
@@ -754,7 +808,42 @@
       if (resultsRegion) resultsRegion.hidden = true;
       if (results) results.innerHTML = '';
       if (pagination) pagination.innerHTML = '';
+      lastResultItems = [];
+      if (askLibrarianResults) askLibrarianResults.hidden = true;
       updateUrl();
+    });
+
+    askLibrarianQuery?.addEventListener('click', () => {
+      const prompt = searchInput?.value.trim() || researchPromptForState();
+      handoffToLibrarian(prompt, []);
+    });
+
+    askLibrarianResults?.addEventListener('click', () => {
+      handoffToLibrarian(researchPromptForState(), lastResultItems.slice(0, 8).map((item) => item.id));
+    });
+
+    document.addEventListener('sc-library-search-request', (event) => {
+      const detail = event.detail || {};
+      if (detail.target && !targetContainsRoot(detail.target)) return;
+      const query = String(detail.query || '').trim();
+      if (!query) return;
+      state.search = query;
+      state.category = 0;
+      state.categoryName = '';
+      state.categorySlug = '';
+      state.series = '';
+      state.seriesName = '';
+      state.concept = '';
+      state.conceptName = '';
+      state.post_type = '';
+      state.sort = 'relevance';
+      state.page = 1;
+      state.hasInteracted = true;
+      if (searchInput) searchInput.value = query;
+      if (sortInput) sortInput.value = 'relevance';
+      if (typeInput) typeInput.value = '';
+      clearSelectedNodes();
+      loadItems().then(() => resultsRegion?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
     });
 
     root.addEventListener('click', (event) => {

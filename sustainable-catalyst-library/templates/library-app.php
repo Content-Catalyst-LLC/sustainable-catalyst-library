@@ -12,6 +12,8 @@
     data-initial-results="<?php echo $initial_results ? '1' : '0'; ?>"
     data-discovery-ui="2.0.1"
     data-discovery-schema="sc-library-discovery/1.0"
+    data-librarian-bridge="<?php echo $show_librarian_bridge ? '1' : '0'; ?>"
+    data-librarian-target="<?php echo esc_attr($librarian_target); ?>"
 >
     <?php if ($show_header && $mode !== 'pathways') : ?>
         <header class="sc-library__masthead">
@@ -28,7 +30,10 @@
                 <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg>
                 <input type="search" name="search" placeholder="<?php echo esc_attr((string) get_option('sc_library_search_placeholder', 'Search concepts, series, methods, and publications')); ?>" autocomplete="off" data-library-search>
             </label>
-            <button type="submit" class="sc-library__search-button"><?php esc_html_e('Search', 'sustainable-catalyst-library'); ?></button>
+            <button type="submit" class="sc-library__search-button"><?php esc_html_e('Search Library', 'sustainable-catalyst-library'); ?></button>
+            <?php if ($show_librarian_bridge) : ?>
+                <button type="button" class="sc-library__librarian-button" data-ask-librarian-query><?php esc_html_e('Ask the Research Librarian', 'sustainable-catalyst-library'); ?></button>
+            <?php endif; ?>
         </form>
     <?php endif; ?>
 
@@ -119,6 +124,9 @@
                         <option value="title"><?php esc_html_e('Title A–Z', 'sustainable-catalyst-library'); ?></option>
                         <option value="series"><?php esc_html_e('Series order', 'sustainable-catalyst-library'); ?></option>
                     </select></label>
+                    <?php if ($show_librarian_bridge) : ?>
+                        <button type="button" class="sc-library__ask-results" data-ask-librarian-results hidden><?php esc_html_e('Ask the Research Librarian about these results', 'sustainable-catalyst-library'); ?></button>
+                    <?php endif; ?>
                     <button type="button" class="sc-library__reset" data-clear-filters><?php esc_html_e('Reset', 'sustainable-catalyst-library'); ?></button>
                 </div>
             </div>

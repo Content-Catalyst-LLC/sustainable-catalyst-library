@@ -207,3 +207,13 @@
 }
 
 .sc-library-record__page-hits{display:grid;gap:.35rem;margin-top:.75rem;padding:.75rem;border-left:3px solid #7a1722;background:#f7f7f7}.sc-library-record__page-hits strong{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}.sc-library-record__page-hits a{font-size:.9rem;line-height:1.45;text-decoration:none}
+
+
+/* Library v4.3.15 — Unified Search & Guided Discovery */
+.sc-library[data-librarian-bridge="1"] .sc-library__command{grid-template-columns:minmax(0,1fr) auto auto}
+.sc-library__librarian-button{min-height:52px;padding:.8rem 1.15rem;border:2px solid #fff;background:#111;color:#fff;font-weight:800;white-space:nowrap}
+.sc-library__librarian-button:hover,.sc-library__librarian-button:focus-visible{background:#fff;color:#111;border-color:#fff}
+.sc-library__ask-results{min-height:40px;border:1px solid #6d1022;background:#fff;padding:.45rem .75rem;color:#6d1022;font-weight:800}
+.sc-library__ask-results:hover,.sc-library__ask-results:focus-visible{background:#6d1022;color:#fff}
+@media(max-width:900px){.sc-library[data-librarian-bridge="1"] .sc-library__command{grid-template-columns:minmax(0,1fr) auto}.sc-library[data-librarian-bridge="1"] .sc-library__librarian-button{grid-column:1/-1;width:100%}.sc-library__results-tools{flex-wrap:wrap}}
+@media(max-width:620px){.sc-library[data-librarian-bridge="1"] .sc-library__command{grid-template-columns:1fr}.sc-library[data-librarian-bridge="1"] .sc-library__librarian-button{grid-column:auto}.sc-library__ask-results{width:100%}}
