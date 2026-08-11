@@ -103,6 +103,7 @@ final class SC_Library_Shortcodes {
 
         wp_enqueue_style('sc-library', SC_LIBRARY_URL . 'assets/css/sc-library.css', [], SC_LIBRARY_VERSION);
         wp_enqueue_style('sc-library-discovery', SC_LIBRARY_URL . 'assets/css/sc-library-discovery.css', ['sc-library'], SC_LIBRARY_VERSION);
+        wp_enqueue_style('sc-library-research-library-page', SC_LIBRARY_URL . 'assets/css/sc-library-research-library-page.css', ['sc-library-discovery'], SC_LIBRARY_VERSION);
         wp_enqueue_script('sc-library', SC_LIBRARY_URL . 'assets/js/sc-library.js', [], SC_LIBRARY_VERSION, true);
         if ($show_workspace) {
             SC_Library_Notebook::enqueue_assets();

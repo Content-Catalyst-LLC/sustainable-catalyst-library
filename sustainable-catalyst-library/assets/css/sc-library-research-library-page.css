@@ -1,0 +1,68 @@
+/* Sustainable Catalyst Library v4.3.20.1 — Knowledge Pathway Alignment & Layout Repair */
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge {
+  min-inline-size: 0;
+}
+
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge > .cc-rl-section-heading,
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge > .cc-rl-section-intro,
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge > .cc-rl-pathway-grid,
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge > .cc-rl-pathway-recommendations,
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge > .cc-rl-core-grid {
+  box-sizing: border-box;
+  inline-size: 100% !important;
+  max-inline-size: none !important;
+  margin-inline: 0 !important;
+  transform: none !important;
+}
+
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge > .cc-rl-section-heading,
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge > .cc-rl-section-heading * ,
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge > .cc-rl-section-intro {
+  text-align: left !important;
+}
+
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge .cc-rl-pathway-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-auto-flow: row !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  margin-block: 20px 28px !important;
+  padding: 0 !important;
+}
+
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge .cc-rl-pathway-grid > a {
+  position: static !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  inline-size: 100% !important;
+  min-inline-size: 0 !important;
+  max-inline-size: none !important;
+  block-size: 100% !important;
+  margin: 0 !important;
+  inset: auto !important;
+  translate: none !important;
+  transform: none !important;
+  align-self: stretch !important;
+  justify-self: stretch !important;
+  text-align: left !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+}
+
+.cc-research-library-brand.cc-rl-v43201 #explore-knowledge .cc-rl-pathway-grid > a > strong {
+  display: block !important;
+  margin: 0 0 6px !important;
+  inline-size: auto !important;
+  max-inline-size: none !important;
+  text-align: left !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+}
+
+@media (max-width: 760px) {
+  .cc-research-library-brand.cc-rl-v43201 #explore-knowledge .cc-rl-pathway-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

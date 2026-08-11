@@ -1,0 +1,28 @@
+Sustainable Catalyst Library v4.3.20.1 — Knowledge Pathway Alignment & Layout Repair
+
+Release-specific validation:
+PASS — 7 v4.3.20.1 alignment/layout tests
+PASS — dedicated page stylesheet is enqueued
+PASS — heading, intro, and pathway grid share the same horizontal rail
+PASS — eight pathway cards retain content and links
+PASS — two-column desktop/tablet layout contract
+PASS — one-column mobile layout contract
+PASS — legacy stagger/transform offsets neutralized
+
+Retained compatibility:
+PASS — v4.3.20 Open Course Finder compatibility
+PASS — v4.3.19.1 Access-First Layout compatibility
+PASS — v4.3.19 Global Library Access compatibility
+PASS — v4.3.18.1 Publications integrity recovery compatibility
+PASS — v4.3.18 scholarly/university access compatibility
+PASS — v4.3.17 federated Research Access compatibility
+PASS — v4.3.16 pathway-aware Research Librarian compatibility
+PASS — v4.3.15 unified search/Librarian compatibility
+PASS — v4.3.14 Research Librarian front-door compatibility
+PASS — v4.3.13 Field Spotlight compatibility
+PASS — v4.3.12 persistence compatibility
+PASS — v4.3.3 Publications compatibility
+PASS — PHP syntax
+PASS — JavaScript syntax
+
+No data migration is required.

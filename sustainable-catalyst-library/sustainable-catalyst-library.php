@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.20 adds an Open Course Finder across open university courseware, free/audit/preview learning providers, and sustainability education while preserving Research Access, My Libraries, Digital Access Resolver, Research Librarian, Workspace, and Publications recovery.
- * Version: 4.3.20
+ * Description: Sustainable Catalyst Library v4.3.20.1 repairs Knowledge Pathways alignment with a stable two-column desktop grid and one-column mobile layout while preserving Open Course Finder, Research Access, My Libraries, Digital Access Resolver, Research Librarian, Workspace, and Publications recovery.
+ * Version: 4.3.20.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.20');
+define('SC_LIBRARY_VERSION', '4.3.20.1');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
