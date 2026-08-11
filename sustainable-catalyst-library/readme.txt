@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.18.1
+Stable tag: 4.3.19
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.18.1 preserves the v4.3.18 scholarly Research Access network—including UCD Research Repository, arXiv, Europe PMC, OpenAlex, Crossref, DataCite, PubMed/PMC, Internet Archive, MIT Libraries, Harvard Library, Library of Congress, and capability-labeled university gateways—while restoring the approved Publications Field Spotlight architecture. All 14 major fields again render on the Publications page, with independent Article Map panel rotation, first-eight disclosure, curated supporting publications, and the durable v4.3.12 panel-content store intact.
+Sustainable Catalyst Library v4.3.18.1 is an emergency integrity patch for the Publications and Field Spotlight surfaces. It preserves the v4.3.18 Research Access and scholarly connector work while repairing implausibly collapsed visibility state, clearing stale Publications/Field Spotlight caches on upgrade, and restoring the canonical multi-field presentation without deleting titles, descriptions, curated articles, hero copy, ordering, or other editorial configuration.
 
 
 
@@ -161,12 +161,24 @@ Sustainable Catalyst Library v4.3.18.1 preserves the v4.3.18 scholarly Research 
 
 == Changelog ==
 
+= 4.3.19 =
+* Adds My Libraries and Research Libraries to the public Research Access surface for signed-in Sustainable Catalyst / Workspace users.
+* Adds a curated global library registry covering launch university, public, national, and worldwide discovery routes.
+* Allows users to add a custom library with homepage, catalog-search template, and interlibrary-loan route without storing library credentials.
+* Adds a Digital Access Resolver that prioritizes open digital/open-access copies before connected-library searches, global holdings discovery, previews, and request routes.
+* Adds account-scoped AJAX persistence for library connections; anonymous users retain full public Research Access search.
+* Adds per-result Check My Libraries links and best-access routing in federated search results.
+* Preserves v4.3.18 scholarly/university connectors and the v4.3.18.1 Publications panel integrity recovery.
+
 
 = 4.3.18.1 =
-* Restores the approved stacked 14-field Publications Field Spotlight.
-* Each major field again renders as its own full Spotlight surface instead of being replaced by a single shared field stage.
-* Preserves first-eight Article Map panel visibility, panel 9+ disclosure, autoplay, thumbnails, supporting-article curation, and all v4.3.18 scholarly Research Access connectors.
-* Keeps the v4.3.12 durable panel-content store unchanged.
+
+* Repairs Publications/Field Spotlight states that collapse to one visible field or panel while the canonical 170-map registry remains intact.
+* Runs a bounded one-time visibility integrity repair during upgrade/activation.
+* Preserves editorial titles, descriptions, order, selected articles, hero copy, CTA copy, and panel-content storage.
+* Clears Publications topic and Field Spotlight model/public caches so stale one-panel models cannot survive the upgrade.
+* Records the repair outcome in `sc_library_publications_integrity_repair_v43181` for diagnostics.
+
 
 = 4.3.18 =
 * Expands Research Access into scholarly literature and university research discovery.

@@ -7,6 +7,7 @@ final class SC_Library_Activator {
     public static function activate(): void {
         self::create_tables();
         self::install_defaults();
+        self::repair_publication_surface_integrity();
         self::schedule_reconcile();
         update_option('sc_library_version', SC_LIBRARY_VERSION);
         update_option('sc_library_flush_rewrite', 1, false);
@@ -21,6 +22,7 @@ final class SC_Library_Activator {
 
         self::create_tables();
         self::install_defaults();
+        self::repair_publication_surface_integrity();
         self::schedule_reconcile();
         update_option('sc_library_version', SC_LIBRARY_VERSION);
         update_option('sc_library_flush_rewrite', 1, false);
@@ -30,7 +32,163 @@ final class SC_Library_Activator {
     public static function repair_schema(): void {
         self::create_tables();
         self::install_defaults();
+        self::repair_publication_surface_integrity();
         self::schedule_reconcile();
+    }
+
+    /**
+     * v4.3.18.1: repair implausibly collapsed Publications/Field Spotlight
+     * visibility state without touching editorial content. This is intentionally
+     * conservative: it only restores canonical visibility when the saved state
+     * would reduce a large canonical publication surface to one or zero public
+     * fields/panels.
+     */
+    private static function repair_publication_surface_integrity(): void {
+        $repair_option = 'sc_library_publications_integrity_repair_v43181';
+        $result = array(
+            'version' => '4.3.18.1',
+            'publications_repaired' => false,
+            'field_spotlights_repaired' => false,
+            'cache_cleared' => true,
+            'timestamp' => time(),
+        );
+
+        foreach ( array(
+            'sc_library_publications_topics_v433',
+            'sc_library_field_spotlights_model_v4313',
+            'sc_library_field_spotlights_public_v4313',
+        ) as $cache_key ) {
+            delete_transient( $cache_key );
+        }
+
+        $registry_file = defined( 'SC_LIBRARY_DIR' ) ? SC_LIBRARY_DIR . 'includes/data/publications-article-map-registry-v431.php' : '';
+        $registry = $registry_file && is_readable( $registry_file ) ? include $registry_file : array();
+        if ( ! is_array( $registry ) || count( $registry ) < 2 ) {
+            update_option( $repair_option, $result, false );
+            return;
+        }
+
+        $canonical_fields = array();
+        $panels_by_field = array();
+        foreach ( $registry as $panel_key => $map ) {
+            if ( ! is_array( $map ) ) { continue; }
+            $field_title = trim( (string) ( $map['field'] ?? '' ) );
+            if ( '' === $field_title ) { continue; }
+            $field_key = sanitize_title( $field_title );
+            $panel_key = sanitize_title( (string) $panel_key );
+            if ( ! $field_key || ! $panel_key ) { continue; }
+            $canonical_fields[ $field_key ] = true;
+            $panels_by_field[ $field_key ][] = $panel_key;
+        }
+
+        // Publications v4.3.3 surface. Explicit hidden flags are honored unless
+        // their combined effect collapses the canonical 14-field surface to <=1.
+        $pub_option = 'sc_library_publications_settings_v433';
+        $pub = get_option( $pub_option, array() );
+        if ( is_array( $pub ) && count( $canonical_fields ) > 1 ) {
+            $field_cfg = is_array( $pub['fields'] ?? null ) ? $pub['fields'] : array();
+            $map_cfg = is_array( $pub['maps'] ?? null ) ? $pub['maps'] : array();
+            $visible_fields = 0;
+
+            foreach ( array_keys( $canonical_fields ) as $field_key ) {
+                if ( isset( $field_cfg[ $field_key ] ) && is_array( $field_cfg[ $field_key ] ) && array_key_exists( 'visible', $field_cfg[ $field_key ] ) && empty( $field_cfg[ $field_key ]['visible'] ) ) {
+                    continue;
+                }
+                $has_visible_map = false;
+                foreach ( $panels_by_field[ $field_key ] ?? array() as $panel_key ) {
+                    if ( isset( $map_cfg[ $panel_key ] ) && is_array( $map_cfg[ $panel_key ] ) && array_key_exists( 'visible', $map_cfg[ $panel_key ] ) && empty( $map_cfg[ $panel_key ]['visible'] ) ) {
+                        continue;
+                    }
+                    $has_visible_map = true;
+                    break;
+                }
+                if ( $has_visible_map ) { $visible_fields++; }
+            }
+
+            if ( $visible_fields <= 1 ) {
+                foreach ( array_keys( $canonical_fields ) as $field_key ) {
+                    if ( isset( $field_cfg[ $field_key ] ) && is_array( $field_cfg[ $field_key ] ) ) {
+                        $field_cfg[ $field_key ]['visible'] = 1;
+                    }
+                }
+                foreach ( $registry as $panel_key => $_map ) {
+                    $panel_key = sanitize_title( (string) $panel_key );
+                    if ( isset( $map_cfg[ $panel_key ] ) && is_array( $map_cfg[ $panel_key ] ) ) {
+                        $map_cfg[ $panel_key ]['visible'] = 1;
+                    }
+                }
+                $pub['fields'] = $field_cfg;
+                $pub['maps'] = $map_cfg;
+                update_option( $pub_option, $pub, false );
+                $result['publications_repaired'] = true;
+            }
+        }
+
+        // Field Spotlight surface. Repair only fields whose canonical panel set
+        // contains multiple panels but saved visibility has collapsed to <=1.
+        $fs_option = 'sc_library_field_spotlights_settings_v434';
+        $fs = get_option( $fs_option, array() );
+        if ( is_array( $fs ) ) {
+            $fs_fields = is_array( $fs['fields'] ?? null ) ? $fs['fields'] : array();
+            $fs_panels = is_array( $fs['panels'] ?? null ) ? $fs['panels'] : array();
+            $changed = false;
+            $visible_field_count = 0;
+
+            foreach ( array_keys( $canonical_fields ) as $field_key ) {
+                $field_hidden = isset( $fs_fields[ $field_key ] ) && is_array( $fs_fields[ $field_key ] ) && array_key_exists( 'visible', $fs_fields[ $field_key ] ) && empty( $fs_fields[ $field_key ]['visible'] );
+                if ( ! $field_hidden ) { $visible_field_count++; }
+            }
+
+            if ( $visible_field_count <= 1 && count( $canonical_fields ) > 1 ) {
+                foreach ( array_keys( $canonical_fields ) as $field_key ) {
+                    if ( isset( $fs_fields[ $field_key ] ) && is_array( $fs_fields[ $field_key ] ) ) {
+                        $fs_fields[ $field_key ]['visible'] = 1;
+                        $changed = true;
+                    }
+                }
+            }
+
+            foreach ( $panels_by_field as $field_key => $panel_keys ) {
+                if ( count( $panel_keys ) <= 1 ) { continue; }
+                $visible_panels = 0;
+                $configured_visibility = 0;
+                foreach ( $panel_keys as $panel_key ) {
+                    if ( isset( $fs_panels[ $panel_key ] ) && is_array( $fs_panels[ $panel_key ] ) && array_key_exists( 'visible', $fs_panels[ $panel_key ] ) ) {
+                        $configured_visibility++;
+                        if ( ! empty( $fs_panels[ $panel_key ]['visible'] ) ) { $visible_panels++; }
+                    } else {
+                        // Unconfigured panels are visible by default.
+                        $visible_panels++;
+                    }
+                }
+                if ( $configured_visibility > 1 && $visible_panels <= 1 ) {
+                    foreach ( $panel_keys as $panel_key ) {
+                        if ( isset( $fs_panels[ $panel_key ] ) && is_array( $fs_panels[ $panel_key ] ) ) {
+                            $fs_panels[ $panel_key ]['visible'] = 1;
+                            $changed = true;
+                        }
+                    }
+                }
+            }
+
+            if ( $changed ) {
+                $fs['fields'] = $fs_fields;
+                $fs['panels'] = $fs_panels;
+                update_option( $fs_option, $fs, false );
+                $result['field_spotlights_repaired'] = true;
+            }
+        }
+
+        // Clear again because update_option hooks may have rebuilt/transformed state.
+        foreach ( array(
+            'sc_library_publications_topics_v433',
+            'sc_library_field_spotlights_model_v4313',
+            'sc_library_field_spotlights_public_v4313',
+        ) as $cache_key ) {
+            delete_transient( $cache_key );
+        }
+
+        update_option( $repair_option, $result, false );
     }
 
     private static function create_tables(): void {

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.18.1 preserves the v4.3.18 scholarly research network and restores the approved stacked Publications Field Spotlight: all 14 major fields render on the Publications page, each with its own Article Map panel carousel and progressive disclosure.
- * Version: 4.3.18.1
+ * Description: Sustainable Catalyst Library v4.3.19 adds Global Library Search, My Libraries, Research Libraries, and a Digital Access Resolver that prioritizes legitimate open copies and connected-library access while preserving the v4.3.18.1 Publications integrity recovery.
+ * Version: 4.3.19
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.18.1');
+define('SC_LIBRARY_VERSION', '4.3.19');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

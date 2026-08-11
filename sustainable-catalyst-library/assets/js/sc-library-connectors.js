@@ -81,6 +81,63 @@
     container.appendChild(link);
   }
 
+  function replaceLibraryTokens(template, result) {
+    var author = resultAuthors(result).split(',')[0] || '';
+    var values = {
+      '{query}': [result.title || '', author].filter(Boolean).join(' '),
+      '{title}': result.title || '',
+      '{author}': author,
+      '{doi}': result.doi || '',
+      '{isbn}': result.isbn || '',
+      '{pmid}': result.pmid || ''
+    };
+    var url = String(template || '');
+    Object.keys(values).forEach(function (token) {
+      url = url.split(token).join(encodeURIComponent(values[token]));
+    });
+    return url;
+  }
+
+  function bestAccessRoute(result) {
+    if (result.open_access_url) {
+      return { label: result.full_text_status === 'public-digital' ? 'Open digital copy' : 'Open-access copy', url: result.open_access_url, status: 'open' };
+    }
+    var libraries = Array.isArray(config.myLibraries) ? config.myLibraries : [];
+    var member = libraries.find(function (library) { return library.relation === 'member' && library.catalog_template; });
+    if (member) {
+      return { label: 'Check ' + member.name, url: replaceLibraryTokens(member.catalog_template, result), status: 'library' };
+    }
+    var research = libraries.find(function (library) { return library.catalog_template; });
+    if (research) {
+      return { label: 'Search ' + research.name, url: replaceLibraryTokens(research.catalog_template, result), status: 'library' };
+    }
+    var worldcat = (result.discovery_links || []).find(function (link) { return link.provider === 'worldcat'; });
+    if (worldcat) {
+      return { label: 'Find in libraries worldwide', url: worldcat.url, status: 'global' };
+    }
+    return null;
+  }
+
+  function renderAccessResolver(result) {
+    var route = bestAccessRoute(result);
+    var libraries = Array.isArray(config.myLibraries) ? config.myLibraries.filter(function (library) { return library.catalog_template; }) : [];
+    if (!route && !libraries.length) { return null; }
+    var panel = make('div', 'sc-connector-result-card__resolver');
+    panel.appendChild(make('small', '', 'Best legitimate access route'));
+    if (route) {
+      addLink(panel, route.label + ' →', route.url, 'sc-access-resolver__best is-' + route.status);
+    }
+    if (libraries.length) {
+      var checks = make('div', 'sc-access-resolver__libraries');
+      checks.appendChild(make('span', '', 'Check My Libraries:'));
+      libraries.slice(0, 6).forEach(function (library) {
+        addLink(checks, library.name, replaceLibraryTokens(library.catalog_template, result));
+      });
+      panel.appendChild(checks);
+    }
+    return panel;
+  }
+
   function renderResult(result) {
     var article = make('article', 'sc-connector-result-card');
     article.dataset.provider = result.provider || '';
@@ -141,6 +198,9 @@
       addLink(links, link.label || 'Open', link.url);
     });
     article.appendChild(links);
+
+    var resolver = renderAccessResolver(result);
+    if (resolver) { article.appendChild(resolver); }
 
     if (config.canImport && result.import_token) {
       var controls = make('div', 'sc-connector-result-card__controls');
@@ -217,7 +277,7 @@
       }
       var scholar = root.querySelector('[data-sc-google-scholar-handoff]');
       if (scholar) { scholar.href = String(root.dataset.googleScholarTemplate || 'https://scholar.google.com/scholar?q={query}').replace('{query}', encodeURIComponent(query)); }
-      root.querySelectorAll('[data-sc-research-gateway]').forEach(function (link) {
+      root.querySelectorAll('[data-sc-research-gateway], [data-sc-my-library-search]').forEach(function (link) {
         var template = String(link.dataset.searchTemplate || link.href || '');
         if (template.indexOf('{query}') !== -1) { link.href = template.replace('{query}', encodeURIComponent(query)); }
       });
@@ -248,6 +308,53 @@
         if (summaryNode) {
           summaryNode.textContent = totalResults + ' normalized results across ' + providers.length + ' sources' + (failures ? ' · ' + failures + ' source failures' : '') + '. Open resources are shown with explicit access labels.';
         }
+      });
+    });
+  });
+
+
+  document.querySelectorAll('[data-sc-my-libraries]').forEach(function (root) {
+    var knownForm = root.querySelector('[data-sc-connect-library-form]');
+    var customForm = root.querySelector('[data-sc-custom-library-form]');
+
+    function saveLibrary(form, statusNode) {
+      var data = new FormData(form);
+      if (statusNode) { statusNode.textContent = 'Connecting library…'; }
+      var values = {};
+      data.forEach(function (value, key) { values[key] = value; });
+      return request('sc_library_v4319_save_library', values).then(function (payload) {
+        config.myLibraries = payload.libraries || [];
+        if (statusNode) { statusNode.textContent = payload.message || 'Library connected.'; }
+        window.setTimeout(function () { window.location.reload(); }, 350);
+      }).catch(function (error) {
+        if (statusNode) { statusNode.textContent = error.message; }
+      });
+    }
+
+    if (knownForm) {
+      knownForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        saveLibrary(knownForm, knownForm.querySelector('[data-sc-library-connect-status]'));
+      });
+    }
+    if (customForm) {
+      customForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        saveLibrary(customForm, customForm.querySelector('[data-sc-custom-library-status]'));
+      });
+    }
+    root.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-sc-remove-library]');
+      if (!button) { return; }
+      event.preventDefault();
+      button.disabled = true;
+      request('sc_library_v4319_remove_library', { library_id: button.dataset.scRemoveLibrary }).then(function (payload) {
+        config.myLibraries = payload.libraries || [];
+        var card = button.closest('[data-library-id]');
+        if (card) { card.remove(); }
+      }).catch(function (error) {
+        button.disabled = false;
+        button.textContent = error.message;
       });
     });
   });

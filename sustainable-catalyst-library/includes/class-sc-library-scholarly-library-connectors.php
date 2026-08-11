@@ -20,6 +20,8 @@ final class SC_Library_Scholarly_Library_Connectors {
     public const SEARCH_SCHEMA = 'sc-library-federated-search/1.0';
     public const LOCATOR_SCHEMA = 'sc-library-source-locator/1.0';
     public const PROFILE_SCHEMA = 'sc-library-library-profile/1.0';
+    public const MY_LIBRARIES_SCHEMA = 'sc-library-my-libraries/1.0';
+    public const USER_META_MY_LIBRARIES = 'sc_library_my_libraries_v4319';
 
     public const PROFILE_POST_TYPE = 'sc_library_profile';
 
@@ -87,6 +89,8 @@ final class SC_Library_Scholarly_Library_Connectors {
         add_action( 'wp_ajax_sc_library_v260_save_settings', array( $this, 'ajax_save_settings' ) );
         add_action( 'wp_ajax_sc_library_v4317_research_access_search', array( $this, 'ajax_research_access_search' ) );
         add_action( 'wp_ajax_nopriv_sc_library_v4317_research_access_search', array( $this, 'ajax_research_access_search' ) );
+        add_action( 'wp_ajax_sc_library_v4319_save_library', array( $this, 'ajax_save_my_library' ) );
+        add_action( 'wp_ajax_sc_library_v4319_remove_library', array( $this, 'ajax_remove_my_library' ) );
 
         add_shortcode( 'sc_source_discovery', array( $this, 'shortcode_source_discovery' ) );
         add_shortcode( 'sc_research_access', array( $this, 'shortcode_research_access' ) );
@@ -531,6 +535,8 @@ final class SC_Library_Scholarly_Library_Connectors {
             'restNonce'        => wp_create_nonce( 'wp_rest' ),
             'canImport'        => current_user_can( 'edit_posts' ),
             'projectId'        => absint( wp_unslash( $_GET['project_id'] ?? 0 ) ),
+            'signedIn'         => is_user_logged_in(),
+            'myLibraries'      => is_user_logged_in() ? $this->current_user_libraries() : array(),
             'strings'          => array(
                 'searching'     => __( 'Searching provider…', 'sustainable-catalyst-library' ),
                 'complete'      => __( 'Search complete.', 'sustainable-catalyst-library' ),
@@ -2464,8 +2470,13 @@ final class SC_Library_Scholarly_Library_Connectors {
         foreach ( $this->library_actions( $data, true ) as $action ) {
             $locations[] = $action;
         }
+        if ( is_user_logged_in() ) {
+            foreach ( $this->user_library_actions( $data ) as $action ) {
+                $locations[] = $action;
+            }
+        }
 
-        $locations = self::unique_locations( $locations );
+        $locations = $this->rank_access_locations( self::unique_locations( $locations ) );
         $this->store_access_locations( $source_id, $locations );
         update_post_meta( $source_id, self::META_CONNECTOR_LAST_CHECKED, current_time( 'mysql' ) );
 
@@ -2997,6 +3008,8 @@ final class SC_Library_Scholarly_Library_Connectors {
         $library_ids = array( 'internetarchive', 'mit', 'harvard', 'loc', 'ucd' );
         $scholarly_ids = array( 'openalex', 'crossref', 'datacite', 'pubmed', 'pmc', 'europepmc', 'arxiv' );
         $gateways = $this->research_gateway_registry();
+        $library_registry = $this->global_library_registry();
+        $my_libraries = is_user_logged_in() ? $this->current_user_libraries() : array();
         ob_start();
         ?>
         <section class="sc-research-access" data-sc-research-access data-google-scholar-template="https://scholar.google.com/scholar?q={query}">
@@ -3042,6 +3055,52 @@ final class SC_Library_Scholarly_Library_Connectors {
                 <article class="is-live"><small><?php esc_html_e( 'Scholarly federation', 'sustainable-catalyst-library' ); ?></small><strong>OpenAlex + Crossref</strong><span><?php esc_html_e( 'Works, institutions, citations, DOI metadata, and access signals.', 'sustainable-catalyst-library' ); ?></span></article>
                 <article class="is-live"><small><?php esc_html_e( 'Open scholarship', 'sustainable-catalyst-library' ); ?></small><strong>arXiv + Europe PMC</strong><span><?php esc_html_e( 'Open preprints, life-science literature, and full-text signals.', 'sustainable-catalyst-library' ); ?></span></article>
             </div>
+            <section class="sc-research-access__my-libraries" data-sc-my-libraries aria-labelledby="sc-my-libraries-title">
+                <header>
+                    <p class="sc-connector-kicker"><?php esc_html_e( 'Personal Access Layer', 'sustainable-catalyst-library' ); ?></p>
+                    <h3 id="sc-my-libraries-title"><?php esc_html_e( 'My Libraries & Research Libraries', 'sustainable-catalyst-library' ); ?></h3>
+                    <p><?php esc_html_e( 'Connect libraries where you have access, plus research libraries you want included in your searches. Sustainable Catalyst stores routes and preferences, never library passwords.', 'sustainable-catalyst-library' ); ?></p>
+                </header>
+                <?php if ( is_user_logged_in() ) : ?>
+                    <div class="sc-research-access__connected-libraries" data-sc-connected-libraries>
+                        <?php if ( $my_libraries ) : foreach ( $my_libraries as $library ) : ?>
+                            <article data-library-id="<?php echo esc_attr( $library['id'] ); ?>">
+                                <small><?php echo esc_html( 'member' === $library['relation'] ? __( 'My Library', 'sustainable-catalyst-library' ) : __( 'Research Library', 'sustainable-catalyst-library' ) ); ?></small>
+                                <strong><?php echo esc_html( $library['name'] ); ?></strong>
+                                <span><?php echo esc_html( $library['region'] ?: $library['capability'] ); ?></span>
+                                <div>
+                                    <?php if ( ! empty( $library['catalog_template'] ) ) : ?><a data-sc-my-library-search data-search-template="<?php echo esc_attr( $library['catalog_template'] ); ?>" href="<?php echo esc_url( $library['homepage'] ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Search library', 'sustainable-catalyst-library' ); ?> →</a><?php endif; ?>
+                                    <?php if ( ! empty( $library['homepage'] ) ) : ?><a href="<?php echo esc_url( $library['homepage'] ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Library website', 'sustainable-catalyst-library' ); ?> →</a><?php endif; ?>
+                                    <button type="button" data-sc-remove-library="<?php echo esc_attr( $library['id'] ); ?>"><?php esc_html_e( 'Remove', 'sustainable-catalyst-library' ); ?></button>
+                                </div>
+                            </article>
+                        <?php endforeach; else : ?>
+                            <p class="sc-research-access__empty-libraries"><?php esc_html_e( 'No libraries connected yet. Add a public, university, or research library below.', 'sustainable-catalyst-library' ); ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <form class="sc-research-access__connect-library" data-sc-connect-library-form>
+                        <label><span><?php esc_html_e( 'Connect a known library', 'sustainable-catalyst-library' ); ?></span><select name="library_id" required><option value=""><?php esc_html_e( 'Choose a library…', 'sustainable-catalyst-library' ); ?></option><?php foreach ( $library_registry as $library_id => $library ) : ?><option value="<?php echo esc_attr( $library_id ); ?>"><?php echo esc_html( $library['name'] . ( $library['region'] ? ' — ' . $library['region'] : '' ) ); ?></option><?php endforeach; ?></select></label>
+                        <label><span><?php esc_html_e( 'Connection type', 'sustainable-catalyst-library' ); ?></span><select name="relation"><option value="member"><?php esc_html_e( 'I have access / membership', 'sustainable-catalyst-library' ); ?></option><option value="research"><?php esc_html_e( 'Research library — include in searches', 'sustainable-catalyst-library' ); ?></option></select></label>
+                        <button type="submit"><?php esc_html_e( 'Connect Library', 'sustainable-catalyst-library' ); ?></button>
+                        <span data-sc-library-connect-status aria-live="polite"></span>
+                    </form>
+                    <details class="sc-research-access__custom-library">
+                        <summary><?php esc_html_e( 'Add another library', 'sustainable-catalyst-library' ); ?></summary>
+                        <form data-sc-custom-library-form>
+                            <label><span><?php esc_html_e( 'Library name', 'sustainable-catalyst-library' ); ?></span><input type="text" name="name" required maxlength="120"></label>
+                            <label><span><?php esc_html_e( 'City / region', 'sustainable-catalyst-library' ); ?></span><input type="text" name="region" maxlength="120"></label>
+                            <label><span><?php esc_html_e( 'Library website', 'sustainable-catalyst-library' ); ?></span><input type="url" name="homepage" required placeholder="https://..."></label>
+                            <label><span><?php esc_html_e( 'Catalog search URL template', 'sustainable-catalyst-library' ); ?></span><input type="text" name="catalog_template" placeholder="https://catalog.example.org/search?q={query}"></label>
+                            <label><span><?php esc_html_e( 'Interlibrary loan / request URL', 'sustainable-catalyst-library' ); ?></span><input type="url" name="ill_url" placeholder="https://..."></label>
+                            <input type="hidden" name="relation" value="member">
+                            <button type="submit"><?php esc_html_e( 'Add My Library', 'sustainable-catalyst-library' ); ?></button>
+                            <span data-sc-custom-library-status aria-live="polite"></span>
+                        </form>
+                    </details>
+                <?php else : ?>
+                    <div class="sc-research-access__account-note"><strong><?php esc_html_e( 'Public Research Access remains open.', 'sustainable-catalyst-library' ); ?></strong><span><?php esc_html_e( 'Sign in with your Sustainable Catalyst / Workspace account to save My Libraries and Research Libraries. An account is not required to search public sources.', 'sustainable-catalyst-library' ); ?></span></div>
+                <?php endif; ?>
+            </section>
             <section class="sc-research-access__institutions" aria-labelledby="sc-research-access-institution-title">
                 <header><p class="sc-connector-kicker"><?php esc_html_e( 'University & Sustainability Research Network', 'sustainable-catalyst-library' ); ?></p><h3 id="sc-research-access-institution-title"><?php esc_html_e( 'Search beyond the launch connectors', 'sustainable-catalyst-library' ); ?></h3><p><?php esc_html_e( 'These institutions are registered by capability. Direct connectors, open repositories, and compliant gateways are deliberately labeled differently while deeper federation is built.', 'sustainable-catalyst-library' ); ?></p></header>
                 <div class="sc-research-access__institution-grid">
@@ -3058,7 +3117,7 @@ final class SC_Library_Scholarly_Library_Connectors {
             <div class="sc-research-access__future">
                 <p class="sc-connector-kicker"><?php esc_html_e( 'Where this is heading', 'sustainable-catalyst-library' ); ?></p>
                 <h3><?php esc_html_e( 'A federated global research network', 'sustainable-catalyst-library' ); ?></h3>
-                <p><?php esc_html_e( 'The connector registry is designed to expand across university libraries, public libraries, national libraries, institutional repositories, scholarly databases, and sustainability research institutions. Future access resolution will distinguish open copies, connected-library entitlements, institutional login, borrowing, physical holdings, and interlibrary loan.', 'sustainable-catalyst-library' ); ?></p>
+                <p><?php esc_html_e( 'The connector registry is designed to expand across university libraries, public libraries, national libraries, institutional repositories, scholarly databases, and sustainability research institutions. Access resolution now prioritizes open copies and connected-library routes, while the connector registry continues expanding toward deeper holdings checks, institutional login, borrowing, physical holdings, and interlibrary loan.', 'sustainable-catalyst-library' ); ?></p>
             </div>
             <div class="sc-connector-search-status" data-sc-research-access-status aria-live="polite"></div>
             <div class="sc-connector-result-summary" data-sc-research-access-summary></div>
@@ -3066,6 +3125,138 @@ final class SC_Library_Scholarly_Library_Connectors {
         </section>
         <?php
         return ob_get_clean();
+    }
+
+    private function global_library_registry() {
+        return array(
+            'mit' => array( 'name' => 'MIT Libraries', 'region' => 'Cambridge, Massachusetts', 'capability' => 'Direct discovery + open repository', 'homepage' => 'https://libraries.mit.edu/', 'catalog_template' => 'https://timdex.mit.edu/?q={query}', 'ill_url' => '' ),
+            'harvard' => array( 'name' => 'Harvard Library', 'region' => 'Cambridge, Massachusetts', 'capability' => 'Open metadata + HOLLIS gateway', 'homepage' => 'https://library.harvard.edu/', 'catalog_template' => 'https://hollis.harvard.edu/primo-explore/search?query=any,contains,{query}', 'ill_url' => '' ),
+            'stanford' => array( 'name' => 'Stanford University Libraries', 'region' => 'Stanford, California', 'capability' => 'Research gateway', 'homepage' => 'https://library.stanford.edu/', 'catalog_template' => 'https://searchworks.stanford.edu/?q={query}', 'ill_url' => '' ),
+            'yale' => array( 'name' => 'Yale University Library', 'region' => 'New Haven, Connecticut', 'capability' => 'Research gateway', 'homepage' => 'https://library.yale.edu/', 'catalog_template' => 'https://search.library.yale.edu/catalog?search_field=all_fields&q={query}', 'ill_url' => '' ),
+            'princeton' => array( 'name' => 'Princeton University Library', 'region' => 'Princeton, New Jersey', 'capability' => 'Research gateway', 'homepage' => 'https://library.princeton.edu/', 'catalog_template' => 'https://catalog.princeton.edu/?search_field=all_fields&q={query}', 'ill_url' => '' ),
+            'columbia' => array( 'name' => 'Columbia University Libraries', 'region' => 'New York, New York', 'capability' => 'CLIO research gateway', 'homepage' => 'https://library.columbia.edu/', 'catalog_template' => 'https://clio.columbia.edu/catalog?q={query}', 'ill_url' => '' ),
+            'berkeley' => array( 'name' => 'UC Berkeley Library', 'region' => 'Berkeley, California', 'capability' => 'UC discovery + open repository', 'homepage' => 'https://www.lib.berkeley.edu/', 'catalog_template' => 'https://escholarship.org/search/?q={query}', 'ill_url' => '' ),
+            'ucd' => array( 'name' => 'University College Dublin Library', 'region' => 'Dublin, Ireland', 'capability' => 'Research repository + library gateway', 'homepage' => 'https://www.ucd.ie/library/', 'catalog_template' => 'https://researchrepository.ucd.ie/discover?query={query}', 'ill_url' => 'https://www.ucd.ie/library/use/borrowing/interlibraryloans/' ),
+            'copenhagen' => array( 'name' => 'University of Copenhagen', 'region' => 'Copenhagen, Denmark', 'capability' => 'Research portal gateway', 'homepage' => 'https://www.kb.dk/en/visit-us/copenhagen-university-library', 'catalog_template' => 'https://researchprofiles.ku.dk/en/searchAll/index/?search={query}', 'ill_url' => '' ),
+            'stockholm' => array( 'name' => 'Stockholm University Library', 'region' => 'Stockholm, Sweden', 'capability' => 'Research / DiVA gateway', 'homepage' => 'https://www.su.se/english/library/', 'catalog_template' => 'https://su.diva-portal.org/smash/resultList.jsf?searchType=SIMPLE&query={query}', 'ill_url' => '' ),
+            'wageningen' => array( 'name' => 'Wageningen University & Research', 'region' => 'Wageningen, Netherlands', 'capability' => 'Research portal gateway', 'homepage' => 'https://www.wur.nl/en/library.htm', 'catalog_template' => 'https://research.wur.nl/en/searchAll/index/?search={query}', 'ill_url' => '' ),
+            'lund' => array( 'name' => 'Lund University Libraries', 'region' => 'Lund, Sweden', 'capability' => 'Publications / library gateway', 'homepage' => 'https://www.lub.lu.se/en', 'catalog_template' => 'https://lup.lub.lu.se/search/publication?q={query}', 'ill_url' => '' ),
+            'eth' => array( 'name' => 'ETH Library', 'region' => 'Zurich, Switzerland', 'capability' => 'Open repository gateway', 'homepage' => 'https://library.ethz.ch/en/', 'catalog_template' => 'https://www.research-collection.ethz.ch/search?query={query}', 'ill_url' => '' ),
+            'oxford' => array( 'name' => 'Bodleian Libraries / Oxford', 'region' => 'Oxford, United Kingdom', 'capability' => 'Repository + library gateway', 'homepage' => 'https://www.bodleian.ox.ac.uk/', 'catalog_template' => 'https://ora.ox.ac.uk/search?search={query}', 'ill_url' => '' ),
+            'cambridge' => array( 'name' => 'Cambridge University Libraries', 'region' => 'Cambridge, United Kingdom', 'capability' => 'Repository + library gateway', 'homepage' => 'https://www.lib.cam.ac.uk/', 'catalog_template' => 'https://www.repository.cam.ac.uk/search?query={query}', 'ill_url' => '' ),
+            'cpl' => array( 'name' => 'Chicago Public Library', 'region' => 'Chicago, Illinois', 'capability' => 'Public library + digital resources', 'homepage' => 'https://www.chipublib.org/', 'catalog_template' => 'https://chipublib.bibliocommons.com/v2/search?query={query}&searchType=smart', 'ill_url' => '' ),
+            'slpl' => array( 'name' => 'St. Louis Public Library', 'region' => 'St. Louis, Missouri', 'capability' => 'Public library + digital resources', 'homepage' => 'https://www.slpl.org/', 'catalog_template' => 'https://slpl.bibliocommons.com/v2/search?query={query}&searchType=smart', 'ill_url' => '' ),
+            'nypl' => array( 'name' => 'New York Public Library', 'region' => 'New York, New York', 'capability' => 'Public / research library', 'homepage' => 'https://www.nypl.org/', 'catalog_template' => 'https://www.nypl.org/research/research-catalog/search?q={query}', 'ill_url' => '' ),
+            'loc' => array( 'name' => 'Library of Congress', 'region' => 'Washington, DC', 'capability' => 'National library + direct public catalog', 'homepage' => 'https://www.loc.gov/', 'catalog_template' => 'https://www.loc.gov/search/?q={query}', 'ill_url' => '' ),
+            'worldcat' => array( 'name' => 'WorldCat', 'region' => 'Libraries worldwide', 'capability' => 'Global holdings discovery', 'homepage' => 'https://search.worldcat.org/', 'catalog_template' => 'https://search.worldcat.org/search?q={query}', 'ill_url' => '' ),
+        );
+    }
+
+    private function current_user_libraries() {
+        if ( ! is_user_logged_in() ) { return array(); }
+        $stored = get_user_meta( get_current_user_id(), self::USER_META_MY_LIBRARIES, true );
+        $stored = is_array( $stored ) ? $stored : array();
+        $registry = $this->global_library_registry();
+        $out = array();
+        foreach ( $stored as $item ) {
+            if ( ! is_array( $item ) ) { continue; }
+            $id = sanitize_key( $item['id'] ?? '' );
+            $relation = in_array( $item['relation'] ?? '', array( 'member', 'research' ), true ) ? $item['relation'] : 'research';
+            if ( isset( $registry[ $id ] ) ) {
+                $library = array_merge( array( 'id' => $id, 'relation' => $relation, 'custom' => false ), $registry[ $id ] );
+            } elseif ( 0 === strpos( $id, 'custom-' ) ) {
+                $library = array(
+                    'id' => $id, 'relation' => $relation, 'custom' => true,
+                    'name' => sanitize_text_field( $item['name'] ?? '' ),
+                    'region' => sanitize_text_field( $item['region'] ?? '' ),
+                    'capability' => __( 'User-connected library', 'sustainable-catalyst-library' ),
+                    'homepage' => esc_url_raw( $item['homepage'] ?? '' ),
+                    'catalog_template' => self::sanitize_catalog_template( $item['catalog_template'] ?? '' ),
+                    'ill_url' => esc_url_raw( $item['ill_url'] ?? '' ),
+                );
+            } else { continue; }
+            if ( ! empty( $library['name'] ) ) { $out[] = $library; }
+        }
+        return array_slice( $out, 0, 20 );
+    }
+
+    private static function sanitize_catalog_template( $value ) {
+        $value = trim( wp_unslash( (string) $value ) );
+        if ( ! $value ) { return ''; }
+        $test = str_replace( array( '{query}', '{title}', '{author}', '{doi}', '{isbn}', '{pmid}' ), 'sample', $value );
+        return wp_http_validate_url( $test ) ? sanitize_text_field( $value ) : '';
+    }
+
+    public function ajax_save_my_library() {
+        check_ajax_referer( 'sc_library_connectors_v260', 'nonce' );
+        if ( ! is_user_logged_in() ) { wp_send_json_error( array( 'message' => __( 'Sign in to connect libraries.', 'sustainable-catalyst-library' ) ), 401 ); }
+        $relation = sanitize_key( wp_unslash( $_POST['relation'] ?? 'research' ) );
+        $relation = in_array( $relation, array( 'member', 'research' ), true ) ? $relation : 'research';
+        $registry = $this->global_library_registry();
+        $library_id = sanitize_key( wp_unslash( $_POST['library_id'] ?? '' ) );
+        $item = array();
+        if ( $library_id && isset( $registry[ $library_id ] ) ) {
+            $item = array( 'id' => $library_id, 'relation' => $relation );
+        } else {
+            $name = sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) );
+            $homepage = esc_url_raw( wp_unslash( $_POST['homepage'] ?? '' ) );
+            if ( ! $name || ! wp_http_validate_url( $homepage ) ) { wp_send_json_error( array( 'message' => __( 'A valid library name and HTTPS/HTTP website are required.', 'sustainable-catalyst-library' ) ), 400 ); }
+            $item = array(
+                'id' => 'custom-' . substr( hash( 'sha256', strtolower( $name . '|' . $homepage ) ), 0, 16 ),
+                'relation' => $relation,
+                'name' => $name,
+                'region' => sanitize_text_field( wp_unslash( $_POST['region'] ?? '' ) ),
+                'homepage' => $homepage,
+                'catalog_template' => self::sanitize_catalog_template( $_POST['catalog_template'] ?? '' ),
+                'ill_url' => esc_url_raw( wp_unslash( $_POST['ill_url'] ?? '' ) ),
+            );
+        }
+        $stored = get_user_meta( get_current_user_id(), self::USER_META_MY_LIBRARIES, true );
+        $stored = is_array( $stored ) ? $stored : array();
+        $next = array(); $replaced = false;
+        foreach ( $stored as $existing ) {
+            if ( sanitize_key( $existing['id'] ?? '' ) === $item['id'] ) { $next[] = $item; $replaced = true; } else { $next[] = $existing; }
+        }
+        if ( ! $replaced ) { $next[] = $item; }
+        $next = array_slice( $next, -20 );
+        update_user_meta( get_current_user_id(), self::USER_META_MY_LIBRARIES, $next );
+        wp_send_json_success( array( 'schema' => self::MY_LIBRARIES_SCHEMA, 'libraries' => $this->current_user_libraries(), 'message' => __( 'Library connected.', 'sustainable-catalyst-library' ) ) );
+    }
+
+    public function ajax_remove_my_library() {
+        check_ajax_referer( 'sc_library_connectors_v260', 'nonce' );
+        if ( ! is_user_logged_in() ) { wp_send_json_error( array( 'message' => __( 'Sign in to manage libraries.', 'sustainable-catalyst-library' ) ), 401 ); }
+        $id = sanitize_key( wp_unslash( $_POST['library_id'] ?? '' ) );
+        $stored = get_user_meta( get_current_user_id(), self::USER_META_MY_LIBRARIES, true );
+        $stored = is_array( $stored ) ? $stored : array();
+        $stored = array_values( array_filter( $stored, static function ( $item ) use ( $id ) { return sanitize_key( $item['id'] ?? '' ) !== $id; } ) );
+        update_user_meta( get_current_user_id(), self::USER_META_MY_LIBRARIES, $stored );
+        wp_send_json_success( array( 'schema' => self::MY_LIBRARIES_SCHEMA, 'libraries' => $this->current_user_libraries(), 'message' => __( 'Library removed.', 'sustainable-catalyst-library' ) ) );
+    }
+
+    private function user_library_actions( $data ) {
+        $actions = array();
+        $tokens = $this->profile_tokens( $data );
+        foreach ( $this->current_user_libraries() as $library ) {
+            if ( ! empty( $library['catalog_template'] ) ) {
+                $actions[] = array( 'kind' => 'my-library-catalog', 'provider' => 'my-library:' . $library['id'], 'label' => sprintf( __( 'Search %s', 'sustainable-catalyst-library' ), $library['name'] ), 'url' => $this->replace_profile_tokens( $library['catalog_template'], $tokens ), 'status' => 'my-library-search', 'relation' => $library['relation'], 'checked_at' => current_time( 'mysql' ) );
+            }
+            if ( ! empty( $library['ill_url'] ) ) {
+                $actions[] = array( 'kind' => 'interlibrary-loan', 'provider' => 'my-library:' . $library['id'], 'label' => sprintf( __( 'Request through %s', 'sustainable-catalyst-library' ), $library['name'] ), 'url' => $library['ill_url'], 'status' => 'interlibrary-loan', 'relation' => $library['relation'], 'checked_at' => current_time( 'mysql' ) );
+            }
+        }
+        return $actions;
+    }
+
+    private function rank_access_locations( $locations ) {
+        $priority = array( 'public-digital' => 10, 'open-access' => 12, 'full-text' => 14, 'my-library-access' => 20, 'subscription-access' => 25, 'institutional-auth' => 28, 'my-library-search' => 35, 'holdings-check' => 40, 'library-search' => 45, 'preview-only' => 55, 'interlibrary-loan' => 60, 'physical' => 65, 'discovery' => 75, 'metadata-only' => 90 );
+        usort( $locations, static function ( $a, $b ) use ( $priority ) {
+            $ap = $priority[ sanitize_key( $a['status'] ?? '' ) ] ?? 80;
+            $bp = $priority[ sanitize_key( $b['status'] ?? '' ) ] ?? 80;
+            if ( $ap === $bp ) { return strcmp( (string) ( $a['label'] ?? '' ), (string) ( $b['label'] ?? '' ) ); }
+            return $ap <=> $bp;
+        } );
+        return $locations;
     }
 
     private function research_gateway_registry() {

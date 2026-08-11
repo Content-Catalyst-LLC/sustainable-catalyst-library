@@ -453,7 +453,7 @@
   };
 
   const boot = () => {
-    document.querySelectorAll('[data-sc-field-spotlights="v4.3.18.1"]').forEach((root) => {
+    document.querySelectorAll('[data-sc-field-spotlights="v4.3.13"]').forEach((root) => {
       if (root.dataset.scFieldSpotlightsMode === 'master') initializeMaster(root);
       else initializeSingle(root);
     });
