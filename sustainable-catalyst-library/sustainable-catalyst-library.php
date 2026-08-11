@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.20.2 replaces the card-heavy Knowledge Pathways block with a restrained editorial index and adds course-level access verification so specific free courses can override provider-level defaults while preserving Research Access, Open Course Finder, My Libraries, Research Librarian, Workspace, and Publications recovery.
- * Version: 4.3.20.2
+ * Description: Sustainable Catalyst Library v4.3.21 adds course access intelligence, Knowledge Pathway matching, Research Librarian course recommendations, and account-saved learning plans while preserving federated Research Access, My Libraries, Publications recovery, and the editorial pathway index.
+ * Version: 4.3.21
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.20.2');
+define('SC_LIBRARY_VERSION', '4.3.21');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

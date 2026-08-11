@@ -57,6 +57,7 @@ final class SC_Library_Orchestrator {
         return [
             'auto' => __('Auto-detect', 'sustainable-catalyst-library'),
             'discover' => __('Discover and explain', 'sustainable-catalyst-library'),
+            'learn' => __('Find courses and build a learning route', 'sustainable-catalyst-library'),
             'collect' => __('Collect records', 'sustainable-catalyst-library'),
             'source' => __('Build a source plan', 'sustainable-catalyst-library'),
             'translate' => __('Start a Technical Translation Matrix', 'sustainable-catalyst-library'),
@@ -80,6 +81,12 @@ final class SC_Library_Orchestrator {
                 'label' => __('Research Notebook', 'sustainable-catalyst-library'),
                 'url' => esc_url_raw((string) get_option('sc_library_main_page_url', home_url('/research-library/'))),
                 'capabilities' => ['collections', 'notes', 'sources', 'saved_records'],
+            ],
+            'course_finder' => [
+                'id' => 'course_finder',
+                'label' => __('Open Course Finder', 'sustainable-catalyst-library'),
+                'url' => esc_url_raw(rtrim((string) get_option('sc_library_main_page_url', home_url('/research-library/')), '/') . '/#open-course-finder'),
+                'capabilities' => ['open_courses', 'access_models', 'knowledge_pathways', 'learning_plan'],
             ],
             'translation_matrix' => [
                 'id' => 'translation_matrix',
@@ -456,9 +463,10 @@ final class SC_Library_Orchestrator {
         }
         $records = array_slice($records, 0, $max_records);
         $pathways = $this->pathway_recommendations($prompt, $records, 4);
+        $courses = class_exists('SC_Library_Open_Course_Finder') ? SC_Library_Open_Course_Finder::recommend_for_prompt($prompt, 4) : [];
         $routes = $this->route_recommendations($intent, $prompt, $records);
         $actions = $this->action_packets($intent, $prompt, $records, $routes);
-        $answer = $this->deterministic_answer($intent, $prompt, $records, $routes, $pathways);
+        $answer = $this->deterministic_answer($intent, $prompt, $records, $routes, $pathways, $courses);
         $provider = ['mode' => 'deterministic', 'provider' => 'sustainable-catalyst-library', 'model' => 'site-scoped-orchestration-rules'];
         $remote = $this->remote_synthesis($prompt, $intent, $records, $routes, $pathways, $answer);
         if (is_array($remote) && !empty($remote['answer'])) {
@@ -479,6 +487,7 @@ final class SC_Library_Orchestrator {
             'answer' => $answer,
             'records' => $records,
             'pathways' => $pathways,
+            'courses' => $courses,
             'routes' => $routes,
             'actions' => $actions,
             'diagnostics' => [
@@ -488,6 +497,7 @@ final class SC_Library_Orchestrator {
                 'recommended_record_count' => count($records),
                 'graph_expansion_count' => count($graph_expansion),
                 'pathway_recommendation_count' => count($pathways),
+                'course_recommendation_count' => count($courses),
                 'provider' => $provider,
                 'scope' => 'sustainable-catalyst-library-and-public-knowledge-graph',
             ],
@@ -509,6 +519,7 @@ final class SC_Library_Orchestrator {
     private function infer_intent(string $prompt): string {
         $text = strtolower($prompt);
         $patterns = [
+            'learn' => ['course', 'courses', 'class', 'classes', 'learn', 'study plan', 'curriculum', 'training'],
             'calculate' => ['calculate', 'equation', 'formula', 'model', 'quantitative', 'graph', 'simulate'],
             'decide' => ['decision', 'tradeoff', 'trade-off', 'choose', 'recommend policy', 'options'],
             'investigate' => ['country', 'city', 'place', 'map', 'indicator', 'geographic', 'event'],
@@ -717,6 +728,7 @@ final class SC_Library_Orchestrator {
     private function route_recommendations(string $intent, string $prompt, array $records): array {
         $targets = self::target_definitions();
         $route_ids = match ($intent) {
+            'learn' => ['course_finder', 'notebook'],
             'collect', 'source', 'discover' => ['notebook'],
             'translate' => ['translation_matrix', 'notebook'],
             'map' => ['whiteboard', 'notebook'],
@@ -747,6 +759,7 @@ final class SC_Library_Orchestrator {
 
     private function route_reason(string $target, string $intent, string $prompt, array $records): string {
         return match ($target) {
+            'course_finder' => __('The request asks for a structured way to learn the subject, so open-course recommendations can complement Library records and Knowledge Pathways.', 'sustainable-catalyst-library'),
             'workbench' => __('The request contains a calculation, model, equation, graph, or validation task.', 'sustainable-catalyst-library'),
             'decision_studio' => __('The request needs claims, evidence, assumptions, uncertainty, tradeoffs, or options organized into a decision packet.', 'sustainable-catalyst-library'),
             'site_intelligence' => __('The request depends on places, countries, indicators, events, maps, or source freshness.', 'sustainable-catalyst-library'),
@@ -840,7 +853,11 @@ final class SC_Library_Orchestrator {
         return implode("\n", $lines);
     }
 
-    private function deterministic_answer(string $intent, string $prompt, array $records, array $routes, array $pathways = []): string {
+    private function deterministic_answer(string $intent, string $prompt, array $records, array $routes, array $pathways = [], array $courses = []): string {
+        if (!$records && $courses) {
+            $course = $courses[0]['title'] ?? __('an open course', 'sustainable-catalyst-library');
+            return sprintf(__('I did not find a strong indexed Library match, but I found relevant structured learning. Start with %s, then use the connected Knowledge Pathways and Research Access sources to deepen the research.', 'sustainable-catalyst-library'), $course);
+        }
         if (!$records) {
             return __('I could not find a strong indexed match. Try a narrower topic, a known article title, or rebuild the Library index if the expected records are missing.', 'sustainable-catalyst-library');
         }
