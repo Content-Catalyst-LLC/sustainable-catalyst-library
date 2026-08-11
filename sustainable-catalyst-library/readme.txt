@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.19.1
+Stable tag: 4.3.20
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.19.1 shifts the Research Library to an access-first public experience. It preserves v4.3.19 Global Library Search, My Libraries, Research Libraries, Digital Access Resolver, Research Librarian, Workspace, and Publications recovery while compressing the main page from a long explanatory architecture into a focused research journey.
+Sustainable Catalyst Library v4.3.20 adds an Open Course Finder to the access-first Research Library. It searches a normalized launch catalog of open courses, distinguishes free/open, free-audit, free-preview, optional-paid-certificate, and mixed access models, and provides query-aware gateways into major university and public learning providers while preserving Global Library Search, My Libraries, Digital Access Resolver, Research Librarian, Workspace, and Publications recovery.
 
 
 
@@ -160,6 +160,15 @@ Sustainable Catalyst Library v4.3.19.1 shifts the Research Library to an access-
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.20 =
+* Added Open Course Finder shortcode `[sc_open_course_finder]`.
+* Added normalized launch catalog with course/provider/access metadata.
+* Added MIT OpenCourseWare, Harvard CS50, Yale Online/Open Yale Courses, Princeton Online, Stanford Online, Columbia Online, edX, Coursera, OpenLearn, SDG Academy, FAO eLearning Academy, and UNITAR/UN learning gateways.
+* Added explicit access labels so free, audit, preview, and paid-certificate models are not conflated.
+* Added local keyword, subject, and access filtering plus query-aware provider searches.
+* Preserved Research Access, My Libraries, Digital Access Resolver, Research Librarian, Workspace, and Publications recovery.
+
 
 = 4.3.19.1 =
 * Replaces the long-form Research Library page with an access-first layout centered on Research Access, the Research Librarian, direct Library search, Knowledge Pathways, Workspace, applied tools, and compact research infrastructure.
