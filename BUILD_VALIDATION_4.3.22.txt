@@ -1,0 +1,28 @@
+Sustainable Catalyst Library v4.3.22 — Citation Studio & Source Manager
+Validation date: 2026-08-11
+
+PASS — 8 v4.3.22 Citation Studio & Source Manager tests
+PASS — 6 retained v4.3.21.1 Publications Runtime Recovery tests
+PASS — 7 retained v4.3.21 Course Access Intelligence tests
+PASS — 7 retained v4.3.20.2 pathway/course refinement tests
+PASS — 6 retained v4.3.20 Open Course Finder tests
+PASS — 7 retained v4.3.19.1 Access-First layout tests
+PASS — 7 retained v4.3.19 Global Library Access tests
+PASS — 3 retained v4.3.18.1 Publications recovery tests
+PASS — 7 retained v4.3.18 scholarly/university access tests
+PASS — 5 retained v4.3.17 Federated Research Access tests
+PASS — 4 retained pathway-aware Research Librarian tests
+PASS — 2 retained unified Search/Librarian tests
+PASS — 3 retained Research Librarian front-door tests
+PASS — 4 retained Field Spotlight tests
+PASS — 3 retained panel persistence tests
+PASS — 8 retained Publications compatibility tests
+
+87 selected Python regression tests passed.
+PASS — PHP syntax validation across plugin PHP files
+PASS — JavaScript syntax: Citation Studio, connectors, Publications, Field Spotlight, Open Course Finder, Course Plan, Research Librarian orchestrator
+PASS — v4.3.21.1 Publications recovery preserved
+PASS — Research Access public discovery remains available without sign-in
+PASS — personal source writes are authenticated and nonce-protected
+PASS — personal and institutional/editorial source actions remain separate
+PASS — Research Library page includes Citation Studio; Publications page replacement is not required

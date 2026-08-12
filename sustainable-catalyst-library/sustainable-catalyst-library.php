@@ -3,7 +3,7 @@
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
  * Description: Sustainable Catalyst Library v4.3.21.1 repairs recurring Publications single-panel failures with fresh Field Spotlight runtime asset versioning, render-time integrity recovery, and no-JavaScript field/panel fallback routes while preserving v4.3.21 course intelligence and all editorial content.
- * Version: 4.3.21.1
+ * Version: 4.3.22
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.21.1');
+define('SC_LIBRARY_VERSION', '4.3.22');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

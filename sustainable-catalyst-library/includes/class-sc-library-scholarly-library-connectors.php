@@ -91,6 +91,7 @@ final class SC_Library_Scholarly_Library_Connectors {
         add_action( 'wp_ajax_nopriv_sc_library_v4317_research_access_search', array( $this, 'ajax_research_access_search' ) );
         add_action( 'wp_ajax_sc_library_v4319_save_library', array( $this, 'ajax_save_my_library' ) );
         add_action( 'wp_ajax_sc_library_v4319_remove_library', array( $this, 'ajax_remove_my_library' ) );
+        add_action( 'wp_ajax_sc_library_v4322_save_result', array( $this, 'ajax_save_personal_result' ) );
 
         add_shortcode( 'sc_source_discovery', array( $this, 'shortcode_source_discovery' ) );
         add_shortcode( 'sc_research_access', array( $this, 'shortcode_research_access' ) );
@@ -534,6 +535,8 @@ final class SC_Library_Scholarly_Library_Connectors {
             'restUrl'          => rest_url( self::API_NAMESPACE ),
             'restNonce'        => wp_create_nonce( 'wp_rest' ),
             'canImport'        => current_user_can( 'edit_posts' ),
+            'canSavePersonal'  => is_user_logged_in(),
+            'citationStudio'   => '#citation-studio',
             'projectId'        => absint( wp_unslash( $_GET['project_id'] ?? 0 ) ),
             'signedIn'         => is_user_logged_in(),
             'myLibraries'      => is_user_logged_in() ? $this->current_user_libraries() : array(),
@@ -2985,6 +2988,29 @@ final class SC_Library_Scholarly_Library_Connectors {
             wp_send_json_error( array( 'provider' => $provider, 'message' => $result->get_error_message(), 'code' => $result->get_error_code() ), 502 );
         }
         wp_send_json_success( $result );
+    }
+
+    public function ajax_save_personal_result() {
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( array( 'message' => __( 'Sign in to save sources.', 'sustainable-catalyst-library' ) ), 401 );
+        }
+        check_ajax_referer( 'sc_library_connectors_v260', 'nonce' );
+        if ( ! class_exists( 'SC_Library_Citation_Studio' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Citation Studio is unavailable.', 'sustainable-catalyst-library' ) ), 503 );
+        }
+        $sealed = $this->read_sealed_result( wp_unslash( $_POST['token'] ?? '' ) );
+        if ( is_wp_error( $sealed ) ) {
+            wp_send_json_error( array( 'message' => $sealed->get_error_message() ), absint( $sealed->get_error_data( 'status' ) ?: 400 ) );
+        }
+        $source_id = SC_Library_Citation_Studio::save_normalized_result( $sealed['result'], get_current_user_id() );
+        if ( is_wp_error( $source_id ) ) {
+            wp_send_json_error( array( 'message' => $source_id->get_error_message() ), 400 );
+        }
+        wp_send_json_success( array(
+            'source_id' => absint( $source_id ),
+            'message' => __( 'Saved to My Sources.', 'sustainable-catalyst-library' ),
+            'studio_url' => '#citation-studio',
+        ) );
     }
 
     public function shortcode_research_access( $atts ) {

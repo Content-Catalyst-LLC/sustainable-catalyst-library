@@ -202,15 +202,26 @@
     var resolver = renderAccessResolver(result);
     if (resolver) { article.appendChild(resolver); }
 
-    if (config.canImport && result.import_token) {
+    if ((config.canImport || config.canSavePersonal) && result.import_token) {
       var controls = make('div', 'sc-connector-result-card__controls');
-      var importButton = make('button', 'button button-primary', 'Import as Draft Source');
-      importButton.type = 'button';
-      importButton.dataset.scImportToken = result.import_token;
-      controls.appendChild(importButton);
-      var status = make('span', 'sc-connector-result-card__import-status');
-      status.setAttribute('aria-live', 'polite');
-      controls.appendChild(status);
+      if (config.canSavePersonal) {
+        var saveButton = make('button', 'button', 'Save to My Sources');
+        saveButton.type = 'button';
+        saveButton.dataset.scSaveSourceToken = result.import_token;
+        controls.appendChild(saveButton);
+        var personalStatus = make('span', 'sc-connector-result-card__personal-status');
+        personalStatus.setAttribute('aria-live', 'polite');
+        controls.appendChild(personalStatus);
+      }
+      if (config.canImport) {
+        var importButton = make('button', 'button button-primary', 'Import as Draft Source');
+        importButton.type = 'button';
+        importButton.dataset.scImportToken = result.import_token;
+        controls.appendChild(importButton);
+        var status = make('span', 'sc-connector-result-card__import-status');
+        status.setAttribute('aria-live', 'polite');
+        controls.appendChild(status);
+      }
       article.appendChild(controls);
     }
 
@@ -252,6 +263,31 @@
     section.appendChild(list);
     return section;
   }
+
+
+  document.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-sc-save-source-token]');
+    if (!button) { return; }
+    event.preventDefault();
+    var card = button.closest('.sc-connector-result-card');
+    var status = card ? card.querySelector('.sc-connector-result-card__personal-status') : null;
+    button.disabled = true;
+    if (status) { status.textContent = 'Saving to My Sources…'; }
+    request('sc_library_v4322_save_result', { token: button.dataset.scSaveSourceToken }).then(function (payload) {
+      button.textContent = 'Saved';
+      document.dispatchEvent(new CustomEvent('sc:citation-source-saved', { detail: payload }));
+      if (status) {
+        status.textContent = payload.message || 'Saved to My Sources.';
+        var link = make('a', 'sc-connector-result-card__studio-link', 'Open Citation Studio →');
+        link.href = payload.studio_url || config.citationStudio || '#citation-studio';
+        status.appendChild(document.createTextNode(' '));
+        status.appendChild(link);
+      }
+    }).catch(function (error) {
+      button.disabled = false;
+      if (status) { status.textContent = error.message; }
+    });
+  });
 
 
   document.querySelectorAll('[data-sc-research-access]').forEach(function (root) {
