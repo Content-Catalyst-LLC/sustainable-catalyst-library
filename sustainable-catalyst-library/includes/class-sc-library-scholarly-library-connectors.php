@@ -92,6 +92,8 @@ final class SC_Library_Scholarly_Library_Connectors {
         add_action( 'wp_ajax_sc_library_v4319_save_library', array( $this, 'ajax_save_my_library' ) );
         add_action( 'wp_ajax_sc_library_v4319_remove_library', array( $this, 'ajax_remove_my_library' ) );
         add_action( 'wp_ajax_sc_library_v4322_save_result', array( $this, 'ajax_save_personal_result' ) );
+        add_action( 'wp_ajax_sc_library_v4324_access_intelligence_result', array( $this, 'ajax_access_intelligence_result' ) );
+        add_action( 'wp_ajax_nopriv_sc_library_v4324_access_intelligence_result', array( $this, 'ajax_access_intelligence_result' ) );
 
         add_shortcode( 'sc_source_discovery', array( $this, 'shortcode_source_discovery' ) );
         add_shortcode( 'sc_research_access', array( $this, 'shortcode_research_access' ) );
@@ -2037,7 +2039,7 @@ final class SC_Library_Scholarly_Library_Connectors {
         return $sealed;
     }
 
-    private function read_sealed_result( $token ) {
+    private function read_sealed_result( $token, $consume = true ) {
         $token = sanitize_text_field( $token );
         if ( strlen( $token ) < 20 ) {
             return new WP_Error( 'invalid_import_token', __( 'The discovery import token is invalid.', 'sustainable-catalyst-library' ), array( 'status' => 400 ) );
@@ -2050,7 +2052,9 @@ final class SC_Library_Scholarly_Library_Connectors {
         if ( absint( $sealed['user_id'] ) !== get_current_user_id() && ! current_user_can( 'manage_options' ) ) {
             return new WP_Error( 'import_token_owner', __( 'The discovery result belongs to another user.', 'sustainable-catalyst-library' ), array( 'status' => 403 ) );
         }
-        delete_transient( $key );
+        if ( $consume ) {
+            delete_transient( $key );
+        }
         return $sealed;
     }
 
@@ -2988,6 +2992,22 @@ final class SC_Library_Scholarly_Library_Connectors {
             wp_send_json_error( array( 'provider' => $provider, 'message' => $result->get_error_message(), 'code' => $result->get_error_code() ), 502 );
         }
         wp_send_json_success( $result );
+    }
+
+    public function ajax_access_intelligence_result() {
+        check_ajax_referer( 'sc_library_connectors_v260', 'nonce' );
+        if ( ! class_exists( 'SC_Library_Research_Librarian_Access_Intelligence' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Research Librarian Access Intelligence is unavailable.', 'sustainable-catalyst-library' ) ), 503 );
+        }
+        $rate = $this->enforce_rate_limit( 'access-intelligence', 60, 10 * MINUTE_IN_SECONDS );
+        if ( is_wp_error( $rate ) ) {
+            wp_send_json_error( array( 'message' => $rate->get_error_message() ), 429 );
+        }
+        $sealed = $this->read_sealed_result( wp_unslash( $_POST['token'] ?? '' ), false );
+        if ( is_wp_error( $sealed ) ) {
+            wp_send_json_error( array( 'message' => $sealed->get_error_message() ), absint( $sealed->get_error_data( 'status' ) ?: 400 ) );
+        }
+        wp_send_json_success( SC_Library_Research_Librarian_Access_Intelligence::evaluate_normalized_result( $sealed['result'] ) );
     }
 
     public function ajax_save_personal_result() {

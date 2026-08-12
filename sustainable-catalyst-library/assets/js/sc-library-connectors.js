@@ -202,6 +202,18 @@
     var resolver = renderAccessResolver(result);
     if (resolver) { article.appendChild(resolver); }
 
+    if (result.import_token) {
+      var accessIntelligence = make('div', 'sc-connector-result-card__access-intelligence');
+      var accessButton = make('button', 'button sc-access-intelligence__button', 'Check access');
+      accessButton.type = 'button';
+      accessButton.dataset.scCheckAccessToken = result.import_token;
+      accessIntelligence.appendChild(accessButton);
+      var accessStatus = make('div', 'sc-access-intelligence__status');
+      accessStatus.setAttribute('aria-live', 'polite');
+      accessIntelligence.appendChild(accessStatus);
+      article.appendChild(accessIntelligence);
+    }
+
     if ((config.canImport || config.canSavePersonal) && result.import_token) {
       var controls = make('div', 'sc-connector-result-card__controls');
       if (config.canSavePersonal) {
@@ -264,6 +276,38 @@
     return section;
   }
 
+
+  document.addEventListener('click', function (event) {
+    var accessButton = event.target.closest('[data-sc-check-access-token]');
+    if (!accessButton) { return; }
+    event.preventDefault();
+    var card = accessButton.closest('.sc-connector-result-card');
+    var target = card ? card.querySelector('.sc-access-intelligence__status') : null;
+    accessButton.disabled = true;
+    if (target) { target.textContent = 'Checking access evidence…'; }
+    request('sc_library_v4324_access_intelligence_result', { token: accessButton.dataset.scCheckAccessToken }).then(function (packet) {
+      accessButton.textContent = packet.state_label || 'Access checked';
+      if (!target) { return; }
+      target.innerHTML = '';
+      var heading = make('strong', 'sc-access-intelligence__state', packet.state_label || 'Access unconfirmed');
+      target.appendChild(heading);
+      target.appendChild(make('p', '', packet.availability || ''));
+      target.appendChild(make('p', 'sc-access-intelligence__entitlement', packet.entitlement || ''));
+      if (packet.best_action && packet.best_action.url) {
+        var action = make('a', 'sc-access-intelligence__best', (packet.best_action.label || 'Open access route') + ' →');
+        action.href = packet.best_action.url;
+        action.target = '_blank';
+        action.rel = 'noopener';
+        target.appendChild(action);
+      }
+      if (packet.stale_count) {
+        target.appendChild(make('small', 'sc-access-intelligence__stale', String(packet.stale_count) + ' stale route(s); recheck before relying on availability.'));
+      }
+    }).catch(function (error) {
+      accessButton.disabled = false;
+      if (target) { target.textContent = error.message; }
+    });
+  });
 
   document.addEventListener('click', function (event) {
     var button = event.target.closest('[data-sc-save-source-token]');

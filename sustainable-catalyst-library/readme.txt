@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.23
+Stable tag: 4.3.24
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.23 adds a personal Research Document Builder for saved research drafts and real DOCX/PDF exports. Users can turn My Sources into reading lists, annotated bibliographies, literature-review packets, research briefs, evidence packets, and research notes while preserving Citation Studio, Course Finder, Research Access, Research Librarian, and the restored 14-field Publications stack.
+Sustainable Catalyst Library v4.3.24 adds Research Librarian Access Intelligence. It interprets discovery and holdings evidence into bounded access states, separates availability from user entitlement, routes open copies, library/institution access, previews, ILL, physical holdings, and metadata checks, and preserves Research Document Builder plus the restored 14-field Publications stack.
 
 
 

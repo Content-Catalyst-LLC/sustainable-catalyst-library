@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.23 adds a personal Research Document Builder that turns Citation Studio sources into saved research drafts and real DOCX/PDF exports, while preserving the restored 14-field Publications stack, Course Finder, Research Access, and Research Librarian workflows.
- * Version: 4.3.23
+ * Description: Sustainable Catalyst Library v4.3.24 adds Research Librarian Access Intelligence that distinguishes open-now, public-digital, library, institutional-login, preview, ILL, physical, holdings-check, and metadata-only routes while preserving Document Builder and the restored 14-field Publications stack.
+ * Version: 4.3.24
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.23');
+define('SC_LIBRARY_VERSION', '4.3.24');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
