@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.28
+Stable tag: 4.3.29
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.28 adds a private personal Library for books, films, music, articles, archives, courses, datasets, tools, websites, podcasts, and other resources. Personal collections and recommendations stay account-owned and explicitly separate from Sustainable Catalyst's official editorial recommendations, while v4.3.27 canonical routing and one-account continuity remain intact.
+Sustainable Catalyst Library v4.3.29 adds private saved searches, passive watchlists, and a research queue so signed-in users can preserve unfinished research and revisit it later. Watchlists do not run background monitoring or notifications in this release. v4.3.28 My Library collections, canonical routing, access intelligence, learning, citations, documents, and Publications remain intact.
 
 
 
@@ -112,6 +112,7 @@ Sustainable Catalyst Library v4.3.28 adds a private personal Library for books, 
 
 == Shortcodes ==
 
+* `[sc_research_continuity]`
 * `[sc_personal_library]`
 * `[sc_library_account_continuity]`
 * `[sc_homepage_spotlight]`
@@ -136,6 +137,7 @@ Sustainable Catalyst Library v4.3.28 adds a private personal Library for books, 
 
 == REST API ==
 
+* `/wp-json/sc-library/v1/research-continuity` (authenticated; current user only)
 * `/wp-json/sc-library/v1/personal-library` (authenticated; current user only)
 * `/wp-json/sc-library/v1/runtime/identity-health`
 * `/wp-json/sustainable-catalyst/v1/library/discovery`
@@ -164,6 +166,12 @@ Sustainable Catalyst Library v4.3.28 adds a private personal Library for books, 
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.29 =
+* Added private Saved Searches, passive Watchlists, and a Research Queue.
+* Added `[sc_research_continuity]` and authenticated `/wp-json/sc-library/v1/research-continuity`.
+* Watchlists are explicitly passive: no background monitoring or automatic notifications.
+* Preserved v4.3.28 My Library and prior research/publication boundaries.
 
 = 4.3.28 =
 * Adds `[sc_personal_library]` as a private, account-owned collection and recommendation workspace.

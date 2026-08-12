@@ -1,0 +1,32 @@
+Sustainable Catalyst Library v4.3.29 — Build Validation
+Release: Saved Searches, Watchlists & Research Queue
+Date: 2026-08-12
+
+PASS - 93 selected Python regression tests
+PASS - PHP syntax across Sustainable Catalyst Library plugin
+PASS - JavaScript syntax for v4.3.29 research continuity and retained critical surfaces
+PASS - v4.3.29 release identity and extension bootstrap boundary
+PASS - private saved-search storage contract
+PASS - passive watchlist truthfulness boundary (no background monitoring / no automatic notifications)
+PASS - private research-queue storage and state contract
+PASS - authenticated current-user research-continuity API boundary
+PASS - canonical /knowledge-libraries/ route preserved
+PASS - v4.3.28 My Library storage contract preserved without migration
+PASS - v4.3.26 Public Library Network boundary preserved
+PASS - v4.3.22.4 Publications 14-field stack preserved
+PASS - macOS installer dry run from clean v4.3.28 Git baseline
+PASS - installer safety backup, checksum gate, release-boundary gate, and Git commit
+
+Selected regression total:
+  v4.3.29 new release tests: 12
+  v4.3.28 retained Personal Library tests: 9
+  v4.3.27 retained route/identity tests: 8
+  v4.3.26 retained Public Library tests: 9
+  v4.3.25 retained institutional connector tests: 7
+  v4.3.24 retained Access Intelligence tests: 9
+  v4.3.23 retained Document Builder tests: 10
+  v4.3.22.4 retained Publications tests: 9
+  v4.3.22 retained Citation Studio tests: 6
+  v4.3.21 retained course/learning tests: 7
+  v4.3.19 retained global-library tests: 7
+  TOTAL: 93
