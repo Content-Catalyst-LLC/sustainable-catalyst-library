@@ -1,0 +1,34 @@
+Sustainable Catalyst Library v4.3.26 — Public Library Network & Local Access
+Validation date: 2026-08-12
+
+PASS — 11 v4.3.26 Public Library Network tests
+PASS — 7 retained v4.3.25 Institutional Connector tests
+PASS — 9 retained v4.3.24 Access Intelligence tests
+PASS — 10 retained v4.3.23 Research Document Builder tests
+PASS — 9 retained v4.3.22.4 Publications 14-field stack tests
+PASS — 6 retained v4.3.22 Citation Studio tests
+PASS — 7 retained v4.3.21 Course Access / Learning Pathways tests
+PASS — 7 retained v4.3.19 Global Library Access tests
+
+TOTAL: 66 selected Python regression tests passed.
+
+PASS — PHP syntax across Sustainable Catalyst Library plugin tree
+PASS — JavaScript syntax: Public Library Network
+PASS — JavaScript syntax: Research Librarian orchestrator
+PASS — JavaScript syntax: Research Access connectors
+PASS — JavaScript syntax: Research Document Builder
+PASS — JavaScript syntax: Publications Field Spotlights
+PASS — JavaScript syntax: Open Course Finder
+PASS — JavaScript syntax: Course Plan
+
+Key release contracts:
+- 11-library launch network is present.
+- Public discovery remains open.
+- My Libraries persistence reuses sc_library_my_libraries_v4319.
+- External-library passwords/PINs are not stored.
+- Availability is not treated as entitlement.
+- New public-library IDs are recognized by the existing locator registry.
+- v4.3.25 Institutional Connector Expansion is preserved.
+- v4.3.24 Access Intelligence is preserved.
+- v4.3.23 Document Builder is preserved.
+- v4.3.22.4 Publications all-fields stack is preserved.
