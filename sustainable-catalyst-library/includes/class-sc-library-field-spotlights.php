@@ -18,7 +18,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.13';
+    public const VERSION = '4.3.21.1';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
     public const PANEL_CONTENT_OPTION = 'sc_library_field_spotlight_panel_content_v4312';
     public const SETTINGS_GROUP = 'sc_library_field_spotlights_v4313';
@@ -657,6 +657,17 @@ final class SC_Library_Field_Spotlights {
 
     private function render_public( string $only_field = '', array $display = array() ): string {
         $fields = $this->public_model();
+
+        // v4.3.21.1: the master Publications stage is intentionally JavaScript-enhanced,
+        // but the saved visibility/cache model must never silently collapse the canonical
+        // multi-field/multi-panel surface to one item. Re-run the bounded v4.3.18.1 repair
+        // at render time when that impossible public signature is detected, then rebuild.
+        if ( $this->public_surface_appears_collapsed( $fields ) && class_exists( 'SC_Library_Activator', false ) ) {
+            SC_Library_Activator::repair_publication_surface_integrity_runtime();
+            $this->invalidate_model();
+            $fields = $this->public_model();
+        }
+
         if ( $only_field ) {
             if ( ! isset( $fields[ $only_field ] ) ) { return ''; }
             $fields = array( $only_field => $fields[ $only_field ] );
@@ -677,6 +688,35 @@ final class SC_Library_Field_Spotlights {
             include SC_LIBRARY_DIR . 'templates/field-spotlight-single.php';
         }
         return (string) ob_get_clean();
+    }
+
+
+    /**
+     * Detect the corruption signature that leaves only the first Publications field
+     * or only the first Article Map panel available while the canonical registry still
+     * contains a full field/panel set. This is deliberately a structural check; it does
+     * not rewrite titles, descriptions, ordering, hero copy, or curated article slots.
+     *
+     * @param array<string,array<string,mixed>> $fields
+     */
+    private function public_surface_appears_collapsed( array $fields ): bool {
+        $definitions = self::field_definitions();
+        if ( count( $definitions ) > 1 && count( $fields ) <= 1 ) { return true; }
+
+        $canonical_counts = array();
+        foreach ( self::series_registry() as $panel ) {
+            if ( ! is_array( $panel ) ) { continue; }
+            $field_slug = sanitize_title( (string) ( $panel['field_slug'] ?? '' ) );
+            if ( ! $field_slug ) { continue; }
+            $canonical_counts[ $field_slug ] = absint( $canonical_counts[ $field_slug ] ?? 0 ) + 1;
+        }
+
+        foreach ( $fields as $field_slug => $field ) {
+            $canonical_count = absint( $canonical_counts[ sanitize_title( (string) $field_slug ) ] ?? 0 );
+            $public_count = is_array( $field['panels'] ?? null ) ? count( $field['panels'] ) : 0;
+            if ( $canonical_count > 1 && $public_count <= 1 ) { return true; }
+        }
+        return false;
     }
 
     public function admin_enqueue( string $hook_suffix = '' ): void {

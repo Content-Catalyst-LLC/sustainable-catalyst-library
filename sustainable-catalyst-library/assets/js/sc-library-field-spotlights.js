@@ -37,9 +37,19 @@
     }
   };
 
-  const createPanelTab = (panel, index, selected = false) => {
-    const button = document.createElement('button');
-    button.type = 'button';
+  const fallbackUrl = (fieldKey, panelKey = '', hash = '') => {
+    try {
+      const url = new URL(window.location.href);
+      if (fieldKey) url.searchParams.set('sc_publication_field', fieldKey); else url.searchParams.delete('sc_publication_field');
+      if (panelKey) url.searchParams.set('sc_publication_panel', panelKey); else url.searchParams.delete('sc_publication_panel');
+      if (hash) url.hash = hash;
+      return url.href;
+    } catch { return '#'; }
+  };
+
+  const createPanelTab = (panel, index, selected = false, fieldKey = '', stageId = '') => {
+    const button = document.createElement('a');
+    button.href = fallbackUrl(fieldKey, panel.key || '', stageId ? `#${stageId}` : '');
     button.setAttribute('role', 'tab');
     button.className = `sc-field-spotlight__tab${selected ? ' is-active' : ''}`;
     button.dataset.panelKey = panel.key || '';
@@ -95,10 +105,11 @@
     let field = initialField;
     let fieldNumber = Number.parseInt(options.fieldNumber || '1', 10) || 1;
     let panels = Array.isArray(field.panels) ? field.panels : [];
-    let active = 0;
+    const requestedPanelKey = String(options.initialPanelKey ?? spotlight.dataset.initialPanelKey ?? '');
+    let active = Math.max(0, panels.findIndex((panel) => panel.key === requestedPanelKey));
     let userPaused = !autoplay;
     let interactionPaused = false;
-    let secondaryExpanded = false;
+    let secondaryExpanded = active >= 8;
     let timer = null;
     let touchStartX = null;
 
@@ -186,7 +197,7 @@
       primaryTabs.replaceChildren();
       additional.replaceChildren();
       panels.forEach((panel, idx) => {
-        const button = createPanelTab(panel, idx, idx === 0);
+        const button = createPanelTab(panel, idx, idx === active, field.key || '', spotlight.id || '');
         if (idx < 8) primaryTabs.append(button);
         else additional.append(button);
       });
@@ -300,6 +311,7 @@
     panelNav?.addEventListener('click', (event) => {
       const tab = event.target.closest('[data-panel-key]');
       if (tab && panelNav.contains(tab)) {
+        event.preventDefault();
         const i = panelIndexByKey(tab.dataset.panelKey);
         if (i >= 0) activate(i);
         return;
@@ -369,7 +381,7 @@
     updateFieldIdentity();
     buildPanelNavigation();
     updateToggle();
-    activate(0);
+    activate(active);
 
     return { setField };
   };
@@ -395,17 +407,23 @@
     try { payload = JSON.parse(dataNode?.textContent || '{}'); } catch { return; }
     const fields = Array.isArray(payload.fields) ? payload.fields : [];
     if (!fields.length) return;
+    const fieldIndexSafe = (items, key) => {
+      const found = items.findIndex((field) => field.key === key);
+      return found >= 0 ? found : 0;
+    };
 
     const spotlight = q(root, '.sc-field-spotlight--master-stage');
     const fieldTabs = qa(root, '[data-field-select-key]');
     const fieldSelect = q(root, '[data-field-select]');
-    let activeField = 0;
+const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key || '');
+    let activeField = Math.max(0, fieldIndexSafe(fields, requestedFieldKey));
 
-    const stage = initializeStage(spotlight, fields[0], payload.labels || {}, {
+    const stage = initializeStage(spotlight, fields[activeField], payload.labels || {}, {
       autoplay: root.dataset.autoplay,
       interval: root.dataset.interval,
       pauseOnHover: root.dataset.pauseOnHover,
-      fieldNumber: 1
+      fieldNumber: activeField + 1,
+      initialPanelKey: spotlight?.dataset.initialPanelKey || ''
     });
     if (!stage) return;
 
@@ -426,7 +444,8 @@
     };
 
     fieldTabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
+      tab.addEventListener('click', (event) => {
+        event.preventDefault();
         const i = fieldIndexByKey(tab.dataset.fieldSelectKey);
         if (i >= 0) activateField(i);
       });
@@ -449,11 +468,12 @@
       if (i >= 0) activateField(i);
     });
 
-    activateField(0);
+    root.dataset.activeField = fields[activeField]?.key || '';
+    if (fieldSelect) fieldSelect.value = fields[activeField]?.key || '';
   };
 
   const boot = () => {
-    document.querySelectorAll('[data-sc-field-spotlights="v4.3.13"]').forEach((root) => {
+    document.querySelectorAll('[data-sc-field-spotlights="v4.3.21.1"]').forEach((root) => {
       if (root.dataset.scFieldSpotlightsMode === 'master') initializeMaster(root);
       else initializeSingle(root);
     });

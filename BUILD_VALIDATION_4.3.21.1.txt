@@ -1,0 +1,31 @@
+Sustainable Catalyst Library v4.3.21.1 — Build Validation
+
+New release tests:
+- 7 passed — Publications Runtime Recovery & Multi-Panel Resilience
+
+Retained compatibility suites:
+- 7 passed, 1 deselected — v4.3.21 Course Access Intelligence
+- 7 passed, 1 deselected — v4.3.20.2 Pathway Editorial/Course Refinement
+- 3 passed, 4 deselected — v4.3.20.1 Pathway Alignment
+- 7 passed, 1 deselected — v4.3.20 Open Course Finder
+- 7 passed, 1 deselected — v4.3.19.1 Access-First Layout
+- 7 passed, 1 deselected — v4.3.19 Global Library Access
+- 3 passed, 1 deselected — v4.3.18.1 Publications integrity recovery
+- 7 passed, 1 deselected — v4.3.18 Scholarly/University Access
+- 5 passed, 3 deselected — v4.3.17 Federated Research Access
+- 4 passed, 2 deselected — v4.3.16 Pathway-Aware Research Guidance
+- 2 passed, 3 deselected — v4.3.15 Unified Search / Librarian
+- 3 passed, 3 deselected — v4.3.14 Research Librarian Front Door
+- 4 passed, 3 deselected — v4.3.13 Field Spotlight retained behavior
+- 3 passed, 1 deselected — v4.3.12 persistence compatibility
+- 8 passed, 1 deselected — v4.3.3 Publications compatibility
+
+PASS — PHP syntax
+PASS — Field Spotlight JavaScript syntax
+PASS — Publications JS syntax
+PASS — Course Finder / Course Plan JS syntax
+PASS — Orchestrator JS syntax
+
+Notes:
+- Identity/version assertions from older releases are intentionally deselected where v4.3.21.1 changes the Field Spotlight runtime version or plugin release marker.
+- The canonical Publications registry remains 170 Article Maps across 14 major fields.

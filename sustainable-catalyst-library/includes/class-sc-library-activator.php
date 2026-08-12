@@ -37,6 +37,22 @@ final class SC_Library_Activator {
     }
 
     /**
+     * v4.3.21.1 runtime guard. Public rendering can call this when the canonical
+     * Publications registry is healthy but the persisted/cache-visible surface has
+     * collapsed to one field or panel. The underlying repair remains bounded and
+     * preserves editorial content.
+     */
+    public static function repair_publication_surface_integrity_runtime(): void {
+        self::repair_publication_surface_integrity();
+        $diag = get_option( 'sc_library_publications_integrity_repair_v43181', array() );
+        if ( ! is_array( $diag ) ) { $diag = array(); }
+        $diag['runtime_guard'] = true;
+        $diag['runtime_version'] = defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '4.3.21.1';
+        $diag['runtime_timestamp'] = time();
+        update_option( 'sc_library_publications_integrity_repair_v43211', $diag, false );
+    }
+
+    /**
      * v4.3.18.1: repair implausibly collapsed Publications/Field Spotlight
      * visibility state without touching editorial content. This is intentionally
      * conservative: it only restores canonical visibility when the saved state
@@ -189,6 +205,10 @@ final class SC_Library_Activator {
         }
 
         update_option( $repair_option, $result, false );
+        $current_result = $result;
+        $current_result['runtime_guard'] = false;
+        $current_result['runtime_version'] = defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '4.3.21.1';
+        update_option( 'sc_library_publications_integrity_repair_v43211', $current_result, false );
     }
 
     private static function create_tables(): void {

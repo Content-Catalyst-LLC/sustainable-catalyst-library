@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.20
+Stable tag: 4.3.21.1
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.20 adds an Open Course Finder to the access-first Research Library. It searches a normalized launch catalog of open courses, distinguishes free/open, free-audit, free-preview, optional-paid-certificate, and mixed access models, and provides query-aware gateways into major university and public learning providers while preserving Global Library Search, My Libraries, Digital Access Resolver, Research Librarian, Workspace, and Publications recovery.
+Sustainable Catalyst Library v4.3.21.1 hardens the Publications Field Spotlight against recurring single-panel failures with cache-busted runtime assets, render-time integrity recovery, and progressive-enhancement fallback links while preserving v4.3.21 course access intelligence, learning pathways, Research Access, and editorial content.
 
 
 
@@ -160,6 +160,13 @@ Sustainable Catalyst Library v4.3.20 adds an Open Course Finder to the access-fi
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.21.1 =
+* Repairs recurring Publications states where only the first field/panel remains usable.
+* Bumps the Field Spotlight public runtime from the stale v4.3.13 asset version to v4.3.21.1 so browser/CDN caches receive the repaired JavaScript and CSS.
+* Adds a bounded render-time integrity guard that reruns the existing visibility/cache recovery if the canonical multi-field/multi-panel surface collapses.
+* Adds real field/panel fallback URLs so Publications remains navigable when JavaScript is unavailable or delayed.
+* Preserves all titles, descriptions, ordering, hero copy, curated supporting articles, panel-content storage, Course Finder, Research Access, and v4.3.21 learning-plan functionality.
 
 = 4.3.20 =
 * Added Open Course Finder shortcode `[sc_open_course_finder]`.

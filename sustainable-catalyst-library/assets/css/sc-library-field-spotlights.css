@@ -336,3 +336,6 @@
 @media(prefers-reduced-motion:reduce){
   .sc-field-master__field-tab{transition:none!important}
 }
+
+/* v4.3.21.1 progressive-enhancement fallback: tab controls are real links when JS is unavailable. */
+.sc-field-master__field-tab,.sc-field-spotlight__tab{text-decoration:none!important}
