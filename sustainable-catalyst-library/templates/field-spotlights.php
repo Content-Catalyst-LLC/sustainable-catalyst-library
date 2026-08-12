@@ -13,7 +13,7 @@ $initial_field = $field_list[ $initial_index ];
 $initial_number = $initial_index + 1;
 $stage_id = $instance_id . '-stage';
 ?>
-<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights sc-field-spotlights--master" data-sc-field-spotlights="v4.3.22.1" data-sc-field-spotlights-mode="master" data-autoplay="<?php echo $autoplay ? 'true' : 'false'; ?>" data-interval="<?php echo esc_attr( (string) $interval ); ?>" data-pause-on-hover="<?php echo $pause_on_hover ? 'true' : 'false'; ?>" data-initial-field-key="<?php echo esc_attr( (string) $initial_field['key'] ); ?>">
+<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights sc-field-spotlights--master" data-sc-field-spotlights="v4.3.22.2" data-sc-field-spotlights-mode="master" data-sc-field-spotlights-runtime-state="server" data-autoplay="<?php echo $autoplay ? 'true' : 'false'; ?>" data-interval="<?php echo esc_attr( (string) $interval ); ?>" data-pause-on-hover="<?php echo $pause_on_hover ? 'true' : 'false'; ?>" data-initial-field-key="<?php echo esc_attr( (string) $initial_field['key'] ); ?>">
     <section class="sc-field-master__selector" aria-labelledby="<?php echo esc_attr( $instance_id . '-selector-title' ); ?>">
         <div class="sc-field-master__selector-head">
             <div>
@@ -25,7 +25,7 @@ $stage_id = $instance_id . '-stage';
         <div class="sc-field-master__field-tabs" role="tablist" aria-label="Publication fields">
             <?php foreach ( $field_list as $index => $selector_field ) : ?>
                 <?php $field_href = add_query_arg( array( 'sc_publication_field' => (string) $selector_field['key'] ), remove_query_arg( 'sc_publication_panel' ) ) . '#' . $stage_id; ?>
-                <a role="tab" class="sc-field-master__field-tab<?php echo $initial_index === $index ? ' is-active' : ''; ?>" href="<?php echo esc_url( $field_href ); ?>" data-field-select-key="<?php echo esc_attr( (string) $selector_field['key'] ); ?>" aria-selected="<?php echo $initial_index === $index ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr( $stage_id ); ?>" tabindex="<?php echo $initial_index === $index ? '0' : '-1'; ?>">
+                <a role="tab" class="sc-field-master__field-tab<?php echo $initial_index === $index ? ' is-active' : ''; ?>" href="<?php echo esc_url( $field_href ); ?>" data-field-select-key="<?php echo esc_attr( (string) $selector_field['key'] ); ?>" data-field-fallback="server" aria-selected="<?php echo $initial_index === $index ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr( $stage_id ); ?>" tabindex="<?php echo $initial_index === $index ? '0' : '-1'; ?>">
                     <span><?php echo esc_html( str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span>
                     <strong><?php echo esc_html( (string) $selector_field['title'] ); ?></strong>
                     <small><?php echo esc_html( (string) count( $selector_field['panels'] ) ); ?></small>

@@ -1,0 +1,14 @@
+Sustainable Catalyst Library v4.3.22.2 — Publications Fail-Open Field Switching & Runtime Hardening
+
+PASS - 9 v4.3.22.2 fail-open runtime contract tests.
+PASS - retained v4.3.22.1 Publications core recovery compatibility.
+PASS - retained v4.3.22 Citation Studio compatibility.
+PASS - retained v4.3.21.1 Publications runtime recovery compatibility.
+PASS - retained Course Access Intelligence, Open Course Finder, Access-First layout, Global Library Access, scholarly connectors, Research Librarian, Field Spotlight, persistence, and Publications compatibility suites.
+PASS - 97 selected regression tests total.
+PASS - PHP syntax validation.
+PASS - JavaScript syntax validation for Publications, Field Spotlight, Citation Studio, connectors, Course Finder, and Course Plan.
+PASS - canonical registry remains 14 fields / 170 Article Maps.
+PASS - both Publications runtime cache boundaries are v4.3.22.2.
+PASS - native server field/panel links remain present.
+PASS - preventDefault occurs only after verified field/panel switching on link navigation.

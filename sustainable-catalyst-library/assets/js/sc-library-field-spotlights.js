@@ -5,6 +5,18 @@
   const qa = (root, sel) => Array.from(root.querySelectorAll(sel));
   const esc = (value) => String(value ?? '');
   const two = (n) => String(n).padStart(2, '0');
+  const markRuntime = (root, state, detail = '') => {
+    if (!root) return;
+    root.dataset.scFieldSpotlightsRuntimeState = state;
+    if (detail) root.dataset.scFieldSpotlightsRuntimeDetail = detail;
+    else delete root.dataset.scFieldSpotlightsRuntimeDetail;
+  };
+  const runtimeFailure = (root, code, error = null) => {
+    markRuntime(root, 'fallback', code);
+    try { root?.dispatchEvent(new CustomEvent('sc:fieldspotlights:runtimefailure', { bubbles: true, detail: { code, message: error?.message || '' } })); } catch {}
+    console?.warn?.('[Sustainable Catalyst Field Spotlight] fail-open navigation:', code, error || '');
+  };
+  const plainPrimaryClick = (event) => !event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
   const absoluteUrl = (value) => {
     try { return new URL(String(value || '/'), window.location.origin).href; }
     catch { return String(value || '#'); }
@@ -246,7 +258,7 @@
     };
 
     const activate = (next, focusTab = false) => {
-      if (!panels.length) return;
+      if (!panels.length) return false;
       active = Math.max(0, Math.min(panels.length - 1, next));
       const panel = panels[active];
       panelTabs().forEach((tab) => {
@@ -280,6 +292,8 @@
       renderCards(panel);
       if (focusTab) panelTabs().find((tab) => tab.dataset.panelKey === panel.key)?.focus({ preventScroll: true });
       schedule();
+      spotlight.dataset.activePanelKey = panel.key || '';
+      return spotlight.dataset.activePanelKey === (panel.key || '');
     };
 
     const updateFieldIdentity = () => {
@@ -295,7 +309,7 @@
     };
 
     const setField = (nextField, nextFieldNumber = 1) => {
-      if (!nextField || !Array.isArray(nextField.panels) || !nextField.panels.length) return;
+      if (!nextField || !Array.isArray(nextField.panels) || !nextField.panels.length) return false;
       clearTimer();
       field = nextField;
       fieldNumber = nextFieldNumber;
@@ -304,16 +318,26 @@
       secondaryExpanded = false;
       updateFieldIdentity();
       buildPanelNavigation();
-      activate(0);
+      if (!activate(0)) return false;
       spotlight.dispatchEvent(new CustomEvent('sc:fieldspotlight:fieldchange', { bubbles: true, detail: { fieldKey: field.key || '', fieldNumber } }));
+      return spotlight.dataset.fieldKey === (field.key || '');
     };
 
     panelNav?.addEventListener('click', (event) => {
       const tab = event.target.closest('[data-panel-key]');
       if (tab && panelNav.contains(tab)) {
-        event.preventDefault();
+        if (!plainPrimaryClick(event)) return;
         const i = panelIndexByKey(tab.dataset.panelKey);
-        if (i >= 0) activate(i);
+        if (i < 0) return;
+        try {
+          if (activate(i) && spotlight.dataset.activePanelKey === tab.dataset.panelKey) {
+            event.preventDefault();
+          } else {
+            runtimeFailure(spotlight.closest('[data-sc-field-spotlights]') || spotlight, 'panel-verification-failed');
+          }
+        } catch (error) {
+          runtimeFailure(spotlight.closest('[data-sc-field-spotlights]') || spotlight, 'panel-switch-exception', error);
+        }
         return;
       }
       const disclosure = event.target.closest('[data-more-toggle]');
@@ -387,21 +411,24 @@
   };
 
   const initializeSingle = (root) => {
+    markRuntime(root, 'initializing');
     const spotlight = q(root, '.sc-field-spotlight');
     const dataNode = q(root, '.sc-field-spotlight__data');
     let payload;
     try { payload = JSON.parse(dataNode?.textContent || '{}'); } catch { return; }
     const field = payload.field || {};
     if (!Array.isArray(field.panels) || !field.panels.length) return;
-    initializeStage(spotlight, field, payload.labels || {}, {
+    const stage = initializeStage(spotlight, field, payload.labels || {}, {
       autoplay: spotlight.dataset.autoplay,
       interval: spotlight.dataset.interval,
       pauseOnHover: spotlight.dataset.pauseOnHover,
       fieldNumber: Number.parseInt(field.order || '1', 10) || 1
     });
+    if (stage) markRuntime(root, 'ready'); else runtimeFailure(root, 'single-stage-init-failed');
   };
 
   const initializeMaster = (root) => {
+    markRuntime(root, 'initializing');
     const dataNode = q(root, '.sc-field-spotlights__master-data');
     let payload;
     try { payload = JSON.parse(dataNode?.textContent || '{}'); } catch { return; }
@@ -425,12 +452,14 @@ const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key 
       fieldNumber: activeField + 1,
       initialPanelKey: spotlight?.dataset.initialPanelKey || ''
     });
-    if (!stage) return;
+    if (!stage) { runtimeFailure(root, 'master-stage-init-failed'); return; }
 
     const fieldIndexByKey = (key) => fields.findIndex((field) => field.key === key);
     const activateField = (next, focusTab = false) => {
-      activeField = Math.max(0, Math.min(fields.length - 1, next));
-      const field = fields[activeField];
+      const requested = Math.max(0, Math.min(fields.length - 1, next));
+      const field = fields[requested];
+      if (!stage.setField(field, requested + 1)) return false;
+      activeField = requested;
       fieldTabs.forEach((tab) => {
         const selected = tab.dataset.fieldSelectKey === field.key;
         tab.classList.toggle('is-active', selected);
@@ -438,16 +467,27 @@ const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key 
         tab.tabIndex = selected ? 0 : -1;
       });
       if (fieldSelect) fieldSelect.value = field.key || '';
-      stage.setField(field, activeField + 1);
       root.dataset.activeField = field.key || '';
       if (focusTab) fieldTabs.find((tab) => tab.dataset.fieldSelectKey === field.key)?.focus({ preventScroll: true });
+      return root.dataset.activeField === (field.key || '') && spotlight.dataset.fieldKey === (field.key || '');
     };
 
     fieldTabs.forEach((tab) => {
       tab.addEventListener('click', (event) => {
-        event.preventDefault();
+        if (!plainPrimaryClick(event)) return;
         const i = fieldIndexByKey(tab.dataset.fieldSelectKey);
-        if (i >= 0) activateField(i);
+        if (i < 0) return;
+        try {
+          if (activateField(i) && root.dataset.activeField === tab.dataset.fieldSelectKey) {
+            // Fail-open: only suppress the server fallback after a verified in-place field switch.
+            event.preventDefault();
+            markRuntime(root, 'ready');
+          } else {
+            runtimeFailure(root, 'field-verification-failed');
+          }
+        } catch (error) {
+          runtimeFailure(root, 'field-switch-exception', error);
+        }
       });
       tab.addEventListener('keydown', (event) => {
         if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
@@ -470,10 +510,11 @@ const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key 
 
     root.dataset.activeField = fields[activeField]?.key || '';
     if (fieldSelect) fieldSelect.value = fields[activeField]?.key || '';
+    markRuntime(root, 'ready');
   };
 
   const boot = () => {
-    document.querySelectorAll('[data-sc-field-spotlights="v4.3.22.1"]').forEach((root) => {
+    document.querySelectorAll('[data-sc-field-spotlights="v4.3.22.2"]').forEach((root) => {
       if (root.dataset.scFieldSpotlightsMode === 'master') initializeMaster(root);
       else initializeSingle(root);
     });

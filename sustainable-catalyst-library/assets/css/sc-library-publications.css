@@ -106,7 +106,7 @@
 }
 @media(prefers-reduced-motion:reduce){.sc-publications *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
-/* v4.3.22.1 progressive fallback links */
+/* v4.3.22.2 progressive fallback links */
 .sc-publications__field-tab,.sc-publications__area-rail a{cursor:pointer;text-decoration:none!important}
 .sc-publications__area-rail a{display:flex;align-items:center}
 .sc-publications__noscript{margin:0;padding:.8rem 1rem;border-top:1px solid #444;background:#111;color:#d2d2ce;font-size:.72rem}

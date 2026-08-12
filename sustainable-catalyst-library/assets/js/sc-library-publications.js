@@ -1,6 +1,8 @@
 (function () {
     'use strict';
 
+    var RUNTIME = 'v4.3.22.2';
+
     function parseData(root) {
         var node = root.querySelector('.sc-publications__data');
         if (!node) return null;
@@ -9,11 +11,51 @@
 
     function pad(value) { return String(value).padStart(2, '0'); }
 
-    function init(root) {
-        var data = parseData(root);
-        if (!data || !Array.isArray(data.fields) || !data.fields.length) return;
+    function markRuntime(root, state, detail) {
+        root.setAttribute('data-sc-publications-runtime-state', state);
+        if (detail) root.setAttribute('data-sc-publications-runtime-detail', detail);
+        else root.removeAttribute('data-sc-publications-runtime-detail');
+        if (state.indexOf('fallback') === 0 || state === 'error') root.classList.remove('is-enhanced');
+    }
 
-        var fieldTabs = Array.prototype.slice.call(root.querySelectorAll('[data-field-index]'));
+    function reportFailure(root, code, error) {
+        markRuntime(root, 'fallback', code);
+        try {
+            root.dispatchEvent(new CustomEvent('sc:publications:runtimefailure', {
+                bubbles: true,
+                detail: { code: code, message: error && error.message ? String(error.message) : '' }
+            }));
+        } catch (ignored) {}
+        if (window.console && typeof window.console.warn === 'function') {
+            window.console.warn('[Sustainable Catalyst Publications] fail-open navigation:', code, error || '');
+        }
+    }
+
+    function isPlainPrimaryClick(event) {
+        return !event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+    }
+
+    function buildFallbackUrl(root, fieldKey, mapKey) {
+        try {
+            var url = new URL(window.location.href);
+            if (fieldKey) url.searchParams.set('sc_publications_field', fieldKey);
+            else url.searchParams.delete('sc_publications_field');
+            if (mapKey) url.searchParams.set('sc_publications_map', mapKey);
+            else url.searchParams.delete('sc_publications_map');
+            url.hash = root.id ? '#' + root.id : '';
+            return url.href;
+        } catch (e) { return ''; }
+    }
+
+    function init(root) {
+        markRuntime(root, 'initializing');
+        var data = parseData(root);
+        if (!data || !Array.isArray(data.fields) || !data.fields.length) {
+            reportFailure(root, 'invalid-payload');
+            return;
+        }
+
+        var fieldTabs = Array.prototype.slice.call(root.querySelectorAll('[data-field-index][data-field-key]'));
         var viewport = root.querySelector('.sc-publications__viewport');
         var rail = root.querySelector('.sc-publications__area-rail');
         var select = root.querySelector('.sc-publications__area-select');
@@ -36,16 +78,25 @@
         var stageIndexPosition = root.querySelector('.sc-publications__stage-index span');
         var previousLabels = Array.prototype.slice.call(root.querySelectorAll('.sc-publications__previous-label'));
         var nextLabels = Array.prototype.slice.call(root.querySelectorAll('.sc-publications__next-label'));
+
+        var required = [viewport, rail, select, activeFieldNumber, fieldPosition, fieldTitle, fieldDescription, areaCount, areaLabel, stage, stageEyebrow, mapPosition, mapHero, mapLabel, mapTitle, mapDescription, mapAction, stageIndexTitle, stageIndexPosition];
+        if (required.some(function (node) { return !node; }) || fieldTabs.length !== data.fields.length) {
+            reportFailure(root, 'incomplete-dom');
+            return;
+        }
+
+        var fieldIndexByKey = function (key) {
+            return data.fields.findIndex(function (field) { return String(field.key || '') === String(key || ''); });
+        };
         var requestedFieldKey = String(root.dataset.initialFieldKey || '');
         var requestedMapKey = String(root.dataset.initialMapKey || '');
-        var activeField = Math.max(0, data.fields.findIndex(function (field) { return field.key === requestedFieldKey; }));
-        if (activeField < 0) activeField = 0;
+        var requestedFieldIndex = fieldIndexByKey(requestedFieldKey);
+        var activeField = requestedFieldIndex >= 0 ? requestedFieldIndex : 0;
         var requestedTopicIndex = data.fields[activeField] && Array.isArray(data.fields[activeField].topics)
             ? data.fields[activeField].topics.findIndex(function (topic) { return topic.key === requestedMapKey; })
             : -1;
         var activeTopic = requestedTopicIndex >= 0 ? requestedTopicIndex : Number(data.fields[activeField].defaultIndex || 0);
         var touchStartX = null;
-        root.classList.add('is-enhanced');
 
         function findHashState() {
             var match = window.location.hash.match(/^#publications-([a-z0-9-]+)--([a-z0-9-]+)$/);
@@ -60,30 +111,55 @@
 
         function writeHash(field, topic) {
             if (!window.history || !window.history.replaceState) return;
-            var base = window.location.pathname + window.location.search;
-            window.history.replaceState(null, '', base + '#publications-' + field.key + '--' + topic.key);
+            try {
+                var url = new URL(window.location.href);
+                url.searchParams.delete('sc_publications_field');
+                url.searchParams.delete('sc_publications_map');
+                url.hash = '#publications-' + field.key + '--' + topic.key;
+                window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+            } catch (e) {}
+        }
+
+        function verifyTopic(field, topic) {
+            return !!field && !!topic && stage.dataset.fieldKey === String(field.key || '') && stage.dataset.mapKey === String(topic.key || '') && stageIndexTitle.textContent === String(topic.title || '');
+        }
+
+        function verifyField(field) {
+            if (!field || root.dataset.activeField !== String(field.key || '') || stage.dataset.fieldKey !== String(field.key || '') || fieldTitle.textContent !== String(field.title || '')) return false;
+            var activeTab = fieldTabs.find(function (tab) { return tab.getAttribute('aria-selected') === 'true'; });
+            return !!activeTab && String(activeTab.dataset.fieldKey || '') === String(field.key || '');
         }
 
         function rebuildRail(field) {
             rail.innerHTML = '';
             select.innerHTML = '';
             field.topics.forEach(function (topic, index) {
-                var button = document.createElement('a');
-                var fallback = new URL(window.location.href);
-                fallback.searchParams.set('sc_publications_field', field.key);
-                fallback.searchParams.set('sc_publications_map', topic.key);
-                fallback.hash = root.id ? '#' + root.id : '';
-                button.href = fallback.href;
-                button.setAttribute('role', 'tab');
-                button.dataset.areaIndex = String(index);
-                button.setAttribute('aria-selected', index === activeTopic ? 'true' : 'false');
-                if (index === activeTopic) button.classList.add('is-active');
-                button.textContent = topic.title;
-                button.addEventListener('click', function (event) { event.preventDefault(); setTopic(index, true); });
-                rail.appendChild(button);
+                var link = document.createElement('a');
+                link.href = buildFallbackUrl(root, field.key, topic.key) || '#';
+                link.setAttribute('role', 'tab');
+                link.dataset.areaIndex = String(index);
+                link.dataset.mapKey = String(topic.key || '');
+                link.setAttribute('aria-selected', index === activeTopic ? 'true' : 'false');
+                if (index === activeTopic) link.classList.add('is-active');
+                link.textContent = topic.title;
+                link.addEventListener('click', function (event) {
+                    if (!isPlainPrimaryClick(event)) return;
+                    try {
+                        if (setTopic(index, true) && verifyTopic(field, topic)) {
+                            event.preventDefault();
+                            markRuntime(root, 'ready');
+                        } else {
+                            reportFailure(root, 'topic-verification-failed');
+                        }
+                    } catch (error) {
+                        reportFailure(root, 'topic-switch-exception', error);
+                    }
+                });
+                rail.appendChild(link);
 
                 var option = document.createElement('option');
                 option.value = String(index);
+                option.dataset.mapKey = String(topic.key || '');
                 option.textContent = topic.title;
                 option.selected = index === activeTopic;
                 select.appendChild(option);
@@ -97,6 +173,7 @@
                 row.hidden = false;
                 var titleLink = row.querySelector('h4 a');
                 var action = row.querySelector('.sc-publications__row-action');
+                if (!titleLink || !action) return;
                 titleLink.textContent = article.title;
                 titleLink.href = article.url;
                 action.href = article.url;
@@ -106,15 +183,15 @@
 
         function renderTopic(animate, updateHash) {
             var field = data.fields[activeField];
-            if (!field || !field.topics.length) return;
+            if (!field || !Array.isArray(field.topics) || !field.topics.length) return false;
             activeTopic = Math.max(0, Math.min(activeTopic, field.topics.length - 1));
             var topic = field.topics[activeTopic];
 
-            Array.prototype.forEach.call(rail.querySelectorAll('[data-area-index]'), function (button) {
-                var selected = Number(button.dataset.areaIndex) === activeTopic;
-                button.classList.toggle('is-active', selected);
-                button.setAttribute('aria-selected', selected ? 'true' : 'false');
-                if (selected) button.scrollIntoView({block: 'nearest', inline: 'nearest', behavior: 'smooth'});
+            Array.prototype.forEach.call(rail.querySelectorAll('[data-area-index]'), function (link) {
+                var selected = Number(link.dataset.areaIndex) === activeTopic;
+                link.classList.toggle('is-active', selected);
+                link.setAttribute('aria-selected', selected ? 'true' : 'false');
+                if (selected && typeof link.scrollIntoView === 'function') link.scrollIntoView({block: 'nearest', inline: 'nearest', behavior: 'smooth'});
             });
             select.value = String(activeTopic);
 
@@ -124,8 +201,12 @@
             mapLabel.textContent = data.labels.map;
             mapTitle.textContent = topic.mapTitle;
             mapDescription.textContent = topic.description || data.labels.heroDescription;
-            mapAction.firstChild.nodeValue = (topic.mapCta || data.labels.mapCta) + ' ';
+            var actionText = Array.prototype.find.call(mapAction.childNodes, function (node) { return node.nodeType === 3; });
+            if (actionText) actionText.nodeValue = (topic.mapCta || data.labels.mapCta) + ' ';
             stage.dataset.articleSource = topic.articleSource || 'unresolved';
+            stage.dataset.fieldKey = String(field.key || '');
+            stage.dataset.mapKey = String(topic.key || '');
+            root.dataset.activeMap = String(topic.key || '');
             stageIndexTitle.textContent = topic.title;
             stageIndexPosition.textContent = pad(activeTopic + 1) + ' / ' + pad(field.topics.length);
             renderArticles(topic);
@@ -136,16 +217,18 @@
                 stage.classList.add('is-refreshing');
             }
             if (updateHash) writeHash(field, topic);
+            return verifyTopic(field, topic);
         }
 
         function renderField(animate, updateHash) {
             var field = data.fields[activeField];
-            if (!field) return;
+            if (!field || !Array.isArray(field.topics) || !field.topics.length) return false;
             activeTopic = Math.max(0, Math.min(activeTopic, field.topics.length - 1));
-            fieldTabs.forEach(function (button, index) {
-                var selected = index === activeField;
-                button.classList.toggle('is-active', selected);
-                button.setAttribute('aria-selected', selected ? 'true' : 'false');
+            fieldTabs.forEach(function (link) {
+                var selected = String(link.dataset.fieldKey || '') === String(field.key || '');
+                link.classList.toggle('is-active', selected);
+                link.setAttribute('aria-selected', selected ? 'true' : 'false');
+                link.tabIndex = selected ? 0 : -1;
             });
             activeFieldNumber.textContent = pad(activeField + 1);
             fieldPosition.textContent = pad(activeField + 1) + ' / ' + pad(data.fields.length);
@@ -155,47 +238,109 @@
             areaCount.textContent = String(field.topics.length);
             areaLabel.textContent = String(data.labels.areas || 'Areas').toUpperCase();
             rail.setAttribute('aria-label', 'Areas in ' + field.title);
+            root.dataset.activeField = String(field.key || '');
             rebuildRail(field);
-            renderTopic(animate, updateHash);
+            if (!renderTopic(animate, updateHash)) return false;
+            return verifyField(field);
         }
 
         function setField(index, focusStage) {
-            if (!data.fields[index]) return;
+            if (!data.fields[index]) return false;
             activeField = index;
             activeTopic = Number(data.fields[index].defaultIndex || 0);
-            renderField(true, true);
-            if (focusStage && viewport) viewport.focus({preventScroll: true});
+            if (!renderField(true, true)) return false;
+            if (focusStage && viewport && typeof viewport.focus === 'function') viewport.focus({preventScroll: true});
+            return verifyField(data.fields[index]);
         }
 
         function setTopic(index, updateHash) {
             var field = data.fields[activeField];
-            if (!field || !field.topics[index]) return;
+            if (!field || !field.topics[index]) return false;
             activeTopic = index;
-            renderTopic(true, updateHash);
+            return renderTopic(true, updateHash);
         }
 
         function step(delta) {
             var field = data.fields[activeField];
-            if (!field || !field.topics.length) return;
-            activeTopic = (activeTopic + delta + field.topics.length) % field.topics.length;
-            renderTopic(true, true);
+            if (!field || !field.topics.length) return false;
+            var next = (activeTopic + delta + field.topics.length) % field.topics.length;
+            return setTopic(next, true);
         }
 
         findHashState();
-        renderField(false, false);
+        try {
+            if (!renderField(false, false)) {
+                reportFailure(root, 'initial-render-verification-failed');
+                return;
+            }
+        } catch (error) {
+            reportFailure(root, 'initial-render-exception', error);
+            return;
+        }
 
-        fieldTabs.forEach(function (button, index) {
-            button.addEventListener('click', function (event) { event.preventDefault(); setField(index, false); });
+        root.classList.add('is-enhanced');
+        markRuntime(root, 'ready');
+
+        fieldTabs.forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                if (!isPlainPrimaryClick(event)) return;
+                var index = fieldIndexByKey(link.dataset.fieldKey);
+                if (index < 0) return;
+                try {
+                    if (setField(index, false) && verifyField(data.fields[index])) {
+                        // Fail-open rule: prevent native navigation only after a verified switch.
+                        event.preventDefault();
+                        markRuntime(root, 'ready');
+                    } else {
+                        reportFailure(root, 'field-verification-failed');
+                    }
+                } catch (error) {
+                    reportFailure(root, 'field-switch-exception', error);
+                }
+            });
         });
-        root.querySelectorAll('[data-area-previous]').forEach(function (button) { button.addEventListener('click', function () { step(-1); }); });
-        root.querySelectorAll('[data-area-next]').forEach(function (button) { button.addEventListener('click', function () { step(1); }); });
-        select.addEventListener('change', function () { setTopic(Number(select.value), true); });
+
+        root.querySelectorAll('[data-area-previous]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                try {
+                    if (!step(-1)) {
+                        var field = data.fields[activeField];
+                        var topic = field && field.topics[(activeTopic - 1 + field.topics.length) % field.topics.length];
+                        var href = topic ? buildFallbackUrl(root, field.key, topic.key) : '';
+                        if (href) window.location.assign(href);
+                    }
+                } catch (error) { reportFailure(root, 'previous-switch-exception', error); }
+            });
+        });
+        root.querySelectorAll('[data-area-next]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                try {
+                    if (!step(1)) {
+                        var field = data.fields[activeField];
+                        var topic = field && field.topics[(activeTopic + 1) % field.topics.length];
+                        var href = topic ? buildFallbackUrl(root, field.key, topic.key) : '';
+                        if (href) window.location.assign(href);
+                    }
+                } catch (error) { reportFailure(root, 'next-switch-exception', error); }
+            });
+        });
+        select.addEventListener('change', function () {
+            var index = Number(select.value);
+            try {
+                if (!setTopic(index, true)) {
+                    var field = data.fields[activeField];
+                    var topic = field && field.topics[index];
+                    var href = topic ? buildFallbackUrl(root, field.key, topic.key) : '';
+                    if (href) window.location.assign(href);
+                }
+            } catch (error) { reportFailure(root, 'select-switch-exception', error); }
+        });
 
         viewport.addEventListener('keydown', function (event) {
             var tag = event.target && event.target.tagName ? event.target.tagName.toLowerCase() : '';
             if (['input', 'textarea', 'select'].indexOf(tag) !== -1) return;
-            if (event.key === 'ArrowLeft') { event.preventDefault(); step(-1); }
-            if (event.key === 'ArrowRight') { event.preventDefault(); step(1); }
+            if (event.key === 'ArrowLeft') { if (step(-1)) event.preventDefault(); }
+            if (event.key === 'ArrowRight') { if (step(1)) event.preventDefault(); }
         });
 
         viewport.addEventListener('touchstart', function (event) {
@@ -214,7 +359,9 @@
     }
 
     function boot() {
-        document.querySelectorAll('[data-sc-publications="v4.3.22.1"]').forEach(init);
+        document.querySelectorAll('[data-sc-publications="' + RUNTIME + '"]').forEach(function (root) {
+            try { init(root); } catch (error) { reportFailure(root, 'boot-exception', error); }
+        });
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

@@ -18,7 +18,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.22.1';
+    public const VERSION = '4.3.22.2';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
     public const PANEL_CONTENT_OPTION = 'sc_library_field_spotlight_panel_content_v4312';
     public const SETTINGS_GROUP = 'sc_library_field_spotlights_v4313';
@@ -645,7 +645,7 @@ final class SC_Library_Field_Spotlights {
         $field = sanitize_title( (string) $atts['field'] );
         unset( $atts['field'] );
 
-        // v4.3.22.1 canonical-route safety net. Older Publications page bodies
+        // v4.3.22.2 canonical-route safety net. Older Publications page bodies
         // sometimes retained the standalone Global Governance shortcode even
         // after the 14-field master stack became canonical. Preserve standalone
         // embeds everywhere else, but never allow /publications/ itself to be
