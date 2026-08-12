@@ -14,7 +14,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Publications {
-    public const VERSION = '4.3.22.2';
+    public const VERSION = '4.3.22.3';
     public const SHORTCODE = 'sc_publications';
     public const CACHE_KEY = 'sc_library_publications_topics_v433';
     public const CACHE_TTL = 600;
@@ -287,7 +287,7 @@ final class SC_Library_Publications {
         $settings = $this->settings();
         $fields = $this->fields();
 
-        // v4.3.22.2: the original dynamic Publications shortcode is also a
+        // v4.3.22.3: the original dynamic Publications shortcode is also a
         // JavaScript-enhanced single-stage surface. If persisted visibility or a
         // stale topics transient collapses the canonical 14-field / 170-map model
         // to one field or one map, run the bounded integrity repair and rebuild
@@ -352,7 +352,7 @@ final class SC_Library_Publications {
     }
 
     /**
-     * v4.3.22.2 structural guard for the original [sc_publications] runtime.
+     * v4.3.22.3 structural guard for the original [sc_publications] runtime.
      * The canonical registry defines the expected field/map cardinality. A
      * public model with only one field, or a multi-map canonical field reduced
      * to one map, is treated as corruption/stale state rather than intentional

@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var RUNTIME = 'v4.3.22.2';
+    var RUNTIME = 'v4.3.22.3';
 
     function parseData(root) {
         var node = root.querySelector('.sc-publications__data');
@@ -142,19 +142,8 @@
                 link.setAttribute('aria-selected', index === activeTopic ? 'true' : 'false');
                 if (index === activeTopic) link.classList.add('is-active');
                 link.textContent = topic.title;
-                link.addEventListener('click', function (event) {
-                    if (!isPlainPrimaryClick(event)) return;
-                    try {
-                        if (setTopic(index, true) && verifyTopic(field, topic)) {
-                            event.preventDefault();
-                            markRuntime(root, 'ready');
-                        } else {
-                            reportFailure(root, 'topic-verification-failed');
-                        }
-                    } catch (error) {
-                        reportFailure(root, 'topic-switch-exception', error);
-                    }
-                });
+                // v4.3.22.3: direct Article Map links are intentionally not intercepted.
+                // The href is the authority; JavaScript may enhance playback controls only.
                 rail.appendChild(link);
 
                 var option = document.createElement('option');
@@ -267,7 +256,7 @@
             return setTopic(next, true);
         }
 
-        findHashState();
+        // Server query parameters are the source of truth; legacy hash state no longer changes fields.
         try {
             if (!renderField(false, false)) {
                 reportFailure(root, 'initial-render-verification-failed');
@@ -281,24 +270,9 @@
         root.classList.add('is-enhanced');
         markRuntime(root, 'ready');
 
-        fieldTabs.forEach(function (link) {
-            link.addEventListener('click', function (event) {
-                if (!isPlainPrimaryClick(event)) return;
-                var index = fieldIndexByKey(link.dataset.fieldKey);
-                if (index < 0) return;
-                try {
-                    if (setField(index, false) && verifyField(data.fields[index])) {
-                        // Fail-open rule: prevent native navigation only after a verified switch.
-                        event.preventDefault();
-                        markRuntime(root, 'ready');
-                    } else {
-                        reportFailure(root, 'field-verification-failed');
-                    }
-                } catch (error) {
-                    reportFailure(root, 'field-switch-exception', error);
-                }
-            });
-        });
+        // v4.3.22.3: major-field tabs are server-authoritative anchors.
+        // Do not attach a click handler and do not call preventDefault() here.
+        // Native navigation carries sc_publications_field to PHP, which renders the selected field.
 
         root.querySelectorAll('[data-area-previous]').forEach(function (button) {
             button.addEventListener('click', function () {
@@ -326,14 +300,10 @@
         });
         select.addEventListener('change', function () {
             var index = Number(select.value);
-            try {
-                if (!setTopic(index, true)) {
-                    var field = data.fields[activeField];
-                    var topic = field && field.topics[index];
-                    var href = topic ? buildFallbackUrl(root, field.key, topic.key) : '';
-                    if (href) window.location.assign(href);
-                }
-            } catch (error) { reportFailure(root, 'select-switch-exception', error); }
+            var field = data.fields[activeField];
+            var topic = field && field.topics[index];
+            var href = topic ? buildFallbackUrl(root, field.key, topic.key) : '';
+            if (href) window.location.assign(href);
         });
 
         viewport.addEventListener('keydown', function (event) {

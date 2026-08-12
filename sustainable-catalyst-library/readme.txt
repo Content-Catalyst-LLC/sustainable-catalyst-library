@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.22.2
+Stable tag: 4.3.22.3
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.22.2 hardens Publications with fail-open field and panel switching. Server-rendered links remain authoritative, JavaScript only cancels navigation after a verified in-place switch, runtime failures expose diagnostic state instead of trapping the page on Global Governance, and both Publications runtimes share the same cache boundary while preserving Citation Studio and the broader research platform.
+Sustainable Catalyst Library v4.3.22.3 makes Publications field navigation server-authoritative. Major-field links always perform normal browser navigation to a server-rendered selected field, eliminating the JavaScript interception path that could leave the page trapped on Global Governance. Direct panel links are also server-authoritative while autoplay and harmless within-field enhancements remain available.
 
 
 

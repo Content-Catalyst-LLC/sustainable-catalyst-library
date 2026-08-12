@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.22.2 hardens Publications with fail-open field and panel navigation, verified progressive enhancement, runtime diagnostics, and server-authoritative fallbacks while preserving Citation Studio, Course Finder, Research Access, and editorial content.
- * Version: 4.3.22.2
+ * Description: Sustainable Catalyst Library v4.3.22.3 makes Publications major-field navigation server-authoritative, removing JavaScript interception from field links while preserving panel playback, Citation Studio, Course Finder, Research Access, and editorial content.
+ * Version: 4.3.22.3
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.22.2');
+define('SC_LIBRARY_VERSION', '4.3.22.3');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

@@ -13,14 +13,14 @@ $initial_field = $field_list[ $initial_index ];
 $initial_number = $initial_index + 1;
 $stage_id = $instance_id . '-stage';
 ?>
-<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights sc-field-spotlights--master" data-sc-field-spotlights="v4.3.22.2" data-sc-field-spotlights-mode="master" data-sc-field-spotlights-runtime-state="server" data-autoplay="<?php echo $autoplay ? 'true' : 'false'; ?>" data-interval="<?php echo esc_attr( (string) $interval ); ?>" data-pause-on-hover="<?php echo $pause_on_hover ? 'true' : 'false'; ?>" data-initial-field-key="<?php echo esc_attr( (string) $initial_field['key'] ); ?>">
+<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights sc-field-spotlights--master" data-sc-field-spotlights="v4.3.22.3" data-sc-field-spotlights-mode="master" data-sc-field-spotlights-runtime-state="server" data-sc-field-navigation="server" data-autoplay="<?php echo $autoplay ? 'true' : 'false'; ?>" data-interval="<?php echo esc_attr( (string) $interval ); ?>" data-pause-on-hover="<?php echo $pause_on_hover ? 'true' : 'false'; ?>" data-initial-field-key="<?php echo esc_attr( (string) $initial_field['key'] ); ?>">
     <section class="sc-field-master__selector" aria-labelledby="<?php echo esc_attr( $instance_id . '-selector-title' ); ?>">
         <div class="sc-field-master__selector-head">
             <div>
                 <p class="sc-field-master__eyebrow">14 MAJOR FIELDS</p>
                 <h3 id="<?php echo esc_attr( $instance_id . '-selector-title' ); ?>">Choose a field</h3>
             </div>
-            <p>Switch fields without leaving the Spotlight. Each selection loads its Article Maps and curated publications into the shared stage below.</p>
+            <p>Choose a field to load its Article Maps and curated publications in the shared stage below. Field selection uses a normal server-rendered navigation so every field remains reliable, shareable, and bookmarkable.</p>
         </div>
         <div class="sc-field-master__field-tabs" role="tablist" aria-label="Publication fields">
             <?php foreach ( $field_list as $index => $selector_field ) : ?>

@@ -38,7 +38,7 @@ $include_data = ! empty( $include_data );
         <div class="sc-field-spotlight__primary-tabs" data-primary-tabs role="tablist">
             <?php foreach ( $primary as $index => $panel ) : ?>
                 <?php $panel_href = add_query_arg( array( 'sc_publication_field' => $field_key, 'sc_publication_panel' => (string) $panel['key'] ) ) . '#' . $field_id; ?>
-                <a role="tab" class="sc-field-spotlight__tab<?php echo $initial_index === $index ? ' is-active' : ''; ?>" href="<?php echo esc_url( $panel_href ); ?>" data-panel-key="<?php echo esc_attr( (string) $panel['key'] ); ?>" aria-selected="<?php echo $initial_index === $index ? 'true' : 'false'; ?>" tabindex="<?php echo $initial_index === $index ? '0' : '-1'; ?>">
+                <a role="tab" class="sc-field-spotlight__tab<?php echo $initial_index === $index ? ' is-active' : ''; ?>" href="<?php echo esc_url( $panel_href ); ?>" data-panel-key="<?php echo esc_attr( (string) $panel['key'] ); ?>" data-panel-fallback="server" aria-selected="<?php echo $initial_index === $index ? 'true' : 'false'; ?>" tabindex="<?php echo $initial_index === $index ? '0' : '-1'; ?>">
                     <span><?php echo esc_html( str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span><strong><?php echo esc_html( (string) $panel['title'] ); ?></strong>
                 </a>
             <?php endforeach; ?>
@@ -51,7 +51,7 @@ $include_data = ! empty( $include_data );
         <div id="<?php echo esc_attr( $additional_id ); ?>" class="sc-field-spotlight__additional-tabs" data-additional-tabs hidden aria-hidden="true" role="tablist" aria-label="Additional panels">
             <?php foreach ( $additional as $extra_index => $panel ) : $index = $limit + $extra_index; ?>
                 <?php $panel_href = add_query_arg( array( 'sc_publication_field' => $field_key, 'sc_publication_panel' => (string) $panel['key'] ) ) . '#' . $field_id; ?>
-                <a role="tab" class="sc-field-spotlight__tab<?php echo $initial_index === $index ? ' is-active' : ''; ?>" href="<?php echo esc_url( $panel_href ); ?>" data-panel-key="<?php echo esc_attr( (string) $panel['key'] ); ?>" aria-selected="<?php echo $initial_index === $index ? 'true' : 'false'; ?>" tabindex="<?php echo $initial_index === $index ? '0' : '-1'; ?>">
+                <a role="tab" class="sc-field-spotlight__tab<?php echo $initial_index === $index ? ' is-active' : ''; ?>" href="<?php echo esc_url( $panel_href ); ?>" data-panel-key="<?php echo esc_attr( (string) $panel['key'] ); ?>" data-panel-fallback="server" aria-selected="<?php echo $initial_index === $index ? 'true' : 'false'; ?>" tabindex="<?php echo $initial_index === $index ? '0' : '-1'; ?>">
                     <span><?php echo esc_html( str_pad( (string) ( $index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span><strong><?php echo esc_html( (string) $panel['title'] ); ?></strong>
                 </a>
             <?php endforeach; ?>

@@ -1,5 +1,5 @@
 <?php
-/** Publications v4.3.22.2 resilient dynamic Spotlight template. Variables: $fields, $heading, $intro, $labels, $instance_id. */
+/** Publications v4.3.22.3 server-authoritative Spotlight template. Variables: $fields, $heading, $intro, $labels, $instance_id. */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 $requested_field = isset( $_GET['sc_publications_field'] ) ? sanitize_title( (string) wp_unslash( $_GET['sc_publications_field'] ) ) : '';
@@ -72,7 +72,7 @@ $payload = array(
     ),
 );
 ?>
-<section id="<?php echo esc_attr( $instance_id ); ?>" class="sc-publications" data-sc-publications="v4.3.22.2" data-sc-publications-runtime-state="server" data-initial-field-key="<?php echo esc_attr( (string) $initial_field['key'] ); ?>" data-initial-map-key="<?php echo esc_attr( (string) $initial_topic['key'] ); ?>" aria-label="<?php esc_attr_e( 'Sustainable Catalyst Publications', 'sustainable-catalyst-library' ); ?>">
+<section id="<?php echo esc_attr( $instance_id ); ?>" class="sc-publications" data-sc-publications="v4.3.22.3" data-sc-publications-runtime-state="server" data-sc-publications-navigation="server" data-initial-field-key="<?php echo esc_attr( (string) $initial_field['key'] ); ?>" data-initial-map-key="<?php echo esc_attr( (string) $initial_topic['key'] ); ?>" aria-label="<?php esc_attr_e( 'Sustainable Catalyst Publications', 'sustainable-catalyst-library' ); ?>">
     <header class="sc-publications__masthead">
         <div class="sc-publications__identity">
             <p class="sc-publications__system-id"><span aria-hidden="true">KL</span> <?php echo esc_html( (string) $labels['eyebrow'] ); ?></p>
@@ -88,7 +88,7 @@ $payload = array(
     <div class="sc-publications__field-deck" role="tablist" aria-label="<?php esc_attr_e( 'Publication fields', 'sustainable-catalyst-library' ); ?>">
         <?php foreach ( $fields as $field_index => $field ) : ?>
             <?php $field_href = add_query_arg( array( 'sc_publications_field' => (string) $field['key'] ), remove_query_arg( 'sc_publications_map' ) ) . '#' . $instance_id; ?>
-            <a role="tab" class="sc-publications__field-tab<?php echo $initial_field_index === $field_index ? ' is-active' : ''; ?>" href="<?php echo esc_url( $field_href ); ?>" data-field-index="<?php echo esc_attr( (string) $field_index ); ?>" data-field-key="<?php echo esc_attr( (string) $field['key'] ); ?>" aria-selected="<?php echo $initial_field_index === $field_index ? 'true' : 'false'; ?>">
+            <a role="tab" class="sc-publications__field-tab<?php echo $initial_field_index === $field_index ? ' is-active' : ''; ?>" href="<?php echo esc_url( $field_href ); ?>" data-field-index="<?php echo esc_attr( (string) $field_index ); ?>" data-field-fallback="server" data-field-key="<?php echo esc_attr( (string) $field['key'] ); ?>" aria-selected="<?php echo $initial_field_index === $field_index ? 'true' : 'false'; ?>">
                 <span class="sc-publications__field-number"><?php echo esc_html( str_pad( (string) ( $field_index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span>
                 <strong><?php echo esc_html( $field['title'] ); ?></strong>
                 <small><?php echo esc_html( count( $field['topics'] ) ); ?></small>
@@ -114,7 +114,7 @@ $payload = array(
             <div class="sc-publications__area-rail" role="tablist" aria-label="<?php echo esc_attr( sprintf( __( 'Areas in %s', 'sustainable-catalyst-library' ), $initial_field['title'] ) ); ?>">
                 <?php foreach ( $initial_field['topics'] as $index => $topic ) : ?>
                     <?php $topic_href = add_query_arg( array( 'sc_publications_field' => (string) $initial_field['key'], 'sc_publications_map' => (string) $topic['key'] ) ) . '#' . $instance_id; ?>
-                    <a role="tab" href="<?php echo esc_url( $topic_href ); ?>" data-area-index="<?php echo esc_attr( (string) $index ); ?>" aria-selected="<?php echo $initial_topic_index === $index ? 'true' : 'false'; ?>" class="<?php echo $initial_topic_index === $index ? 'is-active' : ''; ?>"><?php echo esc_html( $topic['title'] ); ?></a>
+                    <a role="tab" href="<?php echo esc_url( $topic_href ); ?>" data-area-index="<?php echo esc_attr( (string) $index ); ?>" data-area-fallback="server" aria-selected="<?php echo $initial_topic_index === $index ? 'true' : 'false'; ?>" class="<?php echo $initial_topic_index === $index ? 'is-active' : ''; ?>"><?php echo esc_html( $topic['title'] ); ?></a>
                 <?php endforeach; ?>
             </div>
             <button type="button" class="sc-publications__arrow sc-publications__arrow--next" data-area-next aria-label="<?php echo esc_attr( (string) $labels['next_label'] ); ?>">›</button>

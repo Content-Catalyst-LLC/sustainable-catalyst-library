@@ -326,18 +326,8 @@
     panelNav?.addEventListener('click', (event) => {
       const tab = event.target.closest('[data-panel-key]');
       if (tab && panelNav.contains(tab)) {
-        if (!plainPrimaryClick(event)) return;
-        const i = panelIndexByKey(tab.dataset.panelKey);
-        if (i < 0) return;
-        try {
-          if (activate(i) && spotlight.dataset.activePanelKey === tab.dataset.panelKey) {
-            event.preventDefault();
-          } else {
-            runtimeFailure(spotlight.closest('[data-sc-field-spotlights]') || spotlight, 'panel-verification-failed');
-          }
-        } catch (error) {
-          runtimeFailure(spotlight.closest('[data-sc-field-spotlights]') || spotlight, 'panel-switch-exception', error);
-        }
+        // v4.3.22.3: direct panel tabs are server-authoritative links.
+        // Never suppress their native navigation. Playback arrows may still rotate within the loaded field.
         return;
       }
       const disclosure = event.target.closest('[data-more-toggle]');
@@ -363,8 +353,7 @@
       if (event.key === 'End') requested = list.length - 1;
       requested = (requested + list.length) % list.length;
       const nextTab = list[requested];
-      const i = panelIndexByKey(nextTab?.dataset.panelKey);
-      if (i >= 0) activate(i, true);
+      nextTab?.focus({ preventScroll: true });
     });
 
     qa(spotlight, '[data-panel-prev]').forEach((button) => button.addEventListener('click', () => activate(adjacentIndex(-1))));
@@ -473,22 +462,7 @@ const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key 
     };
 
     fieldTabs.forEach((tab) => {
-      tab.addEventListener('click', (event) => {
-        if (!plainPrimaryClick(event)) return;
-        const i = fieldIndexByKey(tab.dataset.fieldSelectKey);
-        if (i < 0) return;
-        try {
-          if (activateField(i) && root.dataset.activeField === tab.dataset.fieldSelectKey) {
-            // Fail-open: only suppress the server fallback after a verified in-place field switch.
-            event.preventDefault();
-            markRuntime(root, 'ready');
-          } else {
-            runtimeFailure(root, 'field-verification-failed');
-          }
-        } catch (error) {
-          runtimeFailure(root, 'field-switch-exception', error);
-        }
-      });
+      // v4.3.22.3: do not install a click handler. The anchor href is authoritative.
       tab.addEventListener('keydown', (event) => {
         if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault();
@@ -499,13 +473,22 @@ const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key 
         if (event.key === 'Home') requested = 0;
         if (event.key === 'End') requested = fieldTabs.length - 1;
         requested = (requested + fieldTabs.length) % fieldTabs.length;
-        activateField(requested, true);
+        fieldTabs[requested]?.focus({ preventScroll: true });
       });
     });
 
     fieldSelect?.addEventListener('change', () => {
-      const i = fieldIndexByKey(fieldSelect.value);
-      if (i >= 0) activateField(i);
+      const key = String(fieldSelect.value || '');
+      if (!key) return;
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('sc_publication_field', key);
+        url.searchParams.delete('sc_publication_panel');
+        url.hash = spotlight?.id ? '#' + spotlight.id : '';
+        window.location.assign(url.href);
+      } catch (error) {
+        runtimeFailure(root, 'field-select-navigation-exception', error);
+      }
     });
 
     root.dataset.activeField = fields[activeField]?.key || '';
@@ -514,7 +497,7 @@ const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key 
   };
 
   const boot = () => {
-    document.querySelectorAll('[data-sc-field-spotlights="v4.3.22.2"]').forEach((root) => {
+    document.querySelectorAll('[data-sc-field-spotlights="v4.3.22.3"]').forEach((root) => {
       if (root.dataset.scFieldSpotlightsMode === 'master') initializeMaster(root);
       else initializeSingle(root);
     });
