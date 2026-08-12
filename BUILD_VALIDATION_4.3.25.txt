@@ -1,0 +1,17 @@
+Sustainable Catalyst Library v4.3.25 — Institutional Connector Expansion
+Validation date: 2026-08-12
+
+PASS — 57 selected Python regression tests
+  9  v4.3.25 Institutional Connector Expansion
+  9  v4.3.24 Research Librarian Access Intelligence retained
+ 10  v4.3.23 Research Document Builder retained
+  9  v4.3.22.4 Publications 14-field stack retained
+  6  v4.3.22 Citation Studio retained
+  7  v4.3.21 Course Access / Learning Pathways retained
+  7  v4.3.19 Global Library Access retained
+
+PASS — PHP syntax across plugin tree
+PASS — JavaScript syntax: Research Librarian, Research Access connectors, Document Builder, Field Spotlights
+PASS — PHP fixture: 18 normalized institutional targets, query-aware routes, 4 direct + 4 standards-capable targets
+PASS — v4.3.22.4 Publications all-fields markers preserved
+PASS — no external-library password storage added

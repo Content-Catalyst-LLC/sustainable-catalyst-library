@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/library/
- * Description: Sustainable Catalyst Library v4.3.24 adds Research Librarian Access Intelligence that distinguishes open-now, public-digital, library, institutional-login, preview, ILL, physical, holdings-check, and metadata-only routes while preserving Document Builder and the restored 14-field Publications stack.
- * Version: 4.3.24
+ * Description: Sustainable Catalyst Library v4.3.25 expands institutional research access with a capability-labeled connector network, standards-aware search routes, repository gateways, and institution-specific access guidance while preserving Access Intelligence, Document Builder, and the restored 14-field Publications stack.
+ * Version: 4.3.25
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.24');
+define('SC_LIBRARY_VERSION', '4.3.25');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
