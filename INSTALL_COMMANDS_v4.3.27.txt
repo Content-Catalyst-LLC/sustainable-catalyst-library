@@ -1,0 +1,15 @@
+cd ~/Downloads
+
+BUNDLE="$(find . -maxdepth 1 -type f -name 'sustainable-catalyst-library-v4.3.27-release-bundle*.zip' -print | sort | tail -1)"
+
+[ -n "$BUNDLE" ] || {
+  echo "ERROR: v4.3.27 release bundle not found in Downloads."
+  exit 1
+}
+
+rm -rf sustainable-catalyst-library-v4.3.27-release
+unzip -q "$BUNDLE"
+cd sustainable-catalyst-library-v4.3.27-release
+
+chmod +x install_and_push_sustainable_catalyst_library_v4_3_27_macos.sh
+./install_and_push_sustainable_catalyst_library_v4_3_27_macos.sh

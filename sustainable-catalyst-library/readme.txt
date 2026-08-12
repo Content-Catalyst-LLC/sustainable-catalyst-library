@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.26
+Stable tag: 4.3.27
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.24 adds Research Librarian Access Intelligence. It interprets discovery and holdings evidence into bounded access states, separates availability from user entitlement, routes open copies, library/institution access, previews, ILL, physical holdings, and metadata checks, and preserves Research Document Builder plus the restored 14-field Publications stack.
+Sustainable Catalyst Library v4.3.27 makes `/knowledge-libraries/` the canonical public Library route, redirects only the retired public `/library/` route, exposes route/identity health, and formalizes one-account continuity between private Library research and Workspace. Internal REST namespaces that contain `/library/` remain unchanged.
 
 
 
@@ -112,6 +112,7 @@ Sustainable Catalyst Library v4.3.24 adds Research Librarian Access Intelligence
 
 == Shortcodes ==
 
+* `[sc_library_account_continuity]`
 * `[sc_homepage_spotlight]`
 * `[sc_library_living_system]`
 * `[sc_library_unified_workspace]`
@@ -134,6 +135,7 @@ Sustainable Catalyst Library v4.3.24 adds Research Librarian Access Intelligence
 
 == REST API ==
 
+* `/wp-json/sc-library/v1/runtime/identity-health`
 * `/wp-json/sustainable-catalyst/v1/library/discovery`
 * `/wp-json/sustainable-catalyst-library/v1/discovery`
 * `/wp-json/sustainable-catalyst/v1/library/system/status`
@@ -160,6 +162,16 @@ Sustainable Catalyst Library v4.3.24 adds Research Librarian Access Intelligence
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.27 =
+* Makes `/knowledge-libraries/` the canonical public Library route.
+* Adds a safe 301 redirect from only the retired public `/library/` route while preserving query strings.
+* Explicitly preserves internal REST/API namespaces that contain `/library/`.
+* Adds `/wp-json/sc-library/v1/runtime/identity-health` for route and account-continuity diagnostics.
+* Adds `[sc_library_account_continuity]` to show shared Sustainable Catalyst account state and Workspace continuity.
+* Keeps My Libraries, Citation Studio collections, course plans, and Research Document Builder drafts attached to the existing WordPress user account.
+* Preserves v4.3.26 Public Library Network, v4.3.25 Institutional Connector Expansion, v4.3.24 Access Intelligence, v4.3.23 Document Builder, and the restored v4.3.22.4 Publications stack.
+
 
 = 4.3.21.1 =
 * Repairs recurring Publications states where only the first field/panel remains usable.

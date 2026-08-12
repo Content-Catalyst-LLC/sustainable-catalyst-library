@@ -1,0 +1,39 @@
+Sustainable Catalyst Library v4.3.27 — Canonical Routing, Identity & Account Continuity
+Build validation
+
+PASS — 11 v4.3.27 canonical route / identity tests
+PASS — 9 retained v4.3.26 Public Library Network tests
+PASS — 7 retained v4.3.25 Institutional Connector Expansion tests
+PASS — 9 retained v4.3.24 Research Librarian Access Intelligence tests
+PASS — 10 retained v4.3.23 Research Document Builder tests
+PASS — 9 retained v4.3.22.4 Publications restoration tests
+PASS — 6 retained v4.3.22 Citation Studio tests
+PASS — 7 retained v4.3.21 Course Access / Learning Pathways tests
+PASS — 7 retained v4.3.19 Global Library Access tests
+
+TOTAL: 75 selected Python regression tests passed.
+
+PASS — PHP syntax across Sustainable Catalyst Library plugin tree
+PASS — JavaScript syntax: Public Library Network
+PASS — JavaScript syntax: Research Librarian orchestrator
+PASS — JavaScript syntax: Research Access connectors
+PASS — JavaScript syntax: Research Document Builder
+PASS — JavaScript syntax: Publications Field Spotlights
+PASS — JavaScript syntax: Open Course Finder
+PASS — JavaScript syntax: Course Plan
+
+Key release contracts:
+- Canonical public Library path is /knowledge-libraries/.
+- Legacy public /library/ receives a 301 redirect only for front-end GET/HEAD requests.
+- Legacy redirect preserves query strings.
+- Admin, AJAX, and REST requests are excluded from public-route redirect handling.
+- Internal API routes containing /library/ remain unchanged.
+- Runtime health route is /wp-json/sc-library/v1/runtime/identity-health.
+- Library and Workspace use one Sustainable Catalyst / WordPress authenticated account.
+- My Libraries, source collections, research documents, and course plans retain their existing account-owned contracts.
+- External library credentials are not stored by the continuity layer.
+- v4.3.26 Public Library Network is preserved.
+- v4.3.25 Institutional Connector Expansion is preserved.
+- v4.3.24 Access Intelligence is preserved.
+- v4.3.23 Document Builder is preserved.
+- v4.3.22.4 Publications all-fields stack is preserved.
