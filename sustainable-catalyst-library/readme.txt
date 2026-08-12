@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.27
+Stable tag: 4.3.28
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.27 makes `/knowledge-libraries/` the canonical public Library route, redirects only the retired public `/library/` route, exposes route/identity health, and formalizes one-account continuity between private Library research and Workspace. Internal REST namespaces that contain `/library/` remain unchanged.
+Sustainable Catalyst Library v4.3.28 adds a private personal Library for books, films, music, articles, archives, courses, datasets, tools, websites, podcasts, and other resources. Personal collections and recommendations stay account-owned and explicitly separate from Sustainable Catalyst's official editorial recommendations, while v4.3.27 canonical routing and one-account continuity remain intact.
 
 
 
@@ -112,6 +112,7 @@ Sustainable Catalyst Library v4.3.27 makes `/knowledge-libraries/` the canonical
 
 == Shortcodes ==
 
+* `[sc_personal_library]`
 * `[sc_library_account_continuity]`
 * `[sc_homepage_spotlight]`
 * `[sc_library_living_system]`
@@ -135,6 +136,7 @@ Sustainable Catalyst Library v4.3.27 makes `/knowledge-libraries/` the canonical
 
 == REST API ==
 
+* `/wp-json/sc-library/v1/personal-library` (authenticated; current user only)
 * `/wp-json/sc-library/v1/runtime/identity-health`
 * `/wp-json/sustainable-catalyst/v1/library/discovery`
 * `/wp-json/sustainable-catalyst-library/v1/discovery`
@@ -162,6 +164,16 @@ Sustainable Catalyst Library v4.3.27 makes `/knowledge-libraries/` the canonical
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.28 =
+* Adds `[sc_personal_library]` as a private, account-owned collection and recommendation workspace.
+* Supports books, films, music, articles, archives, courses, datasets, tools, websites, podcasts, and other resources.
+* Adds personal collections, saved/recommended/reference relationships, progress status, private notes, and a personal reason-for-saving field.
+* Adds authenticated current-user endpoint `/wp-json/sc-library/v1/personal-library` for later Workspace continuity without exposing private records publicly.
+* Stores personal Library records in dedicated user-meta contracts and never merges them with official Sustainable Catalyst editorial recommendations.
+* Adds no automatic publication, editorial promotion, endorsement, or public sharing behavior.
+* Preserves v4.3.27 canonical routing and shared Sustainable Catalyst / Workspace account continuity.
+* Preserves v4.3.26 Public Library Network, v4.3.25 Institutional Connector Expansion, v4.3.24 Access Intelligence, v4.3.23 Document Builder, and the restored v4.3.22.4 Publications stack.
 
 = 4.3.27 =
 * Makes `/knowledge-libraries/` the canonical public Library route.

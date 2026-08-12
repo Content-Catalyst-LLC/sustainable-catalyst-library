@@ -1,0 +1,45 @@
+Sustainable Catalyst Library v4.3.28 — Personal Library Collections & Recommendations
+Build validation
+
+PASS — 12 v4.3.28 Personal Library Collections & Recommendations tests
+PASS — 8 retained v4.3.27 Canonical Routing / Identity tests
+PASS — 9 retained v4.3.26 Public Library Network tests
+PASS — 7 retained v4.3.25 Institutional Connector Expansion tests
+PASS — 9 retained v4.3.24 Research Librarian Access Intelligence tests
+PASS — 10 retained v4.3.23 Research Document Builder tests
+PASS — 9 retained v4.3.22.4 Publications restoration tests
+PASS — 6 retained v4.3.22 Citation Studio tests
+PASS — 7 retained v4.3.21 Course Access / Learning Pathways tests
+PASS — 7 retained v4.3.19 Global Library Access tests
+
+TOTAL: 84 selected Python regression tests passed.
+
+PASS — PHP syntax across Sustainable Catalyst Library plugin tree
+PASS — JavaScript syntax: Personal Library
+PASS — JavaScript syntax: Public Library Network
+PASS — JavaScript syntax: Research Librarian orchestrator
+PASS — JavaScript syntax: Research Access connectors
+PASS — JavaScript syntax: Research Document Builder
+PASS — JavaScript syntax: Publications Field Spotlights
+PASS — JavaScript syntax: Open Course Finder
+PASS — JavaScript syntax: Course Plan
+
+Key release contracts:
+- My Library records are private and account-owned.
+- Personal Library items use sc_library_personal_items_v4328.
+- Personal collections use sc_library_personal_collections_v4328.
+- Personal recommendations remain separate from official Sustainable Catalyst editorial recommendations.
+- No automatic publication, editorial promotion, endorsement, public sharing, or cross-user discovery is introduced.
+- Supported personal resource types include books, films, music, articles, archives, courses, datasets, tools, websites, podcasts, and other resources.
+- Authenticated current-user API is /wp-json/sc-library/v1/personal-library.
+- Write actions use same-origin AJAX plus the v4.3.28 nonce.
+- Stable integration hooks exist for later Workspace / Research Access handoff without duplicating storage.
+- Canonical public Library path remains /knowledge-libraries/.
+- Legacy public /library/ redirect remains bounded to the front-end public route.
+- Runtime identity health is version-aligned to v4.3.28.
+- One Sustainable Catalyst / WordPress account remains authoritative across Library and Workspace.
+- v4.3.26 Public Library Network is preserved.
+- v4.3.25 Institutional Connector Expansion is preserved.
+- v4.3.24 Access Intelligence is preserved.
+- v4.3.23 Document Builder is preserved.
+- v4.3.22.4 Publications all-fields stack is preserved.

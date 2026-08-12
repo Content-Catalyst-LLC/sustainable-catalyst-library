@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v4.3.27 establishes canonical public routing at /knowledge-libraries/, safe legacy-route redirects, runtime route/identity health, and one-account continuity across private Library tools and Workspace while preserving the v4.3.26 public-library network and prior research systems.
- * Version: 4.3.27
+ * Description: Sustainable Catalyst Library v4.3.28 adds a private, account-owned personal Library for books, films, music, articles, archives, courses, datasets, tools and other resources, with collections and personal recommendations kept explicitly separate from official Sustainable Catalyst editorial selections while preserving v4.3.27 routing and identity continuity.
+ * Version: 4.3.28
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.27');
+define('SC_LIBRARY_VERSION', '4.3.28');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
