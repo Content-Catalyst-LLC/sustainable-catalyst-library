@@ -18,7 +18,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.21.1';
+    public const VERSION = '4.3.22.1';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
     public const PANEL_CONTENT_OPTION = 'sc_library_field_spotlight_panel_content_v4312';
     public const SETTINGS_GROUP = 'sc_library_field_spotlights_v4313';
@@ -644,7 +644,28 @@ final class SC_Library_Field_Spotlights {
         $atts = shortcode_atts( array( 'field' => '', 'autoplay' => 'true', 'interval' => (string) self::DEFAULT_INTERVAL, 'pause_on_hover' => 'true' ), $atts, self::SHORTCODE_SINGLE );
         $field = sanitize_title( (string) $atts['field'] );
         unset( $atts['field'] );
+
+        // v4.3.22.1 canonical-route safety net. Older Publications page bodies
+        // sometimes retained the standalone Global Governance shortcode even
+        // after the 14-field master stack became canonical. Preserve standalone
+        // embeds everywhere else, but never allow /publications/ itself to be
+        // stranded on one field because of stale page content.
+        if ( 'global-governance' === $field && $this->is_canonical_publications_page() ) {
+            return $this->render_public( '', $atts );
+        }
+
         return $this->render_public( $field, $atts );
+    }
+
+    private function is_canonical_publications_page(): bool {
+        if ( function_exists( 'is_page' ) && is_page( 'publications' ) ) { return true; }
+        if ( function_exists( 'get_queried_object_id' ) && function_exists( 'get_post_field' ) ) {
+            $post_id = absint( get_queried_object_id() );
+            if ( $post_id > 0 ) {
+                return 'publications' === sanitize_title( (string) get_post_field( 'post_name', $post_id ) );
+            }
+        }
+        return false;
     }
 
     private function shortcode_bool( $value, bool $default = true ): bool {

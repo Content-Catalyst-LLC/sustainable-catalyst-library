@@ -1,0 +1,30 @@
+Sustainable Catalyst Library v4.3.22.1 — Publications Core Runtime Recovery
+Validation date: 2026-08-11
+
+PASS — 8 v4.3.22.1 Publications Core Runtime Recovery tests
+PASS — 6 retained v4.3.22 Citation Studio tests
+PASS — 6 retained v4.3.21.1 Publications Runtime Recovery tests
+PASS — 7 retained v4.3.21 Course Access Intelligence tests
+PASS — 7 retained v4.3.20.2 pathway/course refinement tests
+PASS — 6 retained v4.3.20 Open Course Finder tests
+PASS — 7 retained v4.3.19.1 Access-First layout tests
+PASS — 7 retained v4.3.19 Global Library Access tests
+PASS — 3 retained v4.3.18.1 Publications recovery tests
+PASS — 7 retained v4.3.18 scholarly/university access tests
+PASS — 5 retained v4.3.17 Federated Research Access tests
+PASS — 4 retained pathway-aware Research Librarian tests
+PASS — 2 retained unified Search/Librarian tests
+PASS — 3 retained Research Librarian front-door tests
+PASS — 4 retained Field Spotlight tests
+PASS — 3 retained panel persistence tests
+PASS — 7 retained Publications compatibility tests
+
+92 selected Python regression tests passed.
+PASS — PHP syntax validation across plugin PHP files
+PASS — JavaScript syntax: Publications, Field Spotlight, Citation Studio, connectors, Open Course Finder, Course Plan
+PASS — canonical registry remains 14 fields / 170 Article Maps
+PASS — original Publications runtime is no longer pinned to v4.3.3
+PASS — server fallback links survive JavaScript failure
+PASS — standalone Field Spotlight template/runtime markers match
+PASS — canonical Publications route cannot remain trapped on stale Global Governance-only shortcode content
+PASS — v4.3.22 Citation Studio retained

@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.22
+Stable tag: 4.3.22.1
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.22 adds an account-owned Citation Studio and Source Manager with private My Sources, notes, collections, multi-style citation previews, Research Access save actions, and BibTeX/RIS/CSL-JSON export while preserving v4.3.21.1 Publications runtime recovery, course access intelligence, and federated Research Access.
+Sustainable Catalyst Library v4.3.22.1 repairs the canonical Publications route across both Publications runtimes. It cache-busts the legacy dynamic Publications assets, adds server-rendered field and Article Map fallbacks, applies a render-time structural integrity guard, and promotes an accidental Global-Governance-only Field Spotlight shortcode to the full 14-field master stack on the canonical Publications page while preserving v4.3.22 Citation Studio and all later research infrastructure.
 
 
 

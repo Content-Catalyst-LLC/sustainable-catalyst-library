@@ -1,9 +1,28 @@
 <?php
-/** Publications v4.3.3 dynamic Spotlight template. Variables: $fields, $heading, $intro, $labels, $instance_id. */
+/** Publications v4.3.22.1 resilient dynamic Spotlight template. Variables: $fields, $heading, $intro, $labels, $instance_id. */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-$initial_field = $fields[0];
+$requested_field = isset( $_GET['sc_publications_field'] ) ? sanitize_title( (string) wp_unslash( $_GET['sc_publications_field'] ) ) : '';
+$requested_map = isset( $_GET['sc_publications_map'] ) ? sanitize_title( (string) wp_unslash( $_GET['sc_publications_map'] ) ) : '';
+$initial_field_index = 0;
+if ( $requested_field ) {
+    foreach ( $fields as $field_index => $candidate_field ) {
+        if ( sanitize_title( (string) ( $candidate_field['key'] ?? '' ) ) === $requested_field ) {
+            $initial_field_index = $field_index;
+            break;
+        }
+    }
+}
+$initial_field = $fields[ $initial_field_index ];
 $initial_topic_index = min( max( 0, absint( $initial_field['default_index'] ?? 0 ) ), max( 0, count( $initial_field['topics'] ) - 1 ) );
+if ( $requested_map ) {
+    foreach ( $initial_field['topics'] as $topic_index => $candidate_topic ) {
+        if ( sanitize_title( (string) ( $candidate_topic['key'] ?? '' ) ) === $requested_map ) {
+            $initial_topic_index = $topic_index;
+            break;
+        }
+    }
+}
 $initial_topic = $initial_field['topics'][ $initial_topic_index ];
 $total_maps = array_sum( array_map( static fn( $field ) => count( $field['topics'] ), $fields ) );
 $payload_fields = array();
@@ -53,7 +72,7 @@ $payload = array(
     ),
 );
 ?>
-<section id="<?php echo esc_attr( $instance_id ); ?>" class="sc-publications" data-sc-publications="v4.3.3" aria-label="<?php esc_attr_e( 'Sustainable Catalyst Publications', 'sustainable-catalyst-library' ); ?>">
+<section id="<?php echo esc_attr( $instance_id ); ?>" class="sc-publications" data-sc-publications="v4.3.22.1" data-initial-field-key="<?php echo esc_attr( (string) $initial_field['key'] ); ?>" data-initial-map-key="<?php echo esc_attr( (string) $initial_topic['key'] ); ?>" aria-label="<?php esc_attr_e( 'Sustainable Catalyst Publications', 'sustainable-catalyst-library' ); ?>">
     <header class="sc-publications__masthead">
         <div class="sc-publications__identity">
             <p class="sc-publications__system-id"><span aria-hidden="true">KL</span> <?php echo esc_html( (string) $labels['eyebrow'] ); ?></p>
@@ -68,19 +87,20 @@ $payload = array(
 
     <div class="sc-publications__field-deck" role="tablist" aria-label="<?php esc_attr_e( 'Publication fields', 'sustainable-catalyst-library' ); ?>">
         <?php foreach ( $fields as $field_index => $field ) : ?>
-            <button type="button" role="tab" class="sc-publications__field-tab<?php echo 0 === $field_index ? ' is-active' : ''; ?>" data-field-index="<?php echo esc_attr( (string) $field_index ); ?>" aria-selected="<?php echo 0 === $field_index ? 'true' : 'false'; ?>">
+            <?php $field_href = add_query_arg( array( 'sc_publications_field' => (string) $field['key'] ), remove_query_arg( 'sc_publications_map' ) ) . '#' . $instance_id; ?>
+            <a role="tab" class="sc-publications__field-tab<?php echo $initial_field_index === $field_index ? ' is-active' : ''; ?>" href="<?php echo esc_url( $field_href ); ?>" data-field-index="<?php echo esc_attr( (string) $field_index ); ?>" aria-selected="<?php echo $initial_field_index === $field_index ? 'true' : 'false'; ?>">
                 <span class="sc-publications__field-number"><?php echo esc_html( str_pad( (string) ( $field_index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span>
                 <strong><?php echo esc_html( $field['title'] ); ?></strong>
                 <small><?php echo esc_html( count( $field['topics'] ) ); ?></small>
-            </button>
+            </a>
         <?php endforeach; ?>
     </div>
 
     <div class="sc-publications__viewport" tabindex="-1">
         <header class="sc-publications__field-header">
             <div class="sc-publications__field-kicker">
-                <span class="sc-publications__active-field-number"><?php echo esc_html( str_pad( '1', 2, '0', STR_PAD_LEFT ) ); ?></span>
-                <span class="sc-publications__field-position">01 / <?php echo esc_html( str_pad( (string) count( $fields ), 2, '0', STR_PAD_LEFT ) ); ?></span>
+                <span class="sc-publications__active-field-number"><?php echo esc_html( str_pad( (string) ( $initial_field_index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span>
+                <span class="sc-publications__field-position"><?php echo esc_html( str_pad( (string) ( $initial_field_index + 1 ), 2, '0', STR_PAD_LEFT ) . ' / ' . str_pad( (string) count( $fields ), 2, '0', STR_PAD_LEFT ) ); ?></span>
             </div>
             <div class="sc-publications__field-heading">
                 <h3><?php echo esc_html( $initial_field['title'] ); ?></h3>
@@ -93,7 +113,8 @@ $payload = array(
             <button type="button" class="sc-publications__arrow sc-publications__arrow--previous" data-area-previous aria-label="<?php echo esc_attr( (string) $labels['previous_label'] ); ?>">‹</button>
             <div class="sc-publications__area-rail" role="tablist" aria-label="<?php echo esc_attr( sprintf( __( 'Areas in %s', 'sustainable-catalyst-library' ), $initial_field['title'] ) ); ?>">
                 <?php foreach ( $initial_field['topics'] as $index => $topic ) : ?>
-                    <button type="button" role="tab" data-area-index="<?php echo esc_attr( (string) $index ); ?>" aria-selected="<?php echo $initial_topic_index === $index ? 'true' : 'false'; ?>" class="<?php echo $initial_topic_index === $index ? 'is-active' : ''; ?>"><?php echo esc_html( $topic['title'] ); ?></button>
+                    <?php $topic_href = add_query_arg( array( 'sc_publications_field' => (string) $initial_field['key'], 'sc_publications_map' => (string) $topic['key'] ) ) . '#' . $instance_id; ?>
+                    <a role="tab" href="<?php echo esc_url( $topic_href ); ?>" data-area-index="<?php echo esc_attr( (string) $index ); ?>" aria-selected="<?php echo $initial_topic_index === $index ? 'true' : 'false'; ?>" class="<?php echo $initial_topic_index === $index ? 'is-active' : ''; ?>"><?php echo esc_html( $topic['title'] ); ?></a>
                 <?php endforeach; ?>
             </div>
             <button type="button" class="sc-publications__arrow sc-publications__arrow--next" data-area-next aria-label="<?php echo esc_attr( (string) $labels['next_label'] ); ?>">›</button>
@@ -140,6 +161,8 @@ $payload = array(
             </footer>
         </article>
     </div>
+
+    <noscript><p class="sc-publications__noscript">Publications navigation remains available through the field and Article Map links above.</p></noscript>
 
     <script type="application/json" class="sc-publications__data"><?php echo wp_json_encode( $payload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?></script>
 </section>

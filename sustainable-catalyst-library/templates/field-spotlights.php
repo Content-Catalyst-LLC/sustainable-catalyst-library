@@ -13,7 +13,7 @@ $initial_field = $field_list[ $initial_index ];
 $initial_number = $initial_index + 1;
 $stage_id = $instance_id . '-stage';
 ?>
-<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights sc-field-spotlights--master" data-sc-field-spotlights="v4.3.21.1" data-sc-field-spotlights-mode="master" data-autoplay="<?php echo $autoplay ? 'true' : 'false'; ?>" data-interval="<?php echo esc_attr( (string) $interval ); ?>" data-pause-on-hover="<?php echo $pause_on_hover ? 'true' : 'false'; ?>" data-initial-field-key="<?php echo esc_attr( (string) $initial_field['key'] ); ?>">
+<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights sc-field-spotlights--master" data-sc-field-spotlights="v4.3.22.1" data-sc-field-spotlights-mode="master" data-autoplay="<?php echo $autoplay ? 'true' : 'false'; ?>" data-interval="<?php echo esc_attr( (string) $interval ); ?>" data-pause-on-hover="<?php echo $pause_on_hover ? 'true' : 'false'; ?>" data-initial-field-key="<?php echo esc_attr( (string) $initial_field['key'] ); ?>">
     <section class="sc-field-master__selector" aria-labelledby="<?php echo esc_attr( $instance_id . '-selector-title' ); ?>">
         <div class="sc-field-master__selector-head">
             <div>

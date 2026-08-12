@@ -36,9 +36,16 @@
         var stageIndexPosition = root.querySelector('.sc-publications__stage-index span');
         var previousLabels = Array.prototype.slice.call(root.querySelectorAll('.sc-publications__previous-label'));
         var nextLabels = Array.prototype.slice.call(root.querySelectorAll('.sc-publications__next-label'));
-        var activeField = 0;
-        var activeTopic = Number(data.fields[0].defaultIndex || 0);
+        var requestedFieldKey = String(root.dataset.initialFieldKey || '');
+        var requestedMapKey = String(root.dataset.initialMapKey || '');
+        var activeField = Math.max(0, data.fields.findIndex(function (field) { return field.key === requestedFieldKey; }));
+        if (activeField < 0) activeField = 0;
+        var requestedTopicIndex = data.fields[activeField] && Array.isArray(data.fields[activeField].topics)
+            ? data.fields[activeField].topics.findIndex(function (topic) { return topic.key === requestedMapKey; })
+            : -1;
+        var activeTopic = requestedTopicIndex >= 0 ? requestedTopicIndex : Number(data.fields[activeField].defaultIndex || 0);
         var touchStartX = null;
+        root.classList.add('is-enhanced');
 
         function findHashState() {
             var match = window.location.hash.match(/^#publications-([a-z0-9-]+)--([a-z0-9-]+)$/);
@@ -61,14 +68,18 @@
             rail.innerHTML = '';
             select.innerHTML = '';
             field.topics.forEach(function (topic, index) {
-                var button = document.createElement('button');
-                button.type = 'button';
+                var button = document.createElement('a');
+                var fallback = new URL(window.location.href);
+                fallback.searchParams.set('sc_publications_field', field.key);
+                fallback.searchParams.set('sc_publications_map', topic.key);
+                fallback.hash = root.id ? '#' + root.id : '';
+                button.href = fallback.href;
                 button.setAttribute('role', 'tab');
                 button.dataset.areaIndex = String(index);
                 button.setAttribute('aria-selected', index === activeTopic ? 'true' : 'false');
                 if (index === activeTopic) button.classList.add('is-active');
                 button.textContent = topic.title;
-                button.addEventListener('click', function () { setTopic(index, true); });
+                button.addEventListener('click', function (event) { event.preventDefault(); setTopic(index, true); });
                 rail.appendChild(button);
 
                 var option = document.createElement('option');
@@ -174,7 +185,7 @@
         renderField(false, false);
 
         fieldTabs.forEach(function (button, index) {
-            button.addEventListener('click', function () { setField(index, false); });
+            button.addEventListener('click', function (event) { event.preventDefault(); setField(index, false); });
         });
         root.querySelectorAll('[data-area-previous]').forEach(function (button) { button.addEventListener('click', function () { step(-1); }); });
         root.querySelectorAll('[data-area-next]').forEach(function (button) { button.addEventListener('click', function () { step(1); }); });
@@ -203,7 +214,7 @@
     }
 
     function boot() {
-        document.querySelectorAll('[data-sc-publications="v4.3.3"]').forEach(init);
+        document.querySelectorAll('[data-sc-publications="v4.3.22.1"]').forEach(init);
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

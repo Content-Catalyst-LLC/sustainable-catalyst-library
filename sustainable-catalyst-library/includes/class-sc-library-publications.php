@@ -14,7 +14,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Publications {
-    public const VERSION = '4.3.3';
+    public const VERSION = '4.3.22.1';
     public const SHORTCODE = 'sc_publications';
     public const CACHE_KEY = 'sc_library_publications_topics_v433';
     public const CACHE_TTL = 600;
@@ -286,6 +286,18 @@ final class SC_Library_Publications {
         $atts = shortcode_atts( array( 'title' => '', 'intro' => '', 'empty' => 'hide' ), is_array( $atts ) ? $atts : array(), self::SHORTCODE );
         $settings = $this->settings();
         $fields = $this->fields();
+
+        // v4.3.22.1: the original dynamic Publications shortcode is also a
+        // JavaScript-enhanced single-stage surface. If persisted visibility or a
+        // stale topics transient collapses the canonical 14-field / 170-map model
+        // to one field or one map, run the bounded integrity repair and rebuild
+        // before rendering. This mirrors the newer Field Spotlight runtime guard.
+        if ( $this->public_surface_appears_collapsed( $fields ) && class_exists( 'SC_Library_Activator', false ) ) {
+            SC_Library_Activator::repair_publication_surface_integrity_runtime();
+            $this->invalidate_cache();
+            $fields = $this->fields();
+        }
+
         if ( empty( $fields ) ) {
             return 'hide' === sanitize_key( (string) $atts['empty'] ) ? '' : '<div class="sc-publications-empty"></div>';
         }
@@ -337,6 +349,36 @@ final class SC_Library_Publications {
         }
         unset( $field );
         return array_values( $fields );
+    }
+
+    /**
+     * v4.3.22.1 structural guard for the original [sc_publications] runtime.
+     * The canonical registry defines the expected field/map cardinality. A
+     * public model with only one field, or a multi-map canonical field reduced
+     * to one map, is treated as corruption/stale state rather than intentional
+     * editorial presentation.
+     *
+     * @param array<int,array<string,mixed>> $fields
+     */
+    private function public_surface_appears_collapsed( array $fields ): bool {
+        $registry = self::article_map_registry();
+        $canonical_fields = array();
+        foreach ( $registry as $map ) {
+            if ( ! is_array( $map ) ) { continue; }
+            $field_key = sanitize_title( (string) ( $map['field'] ?? '' ) );
+            if ( ! $field_key ) { continue; }
+            $canonical_fields[ $field_key ] = absint( $canonical_fields[ $field_key ] ?? 0 ) + 1;
+        }
+        if ( count( $canonical_fields ) > 1 && count( $fields ) <= 1 ) { return true; }
+
+        foreach ( $fields as $field ) {
+            if ( ! is_array( $field ) ) { continue; }
+            $field_key = sanitize_title( (string) ( $field['key'] ?? $field['canonical_title'] ?? '' ) );
+            $canonical_count = absint( $canonical_fields[ $field_key ] ?? 0 );
+            $public_count = is_array( $field['topics'] ?? null ) ? count( $field['topics'] ) : 0;
+            if ( $canonical_count > 1 && $public_count <= 1 ) { return true; }
+        }
+        return false;
     }
 
     /** @param mixed $articles @return array<int,array{title:string,url:string}> */

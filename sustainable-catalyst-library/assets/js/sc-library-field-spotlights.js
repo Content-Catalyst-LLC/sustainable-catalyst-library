@@ -473,7 +473,7 @@ const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key 
   };
 
   const boot = () => {
-    document.querySelectorAll('[data-sc-field-spotlights="v4.3.21.1"]').forEach((root) => {
+    document.querySelectorAll('[data-sc-field-spotlights="v4.3.22.1"]').forEach((root) => {
       if (root.dataset.scFieldSpotlightsMode === 'master') initializeMaster(root);
       else initializeSingle(root);
     });

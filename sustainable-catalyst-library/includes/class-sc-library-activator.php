@@ -47,7 +47,7 @@ final class SC_Library_Activator {
         $diag = get_option( 'sc_library_publications_integrity_repair_v43181', array() );
         if ( ! is_array( $diag ) ) { $diag = array(); }
         $diag['runtime_guard'] = true;
-        $diag['runtime_version'] = defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '4.3.21.1';
+        $diag['runtime_version'] = defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '4.3.22.1';
         $diag['runtime_timestamp'] = time();
         update_option( 'sc_library_publications_integrity_repair_v43211', $diag, false );
     }
@@ -207,7 +207,7 @@ final class SC_Library_Activator {
         update_option( $repair_option, $result, false );
         $current_result = $result;
         $current_result['runtime_guard'] = false;
-        $current_result['runtime_version'] = defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '4.3.21.1';
+        $current_result['runtime_version'] = defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '4.3.22.1';
         update_option( 'sc_library_publications_integrity_repair_v43211', $current_result, false );
     }
 
