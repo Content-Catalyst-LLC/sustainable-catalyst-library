@@ -1,0 +1,32 @@
+Sustainable Catalyst Library v4.3.23-r1 — Installer Validation Repair
+Product version remains: 4.3.23
+
+Validation run:
+.........                                                                [100%]
+9 passed in 0.07s
+............                                                             [100%]
+12 passed in 0.07s
+.........                                                                [100%]
+9 passed, 1 deselected in 0.05s
+......                                                                   [100%]
+6 passed, 2 deselected in 0.05s
+.......                                                                  [100%]
+7 passed, 1 deselected in 0.05s
+.......                                                                  [100%]
+7 passed, 1 deselected in 0.06s
+........                                                                 [100%]
+8 passed, 1 deselected in 0.05s
+PASS - v4.3.23 Research Document Builder & DOCX/PDF Export validation complete
+PASS - v4.3.23-r1 installer validation repair and full v4.3.23 regression stack complete
+
+Cross-environment compression reproduction:
+fixture_backend=PharData
+fixture_original_docx_bytes=10349
+fixture_deflated_docx_bytes=3706
+fixture_deflated_testzip=None
+required_ooxml_parts=PASS
+
+PHP syntax: PASS (plugin tree)
+JavaScript syntax: PASS (builder, citation, publications, field spotlight, course finder, course plan)
+Publications v4.3.22.4 all-fields marker: PASS
+Arbitrary DOCX >5000 byte gate removed: PASS

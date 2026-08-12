@@ -1,0 +1,37 @@
+Sustainable Catalyst Library v4.3.23 — Research Document Builder & DOCX/PDF Export
+
+FINAL BUILD VALIDATION
+- 12 dedicated v4.3.23 Research Document Builder tests passed.
+- 9 retained v4.3.22.4 Publications 14-field stack tests passed.
+- 6 retained v4.3.22 Citation Studio tests passed.
+- 7 retained v4.3.21 Course Access / Learning Pathways tests passed.
+- 7 retained v4.3.19 Global Library Access tests passed.
+- 8 retained Publications compatibility tests passed.
+- Total selected regression gate: 49 tests passed.
+- PHP syntax validation passed for the plugin tree.
+- JavaScript syntax validation passed for Research Document Builder, Citation Studio, Publications, Field Spotlights, Open Course Finder, and Course Plan assets.
+
+DOCUMENT EXPORT CONTRACT
+- Native OOXML DOCX generation verified.
+- DOCX ZIP package integrity verified.
+- Native multi-page PDF generation verified.
+- DOCX MIME: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+- PDF MIME: application/pdf
+- SHA-256 response integrity metadata preserved.
+- Private source ownership guard preserved.
+- Document source cap: 100.
+- Saved document cap: 50 per user.
+
+VISUAL EXPORT QA
+- One-page DOCX rendered successfully and visually inspected.
+- Four-page DOCX rendered successfully and all four pages visually inspected.
+- One-page PDF rendered successfully and visually inspected.
+- Four-page PDF rendered successfully and all four pages visually inspected.
+- No clipping, overlap, broken page boundaries, or missing final-page content observed in the QA fixtures.
+- PDF page footers and final research-integrity notice rendered correctly.
+
+PUBLICATIONS REGRESSION BOUNDARY
+- v4.3.22.4 all-fields Publications marker preserved.
+- data-sc-field-stack="v4.3.22.4" preserved.
+- data-sc-field-stack-mode="all-fields" preserved.
+- 14-field stack restoration remains outside the v4.3.23 document-builder change set.

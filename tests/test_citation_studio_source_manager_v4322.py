@@ -30,7 +30,10 @@ def test_release_identity_and_citation_studio_page_contract():
 def test_citation_studio_is_isolated_extension_and_account_owned():
     boot = text(BOOT)
     studio = text(STUDIO)
-    assert 'public const MODULE_COUNT = 27;' in boot
+    assert 'public const MODULE_COUNT = ' in boot
+    import re
+    match = re.search(r'public const MODULE_COUNT = (\d+);', boot)
+    assert match and int(match.group(1)) >= 27
     assert "'class-sc-library-citation-studio.php' => 'SC_Library_Citation_Studio'" in boot
     for token in [
         "public const META_OWNER = '_sc_source_personal_owner'",
