@@ -18,7 +18,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Field_Spotlights {
-    public const VERSION = '4.3.22.3';
+    public const VERSION = '4.3.22.4';
     public const SETTINGS_OPTION = 'sc_library_field_spotlights_settings_v434';
     public const PANEL_CONTENT_OPTION = 'sc_library_field_spotlight_panel_content_v4312';
     public const SETTINGS_GROUP = 'sc_library_field_spotlights_v4313';
@@ -645,11 +645,10 @@ final class SC_Library_Field_Spotlights {
         $field = sanitize_title( (string) $atts['field'] );
         unset( $atts['field'] );
 
-        // v4.3.22.3 canonical-route safety net. Older Publications page bodies
-        // sometimes retained the standalone Global Governance shortcode even
-        // after the 14-field master stack became canonical. Preserve standalone
-        // embeds everywhere else, but never allow /publications/ itself to be
-        // stranded on one field because of stale page content.
+        // v4.3.22.4 canonical-route safety net. Older Publications page bodies may
+        // retain a standalone Global Governance shortcode. Preserve legitimate
+        // single-field embeds elsewhere, but on /publications/ promote that stale
+        // shortcode to the restored complete 14-field stacked surface.
         if ( 'global-governance' === $field && $this->is_canonical_publications_page() ) {
             return $this->render_public( '', $atts );
         }
@@ -679,10 +678,10 @@ final class SC_Library_Field_Spotlights {
     private function render_public( string $only_field = '', array $display = array() ): string {
         $fields = $this->public_model();
 
-        // v4.3.21.1: the master Publications stage is intentionally JavaScript-enhanced,
-        // but the saved visibility/cache model must never silently collapse the canonical
-        // multi-field/multi-panel surface to one item. Re-run the bounded v4.3.18.1 repair
-        // at render time when that impossible public signature is detected, then rebuild.
+        // The saved visibility/cache model must never silently collapse the canonical
+        // multi-field/multi-panel surface to one item. Re-run the bounded v4.3.18.1
+        // repair at render time when that impossible public signature is detected,
+        // then rebuild before the v4.3.22.4 stacked renderer emits every field.
         if ( $this->public_surface_appears_collapsed( $fields ) && class_exists( 'SC_Library_Activator', false ) ) {
             SC_Library_Activator::repair_publication_surface_integrity_runtime();
             $this->invalidate_model();
@@ -701,9 +700,9 @@ final class SC_Library_Field_Spotlights {
         $autoplay = $this->shortcode_bool( $display['autoplay'] ?? $settings['general']['autoplay'] ?? true, true );
         $pause_on_hover = $this->shortcode_bool( $display['pause_on_hover'] ?? $settings['general']['pause_on_hover'] ?? true, true );
         $interval = max( 8000, min( 60000, absint( $display['interval'] ?? $settings['general']['interval'] ?? self::DEFAULT_INTERVAL ) ) );
-        $master_mode = ! $only_field && count( $fields ) > 1;
+        $stack_mode = ! $only_field && count( $fields ) > 1;
         ob_start();
-        if ( $master_mode ) {
+        if ( $stack_mode ) {
             include SC_LIBRARY_DIR . 'templates/field-spotlights.php';
         } else {
             include SC_LIBRARY_DIR . 'templates/field-spotlight-single.php';

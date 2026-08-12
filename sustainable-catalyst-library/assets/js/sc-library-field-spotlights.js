@@ -326,7 +326,7 @@
     panelNav?.addEventListener('click', (event) => {
       const tab = event.target.closest('[data-panel-key]');
       if (tab && panelNav.contains(tab)) {
-        // v4.3.22.3: direct panel tabs are server-authoritative links.
+        // v4.3.22.4: direct panel tabs are server-authoritative links.
         // Never suppress their native navigation. Playback arrows may still rotate within the loaded field.
         return;
       }
@@ -462,7 +462,7 @@ const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key 
     };
 
     fieldTabs.forEach((tab) => {
-      // v4.3.22.3: do not install a click handler. The anchor href is authoritative.
+      // v4.3.22.4: do not install a click handler. The anchor href is authoritative.
       tab.addEventListener('keydown', (event) => {
         if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
         event.preventDefault();
@@ -496,8 +496,10 @@ const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key 
     markRuntime(root, 'ready');
   };
 
+  // v4.3.22.4: [sc_field_spotlights] now emits 14 independent single-field roots.
+  // initializeMaster remains for backward-compatible markup only; the canonical stack never uses it.
   const boot = () => {
-    document.querySelectorAll('[data-sc-field-spotlights="v4.3.22.3"]').forEach((root) => {
+    document.querySelectorAll('[data-sc-field-spotlights="v4.3.22.4"]').forEach((root) => {
       if (root.dataset.scFieldSpotlightsMode === 'master') initializeMaster(root);
       else initializeSingle(root);
     });

@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var RUNTIME = 'v4.3.22.3';
+    var RUNTIME = 'v4.3.22.4';
 
     function parseData(root) {
         var node = root.querySelector('.sc-publications__data');
@@ -142,7 +142,7 @@
                 link.setAttribute('aria-selected', index === activeTopic ? 'true' : 'false');
                 if (index === activeTopic) link.classList.add('is-active');
                 link.textContent = topic.title;
-                // v4.3.22.3: direct Article Map links are intentionally not intercepted.
+                // v4.3.22.4: direct Article Map links are intentionally not intercepted.
                 // The href is the authority; JavaScript may enhance playback controls only.
                 rail.appendChild(link);
 
@@ -270,7 +270,7 @@
         root.classList.add('is-enhanced');
         markRuntime(root, 'ready');
 
-        // v4.3.22.3: major-field tabs are server-authoritative anchors.
+        // v4.3.22.4: major-field tabs are server-authoritative anchors.
         // Do not attach a click handler and do not call preventDefault() here.
         // Native navigation carries sc_publications_field to PHP, which renders the selected field.
 

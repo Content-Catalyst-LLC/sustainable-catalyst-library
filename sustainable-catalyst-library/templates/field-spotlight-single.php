@@ -8,6 +8,6 @@ $stage_id = $instance_id . '-' . sanitize_html_class( (string) $field['key'] );
 $master_stage = false;
 $include_data = true;
 ?>
-<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights sc-field-spotlights--single" data-sc-field-spotlights="v4.3.22.3" data-sc-field-spotlights-mode="single" data-sc-field-spotlights-runtime-state="server">
+<div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-spotlights sc-field-spotlights--single" data-sc-field-spotlights="v4.3.22.4" data-sc-field-spotlights-mode="single" data-sc-field-spotlights-runtime-state="server">
     <?php include SC_LIBRARY_DIR . 'templates/field-spotlight-stage.php'; ?>
 </div>

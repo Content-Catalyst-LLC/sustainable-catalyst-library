@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+PY="${SC_LIBRARY_VALIDATION_PYTHON:-${PYTHON:-python3}}"
+"$PY" -m pytest -q tests/test_publications_14_field_stack_restoration_v432224.py
+"$PY" -m pytest -q tests/test_publications_server_authoritative_v432223.py -k 'test_core_publications_field_links_are_server_authoritative or test_core_article_map_links_are_server_authoritative or test_core_server_query_state_wins_over_legacy_hash_state or test_field_spotlight_direct_panel_tabs_are_server_authoritative or test_registry_and_current_research_features_are_preserved'
+"$PY" -m pytest -q tests/test_publications_fail_open_v43222.py -k 'test_core_publications_server_links_are_authoritative or test_registry_citation_studio_and_previous_integrity_repairs_are_preserved'
+"$PY" -m pytest -q tests/test_publications_core_runtime_recovery_v43221.py -k 'not test_release_identity_and_publications_asset_boundary and not test_original_publications_runtime_is_cache_busted_and_no_longer_v433_only and not test_original_publications_javascript_progressively_enhances_fallback_links and not test_single_field_template_marker_matches_current_field_spotlight_runtime'
+"$PY" -m pytest -q tests/test_citation_studio_source_manager_v4322.py -k 'not test_release_identity_and_citation_studio_page_contract and not test_publications_recovery_course_finder_and_research_access_remain_present'
+"$PY" -m pytest -q tests/test_publications_runtime_recovery_v43211.py -k 'not test_release_identity_and_cache_busted_field_spotlight_runtime and not test_master_field_controls_have_server_side_fallback_routes and not test_javascript_progressively_enhances_links_instead_of_being_required_for_navigation'
+"$PY" -m pytest -q tests/test_course_access_learning_pathways_v4321.py -k 'not test_release_identity_and_page_contract'
+"$PY" -m pytest -q tests/test_pathway_editorial_course_refinement_v43202.py -k 'not test_release_identity_and_page_marker'
+"$PY" -m pytest -q tests/test_open_course_finder_v4320.py -k 'not test_release_identity_and_page_contract and not test_course_finder_is_isolated_optional_extension'
+"$PY" -m pytest -q tests/test_access_first_layout_v43191.py -k 'not test_release_identity'
+"$PY" -m pytest -q tests/test_global_library_access_v4319.py -k 'not test_release_identity_and_page_contract'
+"$PY" -m pytest -q tests/test_publications_integrity_recovery_v43181.py -k 'not test_patch_identity_and_upgrade_hook'
+"$PY" -m pytest -q tests/test_scholarly_university_access_v4318.py -k 'not version_and_page_front_door'
+"$PY" -m pytest -q tests/test_federated_research_access_v4317.py -k 'not release_identity_and_access_is_first and not public_research_access_shortcode_and_public_ajax_are_bounded and not prior_research_librarian_and_field_spotlight_boundaries_remain'
+"$PY" -m pytest -q tests/test_pathway_aware_research_guidance_v4316.py -k 'not release_identity_and_merged_page_contract and not workspace_and_field_spotlight_boundaries_remain'
+"$PY" -m pytest -q tests/test_unified_search_guided_discovery_v4315.py -k 'not release_identity and not page_enables_bridge_only_where_intended and not workspace_and_field_spotlight_boundaries_remain'
+"$PY" -m pytest -q tests/test_research_librarian_front_door_v4314.py -k 'not release_identity_and_readme_contract and not research_library_page_promotes_librarian_and_reorders_institutional_material and not page_retains_core_research_architecture_and_unique_top_level_ids'
+"$PY" -m pytest -q tests/test_field_spotlights_v4313.py -k 'test_first_eight_panel_disclosure_and_playback_are_preserved or test_existing_panel_content_persistence_contract_is_preserved'
+"$PY" -m pytest -q tests/test_field_spotlights_v4312.py -k 'not release_markers_and_dedicated_panel_content_store'
+"$PY" -m pytest -q tests/test_publications_v433.py -k 'not release_markers_and_cache_boundary and not public_page_is_one_dynamic_stage_not_170_rendered_boards'
+if command -v php >/dev/null 2>&1; then find sustainable-catalyst-library -type f -name '*.php' -print0 | xargs -0 -P4 -n1 php -l >/dev/null; fi
+if command -v node >/dev/null 2>&1; then
+  node --check sustainable-catalyst-library/assets/js/sc-library-publications.js
+  node --check sustainable-catalyst-library/assets/js/sc-library-field-spotlights.js
+  node --check sustainable-catalyst-library/assets/js/sc-library-citation-studio.js
+  node --check sustainable-catalyst-library/assets/js/sc-library-connectors.js
+  node --check sustainable-catalyst-library/assets/js/sc-library-open-course-finder.js
+  node --check sustainable-catalyst-library/assets/js/sc-library-course-plan.js
+fi
+printf 'PASS - v4.3.22.4 Publications 14-Field Stack Restoration validation complete\n'

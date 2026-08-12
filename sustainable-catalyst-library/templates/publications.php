@@ -1,5 +1,5 @@
 <?php
-/** Publications v4.3.22.3 server-authoritative Spotlight template. Variables: $fields, $heading, $intro, $labels, $instance_id. */
+/** Publications v4.3.22.4 server-authoritative Spotlight template. Variables: $fields, $heading, $intro, $labels, $instance_id. */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 $requested_field = isset( $_GET['sc_publications_field'] ) ? sanitize_title( (string) wp_unslash( $_GET['sc_publications_field'] ) ) : '';
@@ -72,7 +72,7 @@ $payload = array(
     ),
 );
 ?>
-<section id="<?php echo esc_attr( $instance_id ); ?>" class="sc-publications" data-sc-publications="v4.3.22.3" data-sc-publications-runtime-state="server" data-sc-publications-navigation="server" data-initial-field-key="<?php echo esc_attr( (string) $initial_field['key'] ); ?>" data-initial-map-key="<?php echo esc_attr( (string) $initial_topic['key'] ); ?>" aria-label="<?php esc_attr_e( 'Sustainable Catalyst Publications', 'sustainable-catalyst-library' ); ?>">
+<section id="<?php echo esc_attr( $instance_id ); ?>" class="sc-publications" data-sc-publications="v4.3.22.4" data-sc-publications-runtime-state="server" data-sc-publications-navigation="server" data-initial-field-key="<?php echo esc_attr( (string) $initial_field['key'] ); ?>" data-initial-map-key="<?php echo esc_attr( (string) $initial_topic['key'] ); ?>" aria-label="<?php esc_attr_e( 'Sustainable Catalyst Publications', 'sustainable-catalyst-library' ); ?>">
     <header class="sc-publications__masthead">
         <div class="sc-publications__identity">
             <p class="sc-publications__system-id"><span aria-hidden="true">KL</span> <?php echo esc_html( (string) $labels['eyebrow'] ); ?></p>

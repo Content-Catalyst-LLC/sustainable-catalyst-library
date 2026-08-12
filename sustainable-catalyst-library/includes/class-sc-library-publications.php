@@ -14,7 +14,7 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Publications {
-    public const VERSION = '4.3.22.3';
+    public const VERSION = '4.3.22.4';
     public const SHORTCODE = 'sc_publications';
     public const CACHE_KEY = 'sc_library_publications_topics_v433';
     public const CACHE_TTL = 600;
@@ -284,10 +284,20 @@ final class SC_Library_Publications {
     /** @param array<string,mixed>|string $atts */
     public function shortcode( $atts = array() ): string {
         $atts = shortcode_atts( array( 'title' => '', 'intro' => '', 'empty' => 'hide' ), is_array( $atts ) ? $atts : array(), self::SHORTCODE );
+
+        // v4.3.22.4 canonical Publications restoration. The historical [sc_publications]
+        // shortcode is a one-stage interface, while the canonical /publications/ page
+        // is again defined as the complete 14-field stack. If an older page body still
+        // calls [sc_publications], promote it server-side to the restored Field Spotlight
+        // stack so page-content drift cannot recreate the Global-Governance-only layout.
+        if ( $this->is_canonical_publications_page() && class_exists( 'SC_Library_Field_Spotlights', false ) ) {
+            $stack = new SC_Library_Field_Spotlights();
+            return $stack->shortcode_stack( array( 'autoplay' => 'true', 'pause_on_hover' => 'true' ) );
+        }
         $settings = $this->settings();
         $fields = $this->fields();
 
-        // v4.3.22.3: the original dynamic Publications shortcode is also a
+        // v4.3.22.4: the original dynamic Publications shortcode is also a
         // JavaScript-enhanced single-stage surface. If persisted visibility or a
         // stale topics transient collapses the canonical 14-field / 170-map model
         // to one field or one map, run the bounded integrity repair and rebuild
@@ -313,6 +323,17 @@ final class SC_Library_Publications {
         ob_start();
         include $template;
         return (string) ob_get_clean();
+    }
+
+    private function is_canonical_publications_page(): bool {
+        if ( function_exists( 'is_page' ) && is_page( 'publications' ) ) { return true; }
+        if ( function_exists( 'get_queried_object_id' ) && function_exists( 'get_post_field' ) ) {
+            $post_id = absint( get_queried_object_id() );
+            if ( $post_id > 0 ) {
+                return 'publications' === sanitize_title( (string) get_post_field( 'post_name', $post_id ) );
+            }
+        }
+        return false;
     }
 
     /** @return array<int,array<string,mixed>> */
@@ -352,7 +373,7 @@ final class SC_Library_Publications {
     }
 
     /**
-     * v4.3.22.3 structural guard for the original [sc_publications] runtime.
+     * v4.3.22.4 structural guard for the original [sc_publications] runtime.
      * The canonical registry defines the expected field/map cardinality. A
      * public model with only one field, or a multi-map canonical field reduced
      * to one map, is treated as corruption/stale state rather than intentional
