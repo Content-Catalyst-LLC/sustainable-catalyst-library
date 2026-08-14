@@ -1,0 +1,51 @@
+Sustainable Catalyst Library v4.3.31 — Build Validation
+Release: Reading, Notebook & Annotation Workspace
+Date: 2026-08-14
+
+PASS - 114 selected Python regression tests
+PASS - PHP syntax across Sustainable Catalyst Library plugin
+PASS - JavaScript syntax for v4.3.31 Reading Notebooks and retained critical surfaces
+PASS - v4.3.31 release identity and guarded extension-bootstrap boundary
+PASS - private sc_reading_notebook post-author ownership boundary
+PASS - stable Reading Notebook UUID/URN identity
+PASS - stable reading-note and source-annotation UUID/URN identities
+PASS - canonical v4.3.30 Research Project reuse without a second project store
+PASS - Source Bundle ownership/membership validation
+PASS - source-linked notes and reusable excerpt contract
+PASS - page, section, timestamp, paragraph, and custom annotation locator contract
+PASS - 4,000-character bounded reusable excerpt / selected-passage contract
+PASS - tags, pinning, and explicit ordering contract
+PASS - source records referenced rather than copied
+PASS - no private-binary copy into reading notebooks
+PASS - no automatic AI-generated notes
+PASS - no automatic evidence promotion
+PASS - no automatic publication
+PASS - no automatic Workspace write
+PASS - authenticated current-user Reading Notebooks API boundary
+PASS - checksummed private Reading Notebook manifest
+PASS - legacy browser-local Research Notebook preserved without migration
+PASS - canonical /knowledge-libraries/ route preserved
+PASS - v4.3.30 Research Projects & Source Bundles boundary preserved
+PASS - v4.3.29 Saved Research storage contracts preserved without migration
+PASS - v4.3.28 My Library storage contracts preserved without migration
+PASS - v4.3.26 Public Library Network boundary preserved
+PASS - v4.3.22.4 Publications 14-field stack preserved
+
+Selected regression total:
+  v4.3.31 new release tests: 16
+  v4.3.30 retained Research Projects tests: 11
+  v4.3.29 retained Saved Research tests: 7
+  v4.3.28 retained Personal Library tests: 8
+  v4.3.27 retained route/identity tests: 8
+  v4.3.26 retained Public Library tests: 9
+  v4.3.25 retained institutional connector tests: 7
+  v4.3.24 retained Access Intelligence tests: 9
+  v4.3.23 retained Document Builder tests: 10
+  v4.3.22.4 retained Publications tests: 9
+  v4.3.22 retained Citation Studio tests: 6
+  v4.3.21 retained course/learning tests: 7
+  v4.3.19 retained global-library tests: 7
+  TOTAL: 114
+
+PASS - macOS installer dry run from clean v4.3.30 Git baseline
+PASS - installer safety backup, checksum gate, release-boundary gate, validation gate, Git commit, and clean final working tree

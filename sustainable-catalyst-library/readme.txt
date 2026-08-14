@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.30
+Stable tag: 4.3.31
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.30 adds unified private Research Projects and references-only Source Bundles. Projects connect existing Citation Studio sources, My Library items, saved research, document drafts, courses, pathways, and external references by stable identifiers rather than copying the underlying records. v4.3.29 Saved Research, v4.3.28 My Library, canonical routing, access intelligence, learning, citations, documents, and Publications remain intact.
+Sustainable Catalyst Library v4.3.31 adds an account-persistent Reading, Notebook & Annotation Workspace. Signed-in users can create private reading notebooks, attach them to canonical Research Projects or references-only Source Bundles, keep source-linked notes and reusable excerpts, and record page-, section-, timestamp-, paragraph-, or custom-locator annotations without copying underlying source records or private files. The legacy browser-local Research Notebook remains intact for compatibility; v4.3.30 Research Projects and earlier Library systems are preserved.
 
 
 
@@ -112,6 +112,7 @@ Sustainable Catalyst Library v4.3.30 adds unified private Research Projects and 
 
 == Shortcodes ==
 
+* `[sc_reading_notebook_workspace]`
 * `[sc_research_continuity]`
 * `[sc_personal_library]`
 * `[sc_library_account_continuity]`
@@ -137,6 +138,8 @@ Sustainable Catalyst Library v4.3.30 adds unified private Research Projects and 
 
 == REST API ==
 
+* `/wp-json/sc-library/v1/reading-notebooks` (authenticated; current user only)
+* `/wp-json/sc-library/v1/reading-notebooks/{id}/manifest` (authenticated; current user only)
 * `/wp-json/sc-library/v1/research-continuity` (authenticated; current user only)
 * `/wp-json/sc-library/v1/personal-library` (authenticated; current user only)
 * `/wp-json/sc-library/v1/runtime/identity-health`

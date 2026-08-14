@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v4.3.30 adds unified private research projects and references-only source bundles that connect existing Library records without duplicating them, while retaining saved research continuity, personal collections, access intelligence, citations, learning, documents, and Publications.
- * Version: 4.3.30
+ * Description: Sustainable Catalyst Library v4.3.31 adds an account-persistent Reading, Notebook & Annotation Workspace with project-linked notes, reusable excerpts, and source annotations while preserving unified Research Projects, saved research, personal collections, access intelligence, citations, learning, documents, and Publications.
+ * Version: 4.3.31
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.30');
+define('SC_LIBRARY_VERSION', '4.3.31');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
