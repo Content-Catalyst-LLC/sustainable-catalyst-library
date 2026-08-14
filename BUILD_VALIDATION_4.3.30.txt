@@ -1,0 +1,40 @@
+Sustainable Catalyst Library v4.3.30 — Build Validation
+Release: Unified Research Projects & Source Bundles
+Date: 2026-08-14
+
+PASS - 102 selected Python regression tests
+PASS - PHP syntax across Sustainable Catalyst Library plugin
+PASS - JavaScript syntax for v4.3.30 unified projects and retained critical surfaces
+PASS - v4.3.30 release identity and extension-bootstrap boundary
+PASS - canonical sc_research_project reuse and v3.4 stable project UUID/URN boundary
+PASS - private post-author ownership boundary for front-end Research Projects
+PASS - references-only project-link contract across Library/account record families
+PASS - stable Source Bundle UUID/URN contract
+PASS - source-bundle manifest resolution and SHA-256 checksum contract
+PASS - no source-content copy, no private-binary copy, no automatic publication
+PASS - no automatic Workspace write
+PASS - authenticated current-user Research Projects API boundary
+PASS - canonical /knowledge-libraries/ route preserved
+PASS - v4.3.29 Saved Research storage contracts preserved without migration
+PASS - v4.3.28 My Library storage contracts preserved without migration
+PASS - v4.3.26 Public Library Network boundary preserved
+PASS - v4.3.22.4 Publications 14-field stack preserved
+
+Selected regression total:
+  v4.3.30 new release tests: 15
+  v4.3.29 retained Saved Research tests: 7
+  v4.3.28 retained Personal Library tests: 8
+  v4.3.27 retained route/identity tests: 8
+  v4.3.26 retained Public Library tests: 9
+  v4.3.25 retained institutional connector tests: 7
+  v4.3.24 retained Access Intelligence tests: 9
+  v4.3.23 retained Document Builder tests: 10
+  v4.3.22.4 retained Publications tests: 9
+  v4.3.22 retained Citation Studio tests: 6
+  v4.3.21 retained course/learning tests: 7
+  v4.3.19 retained global-library tests: 7
+  TOTAL: 102
+
+PASS - macOS installer dry run from clean v4.3.29 Git baseline
+PASS - installer safety backup, checksum gate, release-boundary gate, validation gate, and Git commit
+PASS - installer left no residual working-tree changes after commit

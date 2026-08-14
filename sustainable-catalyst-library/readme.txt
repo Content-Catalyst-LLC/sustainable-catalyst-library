@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.29
+Stable tag: 4.3.30
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.29 adds private saved searches, passive watchlists, and a research queue so signed-in users can preserve unfinished research and revisit it later. Watchlists do not run background monitoring or notifications in this release. v4.3.28 My Library collections, canonical routing, access intelligence, learning, citations, documents, and Publications remain intact.
+Sustainable Catalyst Library v4.3.30 adds unified private Research Projects and references-only Source Bundles. Projects connect existing Citation Studio sources, My Library items, saved research, document drafts, courses, pathways, and external references by stable identifiers rather than copying the underlying records. v4.3.29 Saved Research, v4.3.28 My Library, canonical routing, access intelligence, learning, citations, documents, and Publications remain intact.
 
 
 
