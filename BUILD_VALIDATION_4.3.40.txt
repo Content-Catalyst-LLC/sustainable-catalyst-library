@@ -1,0 +1,46 @@
+Sustainable Catalyst Library v4.3.40 — Build Validation
+=======================================================
+
+Baseline
+- sustainable-catalyst-library-v4.3.39-repository.zip
+- v4.3.39 repository SHA-256: 1e140fb56b5692d5472d0aec62d64495a245c8397ab7ed9bbc67c00173dff547
+
+Release intent
+- Stabilize and certify the complete v4.3 research branch.
+- Reuse the established SC_Library_Hardening Production Readiness engine.
+- Add a distinct first-party branch release gate without creating a new research store or health subsystem.
+- Keep third-party provider health non-blocking and private research content outside release diagnostics.
+
+Source validation
+- v4.3.40 feature contract: 16/16 passed.
+- Retained branch regression line: 210 passed, 61 deselected by superseded release-marker/page assertions.
+- Total selected tests: 226 passed.
+- PHP syntax: passed across the complete plugin tree.
+- JavaScript syntax: passed for current v4.3 and retained critical front-end surfaces.
+- Executable PHP fixture: passed; proved release-gate independence from operational warnings and blocked a simulated private REST route using __return_true.
+
+Release boundary
+- Plugin/runtime version: 4.3.40.
+- Canonical route: /knowledge-libraries/ retained.
+- Extension bootstrap remains 44 registered isolated modules; no duplicate production-health extension was added.
+- Existing [sc_library_readiness_status] reused and embedded in Research Infrastructure.
+- New public summary alias: /wp-json/sc-library/v1/runtime/production-readiness.
+- New administrator detail alias: /wp-json/sc-library/v1/runtime/production-readiness/details.
+- branch_release_gate is first-party only.
+- network_calls_performed=false.
+- upstream_health_release_blocking=false.
+- private_record_content_inspected=false.
+- No new private research store, automatic publication, evidence promotion, or Workspace mutation.
+
+Upgrade certification
+- Candidate expected v4.3.39 -> v4.3.40 delta: 16 files.
+- Final installer dry-run result is recorded separately in FINAL_INSTALLER_VALIDATION_4.3.40.txt after the frozen-archive certification pass.
+
+First installer-path dry run
+- Baseline: clean Git repository created from frozen v4.3.39 repository ZIP.
+- Candidate repository checksum verified before installation.
+- Safety backup created successfully.
+- 226 selected tests passed during installer execution.
+- Expected 16-file delta enforced; no tracked-file deletions.
+- Git commit created successfully: 56a2aa0fcf2a.
+- Final working tree: clean.

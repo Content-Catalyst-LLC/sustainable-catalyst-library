@@ -1,5 +1,17 @@
 # Sustainable Catalyst Library
 
+## v4.3.40 — 4.3 Branch Production Hardening
+
+This release certifies the complete v4.3 research branch using the existing Production Readiness engine. A dedicated first-party release gate verifies runtime/version alignment, the isolated extension bootstrap, critical v4.3 modules and assets, canonical `/knowledge-libraries/` routing, shared Library/Workspace account continuity, and authenticated private REST surfaces. Third-party provider health is non-blocking and readiness diagnostics do not inspect private research content.
+
+Public summary: `/wp-json/sc-library/v1/runtime/production-readiness`  
+Admin-only detail: `/wp-json/sc-library/v1/runtime/production-readiness/details`  
+Public status shortcode: `[sc_library_readiness_status]`
+
+The v4.3.27–v4.3.39 research capabilities remain intact; v4.3.40 is a stabilization and certification release rather than a new research-data system.
+
+## Historical release notes
+
 ## v4.2.0 — Twelve-Topic Two-Tier Homepage Spotlight
 
 This release expands the Knowledge Library Homepage Spotlight into a twelve-topic editorial surface while preserving the established five-article page format. Eight primary topics remain visible in the opening navigation, and four additional fields are available through a restrained secondary tier within the same console.

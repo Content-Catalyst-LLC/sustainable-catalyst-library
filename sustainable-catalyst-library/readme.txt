@@ -4,20 +4,29 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.39
+Stable tag: 4.3.40
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.39 adds Research Portability & Preservation. Signed-in users can export an owned Research Project as a checksummed JSON package carrying stable identities, references, Source Bundle manifests, project-linked Reading Notebooks, Evidence Matrices, and learning routes. Complete exports may include user-authored research text, but private source binaries, credentials, raw WordPress tables, and provider secrets are excluded. Re-import validation checks schema and SHA-256 integrity without executing the package or creating records.
+Sustainable Catalyst Library v4.3.40 certifies and hardens the complete 4.3 research branch. The established Production Readiness engine now has a distinct first-party release gate for version alignment, extension startup, recent research modules/assets, canonical routing, shared-account continuity, and authenticated private REST boundaries. Third-party provider health is explicitly non-blocking, and release diagnostics do not inspect private research content.
 
 
 
 
 
 
+
+= 4.3 Branch Production Hardening =
+
+* Existing `[sc_library_readiness_status]` now includes a dedicated `4.3 branch release certification` category.
+* New public summary alias: `/wp-json/sc-library/v1/runtime/production-readiness`; admin-only details: `/wp-json/sc-library/v1/runtime/production-readiness/details`.
+* Release certification checks exact v4.3.40 plugin/identity alignment, the isolated extension bootstrap, the v4.3.27–v4.3.39 research module lineage, critical current assets, canonical `/knowledge-libraries/`, shared Library/Workspace account continuity, and permission callbacks on private research REST bases.
+* `branch_release_gate.status` is independent from broader operational warnings such as optional object-cache, historical snapshot, or hosting-backup recommendations.
+* `first_party_only=true`, `network_calls_performed=false`, `upstream_health_release_blocking=false`, and `private_record_content_inspected=false`.
+* No new research store, automatic publication, provider polling, private-content scan, or Workspace mutation is introduced.
 
 = Research Portability & Preservation =
 

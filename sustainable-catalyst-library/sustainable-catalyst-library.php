@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v4.3.39 adds Research Portability & Preservation with user-initiated, checksummed private Research Project packages, stable research identities, provenance-preserving JSON manifests, and non-executing re-import validation without copying private source binaries or publishing research.
- * Version: 4.3.39
+ * Description: Sustainable Catalyst Library v4.3.40 hardens the complete 4.3 research branch with first-party release certification, runtime/version/module/asset checks, authenticated private-route verification, canonical-route continuity, and a production gate that remains independent of third-party provider health.
+ * Version: 4.3.40
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.39');
+define('SC_LIBRARY_VERSION', '4.3.40');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
