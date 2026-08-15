@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.9.0
+Stable tag: 5.0.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.8.0 adds Global Research Federation: explicit Team Library metadata manifests, compatible-node discovery, provenance-preserving exchange, quarantine-first remote intake, explicit acceptance into Team Libraries, and no federation of private research, credentials, or access entitlement.
+Sustainable Catalyst Library v5.0.0 adds Connected Public Research Infrastructure: a read-only, explicit-relationship composition of the public Library API, Publication ↔ Research Graph, public Knowledge Pathways, canonical knowledge relationships, and published federation metadata, with provenance and checksummed context manifests and no exposure of private research.
 
 
 
@@ -20,6 +20,18 @@ Sustainable Catalyst Library v4.8.0 adds Global Research Federation: explicit Te
 
 
 
+
+
+= Connected Public Research Infrastructure =
+
+* New public shortcode `[sc_connected_public_research]` and contextual shortcode `[sc_public_research_context type="publication" id="123"]`.
+* Public REST facade at `/wp-json/sc-library/v1/connected-public-research` with bounded `/index`, `/context/{type}/{id}`, `/network/{type}/{id}`, `/manifest/{type}/{id}`, and `/federation-manifests` routes.
+* Reuses the canonical v4.9 public object facade, v4.3.37 Publication ↔ Research Graph, v3.3 public Knowledge Pathways, v3.2 public knowledge relationships, and v4.8 published federation manifests. No second public record, graph, token, or federation store is created.
+* Public contexts are one-hop and explicit-only. The infrastructure does not infer semantic similarity, crawl private project relationships, or treat AI-generated similarity as a graph edge.
+* Context manifests include deterministic SHA-256 integrity, canonical public identity, connection counts, and provenance.
+* Private Projects, My Library, notebook/matrix bodies, Research Room or Team Library membership, private federation governance, credentials, and Workspace state remain outside the public surface.
+* Public endpoints are GET/read-only; explicit-origin CORS reuses the v4.9 allowlist with credentials disabled.
+* v5.0.0 performs no automatic publication, federation acceptance, evidence promotion, private-to-public graph promotion, or Workspace write.
 
 = Global Research Federation =
 
