@@ -177,6 +177,20 @@ final class SC_Library_Cross_Product_Research_Handoffs {
                     'gap-analysis'     => __( 'Knowledge-gap analysis', 'sustainable-catalyst-library' ),
                 ),
             ),
+            'workspace' => array(
+                'key'           => 'workspace',
+                'label'         => __( 'Workspace', 'sustainable-catalyst-library' ),
+                'schema'        => 'sc-platform-handoff/workspace/1.0',
+                'default_route' => home_url( '/workspace/' ),
+                'description'   => __( 'Private Sustainable Catalyst Workspace continuation using signed Library reference packets and shared account identity.', 'sustainable-catalyst-library' ),
+                'types'         => array(
+                    'library-continuity' => __( 'Library continuity packet', 'sustainable-catalyst-library' ),
+                    'research-context'   => __( 'Research project context', 'sustainable-catalyst-library' ),
+                    'source-bundle'      => __( 'Source bundle context', 'sustainable-catalyst-library' ),
+                    'reading-context'    => __( 'Reading notebook context', 'sustainable-catalyst-library' ),
+                    'evidence-context'   => __( 'Evidence matrix context', 'sustainable-catalyst-library' ),
+                ),
+            ),
             'site-intelligence' => array(
                 'key'           => 'site-intelligence',
                 'label'         => __( 'Site Intelligence', 'sustainable-catalyst-library' ),
@@ -667,6 +681,21 @@ final class SC_Library_Cross_Product_Research_Handoffs {
                             'pathways'        => $context['pathways'] ?? array(),
                             'recommendations' => $context['pathway_recommendations'] ?? array(),
                             'gaps'            => $context['semantic_context']['coverage']['gaps'] ?? array(),
+                        ),
+                    )
+                );
+            case 'workspace':
+                return array_merge(
+                    $base,
+                    array(
+                        'workspace_continuity' => array(
+                            'project_identity' => self::project_identity( absint( $project['id'] ?? 0 ), true ),
+                            'continuity_scope' => sanitize_key( $request['parameters']['continuity_scope'] ?? 'project' ),
+                            'continuity_scope_id' => sanitize_text_field( $request['parameters']['continuity_scope_id'] ?? '' ),
+                            'continuity_checksum' => sanitize_text_field( $request['parameters']['continuity_checksum'] ?? '' ),
+                            'references_only' => true,
+                            'automatic_workspace_write' => false,
+                            'automatic_library_write' => false,
                         ),
                     )
                 );

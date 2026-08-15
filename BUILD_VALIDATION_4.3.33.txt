@@ -1,0 +1,53 @@
+Sustainable Catalyst Library v4.3.33 — Build Validation
+=======================================================
+
+Release: Library ↔ Workspace Bidirectional Continuity
+Baseline: v4.3.32 — Evidence Matrix & Claim Intelligence
+
+PASS - v4.3.33 feature contract: 16 tests
+PASS - retained selected regression line: 138 tests total
+PASS - PHP syntax across Sustainable Catalyst Library plugin
+PASS - JavaScript syntax for v4.3.33 and retained current surfaces
+PASS - canonical /knowledge-libraries/ route preserved
+PASS - shared Sustainable Catalyst / Workspace account identity preserved
+PASS - v3.4 signed cross-product handoff transport reused
+PASS - Workspace added as first-class handoff target
+PASS - stable Research Project identity reused
+PASS - project, Source Bundle, Reading Notebook and Evidence Matrix continuity scopes
+PASS - v4.3.30 project-linked sources, My Library, saved research, citation collections, documents, courses and pathways remain reference-based
+PASS - signed expiring Workspace delivery contract
+PASS - Workspace launch descriptor uses URL fragment in the v4.3.33 front-end
+PASS - authenticated Workspace -> Library reference resolver
+PASS - Library remains canonical for Library records
+PASS - Workspace remains canonical for Workspace records
+PASS - no automatic Workspace write
+PASS - no automatic Library write
+PASS - no automatic publication
+PASS - no automatic evidence promotion
+PASS - no private binary copy
+PASS - no underlying Library-record duplication
+PASS - v4.3.32 Evidence Matrix preserved
+PASS - v4.3.31 Reading Notebook preserved
+PASS - v4.3.30 Research Projects & Source Bundles preserved
+PASS - v4.3.29 Saved Research preserved
+PASS - v4.3.28 My Library preserved
+PASS - v4.3.22.4 Publications field stack preserved
+
+Upgrade delta from frozen v4.3.32 baseline before release packaging:
+- 5 modified files
+- 12 added files
+- 0 removed files
+- 17 files total
+
+Final installer dry-run result is appended/finalized during release packaging.
+
+Installer dry run #1:
+PASS - installed frozen candidate over a clean v4.3.32 Git baseline
+PASS - repository SHA-256 verified before installation
+PASS - safety backup created
+PASS - 138 selected regression tests passed during installed-tree validation
+PASS - release-boundary checks passed
+PASS - exact 17-file upgrade delta confirmed
+PASS - Git commit created successfully
+PASS - zero residual working-tree changes after commit
+PASS - push skipped intentionally for isolated release validation

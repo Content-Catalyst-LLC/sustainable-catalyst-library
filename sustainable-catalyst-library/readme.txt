@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.32
+Stable tag: 4.3.33
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.31 adds an account-persistent Reading, Notebook & Annotation Workspace. Signed-in users can create private reading notebooks, attach them to canonical Research Projects or references-only Source Bundles, keep source-linked notes and reusable excerpts, and record page-, section-, timestamp-, paragraph-, or custom-locator annotations without copying underlying source records or private files. The legacy browser-local Research Notebook remains intact for compatibility; v4.3.30 Research Projects and earlier Library systems are preserved.
+Sustainable Catalyst Library v4.3.33 adds explicit Library ↔ Workspace bidirectional continuity on the shared Sustainable Catalyst account. Signed-in users can prepare signed, expiring, references-only Workspace handoffs from Research Projects, Source Bundles, Reading Notebooks, and Evidence Matrices, while authenticated Workspace-origin references can resolve back to the canonical Library surface. Library and Workspace remain separate canonical stores; no automatic cross-product write, publication, evidence promotion, or private-file copy occurs.
 
 
 
@@ -171,6 +171,14 @@ Sustainable Catalyst Library v4.3.31 adds an account-persistent Reading, Noteboo
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.33 =
+* Added `[sc_library_workspace_continuity]` and authenticated `/wp-json/sc-library/v1/workspace-continuity`.
+* Added Workspace as a first-class target in the existing signed v3.4 cross-product handoff registry.
+* Added explicit project, Source Bundle, Reading Notebook, and Evidence Matrix continuity packets with stable identities and checksums.
+* Added authenticated Workspace → Library reopen resolution on the canonical `/knowledge-libraries/` route.
+* Continuity is references-only and user-directed: no automatic Workspace write, Library write, publication, evidence promotion, or private binary copy.
+* Preserved v4.3.32 Evidence Matrix, v4.3.31 Reading Notebooks, v4.3.30 Research Projects/Source Bundles, and earlier Library boundaries.
 
 = 4.3.32 =
 * Added private Evidence Matrix & Claim Intelligence workspace with explicit claim/evidence relationships.

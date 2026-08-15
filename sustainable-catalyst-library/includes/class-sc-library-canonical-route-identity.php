@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Canonical_Route_Identity {
-    public const VERSION = '4.3.32';
+    public const VERSION = '4.3.33';
     public const SCHEMA = 'sc-library-route-identity-health/1.0';
     public const ACCOUNT_SCHEMA = 'sc-library-account-continuity/1.0';
     public const CANONICAL_SLUG = 'knowledge-libraries';
@@ -43,6 +43,8 @@ final class SC_Library_Canonical_Route_Identity {
         'evidence_matrices'   => 'sc_evidence_matrix:post_author',
         'matrix_claims'       => '_sc_evidence_matrix_claims_v4332',
         'matrix_links'        => '_sc_evidence_matrix_links_v4332',
+        'workspace_handoffs'   => 'sc_workspace_handoff:_sc_handoff_created_by',
+        'workspace_returns'    => 'sc_workspace_handoff:_sc_handoff_result_url',
     );
 
     public function __construct() {
@@ -131,7 +133,7 @@ final class SC_Library_Canonical_Route_Identity {
         );
 
         nocache_headers();
-        wp_safe_redirect( $target, 301, 'Sustainable Catalyst Library v4.3.32' );
+        wp_safe_redirect( $target, 301, 'Sustainable Catalyst Library v4.3.33' );
         exit;
     }
 
@@ -232,12 +234,12 @@ final class SC_Library_Canonical_Route_Identity {
 
         ob_start();
         ?>
-        <aside class="sc-library-account-continuity" data-sc-library-account-continuity="v4.3.32">
+        <aside class="sc-library-account-continuity" data-sc-library-account-continuity="v4.3.33">
             <div class="sc-library-account-continuity__state">
                 <small><?php esc_html_e( 'Account continuity', 'sustainable-catalyst-library' ); ?></small>
                 <?php if ( $signed_in && $user instanceof WP_User ) : ?>
                     <strong><?php echo esc_html( sprintf( __( 'Signed in as %s', 'sustainable-catalyst-library' ), $user->display_name ) ); ?></strong>
-                    <span><?php esc_html_e( 'Your Sustainable Catalyst account is the same authenticated account used by Workspace and private Library tools. My Sources, My Libraries, course plans, research documents, My Library collections, saved searches, watchlists, the research queue, private research projects with source bundles, reading notebooks, notes, reusable excerpts, source annotations, evidence matrices, claims, and evidence links remain attached to this account; no second Library account is required.', 'sustainable-catalyst-library' ); ?></span>
+                    <span><?php esc_html_e( 'Your Sustainable Catalyst account is the same authenticated account used by Workspace and private Library tools. My Sources, My Libraries, course plans, research documents, My Library collections, saved searches, watchlists, the research queue, private research projects with source bundles, reading notebooks, notes, reusable excerpts, source annotations, evidence matrices, claims, evidence links, and explicit Library ↔ Workspace handoff history remain attached to this account; no second Library account is required.', 'sustainable-catalyst-library' ); ?></span>
                 <?php else : ?>
                     <strong><?php esc_html_e( 'One Sustainable Catalyst account', 'sustainable-catalyst-library' ); ?></strong>
                     <span><?php esc_html_e( 'Public research discovery stays open. Sign in once to persist private Library research and continue into Workspace without creating a separate Library account.', 'sustainable-catalyst-library' ); ?></span>
