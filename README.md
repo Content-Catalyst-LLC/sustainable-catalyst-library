@@ -1,5 +1,11 @@
 # Sustainable Catalyst Library
 
+## v4.5.0 — Knowledge Graph & Evidence Intelligence
+
+v4.5.0 adds a private, account-scoped graph projection over the canonical research environment. `[sc_knowledge_graph_evidence_intelligence]` composes explicit Research Project links, Source Bundles, project-attached Reading Notebooks, notes, annotations, Evidence Matrices, claims, evidence sources, and Open Learning II routes into one bounded graph without creating a replacement graph database.
+
+Evidence Intelligence reuses the deterministic v4.3.32 matrix diagnostics to summarize support, contradiction, qualification, context, source diversity, unresolved references, and quote/locator verification gaps. It never scores truth, infers a semantic relationship from private text, changes claim status or user-declared confidence, publishes research, or writes to Workspace. The public Knowledge Graph and Publications ↔ Research Graph remain separate public projections.
+
 ## v4.4.0 — Unified Personal Research Environment
 
 v4.4.0 consolidates the signed-in research experience without consolidating the underlying data stores. `[sc_personal_research_environment]` reads the canonical My Library, Saved Research, Research Projects/Source Bundles, Reading Notebooks, Evidence Matrices, Open Learning II routes, Workspace continuity, Research Librarian II, and portability lineage and presents one private research home with counts, project context, and resume links.

@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.4.0
+Stable tag: 4.5.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.4.0 introduces the Unified Personal Research Environment: one private, signed-in research home that composes existing Projects, My Library, saved research, Reading Notebooks, Evidence Matrices, learning routes, Research Librarian II, Workspace continuity, and Research Portability without migrating or duplicating their canonical records.
+Sustainable Catalyst Library v4.5.0 adds Knowledge Graph & Evidence Intelligence: a private, signed-in project graph that composes explicit Research Project, Source Bundle, Reading Notebook, note, annotation, Evidence Matrix, claim, evidence-source, and learning-route relationships without creating a replacement graph store or inferring semantic relationships from private text.
 
 
 
@@ -19,6 +19,16 @@ Sustainable Catalyst Library v4.4.0 introduces the Unified Personal Research Env
 
 
 
+
+= Knowledge Graph & Evidence Intelligence =
+
+* New shortcode `[sc_knowledge_graph_evidence_intelligence]` with authenticated `/wp-json/sc-library/v1/knowledge-graph-evidence/catalog` and `/knowledge-graph-evidence?project_id={id}` endpoints.
+* Projects only relationships already explicit in canonical Research Project links, Source Bundles, Reading Notebook records, Evidence Matrix claim/evidence links, and Open Learning II project context.
+* Builds a bounded, rebuildable private graph projection; no new graph record store or data migration is introduced.
+* Evidence Intelligence aggregates deterministic support, qualification, contradiction, context, unresolved-reference, source-diversity, and quote/locator-check patterns from existing Evidence Matrix diagnostics.
+* Graph and diagnostic output never score truth, infer a missing relationship, change claim status or user-declared confidence, resolve entities automatically, publish research, or write to Workspace.
+* The public Knowledge Graph and v4.3.37 Publications ↔ Research Graph remain separate public surfaces; private project graph content is never promoted into them automatically.
+* v4.4.0 Unified Personal Research Environment and the v4.3.40 production-hardening lineage remain intact.
 
 = Unified Personal Research Environment =
 
@@ -253,6 +263,10 @@ Sustainable Catalyst Library v4.4.0 introduces the Unified Personal Research Env
 * `/wp-json/sc-library/v1/research-portability/validate` — authenticated, non-executing package integrity validation.
 
 == Changelog ==
+
+= 4.5.0 =
+* Added private Knowledge Graph & Evidence Intelligence with explicit-only project graph projection and deterministic evidence diagnostics.
+* Preserved all v4.4.0 canonical stores and public/private graph boundaries.
 
 = 4.3.39 =
 * Added `[sc_research_portability]` and authenticated Research Portability REST catalog/export/validate endpoints.

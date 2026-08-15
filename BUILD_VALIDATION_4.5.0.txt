@@ -1,0 +1,31 @@
+Sustainable Catalyst Library v4.5.0 — Knowledge Graph & Evidence Intelligence
+
+SOURCE BASELINE
+- sustainable-catalyst-library-v4.4.0-repository.zip
+
+VALIDATION
+- v4.5.0 feature contract: 16 passed
+- retained v4.4.0 composition checks: 9 passed, 7 current-release assertions deselected
+- retained v4.3.40 hardening checks: 6 passed, 10 current-release assertions deselected
+- retained v4.3.39 → v4.3.19 regression line: 210 passed, 61 historical current-release assertions deselected
+- TOTAL SELECTED TESTS PASSED: 241
+- PHP syntax across plugin tree: PASS
+- JavaScript syntax for v4.5.0 + retained critical research assets: PASS
+
+CORE RELEASE BOUNDARIES
+- explicit relationships only
+- no machine-inferred relationships from private text
+- no new private graph record store
+- canonical v4.3/v4.4 stores remain authoritative
+- owned-project authorization required
+- graph output bounded to 240 nodes / 600 edges
+- evidence diagnostics descriptive only
+- no truth scoring
+- no automatic claim generation/status/confidence changes
+- no automatic evidence promotion
+- no automatic publication
+- no automatic Workspace write
+- public Knowledge Graph / Publications Research Graph remain separate from private project graph
+
+INSTALLER CERTIFICATION
+- Final frozen-archive installer result is recorded separately in FINAL_INSTALLER_VALIDATION_4.5.0.txt in the release bundle.
