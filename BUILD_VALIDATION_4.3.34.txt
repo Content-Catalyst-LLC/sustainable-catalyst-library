@@ -1,0 +1,44 @@
+Sustainable Catalyst Library v4.3.34 — Build Validation
+=======================================================
+
+Release: Metadata Quality & Entity Resolution
+Baseline: v4.3.33 — Library ↔ Workspace Bidirectional Continuity
+
+STATUS: SOURCE VALIDATION PASS
+
+PASS - v4.3.34 feature contract: 16 tests
+PASS - retained selected regression line: 150 tests total
+PASS - PHP syntax across Sustainable Catalyst Library plugin
+PASS - JavaScript syntax for v4.3.34 and retained current surfaces
+PASS - canonical /knowledge-libraries/ route preserved
+PASS - Citation Studio normalized DOI/ISBN/URL and canonical-source contracts reused
+PASS - v3.2 Named Entity authority records, aliases, external URIs, and vocabularies reused
+PASS - deterministic metadata quality diagnostics
+PASS - diagnostic scores explicitly not truth/authority determinations
+PASS - exact authority URI, normalized label, label/alias, and shared-alias entity candidate rules
+PASS - entity candidates remain proposals until explicit reviewer decision
+PASS - editor capability required for accept/reject resolution decisions
+PASS - accepted entity resolution is non-destructive
+PASS - duplicate entity record is not deleted
+PASS - historical assignments are not rewritten
+PASS - canonical entity alias set preserves candidate label/aliases
+PASS - before-state resolution history is retained
+PASS - bounded canonical resolution chain with cycle rejection
+PASS - no automatic metadata overwrite
+PASS - no automatic publication
+PASS - no automatic Workspace write
+PASS - v4.3.33 Library ↔ Workspace Continuity preserved
+PASS - v4.3.32 Evidence Matrix preserved
+PASS - v4.3.31 Reading Notebook preserved
+PASS - v4.3.30 Research Projects & Source Bundles preserved
+PASS - v4.3.29 Saved Research preserved
+PASS - v4.3.28 My Library preserved
+PASS - v4.3.22.4 Publications field stack preserved
+
+Upgrade delta from frozen v4.3.33 baseline before release packaging:
+- 4 modified files
+- 12 added files
+- 0 removed files
+- 16 files total
+
+Final frozen-archive installer result is recorded separately in FINAL_INSTALLER_VALIDATION_4.3.34.txt in the release bundle.

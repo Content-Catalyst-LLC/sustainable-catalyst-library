@@ -4,17 +4,27 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.33
+Stable tag: 4.3.34
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.33 adds explicit Library ↔ Workspace bidirectional continuity on the shared Sustainable Catalyst account. Signed-in users can prepare signed, expiring, references-only Workspace handoffs from Research Projects, Source Bundles, Reading Notebooks, and Evidence Matrices, while authenticated Workspace-origin references can resolve back to the canonical Library surface. Library and Workspace remain separate canonical stores; no automatic cross-product write, publication, evidence promotion, or private-file copy occurs.
+Sustainable Catalyst Library v4.3.34 adds Metadata Quality & Entity Resolution above the existing Citation Studio normalization and v3.2 named-entity authority records. Deterministic quality reports surface missing metadata and normalized identifiers, while duplicate/entity matches remain review proposals. Accepted entity resolutions are non-destructive canonical pointers with alias and pre-resolution history preserved; no automatic merge, deletion, assignment rewrite, metadata overwrite, publication, or Workspace write occurs.
 
 
 
+
+= Metadata Quality & Entity Resolution =
+
+* Public/editorial shortcode `[sc_metadata_quality_center]` and `/wp-json/sc-library/v1/metadata-quality`.
+* Reuses Citation Studio DOI/ISBN/URL normalization, completeness and canonical-source decisions.
+* Reuses v3.2 `sc_named_entity` authority records, aliases, external URIs, and controlled vocabularies.
+* Deterministic quality diagnostics identify missing fields and exact/alias-based resolution candidates.
+* Accepted entity resolutions add a canonical pointer and preserve aliases plus before-state history; duplicate records are not deleted and historical assignments are not rewritten.
+* Quality scores and candidate scores are diagnostics, not truth or identity determinations.
+* No automatic merge, metadata overwrite, publication, or Workspace write.
 
 = Field Spotlight data architecture =
 
@@ -171,6 +181,15 @@ Sustainable Catalyst Library v4.3.33 adds explicit Library ↔ Workspace bidirec
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.34 =
+* Added `[sc_metadata_quality_center]` and `/wp-json/sc-library/v1/metadata-quality`.
+* Reused Citation Studio normalized DOI/ISBN/URL, completeness, duplicate, canonical-source, and provenance records rather than creating another source store.
+* Reused v3.2 Named Entity authority records, aliases, external URIs, and controlled vocabularies.
+* Added deterministic metadata-quality diagnostics and exact/alias-based entity-resolution proposals.
+* Accepted entity resolutions are non-destructive canonical pointers with aliases and pre-resolution history preserved; duplicate records remain and historical assignments are not rewritten.
+* No automatic merge, deletion, metadata overwrite, publication, or Workspace write.
+* Preserved v4.3.33 Library ↔ Workspace Continuity, v4.3.32 Evidence Matrix, v4.3.31 Reading Notebooks, v4.3.30 Research Projects/Source Bundles, and earlier Library boundaries.
 
 = 4.3.33 =
 * Added `[sc_library_workspace_continuity]` and authenticated `/wp-json/sc-library/v1/workspace-continuity`.

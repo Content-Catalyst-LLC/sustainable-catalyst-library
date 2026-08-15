@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v4.3.33 adds Library ↔ Workspace Bidirectional Continuity with explicit signed reference handoffs and safe Library reopen links while preserving Evidence Matrix, Reading Notebooks, Research Projects, saved research, personal collections, access intelligence, citations, learning, documents, and Publications.
- * Version: 4.3.33
+ * Description: Sustainable Catalyst Library v4.3.34 adds Metadata Quality & Entity Resolution with deterministic diagnostics, normalized identifier review, and non-destructive human-approved entity canonicalization while preserving Workspace continuity, Evidence Matrix, Reading Notebooks, Research Projects, access intelligence, citations, learning, documents, and Publications.
+ * Version: 4.3.34
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.33');
+define('SC_LIBRARY_VERSION', '4.3.34');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
