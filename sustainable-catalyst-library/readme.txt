@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.35
+Stable tag: 4.3.36
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.35 adds Access Intelligence II above the existing v4.3.24 access classifier. It ranks direct, provider, connected-library, catalog, request, and public fallback paths using transparent scoring, route freshness, and user-declared My Libraries relationships while keeping availability, holdings, authentication, membership, and entitlement explicitly separate. No catalog search, holding, or connected-library relationship is treated as proof of current user access.
+Sustainable Catalyst Library v4.3.36 adds Open Learning II above the existing Open Course Finder and v4.3.21 My Learning plan. It builds deterministic learning routes from reviewed course metadata, keeps missing prerequisite/duration data explicitly unknown, lets signed-in users save private route manifests, and can attach routes to their Research Projects or Reading Notebooks without enrolling them in third-party courses or claiming current price, availability, certificates, or completion.
 
 
 
@@ -192,7 +192,20 @@ Sustainable Catalyst Library v4.3.35 adds Access Intelligence II above the exist
 * `/wp-json/sustainable-catalyst-library/v1/schemas`
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
+* `[sc_open_learning_ii]` — deterministic learning-route planning and private saved learning routes.
+* `/wp-json/sc-library/v1/open-learning-v2` — public route planner over the reviewed launch catalog.
+* `/wp-json/sc-library/v1/open-learning-v2/routes` — authenticated account-owned saved route manifests.
+
 == Changelog ==
+
+= 4.3.36 =
+* Added `[sc_open_learning_ii]`, `/wp-json/sc-library/v1/open-learning-v2`, and authenticated saved learning routes.
+* Reused the v4.3.20/4.3.21 Open Course Finder catalog, provider registry, Knowledge Pathway mappings, and `sc_library_course_plan_v4321` statuses instead of creating a second course store.
+* Added deterministic route ranking and sequencing from declared course level and metadata matches, with explicit rank reasons and catalog verification date.
+* Missing prerequisite or duration metadata remains unknown rather than being interpreted as none or zero.
+* Signed-in users can save private learning-route manifests and optionally attach them to owned Research Projects, Source Bundles, or Reading Notebooks.
+* Saving a route does not enroll, purchase, award a certificate, change provider credentials, or mark a course complete; provider/course pages remain authoritative for current terms.
+* Preserved v4.3.35 Access Intelligence II, v4.3.34 Metadata Quality, v4.3.33 Workspace Continuity, v4.3.32 Evidence Matrix, v4.3.31 Reading Notebooks, v4.3.30 Research Projects/Source Bundles, and earlier Library boundaries.
 
 = 4.3.35 =
 * Added `[sc_access_intelligence_ii]` and `/wp-json/sc-library/v1/access-intelligence-v2`.

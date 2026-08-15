@@ -1,0 +1,23 @@
+Sustainable Catalyst Library v4.3.36 — Open Learning II
+
+Validation status: PASS
+
+Selected regression coverage
+- v4.3.36 Open Learning II: 16 passed
+- Retained v4.3.35 → v4.3.19 compatibility line: 157 passed, 50 historical release-identity/page assertions intentionally deselected
+- Total selected regression tests: 173 passed
+
+Runtime/static validation
+- PHP syntax: PASS across the complete WordPress plugin tree
+- JavaScript syntax: PASS for Open Learning II and retained current critical Library surfaces
+
+Release boundaries validated
+- Open Course Finder launch catalog/provider registry/pathway registry remain canonical.
+- Existing `sc_library_course_plan_v4321` My Learning state is read/reused and not migrated or rewritten by v4.3.36.
+- Saved learning routes use separate account-owned `sc_library_learning_routes_v4336` storage.
+- Stable route URN + SHA-256 manifest contract present.
+- Missing prerequisite/duration metadata remains explicitly unknown.
+- Research Project / Source Bundle / Reading Notebook attachments are ownership-checked.
+- Public route planning is separated from authenticated route persistence.
+- No automatic enrollment, purchase, completion, certificate claim, publication, Workspace write, or external-provider credential storage.
+- v4.3.35 Access Intelligence II and earlier continuity/evidence/project/Publications contracts remain preserved.

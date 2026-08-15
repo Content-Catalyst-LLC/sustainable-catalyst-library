@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v4.3.35 adds Access Intelligence II with transparent access-path ranking, connected-library fit, route confidence and fallback sequencing while preserving truthful availability/entitlement boundaries, Metadata Quality, Workspace continuity, Evidence Matrix, Reading Notebooks, Research Projects, citations, learning, documents, and Publications.
- * Version: 4.3.35
+ * Description: Sustainable Catalyst Library v4.3.36 adds Open Learning II with deterministic learning-route planning, transparent course metadata, account-owned saved routes, and optional research-context links while preserving truthful provider/access boundaries, Access Intelligence II, Metadata Quality, Workspace continuity, Evidence Matrix, Reading Notebooks, Research Projects, citations, documents, and Publications.
+ * Version: 4.3.36
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.35');
+define('SC_LIBRARY_VERSION', '4.3.36');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
