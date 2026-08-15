@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.7.0
+Stable tag: 4.8.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.7.0 adds Institutional & Team Libraries: durable private organizational curation spaces with governed membership, team collections, explicit references-only contribution, canonical institution/research-unit identity reuse, and no automatic exposure of personal research.
+Sustainable Catalyst Library v4.8.0 adds Global Research Federation: explicit Team Library metadata manifests, compatible-node discovery, provenance-preserving exchange, quarantine-first remote intake, explicit acceptance into Team Libraries, and no federation of private research, credentials, or access entitlement.
 
 
 
@@ -20,6 +20,17 @@ Sustainable Catalyst Library v4.7.0 adds Institutional & Team Libraries: durable
 
 
 
+
+= Global Research Federation =
+
+* New shortcode `[sc_global_research_federation]` with public node/manifest discovery under `/wp-json/sc-library/v1/research-federation/node` and `/research-federation/manifests`, plus authenticated governance under `/research-federation/catalog`.
+* Reuses the canonical v3.9 federation peer/trust/token/quarantine machinery and the v4.7 Team Library governance model; no second peer registry, import queue, institution registry, or research-source store is created.
+* Team Library owners/stewards explicitly select references and publish a checksummed references-only metadata manifest. Draft and revoked manifests are not public.
+* Public manifests exclude My Library, private projects, Research Room membership, notebook/matrix bodies, source binaries, credentials, local file paths, and Workspace state.
+* Remote manifests are integrity-checked and quarantined before administrative metadata approval. Approval alone creates no Team Library record.
+* A Team Library owner/steward must separately accept approved metadata; acceptance contributes references only, preserves remote node/manifest provenance, and conservatively skips duplicate canonical IDs/URLs.
+* Peer trust is transport/review governance rather than a truth score. Institutional context and remote node identity do not prove membership, subscription entitlement, legal authority, or access rights.
+* v4.8.0 performs no automatic remote polling, automatic import acceptance, evidence promotion, publication of private research, or Workspace write.
 
 = Institutional & Team Libraries =
 
@@ -289,7 +300,19 @@ Sustainable Catalyst Library v4.7.0 adds Institutional & Team Libraries: durable
 * `[sc_collaborative_research_rooms]` — authenticated project-anchored private collaboration rooms.
 * `/wp-json/sc-library/v1/research-rooms` — authenticated room catalog/create surface; room-specific member/reference/note/decision endpoints remain role-scoped.
 
+* `[sc_global_research_federation]` — public node/manifest discovery plus authenticated Team Library federation governance.
+* `/wp-json/sc-library/v1/research-federation/node` — public safe node compatibility manifest.
+* `/wp-json/sc-library/v1/research-federation/manifests` — public published references-only manifests; POST requires an authenticated Team Library governor.
+* `/wp-json/sc-library/v1/research-federation/catalog` — authenticated local federation governance catalog.
+
 == Changelog ==
+
+= 4.8.0 =
+* Added Global Research Federation as a governed facade over the canonical v3.9 federation trust/quarantine engine and v4.7 Team Libraries.
+* Added public safe node/manifest discovery, explicit references-only Team Library manifests, SHA-256 integrity, quarantine-first inbound validation, and explicit approved-metadata acceptance into governed Team Libraries.
+* Peer trust is transport/review governance rather than truth; federation never infers institutional membership, subscription entitlement, legal authority, or access rights.
+* Private projects, My Library, Research Room membership, notebook/matrix bodies, source binaries, credentials, and Workspace state are excluded from federation manifests.
+* No parallel peer registry, import queue, institution registry, or research-source store was introduced.
 
 = 4.7.0 =
 * Added Institutional & Team Libraries with governed membership, team collections, references-only contribution, canonical institutional identity reuse, and private activity lineage.
