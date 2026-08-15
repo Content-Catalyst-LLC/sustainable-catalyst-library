@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v4.5.0 adds Knowledge Graph & Evidence Intelligence: a private, account-scoped projection of explicit Research Project, Source Bundle, notebook, claim, evidence, source, and learning-route relationships with deterministic coverage/conflict diagnostics and no inferred truth or automatic research mutation.
- * Version: 4.5.0
+ * Description: Sustainable Catalyst Library v4.6.0 adds Collaborative Research Rooms: private, project-anchored collaboration with explicit references-only sharing, role-scoped review notes and decisions, activity lineage, and no project-ownership transfer or automatic publication.
+ * Version: 4.6.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.5.0');
+define('SC_LIBRARY_VERSION', '4.6.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

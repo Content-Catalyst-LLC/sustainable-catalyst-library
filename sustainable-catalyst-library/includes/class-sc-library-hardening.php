@@ -12,8 +12,8 @@ if (!defined('ABSPATH')) {
  */
 final class SC_Library_Hardening {
     public const SCHEMA = 'sc-library-production-readiness/1.0';
-    public const BRANCH_VERSION = '4.5.0';
-    public const BRANCH_SCHEMA = 'sc-library-v45-production-certification/1.0';
+    public const BRANCH_VERSION = '4.6.0';
+    public const BRANCH_SCHEMA = 'sc-library-v46-production-certification/1.0';
 
     /** Recent 4.3 branch modules that must load together for release certification. */
     private const V43_CRITICAL_MODULES = [
@@ -32,6 +32,7 @@ final class SC_Library_Hardening {
         'SC_Library_Research_Portability_Preservation',
         'SC_Library_Unified_Personal_Research_Environment',
         'SC_Library_Knowledge_Graph_Evidence_Intelligence',
+        'SC_Library_Collaborative_Research_Rooms',
     ];
 
     /** Authenticated/private base routes introduced across the 4.3 research branch. */
@@ -46,6 +47,7 @@ final class SC_Library_Hardening {
         '/sc-library/v1/research-portability/catalog',
         '/sc-library/v1/personal-research-environment',
         '/sc-library/v1/knowledge-graph-evidence',
+        '/sc-library/v1/research-rooms',
     ];
     private const CACHE_GENERATION_OPTION = 'sc_library_public_cache_generation';
     private const LAST_REPORT_OPTION = 'sc_library_readiness_last_report';
@@ -578,13 +580,13 @@ final class SC_Library_Hardening {
         $categories['integrity']['checks'][] = $this->check_status('backup-boundary', __('Off-site backups', 'sustainable-catalyst-library'), 'info', __('WordPress cannot verify your hosting provider’s off-site backup policy.', 'sustainable-catalyst-library'), '', __('Confirm automated database and uploads backups outside this plugin.', 'sustainable-catalyst-library'));
         $categories['integrity']['checks'][] = $this->check('hardening-cron', __('Daily readiness evaluation', 'sustainable-catalyst-library'), (bool) wp_next_scheduled('sc_library_hardening_daily'), __('The daily readiness check is scheduled.', 'sustainable-catalyst-library'), '', __('Use Repair maintenance schedules on this page.', 'sustainable-catalyst-library'));
 
-        // v4.5.0 release certification is intentionally first-party only. It does not
+        // v4.6.0 release certification is intentionally first-party only. It does not
         // contact connector providers and does not inspect private research content.
         $branch_version_ready = defined('SC_LIBRARY_VERSION') && SC_LIBRARY_VERSION === self::BRANCH_VERSION;
-        $categories['branch_43']['checks'][] = $this->check('v43-release-version', __('4.5 release version alignment', 'sustainable-catalyst-library'), $branch_version_ready, __('Plugin runtime is aligned to the certified 4.5.0 release.', 'sustainable-catalyst-library'), defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : __('Not defined', 'sustainable-catalyst-library'), __('Reinstall the complete v4.5.0 package; do not mix files from different releases.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-release-version', __('4.6 release version alignment', 'sustainable-catalyst-library'), $branch_version_ready, __('Plugin runtime is aligned to the certified 4.6.0 release.', 'sustainable-catalyst-library'), defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : __('Not defined', 'sustainable-catalyst-library'), __('Reinstall the complete v4.6.0 package; do not mix files from different releases.', 'sustainable-catalyst-library'));
 
         $identity_ready = class_exists('SC_Library_Canonical_Route_Identity') && defined('SC_Library_Canonical_Route_Identity::VERSION') && SC_Library_Canonical_Route_Identity::VERSION === self::BRANCH_VERSION;
-        $categories['branch_43']['checks'][] = $this->check('v43-identity-version', __('Canonical identity/version alignment', 'sustainable-catalyst-library'), $identity_ready, __('Canonical routing and shared-account identity are aligned to the release.', 'sustainable-catalyst-library'), '', __('Reinstall v4.5.0 so canonical-route identity and plugin runtime versions match.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-identity-version', __('Canonical identity/version alignment', 'sustainable-catalyst-library'), $identity_ready, __('Canonical routing and shared-account identity are aligned to the release.', 'sustainable-catalyst-library'), '', __('Reinstall v4.6.0 so canonical-route identity and plugin runtime versions match.', 'sustainable-catalyst-library'));
 
         $extension_status = class_exists('SC_Library_Extension_Bootstrap_V402') ? SC_Library_Extension_Bootstrap_V402::status() : [];
         $extensions_ready = is_array($extension_status) && (int) ($extension_status['expected'] ?? 0) > 0 && (int) ($extension_status['active'] ?? 0) === (int) ($extension_status['expected'] ?? -1) && empty($extension_status['errors']);
@@ -610,6 +612,8 @@ final class SC_Library_Hardening {
             'assets/css/sc-library-personal-research-environment-v440.css',
             'assets/js/sc-library-knowledge-graph-evidence-v450.js',
             'assets/css/sc-library-knowledge-graph-evidence-v450.css',
+            'assets/js/sc-library-research-rooms-v460.js',
+            'assets/css/sc-library-research-rooms-v460.css',
             'assets/css/sc-library-hardening.css',
             'assets/js/sc-library-hardening.js',
         ];
@@ -622,7 +626,7 @@ final class SC_Library_Hardening {
 
         $route_health = class_exists('SC_Library_Canonical_Route_Identity') ? SC_Library_Canonical_Route_Identity::health_payload() : [];
         $canonical_ready = is_array($route_health) && 'ok' === ($route_health['status'] ?? '');
-        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the v4.5.0 identity-health endpoint.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the v4.6.0 identity-health endpoint.', 'sustainable-catalyst-library'));
 
         $private_routes_ready = $this->private_v43_routes_require_permission();
         $categories['branch_43']['checks'][] = $this->check('v43-private-rest-boundary', __('Private REST authorization boundary', 'sustainable-catalyst-library'), $private_routes_ready, __('Private research base routes are registered with explicit permission callbacks.', 'sustainable-catalyst-library'), '', __('Do not release until every private research endpoint requires an authenticated permission callback.', 'sustainable-catalyst-library'));

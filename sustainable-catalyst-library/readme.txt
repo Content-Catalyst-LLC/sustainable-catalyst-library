@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.5.0
+Stable tag: 4.6.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.5.0 adds Knowledge Graph & Evidence Intelligence: a private, signed-in project graph that composes explicit Research Project, Source Bundle, Reading Notebook, note, annotation, Evidence Matrix, claim, evidence-source, and learning-route relationships without creating a replacement graph store or inferring semantic relationships from private text.
+Sustainable Catalyst Library v4.6.0 adds Collaborative Research Rooms: private, project-anchored spaces for explicit references-only sharing, role-scoped review notes, human-recorded decisions, and bounded activity lineage without transferring project ownership or exposing a member’s complete private research environment.
 
 
 
@@ -19,6 +19,17 @@ Sustainable Catalyst Library v4.5.0 adds Knowledge Graph & Evidence Intelligence
 
 
 
+
+
+= Collaborative Research Rooms =
+
+* New private shortcode `[sc_collaborative_research_rooms]` and authenticated `/wp-json/sc-library/v1/research-rooms` REST surface.
+* Rooms are anchored to one owner-controlled Research Project but membership never transfers project ownership or grants blanket project access.
+* Only explicit room shares are visible to collaborators; shared records are references-only metadata with stable IDs/URNs, titles, URLs, provenance, and sharing lineage.
+* Room roles are owner, editor, reviewer, and observer. Only the owner manages membership; editors may share references and record decisions; reviewers may add review notes; observers are read-only.
+* Human-authored review notes, decision records, and bounded append-only activity lineage are stored on the private room record.
+* No automatic email invitations, private-binary copy, personal-library copy, notebook-body copy, matrix-body copy, evidence promotion, publication, project ownership transfer, or Workspace write occurs.
+* v4.5.0 Knowledge Graph & Evidence Intelligence and the v4.4.0 Unified Personal Research Environment remain canonical composition layers and are not replaced.
 
 = Knowledge Graph & Evidence Intelligence =
 
@@ -262,7 +273,17 @@ Sustainable Catalyst Library v4.5.0 adds Knowledge Graph & Evidence Intelligence
 * `/wp-json/sc-library/v1/research-portability/export` — authenticated checksummed package creation.
 * `/wp-json/sc-library/v1/research-portability/validate` — authenticated, non-executing package integrity validation.
 
+
+* `[sc_collaborative_research_rooms]` — authenticated project-anchored private collaboration rooms.
+* `/wp-json/sc-library/v1/research-rooms` — authenticated room catalog/create surface; room-specific member/reference/note/decision endpoints remain role-scoped.
+
 == Changelog ==
+
+= 4.6.0 =
+* Added private Collaborative Research Rooms anchored to owner-controlled Research Projects.
+* Added owner/editor/reviewer/observer roles, explicit references-only sharing, review notes, decision records, and bounded activity lineage.
+* Room membership does not transfer project ownership or expose the complete private project; no automatic publication, evidence promotion, private-binary copy, or Workspace write occurs.
+* Preserved v4.5.0 Knowledge Graph & Evidence Intelligence and all v4.4/4.3 canonical stores.
 
 = 4.5.0 =
 * Added private Knowledge Graph & Evidence Intelligence with explicit-only project graph projection and deterministic evidence diagnostics.
