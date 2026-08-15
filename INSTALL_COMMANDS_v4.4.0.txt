@@ -1,0 +1,5 @@
+cd ~/Downloads
+unzip -q sustainable-catalyst-library-v4.4.0-release-bundle.zip
+cd sustainable-catalyst-library-v4.4.0-release
+chmod +x install_and_push_sustainable_catalyst_library_v4_4_0_macos.sh
+./install_and_push_sustainable_catalyst_library_v4_4_0_macos.sh

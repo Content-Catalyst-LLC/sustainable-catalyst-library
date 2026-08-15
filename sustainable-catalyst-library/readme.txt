@@ -4,20 +4,31 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.40
+Stable tag: 4.4.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.40 certifies and hardens the complete 4.3 research branch. The established Production Readiness engine now has a distinct first-party release gate for version alignment, extension startup, recent research modules/assets, canonical routing, shared-account continuity, and authenticated private REST boundaries. Third-party provider health is explicitly non-blocking, and release diagnostics do not inspect private research content.
+Sustainable Catalyst Library v4.4.0 introduces the Unified Personal Research Environment: one private, signed-in research home that composes existing Projects, My Library, saved research, Reading Notebooks, Evidence Matrices, learning routes, Research Librarian II, Workspace continuity, and Research Portability without migrating or duplicating their canonical records.
 
 
 
 
 
 
+
+
+= Unified Personal Research Environment =
+
+* New shortcode `[sc_personal_research_environment]` and authenticated `/wp-json/sc-library/v1/personal-research-environment` endpoint.
+* Composes existing private stores instead of creating a replacement project, notebook, evidence, learning, or personal-library database.
+* Shows one account-scoped summary of Projects, My Library, saved searches, watchlists, research queue, Reading Notebooks, Evidence Matrices, and saved Open Learning II routes.
+* Supports a selected owned Research Project context with reference, Source Bundle, notebook, matrix, and learning-route counts plus bounded recent-work links.
+* The `sc_project` query parameter selects context for the page but is not persisted as a new preference store.
+* No automatic migration, project write, notebook write, evidence promotion, publication, remote private-context synthesis, or Workspace write occurs.
+* The v4.3.40 first-party production-hardening gate is carried forward and updated to certify v4.4.0, including the new private REST route and front-end assets.
 
 = 4.3 Branch Production Hardening =
 

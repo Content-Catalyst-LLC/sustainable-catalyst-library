@@ -1,0 +1,43 @@
+Sustainable Catalyst Library v4.4.0 — Build Validation
+======================================================
+
+Baseline
+- sustainable-catalyst-library-v4.3.40-repository.zip
+- v4.3.40 repository SHA-256: 3c9333fe0db3e0b020adfc0f6b60373c298e80d69b2143bc8236a9bee45588ad
+
+Release intent
+- Introduce one authenticated Unified Personal Research Environment over the mature v4.3 research line.
+- Compose existing canonical private stores instead of migrating or duplicating them.
+- Preserve same-account Library/Workspace continuity, private ownership, stable identities, provenance, and tool-specific mutation boundaries.
+- Carry the v4.3.40 first-party production-hardening gate forward and version-align it to v4.4.0.
+
+Source validation
+- v4.4.0 feature contract: 16/16 passed.
+- Retained v4.3.40 production-hardening tests: 11 passed; 5 superseded release-marker/fixture assertions deselected.
+- Retained research regression line: 210 passed; 61 superseded release-marker/page assertions deselected.
+- Total selected tests: 237 passed.
+- PHP syntax: passed across the complete plugin tree.
+- JavaScript syntax: passed for the new research-home surface and retained critical front-end surfaces.
+
+Release boundary
+- Plugin/runtime version: 4.4.0.
+- Canonical route: /knowledge-libraries/ retained.
+- Extension bootstrap: 45 isolated modules, adding only SC_Library_Unified_Personal_Research_Environment.
+- New authenticated state route: /wp-json/sc-library/v1/personal-research-environment.
+- No new private record store, project store, notebook store, evidence store, or learning store.
+- No automatic record migration, project write, notebook write, evidence promotion, publication, remote private-context synthesis, or Workspace write.
+- Existing 4.3 storage keys and post types remain canonical.
+- Production readiness remains first-party only; network_calls_performed=false and upstream_health_release_blocking=false.
+
+Upgrade certification
+- Candidate v4.3.40 -> v4.4.0 delta is expected to be narrow and deletion-free.
+- Final installer dry-run result is recorded separately in FINAL_INSTALLER_VALIDATION_4.4.0.txt after the frozen-archive certification pass.
+
+First installer-path dry run
+- Baseline: clean Git repository created from frozen v4.3.40 repository ZIP.
+- Candidate repository checksum verified before installation.
+- Safety backup created successfully.
+- 237 selected tests passed during installer execution.
+- Expected 18-file delta enforced; no tracked-file deletions.
+- Git commit created successfully: 170917a1a38f3a1b181e786470a14bbf99d0347c.
+- Final working tree: clean.
