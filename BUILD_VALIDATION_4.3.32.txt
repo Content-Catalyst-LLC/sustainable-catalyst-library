@@ -1,0 +1,58 @@
+Sustainable Catalyst Library v4.3.32 — Build Validation
+Build: Evidence Matrix & Claim Intelligence
+Date: 2026-08-14
+
+STATUS: RELEASE VALIDATION PASS
+
+Release identity
+- Plugin header: 4.3.32
+- SC_LIBRARY_VERSION: 4.3.32
+- Canonical Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
+- Extension bootstrap module count: 37
+
+New v4.3.32 boundaries
+- Private sc_evidence_matrix account-owned record type
+- Stable matrix, claim, and evidence-link UUID/URN identities
+- Explicit supports / qualifies / contradicts / contextualizes / unresolved relationships
+- Reading Note and Source Annotation linking requires explicit user action
+- Canonical v2.7 Evidence Notes / Research Claims preserved
+- Deterministic descriptive diagnostics only
+- No automatic claim generation
+- No automatic evidence promotion
+- No automatic claim-status change
+- No automatic confidence scoring
+- No automatic publication
+- No automatic Workspace write
+- Underlying source records and private binary files are not copied
+- Authenticated /wp-json/sc-library/v1/evidence-matrices API
+- SHA-256 checksummed matrix manifests
+
+Regression validation
+- 126 selected pytest tests passed
+- PHP syntax passed across plugin PHP files
+- JavaScript syntax passed for v4.3.32 and retained critical current surfaces
+- v4.3.31 Reading Notebook boundary preserved
+- v4.3.30 Research Projects / Source Bundles preserved
+- v4.3.29 Saved Research preserved
+- v4.3.28 My Library preserved
+- v4.3.27 canonical routing/account continuity preserved
+- v4.3.26 Public Library Network preserved
+- v4.3.25 institutional connector expansion preserved
+- v4.3.24 Access Intelligence preserved
+- v4.3.23 Research Document Builder preserved
+- v4.3.22.4 Publications 14-field stack preserved
+
+Research Library page
+- RESEARCH_LIBRARY_PAGE_v4.3.32.html generated
+- Evidence Matrix placed after Reading Notebook and before Open Course Finder
+- Existing account continuity, My Library, Saved Research, Research Projects, Reading Notebook, courses, citations, documents, and research surfaces retained
+
+Installer dry run
+- PASS — clean v4.3.31 Git baseline upgraded through the packaged macOS installer
+- Repository ZIP checksum verified before installation
+- Safety backup created
+- 126 selected regression tests passed after installed-tree replacement
+- Release boundary checks passed
+- Git commit created successfully
+- Final working tree clean
+- Intended v4.3.31 → v4.3.32 delta: 16 files changed/added in the installer commit

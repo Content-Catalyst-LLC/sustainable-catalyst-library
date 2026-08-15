@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.31
+Stable tag: 4.3.32
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -113,6 +113,7 @@ Sustainable Catalyst Library v4.3.31 adds an account-persistent Reading, Noteboo
 == Shortcodes ==
 
 * `[sc_reading_notebook_workspace]`
+* `[sc_evidence_matrix_workspace]`
 * `[sc_research_continuity]`
 * `[sc_personal_library]`
 * `[sc_library_account_continuity]`
@@ -139,6 +140,7 @@ Sustainable Catalyst Library v4.3.31 adds an account-persistent Reading, Noteboo
 == REST API ==
 
 * `/wp-json/sc-library/v1/reading-notebooks` (authenticated; current user only)
+* `/wp-json/sc-library/v1/evidence-matrices` (authenticated; current user only)
 * `/wp-json/sc-library/v1/reading-notebooks/{id}/manifest` (authenticated; current user only)
 * `/wp-json/sc-library/v1/research-continuity` (authenticated; current user only)
 * `/wp-json/sc-library/v1/personal-library` (authenticated; current user only)
@@ -169,6 +171,13 @@ Sustainable Catalyst Library v4.3.31 adds an account-persistent Reading, Noteboo
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.32 =
+* Added private Evidence Matrix & Claim Intelligence workspace with explicit claim/evidence relationships.
+* Added deterministic contradiction, coverage, source-diversity, unresolved-reference, and review-gap diagnostics that do not infer conclusions.
+* Added explicit Reading Note/Annotation evidence linking while preserving v4.3.31 no-automatic-evidence-promotion.
+* Added authenticated `/wp-json/sc-library/v1/evidence-matrices` and `[sc_evidence_matrix_workspace]`.
+* Preserved v4.3.31 Reading Notebooks, v4.3.30 Research Projects/Source Bundles, and all earlier access, citation, course, and Publications boundaries.
 
 = 4.3.29 =
 * Added private Saved Searches, passive Watchlists, and a Research Queue.

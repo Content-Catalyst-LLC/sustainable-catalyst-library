@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) { exit; }
 
 final class SC_Library_Extension_Bootstrap_V402 {
     public const VERSION = '4.0.2';
-    public const MODULE_COUNT = 36;
+    public const MODULE_COUNT = 37;
     private const STATUS_OPTION = 'sc_library_extension_bootstrap_v402_status';
 
     /** @var array<string,string> */
@@ -33,6 +33,7 @@ final class SC_Library_Extension_Bootstrap_V402 {
         'class-sc-library-saved-searches-watchlists-queue.php' => 'SC_Library_Saved_Searches_Watchlists_Queue',
         'class-sc-library-unified-research-projects-source-bundles.php' => 'SC_Library_Unified_Research_Projects_Source_Bundles',
         'class-sc-library-reading-notebook-annotations.php' => 'SC_Library_Reading_Notebook_Annotations',
+        'class-sc-library-evidence-matrix-claim-intelligence.php' => 'SC_Library_Evidence_Matrix_Claim_Intelligence',
         'class-sc-library-scholarly-library-connectors.php' => 'SC_Library_Scholarly_Library_Connectors',
         'class-sc-library-open-course-finder.php' => 'SC_Library_Open_Course_Finder',
         'class-sc-library-connector-holdings-reliability.php' => 'SC_Library_Connector_Holdings_Reliability',

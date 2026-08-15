@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v4.3.31 adds an account-persistent Reading, Notebook & Annotation Workspace with project-linked notes, reusable excerpts, and source annotations while preserving unified Research Projects, saved research, personal collections, access intelligence, citations, learning, documents, and Publications.
- * Version: 4.3.31
+ * Description: Sustainable Catalyst Library v4.3.32 adds a private Evidence Matrix & Claim Intelligence workspace for explicit claim/evidence relationships, contradiction and coverage review, and notebook-to-evidence promotion while preserving Reading Notebooks, Research Projects, saved research, personal collections, access intelligence, citations, learning, documents, and Publications.
+ * Version: 4.3.32
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.31');
+define('SC_LIBRARY_VERSION', '4.3.32');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
