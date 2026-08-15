@@ -4,19 +4,30 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.36
+Stable tag: 4.3.37
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.36 adds Open Learning II above the existing Open Course Finder and v4.3.21 My Learning plan. It builds deterministic learning routes from reviewed course metadata, keeps missing prerequisite/duration data explicitly unknown, lets signed-in users save private route manifests, and can attach routes to their Research Projects or Reading Notebooks without enrolling them in third-party courses or claiming current price, availability, certificates, or completion.
+Sustainable Catalyst Library v4.3.37 adds Publications ↔ Research Graph Integration. Public publication posts can be explicitly connected to canonical Knowledge Topics, Concepts, Named Entities, public Research Sources, public Research Claims, Article Maps, and published Knowledge Pathways; the Field Spotlight exposes a Research Graph action only when public graph context exists. Private research stays private, and authenticated publication-to-project continuation stores a references-only canonical publication link rather than copying research data.
 
 
 
 
 
+
+= Publications ↔ Research Graph Integration =
+
+* New shortcode `[sc_publications_research_graph]` and public `/wp-json/sc-library/v1/publications-research-graph` lookup.
+* Publication posts can use the canonical Knowledge Topics taxonomy and explicitly link public Research Sources, public Research Claims, canonical Concepts, Named Entities, an Article Map, and published Knowledge Pathways.
+* Canonical Publications Field Spotlight cards show `Research graph →` only when that article has explicit public graph context.
+* Public graph responses exclude private Projects, Source Bundles, Reading Notebooks, notes, annotations, Evidence Matrices, My Library records, saved research, queues, and Workspace state.
+* No source, claim, concept, entity, or relationship is inferred from publication text.
+* Signed-in users can explicitly link the canonical publication URL to an owned v4.3.30 Research Project as a references-only external reference.
+* Public graph manifests include SHA-256 checksums; mapping changes invalidate cached Publication presentation data.
+* No automatic publication, private-data exposure, claim generation, evidence promotion, or Workspace write.
 
 = Access Intelligence II =
 
@@ -134,6 +145,7 @@ Sustainable Catalyst Library v4.3.36 adds Open Learning II above the existing Op
 
 == Shortcodes ==
 
+* `[sc_publications_research_graph]`
 * `[sc_reading_notebook_workspace]`
 * `[sc_evidence_matrix_workspace]`
 * `[sc_research_continuity]`
@@ -161,6 +173,8 @@ Sustainable Catalyst Library v4.3.36 adds Open Learning II above the existing Op
 
 == REST API ==
 
+* `/wp-json/sc-library/v1/publications-research-graph` (public graph lookup; public records only)
+* `/wp-json/sc-library/v1/publications-research-graph/{id}/project-link` (authenticated; owned Research Project only)
 * `/wp-json/sc-library/v1/reading-notebooks` (authenticated; current user only)
 * `/wp-json/sc-library/v1/evidence-matrices` (authenticated; current user only)
 * `/wp-json/sc-library/v1/reading-notebooks/{id}/manifest` (authenticated; current user only)
@@ -197,6 +211,15 @@ Sustainable Catalyst Library v4.3.36 adds Open Learning II above the existing Op
 * `/wp-json/sc-library/v1/open-learning-v2/routes` — authenticated account-owned saved route manifests.
 
 == Changelog ==
+
+= 4.3.37 =
+* Added `[sc_publications_research_graph]` and public publication-graph lookup endpoints.
+* Reused canonical Topics, Concepts, Named Entities, Research Sources, public Research Claims, Article Maps, and Knowledge Pathways instead of creating a second graph store.
+* Added explicit publication editor mappings and conditional `Research graph →` links in the v4.3.22.4 Field Spotlight runtime.
+* Public graph responses are checksummed and exclude private projects, bundles, notebooks, matrices, personal collections, saved research, queues, and Workspace state.
+* Added an authenticated references-only publication-to-owned-Research-Project handoff.
+* No source/claim/entity inference, automatic publication, evidence promotion, private-data exposure, or Workspace write is performed.
+* Preserved Open Learning II, Access Intelligence II, Metadata Quality, Workspace Continuity, Evidence Matrix, Reading Notebooks, Research Projects/Source Bundles, and prior Library boundaries.
 
 = 4.3.36 =
 * Added `[sc_open_learning_ii]`, `/wp-json/sc-library/v1/open-learning-v2`, and authenticated saved learning routes.

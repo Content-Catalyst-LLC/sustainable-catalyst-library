@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v4.3.36 adds Open Learning II with deterministic learning-route planning, transparent course metadata, account-owned saved routes, and optional research-context links while preserving truthful provider/access boundaries, Access Intelligence II, Metadata Quality, Workspace continuity, Evidence Matrix, Reading Notebooks, Research Projects, citations, documents, and Publications.
- * Version: 4.3.36
+ * Description: Sustainable Catalyst Library v4.3.37 adds Publications ↔ Research Graph Integration with explicit public graph context, publication-to-project reference handoff, and conditional graph links across the Publications Field Spotlight while preserving private research boundaries, Open Learning II, Access Intelligence II, Metadata Quality, Workspace continuity, Evidence Matrix, Reading Notebooks, Research Projects, citations, and documents.
+ * Version: 4.3.37
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.3.36');
+define('SC_LIBRARY_VERSION', '4.3.37');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

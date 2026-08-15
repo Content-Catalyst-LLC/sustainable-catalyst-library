@@ -252,6 +252,13 @@
           sum.textContent = esc(article.summary);
           copy.append(sum);
         }
+        if (article.research_graph_url) {
+          const graph = document.createElement('a');
+          graph.className = 'sc-field-spotlight__research-graph';
+          graph.href = article.research_graph_url;
+          graph.textContent = 'Research graph →';
+          copy.append(graph);
+        }
         card.append(mediaLink, copy);
         cards?.append(card);
       });

@@ -1,0 +1,25 @@
+Sustainable Catalyst Library v4.3.37 — Publications ↔ Research Graph Integration
+Build validation
+
+PASS - 16/16 v4.3.37 feature contract tests.
+PASS - 170 retained selected regression tests.
+PASS - 186 selected regression tests total.
+PASS - PHP syntax across the Sustainable Catalyst Library plugin tree.
+PASS - JavaScript syntax for v4.3.37 Publication Graph, Field Spotlights, and retained critical research surfaces.
+PASS - Canonical /knowledge-libraries/ route and shared Sustainable Catalyst account continuity preserved.
+PASS - v4.3.22.4 14-field Publications stack preserved.
+PASS - Public Research Graph reuses canonical Topics, Concepts, Named Entities, Citation Sources, public Claims, Article Maps, and Knowledge Pathways.
+PASS - Public graph excludes private Projects, Source Bundles, Reading Notebooks, notes, annotations, Evidence Matrices, My Library, saved research, queues, metadata-review history, and Workspace state.
+PASS - No automatic source/claim/entity inference, evidence promotion, publication, or Workspace write.
+PASS - Authenticated publication-to-project continuation requires ownership and stores a references-only canonical publication URL.
+PASS - Field Spotlight graph links are conditional and cache invalidation is wired to mapping changes.
+PASS - v4.3.36 Open Learning II and all retained v4.3.35–v4.3.19 critical boundaries remain covered.
+
+Source delta from frozen v4.3.36 repository baseline:
+- 19 intended files total
+- 7 modified
+- 12 added
+- 0 removed
+
+Validation command:
+  bash tests/run_v4337_validation.sh
