@@ -12,8 +12,8 @@ if (!defined('ABSPATH')) {
  */
 final class SC_Library_Hardening {
     public const SCHEMA = 'sc-library-production-readiness/1.0';
-    public const BRANCH_VERSION = '4.8.0';
-    public const BRANCH_SCHEMA = 'sc-library-v48-production-certification/1.0';
+    public const BRANCH_VERSION = '4.9.0';
+    public const BRANCH_SCHEMA = 'sc-library-v49-production-certification/1.0';
 
     /** Recent 4.3 branch modules that must load together for release certification. */
     private const V43_CRITICAL_MODULES = [
@@ -35,6 +35,7 @@ final class SC_Library_Hardening {
         'SC_Library_Collaborative_Research_Rooms',
         'SC_Library_Institutional_Team_Libraries',
         'SC_Library_Global_Research_Federation',
+        'SC_Library_API_Embeds_Interoperability',
     ];
 
     /** Authenticated/private base routes introduced across the 4.3 research branch. */
@@ -272,9 +273,9 @@ final class SC_Library_Hardening {
                 <span class="sc-library-readiness-badge sc-library-readiness-badge--<?php echo esc_attr($status); ?>"><?php echo esc_html(ucfirst(str_replace('_', ' ', $status))); ?></span>
                 <p><?php echo esc_html(sprintf(__('Last evaluated %s.', 'sustainable-catalyst-library'), (string) ($public['generated_at'] ?? ''))); ?></p>
             </header>
-            <div class="sc-library-readiness-release-gate" aria-label="<?php esc_attr_e('4.8 release certification', 'sustainable-catalyst-library'); ?>">
+            <div class="sc-library-readiness-release-gate" aria-label="<?php esc_attr_e('4.9 release certification', 'sustainable-catalyst-library'); ?>">
                 <div>
-                    <strong><?php esc_html_e('4.8 release gate', 'sustainable-catalyst-library'); ?></strong>
+                    <strong><?php esc_html_e('4.9 release gate', 'sustainable-catalyst-library'); ?></strong>
                     <span class="sc-library-readiness-badge sc-library-readiness-badge--<?php echo esc_attr($branch_status); ?>"><?php echo esc_html(ucfirst(str_replace('_', ' ', $branch_status))); ?></span>
                 </div>
                 <p><?php esc_html_e('First-party checks only. No third-party provider health is used to block the Library release, and private research content is not inspected.', 'sustainable-catalyst-library'); ?></p>
@@ -535,7 +536,7 @@ final class SC_Library_Hardening {
             'performance' => ['label' => __('Performance and large-library operations', 'sustainable-catalyst-library'), 'checks' => []],
             'security' => ['label' => __('Security and privacy', 'sustainable-catalyst-library'), 'checks' => []],
             'integrity' => ['label' => __('Preservation, backups, and integrity', 'sustainable-catalyst-library'), 'checks' => []],
-            'branch_43' => ['label' => __('4.8 release certification', 'sustainable-catalyst-library'), 'checks' => []],
+            'branch_43' => ['label' => __('4.9 release certification', 'sustainable-catalyst-library'), 'checks' => []],
         ];
 
         $categories['platform']['checks'][] = $this->check('wordpress-version', __('WordPress version', 'sustainable-catalyst-library'), version_compare(get_bloginfo('version'), '6.4', '>='), __('WordPress meets the Library minimum.', 'sustainable-catalyst-library'), sprintf(__('Current version: %s', 'sustainable-catalyst-library'), get_bloginfo('version')), __('Upgrade WordPress to 6.4 or later.', 'sustainable-catalyst-library'));
@@ -587,10 +588,10 @@ final class SC_Library_Hardening {
         // v4.8.0 release certification is intentionally first-party only. It does not
         // contact connector providers and does not inspect private research content.
         $branch_version_ready = defined('SC_LIBRARY_VERSION') && SC_LIBRARY_VERSION === self::BRANCH_VERSION;
-        $categories['branch_43']['checks'][] = $this->check('v43-release-version', __('4.8 release version alignment', 'sustainable-catalyst-library'), $branch_version_ready, __('Plugin runtime is aligned to the certified 4.8.0 release.', 'sustainable-catalyst-library'), defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : __('Not defined', 'sustainable-catalyst-library'), __('Reinstall the complete v4.8.0 package; do not mix files from different releases.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-release-version', __('4.9 release version alignment', 'sustainable-catalyst-library'), $branch_version_ready, __('Plugin runtime is aligned to the certified 4.9.0 release.', 'sustainable-catalyst-library'), defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : __('Not defined', 'sustainable-catalyst-library'), __('Reinstall the complete v4.9.0 package; do not mix files from different releases.', 'sustainable-catalyst-library'));
 
         $identity_ready = class_exists('SC_Library_Canonical_Route_Identity') && defined('SC_Library_Canonical_Route_Identity::VERSION') && SC_Library_Canonical_Route_Identity::VERSION === self::BRANCH_VERSION;
-        $categories['branch_43']['checks'][] = $this->check('v43-identity-version', __('Canonical identity/version alignment', 'sustainable-catalyst-library'), $identity_ready, __('Canonical routing and shared-account identity are aligned to the release.', 'sustainable-catalyst-library'), '', __('Reinstall v4.8.0 so canonical-route identity and plugin runtime versions match.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-identity-version', __('Canonical identity/version alignment', 'sustainable-catalyst-library'), $identity_ready, __('Canonical routing and shared-account identity are aligned to the release.', 'sustainable-catalyst-library'), '', __('Reinstall v4.9.0 so canonical-route identity and plugin runtime versions match.', 'sustainable-catalyst-library'));
 
         $extension_status = class_exists('SC_Library_Extension_Bootstrap_V402') ? SC_Library_Extension_Bootstrap_V402::status() : [];
         $extensions_ready = is_array($extension_status) && (int) ($extension_status['expected'] ?? 0) > 0 && (int) ($extension_status['active'] ?? 0) === (int) ($extension_status['expected'] ?? -1) && empty($extension_status['errors']);
@@ -622,6 +623,8 @@ final class SC_Library_Hardening {
             'assets/css/sc-library-team-libraries-v470.css',
             'assets/js/sc-library-global-research-federation-v480.js',
             'assets/css/sc-library-global-research-federation-v480.css',
+            'assets/js/sc-library-api-interoperability-v490.js',
+            'assets/css/sc-library-api-interoperability-v490.css',
             'assets/css/sc-library-hardening.css',
             'assets/js/sc-library-hardening.js',
         ];
@@ -634,7 +637,7 @@ final class SC_Library_Hardening {
 
         $route_health = class_exists('SC_Library_Canonical_Route_Identity') ? SC_Library_Canonical_Route_Identity::health_payload() : [];
         $canonical_ready = is_array($route_health) && 'ok' === ($route_health['status'] ?? '');
-        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the v4.8.0 identity-health endpoint.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the v4.9.0 identity-health endpoint.', 'sustainable-catalyst-library'));
 
         $private_routes_ready = $this->private_v43_routes_require_permission();
         $categories['branch_43']['checks'][] = $this->check('v43-private-rest-boundary', __('Private REST authorization boundary', 'sustainable-catalyst-library'), $private_routes_ready, __('Private research base routes are registered with explicit permission callbacks.', 'sustainable-catalyst-library'), '', __('Do not release until every private research endpoint requires an authenticated permission callback.', 'sustainable-catalyst-library'));

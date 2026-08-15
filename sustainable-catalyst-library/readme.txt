@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.8.0
+Stable tag: 4.9.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -305,7 +305,23 @@ Sustainable Catalyst Library v4.8.0 adds Global Research Federation: explicit Te
 * `/wp-json/sc-library/v1/research-federation/manifests` — public published references-only manifests; POST requires an authenticated Team Library governor.
 * `/wp-json/sc-library/v1/research-federation/catalog` — authenticated local federation governance catalog.
 
+
+== Library API, Embeds & Interoperability ==
+
+v4.9.0 adds a stable read-only public integration facade over canonical published Library records and explicitly published federation manifests. Public object payloads expose normalized IDs, titles, summaries, canonical URLs, dates, provenance, versioned schemas, and interoperability links without exposing arbitrary WordPress post meta.
+
+Use `[sc_library_api_interoperability]` for the integration console and `[sc_library_embed type="publication" id="123"]` for a local public-record card. External embeds use the same public GET API and require an explicitly allowed origin. They send no credentials and cannot call authenticated governance routes.
+
+The facade does not expose My Library, private Research Projects, notebook or Evidence Matrix bodies, Research Room or Team Library membership, credentials, tokens, Workspace state, or authenticated federation governance. It performs no cross-site writes, publication, federation acceptance, evidence promotion, or Workspace writes.
+
 == Changelog ==
+= 4.9.0 =
+* Added Library API, Embeds & Interoperability public integration facade.
+* Added normalized public object and interoperability manifest schemas.
+* Added local `[sc_library_embed]` and external read-only embed loader.
+* Added explicit-origin CORS governance with no credentialed embed access.
+* Preserved all private research, room, team, federation-governance, and Workspace boundaries.
+
 
 = 4.8.0 =
 * Added Global Research Federation as a governed facade over the canonical v3.9 federation trust/quarantine engine and v4.7 Team Libraries.
