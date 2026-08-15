@@ -1,0 +1,13 @@
+cd ~/Downloads
+unzip -q sustainable-catalyst-library-v4.3.38-release-bundle.zip
+cd sustainable-catalyst-library-v4.3.38-release
+chmod +x install_and_push_sustainable_catalyst_library_v4_3_38_macos.sh
+./install_and_push_sustainable_catalyst_library_v4_3_38_macos.sh
+
+After deployment:
+1. Replace the /knowledge-libraries/ page body with RESEARCH_LIBRARY_PAGE_v4.3.38.html.
+2. Clear WordPress/cache/CDN caches.
+3. While signed in, verify /wp-json/sc-library/v1/research-librarian-v2/catalog.
+4. Generate guidance through /wp-json/sc-library/v1/research-librarian-v2/guidance or the Research Library UI.
+5. Confirm "Continue in the Research Librarian" transfers only the question and public Research Source IDs.
+6. The Publications page body does not require replacement.

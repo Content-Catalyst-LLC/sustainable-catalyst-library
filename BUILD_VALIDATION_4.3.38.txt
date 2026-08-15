@@ -1,0 +1,33 @@
+Sustainable Catalyst Library v4.3.38 — Research Librarian II — Project-Aware Guidance
+
+Baseline: sustainable-catalyst-library-v4.3.37-repository.zip
+
+Feature validation:
+- 16/16 v4.3.38 project-aware guidance tests passed.
+
+Retained regression validation:
+- 183 selected retained tests passed.
+- Total selected Python tests: 199 passed.
+- PHP syntax: passed across plugin tree.
+- JavaScript syntax: passed for v4.3.38 and retained current critical surfaces.
+
+Release boundaries:
+- Plugin and identity-health version aligned to 4.3.38.
+- Extension bootstrap module count: 43.
+- Reuses v4.3.30 Research Projects/Source Bundles, v4.3.31 Reading Notebooks, v4.3.32 Evidence Matrices, and the existing Research Librarian orchestrator.
+- Private project context is authenticated and account-owned.
+- Private bundle/notebook/matrix/project context is not sent by v4.3.38 to optional remote synthesis.
+- Existing Research Librarian handoff carries only the question and up to eight publish-status Research Source IDs.
+- Deterministic guidance does not create claims, promote evidence, publish, modify private research, or write to Workspace.
+- v4.3.37 Publications ↔ Research Graph and earlier release boundaries preserved.
+
+Source delta before packaging: 16 intended files (4 modified, 12 added), 0 removed.
+
+Installer dry run #1:
+- Clean v4.3.37 Git baseline.
+- Repository checksum verified.
+- Safety backup created.
+- 199 selected tests passed during installer execution.
+- Exact 16-file delta enforced; no tracked deletions.
+- Git commit created: e4f2a80249a2453b39bcd0ced46fa9d2e75eb77e.
+- Final Git working tree: clean (0 residual changes).

@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.37
+Stable tag: 4.3.38
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.37 adds Publications ↔ Research Graph Integration. Public publication posts can be explicitly connected to canonical Knowledge Topics, Concepts, Named Entities, public Research Sources, public Research Claims, Article Maps, and published Knowledge Pathways; the Field Spotlight exposes a Research Graph action only when public graph context exists. Private research stays private, and authenticated publication-to-project continuation stores a references-only canonical publication link rather than copying research data.
+Sustainable Catalyst Library v4.3.38 adds Research Librarian II — Project-Aware Guidance. Signed-in users can scope deterministic guidance to an owned Research Project and optionally a Source Bundle, Reading Notebook, or Evidence Matrix. Private project context stays inside the authenticated Library surface and is not sent to the optional Research Librarian remote-synthesis endpoint; only the question and up to eight public Research Source IDs may be handed into the existing site-scoped Librarian.
 
 
 
@@ -210,7 +210,20 @@ Sustainable Catalyst Library v4.3.37 adds Publications ↔ Research Graph Integr
 * `/wp-json/sc-library/v1/open-learning-v2` — public route planner over the reviewed launch catalog.
 * `/wp-json/sc-library/v1/open-learning-v2/routes` — authenticated account-owned saved route manifests.
 
+* `[sc_research_librarian_ii]` — authenticated project-aware guidance across owned Research Projects, Source Bundles, Reading Notebooks, and Evidence Matrices.
+* `/wp-json/sc-library/v1/research-librarian-v2/catalog` — authenticated project/context catalog.
+* `/wp-json/sc-library/v1/research-librarian-v2/guidance` — authenticated deterministic project-aware guidance packet.
+
 == Changelog ==
+
+= 4.3.38 =
+* Added `[sc_research_librarian_ii]` and authenticated `/wp-json/sc-library/v1/research-librarian-v2/*` routes.
+* Reused v4.3.30 Research Projects/Source Bundles, v4.3.31 Reading Notebooks, and v4.3.32 Evidence Matrices rather than creating another project or notebook store.
+* Added deterministic project-context diagnostics and next-step guidance for source coverage, reference integrity, reading/annotation readiness, evidence gaps, counterevidence, access, learning, and publication boundaries.
+* Private notebook previews, matrix claims, bundle context, and project context remain in the authenticated v4.3.38 packet and are not sent to the optional Research Librarian remote-synthesis endpoint.
+* The existing Research Librarian can be seeded only with the user's question and up to eight public Research Source IDs from the selected project.
+* No automatic project/notebook/matrix write, claim creation, evidence promotion, publication, or Workspace write occurs.
+* Preserved Publications ↔ Research Graph, Open Learning II, Access Intelligence II, Metadata Quality, Workspace continuity, Evidence Matrix, Reading Notebooks, Research Projects, and prior Library boundaries.
 
 = 4.3.37 =
 * Added `[sc_publications_research_graph]` and public publication-graph lookup endpoints.
