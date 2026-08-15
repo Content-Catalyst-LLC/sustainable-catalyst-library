@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.6.0
+Stable tag: 4.7.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.6.0 adds Collaborative Research Rooms: private, project-anchored spaces for explicit references-only sharing, role-scoped review notes, human-recorded decisions, and bounded activity lineage without transferring project ownership or exposing a member’s complete private research environment.
+Sustainable Catalyst Library v4.7.0 adds Institutional & Team Libraries: durable private organizational curation spaces with governed membership, team collections, explicit references-only contribution, canonical institution/research-unit identity reuse, and no automatic exposure of personal research.
 
 
 
@@ -20,6 +20,17 @@ Sustainable Catalyst Library v4.6.0 adds Collaborative Research Rooms: private, 
 
 
 
+
+= Institutional & Team Libraries =
+
+* New private shortcode `[sc_institutional_team_libraries]` and authenticated `/wp-json/sc-library/v1/team-libraries` REST surface.
+* Durable team curation spaces are distinct from project-scoped v4.6.0 Collaborative Research Rooms.
+* Optional institution and research-unit links reuse the canonical v4.0 `sc_institution` and `sc_research_unit` registries instead of creating a parallel institution store.
+* Institution/unit binding is context only; it does not prove legal ownership, employment, institutional membership, subscriptions, borrowing rights, authentication, or access entitlement.
+* Roles are owner, steward, editor, contributor, and reader with explicit member-management, collection-management, contribution, and governance boundaries.
+* Team collections are organizational structures inside the Team Library and do not migrate or expose My Library collections.
+* Contributions are references-only metadata with provenance; private binaries and private project/notebook/matrix bodies are not copied.
+* No automatic publication, evidence promotion, personal-research exposure, institution entitlement inference, or Workspace write occurs.
 
 = Collaborative Research Rooms =
 
@@ -198,6 +209,7 @@ Sustainable Catalyst Library v4.6.0 adds Collaborative Research Rooms: private, 
 
 == Shortcodes ==
 
+* `[sc_institutional_team_libraries]`
 * `[sc_publications_research_graph]`
 * `[sc_reading_notebook_workspace]`
 * `[sc_evidence_matrix_workspace]`
@@ -278,6 +290,10 @@ Sustainable Catalyst Library v4.6.0 adds Collaborative Research Rooms: private, 
 * `/wp-json/sc-library/v1/research-rooms` — authenticated room catalog/create surface; room-specific member/reference/note/decision endpoints remain role-scoped.
 
 == Changelog ==
+
+= 4.7.0 =
+* Added Institutional & Team Libraries with governed membership, team collections, references-only contribution, canonical institutional identity reuse, and private activity lineage.
+* Preserved My Library, Research Projects, Research Rooms, notebooks, Evidence Matrices, institutional/archive systems, and Workspace boundaries without migration or automatic exposure.
 
 = 4.6.0 =
 * Added private Collaborative Research Rooms anchored to owner-controlled Research Projects.

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v4.6.0 adds Collaborative Research Rooms: private, project-anchored collaboration with explicit references-only sharing, role-scoped review notes and decisions, activity lineage, and no project-ownership transfer or automatic publication.
- * Version: 4.6.0
+ * Description: Sustainable Catalyst Library v4.7.0 adds Institutional & Team Libraries: durable private organizational curation spaces with governed membership, team collections, references-only contribution, canonical institutional identity reuse, and no automatic exposure of personal research.
+ * Version: 4.7.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '4.6.0');
+define('SC_LIBRARY_VERSION', '4.7.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
