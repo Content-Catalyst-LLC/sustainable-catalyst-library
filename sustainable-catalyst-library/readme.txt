@@ -4,17 +4,29 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.34
+Stable tag: 4.3.35
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.34 adds Metadata Quality & Entity Resolution above the existing Citation Studio normalization and v3.2 named-entity authority records. Deterministic quality reports surface missing metadata and normalized identifiers, while duplicate/entity matches remain review proposals. Accepted entity resolutions are non-destructive canonical pointers with alias and pre-resolution history preserved; no automatic merge, deletion, assignment rewrite, metadata overwrite, publication, or Workspace write occurs.
+Sustainable Catalyst Library v4.3.35 adds Access Intelligence II above the existing v4.3.24 access classifier. It ranks direct, provider, connected-library, catalog, request, and public fallback paths using transparent scoring, route freshness, and user-declared My Libraries relationships while keeping availability, holdings, authentication, membership, and entitlement explicitly separate. No catalog search, holding, or connected-library relationship is treated as proof of current user access.
 
 
 
+
+
+
+= Access Intelligence II =
+
+* New shortcode `[sc_access_intelligence_ii]` and public/read-only `/wp-json/sc-library/v1/access-intelligence-v2` planning endpoint.
+* Reuses v4.3.24 Access Intelligence as the bounded classification/evidence authority rather than replacing it.
+* Ranks direct routes, provider/holdings evidence, connected My Libraries searches, request/ILL routes, WorldCat, and Library of Congress fallbacks with visible scoring reasons.
+* Adds explicit route confidence, freshness handling, entitlement classes, connected-library fit, unresolved questions, and fallback sequencing.
+* A catalog search is not a holding; a holding is not user eligibility; membership or institution authentication is never inferred from discovery alone.
+* My Libraries relationships are user-declared and external-library passwords/PINs are not stored.
+* Provider and library sites remain authoritative for current availability, rights, authentication, borrowing, and request conditions.
 
 = Metadata Quality & Entity Resolution =
 
@@ -181,6 +193,15 @@ Sustainable Catalyst Library v4.3.34 adds Metadata Quality & Entity Resolution a
 * `/wp-json/sustainable-catalyst-library/v1/openapi.json`
 
 == Changelog ==
+
+= 4.3.35 =
+* Added `[sc_access_intelligence_ii]` and `/wp-json/sc-library/v1/access-intelligence-v2`.
+* Preserved v4.3.24 Access Intelligence as the underlying classification/evidence authority.
+* Added transparent access-path ranking, route confidence, freshness penalties, connected My Libraries fit, unresolved-question diagnostics, and fallback sequencing.
+* Added WorldCat and Library of Congress fallback searches without representing catalog searches as confirmed holdings.
+* Availability, holdings, entitlement, membership, authentication, and user eligibility remain separate; provider/library sites remain authoritative.
+* No external-library credentials are stored and no subscription, holding, or access claim is inferred automatically.
+* Preserved v4.3.34 Metadata Quality, v4.3.33 Workspace Continuity, v4.3.32 Evidence Matrix, v4.3.31 Reading Notebooks, v4.3.30 Research Projects/Source Bundles, and earlier Library boundaries.
 
 = 4.3.34 =
 * Added `[sc_metadata_quality_center]` and `/wp-json/sc-library/v1/metadata-quality`.

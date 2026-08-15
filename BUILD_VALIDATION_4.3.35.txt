@@ -1,0 +1,22 @@
+Sustainable Catalyst Library v4.3.35 — Access Intelligence II
+Build validation
+
+PASS - 162 selected Python regression tests
+PASS - PHP syntax across sustainable-catalyst-library
+PASS - JavaScript syntax for current release and retained critical surfaces
+PASS - v4.3.24 Access Intelligence classifier preserved as underlying evidence/classification authority
+PASS - v4.3.35 transparent access-path ranking and confidence contracts
+PASS - My Libraries user-declared relationship reuse without external credential storage
+PASS - catalog search != holding; holding != user eligibility; availability != entitlement
+PASS - WorldCat and Library of Congress fallback search contracts
+PASS - v4.3.34 Metadata Quality & Entity Resolution preserved
+PASS - v4.3.33 Workspace continuity preserved
+PASS - v4.3.32 Evidence Matrix preserved
+PASS - v4.3.31 Reading Notebook preserved
+PASS - v4.3.30 Research Projects & Source Bundles preserved
+PASS - v4.3.22.4 Publications all-fields stack preserved
+PASS - source delta: 4 modified + 12 added + 0 removed = 16 files
+
+PASS - first macOS installer dry run from clean v4.3.34 Git baseline
+PASS - checksum verification, safety backup, 162-test gate, exact 16-file delta, Git commit, and clean working tree
+Final frozen-archive installer validation is recorded separately in the release bundle.

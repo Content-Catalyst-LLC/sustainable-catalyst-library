@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) { exit; }
 
 final class SC_Library_Extension_Bootstrap_V402 {
     public const VERSION = '4.0.2';
-    public const MODULE_COUNT = 39;
+    public const MODULE_COUNT = 40;
     private const STATUS_OPTION = 'sc_library_extension_bootstrap_v402_status';
 
     /** @var array<string,string> */
@@ -26,6 +26,7 @@ final class SC_Library_Extension_Bootstrap_V402 {
         'class-sc-library-citation-studio.php' => 'SC_Library_Citation_Studio',
         'class-sc-library-research-document-builder.php' => 'SC_Library_Research_Document_Builder',
         'class-sc-library-research-librarian-access-intelligence.php' => 'SC_Library_Research_Librarian_Access_Intelligence',
+        'class-sc-library-access-intelligence-ii.php' => 'SC_Library_Access_Intelligence_II',
         'class-sc-library-institutional-connector-expansion.php' => 'SC_Library_Institutional_Connector_Expansion',
         'class-sc-library-public-library-network.php' => 'SC_Library_Public_Library_Network',
         'class-sc-library-canonical-route-identity.php' => 'SC_Library_Canonical_Route_Identity',
