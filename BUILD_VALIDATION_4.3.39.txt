@@ -1,0 +1,33 @@
+Sustainable Catalyst Library v4.3.39 — Build Validation
+
+Baseline: sustainable-catalyst-library-v4.3.38-repository.zip
+Release: v4.3.39 — Research Portability & Preservation
+
+Feature contract:
+PASS - 16/16 v4.3.39 feature tests.
+PASS - Owned Research Project required for export.
+PASS - Reuses canonical Research Projects, Source Bundles, Reading Notebooks, Evidence Matrices, Open Learning II routes, and existing preservation architecture.
+PASS - Complete and manifest-only export profiles.
+PASS - Five independently checksummed research sections.
+PASS - SHA-256 preservation-manifest checksum and whole-package checksum.
+PASS - Private source binaries, credentials, secrets, local file paths, and raw WordPress tables excluded.
+PASS - Re-import validation is bounded, non-executing, and creates zero records.
+PASS - No automatic import, publication, evidence promotion, record mutation, or Workspace write.
+
+Retained regression gate:
+PASS - 197 retained selected tests.
+PASS - Total selected tests: 213.
+PASS - PHP syntax across plugin tree.
+PASS - JavaScript syntax across current and retained critical research surfaces.
+
+Installer dry run #1:
+PASS - Clean v4.3.38 Git baseline upgraded to v4.3.39.
+PASS - Repository ZIP checksum verified.
+PASS - Safety backup created.
+PASS - 213 selected tests passed during installer execution.
+PASS - Exact 16-file delta; 0 tracked deletions.
+PASS - Release-boundary checks passed.
+PASS - Commit created: 75b1cbf (pre-freeze validation archive).
+PASS - Final working tree clean.
+
+Final frozen-archive installer validation is recorded separately in FINAL_INSTALLER_VALIDATION_4.3.39.txt in the release bundle.

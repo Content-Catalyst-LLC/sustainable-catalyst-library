@@ -1,0 +1,18 @@
+Sustainable Catalyst Library v4.3.39 — Research Portability & Preservation
+
+macOS install / validate / commit / push:
+
+cd ~/Downloads
+unzip -q sustainable-catalyst-library-v4.3.39-release-bundle.zip
+cd sustainable-catalyst-library-v4.3.39-release
+chmod +x install_and_push_sustainable_catalyst_library_v4_3_39_macos.sh
+./install_and_push_sustainable_catalyst_library_v4_3_39_macos.sh
+
+If the repository cannot be auto-detected:
+SC_LIBRARY_REPO=/full/path/to/sustainable-catalyst-library ./install_and_push_sustainable_catalyst_library_v4_3_39_macos.sh
+
+After deployment:
+1. Replace the body of https://sustainablecatalyst.com/knowledge-libraries/ with RESEARCH_LIBRARY_PAGE_v4.3.39.html.
+2. Clear WordPress/server caches.
+3. Sign in and verify /wp-json/sc-library/v1/research-portability/catalog.
+4. Create a test package and validate the downloaded JSON through the Research Portability & Preservation surface.

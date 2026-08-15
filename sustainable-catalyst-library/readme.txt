@@ -4,19 +4,31 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 4.3.38
+Stable tag: 4.3.39
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v4.3.38 adds Research Librarian II — Project-Aware Guidance. Signed-in users can scope deterministic guidance to an owned Research Project and optionally a Source Bundle, Reading Notebook, or Evidence Matrix. Private project context stays inside the authenticated Library surface and is not sent to the optional Research Librarian remote-synthesis endpoint; only the question and up to eight public Research Source IDs may be handed into the existing site-scoped Librarian.
+Sustainable Catalyst Library v4.3.39 adds Research Portability & Preservation. Signed-in users can export an owned Research Project as a checksummed JSON package carrying stable identities, references, Source Bundle manifests, project-linked Reading Notebooks, Evidence Matrices, and learning routes. Complete exports may include user-authored research text, but private source binaries, credentials, raw WordPress tables, and provider secrets are excluded. Re-import validation checks schema and SHA-256 integrity without executing the package or creating records.
 
 
 
 
 
+
+
+= Research Portability & Preservation =
+
+* New shortcode `[sc_research_portability]` with authenticated `/wp-json/sc-library/v1/research-portability/catalog`, `/export`, and `/validate` endpoints.
+* Exports one owned v4.3.30 Research Project at a time as `sc-library-research-portability-package/1.0` JSON.
+* Preserves stable project/notebook/matrix/bundle identities, project references, Source Bundle manifests, attached Reading Notebooks, Evidence Matrices, and project-linked Open Learning II routes.
+* Complete profile includes user-authored notebook/annotation and matrix content; manifest profile intentionally omits those content bodies.
+* SHA-256 checksums cover every package section, the preservation manifest, and the complete package.
+* Private source binaries, credentials, API tokens/secrets, raw WordPress tables, and local file paths are not embedded.
+* Validation is non-executing and non-importing: zero records are created, nothing is published, and Workspace is not written.
+* The established institutional preservation system remains authoritative for server archive snapshots; v4.3.39 adds portable user-research snapshots rather than replacing it.
 
 = Publications ↔ Research Graph Integration =
 
@@ -214,7 +226,22 @@ Sustainable Catalyst Library v4.3.38 adds Research Librarian II — Project-Awar
 * `/wp-json/sc-library/v1/research-librarian-v2/catalog` — authenticated project/context catalog.
 * `/wp-json/sc-library/v1/research-librarian-v2/guidance` — authenticated deterministic project-aware guidance packet.
 
+
+* `[sc_research_portability]` — authenticated portable Research Project export and integrity-validation surface.
+* `/wp-json/sc-library/v1/research-portability/catalog` — authenticated exportable-project catalog.
+* `/wp-json/sc-library/v1/research-portability/export` — authenticated checksummed package creation.
+* `/wp-json/sc-library/v1/research-portability/validate` — authenticated, non-executing package integrity validation.
+
 == Changelog ==
+
+= 4.3.39 =
+* Added `[sc_research_portability]` and authenticated Research Portability REST catalog/export/validate endpoints.
+* Reused v4.3.30 Research Projects/Source Bundles, v4.3.31 Reading Notebooks, v4.3.32 Evidence Matrices, v4.3.36 learning routes, and the existing preservation architecture instead of creating another research store.
+* Added complete and manifest-only portable JSON profiles with stable URNs and SHA-256 checksums for each section, preservation manifest, and whole package.
+* Complete packages may include user-authored notebook/annotation and matrix content; source binaries, credentials, secrets, local paths, and raw WordPress tables are excluded.
+* Added non-executing re-import validation that checks schema, package/manifest/section checksums, size, and release compatibility without creating or mutating records.
+* Export does not imply publication, evidence promotion, Workspace write, or server backup replacement.
+* Preserved Research Librarian II, Publications ↔ Research Graph, Open Learning II, Access Intelligence II, Metadata Quality, Workspace continuity, Evidence Matrix, Reading Notebooks, Research Projects, and prior Library boundaries.
 
 = 4.3.38 =
 * Added `[sc_research_librarian_ii]` and authenticated `/wp-json/sc-library/v1/research-librarian-v2/*` routes.
