@@ -12,8 +12,8 @@ if (!defined('ABSPATH')) {
  */
 final class SC_Library_Hardening {
     public const SCHEMA = 'sc-library-production-readiness/1.0';
-    public const BRANCH_VERSION = '5.0.1';
-    public const BRANCH_SCHEMA = 'sc-library-v501-production-soak-certification/1.0';
+    public const BRANCH_VERSION = '5.1.0';
+    public const BRANCH_SCHEMA = 'sc-library-v510-discovery-certification/1.0';
 
     /** Recent 4.3 branch modules that must load together for release certification. */
     private const V43_CRITICAL_MODULES = [
@@ -37,6 +37,7 @@ final class SC_Library_Hardening {
         'SC_Library_Global_Research_Federation',
         'SC_Library_API_Embeds_Interoperability',
         'SC_Library_Connected_Public_Research_Infrastructure',
+        'SC_Library_Global_Research_Discovery_Federated_Search',
     ];
 
     /** Authenticated/private base routes introduced across the 4.3 research branch. */
@@ -58,6 +59,7 @@ final class SC_Library_Hardening {
     private const V5_PUBLIC_ROUTE_PREFIXES = [
         '/sc-library/v1/library-api',
         '/sc-library/v1/connected-public-research',
+        '/sc-library/v1/research-discovery',
         '/sc-library/v1/research-federation/node',
         '/sc-library/v1/research-federation/manifests',
     ];
@@ -280,9 +282,9 @@ final class SC_Library_Hardening {
                 <span class="sc-library-readiness-badge sc-library-readiness-badge--<?php echo esc_attr($status); ?>"><?php echo esc_html(ucfirst(str_replace('_', ' ', $status))); ?></span>
                 <p><?php echo esc_html(sprintf(__('Last evaluated %s.', 'sustainable-catalyst-library'), (string) ($public['generated_at'] ?? ''))); ?></p>
             </header>
-            <div class="sc-library-readiness-release-gate" aria-label="<?php esc_attr_e('5.0.1 production-soak certification', 'sustainable-catalyst-library'); ?>">
+            <div class="sc-library-readiness-release-gate" aria-label="<?php esc_attr_e('5.1.0 discovery & federation certification', 'sustainable-catalyst-library'); ?>">
                 <div>
-                    <strong><?php esc_html_e('5.0.1 release gate', 'sustainable-catalyst-library'); ?></strong>
+                    <strong><?php esc_html_e('5.1.0 release gate', 'sustainable-catalyst-library'); ?></strong>
                     <span class="sc-library-readiness-badge sc-library-readiness-badge--<?php echo esc_attr($branch_status); ?>"><?php echo esc_html(ucfirst(str_replace('_', ' ', $branch_status))); ?></span>
                 </div>
                 <p><?php esc_html_e('First-party checks only. No third-party provider health is used to block the Library release, and private research content is not inspected.', 'sustainable-catalyst-library'); ?></p>
@@ -423,6 +425,7 @@ final class SC_Library_Hardening {
             'connected_public_research_cacheable' => self::is_v5_public_route('/sc-library/v1/connected-public-research/index'),
             'library_api_cacheable' => self::is_v5_public_route('/sc-library/v1/library-api/objects'),
             'published_federation_cacheable' => self::is_v5_public_route('/sc-library/v1/research-federation/manifests'),
+            'research_discovery_cacheable' => self::is_v5_public_route('/sc-library/v1/research-discovery/search'),
             'private_research_routes_cacheable' => $private_cacheable,
             'authenticated_requests_cacheable' => false,
             'credentialed_requests_cacheable' => false,
@@ -595,7 +598,7 @@ final class SC_Library_Hardening {
             'performance' => ['label' => __('Performance and large-library operations', 'sustainable-catalyst-library'), 'checks' => []],
             'security' => ['label' => __('Security and privacy', 'sustainable-catalyst-library'), 'checks' => []],
             'integrity' => ['label' => __('Preservation, backups, and integrity', 'sustainable-catalyst-library'), 'checks' => []],
-            'branch_43' => ['label' => __('5.0.1 production-soak certification', 'sustainable-catalyst-library'), 'checks' => []],
+            'branch_43' => ['label' => __('5.1.0 discovery & federation certification', 'sustainable-catalyst-library'), 'checks' => []],
         ];
 
         $categories['platform']['checks'][] = $this->check('wordpress-version', __('WordPress version', 'sustainable-catalyst-library'), version_compare(get_bloginfo('version'), '6.4', '>='), __('WordPress meets the Library minimum.', 'sustainable-catalyst-library'), sprintf(__('Current version: %s', 'sustainable-catalyst-library'), get_bloginfo('version')), __('Upgrade WordPress to 6.4 or later.', 'sustainable-catalyst-library'));
@@ -647,10 +650,10 @@ final class SC_Library_Hardening {
         // v5.0.1 production-soak certification is intentionally first-party only. It does not
         // contact connector providers and does not inspect private research content.
         $branch_version_ready = defined('SC_LIBRARY_VERSION') && SC_LIBRARY_VERSION === self::BRANCH_VERSION;
-        $categories['branch_43']['checks'][] = $this->check('v43-release-version', __('5.0.1 release version alignment', 'sustainable-catalyst-library'), $branch_version_ready, __('Plugin runtime is aligned to the certified 5.0.1 release.', 'sustainable-catalyst-library'), defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : __('Not defined', 'sustainable-catalyst-library'), __('Reinstall the complete v5.0.1 package; do not mix files from different releases.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-release-version', __('5.1.0 release version alignment', 'sustainable-catalyst-library'), $branch_version_ready, __('Plugin runtime is aligned to the certified 5.1.0 release.', 'sustainable-catalyst-library'), defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : __('Not defined', 'sustainable-catalyst-library'), __('Reinstall the complete v5.1.0 package; do not mix files from different releases.', 'sustainable-catalyst-library'));
 
         $identity_ready = class_exists('SC_Library_Canonical_Route_Identity') && defined('SC_Library_Canonical_Route_Identity::VERSION') && SC_Library_Canonical_Route_Identity::VERSION === self::BRANCH_VERSION;
-        $categories['branch_43']['checks'][] = $this->check('v43-identity-version', __('Canonical identity/version alignment', 'sustainable-catalyst-library'), $identity_ready, __('Canonical routing and shared-account identity are aligned to the release.', 'sustainable-catalyst-library'), '', __('Reinstall v5.0.1 so canonical-route identity and plugin runtime versions match.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-identity-version', __('Canonical identity/version alignment', 'sustainable-catalyst-library'), $identity_ready, __('Canonical routing and shared-account identity are aligned to the release.', 'sustainable-catalyst-library'), '', __('Reinstall v5.1.0 so canonical-route identity and plugin runtime versions match.', 'sustainable-catalyst-library'));
 
         $extension_status = class_exists('SC_Library_Extension_Bootstrap_V402') ? SC_Library_Extension_Bootstrap_V402::status() : [];
         $extensions_ready = is_array($extension_status) && (int) ($extension_status['expected'] ?? 0) > 0 && (int) ($extension_status['active'] ?? 0) === (int) ($extension_status['expected'] ?? -1) && empty($extension_status['errors']);
@@ -686,6 +689,8 @@ final class SC_Library_Hardening {
             'assets/css/sc-library-api-interoperability-v490.css',
             'assets/js/sc-library-connected-public-research-v500.js',
             'assets/css/sc-library-connected-public-research-v500.css',
+            'assets/js/sc-library-research-discovery-v510.js',
+            'assets/css/sc-library-research-discovery-v510.css',
             'assets/css/sc-library-hardening.css',
             'assets/js/sc-library-hardening.js',
         ];
@@ -698,18 +703,24 @@ final class SC_Library_Hardening {
 
         $route_health = class_exists('SC_Library_Canonical_Route_Identity') ? SC_Library_Canonical_Route_Identity::health_payload() : [];
         $canonical_ready = is_array($route_health) && 'ok' === ($route_health['status'] ?? '');
-        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the v5.0.1 identity-health endpoint.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the v5.1.0 identity-health endpoint.', 'sustainable-catalyst-library'));
 
         $private_routes_ready = $this->private_v43_routes_require_permission();
         $categories['branch_43']['checks'][] = $this->check('v43-private-rest-boundary', __('Private REST authorization boundary', 'sustainable-catalyst-library'), $private_routes_ready, __('Private research base routes are registered with explicit permission callbacks.', 'sustainable-catalyst-library'), '', __('Do not release until every private research endpoint requires an authenticated permission callback.', 'sustainable-catalyst-library'));
 
         $public_v5_profile = self::public_v5_route_profile();
-        $safe_v5_cache = ! empty($public_v5_profile['connected_public_research_cacheable']) && ! empty($public_v5_profile['library_api_cacheable']) && empty($public_v5_profile['private_research_routes_cacheable']);
-        $categories['branch_43']['checks'][] = $this->check('v501-public-cache-boundary', __('v5 public cache boundary', 'sustainable-catalyst-library'), $safe_v5_cache, __('The v4.9/v5 public GET facades use the bounded cache through explicit route allowlisting while private research routes remain excluded.', 'sustainable-catalyst-library'), wp_json_encode($public_v5_profile), __('Restore the v5.0.1 safe-route cache profile before release.', 'sustainable-catalyst-library'));
+        $safe_v5_cache = ! empty($public_v5_profile['connected_public_research_cacheable']) && ! empty($public_v5_profile['library_api_cacheable']) && ! empty($public_v5_profile['research_discovery_cacheable']) && empty($public_v5_profile['private_research_routes_cacheable']);
+        $categories['branch_43']['checks'][] = $this->check('v501-public-cache-boundary', __('v5 public cache boundary', 'sustainable-catalyst-library'), $safe_v5_cache, __('The v4.9/v5 public GET facades use the bounded cache through explicit route allowlisting while private research routes remain excluded.', 'sustainable-catalyst-library'), wp_json_encode($public_v5_profile), __('Restore the v5.1.0 safe-route cache profile before release.', 'sustainable-catalyst-library'));
 
         $soak = class_exists('SC_Library_Connected_Public_Research_Infrastructure') && method_exists('SC_Library_Connected_Public_Research_Infrastructure', 'run_production_soak') ? SC_Library_Connected_Public_Research_Infrastructure::run_production_soak(false) : [];
         $soak_ready = is_array($soak) && 'pass' === ($soak['status'] ?? '') && (int) ($soak['scenario_count'] ?? 0) === 10 && (int) ($soak['failed'] ?? 1) === 0;
         $categories['branch_43']['checks'][] = $this->check('v501-connected-public-soak', __('Connected Public Research production soak', 'sustainable-catalyst-library'), $soak_ready, __('The bounded first-party integration soak passes all ten scenarios.', 'sustainable-catalyst-library'), $soak_ready ? sprintf(__('%d/%d scenarios passed.', 'sustainable-catalyst-library'), (int) ($soak['passed'] ?? 0), (int) ($soak['scenario_count'] ?? 0)) : __('Soak diagnostics are incomplete or failing.', 'sustainable-catalyst-library'), __('Open the v5.0.1 soak details endpoint and resolve every blocking scenario.', 'sustainable-catalyst-library'));
+
+        $discovery_contract = class_exists('SC_Library_Global_Research_Discovery_Federated_Search') ? SC_Library_Global_Research_Discovery_Federated_Search::contract() : [];
+        $discovery_ready = is_array($discovery_contract) && !empty($discovery_contract['canonical_public_records_only']) && !empty($discovery_contract['published_federation_metadata_only']) && empty($discovery_contract['remote_network_calls_during_search']) && empty($discovery_contract['private_projects_searched']) && 'deterministic-lexical' === ($discovery_contract['ranking_mode'] ?? '');
+        $categories['branch_43']['checks'][] = $this->check('v510-discovery-contract', __('Global Research Discovery boundary', 'sustainable-catalyst-library'), $discovery_ready, __('Discovery searches canonical public records and published federation metadata with deterministic lexical ranking and no private or remote-request corpus expansion.', 'sustainable-catalyst-library'), $discovery_ready ? __('local-public + published-federation; remote_search_calls=false; private_research=false', 'sustainable-catalyst-library') : __('Discovery contract is incomplete.', 'sustainable-catalyst-library'), __('Restore the complete v5.1.0 discovery module before release.', 'sustainable-catalyst-library'));
+        $discovery_cacheable = in_array('/sc-library/v1/research-discovery', self::V5_PUBLIC_ROUTE_PREFIXES, true);
+        $categories['branch_43']['checks'][] = $this->check('v510-discovery-cache-boundary', __('Discovery cache/CORS boundary', 'sustainable-catalyst-library'), $discovery_cacheable, __('The public discovery facade is explicitly allowlisted for bounded public GET caching; private research routes remain excluded.', 'sustainable-catalyst-library'), '', __('Restore the explicit /research-discovery public route prefix; never broaden caching to the entire sc-library/v1 namespace.', 'sustainable-catalyst-library'));
 
         $categories['branch_43']['checks'][] = $this->check('v43-first-party-gate', __('First-party-only release gate', 'sustainable-catalyst-library'), true, __('Release certification performs no third-party provider requests; upstream availability cannot invalidate a healthy Library release.', 'sustainable-catalyst-library'), __('network_calls_performed=false; upstream_health_release_blocking=false', 'sustainable-catalyst-library'), '');
         $categories['branch_43']['checks'][] = $this->check('v43-private-content-boundary', __('Private-content diagnostic boundary', 'sustainable-catalyst-library'), true, __('Release certification verifies stores, modules, routes, and assets without reading private notebook, matrix, project, or personal-library content.', 'sustainable-catalyst-library'), __('private_record_content_inspected=false', 'sustainable-catalyst-library'), '');

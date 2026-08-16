@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.0.1
+Stable tag: 5.1.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.0.1 hardens Connected Public Research Infrastructure with a bounded ten-scenario first-party production soak, explicit safe-route caching for the v4.9/v5 public APIs, cache/freshness observability, malformed-request guards, CORS-visible diagnostics, and retained private-research separation.
+Sustainable Catalyst Library v5.1.0 adds Global Research Discovery & Federated Search across canonical public Library records and explicitly published federation metadata, using deterministic lexical ranking, visible provenance, bounded local-first search, and no private-research or remote-crawling expansion.
 
 
 
@@ -22,6 +22,17 @@ Sustainable Catalyst Library v5.0.1 hardens Connected Public Research Infrastruc
 
 
 
+
+= Global Research Discovery & Federated Search =
+
+* New public shortcode `[sc_global_research_discovery]` and GET-only REST facade at `/wp-json/sc-library/v1/research-discovery` with `/search` and `/facets`.
+* Searches canonical published Library objects through the v4.9 public object authority plus records inside explicitly published v4.8 federation manifests already present on the local node.
+* Search requests do not crawl remote institutions or perform third-party network calls. Remote federation expansion remains an explicit federation-governance workflow, not a search-side effect.
+* Ranking is deterministic lexical matching using title, summary, canonical identifier, and type signals. It is not a truth, quality, authority, popularity, institutional-prestige, or access-entitlement score.
+* Every result identifies local or federated origin and preserves source/node/manifest provenance where available. Local results may link into the v5 Connected Public Research one-hop context.
+* Result pages are bounded to 50 records; local and federation candidate pools are capped; federation search reads published manifests only.
+* My Library, private Research Projects, notebook/matrix bodies, Research Room membership, Team Library membership, private federation governance, credentials, and Workspace state remain outside the search corpus.
+* Explicit-origin CORS reuses the v4.9 allowlist with credentials disabled. The `/research-discovery` route is explicitly added to the bounded public GET cache allowlist.
 
 = Connected Public Research Production Soak & Integration Hardening =
 
