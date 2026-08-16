@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.0.0
+Stable tag: 5.0.1
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.0.0 adds Connected Public Research Infrastructure: a read-only, explicit-relationship composition of the public Library API, Publication ↔ Research Graph, public Knowledge Pathways, canonical knowledge relationships, and published federation metadata, with provenance and checksummed context manifests and no exposure of private research.
+Sustainable Catalyst Library v5.0.1 hardens Connected Public Research Infrastructure with a bounded ten-scenario first-party production soak, explicit safe-route caching for the v4.9/v5 public APIs, cache/freshness observability, malformed-request guards, CORS-visible diagnostics, and retained private-research separation.
 
 
 
@@ -21,6 +21,17 @@ Sustainable Catalyst Library v5.0.0 adds Connected Public Research Infrastructur
 
 
 
+
+
+= Connected Public Research Production Soak & Integration Hardening =
+
+* New public soak summary at `/wp-json/sc-library/v1/runtime/connected-public-research-soak` and administrator-only details at `/runtime/connected-public-research-soak/details`.
+* Ten bounded first-party scenarios cover release/schema alignment, public API dependency, malformed inputs, one-hop bounds, manifest determinism, safe public caching, CORS observability, published-only federation, private-route separation, and degraded optional dependencies.
+* The existing hardening cache now explicitly allowlists `/sc-library/v1/library-api`, `/sc-library/v1/connected-public-research`, and the public federation node/manifest routes instead of broadly caching the `sc-library/v1` namespace.
+* Private research routes, authenticated requests, nonce/API-key requests, diagnostics, reports, writes, and governance routes remain non-cacheable.
+* Cache responses expose `X-SC-Library-Cache`, cache age, data state, and freshness window; allowed cross-origin API/embed consumers may read those headers without credentials.
+* The Connected Public Research front end now uses a bounded request timeout and distinguishes rate limiting from general degradation while preserving canonical-record fallback messaging.
+* The soak performs no third-party network calls, reads no private research bodies, and does not use upstream provider health as a release blocker.
 
 = Connected Public Research Infrastructure =
 

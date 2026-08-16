@@ -12,8 +12,8 @@ if (!defined('ABSPATH')) {
  */
 final class SC_Library_Hardening {
     public const SCHEMA = 'sc-library-production-readiness/1.0';
-    public const BRANCH_VERSION = '5.0.0';
-    public const BRANCH_SCHEMA = 'sc-library-v50-production-certification/1.0';
+    public const BRANCH_VERSION = '5.0.1';
+    public const BRANCH_SCHEMA = 'sc-library-v501-production-soak-certification/1.0';
 
     /** Recent 4.3 branch modules that must load together for release certification. */
     private const V43_CRITICAL_MODULES = [
@@ -54,6 +54,12 @@ final class SC_Library_Hardening {
         '/sc-library/v1/research-rooms',
         '/sc-library/v1/team-libraries',
         '/sc-library/v1/research-federation/catalog',
+    ];
+    private const V5_PUBLIC_ROUTE_PREFIXES = [
+        '/sc-library/v1/library-api',
+        '/sc-library/v1/connected-public-research',
+        '/sc-library/v1/research-federation/node',
+        '/sc-library/v1/research-federation/manifests',
     ];
     private const CACHE_GENERATION_OPTION = 'sc_library_public_cache_generation';
     private const LAST_REPORT_OPTION = 'sc_library_readiness_last_report';
@@ -274,9 +280,9 @@ final class SC_Library_Hardening {
                 <span class="sc-library-readiness-badge sc-library-readiness-badge--<?php echo esc_attr($status); ?>"><?php echo esc_html(ucfirst(str_replace('_', ' ', $status))); ?></span>
                 <p><?php echo esc_html(sprintf(__('Last evaluated %s.', 'sustainable-catalyst-library'), (string) ($public['generated_at'] ?? ''))); ?></p>
             </header>
-            <div class="sc-library-readiness-release-gate" aria-label="<?php esc_attr_e('5.0 release certification', 'sustainable-catalyst-library'); ?>">
+            <div class="sc-library-readiness-release-gate" aria-label="<?php esc_attr_e('5.0.1 production-soak certification', 'sustainable-catalyst-library'); ?>">
                 <div>
-                    <strong><?php esc_html_e('5.0 release gate', 'sustainable-catalyst-library'); ?></strong>
+                    <strong><?php esc_html_e('5.0.1 release gate', 'sustainable-catalyst-library'); ?></strong>
                     <span class="sc-library-readiness-badge sc-library-readiness-badge--<?php echo esc_attr($branch_status); ?>"><?php echo esc_html(ucfirst(str_replace('_', ' ', $branch_status))); ?></span>
                 </div>
                 <p><?php esc_html_e('First-party checks only. No third-party provider health is used to block the Library release, and private research content is not inspected.', 'sustainable-catalyst-library'); ?></p>
@@ -321,7 +327,14 @@ final class SC_Library_Hardening {
         }
 
         $response = new WP_REST_Response($cached['data'], (int) ($cached['status'] ?? 200), (array) ($cached['headers'] ?? []));
+        $stored_at = (int) ($cached['stored_at'] ?? time());
+        $ttl = max(30, (int) ($cached['ttl'] ?? get_option('sc_library_public_cache_ttl', 300)));
+        $age = max(0, time() - $stored_at);
         $response->header('X-SC-Library-Cache', 'HIT');
+        $response->header('X-SC-Library-Cache-Age', (string) $age);
+        $response->header('X-SC-Library-Data-State', 'cached-canonical');
+        $response->header('X-SC-Library-Freshness-Window', (string) $ttl);
+        $response->header('Cache-Control', 'public, max-age=' . max(0, $ttl - $age));
         return $response;
     }
 
@@ -333,18 +346,24 @@ final class SC_Library_Hardening {
         $response->header('X-Content-Type-Options', 'nosniff');
         $response->header('Referrer-Policy', 'strict-origin-when-cross-origin');
 
+        $ttl = max(30, (int) get_option('sc_library_public_cache_ttl', 300));
+        $response->header('X-SC-Library-Data-State', 'live-canonical');
+        $response->header('X-SC-Library-Cache-Age', '0');
+        $response->header('X-SC-Library-Freshness-Window', (string) $ttl);
         if (!(bool) get_option('sc_library_enable_public_cache', 1) || $response->get_status() !== 200) {
+            $response->header('X-SC-Library-Cache', 'BYPASS');
             return $response;
         }
         $key = $this->cache_key($request);
         if (!isset($this->cache_candidates[$key])) {
             return $response;
         }
-        $ttl = (int) get_option('sc_library_public_cache_ttl', 300);
         set_transient($key, [
             'data' => $response->get_data(),
             'status' => $response->get_status(),
             'headers' => $response->get_headers(),
+            'stored_at' => time(),
+            'ttl' => $ttl,
         ], $ttl);
         $response->header('X-SC-Library-Cache', 'MISS');
         $response->header('Cache-Control', 'public, max-age=' . $ttl);
@@ -359,7 +378,8 @@ final class SC_Library_Hardening {
             return false;
         }
         return str_starts_with($request->get_route(), '/sustainable-catalyst/v1/library/')
-            || str_starts_with($request->get_route(), '/sustainable-catalyst-library/v1/');
+            || str_starts_with($request->get_route(), '/sustainable-catalyst-library/v1/')
+            || self::is_v5_public_route($request->get_route());
     }
 
     private function cacheable_route(string $route): bool {
@@ -369,7 +389,45 @@ final class SC_Library_Hardening {
                 return false;
             }
         }
+        if (self::is_v5_public_route($route)) {
+            return true;
+        }
         return (bool) preg_match('#/(items|records|categories|series|concepts|pathways|documentation|foundation-documents|graph|roadmap|media/reels|archive|readiness|status)(/|$)#', $route);
+    }
+
+    public static function is_v5_public_route(string $route): bool {
+        foreach (self::V5_PUBLIC_ROUTE_PREFIXES as $prefix) {
+            if ($route === $prefix || str_starts_with($route, $prefix . '/')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static function public_v5_route_profile(): array {
+        $private_samples = [
+            '/sc-library/v1/personal-library',
+            '/sc-library/v1/research-projects',
+            '/sc-library/v1/reading-notebooks',
+            '/sc-library/v1/evidence-matrices',
+            '/sc-library/v1/research-rooms',
+            '/sc-library/v1/team-libraries',
+            '/sc-library/v1/research-federation/catalog',
+        ];
+        $private_cacheable = false;
+        foreach ($private_samples as $route) {
+            if (self::is_v5_public_route($route)) { $private_cacheable = true; break; }
+        }
+        return [
+            'schema' => 'sc-library-v5-public-cache-profile/1.0',
+            'connected_public_research_cacheable' => self::is_v5_public_route('/sc-library/v1/connected-public-research/index'),
+            'library_api_cacheable' => self::is_v5_public_route('/sc-library/v1/library-api/objects'),
+            'published_federation_cacheable' => self::is_v5_public_route('/sc-library/v1/research-federation/manifests'),
+            'private_research_routes_cacheable' => $private_cacheable,
+            'authenticated_requests_cacheable' => false,
+            'credentialed_requests_cacheable' => false,
+            'generation_invalidation' => true,
+        ];
     }
 
     private function cache_key(WP_REST_Request $request): string {
@@ -537,7 +595,7 @@ final class SC_Library_Hardening {
             'performance' => ['label' => __('Performance and large-library operations', 'sustainable-catalyst-library'), 'checks' => []],
             'security' => ['label' => __('Security and privacy', 'sustainable-catalyst-library'), 'checks' => []],
             'integrity' => ['label' => __('Preservation, backups, and integrity', 'sustainable-catalyst-library'), 'checks' => []],
-            'branch_43' => ['label' => __('5.0 release certification', 'sustainable-catalyst-library'), 'checks' => []],
+            'branch_43' => ['label' => __('5.0.1 production-soak certification', 'sustainable-catalyst-library'), 'checks' => []],
         ];
 
         $categories['platform']['checks'][] = $this->check('wordpress-version', __('WordPress version', 'sustainable-catalyst-library'), version_compare(get_bloginfo('version'), '6.4', '>='), __('WordPress meets the Library minimum.', 'sustainable-catalyst-library'), sprintf(__('Current version: %s', 'sustainable-catalyst-library'), get_bloginfo('version')), __('Upgrade WordPress to 6.4 or later.', 'sustainable-catalyst-library'));
@@ -586,13 +644,13 @@ final class SC_Library_Hardening {
         $categories['integrity']['checks'][] = $this->check_status('backup-boundary', __('Off-site backups', 'sustainable-catalyst-library'), 'info', __('WordPress cannot verify your hosting provider’s off-site backup policy.', 'sustainable-catalyst-library'), '', __('Confirm automated database and uploads backups outside this plugin.', 'sustainable-catalyst-library'));
         $categories['integrity']['checks'][] = $this->check('hardening-cron', __('Daily readiness evaluation', 'sustainable-catalyst-library'), (bool) wp_next_scheduled('sc_library_hardening_daily'), __('The daily readiness check is scheduled.', 'sustainable-catalyst-library'), '', __('Use Repair maintenance schedules on this page.', 'sustainable-catalyst-library'));
 
-        // v5.0.0 release certification is intentionally first-party only. It does not
+        // v5.0.1 production-soak certification is intentionally first-party only. It does not
         // contact connector providers and does not inspect private research content.
         $branch_version_ready = defined('SC_LIBRARY_VERSION') && SC_LIBRARY_VERSION === self::BRANCH_VERSION;
-        $categories['branch_43']['checks'][] = $this->check('v43-release-version', __('5.0 release version alignment', 'sustainable-catalyst-library'), $branch_version_ready, __('Plugin runtime is aligned to the certified 5.0.0 release.', 'sustainable-catalyst-library'), defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : __('Not defined', 'sustainable-catalyst-library'), __('Reinstall the complete v5.0.0 package; do not mix files from different releases.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-release-version', __('5.0.1 release version alignment', 'sustainable-catalyst-library'), $branch_version_ready, __('Plugin runtime is aligned to the certified 5.0.1 release.', 'sustainable-catalyst-library'), defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : __('Not defined', 'sustainable-catalyst-library'), __('Reinstall the complete v5.0.1 package; do not mix files from different releases.', 'sustainable-catalyst-library'));
 
         $identity_ready = class_exists('SC_Library_Canonical_Route_Identity') && defined('SC_Library_Canonical_Route_Identity::VERSION') && SC_Library_Canonical_Route_Identity::VERSION === self::BRANCH_VERSION;
-        $categories['branch_43']['checks'][] = $this->check('v43-identity-version', __('Canonical identity/version alignment', 'sustainable-catalyst-library'), $identity_ready, __('Canonical routing and shared-account identity are aligned to the release.', 'sustainable-catalyst-library'), '', __('Reinstall v5.0.0 so canonical-route identity and plugin runtime versions match.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-identity-version', __('Canonical identity/version alignment', 'sustainable-catalyst-library'), $identity_ready, __('Canonical routing and shared-account identity are aligned to the release.', 'sustainable-catalyst-library'), '', __('Reinstall v5.0.1 so canonical-route identity and plugin runtime versions match.', 'sustainable-catalyst-library'));
 
         $extension_status = class_exists('SC_Library_Extension_Bootstrap_V402') ? SC_Library_Extension_Bootstrap_V402::status() : [];
         $extensions_ready = is_array($extension_status) && (int) ($extension_status['expected'] ?? 0) > 0 && (int) ($extension_status['active'] ?? 0) === (int) ($extension_status['expected'] ?? -1) && empty($extension_status['errors']);
@@ -640,10 +698,18 @@ final class SC_Library_Hardening {
 
         $route_health = class_exists('SC_Library_Canonical_Route_Identity') ? SC_Library_Canonical_Route_Identity::health_payload() : [];
         $canonical_ready = is_array($route_health) && 'ok' === ($route_health['status'] ?? '');
-        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the v5.0.0 identity-health endpoint.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the v5.0.1 identity-health endpoint.', 'sustainable-catalyst-library'));
 
         $private_routes_ready = $this->private_v43_routes_require_permission();
         $categories['branch_43']['checks'][] = $this->check('v43-private-rest-boundary', __('Private REST authorization boundary', 'sustainable-catalyst-library'), $private_routes_ready, __('Private research base routes are registered with explicit permission callbacks.', 'sustainable-catalyst-library'), '', __('Do not release until every private research endpoint requires an authenticated permission callback.', 'sustainable-catalyst-library'));
+
+        $public_v5_profile = self::public_v5_route_profile();
+        $safe_v5_cache = ! empty($public_v5_profile['connected_public_research_cacheable']) && ! empty($public_v5_profile['library_api_cacheable']) && empty($public_v5_profile['private_research_routes_cacheable']);
+        $categories['branch_43']['checks'][] = $this->check('v501-public-cache-boundary', __('v5 public cache boundary', 'sustainable-catalyst-library'), $safe_v5_cache, __('The v4.9/v5 public GET facades use the bounded cache through explicit route allowlisting while private research routes remain excluded.', 'sustainable-catalyst-library'), wp_json_encode($public_v5_profile), __('Restore the v5.0.1 safe-route cache profile before release.', 'sustainable-catalyst-library'));
+
+        $soak = class_exists('SC_Library_Connected_Public_Research_Infrastructure') && method_exists('SC_Library_Connected_Public_Research_Infrastructure', 'run_production_soak') ? SC_Library_Connected_Public_Research_Infrastructure::run_production_soak(false) : [];
+        $soak_ready = is_array($soak) && 'pass' === ($soak['status'] ?? '') && (int) ($soak['scenario_count'] ?? 0) === 10 && (int) ($soak['failed'] ?? 1) === 0;
+        $categories['branch_43']['checks'][] = $this->check('v501-connected-public-soak', __('Connected Public Research production soak', 'sustainable-catalyst-library'), $soak_ready, __('The bounded first-party integration soak passes all ten scenarios.', 'sustainable-catalyst-library'), $soak_ready ? sprintf(__('%d/%d scenarios passed.', 'sustainable-catalyst-library'), (int) ($soak['passed'] ?? 0), (int) ($soak['scenario_count'] ?? 0)) : __('Soak diagnostics are incomplete or failing.', 'sustainable-catalyst-library'), __('Open the v5.0.1 soak details endpoint and resolve every blocking scenario.', 'sustainable-catalyst-library'));
 
         $categories['branch_43']['checks'][] = $this->check('v43-first-party-gate', __('First-party-only release gate', 'sustainable-catalyst-library'), true, __('Release certification performs no third-party provider requests; upstream availability cannot invalidate a healthy Library release.', 'sustainable-catalyst-library'), __('network_calls_performed=false; upstream_health_release_blocking=false', 'sustainable-catalyst-library'), '');
         $categories['branch_43']['checks'][] = $this->check('v43-private-content-boundary', __('Private-content diagnostic boundary', 'sustainable-catalyst-library'), true, __('Release certification verifies stores, modules, routes, and assets without reading private notebook, matrix, project, or personal-library content.', 'sustainable-catalyst-library'), __('private_record_content_inspected=false', 'sustainable-catalyst-library'), '');

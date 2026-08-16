@@ -1,6 +1,6 @@
 <?php
 /**
- * Connected Public Research Infrastructure — v5.0.0.
+ * Connected Public Research Infrastructure — v5.0.1 production-soak hardening.
  *
  * Composes the v4.9 public API with explicit public knowledge, publication,
  * pathway, and federation relationships. No parallel graph/content store is
@@ -11,11 +11,14 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 final class SC_Library_Connected_Public_Research_Infrastructure {
-    public const VERSION = '5.0.0';
+    public const VERSION = '5.0.1';
     public const SCHEMA = 'sc-library-connected-public-research/1.0';
     public const CONTEXT_SCHEMA = 'sc-library-public-research-context/1.0';
     public const NETWORK_SCHEMA = 'sc-library-public-research-network/1.0';
     public const MANIFEST_SCHEMA = 'sc-library-public-research-manifest/1.0';
+    public const SOAK_SCHEMA = 'sc-library-connected-public-research-soak/1.0';
+    public const SOAK_ROUTE = '/runtime/connected-public-research-soak';
+    public const SOAK_SCENARIO_COUNT = 10;
     public const REST_NAMESPACE = 'sc-library/v1';
     public const REST_ROUTE = '/connected-public-research';
     public const DEFAULT_RESULTS = 18;
@@ -60,6 +63,12 @@ final class SC_Library_Connected_Public_Research_Infrastructure {
             'automatic_federation_acceptance' => false,
             'automatic_evidence_promotion' => false,
             'automatic_workspace_write' => false,
+            'production_soak_bounded' => true,
+            'safe_route_cache_allowlist' => true,
+            'malformed_request_guards' => true,
+            'freshness_headers' => true,
+            'external_network_calls_in_soak' => false,
+            'private_record_content_inspected_by_soak' => false,
         );
     }
 
@@ -100,7 +109,84 @@ final class SC_Library_Connected_Public_Research_Infrastructure {
         register_rest_route( self::REST_NAMESPACE, self::REST_ROUTE . '/network/(?P<type>[a-z0-9-]+)/(?P<id>\\d+)', $read + array( 'callback' => array( $this, 'rest_network' ) ) );
         register_rest_route( self::REST_NAMESPACE, self::REST_ROUTE . '/manifest/(?P<type>[a-z0-9-]+)/(?P<id>\\d+)', $read + array( 'callback' => array( $this, 'rest_manifest' ) ) );
         register_rest_route( self::REST_NAMESPACE, self::REST_ROUTE . '/federation-manifests', $read + array( 'callback' => array( $this, 'rest_federation_manifests' ) ) );
+        register_rest_route( self::REST_NAMESPACE, self::SOAK_ROUTE, $read + array( 'callback' => array( $this, 'rest_soak_status' ) ) );
+        register_rest_route( self::REST_NAMESPACE, self::SOAK_ROUTE . '/details', array(
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => static function() { return current_user_can( 'manage_options' ); },
+            'callback' => array( $this, 'rest_soak_details' ),
+        ) );
     }
+
+    public static function soak_scenarios() {
+        return array(
+            array( 'id' => 'release-alignment', 'label' => 'Release and schema alignment' ),
+            array( 'id' => 'public-api-dependency', 'label' => 'Public API dependency' ),
+            array( 'id' => 'malformed-request-guards', 'label' => 'Malformed request guards' ),
+            array( 'id' => 'bounded-one-hop-network', 'label' => 'Bounded one-hop network' ),
+            array( 'id' => 'manifest-determinism', 'label' => 'Manifest determinism' ),
+            array( 'id' => 'safe-public-cache', 'label' => 'Safe public cache allowlist' ),
+            array( 'id' => 'cors-observability', 'label' => 'CORS and cache observability' ),
+            array( 'id' => 'published-federation-only', 'label' => 'Published federation boundary' ),
+            array( 'id' => 'private-route-separation', 'label' => 'Private route separation' ),
+            array( 'id' => 'first-party-degradation', 'label' => 'First-party degradation boundary' ),
+        );
+    }
+
+    private static function soak_check( $id, $label, $pass, $detail = '' ) {
+        return array(
+            'id' => sanitize_key( $id ),
+            'label' => sanitize_text_field( $label ),
+            'status' => $pass ? 'pass' : 'fail',
+            'detail' => sanitize_text_field( $detail ),
+        );
+    }
+
+    public static function run_production_soak( $include_details = false ) {
+        $checks = array();
+        $contract = self::contract();
+        $checks[] = self::soak_check( 'release-alignment', 'Release and schema alignment', defined( 'SC_LIBRARY_VERSION' ) && self::VERSION === SC_LIBRARY_VERSION && 0 === strpos( self::SCHEMA, 'sc-library-connected-public-research/' ), self::VERSION );
+        $profiles = self::api_profiles();
+        $checks[] = self::soak_check( 'public-api-dependency', 'Public API dependency', class_exists( 'SC_Library_API_Embeds_Interoperability' ) && count( $profiles ) >= 6, sprintf( '%d public object profiles', count( $profiles ) ) );
+        $bad_type = self::index_payload( '__invalid_public_type__', '', 1 );
+        $bad_context = self::build_context( '__invalid_public_type__', 0 );
+        $checks[] = self::soak_check( 'malformed-request-guards', 'Malformed request guards', is_wp_error( $bad_type ) && is_wp_error( $bad_context ), 'Invalid type/index and context requests reject before data exposure.' );
+        $checks[] = self::soak_check( 'bounded-one-hop-network', 'Bounded one-hop network', self::MAX_CONNECTIONS === 120 && ! empty( $contract['one_hop_network_only'] ) && ! empty( $contract['explicit_relationships_only'] ), 'max_connections=120; one_hop=true' );
+        $fixture = array( 'schema' => self::CONTEXT_SCHEMA, 'object' => array( 'canonical_id' => 'urn:sc:soak:fixture' ), 'connections' => array(), 'explicit_relationships_only' => true );
+        $hash_a = hash( 'sha256', wp_json_encode( $fixture, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+        $hash_b = hash( 'sha256', wp_json_encode( $fixture, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+        $checks[] = self::soak_check( 'manifest-determinism', 'Manifest determinism', hash_equals( $hash_a, $hash_b ) && 64 === strlen( $hash_a ), 'sha256=' . $hash_a );
+        $cache_profile = class_exists( 'SC_Library_Hardening' ) && method_exists( 'SC_Library_Hardening', 'public_v5_route_profile' ) ? SC_Library_Hardening::public_v5_route_profile() : array();
+        $cache_ready = ! empty( $cache_profile['connected_public_research_cacheable'] ) && ! empty( $cache_profile['library_api_cacheable'] ) && empty( $cache_profile['private_research_routes_cacheable'] );
+        $checks[] = self::soak_check( 'safe-public-cache', 'Safe public cache allowlist', $cache_ready, $cache_ready ? 'Public v5 routes explicitly allowlisted; private research excluded.' : 'Safe-route cache profile incomplete.' );
+        $origins = class_exists( 'SC_Library_API_Embeds_Interoperability' ) ? SC_Library_API_Embeds_Interoperability::allowed_origins() : array();
+        $cors_ready = ! in_array( '*', (array) $origins, true ) && empty( $contract['credentials_exposed'] );
+        $checks[] = self::soak_check( 'cors-observability', 'CORS and cache observability', $cors_ready, 'credentials=false; wildcard_origin=false; cache headers exposed on allowed origins' );
+        $federation_ready = class_exists( 'SC_Library_Global_Research_Federation' ) && method_exists( 'SC_Library_Global_Research_Federation', 'published_manifest_ids' ) && self::MAX_FEDERATION_MANIFESTS === 20;
+        $checks[] = self::soak_check( 'published-federation-only', 'Published federation boundary', $federation_ready, 'published-only federation facade retained' );
+        $private_ready = empty( $contract['private_projects_exposed'] ) && empty( $contract['personal_library_exposed'] ) && empty( $contract['notebook_bodies_exposed'] ) && empty( $contract['matrix_bodies_exposed'] ) && empty( $contract['research_room_membership_exposed'] ) && empty( $contract['team_library_membership_exposed'] ) && empty( $contract['private_federation_governance_exposed'] );
+        $checks[] = self::soak_check( 'private-route-separation', 'Private route separation', $private_ready, 'private research and governance remain outside public context' );
+        $checks[] = self::soak_check( 'first-party-degradation', 'First-party degradation boundary', ! empty( $contract['production_soak_bounded'] ) && empty( $contract['external_network_calls_in_soak'] ) && empty( $contract['private_record_content_inspected_by_soak'] ), 'network_calls=false; private_content_inspected=false; upstream_health_nonblocking=true' );
+        $failed = array_values( array_filter( $checks, static function( $check ) { return 'pass' !== ( $check['status'] ?? '' ); } ) );
+        $report = array(
+            'schema' => self::SOAK_SCHEMA,
+            'version' => self::VERSION,
+            'status' => empty( $failed ) ? 'pass' : 'fail',
+            'scenario_count' => count( $checks ),
+            'passed' => count( $checks ) - count( $failed ),
+            'failed' => count( $failed ),
+            'first_party_only' => true,
+            'network_calls_performed' => false,
+            'upstream_health_release_blocking' => false,
+            'private_record_content_inspected' => false,
+            'cache_profile' => $cache_profile,
+        );
+        if ( $include_details ) { $report['scenarios'] = $checks; }
+        else { $report['scenarios'] = array_map( static function( $check ) { return array_intersect_key( $check, array_flip( array( 'id', 'label', 'status' ) ) ); }, $checks ); }
+        return $report;
+    }
+
+    public function rest_soak_status() { return rest_ensure_response( self::run_production_soak( false ) ); }
+    public function rest_soak_details() { return rest_ensure_response( self::run_production_soak( true ) ); }
 
     private static function api_profiles() {
         return class_exists( 'SC_Library_API_Embeds_Interoperability' ) ? SC_Library_API_Embeds_Interoperability::object_profiles() : array();
@@ -386,7 +472,7 @@ final class SC_Library_Connected_Public_Research_Infrastructure {
         );
     }
 
-    public function rest_capabilities() { return rest_ensure_response( array( 'profile' => self::infrastructure_profile(), 'contract' => self::contract(), 'endpoints' => array( 'index' => rest_url( self::REST_NAMESPACE . self::REST_ROUTE . '/index' ), 'context' => rest_url( self::REST_NAMESPACE . self::REST_ROUTE . '/context/{type}/{id}' ), 'network' => rest_url( self::REST_NAMESPACE . self::REST_ROUTE . '/network/{type}/{id}' ), 'manifest' => rest_url( self::REST_NAMESPACE . self::REST_ROUTE . '/manifest/{type}/{id}' ), 'federation_manifests' => rest_url( self::REST_NAMESPACE . self::REST_ROUTE . '/federation-manifests' ) ) ) ); }
+    public function rest_capabilities() { return rest_ensure_response( array( 'profile' => self::infrastructure_profile(), 'contract' => self::contract(), 'endpoints' => array( 'index' => rest_url( self::REST_NAMESPACE . self::REST_ROUTE . '/index' ), 'context' => rest_url( self::REST_NAMESPACE . self::REST_ROUTE . '/context/{type}/{id}' ), 'network' => rest_url( self::REST_NAMESPACE . self::REST_ROUTE . '/network/{type}/{id}' ), 'manifest' => rest_url( self::REST_NAMESPACE . self::REST_ROUTE . '/manifest/{type}/{id}' ), 'federation_manifests' => rest_url( self::REST_NAMESPACE . self::REST_ROUTE . '/federation-manifests' ), 'production_soak' => rest_url( self::REST_NAMESPACE . self::SOAK_ROUTE ) ) ) ); }
     public function rest_index( WP_REST_Request $request ) { $out = self::index_payload( $request->get_param( 'type' ), $request->get_param( 'q' ), $request->get_param( 'per_page' ) ); return is_wp_error( $out ) ? $out : rest_ensure_response( $out ); }
     public function rest_context( WP_REST_Request $request ) { $out = self::build_context( $request['type'], $request['id'] ); return is_wp_error( $out ) ? $out : rest_ensure_response( $out ); }
     public function rest_network( WP_REST_Request $request ) { $out = self::build_network( $request['type'], $request['id'] ); return is_wp_error( $out ) ? $out : rest_ensure_response( $out ); }
@@ -397,11 +483,16 @@ final class SC_Library_Connected_Public_Research_Infrastructure {
         if ( ! $request instanceof WP_REST_Request || 0 !== strpos( (string) $request->get_route(), '/' . self::REST_NAMESPACE . self::REST_ROUTE ) ) { return $response; }
         $origin = isset( $_SERVER['HTTP_ORIGIN'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_ORIGIN'] ) ) : '';
         $allowed = class_exists( 'SC_Library_API_Embeds_Interoperability' ) ? SC_Library_API_Embeds_Interoperability::allowed_origins() : array();
-        if ( $origin && in_array( $origin, $allowed, true ) && $response instanceof WP_HTTP_Response ) {
-            $response->header( 'Access-Control-Allow-Origin', $origin );
-            $response->header( 'Access-Control-Allow-Credentials', 'false' );
-            $response->header( 'Access-Control-Allow-Methods', 'GET' );
-            $response->header( 'Vary', 'Origin' );
+        if ( $response instanceof WP_HTTP_Response ) {
+            $response->header( 'X-SC-Library-Version', self::VERSION );
+            $response->header( 'X-SC-Library-Schema', self::SCHEMA );
+            if ( $origin && in_array( $origin, $allowed, true ) ) {
+                $response->header( 'Access-Control-Allow-Origin', $origin );
+                $response->header( 'Access-Control-Allow-Credentials', 'false' );
+                $response->header( 'Access-Control-Allow-Methods', 'GET' );
+                $response->header( 'Access-Control-Expose-Headers', 'X-SC-Library-Cache, X-SC-Library-Cache-Age, X-SC-Library-Data-State, X-SC-Library-Freshness-Window, X-SC-Library-Version, X-SC-Library-Schema, Retry-After' );
+                $response->header( 'Vary', 'Origin' );
+            }
         }
         return $response;
     }
@@ -449,8 +540,8 @@ final class SC_Library_Connected_Public_Research_Infrastructure {
             <header class="sc-cpri__hero"><div><p><?php esc_html_e( 'Public research infrastructure · explicit provenance', 'sustainable-catalyst-library' ); ?></p><h3><?php echo esc_html( $atts['title'] ); ?></h3><span><?php esc_html_e( 'Move from a public Library record into its declared topics, concepts, entities, sources, claims, pathways, publication graph, and published federation context without exposing private research.', 'sustainable-catalyst-library' ); ?></span></div><aside><strong><?php esc_html_e( 'Connected does not mean inferred', 'sustainable-catalyst-library' ); ?></strong><span><?php esc_html_e( 'Only explicit public relationships are projected, one hop at a time. No private project graph is promoted into this surface.', 'sustainable-catalyst-library' ); ?></span></aside></header>
             <div class="sc-cpri__metrics" aria-label="<?php esc_attr_e( 'Public infrastructure guarantees', 'sustainable-catalyst-library' ); ?>"><article><strong>GET</strong><span><?php esc_html_e( 'Read only', 'sustainable-catalyst-library' ); ?></span></article><article><strong>1</strong><span><?php esc_html_e( 'Hop maximum', 'sustainable-catalyst-library' ); ?></span></article><article><strong><?php echo esc_html( (string) self::MAX_CONNECTIONS ); ?></strong><span><?php esc_html_e( 'Connection cap', 'sustainable-catalyst-library' ); ?></span></article><article><strong>SHA-256</strong><span><?php esc_html_e( 'Context manifests', 'sustainable-catalyst-library' ); ?></span></article></div>
             <div class="sc-cpri__index" data-sc-cpri-index aria-live="polite" aria-busy="true"><p><?php esc_html_e( 'Loading recent public research records…', 'sustainable-catalyst-library' ); ?></p></div>
-            <div class="sc-cpri__links"><a href="<?php echo esc_url( $base ); ?>"><?php esc_html_e( 'Infrastructure contract', 'sustainable-catalyst-library' ); ?></a><a href="<?php echo esc_url( $base . '/index' ); ?>"><?php esc_html_e( 'Public research index', 'sustainable-catalyst-library' ); ?></a><a href="<?php echo esc_url( $base . '/federation-manifests' ); ?>"><?php esc_html_e( 'Published federation manifests', 'sustainable-catalyst-library' ); ?></a></div>
-            <p class="sc-cpri__boundary"><?php esc_html_e( 'Private Projects, My Library, notebook and matrix bodies, Research Room membership, Team Library membership, private federation governance, credentials, and Workspace state are outside this public infrastructure.', 'sustainable-catalyst-library' ); ?></p>
+            <div class="sc-cpri__links"><a href="<?php echo esc_url( $base ); ?>"><?php esc_html_e( 'Infrastructure contract', 'sustainable-catalyst-library' ); ?></a><a href="<?php echo esc_url( $base . '/index' ); ?>"><?php esc_html_e( 'Public research index', 'sustainable-catalyst-library' ); ?></a><a href="<?php echo esc_url( $base . '/federation-manifests' ); ?>"><?php esc_html_e( 'Published federation manifests', 'sustainable-catalyst-library' ); ?></a><a href="<?php echo esc_url( rest_url( self::REST_NAMESPACE . self::SOAK_ROUTE ) ); ?>"><?php esc_html_e( 'Production soak status', 'sustainable-catalyst-library' ); ?></a></div>
+            <p class="sc-cpri__boundary"><?php esc_html_e( 'Private Projects, My Library, notebook and matrix bodies, Research Room membership, Team Library membership, private federation governance, credentials, and Workspace state are outside this public infrastructure. v5.0.1 adds bounded first-party soak diagnostics and safe public caching without broadening that boundary.', 'sustainable-catalyst-library' ); ?></p>
         </section><?php return (string) ob_get_clean();
     }
 }

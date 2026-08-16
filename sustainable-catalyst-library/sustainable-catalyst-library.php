@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.0.0 adds Connected Public Research Infrastructure: a governed, read-only composition of canonical public Library objects, explicit publication/knowledge/pathway relationships, published federation metadata, provenance, and checksummed public research manifests without exposing private research.
- * Version: 5.0.0
+ * Description: Sustainable Catalyst Library v5.0.1 hardens Connected Public Research Infrastructure with bounded production-soak diagnostics, explicit safe-route caching, freshness/cache headers, malformed-request guards, CORS observability, and integration certification without exposing private research.
+ * Version: 5.0.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.0.0');
+define('SC_LIBRARY_VERSION', '5.0.1');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

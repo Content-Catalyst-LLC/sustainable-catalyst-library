@@ -287,6 +287,7 @@ final class SC_Library_API_Embeds_Interoperability {
             $response->header( 'Vary', 'Origin' );
             $response->header( 'Access-Control-Allow-Credentials', 'false' );
             $response->header( 'Access-Control-Allow-Methods', 'GET' );
+            $response->header( 'Access-Control-Expose-Headers', 'X-SC-Library-Cache, X-SC-Library-Cache-Age, X-SC-Library-Data-State, X-SC-Library-Freshness-Window, Retry-After' );
         }
         return $response;
     }
