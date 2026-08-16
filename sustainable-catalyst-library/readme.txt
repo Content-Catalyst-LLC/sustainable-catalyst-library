@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.2.0
+Stable tag: 5.3.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.2.0 adds Research Identity, Authority & Persistent Identifier Network across canonical public Library records and explicitly published federation metadata, using deterministic DOI/ORCID/ROR/ISBN/ISSN/Wikidata/PMID normalization, provenance-visible authority resolution, ambiguity preservation, and no automatic record merge or external registry verification.
+Sustainable Catalyst Library v5.3.0 adds Public Evidence & Claim Navigation across canonical public Research Claims, public Evidence Notes, explicit Publication ↔ Research Graph links, and public Research Sources while keeping private Evidence Matrix, notebook, review-note, project, and membership content outside the public surface.
 
 
 
@@ -23,6 +23,19 @@ Sustainable Catalyst Library v5.2.0 adds Research Identity, Authority & Persiste
 
 
 
+
+= Public Evidence & Claim Navigation =
+
+* New public shortcode `[sc_public_evidence_claim_navigation]` and GET-only REST facade at `/wp-json/sc-library/v1/public-evidence` with `/index`, `/claim/{id}`, `/evidence/{id}`, `/publication/{id}`, and `/source/{id}`.
+* Reuses the canonical v2.7 Research Claim / Evidence Note authority, v4.3.37 Publication ↔ Research Graph, Citation Studio public sources, v5 public API/CORS/cache infrastructure, and existing public visibility rules. No parallel claim or evidence store is created.
+* Only claims and evidence notes already marked public by the canonical evidence system are navigable. Private Evidence Matrix bodies, Reading Notebook content, project context, review notes, relation notes, credentials, memberships, and Workspace state remain excluded.
+* Relation semantics remain explicit and provenance-aware: supports, qualifies, contradicts, contextualizes, illustrates, and unresolved. The facade does not infer relationships from text.
+* Claim status and declared confidence remain descriptive record fields. They are not truth, certainty, consensus, institutional-authority, or access-entitlement scores.
+* Evidence responses expose a bounded public excerpt, public source/citation, locator and verification state, not private analysis/context fields or relation notes.
+* Publication navigation uses only claims explicitly connected through Publication ↔ Research Graph; source navigation uses only canonical public evidence-source links.
+* Public v4.9 publication/source payloads gain bounded `public_evidence` navigation metadata.
+* Explicit-origin CORS reuses the v4.9 allowlist with credentials disabled; `/public-evidence` is explicitly added to the safe public GET cache allowlist.
+* v5.3.0 performs no automatic claim creation, evidence promotion, claim-status change, confidence change, publication, federation acceptance, or Workspace write.
 
 = Research Identity, Authority & Persistent Identifier Network =
 

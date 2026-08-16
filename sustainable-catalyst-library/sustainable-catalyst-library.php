@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.2.0 adds Research Identity, Authority & Persistent Identifier Network across canonical public records and published federation metadata with deterministic identifier normalization, provenance, ambiguity preservation, and no automatic identity merge.
- * Version: 5.2.0
+ * Description: Sustainable Catalyst Library v5.3.0 adds Public Evidence & Claim Navigation across canonical public claims, public evidence notes, explicit publication research links, and public research sources without exposing private Evidence Matrix or notebook content.
+ * Version: 5.3.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.2.0');
+define('SC_LIBRARY_VERSION', '5.3.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
