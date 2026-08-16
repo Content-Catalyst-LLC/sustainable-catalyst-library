@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Canonical_Route_Identity {
-    public const VERSION = '5.1.0';
+    public const VERSION = '5.2.0';
     public const SCHEMA = 'sc-library-route-identity-health/1.0';
     public const ACCOUNT_SCHEMA = 'sc-library-account-continuity/1.0';
     public const CANONICAL_SLUG = 'knowledge-libraries';
@@ -140,7 +140,7 @@ final class SC_Library_Canonical_Route_Identity {
         );
 
         nocache_headers();
-        wp_safe_redirect( $target, 301, 'Sustainable Catalyst Library v5.0.0' );
+        wp_safe_redirect( $target, 301, 'Sustainable Catalyst Library v5.2.0' );
         exit;
     }
 
@@ -241,7 +241,7 @@ final class SC_Library_Canonical_Route_Identity {
 
         ob_start();
         ?>
-        <aside class="sc-library-account-continuity" data-sc-library-account-continuity="v5.1.0">
+        <aside class="sc-library-account-continuity" data-sc-library-account-continuity="v5.2.0">
             <div class="sc-library-account-continuity__state">
                 <small><?php esc_html_e( 'Account continuity', 'sustainable-catalyst-library' ); ?></small>
                 <?php if ( $signed_in && $user instanceof WP_User ) : ?>

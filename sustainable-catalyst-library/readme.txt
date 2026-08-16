@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.1.0
+Stable tag: 5.2.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.1.0 adds Global Research Discovery & Federated Search across canonical public Library records and explicitly published federation metadata, using deterministic lexical ranking, visible provenance, bounded local-first search, and no private-research or remote-crawling expansion.
+Sustainable Catalyst Library v5.2.0 adds Research Identity, Authority & Persistent Identifier Network across canonical public Library records and explicitly published federation metadata, using deterministic DOI/ORCID/ROR/ISBN/ISSN/Wikidata/PMID normalization, provenance-visible authority resolution, ambiguity preservation, and no automatic record merge or external registry verification.
 
 
 
@@ -22,6 +22,19 @@ Sustainable Catalyst Library v5.1.0 adds Global Research Discovery & Federated S
 
 
 
+
+
+= Research Identity, Authority & Persistent Identifier Network =
+
+* New public shortcode `[sc_research_identity_authority]` and GET-only REST facade at `/wp-json/sc-library/v1/research-identity` with `/schemes`, `/resolve`, `/record/{type}/{id}`, and `/network/{scheme}/{value}`.
+* Reuses canonical v4.9 public objects, Citation Studio source identifier fields, v4.3.34 metadata/entity-resolution boundaries, v3.2 named-entity/concept authority URIs, and explicitly published v4.8 federation metadata. No parallel identity or entity store is created.
+* Supports DOI, ORCID, ROR, ISBN, ISSN, Wikidata and PMID with deterministic local normalization plus syntax/checksum validation where defined.
+* Identifier provenance is retained at field/record/manifest level. Multiple public records declaring the same normalized identifier remain visible as ambiguous candidates rather than being silently merged.
+* Identifier matching is a discovery and reconciliation signal, not proof of identity, authorship, affiliation, ownership, truth, quality, institutional authority, or access entitlement.
+* Resolution performs no third-party registry requests. External registry verification is explicitly false in v5.2.0.
+* Public v4.9 object payloads gain bounded `persistent_identifiers` and `identity_url` fields; raw post meta is never exposed.
+* My Library, private Projects, notebook/matrix bodies, Room/Team membership, private federation governance, credentials, and Workspace state remain outside the identity corpus.
+* Explicit-origin CORS reuses the v4.9 allowlist with credentials disabled; `/research-identity` is explicitly added to the safe public GET cache allowlist.
 
 = Global Research Discovery & Federated Search =
 
