@@ -12,8 +12,8 @@ if (!defined('ABSPATH')) {
  */
 final class SC_Library_Hardening {
     public const SCHEMA = 'sc-library-production-readiness/1.0';
-    public const BRANCH_VERSION = '5.3.0';
-    public const BRANCH_SCHEMA = 'sc-library-v530-public-evidence-certification/1.0';
+    public const BRANCH_VERSION = '5.4.0';
+    public const BRANCH_SCHEMA = 'sc-library-v540-curated-spaces-certification/1.0';
 
     /** Recent 4.3 branch modules that must load together for release certification. */
     private const V43_CRITICAL_MODULES = [
@@ -40,6 +40,7 @@ final class SC_Library_Hardening {
         'SC_Library_Global_Research_Discovery_Federated_Search',
         'SC_Library_Research_Identity_Authority_Network',
         'SC_Library_Public_Evidence_Claim_Navigation',
+        'SC_Library_Research_Collections_Curated_Spaces',
     ];
 
     /** Authenticated/private base routes introduced across the 4.3 research branch. */
@@ -64,6 +65,7 @@ final class SC_Library_Hardening {
         '/sc-library/v1/research-discovery',
         '/sc-library/v1/research-identity',
         '/sc-library/v1/public-evidence',
+        '/sc-library/v1/curated-spaces',
         '/sc-library/v1/research-federation/node',
         '/sc-library/v1/research-federation/manifests',
     ];
@@ -432,6 +434,7 @@ final class SC_Library_Hardening {
             'research_discovery_cacheable' => self::is_v5_public_route('/sc-library/v1/research-discovery/search'),
             'research_identity_cacheable' => self::is_v5_public_route('/sc-library/v1/research-identity/resolve'),
             'public_evidence_cacheable' => self::is_v5_public_route('/sc-library/v1/public-evidence/index'),
+            'curated_spaces_cacheable' => self::is_v5_public_route('/sc-library/v1/curated-spaces/index'),
             'private_research_routes_cacheable' => $private_cacheable,
             'authenticated_requests_cacheable' => false,
             'credentialed_requests_cacheable' => false,
@@ -701,6 +704,8 @@ final class SC_Library_Hardening {
             'assets/css/sc-library-research-identity-v520.css',
             'assets/js/sc-library-public-evidence-v530.js',
             'assets/css/sc-library-public-evidence-v530.css',
+            'assets/js/sc-library-curated-spaces-v540.js',
+            'assets/css/sc-library-curated-spaces-v540.css',
             'assets/css/sc-library-hardening.css',
             'assets/js/sc-library-hardening.js',
         ];
@@ -713,14 +718,14 @@ final class SC_Library_Hardening {
 
         $route_health = class_exists('SC_Library_Canonical_Route_Identity') ? SC_Library_Canonical_Route_Identity::health_payload() : [];
         $canonical_ready = is_array($route_health) && 'ok' === ($route_health['status'] ?? '');
-        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the v5.3.0 identity-health endpoint.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the v5.4.0 identity-health endpoint.', 'sustainable-catalyst-library'));
 
         $private_routes_ready = $this->private_v43_routes_require_permission();
         $categories['branch_43']['checks'][] = $this->check('v43-private-rest-boundary', __('Private REST authorization boundary', 'sustainable-catalyst-library'), $private_routes_ready, __('Private research base routes are registered with explicit permission callbacks.', 'sustainable-catalyst-library'), '', __('Do not release until every private research endpoint requires an authenticated permission callback.', 'sustainable-catalyst-library'));
 
         $public_v5_profile = self::public_v5_route_profile();
-        $safe_v5_cache = ! empty($public_v5_profile['connected_public_research_cacheable']) && ! empty($public_v5_profile['library_api_cacheable']) && ! empty($public_v5_profile['research_discovery_cacheable']) && ! empty($public_v5_profile['research_identity_cacheable']) && ! empty($public_v5_profile['public_evidence_cacheable']) && empty($public_v5_profile['private_research_routes_cacheable']);
-        $categories['branch_43']['checks'][] = $this->check('v501-public-cache-boundary', __('v5 public cache boundary', 'sustainable-catalyst-library'), $safe_v5_cache, __('The v4.9/v5 public GET facades use the bounded cache through explicit route allowlisting while private research routes remain excluded.', 'sustainable-catalyst-library'), wp_json_encode($public_v5_profile), __('Restore the v5.3.0 safe-route cache profile before release.', 'sustainable-catalyst-library'));
+        $safe_v5_cache = ! empty($public_v5_profile['connected_public_research_cacheable']) && ! empty($public_v5_profile['library_api_cacheable']) && ! empty($public_v5_profile['research_discovery_cacheable']) && ! empty($public_v5_profile['research_identity_cacheable']) && ! empty($public_v5_profile['public_evidence_cacheable']) && ! empty($public_v5_profile['curated_spaces_cacheable']) && empty($public_v5_profile['private_research_routes_cacheable']);
+        $categories['branch_43']['checks'][] = $this->check('v501-public-cache-boundary', __('v5 public cache boundary', 'sustainable-catalyst-library'), $safe_v5_cache, __('The v4.9/v5 public GET facades use the bounded cache through explicit route allowlisting while private research routes remain excluded.', 'sustainable-catalyst-library'), wp_json_encode($public_v5_profile), __('Restore the v5.4.0 safe-route cache profile before release.', 'sustainable-catalyst-library'));
 
         $soak = class_exists('SC_Library_Connected_Public_Research_Infrastructure') && method_exists('SC_Library_Connected_Public_Research_Infrastructure', 'run_production_soak') ? SC_Library_Connected_Public_Research_Infrastructure::run_production_soak(false) : [];
         $soak_ready = is_array($soak) && 'pass' === ($soak['status'] ?? '') && (int) ($soak['scenario_count'] ?? 0) === 10 && (int) ($soak['failed'] ?? 1) === 0;
@@ -743,6 +748,12 @@ final class SC_Library_Hardening {
         $categories['branch_43']['checks'][] = $this->check('v530-public-evidence-contract', __('Public Evidence & Claim Navigation boundary', 'sustainable-catalyst-library'), $evidence_ready, __('Public evidence navigation reuses canonical public claims, public evidence notes, explicit publication graph links, and public sources while private matrix/notebook/review context remains excluded.', 'sustainable-catalyst-library'), $evidence_ready ? __('canonical-public-only; explicit relations; truth_scoring=false; private_matrix=false', 'sustainable-catalyst-library') : __('Public evidence contract is incomplete.', 'sustainable-catalyst-library'), __('Restore the complete v5.3.0 public evidence module before release.', 'sustainable-catalyst-library'));
         $evidence_cacheable = in_array('/sc-library/v1/public-evidence', self::V5_PUBLIC_ROUTE_PREFIXES, true);
         $categories['branch_43']['checks'][] = $this->check('v530-public-evidence-cache-boundary', __('Public evidence cache/CORS boundary', 'sustainable-catalyst-library'), $evidence_cacheable, __('The public evidence facade is explicitly allowlisted for bounded GET caching and reuses explicit-origin CORS with credentials disabled.', 'sustainable-catalyst-library'), '', __('Restore the explicit /public-evidence route prefix; never broaden caching to the entire sc-library/v1 namespace.', 'sustainable-catalyst-library'));
+
+        $curated_contract = class_exists('SC_Library_Research_Collections_Curated_Spaces') ? SC_Library_Research_Collections_Curated_Spaces::contract() : [];
+        $curated_ready = is_array($curated_contract) && !empty($curated_contract['canonical_public_api_reused']) && !empty($curated_contract['references_only']) && !empty($curated_contract['ordered_sections']) && !empty($curated_contract['curated_space_store_is_editorial_only']) && empty($curated_contract['underlying_record_ownership_transferred']) && empty($curated_contract['underlying_record_publication_state_mutated']) && empty($curated_contract['private_projects_exposed']) && empty($curated_contract['notebook_bodies_exposed']) && empty($curated_contract['matrix_bodies_exposed']) && empty($curated_contract['automatic_publication']);
+        $categories['branch_43']['checks'][] = $this->check('v540-curated-spaces-contract', __('Research Collections & Curated Spaces boundary', 'sustainable-catalyst-library'), $curated_ready, __('Curated public spaces store ordered curator narrative and references to already-public records without copying private research, transferring ownership, or changing underlying publication state.', 'sustainable-catalyst-library'), $curated_ready ? __('references_only=true; ordered_sections=true; private_research=false; automatic_publication=false', 'sustainable-catalyst-library') : __('Curated-space contract is incomplete.', 'sustainable-catalyst-library'), __('Restore the complete v5.4.0 curated-spaces module before release.', 'sustainable-catalyst-library'));
+        $curated_cacheable = in_array('/sc-library/v1/curated-spaces', self::V5_PUBLIC_ROUTE_PREFIXES, true);
+        $categories['branch_43']['checks'][] = $this->check('v540-curated-spaces-cache-boundary', __('Curated spaces cache/CORS boundary', 'sustainable-catalyst-library'), $curated_cacheable, __('The public curated-space facade is explicitly allowlisted for bounded GET caching and uses explicit-origin CORS with credentials disabled.', 'sustainable-catalyst-library'), '', __('Restore the explicit /curated-spaces route prefix; never broaden caching to the entire sc-library/v1 namespace.', 'sustainable-catalyst-library'));
 
         $categories['branch_43']['checks'][] = $this->check('v43-first-party-gate', __('First-party-only release gate', 'sustainable-catalyst-library'), true, __('Release certification performs no third-party provider requests; upstream availability cannot invalidate a healthy Library release.', 'sustainable-catalyst-library'), __('network_calls_performed=false; upstream_health_release_blocking=false', 'sustainable-catalyst-library'), '');
         $categories['branch_43']['checks'][] = $this->check('v43-private-content-boundary', __('Private-content diagnostic boundary', 'sustainable-catalyst-library'), true, __('Release certification verifies stores, modules, routes, and assets without reading private notebook, matrix, project, or personal-library content.', 'sustainable-catalyst-library'), __('private_record_content_inspected=false', 'sustainable-catalyst-library'), '');

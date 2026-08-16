@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.3.0
+Stable tag: 5.4.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.3.0 adds Public Evidence & Claim Navigation across canonical public Research Claims, public Evidence Notes, explicit Publication ↔ Research Graph links, and public Research Sources while keeping private Evidence Matrix, notebook, review-note, project, and membership content outside the public surface.
+Sustainable Catalyst Library v5.4.0 adds Research Collections, Exhibitions & Curated Knowledge Spaces: editor-governed public narrative and ordered references to already-public Library objects, public claims/evidence, and published federation manifests without copying private research or mutating the underlying records.
 
 
 
@@ -35,6 +35,9 @@ Sustainable Catalyst Library v5.3.0 adds Public Evidence & Claim Navigation acro
 * Publication navigation uses only claims explicitly connected through Publication ↔ Research Graph; source navigation uses only canonical public evidence-source links.
 * Public v4.9 publication/source payloads gain bounded `public_evidence` navigation metadata.
 * Explicit-origin CORS reuses the v4.9 allowlist with credentials disabled; `/public-evidence` is explicitly added to the safe public GET cache allowlist.
+* v5.4.0 adds an editor-governed curated-space post type with explicit WordPress draft/publish workflow, ordered sections, curator narrative, and references-only public manifests.
+* Curated spaces can reference canonical public Library API objects, public Research Claims, public Evidence Notes, and explicitly published federation manifests; unavailable or no-longer-public references are omitted from public output.
+* v5.4.0 performs no automatic record copy, publication-state mutation, ownership transfer, evidence promotion, federation acceptance, or Workspace write.
 * v5.3.0 performs no automatic claim creation, evidence promotion, claim-status change, confidence change, publication, federation acceptance, or Workspace write.
 
 = Research Identity, Authority & Persistent Identifier Network =

@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) { exit; }
 
 final class SC_Library_Extension_Bootstrap_V402 {
     public const VERSION = '4.0.2';
-    public const MODULE_COUNT = 54;
+    public const MODULE_COUNT = 55;
     private const STATUS_OPTION = 'sc_library_extension_bootstrap_v402_status';
 
     /** @var array<string,string> */
@@ -44,6 +44,7 @@ final class SC_Library_Extension_Bootstrap_V402 {
         'class-sc-library-global-research-discovery-federated-search.php' => 'SC_Library_Global_Research_Discovery_Federated_Search',
         'class-sc-library-research-identity-authority-network.php' => 'SC_Library_Research_Identity_Authority_Network',
         'class-sc-library-public-evidence-claim-navigation.php' => 'SC_Library_Public_Evidence_Claim_Navigation',
+        'class-sc-library-research-collections-curated-spaces.php' => 'SC_Library_Research_Collections_Curated_Spaces',
         'class-sc-library-workspace-bidirectional-continuity.php' => 'SC_Library_Workspace_Bidirectional_Continuity',
         'class-sc-library-metadata-quality-entity-resolution.php' => 'SC_Library_Metadata_Quality_Entity_Resolution',
         'class-sc-library-scholarly-library-connectors.php' => 'SC_Library_Scholarly_Library_Connectors',
