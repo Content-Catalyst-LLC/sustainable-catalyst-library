@@ -1,0 +1,31 @@
+Sustainable Catalyst Library v5.5.1 — Build Validation
+======================================================
+
+Release: v5.5.1 — Ingestion Hardening & Adaptive Reindex Recovery
+WordPress plugin: 5.5.1
+Python backend: 1.0.1
+Validation date: 2026-09-01
+
+PASS - PHP syntax across all 135 plugin PHP files
+PASS - Python compileall for backend app and backend tests
+PASS - v5.5.1 targeted contract suite: 16 passed
+PASS - WordPress adaptive record-count batching contract present
+PASS - encoded JSON payload-byte preflight contract present
+PASS - HTTP 413 recursive split contract present
+PASS - bounded transient retry contract present
+PASS - changed/unchanged/completed/failed telemetry present
+PASS - failed-record checkpoint and resume action present
+PASS - compact single-record transport fallback present
+PASS - backend deterministic chunk fallback present
+PASS - backend ingest limit health metadata present
+PASS - backend 413 limit headers present
+PASS - localhost-only 127.0.0.1:8087 binding retained
+PASS - external sc-internal Docker network retained
+PASS - ingest schema sc-library-backend-ingest/1.0 retained
+PASS - no PostgreSQL schema migration required
+
+Validation environment notes:
+- PHP 8.4.23 CLI
+- Python 3.13.5
+- pytest 9.0.2
+- A separate clean-venv dependency fetch was not possible in the isolated build environment because outbound package-index DNS was unavailable. This did not affect the local targeted contract suite, which passed with installed validation dependencies.

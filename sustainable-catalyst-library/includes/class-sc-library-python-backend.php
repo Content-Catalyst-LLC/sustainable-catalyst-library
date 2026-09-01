@@ -2,16 +2,22 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.5.0 Python Research Intelligence Backend bridge.
+ * v5.5.1 Python Research Intelligence Backend bridge.
  *
  * WordPress remains authoritative for users, editorial state, and public URLs.
  * The Python service receives bounded server-to-server index packets only.
+ * v5.5.1 hardens bulk ingestion with payload-aware adaptive batching,
+ * automatic 413 splitting, bounded transient retries, and resumable failures.
  */
 final class SC_Library_Python_Backend {
-    public const VERSION = '5.5.0';
+    public const VERSION = '5.5.1';
     public const BACKEND_SCHEMA = 'sc-library-backend-ingest/1.0';
     public const REST_NAMESPACE = 'sc-library/v1';
     public const CRON_HOOK = 'sc_library_python_backend_sync_post';
+    private const DEFAULT_BATCH_RECORDS = 25;
+    private const DEFAULT_TARGET_PAYLOAD_MB = 6;
+    private const DEFAULT_RETRY_ATTEMPTS = 2;
+    private const MAX_ERROR_DETAILS = 20;
 
     public function register_hooks(): void {
         add_action('admin_init', [$this, 'register_settings']);
@@ -22,6 +28,7 @@ final class SC_Library_Python_Backend {
         add_action('before_delete_post', [$this, 'delete_remote_post']);
         add_action(self::CRON_HOOK, [$this, 'sync_post'], 10, 1);
         add_action('admin_post_sc_library_backend_sync_all', [$this, 'handle_sync_all']);
+        add_action('admin_post_sc_library_backend_resume_sync', [$this, 'handle_resume_sync']);
     }
 
     public function register_settings(): void {
@@ -37,6 +44,15 @@ final class SC_Library_Python_Backend {
         register_setting('sc_library_backend_settings', 'sc_library_backend_timeout', [
             'type' => 'integer', 'sanitize_callback' => static fn($v) => min(30, max(2, absint($v))), 'default' => 8,
         ]);
+        register_setting('sc_library_backend_settings', 'sc_library_backend_batch_records', [
+            'type' => 'integer', 'sanitize_callback' => static fn($v) => min(100, max(5, absint($v))), 'default' => self::DEFAULT_BATCH_RECORDS,
+        ]);
+        register_setting('sc_library_backend_settings', 'sc_library_backend_target_payload_mb', [
+            'type' => 'integer', 'sanitize_callback' => static fn($v) => min(20, max(1, absint($v))), 'default' => self::DEFAULT_TARGET_PAYLOAD_MB,
+        ]);
+        register_setting('sc_library_backend_settings', 'sc_library_backend_retry_attempts', [
+            'type' => 'integer', 'sanitize_callback' => static fn($v) => min(3, max(0, absint($v))), 'default' => self::DEFAULT_RETRY_ATTEMPTS,
+        ]);
     }
 
     public static function configured(): bool {
@@ -50,6 +66,19 @@ final class SC_Library_Python_Backend {
 
     private static function timeout(): int {
         return min(30, max(2, (int) get_option('sc_library_backend_timeout', 8)));
+    }
+
+    private static function batch_records(): int {
+        return min(100, max(5, (int) get_option('sc_library_backend_batch_records', self::DEFAULT_BATCH_RECORDS)));
+    }
+
+    private static function target_payload_bytes(): int {
+        $mb = min(20, max(1, (int) get_option('sc_library_backend_target_payload_mb', self::DEFAULT_TARGET_PAYLOAD_MB)));
+        return $mb * 1024 * 1024;
+    }
+
+    private static function retry_attempts(): int {
+        return min(3, max(0, (int) get_option('sc_library_backend_retry_attempts', self::DEFAULT_RETRY_ATTEMPTS)));
     }
 
     public function admin_menu(): void {
@@ -67,6 +96,8 @@ final class SC_Library_Python_Backend {
         if (!current_user_can('manage_options')) { return; }
         $health = self::health();
         $last = get_option('sc_library_backend_last_sync', []);
+        $checkpoint = get_option('sc_library_backend_sync_checkpoint', []);
+        $has_failures = is_array($checkpoint) && !empty($checkpoint['failed_record_ids']);
         ?>
         <div class="wrap">
             <h1><?php esc_html_e('Library Python Research Intelligence Backend', 'sustainable-catalyst-library'); ?></h1>
@@ -78,6 +109,9 @@ final class SC_Library_Python_Backend {
                     <tr><th scope="row"><label for="sc_library_backend_api_key"><?php esc_html_e('Server API key', 'sustainable-catalyst-library'); ?></label></th><td><input class="regular-text code" id="sc_library_backend_api_key" name="sc_library_backend_api_key" type="password" autocomplete="new-password" value="<?php echo esc_attr((string) get_option('sc_library_backend_api_key', '')); ?>"><p class="description"><?php esc_html_e('Stored server-side in WordPress and never exposed to the browser.', 'sustainable-catalyst-library'); ?></p></td></tr>
                     <tr><th scope="row"><?php esc_html_e('Automatic indexing', 'sustainable-catalyst-library'); ?></th><td><label><input name="sc_library_backend_auto_index" type="checkbox" value="1" <?php checked((int) get_option('sc_library_backend_auto_index', 1), 1); ?>> <?php esc_html_e('Queue published Library records after WordPress saves.', 'sustainable-catalyst-library'); ?></label></td></tr>
                     <tr><th scope="row"><label for="sc_library_backend_timeout"><?php esc_html_e('Request timeout', 'sustainable-catalyst-library'); ?></label></th><td><input id="sc_library_backend_timeout" name="sc_library_backend_timeout" type="number" min="2" max="30" value="<?php echo esc_attr((int) get_option('sc_library_backend_timeout', 8)); ?>"> seconds</td></tr>
+                    <tr><th scope="row"><label for="sc_library_backend_batch_records"><?php esc_html_e('Bulk target records', 'sustainable-catalyst-library'); ?></label></th><td><input id="sc_library_backend_batch_records" name="sc_library_backend_batch_records" type="number" min="5" max="100" value="<?php echo esc_attr(self::batch_records()); ?>"><p class="description"><?php esc_html_e('Maximum records in a client-side leaf batch. Payload bytes can force a smaller batch automatically.', 'sustainable-catalyst-library'); ?></p></td></tr>
+                    <tr><th scope="row"><label for="sc_library_backend_target_payload_mb"><?php esc_html_e('Bulk target payload', 'sustainable-catalyst-library'); ?></label></th><td><input id="sc_library_backend_target_payload_mb" name="sc_library_backend_target_payload_mb" type="number" min="1" max="20" value="<?php echo esc_attr((int) (self::target_payload_bytes() / 1024 / 1024)); ?>"> MB<p class="description"><?php esc_html_e('WordPress preflights encoded JSON and splits batches before they approach the backend request ceiling.', 'sustainable-catalyst-library'); ?></p></td></tr>
+                    <tr><th scope="row"><label for="sc_library_backend_retry_attempts"><?php esc_html_e('Transient retries', 'sustainable-catalyst-library'); ?></label></th><td><input id="sc_library_backend_retry_attempts" name="sc_library_backend_retry_attempts" type="number" min="0" max="3" value="<?php echo esc_attr(self::retry_attempts()); ?>"><p class="description"><?php esc_html_e('Retries are limited to network failures and retryable HTTP statuses. HTTP 413 is split instead of retried.', 'sustainable-catalyst-library'); ?></p></td></tr>
                 </table>
                 <?php submit_button(__('Save backend settings', 'sustainable-catalyst-library')); ?>
             </form>
@@ -85,12 +119,20 @@ final class SC_Library_Python_Backend {
             <h2><?php esc_html_e('Service state', 'sustainable-catalyst-library'); ?></h2>
             <pre style="max-width:1100px;overflow:auto;background:#fff;border:1px solid #ccd0d4;padding:12px;"><?php echo esc_html(wp_json_encode($health, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
             <?php if (self::configured()) : ?>
-                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline-block;margin-right:8px;">
                     <input type="hidden" name="action" value="sc_library_backend_sync_all">
                     <?php wp_nonce_field('sc_library_backend_sync_all'); ?>
-                    <?php submit_button(__('Reindex all published Library records', 'sustainable-catalyst-library'), 'secondary'); ?>
+                    <?php submit_button(__('Reindex all published Library records', 'sustainable-catalyst-library'), 'secondary', 'submit', false); ?>
                 </form>
+                <?php if ($has_failures) : ?>
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline-block;">
+                        <input type="hidden" name="action" value="sc_library_backend_resume_sync">
+                        <?php wp_nonce_field('sc_library_backend_resume_sync'); ?>
+                        <?php submit_button(__('Resume failed records', 'sustainable-catalyst-library'), 'secondary', 'submit', false); ?>
+                    </form>
+                <?php endif; ?>
             <?php endif; ?>
+            <?php if (is_array($checkpoint) && $checkpoint) : ?><h2><?php esc_html_e('Sync checkpoint', 'sustainable-catalyst-library'); ?></h2><pre><?php echo esc_html(wp_json_encode($checkpoint, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre><?php endif; ?>
             <?php if (is_array($last) && $last) : ?><h2><?php esc_html_e('Last bulk sync', 'sustainable-catalyst-library'); ?></h2><pre><?php echo esc_html(wp_json_encode($last, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre><?php endif; ?>
         </div>
         <?php
@@ -146,6 +188,7 @@ final class SC_Library_Python_Backend {
             'service' => $body['service'] ?? 'sustainable-catalyst-library-backend',
             'version' => $body['version'] ?? null,
             'capabilities' => $body['capabilities'] ?? [],
+            'ingest_limits' => $body['ingest_limits'] ?? [],
             'database_detail' => $body['database_detail'] ?? null,
         ];
     }
@@ -205,7 +248,11 @@ final class SC_Library_Python_Backend {
     public function sync_post(int $post_id): void {
         $post = get_post($post_id);
         if (!$post instanceof WP_Post || 'publish' !== $post->post_status || !in_array($post->post_type, self::post_types(), true)) { return; }
-        self::send_records([$post]);
+        $summary = self::new_summary(1, 'automatic');
+        self::send_records_resilient([$post], $summary);
+        if (!empty($summary['failed'])) {
+            error_log('[Sustainable Catalyst Library] Python backend automatic sync failed for post ' . $post_id);
+        }
     }
 
     public function handle_sync_all(): void {
@@ -217,18 +264,87 @@ final class SC_Library_Python_Backend {
             'fields' => 'ids', 'orderby' => 'ID', 'order' => 'ASC', 'no_found_rows' => true,
             'update_post_meta_cache' => false, 'update_post_term_cache' => false,
         ]);
-        $summary = ['ok' => true, 'records' => count($ids), 'batches' => 0, 'changed' => 0, 'errors' => []];
-        foreach (array_chunk(array_map('intval', $ids), 100) as $chunk) {
-            $posts = array_values(array_filter(array_map('get_post', $chunk), static fn($p) => $p instanceof WP_Post));
-            $result = self::send_records($posts);
-            $summary['batches']++;
-            if (is_wp_error($result)) { $summary['ok'] = false; $summary['errors'][] = $result->get_error_message(); continue; }
-            $summary['changed'] += (int) ($result['changed'] ?? 0);
-        }
-        $summary['timestamp'] = current_time('mysql', true);
-        update_option('sc_library_backend_last_sync', $summary, false);
+        self::run_bulk_sync(array_map('intval', $ids), 'full');
         wp_safe_redirect(admin_url('admin.php?page=sc-library-python-backend'));
         exit;
+    }
+
+    public function handle_resume_sync(): void {
+        if (!current_user_can('manage_options')) { wp_die(esc_html__('Insufficient permissions.', 'sustainable-catalyst-library')); }
+        check_admin_referer('sc_library_backend_resume_sync');
+        if (!self::configured()) { wp_safe_redirect(add_query_arg('backend_sync', 'not_configured', admin_url('admin.php?page=sc-library-python-backend'))); exit; }
+        $checkpoint = get_option('sc_library_backend_sync_checkpoint', []);
+        $ids = is_array($checkpoint) && !empty($checkpoint['failed_record_ids']) && is_array($checkpoint['failed_record_ids'])
+            ? array_values(array_unique(array_map('intval', $checkpoint['failed_record_ids'])))
+            : [];
+        if ($ids) { self::run_bulk_sync($ids, 'resume'); }
+        wp_safe_redirect(admin_url('admin.php?page=sc-library-python-backend'));
+        exit;
+    }
+
+    private static function new_summary(int $records, string $mode): array {
+        return [
+            'ok' => true,
+            'mode' => $mode,
+            'records' => $records,
+            'completed' => 0,
+            'changed' => 0,
+            'unchanged' => 0,
+            'failed' => 0,
+            'batches' => 0,
+            'requests' => 0,
+            'splits' => 0,
+            'preflight_splits' => 0,
+            'http_413_splits' => 0,
+            'retries' => 0,
+            'compact_single_record_packets' => 0,
+            'payload_bytes_sent' => 0,
+            'largest_payload_bytes' => 0,
+            'error_count' => 0,
+            'errors' => [],
+            'failed_record_ids' => [],
+            'started_at' => current_time('mysql', true),
+        ];
+    }
+
+    private static function run_bulk_sync(array $ids, string $mode): array {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        $summary = self::new_summary(count($ids), $mode);
+        self::save_checkpoint($summary, 'running');
+
+        // Seed groups bound PHP memory. Each seed is split again by record count and encoded byte size.
+        foreach (array_chunk($ids, 100) as $seed_ids) {
+            $posts = array_values(array_filter(array_map('get_post', $seed_ids), static fn($p) => $p instanceof WP_Post && 'publish' === $p->post_status));
+            $missing = count($seed_ids) - count($posts);
+            if ($missing > 0) {
+                $summary['failed'] += $missing;
+                $summary['error_count'] += $missing;
+            }
+            self::send_records_resilient($posts, $summary);
+            self::save_checkpoint($summary, $summary['failed'] > 0 ? 'partial' : 'running');
+        }
+
+        $summary['failed_record_ids'] = array_values(array_unique($summary['failed_record_ids']));
+        $summary['failed'] = count($summary['failed_record_ids']) + max(0, $summary['failed'] - count($summary['failed_record_ids']));
+        $summary['ok'] = 0 === (int) $summary['failed'];
+        $summary['timestamp'] = current_time('mysql', true);
+        update_option('sc_library_backend_last_sync', $summary, false);
+        self::save_checkpoint($summary, $summary['ok'] ? 'complete' : 'partial');
+        return $summary;
+    }
+
+    private static function save_checkpoint(array $summary, string $status): void {
+        update_option('sc_library_backend_sync_checkpoint', [
+            'status' => $status,
+            'mode' => $summary['mode'] ?? 'full',
+            'records' => (int) ($summary['records'] ?? 0),
+            'completed' => (int) ($summary['completed'] ?? 0),
+            'failed' => (int) ($summary['failed'] ?? 0),
+            'failed_record_ids' => array_values(array_unique(array_map('intval', $summary['failed_record_ids'] ?? []))),
+            'requests' => (int) ($summary['requests'] ?? 0),
+            'splits' => (int) ($summary['splits'] ?? 0),
+            'updated_at' => current_time('mysql', true),
+        ], false);
     }
 
     private static function record_id(int $post_id, string $post_type): string {
@@ -255,7 +371,7 @@ final class SC_Library_Python_Backend {
         return $chunks;
     }
 
-    private static function packet(WP_Post $post): array {
+    private static function packet(WP_Post $post, bool $compact = false): array {
         $body = trim(wp_strip_all_tags(strip_shortcodes((string) $post->post_content), true));
         $excerpt = trim(wp_strip_all_tags((string) $post->post_excerpt, true));
         if ('' === $excerpt && '' !== $body) { $excerpt = wp_trim_words($body, 60, '…'); }
@@ -276,13 +392,15 @@ final class SC_Library_Python_Backend {
             'topics' => self::term_names((int) $post->ID, 'category'),
             'tags' => self::term_names((int) $post->ID, 'post_tag'),
             'identifiers' => ['wordpress_post_id' => (string) $post->ID],
-            'metadata' => ['wordpress_post_type' => $post->post_type, 'wordpress_status' => $post->post_status],
-            'chunks' => self::chunks($body),
+            'metadata' => [
+                'wordpress_post_type' => $post->post_type,
+                'wordpress_status' => $post->post_status,
+            ],
+            'chunks' => $compact ? [] : self::chunks($body),
         ];
     }
 
-    private static function send_records(array $posts) {
-        if (!$posts) { return ['ok' => true, 'received' => 0, 'changed' => 0]; }
+    private static function encoded_payload(array $posts, bool $compact = false): array {
         $payload = [
             'schema' => self::BACKEND_SCHEMA,
             'source' => [
@@ -292,10 +410,112 @@ final class SC_Library_Python_Backend {
                 'canonical_url' => home_url('/knowledge-libraries/'),
                 'metadata' => ['site_url' => home_url('/'), 'plugin_version' => SC_LIBRARY_VERSION],
             ],
-            'records' => array_map([self::class, 'packet'], $posts),
+            'records' => array_map(static fn($post) => self::packet($post, $compact), $posts),
         ];
         $body = (string) wp_json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        return self::signed_request('POST', '/v1/ingest/records', $body);
+        return ['body' => $body, 'bytes' => strlen($body), 'compact' => $compact];
+    }
+
+    private static function split_posts(array $posts): array {
+        $mid = max(1, intdiv(count($posts), 2));
+        return [array_slice($posts, 0, $mid), array_slice($posts, $mid)];
+    }
+
+    private static function send_records_resilient(array $posts, array &$summary): void {
+        if (!$posts) { return; }
+        $payload = self::encoded_payload($posts, false);
+        $summary['largest_payload_bytes'] = max((int) $summary['largest_payload_bytes'], (int) $payload['bytes']);
+
+        if (count($posts) > 1 && (count($posts) > self::batch_records() || $payload['bytes'] > self::target_payload_bytes())) {
+            $summary['splits']++;
+            $summary['preflight_splits']++;
+            [$left, $right] = self::split_posts($posts);
+            self::send_records_resilient($left, $summary);
+            self::send_records_resilient($right, $summary);
+            return;
+        }
+
+        if (1 === count($posts) && $payload['bytes'] > self::target_payload_bytes()) {
+            $payload = self::encoded_payload($posts, true);
+            $summary['compact_single_record_packets']++;
+            $summary['largest_payload_bytes'] = max((int) $summary['largest_payload_bytes'], (int) $payload['bytes']);
+        }
+
+        $max_attempts = 1 + self::retry_attempts();
+        for ($attempt = 1; $attempt <= $max_attempts; $attempt++) {
+            $summary['requests']++;
+            $summary['payload_bytes_sent'] += (int) $payload['bytes'];
+            $result = self::signed_request('POST', '/v1/ingest/records', (string) $payload['body']);
+            if (!is_wp_error($result)) {
+                $received = (int) ($result['received'] ?? count($posts));
+                $summary['batches']++;
+                $summary['completed'] += $received;
+                $summary['changed'] += (int) ($result['changed'] ?? 0);
+                $summary['unchanged'] += (int) ($result['unchanged'] ?? max(0, $received - (int) ($result['changed'] ?? 0)));
+                return;
+            }
+
+            $status = self::error_status($result);
+            if (413 === $status && count($posts) > 1) {
+                $summary['splits']++;
+                $summary['http_413_splits']++;
+                [$left, $right] = self::split_posts($posts);
+                self::send_records_resilient($left, $summary);
+                self::send_records_resilient($right, $summary);
+                return;
+            }
+
+            if (413 === $status && 1 === count($posts) && empty($payload['compact'])) {
+                $payload = self::encoded_payload($posts, true);
+                $summary['compact_single_record_packets']++;
+                $summary['largest_payload_bytes'] = max((int) $summary['largest_payload_bytes'], (int) $payload['bytes']);
+                continue;
+            }
+
+            if ($attempt < $max_attempts && self::retryable_error($result)) {
+                $summary['retries']++;
+                usleep(250000 * $attempt);
+                continue;
+            }
+
+            self::record_failure($posts, $result, $summary);
+            return;
+        }
+    }
+
+    private static function record_failure(array $posts, WP_Error $error, array &$summary): void {
+        $summary['ok'] = false;
+        $summary['failed'] += count($posts);
+        $summary['error_count']++;
+        foreach ($posts as $post) {
+            if ($post instanceof WP_Post) { $summary['failed_record_ids'][] = (int) $post->ID; }
+        }
+        if (count($summary['errors']) < self::MAX_ERROR_DETAILS) {
+            $status = self::error_status($error);
+            $ids = array_map(static fn($post) => $post instanceof WP_Post ? (int) $post->ID : 0, $posts);
+            $summary['errors'][] = [
+                'message' => $error->get_error_message(),
+                'status' => $status ?: null,
+                'records' => array_values(array_filter($ids)),
+            ];
+        }
+    }
+
+    private static function error_status(WP_Error $error): int {
+        $data = $error->get_error_data();
+        return is_array($data) && isset($data['status']) ? (int) $data['status'] : 0;
+    }
+
+    private static function retryable_error(WP_Error $error): bool {
+        $status = self::error_status($error);
+        if (0 === $status) { return true; }
+        return in_array($status, [408, 425, 429, 500, 502, 503, 504], true);
+    }
+
+    private static function send_records(array $posts) {
+        if (!$posts) { return ['ok' => true, 'received' => 0, 'changed' => 0, 'unchanged' => 0]; }
+        $payload = self::encoded_payload($posts, false);
+        return self::signed_request('POST', '/v1/ingest/records', (string) $payload['body']);
     }
 
     private static function signed_request(string $method, string $path, string $body) {
@@ -321,7 +541,12 @@ final class SC_Library_Python_Backend {
         $code = (int) wp_remote_retrieve_response_code($response);
         $decoded = json_decode((string) wp_remote_retrieve_body($response), true);
         if ($code < 200 || $code >= 300) {
-            return new WP_Error('sc_library_backend_http_error', sprintf(__('Library backend returned HTTP %d.', 'sustainable-catalyst-library'), $code), ['status' => $code, 'body' => $decoded]);
+            return new WP_Error('sc_library_backend_http_error', sprintf(__('Library backend returned HTTP %d.', 'sustainable-catalyst-library'), $code), [
+                'status' => $code,
+                'body' => $decoded,
+                'max_body_bytes' => (int) wp_remote_retrieve_header($response, 'x-sc-max-body-bytes'),
+                'max_batch_records' => (int) wp_remote_retrieve_header($response, 'x-sc-max-batch-records'),
+            ]);
         }
         return is_array($decoded) ? $decoded : ['ok' => true];
     }

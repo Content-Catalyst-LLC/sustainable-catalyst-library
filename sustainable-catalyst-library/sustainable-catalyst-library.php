@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.5.0 adds a dedicated Python research-intelligence backend for PostgreSQL indexing, full-text discovery, provenance, knowledge graphs, related records, and knowledge-evolution timelines while WordPress remains the editorial and identity authority.
- * Version: 5.5.0
+ * Description: Sustainable Catalyst Library v5.5.1 hardens Python-backend ingestion with payload-aware adaptive batching, automatic HTTP 413 splitting, bounded retries, resumable failed-record sync, and truthful bulk-sync telemetry while preserving the v5.5 research intelligence architecture.
+ * Version: 5.5.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.5.0');
+define('SC_LIBRARY_VERSION', '5.5.1');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

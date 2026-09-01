@@ -8,8 +8,8 @@ from typing import Any
 from psycopg.types.json import Jsonb
 
 from .db import get_pool
+from .chunking import ensure_record_chunks
 from .models import EdgeBatch, RecordBatch, RecordPacket
-
 
 def canonical_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True, default=str)
@@ -50,6 +50,7 @@ def ingest_records(batch: RecordBatch, request_hash: str) -> dict[str, Any]:
             )
 
             for record in batch.records:
+                record = ensure_record_chunks(record)
                 ids.append(record.record_id)
                 digest = record_hash(record)
                 cur.execute("SELECT content_hash, revision FROM library_records WHERE record_id=%s FOR UPDATE", (record.record_id,))

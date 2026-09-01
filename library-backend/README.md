@@ -1,6 +1,8 @@
-# Sustainable Catalyst Library Backend v1.0.0
+# Sustainable Catalyst Library Backend v1.0.1
 
-This is the first dedicated Python research-intelligence backend for Sustainable Catalyst Library. WordPress remains the authority for public presentation, editorial state, users, and permissions. The backend is an additive server-side data plane for indexing, discovery, provenance, graph traversal, and knowledge evolution.
+This backend is the dedicated Python research-intelligence data plane for Sustainable Catalyst Library. WordPress remains the authority for public presentation, editorial state, users, and permissions.
+
+v1.0.1 is the ingestion-hardening companion to Library v5.5.1. It keeps the v1.0 API and PostgreSQL schema compatible while making large Library reindexes safer and more observable.
 
 ## Capabilities
 
@@ -15,28 +17,49 @@ This is the first dedicated Python research-intelligence backend for Sustainable
 - public facets for object type, source, and topic
 - signed HMAC + bearer server-to-server ingestion
 - public-only read boundary by default
+- request-limit telemetry in `/health`
+- explicit `413` limit headers for adaptive clients
+- deterministic backend chunk generation when a compact single-record packet omits duplicated chunks
 - adapter-ready schema for later semantic embeddings/reranking without making an external model the authority
+
+## Ingestion hardening contract
+
+Library v5.5.1 preflights JSON payload bytes and record count before sending. If a server still responds with HTTP 413, the client splits only that batch and retries its children. Network failures and selected transient HTTP statuses receive a small bounded retry budget; 413 is never blindly retried.
+
+Backend v1.0.1 reports:
+
+```json
+"ingest_limits": {
+  "max_batch_records": 200,
+  "max_body_bytes": 12582912,
+  "max_body_mb": 12
+}
+```
+
+When a single record is too large because `body_text` and chunks would duplicate too much transport data, WordPress can send the record with an empty `chunks` list. The backend regenerates the same 6,000-character `wordpress-text-v1` chunk contract before hashing and persistence.
 
 ## Deployment boundary
 
-The compose file binds the service to `127.0.0.1:8087` so it is not exposed directly to the internet. Put it behind the existing Sustainable Catalyst reverse proxy, for example at `https://library-api.sustainablecatalyst.com`.
+The compose file binds the service to `127.0.0.1:8087` so it is not exposed directly to the internet. Put it behind the existing Sustainable Catalyst reverse proxy at `https://library-api.sustainablecatalyst.com`.
 
 The service expects the existing external Docker network `sc-internal` and a PostgreSQL host reachable as `sc-postgres`. It does not create a second database container.
 
-## First deployment
+## Upgrade from v1.0.0
+
+Preserve the existing `.env`; no database migration is required.
 
 ```bash
 cd /opt/sustainable-catalyst/library-backend
-cp .env.example .env
-nano .env
+cp .env /tmp/sc-library-backend.env
+# replace application files with the v1.0.1 package
+cp /tmp/sc-library-backend.env .env
 
 docker compose build --pull
-docker compose up -d
+docker compose up -d --force-recreate
 docker compose ps
 curl -fsS http://127.0.0.1:8087/health | python3 -m json.tool
+curl -fsS http://127.0.0.1:8087/ready | python3 -m json.tool
 ```
-
-Create the database/user in the existing PostgreSQL container before first boot. See `DEPLOY_CONTABO.md` in the repository root.
 
 ## Signed write contract
 

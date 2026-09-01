@@ -75,7 +75,14 @@ async def authorize_write(
         raise HTTPException(status_code=401, detail="invalid or expired request timestamp")
     body = await request.body()
     if len(body) > settings.max_body_bytes:
-        raise HTTPException(status_code=413, detail="request body exceeds configured limit")
+        raise HTTPException(
+            status_code=413,
+            detail="request body exceeds configured limit",
+            headers={
+                "X-SC-Max-Body-Bytes": str(settings.max_body_bytes),
+                "X-SC-Max-Batch-Records": str(settings.max_batch_records),
+            },
+        )
     expected = sign_request(request.method, request.url.path, timestamp, body, settings.api_key)
     if not signature or not constant_time_equal(signature, expected):
         raise HTTPException(status_code=401, detail="invalid request signature")
@@ -115,7 +122,14 @@ def health() -> dict[str, Any]:
             "record_timeline": True,
             "facets": True,
             "signed_ingestion": True,
+            "adaptive_ingestion": True,
+            "server_chunk_fallback": True,
             "semantic_embeddings": "adapter-ready",
+        },
+        "ingest_limits": {
+            "max_batch_records": settings.max_batch_records,
+            "max_body_bytes": settings.max_body_bytes,
+            "max_body_mb": settings.max_body_bytes // (1024 * 1024),
         },
         "time": datetime.now(timezone.utc).isoformat(),
     }
@@ -146,7 +160,14 @@ async def ingest_records_route(
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=exc.errors()) from exc
     if len(batch.records) > settings.max_batch_records:
-        raise HTTPException(status_code=413, detail="record batch exceeds configured maximum")
+        raise HTTPException(
+            status_code=413,
+            detail="record batch exceeds configured maximum",
+            headers={
+                "X-SC-Max-Body-Bytes": str(settings.max_body_bytes),
+                "X-SC-Max-Batch-Records": str(settings.max_batch_records),
+            },
+        )
     if any(record.source_key != batch.source.source_key for record in batch.records):
         raise HTTPException(status_code=400, detail="record source_key does not match batch source")
     return ingest_records(batch, sha256_hex(body))
