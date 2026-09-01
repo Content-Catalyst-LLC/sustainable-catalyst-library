@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.4.0
+Stable tag: 5.5.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -1269,3 +1269,7 @@ The facade does not expose My Library, private Research Projects, notebook or Ev
 = 1.11.0 =
 
 * Added planning analytics, dependency intelligence, and release coordination.
+
+
+= 5.5.0 =
+* Adds the dedicated Python Research Intelligence Backend bridge with signed ingestion, public search proxying, health diagnostics, and safe WordPress-authoritative indexing.

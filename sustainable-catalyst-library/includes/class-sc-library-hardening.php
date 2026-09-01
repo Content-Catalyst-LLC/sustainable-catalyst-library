@@ -12,8 +12,8 @@ if (!defined('ABSPATH')) {
  */
 final class SC_Library_Hardening {
     public const SCHEMA = 'sc-library-production-readiness/1.0';
-    public const BRANCH_VERSION = '5.4.0';
-    public const BRANCH_SCHEMA = 'sc-library-v540-curated-spaces-certification/1.0';
+    public const BRANCH_VERSION = '5.5.0';
+    public const BRANCH_SCHEMA = 'sc-library-v550-python-backend-certification/1.0';
 
     /** Recent 4.3 branch modules that must load together for release certification. */
     private const V43_CRITICAL_MODULES = [

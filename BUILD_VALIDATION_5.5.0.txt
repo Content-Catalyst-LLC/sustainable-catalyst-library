@@ -1,0 +1,12 @@
+Sustainable Catalyst Library v5.5.0 validation target
+
+- WordPress plugin identity: 5.5.0
+- Python backend identity: 1.0.0
+- PHP syntax: required
+- Python compile: required
+- backend security/model tests: required
+- v5.5.0 release contract tests: required
+- Docker compose localhost bind: required
+- WordPress remains editorial/identity/publication authority: required
+- backend public read boundary: public + published only
+- signed writes: bearer + timestamp + HMAC-SHA256
