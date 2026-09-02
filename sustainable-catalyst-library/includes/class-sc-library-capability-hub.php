@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.6.0 R2 capability-preserving Research Library interface.
+ * v5.6.0 R3 capability-preserving Research Library interface.
  *
  * The restored v5.4 public page is the preservation baseline. Heavy Library
  * applications are no longer all rendered into the first page response.
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) { exit; }
  * WordPress authentication, registered styles/scripts and existing APIs.
  */
 final class SC_Library_Capability_Hub {
-    public const VERSION = '5.6.0.2';
+    public const VERSION = '5.6.0.3';
     private const QUERY_ARG = 'sc_library_capability';
 
     public function register_hooks(): void {
@@ -84,14 +84,17 @@ final class SC_Library_Capability_Hub {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Library Capability Map',
-            'intro' => 'Choose a research area, then open the capability you need. Only one capability group is shown at a time and heavy applications stay inside a bounded workspace.',
+            'intro' => 'The complete Library stays visible by research area. Open a capability only when you need the full application; heavy tools remain inside a bounded workspace.',
             'default_group' => 'explore',
+            'display' => 'tabbed',
+            'exclude_groups' => '',
+            'exclude_capabilities' => '',
         ], $atts, 'sc_library_capability_hub');
 
-        wp_enqueue_style('sc-library-capability-hub-v560r2', SC_LIBRARY_URL . 'assets/css/sc-library-capability-hub-v560r2.css', [], SC_LIBRARY_VERSION);
-        wp_enqueue_script('sc-library-capability-hub-v560r2', SC_LIBRARY_URL . 'assets/js/sc-library-capability-hub-v560r2.js', [], SC_LIBRARY_VERSION, true);
+        wp_enqueue_style('sc-library-capability-hub-v560r3', SC_LIBRARY_URL . 'assets/css/sc-library-capability-hub-v560r3.css', [], SC_LIBRARY_VERSION);
+        wp_enqueue_script('sc-library-capability-hub-v560r3', SC_LIBRARY_URL . 'assets/js/sc-library-capability-hub-v560r3.js', [], SC_LIBRARY_VERSION, true);
         $page_url = is_singular() ? get_permalink() : home_url('/knowledge-libraries/');
-        wp_localize_script('sc-library-capability-hub-v560r2', 'SCLibraryCapabilityHubV560R2', [
+        wp_localize_script('sc-library-capability-hub-v560r3', 'SCLibraryCapabilityHubV560R3', [
             'frameBase' => esc_url_raw(remove_query_arg([self::QUERY_ARG, 'library_legacy'], $page_url)),
             'queryArg' => self::QUERY_ARG,
             'version' => self::VERSION,
@@ -104,11 +107,18 @@ final class SC_Library_Capability_Hub {
 
         $registry = self::registry();
         $groups = self::groups();
+        $excluded_caps = array_filter(array_map('sanitize_key', preg_split('/[\s,]+/', (string) $atts['exclude_capabilities'])));
+        foreach ($excluded_caps as $cap_key) { unset($registry[$cap_key]); }
+        $display = sanitize_key((string) $atts['display']);
+        if (!in_array($display, ['tabbed', 'expanded'], true)) { $display = 'tabbed'; }
+        $excluded = array_filter(array_map('sanitize_key', preg_split('/[\s,]+/', (string) $atts['exclude_groups'])));
+        foreach ($excluded as $group_key) { unset($groups[$group_key]); }
+        if (!$groups) { return ''; }
         $default_group = sanitize_key((string) $atts['default_group']);
-        if (!isset($groups[$default_group])) { $default_group = 'explore'; }
+        if (!isset($groups[$default_group])) { $default_group = (string) array_key_first($groups); }
         $instance = 'sc-library-capability-hub-' . wp_rand(1000, 999999);
         ob_start(); ?>
-        <section class="sc-library-capability-hub" id="<?php echo esc_attr($instance); ?>" data-sc-library-capability-hub>
+        <section class="sc-library-capability-hub sc-library-capability-hub--<?php echo esc_attr($display); ?>" id="<?php echo esc_attr($instance); ?>" data-sc-library-capability-hub data-display="<?php echo esc_attr($display); ?>">
             <header class="sc-library-capability-hub__header">
                 <p class="sc-library-capability-hub__kicker"><?php esc_html_e('Complete Research System', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string) $atts['title']); ?></h2>
@@ -121,7 +131,7 @@ final class SC_Library_Capability_Hub {
             </nav>
             <div class="sc-library-capability-hub__groups">
                 <?php foreach ($groups as $group_key => $group) : ?>
-                    <section class="sc-library-capability-group<?php echo $group_key === $default_group ? ' is-active-group' : ''; ?>" id="library-group-<?php echo esc_attr($group_key); ?>" data-capability-group="<?php echo esc_attr($group_key); ?>" <?php echo $group_key === $default_group ? '' : 'hidden'; ?>>
+                    <section class="sc-library-capability-group<?php echo $group_key === $default_group ? ' is-active-group' : ''; ?>" id="library-group-<?php echo esc_attr($group_key); ?>" data-capability-group="<?php echo esc_attr($group_key); ?>" <?php echo ('tabbed' === $display && $group_key !== $default_group) ? 'hidden' : ''; ?>>
                         <div class="sc-library-capability-group__heading">
                             <div><p><?php echo esc_html($group['label']); ?></p><h3><?php echo esc_html($group['label']); ?></h3></div>
                             <span><?php echo esc_html($group['summary']); ?></span>

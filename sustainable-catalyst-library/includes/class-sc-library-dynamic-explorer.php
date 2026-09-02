@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) { exit; }
  * fallback when the backend cannot be reached.
  */
 final class SC_Library_Dynamic_Explorer {
-    public const VERSION = '5.6.0.2';
+    public const VERSION = '5.6.0.3';
     public const REST_NAMESPACE = 'sc-library/v1';
     private const DEFAULT_PER_PAGE = 12;
 

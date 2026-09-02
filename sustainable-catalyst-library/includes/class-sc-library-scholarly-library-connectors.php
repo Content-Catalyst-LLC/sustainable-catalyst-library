@@ -3157,8 +3157,8 @@ final class SC_Library_Scholarly_Library_Connectors {
                         <button type="submit"><?php esc_html_e( 'Connect Library', 'sustainable-catalyst-library' ); ?></button>
                         <span data-sc-library-connect-status aria-live="polite"></span>
                     </form>
-                    <details class="sc-research-access__custom-library">
-                        <summary><?php esc_html_e( 'Add another library', 'sustainable-catalyst-library' ); ?></summary>
+                    <details class="sc-research-access__custom-library" open>
+                        <summary><?php esc_html_e( 'Connect another library or research institution', 'sustainable-catalyst-library' ); ?></summary>
                         <form data-sc-custom-library-form>
                             <label><span><?php esc_html_e( 'Library name', 'sustainable-catalyst-library' ); ?></span><input type="text" name="name" required maxlength="120"></label>
                             <label><span><?php esc_html_e( 'City / region', 'sustainable-catalyst-library' ); ?></span><input type="text" name="region" maxlength="120"></label>

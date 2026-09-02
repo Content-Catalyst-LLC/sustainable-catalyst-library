@@ -190,6 +190,10 @@ final class SC_Library_Public_Library_Network {
         ob_start(); ?>
         <section class="sc-public-library-network" data-sc-public-library-network="v4.3.26">
           <header><p class="sc-connector-kicker"><?php esc_html_e( 'Public Library Network', 'sustainable-catalyst-library' ); ?></p><h3><?php echo esc_html( $atts['title'] ); ?></h3><p><?php esc_html_e( 'Search public-library catalogs and digital collections, connect libraries you actually belong to, and carry those memberships into Access Intelligence. Sustainable Catalyst stores the relationship to a library—not its password.', 'sustainable-catalyst-library' ); ?></p></header>
+          <div class="sc-public-library-network__nearby" id="find-library-near-me">
+            <div><small><?php esc_html_e( 'Local Library Discovery', 'sustainable-catalyst-library' ); ?></small><h4><?php esc_html_e( 'Find a Library Near You', 'sustainable-catalyst-library' ); ?></h4><p><?php esc_html_e( 'Use the configured public-library network below, or open the WorldCat Libraries directory to locate libraries by current location, city, or postal code. Then connect the library to My Libraries without giving Sustainable Catalyst the library password.', 'sustainable-catalyst-library' ); ?></p></div>
+            <div><a class="sc-public-library-network__nearby-primary" href="https://search.worldcat.org/libraries" target="_blank" rel="noopener"><?php esc_html_e( 'Find nearby libraries', 'sustainable-catalyst-library' ); ?> →</a><a href="#sc-my-libraries-title"><?php esc_html_e( 'Connect to My Libraries', 'sustainable-catalyst-library' ); ?> →</a></div>
+          </div>
           <form method="get" class="sc-public-library-network__search">
             <label><span><?php esc_html_e( 'Search public-library catalogs', 'sustainable-catalyst-library' ); ?></span><input type="search" name="sc_public_library_query" value="<?php echo esc_attr( $query ); ?>" placeholder="Title, author, subject, ISBN…"></label>
             <button type="submit"><?php esc_html_e( 'Prepare library searches', 'sustainable-catalyst-library' ); ?></button>

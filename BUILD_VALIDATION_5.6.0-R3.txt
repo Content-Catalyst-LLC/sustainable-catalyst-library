@@ -1,0 +1,24 @@
+Sustainable Catalyst Library v5.6.0 R3
+Visible Research Network, University Search & Local Library Access
+
+FINAL PACKAGED VALIDATION
+PASS — SHA-256 primary package verification
+PASS — 140/140 packaged WordPress PHP files parse
+PASS — Dynamic Explorer JavaScript syntax
+PASS — Capability Hub R3 JavaScript syntax
+PASS — Research Network Console JavaScript syntax
+PASS — Python backend compilation
+PASS — 58/58 targeted regression + preservation + visibility tests
+PASS — 37/37 restored Library shortcodes protected
+PASS — 72/72 restored Library anchors protected/compatibility-routed
+PASS — University College Dublin first-class direct source verified
+PASS — MIT / Harvard / Yale / Princeton / Stanford / Columbia / Berkeley / UCD / Copenhagen / Stockholm / Oxford / Cambridge visibility contract
+PASS — NYPL / Chicago / St. Louis / Boston / Los Angeles / San Francisco / Seattle / Philadelphia / Toronto / Library of Congress / WorldCat visibility contract
+PASS — Find a Library Near You route verified
+PASS — expanded capability visibility + bounded heavy workspace contract
+PASS — macOS installer shell syntax
+
+WordPress plugin: 5.6.0.3
+Python backend: 1.1.0 unchanged
+Database migration: none
+Caddy/DNS/port changes: none
