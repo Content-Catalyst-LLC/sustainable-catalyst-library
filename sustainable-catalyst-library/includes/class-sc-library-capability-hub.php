@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.6.0 R1 capability-preserving Research Library interface.
+ * v5.6.0 R2 capability-preserving Research Library interface.
  *
  * The restored v5.4 public page is the preservation baseline. Heavy Library
  * applications are no longer all rendered into the first page response.
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) { exit; }
  * WordPress authentication, registered styles/scripts and existing APIs.
  */
 final class SC_Library_Capability_Hub {
-    public const VERSION = '5.6.0.1';
+    public const VERSION = '5.6.0.2';
     private const QUERY_ARG = 'sc_library_capability';
 
     public function register_hooks(): void {
@@ -84,13 +84,14 @@ final class SC_Library_Capability_Hub {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Library Capability Map',
-            'intro' => 'Open the capability you need. Heavy research applications load only when selected; the complete Library remains available.',
+            'intro' => 'Choose a research area, then open the capability you need. Only one capability group is shown at a time and heavy applications stay inside a bounded workspace.',
+            'default_group' => 'explore',
         ], $atts, 'sc_library_capability_hub');
 
-        wp_enqueue_style('sc-library-capability-hub-v560r1', SC_LIBRARY_URL . 'assets/css/sc-library-capability-hub-v560r1.css', [], SC_LIBRARY_VERSION);
-        wp_enqueue_script('sc-library-capability-hub-v560r1', SC_LIBRARY_URL . 'assets/js/sc-library-capability-hub-v560r1.js', [], SC_LIBRARY_VERSION, true);
+        wp_enqueue_style('sc-library-capability-hub-v560r2', SC_LIBRARY_URL . 'assets/css/sc-library-capability-hub-v560r2.css', [], SC_LIBRARY_VERSION);
+        wp_enqueue_script('sc-library-capability-hub-v560r2', SC_LIBRARY_URL . 'assets/js/sc-library-capability-hub-v560r2.js', [], SC_LIBRARY_VERSION, true);
         $page_url = is_singular() ? get_permalink() : home_url('/knowledge-libraries/');
-        wp_localize_script('sc-library-capability-hub-v560r1', 'SCLibraryCapabilityHubV560R1', [
+        wp_localize_script('sc-library-capability-hub-v560r2', 'SCLibraryCapabilityHubV560R2', [
             'frameBase' => esc_url_raw(remove_query_arg([self::QUERY_ARG, 'library_legacy'], $page_url)),
             'queryArg' => self::QUERY_ARG,
             'version' => self::VERSION,
@@ -103,6 +104,8 @@ final class SC_Library_Capability_Hub {
 
         $registry = self::registry();
         $groups = self::groups();
+        $default_group = sanitize_key((string) $atts['default_group']);
+        if (!isset($groups[$default_group])) { $default_group = 'explore'; }
         $instance = 'sc-library-capability-hub-' . wp_rand(1000, 999999);
         ob_start(); ?>
         <section class="sc-library-capability-hub" id="<?php echo esc_attr($instance); ?>" data-sc-library-capability-hub>
@@ -113,12 +116,12 @@ final class SC_Library_Capability_Hub {
             </header>
             <nav class="sc-library-capability-hub__group-nav" aria-label="<?php esc_attr_e('Research Library capability groups', 'sustainable-catalyst-library'); ?>">
                 <?php foreach ($groups as $group_key => $group) : ?>
-                    <button type="button" data-capability-group-button="<?php echo esc_attr($group_key); ?>"><?php echo esc_html($group['label']); ?></button>
+                    <button type="button" data-capability-group-button="<?php echo esc_attr($group_key); ?>" aria-selected="<?php echo $group_key === $default_group ? 'true' : 'false'; ?>" class="<?php echo $group_key === $default_group ? 'is-active' : ''; ?>"><?php echo esc_html($group['label']); ?></button>
                 <?php endforeach; ?>
             </nav>
             <div class="sc-library-capability-hub__groups">
                 <?php foreach ($groups as $group_key => $group) : ?>
-                    <section class="sc-library-capability-group" id="library-group-<?php echo esc_attr($group_key); ?>" data-capability-group="<?php echo esc_attr($group_key); ?>">
+                    <section class="sc-library-capability-group<?php echo $group_key === $default_group ? ' is-active-group' : ''; ?>" id="library-group-<?php echo esc_attr($group_key); ?>" data-capability-group="<?php echo esc_attr($group_key); ?>" <?php echo $group_key === $default_group ? '' : 'hidden'; ?>>
                         <div class="sc-library-capability-group__heading">
                             <div><p><?php echo esc_html($group['label']); ?></p><h3><?php echo esc_html($group['label']); ?></h3></div>
                             <span><?php echo esc_html($group['summary']); ?></span>

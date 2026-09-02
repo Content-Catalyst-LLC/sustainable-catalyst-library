@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.6.0 R1 preserves the complete Research Library capability surface while introducing a compact, progressive interface with Python-backed discovery, grouped capability navigation, legacy deep-link continuity, and on-demand capability mounting.
- * Version: 5.6.0.1
+ * Description: Sustainable Catalyst Library v5.6.0 R2 preserves the complete Research Library while featuring Knowledge Base, Library Access, and Research Librarian as primary front doors, tightening capability density, and bounding heavy on-demand workspaces.
+ * Version: 5.6.0.2
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.6.0.1');
+define('SC_LIBRARY_VERSION', '5.6.0.2');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

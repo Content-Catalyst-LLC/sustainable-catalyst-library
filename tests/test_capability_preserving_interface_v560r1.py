@@ -3,11 +3,11 @@ import json,re,subprocess
 ROOT=Path(__file__).resolve().parents[1]
 PLUGIN=ROOT/'sustainable-catalyst-library'
 BASELINE=ROOT/'tests/fixtures/research-library-v5.4-source-of-truth.html'
-PAGE=ROOT/'RESEARCH_LIBRARY_PAGE_v5.6.0-R1.html'
-MANIFEST=ROOT/'LIBRARY_CAPABILITY_MANIFEST_v5.6.0-R1.json'
+PAGE=ROOT/'RESEARCH_LIBRARY_PAGE_v5.6.0-R2.html'
+MANIFEST=ROOT/'LIBRARY_CAPABILITY_MANIFEST_v5.6.0-R2.json'
 HUB=PLUGIN/'includes/class-sc-library-capability-hub.php'
-JS=PLUGIN/'assets/js/sc-library-capability-hub-v560r1.js'
-CSS=PLUGIN/'assets/css/sc-library-capability-hub-v560r1.css'
+JS=PLUGIN/'assets/js/sc-library-capability-hub-v560r2.js'
+CSS=PLUGIN/'assets/css/sc-library-capability-hub-v560r2.css'
 MAIN=PLUGIN/'sustainable-catalyst-library.php'
 
 def text(p): return p.read_text(encoding='utf-8')
@@ -16,8 +16,8 @@ def uniq(xs): return list(dict.fromkeys(xs))
 
 def test_release_identity_is_upgrade_safe_and_backend_contract_is_retained():
     m=text(MAIN)
-    assert 'Version: 5.6.0.1' in m
-    assert "SC_LIBRARY_VERSION', '5.6.0.1'" in m
+    assert 'Version: 5.6.0.2' in m
+    assert "SC_LIBRARY_VERSION', '5.6.0.2'" in m
     assert '__version__ = "1.1.0"' in text(ROOT/'library-backend/app/__init__.py')
 
 def test_manifest_is_derived_from_restored_source_of_truth():
@@ -82,6 +82,7 @@ def test_lazy_mount_uses_same_origin_frontend_frame_so_existing_assets_and_auth_
     assert "searchParams.set(cfg.queryArg" in js
     assert "postMessage({type:'sc-library-capability-height'" in hub
     assert "e.origin!==location.origin" in js
+    assert 'bounded' in js
 
 def test_deep_link_activation_and_access_visibility_exist():
     js=text(JS); hub=text(HUB)

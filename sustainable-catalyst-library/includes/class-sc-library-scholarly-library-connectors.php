@@ -3040,6 +3040,7 @@ final class SC_Library_Scholarly_Library_Connectors {
                 'default_providers' => 'internetarchive,mit,harvard,ucd,openalex,europepmc,arxiv',
                 'limit'             => 5,
                 'title'             => __( 'Search Libraries, University Research, and Scholarly Sources', 'sustainable-catalyst-library' ),
+                'mode'              => 'standard',
             ),
             $atts,
             'sc_research_access'
@@ -3056,6 +3057,32 @@ final class SC_Library_Scholarly_Library_Connectors {
         $gateways = $this->research_gateway_registry();
         $library_registry = $this->global_library_registry();
         $my_libraries = is_user_logged_in() ? $this->current_user_libraries() : array();
+        $mode = sanitize_key( (string) $atts['mode'] );
+        if ( 'front-door' === $mode ) {
+            ob_start(); ?>
+            <section class="sc-research-access sc-research-access--front-door" data-sc-research-access data-google-scholar-template="https://scholar.google.com/scholar?q={query}">
+                <header class="sc-research-access__header">
+                    <p class="sc-connector-kicker"><?php esc_html_e( 'Library Access', 'sustainable-catalyst-library' ); ?></p>
+                    <h2><?php esc_html_e( 'Search Connected Research', 'sustainable-catalyst-library' ); ?></h2>
+                    <p><?php esc_html_e( 'Search libraries, university repositories, archives and scholarly systems while keeping provenance and legitimate access routes visible.', 'sustainable-catalyst-library' ); ?></p>
+                </header>
+                <form class="sc-research-access__search" data-sc-research-access-form>
+                    <label><span><?php esc_html_e( 'Title, author, DOI, ISBN or topic', 'sustainable-catalyst-library' ); ?></span><input type="search" name="query" required minlength="2" autocomplete="off" placeholder="Search connected research…"></label>
+                    <input type="hidden" name="limit" value="3">
+                    <button type="submit"><?php esc_html_e( 'Search Access', 'sustainable-catalyst-library' ); ?></button>
+                </form>
+                <div class="sc-research-access__front-door-sources" aria-label="Featured connected research sources">
+                    <?php foreach ( array('internetarchive','mit','harvard','ucd','openalex','europepmc','arxiv') as $provider_id ) : if ( empty( $providers[$provider_id] ) ) { continue; } ?>
+                        <label><input type="checkbox" name="research_access_providers[]" value="<?php echo esc_attr($provider_id); ?>" checked><span><?php echo esc_html($providers[$provider_id]['name']); ?></span></label>
+                    <?php endforeach; ?>
+                </div>
+                <div class="sc-connector-search-status" data-sc-research-access-status aria-live="polite"></div>
+                <div class="sc-connector-result-summary" data-sc-research-access-summary></div>
+                <div class="sc-connector-results sc-research-access__front-door-results" data-sc-research-access-results></div>
+                <div class="sc-research-access__front-door-actions"><a href="#research-access"><?php esc_html_e( 'Open full Library Access', 'sustainable-catalyst-library' ); ?> →</a><a href="#public-library-network"><?php esc_html_e( 'My Libraries', 'sustainable-catalyst-library' ); ?> →</a><a href="#access-intelligence-ii"><?php esc_html_e( 'Access Intelligence', 'sustainable-catalyst-library' ); ?> →</a></div>
+            </section>
+            <?php return (string) ob_get_clean();
+        }
         ob_start();
         ?>
         <section class="sc-research-access" data-sc-research-access data-google-scholar-template="https://scholar.google.com/scholar?q={query}">
