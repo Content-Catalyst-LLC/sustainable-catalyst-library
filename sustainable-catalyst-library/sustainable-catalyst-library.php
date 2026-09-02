@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.6.0 introduces the Dynamic Library Explorer: a compact, Python-backed public discovery experience with progressive results, faceted filtering, URL-preserved research state, quick-view record drawers, related research, provenance, timeline views, and WordPress fallback.
- * Version: 5.6.0
+ * Description: Sustainable Catalyst Library v5.6.0 R1 preserves the complete Research Library capability surface while introducing a compact, progressive interface with Python-backed discovery, grouped capability navigation, legacy deep-link continuity, and on-demand capability mounting.
+ * Version: 5.6.0.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.6.0');
+define('SC_LIBRARY_VERSION', '5.6.0.1');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -58,6 +58,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-field-spotlights.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-backend.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-operations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-dynamic-explorer.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-capability-hub.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
 register_deactivation_hook(__FILE__, ['SC_Library_Activator', 'deactivate']);
@@ -114,6 +115,7 @@ final class SC_Library_Plugin {
         $python_backend = new SC_Library_Python_Backend();
         $python_operations = new SC_Library_Python_Operations();
         $dynamic_explorer = new SC_Library_Dynamic_Explorer();
+        $capability_hub = new SC_Library_Capability_Hub();
 
         // v4.2.0 is an optional, contained editorial surface. A Spotlight
         // startup failure must not terminate the public Research Library.
@@ -176,6 +178,7 @@ final class SC_Library_Plugin {
         $python_backend->register_hooks();
         $python_operations->register_hooks();
         $dynamic_explorer->register_hooks();
+        $capability_hub->register_hooks();
     }
 }
 

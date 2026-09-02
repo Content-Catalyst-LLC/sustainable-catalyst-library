@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.6.0 Dynamic Library Explorer.
+ * v5.6.0 R1 Dynamic Library Explorer.
  *
  * Python/PostgreSQL is the preferred public discovery/read model. WordPress
  * remains authoritative for publication state and provides a bounded local
  * fallback when the backend cannot be reached.
  */
 final class SC_Library_Dynamic_Explorer {
-    public const VERSION = '5.6.0';
+    public const VERSION = '5.6.0.1';
     public const REST_NAMESPACE = 'sc-library/v1';
     private const DEFAULT_PER_PAGE = 12;
 

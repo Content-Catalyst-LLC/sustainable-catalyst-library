@@ -21,9 +21,9 @@ def text(path: Path) -> str:
 
 def test_release_identity_and_backend_version():
     main = text(MAIN)
-    assert "Version: 5.6.0" in main
-    assert "SC_LIBRARY_VERSION', '5.6.0'" in main
-    assert "public const VERSION = '5.6.0'" in text(BRIDGE)
+    assert "Version: 5.6.0.1" in main
+    assert "SC_LIBRARY_VERSION', '5.6.0.1'" in main
+    assert "public const VERSION = '5.6.0.1'" in text(BRIDGE)
     assert '__version__ = "1.1.0"' in text(BACKEND / "app/__init__.py")
 
 
@@ -153,10 +153,11 @@ def test_localhost_binding_and_shared_network_remain_unchanged():
 
 
 
-def test_compact_page_replacement_removes_inline_application_sprawl():
-    page = text(ROOT / "RESEARCH_LIBRARY_PAGE_v5.6.0.html")
+def test_r1_page_preserves_capabilities_through_lazy_hub():
+    page = text(ROOT / "RESEARCH_LIBRARY_PAGE_v5.6.0-R1.html")
+    hub = text(PLUGIN / "includes/class-sc-library-capability-hub.php")
     assert '[sc_library mode="explorer" show_header="false" per_page="12"]' in page
-    assert len(page.splitlines()) < 100
+    assert '[sc_library_capability_hub' in page
     for old_embed in [
         '[sc_library_unified_workspace]',
         '[sc_citation_studio',
@@ -166,6 +167,7 @@ def test_compact_page_replacement_removes_inline_application_sprawl():
         '[sc_global_research_federation',
     ]:
         assert old_embed not in page
+        assert old_embed in hub
 
 def test_changed_php_files_parse_and_js_parses():
     for path in [MAIN, BRIDGE, EXPLORER, SHORTCODES, TEMPLATE]:

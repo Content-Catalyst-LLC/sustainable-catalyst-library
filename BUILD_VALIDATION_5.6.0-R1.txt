@@ -1,0 +1,39 @@
+Sustainable Catalyst Library v5.6.0 R1 — Build Validation
+Capability-Preserving Dynamic Library Interface
+
+Validation status: PASS (working tree)
+
+Release identity
+- WordPress plugin: 5.6.0.1
+- Release label: v5.6.0 R1
+- Python backend: 1.1.0 (unchanged from v5.6.0)
+- Preserved baseline: restored Research Library v5.4.0 page
+
+Preservation baseline
+- 534 source-of-truth page lines retained as a test fixture.
+- 37 unique existing shortcodes protected.
+- 72 named legacy anchors protected.
+- Build fails if a protected shortcode is missing from the R1 page + capability registry.
+- Build fails if a protected anchor lacks a page or registry compatibility target.
+
+Interface architecture
+- Python Dynamic Explorer remains visible near the top as the Knowledge Base search surface.
+- Six capability zones preserve the complete Library system.
+- Heavy WordPress applications are lazy-mounted only when selected.
+- Lazy mounting uses a same-origin front-end WordPress document so existing authentication, module CSS/JS, REST nonces and shortcode behavior remain intact.
+- External libraries, universities, scholarly systems, archives and federation remain explicitly discoverable.
+- Historical hash/deep links activate the matching compact capability card and workspace.
+- Knowledge Pathways and applied platform handoffs remain visible without requiring application mounting.
+- The stripped v5.6.0 page is explicitly marked WITHDRAWN.
+
+Infrastructure boundary
+- No database migration.
+- No Caddy or DNS change.
+- No API credential change.
+- Backend remains v1.1.0 on 127.0.0.1:8087 / sc-internal.
+
+Test result
+- 39/39 targeted regression + preservation tests pass.
+- All plugin PHP files parse.
+- Dynamic Explorer and Capability Hub JavaScript syntax pass.
+- Python backend compiles.
