@@ -1,0 +1,19 @@
+Sustainable Catalyst Library v5.6.1.1 validation
+
+PASS - PHP syntax across plugin
+PASS - JavaScript syntax across v5.6.1 validation set
+PASS - Python backend compile
+PASS - v5.6.1 regression + preservation tests
+PASS - Publications spotlight context tests
+RESULT - 87 passed
+
+Behavioral contract:
+- [sc_homepage_spotlight context="publications"] supported
+- Publications visible identity: PUB / Publications
+- Publications default heading: Featured Publications
+- Publications-specific accessible navigation labels
+- Knowledge Library remains default context for backward compatibility
+- Existing title and intro attributes remain configurable
+- v5.6.1 Library homepage console unchanged
+- R3.2.1 Research Library page unchanged
+- Backend remains 1.1.0

@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Homepage_Spotlight {
-    public const VERSION = '4.2.0';
+    public const VERSION = '4.2.1';
     public const ITEM_POST_TYPE = 'sc_home_spotlight';
     public const PAGE_POST_TYPE = 'sc_spot_page';
     public const SHORTCODE = 'sc_homepage_spotlight';
@@ -1035,6 +1035,7 @@ final class SC_Library_Homepage_Spotlight {
 
     /** @param array<string,mixed>|string $atts */
     public function shortcode( $atts = array() ): string {
+        $raw_atts = is_array( $atts ) ? $atts : array();
         $atts = shortcode_atts(
             array(
                 'autoplay' => 'true',
@@ -1050,13 +1051,42 @@ final class SC_Library_Homepage_Spotlight {
                 'secondary_label' => __( 'Explore additional topics', 'sustainable-catalyst-library' ),
                 'show_thumbnail' => '',
                 'show_metadata' => '',
+                'context' => 'library',
                 'title' => __( 'Explore the Knowledge Library', 'sustainable-catalyst-library' ),
                 'intro' => __( 'Selected research across the subjects currently featured by Sustainable Catalyst.', 'sustainable-catalyst-library' ),
                 'empty' => 'hide',
             ),
-            is_array( $atts ) ? $atts : array(),
+            $raw_atts,
             self::SHORTCODE
         );
+
+        $context = sanitize_key( (string) $atts['context'] );
+        if ( ! in_array( $context, array( 'library', 'publications' ), true ) ) {
+            $context = 'library';
+        }
+
+        $context_defaults = 'publications' === $context
+            ? array(
+                'system_id' => 'PUB',
+                'system_label' => __( 'Publications', 'sustainable-catalyst-library' ),
+                'title' => __( 'Featured Publications', 'sustainable-catalyst-library' ),
+                'intro' => __( 'Selected public work across the subjects currently featured by Sustainable Catalyst.', 'sustainable-catalyst-library' ),
+                'console_aria' => __( 'Curated Publications spotlight', 'sustainable-catalyst-library' ),
+                'subjects_aria' => __( 'Publication subjects', 'sustainable-catalyst-library' ),
+                'controls_aria' => __( 'Publications spotlight navigation', 'sustainable-catalyst-library' ),
+                'default_record_label' => __( 'Publication', 'sustainable-catalyst-library' ),
+            )
+            : array(
+                'system_id' => 'KL',
+                'system_label' => __( 'Knowledge Library', 'sustainable-catalyst-library' ),
+                'title' => __( 'Explore the Knowledge Library', 'sustainable-catalyst-library' ),
+                'intro' => __( 'Selected research across the subjects currently featured by Sustainable Catalyst.', 'sustainable-catalyst-library' ),
+                'console_aria' => __( 'Curated Knowledge Library console', 'sustainable-catalyst-library' ),
+                'subjects_aria' => __( 'Knowledge Library subjects', 'sustainable-catalyst-library' ),
+                'controls_aria' => __( 'Knowledge Library console navigation', 'sustainable-catalyst-library' ),
+                'default_record_label' => __( 'From the Knowledge Library', 'sustainable-catalyst-library' ),
+            );
+
         $category_limit = max( 0, absint( $atts['category_limit'] ) );
         $pages = $this->active_pages( $category_limit );
         if ( empty( $pages ) ) {
@@ -1089,8 +1119,18 @@ final class SC_Library_Homepage_Spotlight {
         $interval = max( 8000, min( 60000, absint( $atts['interval'] ) ) );
         $show_thumbnail_override = '' === (string) $atts['show_thumbnail'] ? null : $this->truthy( $atts['show_thumbnail'] );
         $show_metadata_override = '' === (string) $atts['show_metadata'] ? null : $this->truthy( $atts['show_metadata'] );
-        $heading = sanitize_text_field( (string) $atts['title'] );
-        $intro = sanitize_textarea_field( (string) $atts['intro'] );
+        $heading = array_key_exists( 'title', $raw_atts )
+            ? sanitize_text_field( (string) $atts['title'] )
+            : sanitize_text_field( (string) $context_defaults['title'] );
+        $intro = array_key_exists( 'intro', $raw_atts )
+            ? sanitize_textarea_field( (string) $atts['intro'] )
+            : sanitize_textarea_field( (string) $context_defaults['intro'] );
+        $system_id = sanitize_text_field( (string) $context_defaults['system_id'] );
+        $system_label = sanitize_text_field( (string) $context_defaults['system_label'] );
+        $console_aria = sanitize_text_field( (string) $context_defaults['console_aria'] );
+        $subjects_aria = sanitize_text_field( (string) $context_defaults['subjects_aria'] );
+        $controls_aria = sanitize_text_field( (string) $context_defaults['controls_aria'] );
+        $default_record_label = sanitize_text_field( (string) $context_defaults['default_record_label'] );
         $instance_id = wp_unique_id( 'sc-homepage-spotlight-' );
         $template = SC_LIBRARY_DIR . 'templates/homepage-spotlight.php';
         if ( ! is_readable( $template ) ) {

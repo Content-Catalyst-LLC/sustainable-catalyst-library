@@ -19,8 +19,8 @@ def text(p): return p.read_text(encoding='utf-8')
 def uniq(xs): return list(dict.fromkeys(xs))
 def test_identity_and_backend_unchanged():
     main=text(MAIN)
-    assert 'Version: 5.6.1' in main
-    assert "SC_LIBRARY_VERSION', '5.6.1'" in main
+    assert 'Version: 5.6.1.1' in main
+    assert "SC_LIBRARY_VERSION', '5.6.1.1'" in main
     assert '__version__ = "1.1.0"' in text(ROOT/'library-backend/app/__init__.py')
 def test_preservation_contract():
     base=text(BASELINE); page=text(PAGE); hub=text(HUB); m=json.loads(text(MANIFEST))

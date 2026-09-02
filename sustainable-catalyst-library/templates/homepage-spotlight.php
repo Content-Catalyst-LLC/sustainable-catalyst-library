@@ -1,11 +1,12 @@
 <?php
 /**
- * Public Knowledge Library Console template.
+ * Public curated spotlight console template.
  *
  * Available variables: $pages, $controls, $tabs, $instance_id, $autoplay,
  * $interval, $loop, $pause_on_hover, $secondary_topics, $secondary_open,
  * $secondary_label, $show_thumbnail_override, $show_metadata_override,
- * $heading, $intro.
+ * $heading, $intro, $context, $system_id, $system_label, $console_aria,
+ * $subjects_aria, $controls_aria, $default_record_label.
  */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -44,11 +45,11 @@ $secondary_panel_id = $instance_id . '-secondary-topics';
     data-status-static="<?php esc_attr_e( 'Static', 'sustainable-catalyst-library' ); ?>"
     data-status-reduced="<?php esc_attr_e( 'Reduced motion', 'sustainable-catalyst-library' ); ?>"
     style="--sc-spotlight-interval: <?php echo esc_attr( $interval ); ?>ms;"
-    aria-label="<?php esc_attr_e( 'Curated Knowledge Library console', 'sustainable-catalyst-library' ); ?>"
+    aria-label="<?php echo esc_attr( $console_aria ); ?>"
 >
     <header class="sc-homepage-spotlight__masthead">
         <div class="sc-homepage-spotlight__identity">
-            <p class="sc-homepage-spotlight__system-id"><span aria-hidden="true">KL</span> <?php esc_html_e( 'Knowledge Library', 'sustainable-catalyst-library' ); ?></p>
+            <p class="sc-homepage-spotlight__system-id"><span aria-hidden="true"><?php echo esc_html( $system_id ); ?></span> <?php echo esc_html( $system_label ); ?></p>
             <?php if ( $heading ) : ?><h2><?php echo esc_html( $heading ); ?></h2><?php endif; ?>
         </div>
         <?php if ( $intro ) : ?><p class="sc-homepage-spotlight__intro-copy"><?php echo esc_html( $intro ); ?></p><?php endif; ?>
@@ -61,7 +62,7 @@ $secondary_panel_id = $instance_id . '-secondary-topics';
     <div class="sc-homepage-spotlight__progress" aria-hidden="true"><span data-sc-spotlight-progress></span></div>
 
     <?php if ( $tabs ) : ?>
-        <nav class="sc-homepage-spotlight__topic-navigation" aria-label="<?php esc_attr_e( 'Knowledge Library subjects', 'sustainable-catalyst-library' ); ?>">
+        <nav class="sc-homepage-spotlight__topic-navigation" aria-label="<?php echo esc_attr( $subjects_aria ); ?>">
             <div class="sc-homepage-spotlight__tabs sc-homepage-spotlight__tabs--primary" role="tablist" aria-label="<?php esc_attr_e( 'Primary subjects', 'sustainable-catalyst-library' ); ?>">
                 <?php foreach ( $primary_pages as $page ) :
                     $page_index = (int) $page['index'];
@@ -186,14 +187,20 @@ $secondary_panel_id = $instance_id . '-secondary-topics';
                                     if ( $thumbnail_html ) {
                                         echo wp_kses_post( $thumbnail_html );
                                     } else {
-                                        echo '<span class="sc-homepage-spotlight__thumbnail-placeholder-mark">KL</span>';
+                                        echo '<span class="sc-homepage-spotlight__thumbnail-placeholder-mark">' . esc_html( $system_id ) . '</span>';
                                     }
                                     ?>
                                 </figure>
                             <?php endif; ?>
                             <div class="sc-homepage-spotlight__card-copy">
                                 <div class="sc-homepage-spotlight__record-line">
-                                    <?php if ( $card['label'] ) : ?><span class="sc-homepage-spotlight__label"><?php echo esc_html( $card['label'] ); ?></span><?php endif; ?>
+                                    <?php
+                                    $display_label = (string) $card['label'];
+                                    if ( 'publications' === $context && __( 'From the Knowledge Library', 'sustainable-catalyst-library' ) === $display_label ) {
+                                        $display_label = $default_record_label;
+                                    }
+                                    ?>
+                                    <?php if ( $display_label ) : ?><span class="sc-homepage-spotlight__label"><?php echo esc_html( $display_label ); ?></span><?php endif; ?>
                                     <?php if ( $show_metadata && $card['metadata'] ) : ?><span class="sc-homepage-spotlight__metadata"><?php echo esc_html( $card['metadata'] ); ?></span><?php endif; ?>
                                 </div>
                                 <h4 class="sc-homepage-spotlight__headline">
@@ -213,7 +220,7 @@ $secondary_panel_id = $instance_id . '-secondary-topics';
     </div>
 
     <?php if ( $controls ) : ?>
-        <div class="sc-homepage-spotlight__controls" aria-label="<?php esc_attr_e( 'Knowledge Library console navigation', 'sustainable-catalyst-library' ); ?>">
+        <div class="sc-homepage-spotlight__controls" aria-label="<?php echo esc_attr( $controls_aria ); ?>">
             <button type="button" data-sc-spotlight-prev aria-label="<?php esc_attr_e( 'Show previous category', 'sustainable-catalyst-library' ); ?>"><span aria-hidden="true">←</span><span><?php esc_html_e( 'Previous', 'sustainable-catalyst-library' ); ?></span></button>
             <button type="button" data-sc-spotlight-toggle aria-pressed="<?php echo $autoplay ? 'false' : 'true'; ?>" aria-label="<?php echo esc_attr( $autoplay ? __( 'Pause automatic rotation', 'sustainable-catalyst-library' ) : __( 'Play automatic rotation', 'sustainable-catalyst-library' ) ); ?>"><span data-sc-spotlight-toggle-icon aria-hidden="true"><?php echo $autoplay ? 'Ⅱ' : '▶'; ?></span><span data-sc-spotlight-toggle-text><?php echo esc_html( $autoplay ? __( 'Pause', 'sustainable-catalyst-library' ) : __( 'Play', 'sustainable-catalyst-library' ) ); ?></span></button>
             <span class="sc-homepage-spotlight__position" data-sc-spotlight-position>01 / <?php echo esc_html( str_pad( (string) count( $pages ), 2, '0', STR_PAD_LEFT ) ); ?></span>

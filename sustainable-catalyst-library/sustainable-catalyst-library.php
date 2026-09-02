@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.6.1 adds a Library-owned homepage Research Network & Knowledge Discovery Console with live corpus telemetry, governed source visibility, research handoffs and fail-open homepage behavior.
- * Version: 5.6.1
+ * Description: Sustainable Catalyst Library v5.6.1.1 adds a Library-owned homepage Research Network & Knowledge Discovery Console with live corpus telemetry, governed source visibility, research handoffs and fail-open homepage behavior.
+ * Version: 5.6.1.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.6.1');
+define('SC_LIBRARY_VERSION', '5.6.1.1');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

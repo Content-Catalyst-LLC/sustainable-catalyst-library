@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.6.1
+Stable tag: 5.6.1.1
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.6.1 adds a reusable homepage Research Network & Knowledge Discovery Console with live corpus telemetry, governed university/library/scholarly-source visibility, and direct handoffs into Library search and the Research Librarian. The current Research Library page remains the R3.2.1 capability-preserving baseline with Three Research Front Doors removed. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
+Sustainable Catalyst Library v5.6.1.1 adds a configurable Publications presentation context to the curated homepage spotlight and preserves the v5.6.1 Research Network & Knowledge Discovery Console with live corpus telemetry, governed university/library/scholarly-source visibility, and direct handoffs into Library search and the Research Librarian. The current Research Library page remains the R3.2.1 capability-preserving baseline with Three Research Front Doors removed. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
 
 = Public Evidence & Claim Navigation =
 
@@ -367,6 +367,11 @@ Use `[sc_library_api_interoperability]` for the integration console and `[sc_lib
 The facade does not expose My Library, private Research Projects, notebook or Evidence Matrix bodies, Research Room or Team Library membership, credentials, tokens, Workspace state, or authenticated federation governance. It performs no cross-site writes, publication, federation acceptance, evidence promotion, or Workspace writes.
 
 == Changelog ==
+
+= 5.6.1.1 =
+* Added `context="publications"` to `[sc_homepage_spotlight]` so the curated homepage spotlight can present as Publications while preserving the Library-backed editorial engine.
+* Publications context uses `PUB · Publications`, `Featured Publications`, publication-specific accessible labels, and a neutral `Publication` fallback card label.
+* Existing Library context remains the default for backward compatibility.
 
 = 5.6.1 =
 * Adds `[sc_library_homepage_console]` with `full`, `compact`, and `network` modes.

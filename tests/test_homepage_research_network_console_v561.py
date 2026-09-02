@@ -25,8 +25,8 @@ def uniq(xs):
 
 def test_release_identity_and_backend_contract():
     main = text(MAIN)
-    assert 'Version: 5.6.1' in main
-    assert "SC_LIBRARY_VERSION', '5.6.1'" in main
+    assert 'Version: 5.6.1.1' in main
+    assert "SC_LIBRARY_VERSION', '5.6.1.1'" in main
     assert '__version__ = "1.1.0"' in text(ROOT / 'library-backend/app/__init__.py')
     assert "class-sc-library-homepage-console.php" in main
     assert '$homepage_console->register_hooks();' in main
