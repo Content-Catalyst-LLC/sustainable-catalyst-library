@@ -13,7 +13,7 @@ from pydantic import ValidationError
 from . import __version__
 from .db import close_pool, get_pool, initialize_database
 from .models import EdgeBatch, IntegrityAuditRequest, PruneRequest, RecordBatch
-from .query import facets, get_record, graph_neighborhood, related_records, search_records, stats, timeline
+from .query import explorer_bootstrap, facets, get_record, graph_neighborhood, related_records, search_records, stats, timeline
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -126,6 +126,10 @@ def health() -> dict[str, Any]:
             "adaptive_ingestion": True,
             "server_chunk_fallback": True,
             "operations_recovery": True,
+            "dynamic_explorer": True,
+            "progressive_discovery": True,
+            "filterable_search": True,
+            "progressive_record_detail": True,
             "integrity_audit": True,
             "targeted_pruning": True,
             "semantic_embeddings": "adapter-ready",
@@ -209,15 +213,27 @@ def search(
     q: str = Query(default="", max_length=500),
     object_type: str | None = Query(default=None, max_length=80),
     source_key: str | None = Query(default=None, max_length=191),
+    topic: str | None = Query(default=None, max_length=500),
+    year_from: int | None = Query(default=None, ge=1000, le=3000),
+    year_to: int | None = Query(default=None, ge=1000, le=3000),
+    sort: str = Query(default="relevance", max_length=20),
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0, le=100000),
 ) -> dict[str, Any]:
-    return search_records(q, object_type, source_key, limit, offset)
+    return search_records(q, object_type, source_key, topic, year_from, year_to, sort, limit, offset)
+
+
+@app.get("/v1/explorer/bootstrap")
+def explorer_public_bootstrap(
+    featured_limit: int = Query(default=4, ge=1, le=12),
+    recent_limit: int = Query(default=4, ge=1, le=12),
+) -> dict[str, Any]:
+    return explorer_bootstrap(featured_limit, recent_limit)
 
 
 @app.get("/v1/records/{record_id}")
-def record(record_id: str) -> dict[str, Any]:
-    row = get_record(record_id)
+def record(record_id: str, include_body: bool = Query(default=True)) -> dict[str, Any]:
+    row = get_record(record_id, include_body=include_body)
     if row is None:
         raise HTTPException(status_code=404, detail="public record not found")
     return {"schema": "sc-library-record/1.0", "record": row}

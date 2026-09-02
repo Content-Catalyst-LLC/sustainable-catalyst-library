@@ -12,6 +12,9 @@ final class SC_Library_Shortcodes {
     }
 
     public function render(array $atts = []): string {
+        if (class_exists('SC_Library_Dynamic_Explorer') && SC_Library_Dynamic_Explorer::should_render($atts)) {
+            return SC_Library_Dynamic_Explorer::render_shortcode($atts);
+        }
         $initial_buffer_level = ob_get_level();
         try {
             return $this->render_runtime($atts);

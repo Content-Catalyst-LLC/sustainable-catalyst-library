@@ -1,5 +1,13 @@
 # Sustainable Catalyst Library
 
+## v5.6.0 — Dynamic Library Explorer & Progressive Discovery
+
+v5.6.0 moves the public Library front door onto the hardened Python/PostgreSQL read model. It adds a compact Explorer, bounded 12-record discovery pages, topic/type/source/year filters, URL-preserved search state, load-more retrieval, progressive quick-view drawers, related-record discovery, provenance, record timelines, and a WordPress-local fallback. The release also includes a compact `RESEARCH_LIBRARY_PAGE_v5.6.0.html` that reduces the former 500+ line public page to a focused Explorer plus research-tool handoffs.
+
+The v5.5 ingestion-hardening and backend-operations/recovery contracts remain intact. No PostgreSQL migration is required.
+
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.6.0.md` and `DYNAMIC_LIBRARY_EXPLORER_v5.6.0.md`.
+
 ## v5.5.2 — Backend Operations & Recovery
 
 v5.5.2 adds a signed operations and recovery layer to the Python research-intelligence backend: WordPress-vs-backend integrity audits, missing/stale/orphan/chunkless detection, targeted repairs, verified orphan pruning, post-ID and Library Collection reindexing, operation lineage, and backend ingest/coverage diagnostics. WordPress remains authoritative for editorial state and record existence. No PostgreSQL migration is required.

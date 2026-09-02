@@ -1,0 +1,37 @@
+Sustainable Catalyst Library v5.6.0 — Build Validation
+Dynamic Library Explorer & Progressive Discovery
+
+Validation status: PASS
+
+Release identity
+- WordPress plugin: 5.6.0
+- Python backend: 1.1.0
+- Explorer REST bridge: sc-library/v1
+- Backend Explorer bootstrap schema: sc-library-explorer-bootstrap/1.0
+
+Validated release contract
+- 138 WordPress/PHP files parse successfully.
+- JavaScript syntax validation passes, including Dynamic Explorer v5.6.0.
+- Python backend compilation passes.
+- 29/29 targeted v5.6.0 contract tests pass.
+- Existing v5.5.x ingestion hardening and operations/recovery contracts remain present.
+- Backend remains localhost-bound at 127.0.0.1:8087 and attached to sc-internal.
+- No PostgreSQL migration is required.
+- No Caddy or DNS change is required.
+
+Dynamic Explorer coverage
+- Bare [sc_library] routes to Dynamic Explorer; explicit legacy modes remain available.
+- Python-first Explorer bootstrap, search, progressive record detail, related-record and timeline APIs.
+- WordPress-local fallback when the Python discovery API is unavailable.
+- URL-preserved search/filter state and browser back/forward support.
+- Bounded load-more pagination instead of full-catalog rendering.
+- Lazy related, provenance and timeline detail.
+- Compact v5.6.0 public page replacement avoids embedding the full workspace/tool stack inline.
+- Responsive/mobile behavior and reduced-motion handling validated by contract tests.
+
+Deployment safeguards
+- macOS release installer performs checksum, source validation, safety backup, tests, commit and push.
+- Contabo backend v1.1.0 upgrader preserves .env, creates an application backup, waits for Docker health, verifies /health and /ready, and verifies /v1/explorer/bootstrap.
+
+Result
+PASS - v5.6.0 is ready for packaging and deployment.

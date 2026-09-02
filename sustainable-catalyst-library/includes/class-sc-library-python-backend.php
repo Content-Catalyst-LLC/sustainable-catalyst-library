@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.5.2 Python Research Intelligence Backend bridge.
+ * v5.6.0 Python Research Intelligence Backend bridge.
  *
  * WordPress remains authoritative for users, editorial state, and public URLs.
  * The Python service receives bounded server-to-server index packets only.
@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) { exit; }
  * v5.5.2 exposes signed operations/recovery helpers used by the operations console.
  */
 final class SC_Library_Python_Backend {
-    public const VERSION = '5.5.2';
+    public const VERSION = '5.6.0';
     public const BACKEND_SCHEMA = 'sc-library-backend-ingest/1.0';
     public const REST_NAMESPACE = 'sc-library/v1';
     public const CRON_HOOK = 'sc_library_python_backend_sync_post';

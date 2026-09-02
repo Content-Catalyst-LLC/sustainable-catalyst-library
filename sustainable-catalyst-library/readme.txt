@@ -4,25 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.5.2
+Stable tag: 5.6.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.4.0 adds Research Collections, Exhibitions & Curated Knowledge Spaces: editor-governed public narrative and ordered references to already-public Library objects, public claims/evidence, and published federation manifests without copying private research or mutating the underlying records.
-
-
-
-
-
-
-
-
-
-
-
+Sustainable Catalyst Library v5.6.0 introduces Dynamic Library Explorer & Progressive Discovery. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
 
 = Public Evidence & Claim Navigation =
 
