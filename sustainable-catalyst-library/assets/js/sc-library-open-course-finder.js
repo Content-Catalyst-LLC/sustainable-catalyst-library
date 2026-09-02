@@ -45,21 +45,33 @@
     var cards = Array.prototype.slice.call(root.querySelectorAll('[data-sc-course-card]'));
     var status = root.querySelector('[data-sc-course-status]');
     var empty = root.querySelector('[data-sc-course-empty]');
+    var showAllButton = root.querySelector('[data-sc-course-show-all]');
+    var featuredLimit = parseInt(root.dataset.featuredLimit || '0', 10) || 0;
+    var featuredMode = root.dataset.courseMode === 'featured' && featuredLimit > 0;
+    var showAll = false;
     if (!form) { return; }
 
     function applyFilters() {
       var data = new FormData(form);
-      var count = 0;
-      cards.forEach(function (card) {
-        var visible = filterMatches(card, data);
-        card.hidden = !visible;
-        if (visible) { count += 1; }
-      });
+      var matches = cards.filter(function (card) { return filterMatches(card, data); });
+      var hasActiveFilter = Array.from(data.entries()).some(function (entry) { return normalize(entry[1]); });
+      var limited = featuredMode && !showAll && !hasActiveFilter && matches.length > featuredLimit;
+      cards.forEach(function (card) { card.hidden = true; });
+      matches.forEach(function (card, index) { card.hidden = limited && index >= featuredLimit; });
       updateProviderLinks(root, normalize(data.get('query')));
-      if (empty) { empty.hidden = count !== 0; }
+      if (empty) { empty.hidden = matches.length !== 0; }
+      if (showAllButton) { showAllButton.hidden = !featuredMode || showAll || hasActiveFilter || matches.length <= featuredLimit; }
       if (status) {
-        status.textContent = count + ' launch-catalog course' + (count === 1 ? '' : 's') + ' match' + (count === 1 ? 'es' : '') + '. Pathway and learning-plan filters stay local; provider gateways below search beyond the launch catalog.';
+        if (limited) {
+          status.textContent = 'Showing ' + featuredLimit + ' featured courses from ' + matches.length + ' verified launch-catalog courses. Search or filter to explore the full catalog.';
+        } else {
+          status.textContent = matches.length + ' launch-catalog course' + (matches.length === 1 ? '' : 's') + ' match' + (matches.length === 1 ? 'es' : '') + '. Provider gateways below search beyond the launch catalog.';
+        }
       }
+    }
+
+    if (showAllButton) {
+      showAllButton.addEventListener('click', function () { showAll = true; applyFilters(); });
     }
 
     form.addEventListener('submit', function (event) {

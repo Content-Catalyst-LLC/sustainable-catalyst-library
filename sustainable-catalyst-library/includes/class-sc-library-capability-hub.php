@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) { exit; }
  * WordPress authentication, registered styles/scripts and existing APIs.
  */
 final class SC_Library_Capability_Hub {
-    public const VERSION = '5.6.0.3';
+    public const VERSION = '5.6.0.31';
     private const QUERY_ARG = 'sc_library_capability';
 
     public function register_hooks(): void {

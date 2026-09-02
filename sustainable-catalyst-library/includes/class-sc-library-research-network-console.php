@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) { exit; }
  * explicitly labeled by capability.
  */
 final class SC_Library_Research_Network_Console {
-    public const VERSION = '5.6.0.3';
+    public const VERSION = '5.6.0.31';
 
     public function register_hooks(): void {
         add_action('wp_enqueue_scripts', [$this, 'maybe_enqueue_public_assets']);

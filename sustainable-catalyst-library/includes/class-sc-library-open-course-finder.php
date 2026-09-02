@@ -589,6 +589,8 @@ final class SC_Library_Open_Course_Finder {
             array(
                 'title' => __( 'Find Free and Open Courses', 'sustainable-catalyst-library' ),
                 'show_providers' => 'true',
+                'mode' => 'standard',
+                'featured_limit' => '6',
             ),
             $atts,
             'sc_open_course_finder'
@@ -599,6 +601,21 @@ final class SC_Library_Open_Course_Finder {
         wp_enqueue_script( 'sc-library-course-plan' );
 
         $courses = self::launch_catalog();
+        $mode = sanitize_key( (string) $atts['mode'] );
+        if ( ! in_array( $mode, array( 'standard', 'featured' ), true ) ) {
+            $mode = 'standard';
+        }
+        $featured_limit = max( 3, min( 12, absint( $atts['featured_limit'] ) ) );
+        if ( 'featured' === $mode ) {
+            $featured_ids = array( 'mit-6-100l', 'cs50x', 'yale-wellbeing', 'princeton-algorithms-1', 'stanford-cs101', 'ucph-global-sdgs' );
+            $rank = array_flip( $featured_ids );
+            $original_order = array_flip( array_column( $courses, 'id' ) );
+            usort( $courses, static function( $a, $b ) use ( $rank, $original_order ) {
+                $ar = $rank[ $a['id'] ] ?? ( 1000 + ( $original_order[ $a['id'] ] ?? 999 ) );
+                $br = $rank[ $b['id'] ] ?? ( 1000 + ( $original_order[ $b['id'] ] ?? 999 ) );
+                return $ar <=> $br;
+            } );
+        }
         $providers = self::provider_registry();
         $subjects = self::subjects();
         $pathways = self::pathway_registry();
@@ -624,7 +641,7 @@ final class SC_Library_Open_Course_Finder {
 
         ob_start();
         ?>
-        <section class="sc-course-finder" data-sc-course-finder data-verified-on="<?php echo esc_attr( self::VERIFIED_ON ); ?>" data-signed-in="<?php echo $signed_in ? '1' : '0'; ?>">
+        <section class="sc-course-finder<?php echo 'featured' === $mode ? ' sc-course-finder--featured' : ''; ?>" data-sc-course-finder data-course-mode="<?php echo esc_attr( $mode ); ?>" data-featured-limit="<?php echo esc_attr( (string) $featured_limit ); ?>" data-verified-on="<?php echo esc_attr( self::VERIFIED_ON ); ?>" data-signed-in="<?php echo $signed_in ? '1' : '0'; ?>">
             <header class="sc-course-finder__header">
                 <p class="sc-course-finder__kicker"><?php esc_html_e( 'Open Course Finder', 'sustainable-catalyst-library' ); ?></p>
                 <h2><?php echo esc_html( $atts['title'] ); ?></h2>
@@ -720,6 +737,9 @@ final class SC_Library_Open_Course_Finder {
             </div>
 
             <div class="sc-course-finder__status" data-sc-course-status aria-live="polite"></div>
+            <?php if ( 'featured' === $mode ) : ?>
+                <button class="sc-course-finder__show-all" type="button" data-sc-course-show-all><?php esc_html_e( 'Explore all launch-catalog courses', 'sustainable-catalyst-library' ); ?> →</button>
+            <?php endif; ?>
             <div class="sc-course-finder__results" data-sc-course-results>
                 <?php foreach ( $courses as $course ) :
                     $course_pathways = array_values( array_filter( array_map( static function( $slug ) use ( $pathways ) {

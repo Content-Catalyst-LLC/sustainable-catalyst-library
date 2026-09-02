@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.6.0 R3 preserves the complete Research Library while restoring visible university, scholarly, public-library, and Research Librarian access through a dynamic research-network interface.
- * Version: 5.6.0.3
+ * Description: Sustainable Catalyst Library v5.6.0 R3.1 repairs the R3 public interface, compacts account continuity, restores visible capability actions, and replaces the redundant Research Flow band with dynamic Open Courses while preserving the full research network.
+ * Version: 5.6.0.31
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.6.0.3');
+define('SC_LIBRARY_VERSION', '5.6.0.31');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
