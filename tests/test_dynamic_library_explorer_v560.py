@@ -21,8 +21,8 @@ def text(path: Path) -> str:
 
 def test_release_identity_and_backend_version():
     main = text(MAIN)
-    assert "Version: 5.6.0.32" in main
-    assert "SC_LIBRARY_VERSION', '5.6.0.32'" in main
+    assert "Version: 5.6.1" in main
+    assert "SC_LIBRARY_VERSION', '5.6.1'" in main
     assert "public const VERSION = '5.6.0.32'" in text(BRIDGE)
     assert '__version__ = "1.1.0"' in text(BACKEND / "app/__init__.py")
 

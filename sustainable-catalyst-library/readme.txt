@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.6.0.32
+Stable tag: 5.6.1
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.6.0 R3.2 preserves the full dynamic Research Library while repairing the R3 front-door layout, restoring visible Capability Map actions, compacting Account Continuity, and promoting Open Courses into a directly visible dynamic section. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
+Sustainable Catalyst Library v5.6.1 adds a reusable homepage Research Network & Knowledge Discovery Console with live corpus telemetry, governed university/library/scholarly-source visibility, and direct handoffs into Library search and the Research Librarian. The current Research Library page remains the R3.2.1 capability-preserving baseline with Three Research Front Doors removed. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
 
 = Public Evidence & Claim Navigation =
 
@@ -367,6 +367,14 @@ Use `[sc_library_api_interoperability]` for the integration console and `[sc_lib
 The facade does not expose My Library, private Research Projects, notebook or Evidence Matrix bodies, Research Room or Team Library membership, credentials, tokens, Workspace state, or authenticated federation governance. It performs no cross-site writes, publication, federation acceptance, evidence promotion, or Workspace writes.
 
 == Changelog ==
+
+= 5.6.1 =
+* Adds `[sc_library_homepage_console]` with `full`, `compact`, and `network` modes.
+* Reuses the Research Network connector registries for MIT, Harvard, University College Dublin, Yale, Princeton, Stanford, public libraries, scholarly systems, and other visible routes.
+* Loads public record/topic/passage telemetry through the existing progressive Explorer bootstrap with WordPress fail-open behavior.
+* Adds query handoffs from the homepage into Knowledge search, Research Access, and the Research Librarian.
+* Preserves the R3.2.1 Research Library page composition; no Library page replacement or backend redeploy is required.
+
 = 5.6.0.32 =
 * R3.2 replaces the broken nested Three Research Front Door widgets with three clean navigation surfaces that route into the full Knowledge Base, Research Access, and Research Librarian sections.
 * Library-page CSS is now enqueued explicitly before rendering and critical controls also carry last-resort component fallbacks against aggressive site-level/Astra button rules.

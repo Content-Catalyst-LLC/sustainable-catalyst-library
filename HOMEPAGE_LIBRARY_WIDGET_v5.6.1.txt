@@ -1,0 +1,14 @@
+Sustainable Catalyst Library v5.6.1 — Homepage Widget
+
+Recommended homepage shortcode:
+
+[sc_library_homepage_console mode="full"]
+
+Optional variants:
+
+[sc_library_homepage_console mode="compact"]
+[sc_library_homepage_console mode="network"]
+
+The v5.6.1 plugin owns all CSS, JavaScript, source-registry data, live corpus telemetry, and Library handoffs for this widget.
+
+If replacing the older Knowledge Library homepage presentation, replace only that existing Library widget/shortcode with the new shortcode. Do not replace the entire homepage.

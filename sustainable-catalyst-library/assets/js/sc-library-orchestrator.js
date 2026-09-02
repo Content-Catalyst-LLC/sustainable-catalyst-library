@@ -156,6 +156,13 @@
       select.value = initial;
     }
     let current = null;
+    try {
+      const handoffPrompt = new URLSearchParams(window.location.search).get('librarian_query') || '';
+      if (handoffPrompt && form?.elements?.prompt && !form.elements.prompt.value) {
+        form.elements.prompt.value = handoffPrompt;
+        notice(root, 'Homepage research question loaded. Review it, then build the research route when ready.');
+      }
+    } catch (_) {}
     document.addEventListener('sc-library-librarian-request', (event) => {
       const detail = event.detail || {};
       if (detail.target && !targetContainsRoot(detail.target, root)) return;

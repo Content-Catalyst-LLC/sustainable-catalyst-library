@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) { exit; }
  * explicitly labeled by capability.
  */
 final class SC_Library_Research_Network_Console {
-    public const VERSION = '5.6.0.32';
+    public const VERSION = '5.6.1';
 
     public function register_hooks(): void {
         add_action('wp_enqueue_scripts', [$this, 'maybe_enqueue_public_assets']);
@@ -90,6 +90,22 @@ final class SC_Library_Research_Network_Console {
         return $out;
     }
 
+    /** @return array<int,array<string,string>> */
+    public static function source_registry(): array {
+        return array_merge(self::direct_sources(), self::institutional_sources(), self::public_library_sources());
+    }
+
+    /** @return array<string,int> */
+    public static function source_counts(): array {
+        $all = self::source_registry();
+        return [
+            'routes' => count($all),
+            'universities' => count(array_filter($all, static fn($row) => 'university' === ($row['kind'] ?? ''))),
+            'libraries' => count(array_filter($all, static fn($row) => in_array(($row['kind'] ?? ''), ['library','public-library'], true))),
+            'scholarly' => count(array_filter($all, static fn($row) => 'scholarly' === ($row['kind'] ?? ''))),
+        ];
+    }
+
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Research Network Console',
@@ -101,16 +117,9 @@ final class SC_Library_Research_Network_Console {
         wp_enqueue_script('sc-library-research-network-console-v560r3', SC_LIBRARY_URL . 'assets/js/sc-library-research-network-console-v560r3.js', [], SC_LIBRARY_VERSION, true);
 
         $direct = self::direct_sources();
-        $institutional = self::institutional_sources();
-        $public = self::public_library_sources();
-        $all = array_merge($direct, $institutional, $public);
-        $counts = [
-            'direct' => count($direct),
-            'universities' => count(array_filter($all, static fn($row) => 'university' === ($row['kind'] ?? ''))),
-            'libraries' => count(array_filter($all, static fn($row) => in_array(($row['kind'] ?? ''), ['library','public-library'], true))),
-            'scholarly' => count(array_filter($all, static fn($row) => 'scholarly' === ($row['kind'] ?? ''))),
-            'routes' => count($all),
-        ];
+        $all = self::source_registry();
+        $counts = self::source_counts();
+        $counts['direct'] = count($direct);
 
         $instance = 'sc-research-network-' . wp_rand(1000, 999999);
         ob_start(); ?>
