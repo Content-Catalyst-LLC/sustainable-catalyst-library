@@ -12,11 +12,12 @@ from pydantic import ValidationError
 
 from . import __version__
 from .db import close_pool, get_pool, initialize_database
-from .models import EdgeBatch, RecordBatch
+from .models import EdgeBatch, IntegrityAuditRequest, PruneRequest, RecordBatch
 from .query import facets, get_record, graph_neighborhood, related_records, search_records, stats, timeline
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
+from .operations import integrity_audit, operations_status, prune_records
 
 
 @asynccontextmanager
@@ -124,6 +125,9 @@ def health() -> dict[str, Any]:
             "signed_ingestion": True,
             "adaptive_ingestion": True,
             "server_chunk_fallback": True,
+            "operations_recovery": True,
+            "integrity_audit": True,
+            "targeted_pruning": True,
             "semantic_embeddings": "adapter-ready",
         },
         "ingest_limits": {
@@ -237,3 +241,44 @@ def graph(record_id: str, limit: int = Query(default=100, ge=1, le=500)) -> dict
 @app.get("/v1/facets")
 def public_facets() -> dict[str, Any]:
     return facets()
+
+
+@app.get("/v1/admin/status")
+async def admin_status(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    return operations_status()
+
+
+@app.post("/v1/admin/integrity")
+async def admin_integrity(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = IntegrityAuditRequest.model_validate_json(body)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=exc.errors()) from exc
+    return integrity_audit(payload)
+
+
+@app.post("/v1/admin/prune")
+async def admin_prune(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = PruneRequest.model_validate_json(body)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=exc.errors()) from exc
+    return prune_records(payload)

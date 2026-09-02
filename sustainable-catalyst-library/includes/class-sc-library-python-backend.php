@@ -2,15 +2,15 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.5.1 Python Research Intelligence Backend bridge.
+ * v5.5.2 Python Research Intelligence Backend bridge.
  *
  * WordPress remains authoritative for users, editorial state, and public URLs.
  * The Python service receives bounded server-to-server index packets only.
- * v5.5.1 hardens bulk ingestion with payload-aware adaptive batching,
- * automatic 413 splitting, bounded transient retries, and resumable failures.
+ * v5.5.1 hardens bulk ingestion with payload-aware adaptive batching.
+ * v5.5.2 exposes signed operations/recovery helpers used by the operations console.
  */
 final class SC_Library_Python_Backend {
-    public const VERSION = '5.5.1';
+    public const VERSION = '5.5.2';
     public const BACKEND_SCHEMA = 'sc-library-backend-ingest/1.0';
     public const REST_NAMESPACE = 'sc-library/v1';
     public const CRON_HOOK = 'sc_library_python_backend_sync_post';
@@ -214,7 +214,7 @@ final class SC_Library_Python_Backend {
         return new WP_REST_Response(is_array($body) ? $body : ['ok' => false], $code ?: 502);
     }
 
-    private static function post_types(): array {
+    public static function post_types(): array {
         $types = get_option('sc_library_post_types', ['post']);
         $types = is_array($types) ? array_values(array_filter(array_map('sanitize_key', $types))) : ['post'];
         return $types ?: ['post'];
@@ -285,6 +285,7 @@ final class SC_Library_Python_Backend {
     private static function new_summary(int $records, string $mode): array {
         return [
             'ok' => true,
+            'operation_id' => function_exists('wp_generate_uuid4') ? wp_generate_uuid4() : uniqid('sc-library-', true),
             'mode' => $mode,
             'records' => $records,
             'completed' => 0,
@@ -307,7 +308,7 @@ final class SC_Library_Python_Backend {
         ];
     }
 
-    private static function run_bulk_sync(array $ids, string $mode): array {
+    public static function run_bulk_sync(array $ids, string $mode): array {
         $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
         $summary = self::new_summary(count($ids), $mode);
         self::save_checkpoint($summary, 'running');
@@ -327,8 +328,10 @@ final class SC_Library_Python_Backend {
         $summary['failed_record_ids'] = array_values(array_unique($summary['failed_record_ids']));
         $summary['failed'] = count($summary['failed_record_ids']) + max(0, $summary['failed'] - count($summary['failed_record_ids']));
         $summary['ok'] = 0 === (int) $summary['failed'];
-        $summary['timestamp'] = current_time('mysql', true);
+        $summary['finished_at'] = current_time('mysql', true);
+        $summary['timestamp'] = $summary['finished_at'];
         update_option('sc_library_backend_last_sync', $summary, false);
+        if ($summary['ok']) { update_option('sc_library_backend_last_successful_sync', $summary, false); }
         self::save_checkpoint($summary, $summary['ok'] ? 'complete' : 'partial');
         return $summary;
     }
@@ -336,6 +339,7 @@ final class SC_Library_Python_Backend {
     private static function save_checkpoint(array $summary, string $status): void {
         update_option('sc_library_backend_sync_checkpoint', [
             'status' => $status,
+            'operation_id' => $summary['operation_id'] ?? '',
             'mode' => $summary['mode'] ?? 'full',
             'records' => (int) ($summary['records'] ?? 0),
             'completed' => (int) ($summary['completed'] ?? 0),
@@ -347,7 +351,7 @@ final class SC_Library_Python_Backend {
         ], false);
     }
 
-    private static function record_id(int $post_id, string $post_type): string {
+    public static function record_id(int $post_id, string $post_type): string {
         return 'wordpress:' . get_current_blog_id() . ':' . sanitize_key($post_type) . ':' . $post_id;
     }
 
@@ -518,7 +522,7 @@ final class SC_Library_Python_Backend {
         return self::signed_request('POST', '/v1/ingest/records', (string) $payload['body']);
     }
 
-    private static function signed_request(string $method, string $path, string $body) {
+    public static function signed_request(string $method, string $path, string $body) {
         $timestamp = (string) time();
         $key = (string) get_option('sc_library_backend_api_key', '');
         $base = strtoupper($method) . "\n" . $path . "\n" . $timestamp . "\n" . hash('sha256', $body);

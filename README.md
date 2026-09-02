@@ -1,5 +1,11 @@
 # Sustainable Catalyst Library
 
+## v5.5.2 — Backend Operations & Recovery
+
+v5.5.2 adds a signed operations and recovery layer to the Python research-intelligence backend: WordPress-vs-backend integrity audits, missing/stale/orphan/chunkless detection, targeted repairs, verified orphan pruning, post-ID and Library Collection reindexing, operation lineage, and backend ingest/coverage diagnostics. WordPress remains authoritative for editorial state and record existence. No PostgreSQL migration is required.
+
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.5.2.md` and `LIBRARY_BACKEND_OPERATIONS_RECOVERY_v5.5.2.md`.
+
 ## v4.5.0 — Knowledge Graph & Evidence Intelligence
 
 v4.5.0 adds a private, account-scoped graph projection over the canonical research environment. `[sc_knowledge_graph_evidence_intelligence]` composes explicit Research Project links, Source Bundles, project-attached Reading Notebooks, notes, annotations, Evidence Matrices, claims, evidence sources, and Open Learning II routes into one bounded graph without creating a replacement graph database.

@@ -104,3 +104,35 @@ class EdgeBatch(BaseModel):
         if value != "sc-library-backend-edges/1.0":
             raise ValueError("unsupported edge schema")
         return value
+
+class ExpectedRecordState(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    record_id: str = Field(min_length=1, max_length=255)
+    source_updated_at: datetime | None = None
+
+
+class IntegrityAuditRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_key: str = Field(min_length=1, max_length=191)
+    records: list[ExpectedRecordState] = Field(default_factory=list, max_length=10000)
+
+
+class PruneRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_key: str = Field(min_length=1, max_length=191)
+    record_ids: list[str] = Field(min_length=1, max_length=10000)
+
+    @field_validator("record_ids")
+    @classmethod
+    def clean_record_ids(cls, values: list[str]) -> list[str]:
+        cleaned: list[str] = []
+        seen: set[str] = set()
+        for value in values:
+            item = str(value).strip()
+            if item and item not in seen:
+                cleaned.append(item)
+                seen.add(item)
+        return cleaned

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.5.1 hardens Python-backend ingestion with payload-aware adaptive batching, automatic HTTP 413 splitting, bounded retries, resumable failed-record sync, and truthful bulk-sync telemetry while preserving the v5.5 research intelligence architecture.
- * Version: 5.5.1
+ * Description: Sustainable Catalyst Library v5.5.2 adds backend operations, index-integrity auditing, stale/missing/orphan recovery, targeted record and collection reindexing, verified orphan pruning, and durable operations history on the hardened v5.5 Python research-intelligence line.
+ * Version: 5.5.2
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.5.1');
+define('SC_LIBRARY_VERSION', '5.5.2');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -56,6 +56,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-shortcodes.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-publications.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-field-spotlights.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-backend.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-operations.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
 register_deactivation_hook(__FILE__, ['SC_Library_Activator', 'deactivate']);
@@ -110,6 +111,7 @@ final class SC_Library_Plugin {
         $publications = new SC_Library_Publications();
         $field_spotlights = new SC_Library_Field_Spotlights();
         $python_backend = new SC_Library_Python_Backend();
+        $python_operations = new SC_Library_Python_Operations();
 
         // v4.2.0 is an optional, contained editorial surface. A Spotlight
         // startup failure must not terminate the public Research Library.
@@ -170,6 +172,7 @@ final class SC_Library_Plugin {
         $publications->register_hooks();
         $field_spotlights->register_hooks();
         $python_backend->register_hooks();
+        $python_operations->register_hooks();
     }
 }
 

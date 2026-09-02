@@ -1,0 +1,40 @@
+Sustainable Catalyst Library v5.5.2 — Build Validation
+======================================================
+
+Release: v5.5.2 — Backend Operations & Recovery
+WordPress plugin: 5.5.2
+Python backend: 1.0.2
+Validation date: 2026-09-01
+
+PASS - PHP syntax across all 136 plugin PHP files
+PASS - Python compileall for backend app and backend tests
+PASS - v5.5.2 targeted contract suite: 21 passed
+PASS - signed backend operations status endpoint present
+PASS - signed WordPress-vs-backend integrity audit present
+PASS - missing/stale/orphan/chunkless classification tested
+PASS - repair set excludes destructive orphan pruning
+PASS - source-scoped exact-ID prune contract present
+PASS - WordPress re-checks publication truth before prune
+PASS - targeted post-ID reindex present
+PASS - Library Collection reindex present
+PASS - operation IDs and last-successful-sync lineage present
+PASS - recent recovery operation history present
+PASS - v5.5.1 adaptive ingestion / 413 recovery retained
+PASS - localhost-only 127.0.0.1:8087 binding retained
+PASS - external sc-internal Docker network retained
+PASS - ingest schema sc-library-backend-ingest/1.0 retained
+PASS - no PostgreSQL schema migration required
+PASS - Contabo upgrader preserves .env
+PASS - Contabo upgrader waits for Docker health before curl validation
+PASS - macOS installer shell syntax valid
+PASS - Contabo upgrader shell syntax valid
+
+Validation environment notes:
+- PHP 8.4.23 CLI
+- Python 3.13.5
+- pytest 9.0.2
+PASS - repository release-candidate ZIP extracted and v5.5.2 suite passed
+PASS - packaged WordPress PHP syntax validation passed
+PASS - packaged backend Python compile validation passed
+PASS - component SHA-256 manifest generated and verified
+PASS - complete release bundle structure verified

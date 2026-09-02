@@ -1,86 +1,67 @@
-# Sustainable Catalyst Library Backend v1.0.1
+# Sustainable Catalyst Library Backend v1.0.2
 
-This backend is the dedicated Python research-intelligence data plane for Sustainable Catalyst Library. WordPress remains the authority for public presentation, editorial state, users, and permissions.
+This backend is the dedicated Python research-intelligence data plane for Sustainable Catalyst Library. WordPress remains the authority for public presentation, editorial state, users, permissions, and the set of records that should exist.
 
-v1.0.1 is the ingestion-hardening companion to Library v5.5.1. It keeps the v1.0 API and PostgreSQL schema compatible while making large Library reindexes safer and more observable.
+v1.0.2 is the operations/recovery companion to Library v5.5.2. It retains the v1.0 ingestion schema and existing PostgreSQL schema while adding signed operational diagnostics and integrity recovery endpoints.
 
 ## Capabilities
 
 - FastAPI service with `/health` and `/ready`
 - PostgreSQL durable research index
 - weighted PostgreSQL full-text search with trigram title recovery
-- record-level provenance and stable source identities
-- chunk storage for long-form documents
-- immutable per-record revision snapshots and public timelines
-- explicit knowledge-graph edges
-- related-record discovery from shared topics/tags
-- public facets for object type, source, and topic
+- record chunks, provenance, revisions, timelines, graph edges, facets, and related discovery
 - signed HMAC + bearer server-to-server ingestion
+- v1.0.1 adaptive-ingestion and deterministic chunk fallback contracts
+- operations status from existing ingest events and index coverage
+- WordPress-vs-backend integrity auditing
+- missing, stale, orphan, and chunkless classification
+- source-scoped exact-ID pruning for verified orphan cleanup
 - public-only read boundary by default
-- request-limit telemetry in `/health`
-- explicit `413` limit headers for adaptive clients
-- deterministic backend chunk generation when a compact single-record packet omits duplicated chunks
-- adapter-ready schema for later semantic embeddings/reranking without making an external model the authority
+- adapter-ready schema for later semantic embeddings/reranking
 
-## Ingestion hardening contract
+## Signed operations API
 
-Library v5.5.1 preflights JSON payload bytes and record count before sending. If a server still responds with HTTP 413, the client splits only that batch and retries its children. Network failures and selected transient HTTP statuses receive a small bounded retry budget; 413 is never blindly retried.
+The following endpoints require the same bearer + timestamp + HMAC signature as ingestion:
 
-Backend v1.0.1 reports:
+- `GET /v1/admin/status`
+- `POST /v1/admin/integrity`
+- `POST /v1/admin/prune`
 
-```json
-"ingest_limits": {
-  "max_batch_records": 200,
-  "max_body_bytes": 12582912,
-  "max_body_mb": 12
-}
-```
+The integrity request supplies the authoritative WordPress record manifest for a source. The backend does not independently decide which records should be deleted.
 
-When a single record is too large because `body_text` and chunks would duplicate too much transport data, WordPress can send the record with an empty `chunks` list. The backend regenerates the same 6,000-character `wordpress-text-v1` chunk contract before hashing and persistence.
+## Integrity classifications
+
+- **missing** — expected by WordPress but absent from the backend;
+- **stale** — backend `source_updated_at` trails WordPress;
+- **orphaned** — present in the backend but absent from the current WordPress published manifest;
+- **chunkless** — non-empty backend record unexpectedly has no chunks.
+
+`repair_record_ids` contains missing + stale + chunkless IDs. Orphans remain separate because pruning is destructive.
 
 ## Deployment boundary
 
-The compose file binds the service to `127.0.0.1:8087` so it is not exposed directly to the internet. Put it behind the existing Sustainable Catalyst reverse proxy at `https://library-api.sustainablecatalyst.com`.
+The compose file remains bound to `127.0.0.1:8087` and the external `sc-internal` Docker network. Continue using `https://library-api.sustainablecatalyst.com` through Caddy. Preserve the existing `.env` on upgrade.
 
-The service expects the existing external Docker network `sc-internal` and a PostgreSQL host reachable as `sc-postgres`. It does not create a second database container.
-
-## Upgrade from v1.0.0
-
-Preserve the existing `.env`; no database migration is required.
-
-```bash
-cd /opt/sustainable-catalyst/library-backend
-cp .env /tmp/sc-library-backend.env
-# replace application files with the v1.0.1 package
-cp /tmp/sc-library-backend.env .env
-
-docker compose build --pull
-docker compose up -d --force-recreate
-docker compose ps
-curl -fsS http://127.0.0.1:8087/health | python3 -m json.tool
-curl -fsS http://127.0.0.1:8087/ready | python3 -m json.tool
-```
-
-## Signed write contract
-
-Write requests require:
-
-- `Authorization: Bearer <SC_LIBRARY_BACKEND_API_KEY>`
-- `X-SC-Timestamp: <unix seconds>`
-- `X-SC-Signature: HMAC-SHA256(key, METHOD + "\\n" + PATH + "\\n" + TIMESTAMP + "\\n" + SHA256(BODY))`
-
-Read endpoints return only records with `visibility=public` and `publication_status=published`.
+No PostgreSQL schema migration is required for v1.0.2.
 
 ## API
 
+Public/read:
+
 - `GET /health`
 - `GET /ready`
-- `POST /v1/ingest/records`
-- `POST /v1/ingest/edges`
-- `DELETE /v1/records/{record_id}`
 - `GET /v1/search`
 - `GET /v1/records/{record_id}`
 - `GET /v1/records/{record_id}/related`
 - `GET /v1/records/{record_id}/timeline`
 - `GET /v1/graph/{record_id}`
 - `GET /v1/facets`
+
+Signed/write/operations:
+
+- `POST /v1/ingest/records`
+- `POST /v1/ingest/edges`
+- `DELETE /v1/records/{record_id}`
+- `GET /v1/admin/status`
+- `POST /v1/admin/integrity`
+- `POST /v1/admin/prune`
