@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) { exit; }
  * WordPress authentication, registered styles/scripts and existing APIs.
  */
 final class SC_Library_Capability_Hub {
-    public const VERSION = '5.6.0.31';
+    public const VERSION = '5.6.0.32';
     private const QUERY_ARG = 'sc_library_capability';
 
     public function register_hooks(): void {
@@ -118,6 +118,10 @@ final class SC_Library_Capability_Hub {
         if (!isset($groups[$default_group])) { $default_group = (string) array_key_first($groups); }
         $instance = 'sc-library-capability-hub-' . wp_rand(1000, 999999);
         ob_start(); ?>
+        <style id="sc-library-capability-hub-critical">
+.sc-library-capability-hub .sc-library-capability-open{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:40px!important;margin-top:auto!important;padding:8px 13px!important;border:1px solid #171717!important;background:#fff!important;color:#171717!important;font:800 12px/1.2 Helvetica,Arial,sans-serif!important;visibility:visible!important;opacity:1!important;cursor:pointer!important}
+.sc-library-capability-hub .sc-library-capability-open:hover,.sc-library-capability-hub .sc-library-capability-open:focus-visible{background:#171717!important;color:#fff!important}
+</style>
         <section class="sc-library-capability-hub sc-library-capability-hub--<?php echo esc_attr($display); ?>" id="<?php echo esc_attr($instance); ?>" data-sc-library-capability-hub data-display="<?php echo esc_attr($display); ?>">
             <header class="sc-library-capability-hub__header">
                 <p class="sc-library-capability-hub__kicker"><?php esc_html_e('Complete Research System', 'sustainable-catalyst-library'); ?></p>
@@ -145,7 +149,7 @@ final class SC_Library_Capability_Hub {
                                     <?php foreach ($cap['aliases'] as $alias) : ?><span id="<?php echo esc_attr($alias); ?>" class="sc-library-capability-anchor" aria-hidden="true"></span><?php endforeach; ?>
                                     <h4><?php echo esc_html($cap['label']); ?></h4>
                                     <p><?php echo esc_html($cap['summary']); ?></p>
-                                    <button type="button" data-open-capability="<?php echo esc_attr($key); ?>" aria-controls="<?php echo esc_attr($instance); ?>-workspace"><?php esc_html_e('Open', 'sustainable-catalyst-library'); ?> <span aria-hidden="true">→</span></button>
+                                    <button type="button" class="sc-library-capability-open" data-open-capability="<?php echo esc_attr($key); ?>" aria-controls="<?php echo esc_attr($instance); ?>-workspace" style="display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:40px!important;margin-top:auto!important;padding:8px 13px!important;border:1px solid #171717!important;background:#ffffff!important;color:#171717!important;-webkit-text-fill-color:#171717!important;font-size:12px!important;font-weight:800!important;line-height:1.2!important;visibility:visible!important;opacity:1!important;cursor:pointer!important;"><?php esc_html_e('Open', 'sustainable-catalyst-library'); ?> <span aria-hidden="true">→</span></button>
                                 </article>
                             <?php endforeach; ?>
                         </div>

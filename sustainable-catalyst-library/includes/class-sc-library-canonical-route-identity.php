@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class SC_Library_Canonical_Route_Identity {
-    public const VERSION = '5.6.0.31';
+    public const VERSION = '5.6.0.32';
     public const SCHEMA = 'sc-library-route-identity-health/1.0';
     public const ACCOUNT_SCHEMA = 'sc-library-account-continuity/1.0';
     public const CANONICAL_SLUG = 'knowledge-libraries';
@@ -140,7 +140,7 @@ final class SC_Library_Canonical_Route_Identity {
         );
 
         nocache_headers();
-        wp_safe_redirect( $target, 301, 'Sustainable Catalyst Library v5.6.0 R3.1' );
+        wp_safe_redirect( $target, 301, 'Sustainable Catalyst Library v5.6.0 R3.2' );
         exit;
     }
 
@@ -241,27 +241,21 @@ final class SC_Library_Canonical_Route_Identity {
 
         ob_start();
         ?>
-        <aside class="sc-library-account-continuity" data-sc-library-account-continuity="v5.6.0-r3.1">
-            <div class="sc-library-account-continuity__main">
-                <div class="sc-library-account-continuity__state">
-                    <small><?php esc_html_e( 'Account continuity', 'sustainable-catalyst-library' ); ?></small>
-                    <?php if ( $signed_in && $user instanceof WP_User ) : ?>
-                        <strong><?php echo esc_html( sprintf( __( 'Signed in as %s', 'sustainable-catalyst-library' ), $user->display_name ) ); ?></strong>
-                        <p><?php esc_html_e( 'Your Sustainable Catalyst account keeps private Library research connected with Workspace without creating a separate Library account.', 'sustainable-catalyst-library' ); ?></p>
-                    <?php else : ?>
-                        <strong><?php esc_html_e( 'One Sustainable Catalyst account', 'sustainable-catalyst-library' ); ?></strong>
-                        <p><?php esc_html_e( 'Public research discovery stays open. Sign in once to persist private Library research and continue into Workspace.', 'sustainable-catalyst-library' ); ?></p>
-                    <?php endif; ?>
-                </div>
-                <dl class="sc-library-account-continuity__status" aria-label="<?php esc_attr_e( 'Account continuity status', 'sustainable-catalyst-library' ); ?>">
-                    <div><dt><?php esc_html_e( 'Private research', 'sustainable-catalyst-library' ); ?></dt><dd><?php echo esc_html( $signed_in ? __( 'Account-scoped', 'sustainable-catalyst-library' ) : __( 'Sign-in optional', 'sustainable-catalyst-library' ) ); ?></dd></div>
-                    <div><dt><?php esc_html_e( 'My Libraries', 'sustainable-catalyst-library' ); ?></dt><dd><?php esc_html_e( 'Passwords stay external', 'sustainable-catalyst-library' ); ?></dd></div>
-                    <div><dt><?php esc_html_e( 'Workspace', 'sustainable-catalyst-library' ); ?></dt><dd><?php esc_html_e( 'Shared account', 'sustainable-catalyst-library' ); ?></dd></div>
-                </dl>
-                <details class="sc-library-account-continuity__details">
-                    <summary><?php esc_html_e( 'How account continuity works', 'sustainable-catalyst-library' ); ?></summary>
-                    <p><?php esc_html_e( 'My Sources, My Libraries, course plans, research documents, My Library collections, saved searches, watchlists, the research queue, private research projects with source bundles, reading notebooks, notes, reusable excerpts, source annotations, evidence matrices, claims, evidence links, Library ↔ Workspace handoff history and private metadata-review history remain attached to the shared Sustainable Catalyst account. Connected My Libraries relationships can inform Access Intelligence II pathway ranking without storing external-library credentials. Open Learning II can save private learning-route manifests without enrolling the user or changing provider accounts. Publications ↔ Research Graph handoffs add only canonical public-publication references to owned projects and never expose private research. Research Librarian II can read owned project context for deterministic guidance but does not store a second copy or send private notebook, bundle, matrix, or project context to optional remote synthesis. Knowledge Graph & Evidence Intelligence creates a rebuildable private projection of explicit relationships without inferring semantic links, scoring truth, or mutating research. Collaborative Research Rooms use references-only sharing and role-scoped review. Public Evidence & Claim Navigation exposes only material already marked public. No second Library account is required.', 'sustainable-catalyst-library' ); ?></p>
-                </details>
+        <aside class="sc-library-account-continuity" data-sc-library-account-continuity="v5.6.0-r3.2">
+            <div class="sc-library-account-continuity__identity">
+                <small><?php esc_html_e( 'Account continuity', 'sustainable-catalyst-library' ); ?></small>
+                <?php if ( $signed_in && $user instanceof WP_User ) : ?>
+                    <strong><?php echo esc_html( sprintf( __( 'Signed in as %s', 'sustainable-catalyst-library' ), $user->display_name ) ); ?></strong>
+                    <span><?php esc_html_e( 'Library and Workspace use the same Sustainable Catalyst account.', 'sustainable-catalyst-library' ); ?></span>
+                <?php else : ?>
+                    <strong><?php esc_html_e( 'One Sustainable Catalyst account', 'sustainable-catalyst-library' ); ?></strong>
+                    <span><?php esc_html_e( 'Public discovery stays open; sign in only to save private research and continue into Workspace.', 'sustainable-catalyst-library' ); ?></span>
+                <?php endif; ?>
+            </div>
+            <div class="sc-library-account-continuity__signals" aria-label="<?php esc_attr_e( 'Account continuity safeguards', 'sustainable-catalyst-library' ); ?>">
+                <span><?php esc_html_e( 'Private research stays private', 'sustainable-catalyst-library' ); ?></span>
+                <span><?php esc_html_e( 'Library credentials stay external', 'sustainable-catalyst-library' ); ?></span>
+                <span><?php esc_html_e( 'Workspace continuity enabled', 'sustainable-catalyst-library' ); ?></span>
             </div>
             <div class="sc-library-account-continuity__actions">
                 <?php if ( $signed_in ) : ?>
@@ -269,6 +263,10 @@ final class SC_Library_Canonical_Route_Identity {
                 <?php else : ?>
                     <a href="<?php echo esc_url( wp_login_url( $this->current_return_url() ) ); ?>"><?php esc_html_e( 'Sign in →', 'sustainable-catalyst-library' ); ?></a>
                 <?php endif; ?>
+                <details class="sc-library-account-continuity__details">
+                    <summary><?php esc_html_e( 'Account details', 'sustainable-catalyst-library' ); ?></summary>
+                    <p><?php esc_html_e( 'My Sources, My Libraries, course plans, research documents, collections, saved searches, watchlists, research queue, private projects, source bundles, notebooks, notes, annotations, evidence matrices, explicit knowledge-graph relationships, Research Rooms, Team Libraries, Workspace handoffs and metadata-review history remain attached to the shared account. Sustainable Catalyst does not store external-library passwords, and private research is not made public by these continuity features.', 'sustainable-catalyst-library' ); ?></p>
+                </details>
             </div>
         </aside>
         <?php

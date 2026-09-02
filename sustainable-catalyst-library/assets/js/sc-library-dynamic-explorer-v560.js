@@ -145,8 +145,8 @@
     const renderTopics = (topics) => {
       if (!topicStrip) return;
       topicStrip.innerHTML = (topics || []).slice(0, 10).map((topic) => `
-        <button type="button" data-topic="${esc(topic.topic)}" class="${state.topic === topic.topic ? 'is-active' : ''}">
-          <span>${esc(topic.topic)}</span><em>${fmt(topic.count)}</em>
+        <button type="button" data-topic="${esc(topic.topic)}" class="${state.topic === topic.topic ? 'is-active' : ''}" style="display:inline-flex!important;align-items:center!important;gap:7px!important;min-height:34px!important;padding:7px 11px!important;border:1px solid #d7dbd7!important;border-radius:999px!important;background:#fff!important;color:#151515!important;-webkit-text-fill-color:#151515!important;font-size:11px!important;font-weight:800!important;line-height:1.15!important;visibility:visible!important;opacity:1!important;appearance:none!important;-webkit-appearance:none!important;">
+          <span style="color:inherit!important;-webkit-text-fill-color:currentColor!important;">${esc(topic.topic)}</span><em style="color:inherit!important;-webkit-text-fill-color:currentColor!important;">${fmt(topic.count)}</em>
         </button>`).join('');
     };
 

@@ -25,10 +25,10 @@ def uniq(xs): return list(dict.fromkeys(xs))
 
 def test_r3_release_identity_and_backend_contract_stays_11():
     main=text(MAIN)
-    assert 'Version: 5.6.0.31' in main
-    assert "SC_LIBRARY_VERSION', '5.6.0.31'" in main
-    assert "public const VERSION = '5.6.0.31'" in text(PY_BRIDGE)
-    assert "public const VERSION = '5.6.0.31'" in text(EXPLORER)
+    assert 'Version: 5.6.0.32' in main
+    assert "SC_LIBRARY_VERSION', '5.6.0.32'" in main
+    assert "public const VERSION = '5.6.0.32'" in text(PY_BRIDGE)
+    assert "public const VERSION = '5.6.0.32'" in text(EXPLORER)
     assert '__version__ = "1.1.0"' in text(ROOT/'library-backend/app/__init__.py')
 
 def test_original_37_shortcodes_and_72_anchors_remain_the_preservation_baseline():

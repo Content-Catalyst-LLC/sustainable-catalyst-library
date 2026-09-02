@@ -16,8 +16,8 @@ def uniq(xs): return list(dict.fromkeys(xs))
 
 def test_release_identity_is_upgrade_safe_and_backend_contract_is_retained():
     m=text(MAIN)
-    assert 'Version: 5.6.0.31' in m
-    assert "SC_LIBRARY_VERSION', '5.6.0.31'" in m
+    assert 'Version: 5.6.0.32' in m
+    assert "SC_LIBRARY_VERSION', '5.6.0.32'" in m
     assert '__version__ = "1.1.0"' in text(ROOT/'library-backend/app/__init__.py')
 
 def test_manifest_is_derived_from_restored_source_of_truth():

@@ -41,7 +41,7 @@
                 <p><?php esc_html_e('Explore', 'sustainable-catalyst-library'); ?></p>
                 <h3 id="<?php echo esc_attr($instance_id); ?>-discover-title"><?php esc_html_e('Start with a topic', 'sustainable-catalyst-library'); ?></h3>
             </div>
-            <button type="button" class="sc-library-explorer__filter-toggle" data-explorer-filter-toggle aria-expanded="false">
+            <button type="button" class="sc-library-explorer__filter-toggle" data-explorer-filter-toggle aria-expanded="false" style="display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:38px!important;padding:8px 12px!important;border:1px solid #cfcfcf!important;background:#fff!important;color:#151515!important;-webkit-text-fill-color:#151515!important;visibility:visible!important;opacity:1!important;">
                 <?php esc_html_e('Filters', 'sustainable-catalyst-library'); ?>
             </button>
         </div>
@@ -60,7 +60,7 @@
                 <option value="oldest"><?php esc_html_e('Oldest published', 'sustainable-catalyst-library'); ?></option>
                 <option value="title"><?php esc_html_e('Title A–Z', 'sustainable-catalyst-library'); ?></option>
             </select></label>
-            <button type="button" class="sc-library-explorer__reset" data-explorer-reset><?php esc_html_e('Reset filters', 'sustainable-catalyst-library'); ?></button>
+            <button type="button" class="sc-library-explorer__reset" data-explorer-reset style="display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:38px!important;padding:8px 12px!important;border:1px solid #cfcfcf!important;background:#fff!important;color:#151515!important;-webkit-text-fill-color:#151515!important;visibility:visible!important;opacity:1!important;"><?php esc_html_e('Reset filters', 'sustainable-catalyst-library'); ?></button>
         </div>
     </section>
 

@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.6.0.31
+Stable tag: 5.6.0.32
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.6.0 R3.1 preserves the full dynamic Research Library while repairing the R3 front-door layout, restoring visible Capability Map actions, compacting Account Continuity, and promoting Open Courses into a directly visible dynamic section. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
+Sustainable Catalyst Library v5.6.0 R3.2 preserves the full dynamic Research Library while repairing the R3 front-door layout, restoring visible Capability Map actions, compacting Account Continuity, and promoting Open Courses into a directly visible dynamic section. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
 
 = Public Evidence & Claim Navigation =
 
@@ -367,12 +367,14 @@ Use `[sc_library_api_interoperability]` for the integration console and `[sc_lib
 The facade does not expose My Library, private Research Projects, notebook or Evidence Matrix bodies, Research Room or Team Library membership, credentials, tokens, Workspace state, or authenticated federation governance. It performs no cross-site writes, publication, federation acceptance, evidence promotion, or Workspace writes.
 
 == Changelog ==
-= 5.6.0.31 =
-* R3.1 repairs Three Research Front Doors against site-level/Astra CSS collisions without changing the R3 information architecture.
-* Capability Map Open actions now render as explicit keyboard-visible controls instead of low-contrast text buttons.
-* Account Continuity now defaults to a compact status panel; the full governance explanation remains available in an expandable disclosure.
-* Replaced the redundant Research Flow band with a directly visible Open Courses section and featured Open Course Finder mode.
-* Featured course discovery begins with MIT, Harvard, Yale, Princeton, Stanford, and University of Copenhagen, while search/filter and the wider provider network remain available.
+= 5.6.0.32 =
+* R3.2 replaces the broken nested Three Research Front Door widgets with three clean navigation surfaces that route into the full Knowledge Base, Research Access, and Research Librarian sections.
+* Library-page CSS is now enqueued explicitly before rendering and critical controls also carry last-resort component fallbacks against aggressive site-level/Astra button rules.
+* Knowledge Explorer topic controls and Filters/Reset controls are explicitly visible even when global button text-fill rules are present.
+* Complete Library Capability Map Open actions now carry markup-level visibility fallbacks in addition to component CSS.
+* Knowledge Pathways is rebuilt as a responsive two-column research index: eight question routes plus a distinct field directory, with browser list markers neutralized.
+* Account Continuity is a thin utility strip; the governance detail remains available in an expandable Account details disclosure.
+* Open Courses remains directly visible in place of the redundant Research Flow band, with MIT, Harvard, Yale, Princeton, Stanford, University of Copenhagen and the wider provider network.
 * Preserved legacy #research-flow and #research-flow-title deep links as compatibility anchors.
 * Python backend remains v1.1.0; no database, DNS, Caddy, port, API-key, or reindex change is required.
 

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.6.0 R3.1 repairs the R3 public interface, compacts account continuity, restores visible capability actions, and replaces the redundant Research Flow band with dynamic Open Courses while preserving the full research network.
- * Version: 5.6.0.31
+ * Description: Sustainable Catalyst Library v5.6.0 R3.2 repairs the rendered public interface, Knowledge Pathways, topic controls and capability actions; compacts Account Continuity; and keeps Open Courses and the full research network visibly accessible.
+ * Version: 5.6.0.32
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.6.0.31');
+define('SC_LIBRARY_VERSION', '5.6.0.32');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -60,6 +60,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-operations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-dynamic-explorer.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-capability-hub.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-research-network-console.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-public-interface-assets.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
 register_deactivation_hook(__FILE__, ['SC_Library_Activator', 'deactivate']);
@@ -118,6 +119,7 @@ final class SC_Library_Plugin {
         $dynamic_explorer = new SC_Library_Dynamic_Explorer();
         $capability_hub = new SC_Library_Capability_Hub();
         $research_network_console = new SC_Library_Research_Network_Console();
+        $public_interface_assets = new SC_Library_Public_Interface_Assets();
 
         // v4.2.0 is an optional, contained editorial surface. A Spotlight
         // startup failure must not terminate the public Research Library.
@@ -182,6 +184,7 @@ final class SC_Library_Plugin {
         $dynamic_explorer->register_hooks();
         $capability_hub->register_hooks();
         $research_network_console->register_hooks();
+        $public_interface_assets->register_hooks();
     }
 }
 

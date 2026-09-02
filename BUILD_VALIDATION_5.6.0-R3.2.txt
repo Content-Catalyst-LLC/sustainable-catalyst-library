@@ -1,0 +1,27 @@
+Sustainable Catalyst Library v5.6.0 R3.2 — Build Validation
+Release: v5.6.0 R3.2 — Rendered Interface, Pathways & Action Visibility Repair
+WordPress plugin: 5.6.0.32
+Python backend: 1.1.0 (unchanged)
+
+VALIDATION
+PASS - 72/72 targeted regression + preservation + rendered-interface tests
+PASS - 37/37 protected original shortcodes preserved
+PASS - 72/72 protected original anchors preserved or compatibility-routed
+PASS - 141/141 packaged WordPress PHP source files parsed before packaging
+PASS - Dynamic Explorer JavaScript syntax
+PASS - Capability Hub JavaScript syntax
+PASS - Research Network Console JavaScript syntax
+PASS - Open Course Finder JavaScript syntax
+PASS - Course Plan JavaScript syntax
+PASS - Python backend/application compile
+PASS - macOS installer shell syntax
+PASS - Knowledge Explorer topic-control visibility fallback
+PASS - Capability Map Open-action markup-level visibility fallback
+PASS - Three Research Front Doors contain no nested heavy mini-applications
+PASS - Knowledge Pathways structured 8-question + 5-field responsive interface
+PASS - Account Continuity compact utility strip
+PASS - Open Courses directly visible; Research Flow retained only as compatibility anchors
+PASS - University College Dublin remains a visible direct research source
+
+NO BACKEND CHANGE
+No PostgreSQL migration, reindex, DNS, Caddy, port, or API-key change is required.

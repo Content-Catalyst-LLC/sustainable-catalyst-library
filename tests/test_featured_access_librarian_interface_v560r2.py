@@ -14,8 +14,8 @@ def text(p): return p.read_text(encoding='utf-8')
 
 def test_r2_release_identity_and_no_backend_contract_change():
     main=text(MAIN)
-    assert 'Version: 5.6.0.31' in main
-    assert "SC_LIBRARY_VERSION', '5.6.0.31'" in main
+    assert 'Version: 5.6.0.32' in main
+    assert "SC_LIBRARY_VERSION', '5.6.0.32'" in main
     assert '__version__ = "1.1.0"' in text(ROOT/'library-backend/app/__init__.py')
 
 def test_three_primary_front_doors_are_explicit_and_above_explorer():
