@@ -19,6 +19,7 @@ from .security import constant_time_equal, sha256_hex, sign_request, valid_times
 from .settings import settings
 from .operations import integrity_audit, operations_status, prune_records
 from .institutional_sources import InstitutionalSourceError, build_registry
+from .biomedical_sources import BiomedicalSourceError, build_biomedical_registry
 
 
 @asynccontextmanager
@@ -30,6 +31,10 @@ async def lifespan(_: FastAPI):
 
 
 institutional_sources = build_registry(settings.institutional_source_timeout_seconds)
+biomedical_sources = build_biomedical_registry(
+    settings.biomedical_source_timeout_seconds,
+    ncbi_tool=settings.ncbi_tool, ncbi_email=settings.ncbi_email, ncbi_api_key=settings.ncbi_api_key,
+)
 
 
 app = FastAPI(
@@ -140,6 +145,12 @@ def health() -> dict[str, Any]:
             "institutional_sources": True,
             "johns_hopkins_dataverse": True,
             "license_reuse_normalization": True,
+            "biomedical_evidence": True,
+            "pubmed": True,
+            "pubmed_central": True,
+            "clinicaltrials_gov": True,
+            "mesh_2026": True,
+            "rxnorm": True,
         },
         "ingest_limits": {
             "max_batch_records": settings.max_batch_records,
@@ -213,6 +224,41 @@ async def delete_record_route(
 ) -> dict[str, Any]:
     await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
     return {"ok": True, "record_id": record_id, "deleted": delete_record(record_id)}
+
+
+@app.get("/v1/biomedical-sources")
+def list_biomedical_sources() -> dict[str, Any]:
+    return {"schema": "sc-biomedical-sources/1.0", "sources": biomedical_sources.list_sources()}
+
+
+@app.get("/v1/biomedical-sources/{source_key}/search")
+def biomedical_source_search(
+    source_key: str,
+    q: str = Query(..., min_length=1, max_length=500),
+    limit: int = Query(default=10, ge=1, le=50),
+    cursor: str = Query(default="", max_length=500),
+) -> dict[str, Any]:
+    try:
+        return biomedical_sources.get(source_key).search(q, limit=limit, cursor=cursor)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="biomedical source not found") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except BiomedicalSourceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/biomedical/search")
+def biomedical_unified_search(
+    q: str = Query(..., min_length=1, max_length=500),
+    sources: str = Query(default="", max_length=200),
+    limit: int = Query(default=5, ge=1, le=20),
+) -> dict[str, Any]:
+    requested = [item.strip() for item in sources.split(",") if item.strip()] or None
+    try:
+        return biomedical_sources.unified_search(q, limit=limit, source_keys=requested)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.get("/v1/institutional-sources")

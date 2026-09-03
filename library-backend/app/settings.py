@@ -34,6 +34,10 @@ class Settings:
     statement_timeout_ms: int = _as_int("SC_LIBRARY_STATEMENT_TIMEOUT_MS", 8000, 500, 60000)
     enable_docs: bool = _as_bool("SC_LIBRARY_ENABLE_DOCS", False)
     institutional_source_timeout_seconds: int = _as_int("SC_LIBRARY_INSTITUTIONAL_TIMEOUT_SECONDS", 8, 2, 30)
+    biomedical_source_timeout_seconds: int = _as_int("SC_LIBRARY_BIOMEDICAL_TIMEOUT_SECONDS", 8, 2, 30)
+    ncbi_tool: str = os.getenv("SC_LIBRARY_NCBI_TOOL", "sustainable_catalyst_library").strip()
+    ncbi_email: str = os.getenv("SC_LIBRARY_NCBI_EMAIL", "").strip()
+    ncbi_api_key: str = os.getenv("SC_LIBRARY_NCBI_API_KEY", "").strip()
 
     @property
     def allowed_origins(self) -> list[str]:

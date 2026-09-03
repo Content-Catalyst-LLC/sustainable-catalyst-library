@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.7.1
+Stable tag: 5.8.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -1293,3 +1293,8 @@ The facade does not expose My Library, private Research Projects, notebook or Ev
 
 = 5.5.0 =
 * Adds the dedicated Python Research Intelligence Backend bridge with signed ingestion, public search proxying, health diagnostics, and safe WordPress-authoritative indexing.
+
+= 5.8.0 =
+* Adds Biomedical & Clinical Evidence Intelligence Foundation with PubMed, PMC, ClinicalTrials.gov, MeSH 2026, and RxNorm.
+* Adds governed evidence and terminology normalization plus Research Librarian/Lab handoff metadata.
+* Adds [sc_biomedical_evidence] and backend v1.3.0.
