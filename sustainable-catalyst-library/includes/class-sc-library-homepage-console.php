@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.6.1 Homepage Research Network & Knowledge Discovery Console.
+ * v5.7.1 Homepage Research Network & Knowledge Discovery Console.
  *
  * A compact public front door owned by the Research Library plugin. The
  * console reuses the governed research-network registries and the Dynamic
@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) { exit; }
  * names, counts, or corpus telemetry.
  */
 final class SC_Library_Homepage_Console {
-    public const VERSION = '5.6.1';
+    public const VERSION = '5.7.1';
     public const SHORTCODE = 'sc_library_homepage_console';
 
     public function register_hooks(): void {
@@ -64,7 +64,7 @@ final class SC_Library_Homepage_Console {
         }
 
         $priority = [
-            'mit', 'harvard', 'ucd', 'yale', 'princeton', 'stanford',
+            'mit', 'harvard', 'johns-hopkins-dataverse', 'ucd', 'yale', 'princeton', 'stanford',
             'nypl', 'loc', 'internetarchive', 'openalex', 'crossref',
             'europepmc', 'arxiv', 'worldcat',
         ];
@@ -132,7 +132,7 @@ final class SC_Library_Homepage_Console {
                 <div class="sc-library-home-console__viewport" tabindex="0" data-sc-home-network-viewport>
                     <div class="sc-library-home-console__track" data-sc-home-network-track>
                         <?php foreach ($sources as $row) : ?>
-                        <div class="sc-library-home-console__row" data-sc-home-network-row>
+                        <div class="sc-library-home-console__row" data-sc-home-network-row data-source-id="<?php echo esc_attr((string) ($row['id'] ?? '')); ?>">
                             <div><i aria-hidden="true">&gt;</i><strong><?php echo esc_html((string) ($row['name'] ?? 'Research source')); ?></strong><small><?php echo esc_html((string) ($row['detail'] ?? '')); ?></small></div>
                             <span><?php echo esc_html((string) ($row['type'] ?? 'Research source')); ?></span>
                             <span><?php echo esc_html((string) ($row['mode'] ?? 'DISCOVER')); ?></span>

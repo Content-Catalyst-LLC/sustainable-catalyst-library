@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.6.0 R3 Research Network Console.
+ * v5.7.1 Research Network Console.
  *
  * Makes the Library's real research-access surface visible without claiming
  * equivalent integration for every institution. Direct connectors, standards
@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) { exit; }
  * explicitly labeled by capability.
  */
 final class SC_Library_Research_Network_Console {
-    public const VERSION = '5.6.1';
+    public const VERSION = '5.7.1';
 
     public function register_hooks(): void {
         add_action('wp_enqueue_scripts', [$this, 'maybe_enqueue_public_assets']);
@@ -47,10 +47,13 @@ final class SC_Library_Research_Network_Console {
 
     /** @return array<int,array<string,string>> */
     private static function institutional_sources(): array {
-        if (!class_exists('SC_Library_Institutional_Connector_Expansion')) { return []; }
-        $types = SC_Library_Institutional_Connector_Expansion::capability_types();
-        $skip = ['mit'=>true,'harvard'=>true,'ucd'=>true];
         $out = [];
+        if (class_exists('SC_Library_Institutional_Research_Sources')) {
+            $out[] = SC_Library_Institutional_Research_Sources::network_source();
+        }
+        if (!class_exists('SC_Library_Institutional_Connector_Expansion')) { return $out; }
+        $types = SC_Library_Institutional_Connector_Expansion::capability_types();
+        $skip = ['mit'=>true,'harvard'=>true,'ucd'=>true,'johns-hopkins-dataverse'=>true];
         foreach (SC_Library_Institutional_Connector_Expansion::registry() as $id => $item) {
             if (isset($skip[$id])) { continue; }
             $label = $types[$item['type']]['label'] ?? 'Research Gateway';

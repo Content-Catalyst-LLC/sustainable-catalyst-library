@@ -1,0 +1,20 @@
+Sustainable Catalyst Library v5.7.1 — Homepage Widget
+
+Full homepage console:
+[sc_library_homepage_console mode="full"]
+
+Compact:
+[sc_library_homepage_console mode="compact"]
+
+Network-only:
+[sc_library_homepage_console mode="network"]
+
+Expected early Research Network rows include:
+- MIT Libraries
+- Harvard Library
+- Johns Hopkins Research Data Repository
+- University College Dublin
+
+Johns Hopkins should display as:
+TYPE: Institutional research data
+ACCESS: LIVE METADATA

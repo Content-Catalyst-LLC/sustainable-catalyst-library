@@ -1,5 +1,11 @@
 # Sustainable Catalyst Library
 
+## v5.7.1 — Johns Hopkins Widget Integration & Source Registry Repair
+
+v5.7.1 repairs the public visibility gap in v5.7.0. The canonical Johns Hopkins institutional-source record now feeds the existing Research Network Console and the homepage Research Network ticker, where Johns Hopkins Research Data Repository is prioritized alongside MIT, Harvard, UCD and other governed sources. The live Dataverse connector and Library backend remain at v1.2.0; no database migration or backend code change is required for this repair.
+
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.7.1.md` and `JOHNS_HOPKINS_WIDGET_INTEGRATION_v5.7.1.md`.
+
 ## v5.6.0 — Dynamic Library Explorer & Progressive Discovery
 
 v5.6.0 moves the public Library front door onto the hardened Python/PostgreSQL read model. It adds a compact Explorer, bounded 12-record discovery pages, topic/type/source/year filters, URL-preserved search state, load-more retrieval, progressive quick-view drawers, related-record discovery, provenance, record timelines, and a WordPress-local fallback. The release also includes a compact `RESEARCH_LIBRARY_PAGE_v5.6.0.html` that reduces the former 500+ line public page to a focused Explorer plus research-tool handoffs.

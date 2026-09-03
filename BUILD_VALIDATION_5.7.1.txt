@@ -1,0 +1,13 @@
+Sustainable Catalyst Library v5.7.1 validation target
+
+Required checks:
+- WordPress plugin version 5.7.1
+- canonical Johns Hopkins network-source projection
+- Research Network source-registry consumption
+- homepage featured-source priority and source-id output
+- PHP syntax for changed WordPress modules
+- Python backend v1.2.0 institutional-source tests preserved
+- v5.7.0 institutional-source behavior preserved (identity assertion superseded)
+- existing v5.6.x Explorer / homepage / Publications behavioral regressions preserved
+- corrected release archive layout
+- SHA-256 checksum generation

@@ -2,15 +2,38 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.7.0 Institutional Research Sources bridge.
+ * v5.7.1 Institutional Research Sources bridge.
  *
  * The browser never calls university repositories directly. WordPress proxies
  * bounded public metadata through the Library backend, preserving a stable
  * Catalyst source contract and fail-closed upstream behavior.
  */
 final class SC_Library_Institutional_Research_Sources {
-    public const VERSION = '5.7.0';
+    public const VERSION = '5.7.1';
     public const SOURCE_JHU = 'johns-hopkins-dataverse';
+
+    /**
+     * Canonical network metadata for the Johns Hopkins connector.
+     *
+     * Research Network and homepage surfaces consume this record so source
+     * identity, capability labeling, and provenance language are not copied
+     * into parallel registries.
+     *
+     * @return array<string,string>
+     */
+    public static function network_source(): array {
+        return [
+            'id' => self::SOURCE_JHU,
+            'name' => 'Johns Hopkins Research Data Repository',
+            'kind' => 'university',
+            'type' => 'Institutional research data',
+            'mode' => 'LIVE METADATA',
+            'detail' => 'Johns Hopkins University · datasets · DOI provenance · reuse terms',
+            'search_template' => 'https://archive.data.jhu.edu/dataverse/root?q={query}',
+            'homepage' => 'https://archive.data.jhu.edu/',
+            'connector' => self::SOURCE_JHU,
+        ];
+    }
 
     public function register_hooks(): void {
         add_action('rest_api_init', [$this, 'register_routes']);
