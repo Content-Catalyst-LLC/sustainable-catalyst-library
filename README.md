@@ -1,10 +1,14 @@
 # Sustainable Catalyst Library
 
-## v5.7.1 — Johns Hopkins Widget Integration & Source Registry Repair
+## v5.8.1 — FDA Drug & Regulatory Intelligence
 
-v5.7.1 repairs the public visibility gap in v5.7.0. The canonical Johns Hopkins institutional-source record now feeds the existing Research Network Console and the homepage Research Network ticker, where Johns Hopkins Research Data Repository is prioritized alongside MIT, Harvard, UCD and other governed sources. The live Dataverse connector and Library backend remain at v1.2.0; no database migration or backend code change is required for this repair.
+v5.8.1 extends the biomedical evidence foundation with a governed FDA regulatory layer backed by openFDA. Drugs@FDA, drug labeling, the NDC Directory, FAERS adverse-event reports, drug recall enforcement reports, drug shortages, and the Orange Book are normalized as distinct regulatory evidence classes rather than flattened into clinical literature. The Library backend advances to v1.4.0 and adds FDA-specific and combined biomedical+regulatory search routes. A new `[sc_fda_regulatory_intelligence]` WordPress surface exposes the capability while preserving explicit research-only and adverse-event causality guardrails. No PostgreSQL migration is required.
 
-See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.7.1.md` and `JOHNS_HOPKINS_WIDGET_INTEGRATION_v5.7.1.md`.
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.8.1.md` and `FDA_DRUG_REGULATORY_INTELLIGENCE_v5.8.1.md`.
+
+## v5.8.0 — Biomedical & Clinical Evidence Intelligence Foundation
+
+v5.8.0 establishes governed biomedical discovery across PubMed, PMC, ClinicalTrials.gov, MeSH 2026, and RxNorm. The backend adds normalized evidence/concept objects and a unified biomedical search route, while WordPress adds `[sc_biomedical_evidence]`. No PostgreSQL migration is required.
 
 ## v5.6.0 — Dynamic Library Explorer & Progressive Discovery
 

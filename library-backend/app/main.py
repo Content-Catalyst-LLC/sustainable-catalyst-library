@@ -20,6 +20,7 @@ from .settings import settings
 from .operations import integrity_audit, operations_status, prune_records
 from .institutional_sources import InstitutionalSourceError, build_registry
 from .biomedical_sources import BiomedicalSourceError, build_biomedical_registry
+from .fda_regulatory import FDARegulatoryError, build_fda_regulatory_registry
 
 
 @asynccontextmanager
@@ -34,6 +35,9 @@ institutional_sources = build_registry(settings.institutional_source_timeout_sec
 biomedical_sources = build_biomedical_registry(
     settings.biomedical_source_timeout_seconds,
     ncbi_tool=settings.ncbi_tool, ncbi_email=settings.ncbi_email, ncbi_api_key=settings.ncbi_api_key,
+)
+fda_regulatory_sources = build_fda_regulatory_registry(
+    settings.fda_source_timeout_seconds, api_key=settings.openfda_api_key,
 )
 
 
@@ -151,6 +155,14 @@ def health() -> dict[str, Any]:
             "clinicaltrials_gov": True,
             "mesh_2026": True,
             "rxnorm": True,
+            "fda_regulatory_intelligence": True,
+            "drugs_at_fda": True,
+            "fda_drug_labeling": True,
+            "fda_ndc_directory": True,
+            "faers_adverse_events": True,
+            "fda_drug_recalls": True,
+            "fda_drug_shortages": True,
+            "fda_orange_book": True,
         },
         "ingest_limits": {
             "max_batch_records": settings.max_batch_records,
@@ -259,6 +271,62 @@ def biomedical_unified_search(
         return biomedical_sources.unified_search(q, limit=limit, source_keys=requested)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/fda-sources")
+def list_fda_sources() -> dict[str, Any]:
+    return {"schema": "sc-fda-sources/1.0", "sources": fda_regulatory_sources.list_sources()}
+
+
+@app.get("/v1/fda-sources/{source_key}/search")
+def fda_source_search(
+    source_key: str,
+    q: str = Query(..., min_length=1, max_length=500),
+    limit: int = Query(default=10, ge=1, le=20),
+    cursor: str = Query(default="", max_length=20),
+) -> dict[str, Any]:
+    try:
+        return fda_regulatory_sources.get(source_key).search(q, limit=limit, cursor=cursor)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="FDA regulatory source not found") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except FDARegulatoryError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/fda/search")
+def fda_unified_search(
+    q: str = Query(..., min_length=1, max_length=500),
+    sources: str = Query(default="", max_length=300),
+    limit: int = Query(default=4, ge=1, le=10),
+) -> dict[str, Any]:
+    requested = [item.strip() for item in sources.split(",") if item.strip()] or None
+    try:
+        return fda_regulatory_sources.unified_search(q, limit=limit, source_keys=requested)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/biomedical/intelligence/search")
+def biomedical_intelligence_search(
+    q: str = Query(..., min_length=1, max_length=500),
+    biomedical_limit: int = Query(default=3, ge=1, le=10),
+    regulatory_limit: int = Query(default=3, ge=1, le=10),
+) -> dict[str, Any]:
+    return {
+        "schema": "sc-biomedical-intelligence/1.0",
+        "query": q,
+        "biomedical": biomedical_sources.unified_search(q, limit=biomedical_limit),
+        "regulatory": fda_regulatory_sources.unified_search(q, limit=regulatory_limit),
+        "governance": {
+            "research_only": True,
+            "clinical_decision_support": False,
+            "evidence_classes_preserved": True,
+            "notice": "Biomedical literature and FDA regulatory records are returned as separate evidence families and must not be treated as equivalent evidence."
+        },
+        "time": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 @app.get("/v1/institutional-sources")

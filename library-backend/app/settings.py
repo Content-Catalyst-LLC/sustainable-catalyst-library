@@ -38,6 +38,8 @@ class Settings:
     ncbi_tool: str = os.getenv("SC_LIBRARY_NCBI_TOOL", "sustainable_catalyst_library").strip()
     ncbi_email: str = os.getenv("SC_LIBRARY_NCBI_EMAIL", "").strip()
     ncbi_api_key: str = os.getenv("SC_LIBRARY_NCBI_API_KEY", "").strip()
+    fda_source_timeout_seconds: int = _as_int("SC_LIBRARY_FDA_TIMEOUT_SECONDS", 8, 2, 30)
+    openfda_api_key: str = os.getenv("SC_LIBRARY_OPENFDA_API_KEY", "").strip()
 
     @property
     def allowed_origins(self) -> list[str]:

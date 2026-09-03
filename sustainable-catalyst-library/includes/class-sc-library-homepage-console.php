@@ -64,7 +64,7 @@ final class SC_Library_Homepage_Console {
         }
 
         $priority = [
-            'mit', 'harvard', 'johns-hopkins-dataverse', 'ucd', 'pubmed', 'clinicaltrials', 'mesh', 'rxnorm', 'yale', 'princeton', 'stanford',
+            'mit', 'harvard', 'johns-hopkins-dataverse', 'ucd', 'pubmed', 'clinicaltrials', 'mesh', 'rxnorm', 'fda-regulatory', 'yale', 'princeton', 'stanford',
             'nypl', 'loc', 'internetarchive', 'openalex', 'crossref',
             'europepmc', 'arxiv', 'worldcat',
         ];

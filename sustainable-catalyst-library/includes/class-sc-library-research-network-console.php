@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) { exit; }
  * explicitly labeled by capability.
  */
 final class SC_Library_Research_Network_Console {
-    public const VERSION = '5.8.0';
+    public const VERSION = '5.8.1';
 
     public function register_hooks(): void {
         add_action('wp_enqueue_scripts', [$this, 'maybe_enqueue_public_assets']);
@@ -79,6 +79,12 @@ final class SC_Library_Research_Network_Console {
     }
 
     /** @return array<int,array<string,string>> */
+    /** @return array<int,array<string,string>> */
+    private static function fda_sources(): array {
+        if (!class_exists('SC_Library_FDA_Regulatory_Intelligence')) { return []; }
+        return SC_Library_FDA_Regulatory_Intelligence::network_sources();
+    }
+
     private static function public_library_sources(): array {
         if (!class_exists('SC_Library_Public_Library_Network')) { return []; }
         $types = SC_Library_Public_Library_Network::access_types();
@@ -101,7 +107,7 @@ final class SC_Library_Research_Network_Console {
 
     /** @return array<int,array<string,string>> */
     public static function source_registry(): array {
-        return array_merge(self::direct_sources(), self::institutional_sources(), self::biomedical_sources(), self::public_library_sources());
+        return array_merge(self::direct_sources(), self::institutional_sources(), self::biomedical_sources(), self::fda_sources(), self::public_library_sources());
     }
 
     /** @return array<string,int> */
