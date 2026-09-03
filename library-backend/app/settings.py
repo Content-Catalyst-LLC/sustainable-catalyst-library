@@ -33,6 +33,7 @@ class Settings:
     pool_max_size: int = _as_int("SC_LIBRARY_DB_POOL_MAX", 10, 2, 50)
     statement_timeout_ms: int = _as_int("SC_LIBRARY_STATEMENT_TIMEOUT_MS", 8000, 500, 60000)
     enable_docs: bool = _as_bool("SC_LIBRARY_ENABLE_DOCS", False)
+    institutional_source_timeout_seconds: int = _as_int("SC_LIBRARY_INSTITUTIONAL_TIMEOUT_SECONDS", 8, 2, 30)
 
     @property
     def allowed_origins(self) -> list[str]:

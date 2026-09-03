@@ -18,6 +18,7 @@ from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
 from .operations import integrity_audit, operations_status, prune_records
+from .institutional_sources import InstitutionalSourceError, build_registry
 
 
 @asynccontextmanager
@@ -26,6 +27,9 @@ async def lifespan(_: FastAPI):
         initialize_database()
     yield
     close_pool()
+
+
+institutional_sources = build_registry(settings.institutional_source_timeout_seconds)
 
 
 app = FastAPI(
@@ -133,6 +137,9 @@ def health() -> dict[str, Any]:
             "integrity_audit": True,
             "targeted_pruning": True,
             "semantic_embeddings": "adapter-ready",
+            "institutional_sources": True,
+            "johns_hopkins_dataverse": True,
+            "license_reuse_normalization": True,
         },
         "ingest_limits": {
             "max_batch_records": settings.max_batch_records,
@@ -206,6 +213,47 @@ async def delete_record_route(
 ) -> dict[str, Any]:
     await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
     return {"ok": True, "record_id": record_id, "deleted": delete_record(record_id)}
+
+
+@app.get("/v1/institutional-sources")
+def list_institutional_sources() -> dict[str, Any]:
+    return {
+        "schema": "sc-institutional-sources/1.0",
+        "sources": institutional_sources.list_sources(),
+    }
+
+
+@app.get("/v1/institutional-sources/{source_key}/search")
+def institutional_source_search(
+    source_key: str,
+    q: str = Query(default="", max_length=500),
+    object_type: str = Query(default="dataset", max_length=40),
+    limit: int = Query(default=10, ge=1, le=50),
+    start: int = Query(default=0, ge=0, le=100000),
+) -> dict[str, Any]:
+    try:
+        source = institutional_sources.get(source_key)
+        return source.search(q, limit=limit, start=start, object_type=object_type)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="institutional source not found") from exc
+    except InstitutionalSourceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/institutional-sources/{source_key}/record")
+def institutional_source_record(
+    source_key: str,
+    persistent_id: str = Query(..., min_length=1, max_length=300),
+) -> dict[str, Any]:
+    try:
+        source = institutional_sources.get(source_key)
+        return source.get_record(persistent_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="institutional source not found") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except InstitutionalSourceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @app.get("/v1/search")

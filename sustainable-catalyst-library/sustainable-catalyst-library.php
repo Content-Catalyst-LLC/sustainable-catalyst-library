@@ -3,7 +3,7 @@
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
  * Description: Sustainable Catalyst Library v5.6.1.1 adds a Library-owned homepage Research Network & Knowledge Discovery Console with live corpus telemetry, governed source visibility, research handoffs and fail-open homepage behavior.
- * Version: 5.6.1.1
+ * Version: 5.7.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.6.1.1');
+define('SC_LIBRARY_VERSION', '5.7.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -62,6 +62,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-capability-hub.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-research-network-console.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-homepage-console.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-public-interface-assets.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-institutional-research-sources.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
 register_deactivation_hook(__FILE__, ['SC_Library_Activator', 'deactivate']);
@@ -122,6 +123,7 @@ final class SC_Library_Plugin {
         $research_network_console = new SC_Library_Research_Network_Console();
         $homepage_console = new SC_Library_Homepage_Console();
         $public_interface_assets = new SC_Library_Public_Interface_Assets();
+        $institutional_research_sources = new SC_Library_Institutional_Research_Sources();
 
         // v4.2.0 is an optional, contained editorial surface. A Spotlight
         // startup failure must not terminate the public Research Library.
@@ -188,6 +190,7 @@ final class SC_Library_Plugin {
         $research_network_console->register_hooks();
         $homepage_console->register_hooks();
         $public_interface_assets->register_hooks();
+        $institutional_research_sources->register_hooks();
     }
 }
 

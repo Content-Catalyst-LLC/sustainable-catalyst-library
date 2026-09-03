@@ -1,0 +1,10 @@
+Sustainable Catalyst Library v5.7.0 validation target
+
+Required checks:
+- Python compile
+- backend institutional-source unit tests
+- release wiring tests
+- PHP syntax (when php CLI is available)
+- existing v5.6.1.1 targeted regression tests
+- archive integrity
+- checksum generation
