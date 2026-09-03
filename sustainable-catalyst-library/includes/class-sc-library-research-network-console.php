@@ -85,6 +85,12 @@ final class SC_Library_Research_Network_Console {
         return SC_Library_FDA_Regulatory_Intelligence::network_sources();
     }
 
+    /** @return array<int,array<string,string>> */
+    private static function medical_terminology_sources(): array {
+        if (!class_exists('SC_Library_Medical_Terminology')) { return []; }
+        return SC_Library_Medical_Terminology::network_sources();
+    }
+
     private static function public_library_sources(): array {
         if (!class_exists('SC_Library_Public_Library_Network')) { return []; }
         $types = SC_Library_Public_Library_Network::access_types();
@@ -107,7 +113,7 @@ final class SC_Library_Research_Network_Console {
 
     /** @return array<int,array<string,string>> */
     public static function source_registry(): array {
-        return array_merge(self::direct_sources(), self::institutional_sources(), self::biomedical_sources(), self::fda_sources(), self::public_library_sources());
+        return array_merge(self::direct_sources(), self::institutional_sources(), self::biomedical_sources(), self::fda_sources(), self::medical_terminology_sources(), self::public_library_sources());
     }
 
     /** @return array<string,int> */

@@ -21,6 +21,7 @@ from .operations import integrity_audit, operations_status, prune_records
 from .institutional_sources import InstitutionalSourceError, build_registry
 from .biomedical_sources import BiomedicalSourceError, build_biomedical_registry
 from .fda_regulatory import FDARegulatoryError, build_fda_regulatory_registry
+from .medical_terminology import MedicalTerminologyError, MedicalTerminologyResolver, WHOICD11Connector
 
 
 @asynccontextmanager
@@ -39,6 +40,17 @@ biomedical_sources = build_biomedical_registry(
 fda_regulatory_sources = build_fda_regulatory_registry(
     settings.fda_source_timeout_seconds, api_key=settings.openfda_api_key,
 )
+icd11_source = WHOICD11Connector(
+    settings.medical_terminology_timeout_seconds,
+    base_url=settings.who_icd_base_url,
+    token_url=settings.who_icd_token_url,
+    client_id=settings.who_icd_client_id,
+    client_secret=settings.who_icd_client_secret,
+    release_id=settings.who_icd_release_id,
+    language=settings.who_icd_language,
+    local_mode=settings.who_icd_local_mode,
+)
+medical_terminology = MedicalTerminologyResolver(icd11_source, biomedical_sources)
 
 
 app = FastAPI(
@@ -163,6 +175,10 @@ def health() -> dict[str, Any]:
             "fda_drug_recalls": True,
             "fda_drug_shortages": True,
             "fda_orange_book": True,
+            "medical_terminology": True,
+            "icd11_2026": True,
+            "mesh_rxnorm_crosswalk": True,
+            "semantic_equivalence_guardrail": True,
         },
         "ingest_limits": {
             "max_batch_records": settings.max_batch_records,
@@ -327,6 +343,44 @@ def biomedical_intelligence_search(
         },
         "time": datetime.now(timezone.utc).isoformat(),
     }
+
+
+@app.get("/v1/medical-terminology")
+def medical_terminology_manifest() -> dict[str, Any]:
+    return {
+        "schema": "sc-medical-terminology-sources/1.0",
+        "sources": medical_terminology.source_manifest(),
+        "icd11": {
+            "configured": icd11_source.configured(),
+            "release_id": settings.who_icd_release_id,
+            "language": settings.who_icd_language,
+            "local_mode": settings.who_icd_local_mode,
+        },
+        "governance": {
+            "research_only": True,
+            "clinical_decision_support": False,
+            "semantic_equivalence_asserted": False,
+        },
+    }
+
+
+@app.get("/v1/medical-terminology/icd11/search")
+def icd11_search(
+    q: str = Query(..., min_length=1, max_length=500),
+    limit: int = Query(default=10, ge=1, le=25),
+) -> dict[str, Any]:
+    try:
+        return icd11_source.search(q, limit=limit)
+    except MedicalTerminologyError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/medical-terminology/resolve")
+def medical_terminology_resolve(
+    q: str = Query(..., min_length=1, max_length=500),
+    limit: int = Query(default=5, ge=1, le=10),
+) -> dict[str, Any]:
+    return medical_terminology.resolve(q, limit=limit)
 
 
 @app.get("/v1/institutional-sources")

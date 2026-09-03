@@ -40,6 +40,14 @@ class Settings:
     ncbi_api_key: str = os.getenv("SC_LIBRARY_NCBI_API_KEY", "").strip()
     fda_source_timeout_seconds: int = _as_int("SC_LIBRARY_FDA_TIMEOUT_SECONDS", 8, 2, 30)
     openfda_api_key: str = os.getenv("SC_LIBRARY_OPENFDA_API_KEY", "").strip()
+    medical_terminology_timeout_seconds: int = _as_int("SC_LIBRARY_MEDICAL_TERMINOLOGY_TIMEOUT_SECONDS", 8, 2, 30)
+    who_icd_base_url: str = os.getenv("SC_LIBRARY_WHO_ICD_BASE_URL", "https://id.who.int").strip().rstrip("/")
+    who_icd_token_url: str = os.getenv("SC_LIBRARY_WHO_ICD_TOKEN_URL", "https://icdaccessmanagement.who.int/connect/token").strip()
+    who_icd_client_id: str = os.getenv("SC_LIBRARY_WHO_ICD_CLIENT_ID", "").strip()
+    who_icd_client_secret: str = os.getenv("SC_LIBRARY_WHO_ICD_CLIENT_SECRET", "").strip()
+    who_icd_release_id: str = os.getenv("SC_LIBRARY_WHO_ICD_RELEASE_ID", "2026-01").strip()
+    who_icd_language: str = os.getenv("SC_LIBRARY_WHO_ICD_LANGUAGE", "en").strip()
+    who_icd_local_mode: bool = _as_bool("SC_LIBRARY_WHO_ICD_LOCAL_MODE", False)
 
     @property
     def allowed_origins(self) -> list[str]:
