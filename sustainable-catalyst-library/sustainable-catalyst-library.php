@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.8.1 adds FDA drug and regulatory intelligence across approvals, labels, NDC, FAERS, recalls, shortages, and Orange Book records.
- * Version: 5.8.1
+ * Description: Sustainable Catalyst Library v5.8.1.1 repairs release-console version identity and synchronizes visible Library/runtime backend release state while preserving v5.8.1 FDA and biomedical intelligence.
+ * Version: 5.8.1.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.8.1');
+define('SC_LIBRARY_VERSION', '5.8.1.1');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

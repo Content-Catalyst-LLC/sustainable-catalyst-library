@@ -34,7 +34,7 @@
 .sc-library-home-console__row small{overflow:hidden;margin-top:3px;color:#7f8a82;font-size:9px;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}
 .sc-library-home-console__row>span{color:#96a29a;font-size:9px;font-weight:750;letter-spacing:.04em;text-transform:uppercase}
 .sc-library-home-console__row>span:last-child{color:var(--schc-green)}
-.sc-library-home-console__terminal-foot{display:flex;flex-wrap:wrap;gap:7px 18px;padding:9px 14px;border-top:1px solid #28302b;background:#0d110e;color:#7f8c83;font:700 8px/1.2 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;letter-spacing:.08em}
+.sc-library-home-console__terminal-foot{display:flex;flex-wrap:wrap;gap:7px 18px;padding:9px 14px;border-top:1px solid #28302b;background:#0d110e;color:#7f8c83;font:700 8px/1.2 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;letter-spacing:.08em}.sc-library-home-console__terminal-foot strong{color:#b9c8be;font:800 8px/1.2 inherit;letter-spacing:.08em}.sc-library-home-console.has-release-drift .sc-library-home-console__terminal-foot [data-sc-home-library-version]{color:#f0b44c}
 .sc-library-home-console__signals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:16px;border:1px solid var(--schc-line)}
 .sc-library-home-console__signals>div{padding:11px 13px;border-left:1px solid var(--schc-line);background:#fff}
 .sc-library-home-console__signals>div:first-child{border-left:0}

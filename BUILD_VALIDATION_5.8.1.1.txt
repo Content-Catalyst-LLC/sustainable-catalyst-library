@@ -1,0 +1,17 @@
+Sustainable Catalyst Library v5.8.1.1 — Release Console Version Identity & Runtime Synchronization Repair
+
+Validation gates:
+- canonical plugin release identity = 5.8.1.1
+- console public version reads SC_LIBRARY_VERSION
+- historical console module provenance remains 5.7.1
+- runtime/release contract separates Library and backend versions
+- response no-store behavior present
+- browser runtime display/drift handling present
+- backend remains 1.4.0
+- FDA v5.8.1 regression preserved
+- biomedical v5.8.0 regression preserved
+- Johns Hopkins/institutional regressions preserved
+- Dynamic Explorer/homepage/Publications behavioral regressions preserved
+- PHP syntax and browser JavaScript syntax checked when runtimes are available
+- no PostgreSQL migration
+- no backend redeploy required

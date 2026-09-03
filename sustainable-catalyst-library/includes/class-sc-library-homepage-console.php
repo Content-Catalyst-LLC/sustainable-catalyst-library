@@ -10,12 +10,68 @@ if (!defined('ABSPATH')) { exit; }
  * names, counts, or corpus telemetry.
  */
 final class SC_Library_Homepage_Console {
+    /** Module provenance version; public release identity comes from SC_LIBRARY_VERSION. */
     public const VERSION = '5.7.1';
     public const SHORTCODE = 'sc_library_homepage_console';
+    public const REST_NAMESPACE = 'sc-library/v1';
+    private const RUNTIME_HEALTH_TRANSIENT = 'sc_library_runtime_release_health_v1';
 
     public function register_hooks(): void {
         add_action('wp_enqueue_scripts', [$this, 'maybe_enqueue_assets']);
+        add_action('rest_api_init', [$this, 'register_runtime_route']);
         add_shortcode(self::SHORTCODE, [$this, 'shortcode']);
+    }
+
+    /** Canonical current Library release identity. */
+    public static function runtime_version(): string {
+        return defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : self::VERSION;
+    }
+
+    public function register_runtime_route(): void {
+        register_rest_route(self::REST_NAMESPACE, '/runtime/release', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'runtime_release'],
+        ]);
+    }
+
+    public function runtime_release(WP_REST_Request $request): WP_REST_Response {
+        unset($request);
+        $library_version = self::runtime_version();
+        $installed_version = (string) get_option('sc_library_version', '');
+        $backend = self::cached_backend_health();
+
+        $response = new WP_REST_Response([
+            'schema' => 'sc-library-runtime-release/1.0',
+            'library' => [
+                'version' => $library_version,
+                'installed_version' => $installed_version,
+                'synchronized' => $installed_version === $library_version,
+            ],
+            'backend' => [
+                'configured' => !empty($backend['configured']),
+                'ok' => !empty($backend['ok']),
+                'state' => (string) ($backend['state'] ?? 'unknown'),
+                'service' => (string) ($backend['service'] ?? 'sustainable-catalyst-library-backend'),
+                'version' => isset($backend['version']) && $backend['version'] !== null ? (string) $backend['version'] : null,
+            ],
+            'module_provenance' => [
+                'homepage_console' => self::VERSION,
+            ],
+        ], 200);
+        $response->header('Cache-Control', 'no-store, max-age=0');
+        return $response;
+    }
+
+    /** @return array<string,mixed> */
+    private static function cached_backend_health(): array {
+        $cached = get_transient(self::RUNTIME_HEALTH_TRANSIENT);
+        if (is_array($cached)) { return $cached; }
+        $health = class_exists('SC_Library_Python_Backend')
+            ? SC_Library_Python_Backend::health()
+            : ['ok' => false, 'configured' => false, 'state' => 'bridge_unavailable', 'version' => null];
+        set_transient(self::RUNTIME_HEALTH_TRANSIENT, $health, 60);
+        return $health;
     }
 
     public function maybe_enqueue_assets(): void {
@@ -43,7 +99,8 @@ final class SC_Library_Homepage_Console {
         wp_localize_script('sc-library-homepage-console-v561', 'SCLibraryHomepageConsoleV561', [
             'bootstrapUrl' => esc_url_raw(rest_url(SC_Library_Dynamic_Explorer::REST_NAMESPACE . '/explorer/bootstrap')),
             'libraryUrl' => esc_url_raw(home_url('/knowledge-libraries/')),
-            'version' => self::VERSION,
+            'runtimeUrl' => esc_url_raw(rest_url(self::REST_NAMESPACE . '/runtime/release')),
+            'version' => self::runtime_version(),
             'strings' => [
                 'connected' => __('Connected index', 'sustainable-catalyst-library'),
                 'local' => __('Local index', 'sustainable-catalyst-library'),
@@ -104,7 +161,7 @@ final class SC_Library_Homepage_Console {
         $librarian_url = $library_url . '#research-front-door';
 
         ob_start(); ?>
-        <section class="sc-library-home-console sc-library-home-console--<?php echo esc_attr($mode); ?>" id="<?php echo esc_attr($instance); ?>" data-sc-library-home-console>
+        <section class="sc-library-home-console sc-library-home-console--<?php echo esc_attr($mode); ?>" id="<?php echo esc_attr($instance); ?>" data-sc-library-home-console data-library-version="<?php echo esc_attr(self::runtime_version()); ?>">
             <?php if ('network' !== $mode) : ?>
             <header class="sc-library-home-console__header">
                 <div class="sc-library-home-console__identity">
@@ -140,7 +197,7 @@ final class SC_Library_Homepage_Console {
                         <?php endforeach; ?>
                     </div>
                 </div>
-                <div class="sc-library-home-console__terminal-foot"><span>PROVENANCE: VISIBLE</span><span>ACCESS: LABELED</span><span>ENTITLEMENT: NEVER ASSUMED</span></div>
+                <div class="sc-library-home-console__terminal-foot"><span>LIBRARY: <strong data-sc-home-library-version>v<?php echo esc_html(self::runtime_version()); ?></strong></span><span>BACKEND: <strong data-sc-home-backend-version>CHECKING</strong></span><span>PROVENANCE: VISIBLE</span><span>ACCESS: LABELED</span><span>ENTITLEMENT: NEVER ASSUMED</span></div>
             </div>
 
             <?php if ('network' !== $mode) : ?>

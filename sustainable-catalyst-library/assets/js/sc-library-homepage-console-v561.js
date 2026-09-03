@@ -10,6 +10,37 @@
     if (node) node.textContent = value;
   };
 
+
+  const setReleaseState = (root, libraryVersion, backendLabel) => {
+    const library = root.querySelector('[data-sc-home-library-version]');
+    const backend = root.querySelector('[data-sc-home-backend-version]');
+    if (library && libraryVersion) library.textContent = `v${String(libraryVersion).replace(/^v/i, '')}`;
+    if (backend && backendLabel) backend.textContent = backendLabel;
+  };
+
+  const loadRuntimeRelease = async (root) => {
+    setReleaseState(root, cfg.version || root.dataset.libraryVersion || '', 'CHECKING');
+    if (!cfg.runtimeUrl) return;
+    try {
+      const response = await fetch(cfg.runtimeUrl, {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const libraryVersion = data?.library?.version || cfg.version || root.dataset.libraryVersion || '';
+      const backendVersion = data?.backend?.version ? `v${String(data.backend.version).replace(/^v/i, '')}` : '';
+      const backendState = data?.backend?.configured === false
+        ? 'NOT CONFIGURED'
+        : (data?.backend?.ok ? 'ONLINE' : String(data?.backend?.state || 'UNAVAILABLE').replace(/_/g, ' ').toUpperCase());
+      setReleaseState(root, libraryVersion, backendVersion ? `${backendVersion} · ${backendState}` : backendState);
+      root.classList.toggle('has-release-drift', data?.library?.synchronized === false);
+    } catch (_) {
+      setReleaseState(root, cfg.version || root.dataset.libraryVersion || '', 'UNAVAILABLE');
+    }
+  };
+
   const loadMetrics = async (root) => {
     const live = root.querySelector('[data-sc-home-live-state]');
     if (!cfg.bootstrapUrl) return;
@@ -76,6 +107,7 @@
   };
 
   roots.forEach((root) => {
+    loadRuntimeRelease(root);
     loadMetrics(root);
     startTicker(root);
     bindSearch(root);
