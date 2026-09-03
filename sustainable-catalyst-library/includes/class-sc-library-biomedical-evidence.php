@@ -10,7 +10,7 @@ final class SC_Library_Biomedical_Evidence {
     /** @return array<int,array<string,string>> */
     public static function network_sources(): array {
         return [
-            ['id'=>'clinicaltrials','name'=>'ClinicalTrials.gov','kind'=>'scholarly','type'=>'Clinical trial registry','mode'=>'LIVE API','detail'=>'Registered studies · phases · status · outcomes · sponsors'],
+            ['id'=>'clinicaltrials','name'=>'ClinicalTrials.gov','kind'=>'scholarly','type'=>'Clinical trial registry','mode'=>'LIVE API','detail'=>'Registered studies · populations · endpoints · results state · linked publications · comparison'],
             ['id'=>'mesh','name'=>'Medical Subject Headings (MeSH)','kind'=>'scholarly','type'=>'Biomedical terminology','mode'=>'LIVE API','detail'=>'2026 controlled vocabulary · concept resolution · hierarchy'],
             ['id'=>'rxnorm','name'=>'RxNorm','kind'=>'scholarly','type'=>'Drug terminology','mode'=>'LIVE API','detail'=>'Normalized drug concepts · RxCUI resolution'],
         ];

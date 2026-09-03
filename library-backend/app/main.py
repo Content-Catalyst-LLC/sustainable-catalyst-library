@@ -22,6 +22,7 @@ from .institutional_sources import InstitutionalSourceError, build_registry
 from .biomedical_sources import BiomedicalSourceError, build_biomedical_registry
 from .fda_regulatory import FDARegulatoryError, build_fda_regulatory_registry
 from .medical_terminology import MedicalTerminologyError, MedicalTerminologyResolver, WHOICD11Connector
+from .clinical_trials import ClinicalTrialIntelligence, ClinicalTrialIntelligenceError
 
 
 @asynccontextmanager
@@ -51,6 +52,7 @@ icd11_source = WHOICD11Connector(
     local_mode=settings.who_icd_local_mode,
 )
 medical_terminology = MedicalTerminologyResolver(icd11_source, biomedical_sources)
+clinical_trials = ClinicalTrialIntelligence(settings.clinical_trial_timeout_seconds)
 
 
 app = FastAPI(
@@ -179,6 +181,12 @@ def health() -> dict[str, Any]:
             "icd11_2026": True,
             "mesh_rxnorm_crosswalk": True,
             "semantic_equivalence_guardrail": True,
+            "clinical_trial_intelligence": True,
+            "clinical_trial_structured_search": True,
+            "clinical_trial_comparison": True,
+            "clinical_trial_results_state": True,
+            "trial_publication_linkage": True,
+            "trial_retraction_signals": True,
         },
         "ingest_limits": {
             "max_batch_records": settings.max_batch_records,
@@ -381,6 +389,63 @@ def medical_terminology_resolve(
     limit: int = Query(default=5, ge=1, le=10),
 ) -> dict[str, Any]:
     return medical_terminology.resolve(q, limit=limit)
+
+
+@app.get("/v1/clinical-trials")
+def clinical_trial_manifest() -> dict[str, Any]:
+    return clinical_trials.manifest()
+
+
+@app.get("/v1/clinical-trials/search")
+def clinical_trial_search(
+    q: str = Query(default="", max_length=500),
+    condition: str = Query(default="", max_length=300),
+    intervention: str = Query(default="", max_length=300),
+    sponsor: str = Query(default="", max_length=300),
+    location: str = Query(default="", max_length=300),
+    status: str = Query(default="", max_length=200),
+    phase: str = Query(default="", max_length=40),
+    study_type: str = Query(default="", max_length=40),
+    limit: int = Query(default=10, ge=1, le=50),
+    cursor: str = Query(default="", max_length=500),
+) -> dict[str, Any]:
+    try:
+        return clinical_trials.search(
+            query=q, condition=condition, intervention=intervention, sponsor=sponsor,
+            location=location, status=status, phase=phase, study_type=study_type,
+            limit=limit, cursor=cursor,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except ClinicalTrialIntelligenceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/clinical-trials/compare")
+def clinical_trial_compare(
+    nct_ids: str = Query(..., min_length=1, max_length=200),
+) -> dict[str, Any]:
+    ids = [item.strip() for item in nct_ids.split(",") if item.strip()]
+    try:
+        return clinical_trials.compare(ids)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="clinical trial not found") from exc
+    except ClinicalTrialIntelligenceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/clinical-trials/{nct_id}")
+def clinical_trial_detail(nct_id: str) -> dict[str, Any]:
+    try:
+        return clinical_trials.get_study(nct_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="clinical trial not found") from exc
+    except ClinicalTrialIntelligenceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @app.get("/v1/institutional-sources")

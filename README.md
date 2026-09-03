@@ -1,4 +1,14 @@
+## Current release
+
+**v5.8.3 — Clinical Study & Trial Intelligence** adds structured ClinicalTrials.gov search, study detail, posted-results state, linked-publication/retraction provenance, and descriptive multi-trial comparison. Library backend is v1.6.0.
+
 # Sustainable Catalyst Library
+
+## v5.8.1.1 — Release Console Version Identity & Runtime Synchronization Repair
+
+v5.8.1.1 repairs public release identity drift without relabeling historical module provenance. The homepage/research console now reads its visible Library release directly from the canonical `SC_LIBRARY_VERSION`, exposes a no-store `/wp-json/sc-library/v1/runtime/release` runtime contract, and displays Library and backend versions separately. Backend v1.4.0 is unchanged; no backend redeploy or PostgreSQL migration is required. FDA, biomedical, Johns Hopkins, Explorer, and Publications behavior are preserved.
+
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.8.1.1.md` and `RELEASE_CONSOLE_RUNTIME_SYNC_v5.8.1.1.md`.
 
 ## v5.8.1 — FDA Drug & Regulatory Intelligence
 
