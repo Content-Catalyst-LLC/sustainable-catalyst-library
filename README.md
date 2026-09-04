@@ -1,8 +1,19 @@
 ## Current release
 
-**v5.8.4 — Biomedical Evidence Grading & Study Design Intelligence** adds metadata-derived study-design classification, evidence-body mapping, integrity signals, certainty-domain readiness, and human-review handoffs. Library backend is v1.7.0. Formal certainty grades and formal risk-of-bias judgments are not generated automatically.
+**v5.9.0 — Biomedical Evidence Graph & Evidence Synthesis** connects PubMed literature, ClinicalTrials.gov studies/results/publication references, terminology candidates, FDA regulatory context, and v5.8.4 evidence profiles into a provenance-backed graph. The Library backend is v1.8.0. Synthesis is descriptive and does not generate pooled effects, formal GRADE certainty, causal conclusions, comparative-effectiveness rankings, or clinical recommendations.
 
 # Sustainable Catalyst Library
+
+## v5.9.0 — Biomedical Evidence Graph & Evidence Synthesis
+
+v5.9.0 adds a governed biomedical evidence graph plus descriptive synthesis, including exact ClinicalTrials.gov PMID links, trial-condition/intervention/outcome edges, terminology candidate context, regulatory evidence-class preservation, integrity-signal propagation, and Research Librarian/Lab-ready handoff structure. No PostgreSQL migration or new credentials are required.
+
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.9.0.md` and `BIOMEDICAL_EVIDENCE_GRAPH_SYNTHESIS_v5.9.0.md`.
+
+## v5.8.4 — Biomedical Evidence Grading & Study Design Intelligence
+
+v5.8.4 adds metadata-derived study-design classification, evidence-body mapping, integrity signals, certainty-domain readiness, and human-review handoffs. Library backend is v1.7.0. Formal certainty grades and formal risk-of-bias judgments are not generated automatically.
+
 
 ## v5.8.1.1 — Release Console Version Identity & Runtime Synchronization Repair
 

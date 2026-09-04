@@ -24,6 +24,7 @@ from .fda_regulatory import FDARegulatoryError, build_fda_regulatory_registry
 from .medical_terminology import MedicalTerminologyError, MedicalTerminologyResolver, WHOICD11Connector
 from .clinical_trials import ClinicalTrialIntelligence, ClinicalTrialIntelligenceError
 from .evidence_grading import EvidenceGradingEngine
+from .biomedical_evidence_graph import BiomedicalEvidenceGraphEngine
 
 
 @asynccontextmanager
@@ -55,6 +56,7 @@ icd11_source = WHOICD11Connector(
 medical_terminology = MedicalTerminologyResolver(icd11_source, biomedical_sources)
 clinical_trials = ClinicalTrialIntelligence(settings.clinical_trial_timeout_seconds)
 evidence_grading = EvidenceGradingEngine(biomedical_sources, clinical_trials)
+biomedical_evidence_graph = BiomedicalEvidenceGraphEngine(evidence_grading, clinical_trials, medical_terminology, fda_regulatory_sources)
 
 
 app = FastAPI(
@@ -194,6 +196,13 @@ def health() -> dict[str, Any]:
             "evidence_body_mapping": True,
             "certainty_domain_readiness": True,
             "automated_formal_grade": False,
+            "biomedical_evidence_graph": True,
+            "evidence_synthesis": True,
+            "trial_publication_graph_linkage": True,
+            "regulatory_evidence_graph_context": True,
+            "terminology_candidate_graph_context": True,
+            "automated_pooled_effect": False,
+            "automated_clinical_recommendation": False,
         },
         "ingest_limits": {
             "max_batch_records": settings.max_batch_records,
@@ -476,6 +485,57 @@ def evidence_grading_search(
 def evidence_grading_trial(nct_id: str) -> dict[str, Any]:
     try:
         return evidence_grading.trial_profile(nct_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="clinical trial not found") from exc
+    except ClinicalTrialIntelligenceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/biomedical-evidence-graph")
+def biomedical_evidence_graph_manifest() -> dict[str, Any]:
+    return biomedical_evidence_graph.manifest()
+
+
+@app.get("/v1/biomedical-evidence-graph/build")
+def biomedical_evidence_graph_build(
+    q: str = Query(..., min_length=1, max_length=500),
+    literature_limit: int = Query(default=8, ge=1, le=20),
+    trial_limit: int = Query(default=8, ge=1, le=20),
+    concept_limit: int = Query(default=3, ge=1, le=5),
+    regulatory_limit: int = Query(default=2, ge=1, le=5),
+) -> dict[str, Any]:
+    try:
+        return biomedical_evidence_graph.build_graph(
+            q, literature_limit=literature_limit, trial_limit=trial_limit,
+            concept_limit=concept_limit, regulatory_limit=regulatory_limit,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/biomedical-evidence-graph/synthesis")
+def biomedical_evidence_graph_synthesis(
+    q: str = Query(..., min_length=1, max_length=500),
+    literature_limit: int = Query(default=8, ge=1, le=20),
+    trial_limit: int = Query(default=8, ge=1, le=20),
+    concept_limit: int = Query(default=3, ge=1, le=5),
+    regulatory_limit: int = Query(default=2, ge=1, le=5),
+) -> dict[str, Any]:
+    try:
+        return biomedical_evidence_graph.synthesis(
+            q, literature_limit=literature_limit, trial_limit=trial_limit,
+            concept_limit=concept_limit, regulatory_limit=regulatory_limit,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/biomedical-evidence-graph/trial/{nct_id}")
+def biomedical_evidence_graph_trial(nct_id: str) -> dict[str, Any]:
+    try:
+        return biomedical_evidence_graph.trial_neighborhood(nct_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except KeyError as exc:

@@ -4,7 +4,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.8.0
+Stable tag: 5.9.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -367,6 +367,11 @@ Use `[sc_library_api_interoperability]` for the integration console and `[sc_lib
 The facade does not expose My Library, private Research Projects, notebook or Evidence Matrix bodies, Research Room or Team Library membership, credentials, tokens, Workspace state, or authenticated federation governance. It performs no cross-site writes, publication, federation acceptance, evidence promotion, or Workspace writes.
 
 == Changelog ==
+
+= 5.9.0 =
+* Adds a provenance-backed biomedical evidence graph across PubMed, ClinicalTrials.gov, terminology candidates, FDA regulatory context, and evidence-profile metadata.
+* Adds exact registry PMID trial-publication edges plus trial-condition, intervention, and outcome relationships.
+* Adds descriptive evidence synthesis with explicit gaps and integrity-review signals while keeping formal certainty, pooled effects, causal conclusions, comparative-effectiveness rankings, and clinical recommendations disabled.
 
 = 5.8.4 =
 * Adds governed biomedical evidence grading and study-design intelligence.

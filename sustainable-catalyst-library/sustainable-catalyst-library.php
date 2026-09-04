@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.8.4 adds biomedical evidence grading, study-design intelligence, integrity signals, and governed evidence-body mapping.
- * Version: 5.8.4
+ * Description: Sustainable Catalyst Library v5.9.0 adds a provenance-backed biomedical evidence graph and descriptive evidence synthesis across literature, trials, terminology, and regulatory evidence.
+ * Version: 5.9.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.8.4');
+define('SC_LIBRARY_VERSION', '5.9.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -68,6 +68,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-fda-regulatory-intellig
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-medical-terminology.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-clinical-trial-intelligence.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence-grading.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence-graph.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
 register_deactivation_hook(__FILE__, ['SC_Library_Activator', 'deactivate']);
@@ -134,6 +135,7 @@ final class SC_Library_Plugin {
         $medical_terminology = new SC_Library_Medical_Terminology();
         $clinical_trial_intelligence = new SC_Library_Clinical_Trial_Intelligence();
         $biomedical_evidence_grading = new SC_Library_Biomedical_Evidence_Grading();
+        $biomedical_evidence_graph = new SC_Library_Biomedical_Evidence_Graph();
 
         // v4.2.0 is an optional, contained editorial surface. A Spotlight
         // startup failure must not terminate the public Research Library.
@@ -206,6 +208,7 @@ final class SC_Library_Plugin {
         $medical_terminology->register_hooks();
         $clinical_trial_intelligence->register_hooks();
         $biomedical_evidence_grading->register_hooks();
+        $biomedical_evidence_graph->register_hooks();
     }
 }
 
