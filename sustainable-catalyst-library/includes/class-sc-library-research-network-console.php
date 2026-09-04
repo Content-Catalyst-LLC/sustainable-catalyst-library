@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) { exit; }
  * explicitly labeled by capability.
  */
 final class SC_Library_Research_Network_Console {
-    public const VERSION = '5.8.1';
+    public const VERSION = '5.10.0';
 
     public function register_hooks(): void {
         add_action('wp_enqueue_scripts', [$this, 'maybe_enqueue_public_assets']);
@@ -50,6 +50,9 @@ final class SC_Library_Research_Network_Console {
         $out = [];
         if (class_exists('SC_Library_Institutional_Research_Sources')) {
             $out[] = SC_Library_Institutional_Research_Sources::network_source();
+        }
+        if (class_exists('SC_Library_Institutional_Research_Network')) {
+            $out = array_merge($out, SC_Library_Institutional_Research_Network::network_sources());
         }
         if (!class_exists('SC_Library_Institutional_Connector_Expansion')) { return $out; }
         $types = SC_Library_Institutional_Connector_Expansion::capability_types();
@@ -113,7 +116,18 @@ final class SC_Library_Research_Network_Console {
 
     /** @return array<int,array<string,string>> */
     public static function source_registry(): array {
-        return array_merge(self::direct_sources(), self::institutional_sources(), self::biomedical_sources(), self::fda_sources(), self::medical_terminology_sources(), self::public_library_sources());
+        $merged = array_merge(self::direct_sources(), self::institutional_sources(), self::biomedical_sources(), self::fda_sources(), self::medical_terminology_sources(), self::public_library_sources());
+        $by_id = [];
+        $order = [];
+        foreach ($merged as $row) {
+            $id = sanitize_key((string)($row['id'] ?? ''));
+            if ($id === '') { continue; }
+            if (!array_key_exists($id, $by_id)) { $order[] = $id; }
+            $by_id[$id] = $row;
+        }
+        $out = [];
+        foreach ($order as $id) { $out[] = $by_id[$id]; }
+        return $out;
     }
 
     /** @return array<string,int> */

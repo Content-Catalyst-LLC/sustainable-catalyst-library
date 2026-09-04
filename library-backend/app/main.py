@@ -25,6 +25,7 @@ from .medical_terminology import MedicalTerminologyError, MedicalTerminologyReso
 from .clinical_trials import ClinicalTrialIntelligence, ClinicalTrialIntelligenceError
 from .evidence_grading import EvidenceGradingEngine
 from .biomedical_evidence_graph import BiomedicalEvidenceGraphEngine
+from .institutional_research_network import InstitutionalResearchNetwork
 
 
 @asynccontextmanager
@@ -57,6 +58,7 @@ medical_terminology = MedicalTerminologyResolver(icd11_source, biomedical_source
 clinical_trials = ClinicalTrialIntelligence(settings.clinical_trial_timeout_seconds)
 evidence_grading = EvidenceGradingEngine(biomedical_sources, clinical_trials)
 biomedical_evidence_graph = BiomedicalEvidenceGraphEngine(evidence_grading, clinical_trials, medical_terminology, fda_regulatory_sources)
+institutional_research_network = InstitutionalResearchNetwork(timeout_seconds=settings.institutional_source_timeout_seconds)
 
 
 app = FastAPI(
@@ -206,6 +208,12 @@ def health() -> dict[str, Any]:
             "graph_provenance_ledger": True,
             "graph_content_fingerprint": True,
             "graph_partial_failure_containment": True,
+            "institutional_research_network_ii": True,
+            "institutional_cross_repository_search": True,
+            "institutional_exact_doi_deduplication": True,
+            "institutional_provenance_ledger": True,
+            "institutional_source_failure_containment": True,
+            "institutional_graph_fingerprint": True,
             "automated_clinical_recommendation": False,
         },
         "ingest_limits": {
@@ -563,6 +571,37 @@ def biomedical_evidence_graph_trial(nct_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="clinical trial not found") from exc
     except ClinicalTrialIntelligenceError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/institutional-research-network")
+def institutional_research_network_manifest() -> dict[str, Any]:
+    return institutional_research_network.manifest()
+
+
+@app.get("/v1/institutional-research-network/search")
+def institutional_research_network_search(
+    q: str = Query(..., min_length=1, max_length=500),
+    sources: str | None = Query(default=None, max_length=500),
+    limit_per_source: int = Query(default=8, ge=1, le=25),
+) -> dict[str, Any]:
+    keys = [item.strip() for item in (sources or "").split(",") if item.strip()] or None
+    try:
+        return institutional_research_network.search(q, source_keys=keys, limit_per_source=limit_per_source)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/institutional-research-network/graph")
+def institutional_research_network_graph(
+    q: str = Query(..., min_length=1, max_length=500),
+    sources: str | None = Query(default=None, max_length=500),
+    limit_per_source: int = Query(default=8, ge=1, le=25),
+) -> dict[str, Any]:
+    keys = [item.strip() for item in (sources or "").split(",") if item.strip()] or None
+    try:
+        return institutional_research_network.graph(q, source_keys=keys, limit_per_source=limit_per_source)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.get("/v1/institutional-sources")

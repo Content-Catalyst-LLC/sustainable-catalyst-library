@@ -1,0 +1,39 @@
+Sustainable Catalyst Library v5.10.0 — Institutional Research Network II
+Validation result: PASS
+
+New v5.10.0 validation:
+- 20 passed
+
+Retained biomedical / institutional regression:
+- 81 passed
+- 11 deselected historical release-identity assertions
+
+Retained public interface regression:
+- 26 passed
+- 3 deselected historical release-identity assertions
+
+Static gates:
+- Python compileall: PASS
+- WordPress plugin PHP lint: PASS
+- Institutional Research Network PHP lint: PASS
+- Research Network Console PHP lint: PASS
+- Institutional Research Network JavaScript syntax: PASS
+
+Key v5.10.0 contracts verified:
+- backend identity 2.0.0
+- WordPress identity 5.10.0
+- DSpace@MIT, Harvard Dataverse, Johns Hopkins Dataverse, and Research Repository UCD descriptors
+- Dataverse normalization
+- DSpace discovery normalization
+- bounded OAI-PMH harvest with explicit search limitation
+- exact DOI cross-source duplicate consolidation
+- title-only identity merging disabled
+- cross-source author identity inference disabled
+- provenance ledger preservation
+- source-local failure containment
+- deterministic content fingerprint
+- deterministic graph fingerprint
+- repository discovery does not imply entitlement or reuse permission
+- affiliation / partnership / endorsement not asserted
+- Source Bundle / Research Project / Research Librarian / Lab handoff boundaries
+- v5.9.1 biomedical graph reliability retained

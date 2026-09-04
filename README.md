@@ -1,8 +1,14 @@
 ## Current release
 
-**v5.9.1 — Biomedical Evidence Graph Reliability & Provenance Repair** hardens v5.9.0 with canonical graph identity, duplicate-observation consolidation, node/edge provenance ledgers, source freshness/status reporting, deterministic ordering, SHA-256 content/provenance fingerprints, and bounded partial-source failure containment. The Library backend is v1.9.0. Title-only identity merging, inferred staleness, semantic equivalence, causality, pooled effects, formal GRADE certainty, and clinical recommendations remain disabled.
+**v5.10.0 — Institutional Research Network II** generalizes the Library's provenance-first architecture across DSpace@MIT, Harvard Dataverse, the Johns Hopkins Research Data Repository, and Research Repository UCD. Backend v2.0.0 adds a normalized institutional research object, exact-DOI duplicate consolidation, source-local identity, per-record rights observations, source-local failure containment, deterministic fingerprints, and an institution→repository→record graph. Repository discovery remains metadata discovery only: it does not imply entitlement, reuse permission, affiliation, partnership, or endorsement.
 
 # Sustainable Catalyst Library
+
+## v5.10.0 — Institutional Research Network II
+
+v5.10.0 adds governed cross-repository institutional research discovery while preserving heterogeneous repository protocols and rights state. DSpace@MIT and Dataverse sources use native search surfaces; Research Repository UCD uses a bounded OAI-PMH metadata harvest and explicitly reports that limitation. Cross-source consolidation is exact-DOI-first and never title-only.
+
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.10.0.md` and `INSTITUTIONAL_RESEARCH_NETWORK_II_v5.10.0.md`.
 
 ## v5.9.1 — Biomedical Evidence Graph Reliability & Provenance Repair
 
