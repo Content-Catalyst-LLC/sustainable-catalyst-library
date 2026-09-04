@@ -23,6 +23,7 @@ from .biomedical_sources import BiomedicalSourceError, build_biomedical_registry
 from .fda_regulatory import FDARegulatoryError, build_fda_regulatory_registry
 from .medical_terminology import MedicalTerminologyError, MedicalTerminologyResolver, WHOICD11Connector
 from .clinical_trials import ClinicalTrialIntelligence, ClinicalTrialIntelligenceError
+from .evidence_grading import EvidenceGradingEngine
 
 
 @asynccontextmanager
@@ -53,6 +54,7 @@ icd11_source = WHOICD11Connector(
 )
 medical_terminology = MedicalTerminologyResolver(icd11_source, biomedical_sources)
 clinical_trials = ClinicalTrialIntelligence(settings.clinical_trial_timeout_seconds)
+evidence_grading = EvidenceGradingEngine(biomedical_sources, clinical_trials)
 
 
 app = FastAPI(
@@ -187,6 +189,11 @@ def health() -> dict[str, Any]:
             "clinical_trial_results_state": True,
             "trial_publication_linkage": True,
             "trial_retraction_signals": True,
+            "biomedical_evidence_grading": True,
+            "study_design_intelligence": True,
+            "evidence_body_mapping": True,
+            "certainty_domain_readiness": True,
+            "automated_formal_grade": False,
         },
         "ingest_limits": {
             "max_batch_records": settings.max_batch_records,
@@ -440,6 +447,35 @@ def clinical_trial_compare(
 def clinical_trial_detail(nct_id: str) -> dict[str, Any]:
     try:
         return clinical_trials.get_study(nct_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="clinical trial not found") from exc
+    except ClinicalTrialIntelligenceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/evidence-grading")
+def evidence_grading_manifest() -> dict[str, Any]:
+    return evidence_grading.manifest()
+
+
+@app.get("/v1/evidence-grading/search")
+def evidence_grading_search(
+    q: str = Query(..., min_length=1, max_length=500),
+    literature_limit: int = Query(default=8, ge=1, le=20),
+    trial_limit: int = Query(default=8, ge=1, le=20),
+) -> dict[str, Any]:
+    try:
+        return evidence_grading.search_body(q, literature_limit=literature_limit, trial_limit=trial_limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/evidence-grading/trial/{nct_id}")
+def evidence_grading_trial(nct_id: str) -> dict[str, Any]:
+    try:
+        return evidence_grading.trial_profile(nct_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except KeyError as exc:

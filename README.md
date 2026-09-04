@@ -1,6 +1,6 @@
 ## Current release
 
-**v5.8.3 — Clinical Study & Trial Intelligence** adds structured ClinicalTrials.gov search, study detail, posted-results state, linked-publication/retraction provenance, and descriptive multi-trial comparison. Library backend is v1.6.0.
+**v5.8.4 — Biomedical Evidence Grading & Study Design Intelligence** adds metadata-derived study-design classification, evidence-body mapping, integrity signals, certainty-domain readiness, and human-review handoffs. Library backend is v1.7.0. Formal certainty grades and formal risk-of-bias judgments are not generated automatically.
 
 # Sustainable Catalyst Library
 

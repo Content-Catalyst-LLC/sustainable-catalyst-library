@@ -92,7 +92,7 @@ class ClinicalTrialSourceDescriptor:
 class ClinicalTrialIntelligence:
     descriptor = ClinicalTrialSourceDescriptor()
 
-    def __init__(self, timeout_seconds: int = 8, user_agent: str = "SustainableCatalystLibrary/1.6") -> None:
+    def __init__(self, timeout_seconds: int = 8, user_agent: str = "SustainableCatalystLibrary/1.7") -> None:
         self.timeout_seconds = max(2, min(int(timeout_seconds), 30))
         self.user_agent = user_agent
 
@@ -444,6 +444,9 @@ class ClinicalTrialIntelligence:
                 analyses.append({
                     "param_type": aa.get("paramType"), "param_value": aa.get("paramValue"),
                     "dispersion_type": aa.get("dispersionType"), "dispersion_value": aa.get("dispersionValue"),
+                    "ci_percent": aa.get("ciPctValue"),
+                    "ci_lower_limit": aa.get("ciLowerLimit"),
+                    "ci_upper_limit": aa.get("ciUpperLimit"),
                     "p_value": aa.get("pValue"), "statistical_method": aa.get("statisticalMethod"),
                 })
             outcome_rows.append({

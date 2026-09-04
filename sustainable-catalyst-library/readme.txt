@@ -368,6 +368,11 @@ The facade does not expose My Library, private Research Projects, notebook or Ev
 
 == Changelog ==
 
+= 5.8.4 =
+* Adds governed biomedical evidence grading and study-design intelligence.
+* Adds evidence-body mapping across PubMed and ClinicalTrials.gov.
+* Preserves integrity, retraction and certainty-review signals without generating automated formal certainty grades.
+
 = 5.7.1 =
 * Adds Johns Hopkins Research Data Repository to the canonical Research Network source registry through the v5.7 institutional-source record.
 * Prioritizes Johns Hopkins in the homepage Research Network ticker so the existing Library widget visibly surfaces the integration.
