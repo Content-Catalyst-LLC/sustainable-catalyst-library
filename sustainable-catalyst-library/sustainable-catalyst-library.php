@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.9.0 adds a provenance-backed biomedical evidence graph and descriptive evidence synthesis across literature, trials, terminology, and regulatory evidence.
- * Version: 5.9.0
+ * Description: Sustainable Catalyst Library v5.9.1 hardens the biomedical evidence graph with canonical identity, provenance ledgers, freshness reporting, deterministic fingerprints, and partial-source failure containment.
+ * Version: 5.9.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.9.0');
+define('SC_LIBRARY_VERSION', '5.9.1');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

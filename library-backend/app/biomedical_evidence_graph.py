@@ -6,13 +6,14 @@ from datetime import datetime, timezone
 import hashlib
 import re
 from typing import Any
+import json
 
 
 @dataclass(frozen=True)
 class BiomedicalEvidenceGraphDescriptor:
     key: str = "biomedical-evidence-graph"
     name: str = "Biomedical Evidence Graph & Evidence Synthesis"
-    version: str = "1.0"
+    version: str = "1.1"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -29,6 +30,12 @@ class BiomedicalEvidenceGraphDescriptor:
                 "integrity-signal-propagation",
                 "research-librarian-handoff",
                 "lab-aggregate-results-handoff",
+                "canonical-node-identity",
+                "edge-provenance-ledger",
+                "duplicate-observation-consolidation",
+                "source-freshness-reporting",
+                "deterministic-graph-fingerprint",
+                "partial-source-failure-containment",
             ],
             "governance": {
                 "research_only": True,
@@ -42,6 +49,8 @@ class BiomedicalEvidenceGraphDescriptor:
                 "comparative_effectiveness_conclusion_generated": False,
                 "clinical_recommendation_generated": False,
                 "human_review_required": True,
+                "title_only_identity_merge": False,
+                "provenance_required_on_edges": True,
             },
         }
 
@@ -86,6 +95,104 @@ def _pmid(value: Any) -> str:
     return re.sub(r"\D", "", text)
 
 
+_VOLATILE_KEYS = {"retrieved_at", "requested_at", "generated_at", "retrieval_time"}
+
+def _stable_value(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {k: _stable_value(v) for k, v in sorted(value.items()) if k not in _VOLATILE_KEYS}
+    if isinstance(value, list):
+        return [_stable_value(v) for v in value]
+    return value
+
+def _stable_json(value: Any) -> str:
+    return json.dumps(_stable_value(value), sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
+
+def _stable_digest(value: Any, length: int = 64) -> str:
+    return hashlib.sha256(_stable_json(value).encode("utf-8")).hexdigest()[:length]
+
+def _normal_query(value: str) -> str:
+    return _clean(value).casefold()
+
+def _canonical_identity(node: dict[str, Any]) -> dict[str, Any]:
+    node_type = _clean(node.get("type")) or "unknown"
+    identifier = _clean(node.get("identifier"))
+    source_key = _clean(node.get("source_key")) or "unknown"
+    label = _clean(node.get("label"))
+    namespace = "source-scoped-label"
+    canonical = ""
+    if node_type == "publication":
+        pmid = _pmid(identifier)
+        if pmid:
+            namespace, canonical = "PMID", pmid
+        elif identifier.lower().startswith("doi:"):
+            namespace, canonical = "DOI", identifier[4:].strip().casefold()
+    elif node_type == "clinical-trial":
+        nct = re.sub(r"[^A-Z0-9]", "", identifier.upper())
+        if re.fullmatch(r"NCT\d{8}", nct):
+            namespace, canonical = "NCT", nct
+    elif node_type == "terminology-concept" and identifier:
+        namespace, canonical = source_key, identifier
+    elif node_type == "regulatory-record" and identifier:
+        namespace, canonical = source_key, identifier
+    elif node_type == "research-question":
+        namespace, canonical = "query", _normal_query(label)
+    if not canonical:
+        canonical = f"{source_key}|{node_type}|{_normal_query(label)}"
+    key = f"{node_type}|{namespace}|{canonical}"
+    return {
+        "schema": "sc-biomedical-graph-node-identity/1.0",
+        "canonical_key": key,
+        "canonical_identifier": canonical or None,
+        "namespace": namespace,
+        "merge_basis": "exact-identifier" if namespace != "source-scoped-label" else "source-scoped-label",
+        "title_only_merge_used": False,
+        "observations": 1,
+    }
+
+def _provenance_record(value: Any, *, fallback_source: str = "unknown") -> dict[str, Any]:
+    row = dict(_dict(value))
+    row.setdefault("source_key", fallback_source or "unknown")
+    row.setdefault("relationship_state", "source-record")
+    return row
+
+def _merge_unique_records(existing: list[Any], incoming: list[Any]) -> list[Any]:
+    out: list[Any] = []
+    seen: set[str] = set()
+    for item in [*existing, *incoming]:
+        key = _stable_json(item)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(item)
+    return sorted(out, key=_stable_json)
+
+def _source_freshness(nodes: list[dict[str, Any]]) -> dict[str, Any]:
+    buckets: dict[str, dict[str, Any]] = {}
+    update_keys = ("source_updated_at", "last_update_posted", "updated_at", "effective_time", "published_at")
+    for node in nodes:
+        for prov in _list(node.get("provenance_records")) or [_dict(node.get("provenance"))]:
+            row = _dict(prov)
+            source = _clean(row.get("source_key") or node.get("source_key")) or "unknown"
+            b = buckets.setdefault(source, {"source_key": source, "retrieval_observations": [], "source_update_observations": []})
+            if row.get("retrieved_at"):
+                b["retrieval_observations"].append(str(row["retrieved_at"]))
+            for key in update_keys:
+                if row.get(key):
+                    b["source_update_observations"].append(str(row[key]))
+        attrs = _dict(node.get("attributes"))
+        source = _clean(node.get("source_key")) or "unknown"
+        b = buckets.setdefault(source, {"source_key": source, "retrieval_observations": [], "source_update_observations": []})
+        for key in update_keys:
+            if attrs.get(key):
+                b["source_update_observations"].append(str(attrs[key]))
+    for b in buckets.values():
+        b["retrieval_observations"] = sorted(set(b["retrieval_observations"]))
+        b["source_update_observations"] = sorted(set(b["source_update_observations"]))
+        b["freshness_state"] = "source-timestamp-available" if b["source_update_observations"] else "retrieval-time-only" if b["retrieval_observations"] else "timestamp-unavailable"
+        b["staleness_inferred"] = False
+    return {k: buckets[k] for k in sorted(buckets)}
+
+
 class BiomedicalEvidenceGraphEngine:
     """Build a bounded evidence graph using explicit source relationships only.
 
@@ -111,7 +218,7 @@ class BiomedicalEvidenceGraphEngine:
 
     def manifest(self) -> dict[str, Any]:
         return {
-            "schema": "sc-biomedical-evidence-graph-manifest/1.0",
+            "schema": "sc-biomedical-evidence-graph-manifest/1.1",
             "framework": self.descriptor.to_dict(),
             "node_types": [
                 "research-question",
@@ -138,6 +245,15 @@ class BiomedicalEvidenceGraphEngine:
                 "terminology_edges": "Candidate-context edges do not assert equivalence among ICD-11, MeSH, or RxNorm.",
                 "regulatory_edges": "Query-context edges preserve regulatory evidence class and do not imply clinical effect.",
             },
+            "reliability_policy": {
+                "canonical_identity_version": "1.0",
+                "edge_provenance_version": "1.0",
+                "title_only_merge": False,
+                "deterministic_ordering": True,
+                "content_fingerprint": "sha256",
+                "staleness_inference_without_source_policy": False,
+                "partial_source_failures_are_contained": True,
+            },
             "synthesis_policy": {
                 "state": "descriptive-graph-derived",
                 "formal_systematic_review": False,
@@ -153,27 +269,52 @@ class BiomedicalEvidenceGraphEngine:
     @staticmethod
     def _add_node(nodes: dict[str, dict[str, Any]], node: dict[str, Any]) -> str:
         node_id = str(node["id"])
+        node = dict(node)
+        node.setdefault("identity", _canonical_identity(node))
+        source_key = _clean(node.get("source_key")) or "unknown"
+        node.setdefault("source_keys", [source_key])
+        prov = _provenance_record(node.get("provenance"), fallback_source=source_key)
+        node.setdefault("provenance_records", [prov])
         existing = nodes.get(node_id)
         if existing is None:
             nodes[node_id] = node
         else:
-            # Preserve richer values without silently overwriting source identity.
+            # Consolidate only an already-identical canonical node id. Never merge by title alone.
+            existing.setdefault("identity", _canonical_identity(existing))
+            existing["identity"]["observations"] = int(_dict(existing.get("identity")).get("observations") or 1) + 1
+            existing["source_keys"] = sorted(set([*_list(existing.get("source_keys")), *_list(node.get("source_keys"))]))
+            existing["provenance_records"] = _merge_unique_records(_list(existing.get("provenance_records")), _list(node.get("provenance_records")))
             for key, value in node.items():
+                if key in {"identity", "source_keys", "provenance_records"}:
+                    continue
                 if key not in existing or existing[key] in (None, "", [], {}):
                     existing[key] = value
+                elif key == "attributes" and isinstance(value, dict):
+                    target = existing.setdefault("attributes", {})
+                    if isinstance(target, dict):
+                        for attr_key, attr_value in value.items():
+                            if attr_key not in target or target[attr_key] in (None, "", [], {}):
+                                target[attr_key] = attr_value
         return node_id
 
     @staticmethod
     def _add_edge(edges: dict[str, dict[str, Any]], edge: dict[str, Any]) -> str:
-        raw = "|".join([
-            str(edge.get("source") or ""),
-            str(edge.get("type") or ""),
-            str(edge.get("target") or ""),
-            str(_dict(edge.get("provenance")).get("source_key") or ""),
-        ])
+        # One logical edge per endpoint/type tuple; multiple source observations aggregate in its provenance ledger.
+        raw = "|".join([str(edge.get("source") or ""), str(edge.get("type") or ""), str(edge.get("target") or "")])
         edge_id = f"edge:{_digest(raw, 20)}"
+        edge = dict(edge)
         edge["id"] = edge_id
-        edges.setdefault(edge_id, edge)
+        source_key = _clean(_dict(edge.get("provenance")).get("source_key")) or "unknown"
+        edge.setdefault("provenance_records", [_provenance_record(edge.get("provenance"), fallback_source=source_key)])
+        existing = edges.get(edge_id)
+        if existing is None:
+            edges[edge_id] = edge
+        else:
+            existing["provenance_records"] = _merge_unique_records(_list(existing.get("provenance_records")), _list(edge.get("provenance_records")))
+            existing.setdefault("observations", 1)
+            existing["observations"] = int(existing["observations"]) + 1
+            if not existing.get("attributes") and edge.get("attributes"):
+                existing["attributes"] = edge["attributes"]
         return edge_id
 
     @staticmethod
@@ -229,6 +370,7 @@ class BiomedicalEvidenceGraphEngine:
                 "study_design": _dict(row.get("study_design")),
                 "results_state": _dict(row.get("results_state")),
                 "evidence_profile": _dict(row.get("evidence_profile")),
+                "last_update_posted": row.get("last_update_posted"),
             },
             "provenance": row.get("provenance") or {"source_key": "clinicaltrials.gov"},
         })
@@ -469,8 +611,9 @@ class BiomedicalEvidenceGraphEngine:
             row = _dict(item)
             errors.append({"source": str(row.get("source_key") or "fda"), "error": str(row.get("error") or "contained-source-error")})
 
-        node_rows = list(nodes.values())
-        edge_rows = list(edges.values())
+        node_rows = sorted(nodes.values(), key=lambda row: str(row.get("id") or ""))
+        edge_rows = sorted(edges.values(), key=lambda row: str(row.get("id") or ""))
+        errors = sorted(errors, key=lambda row: (str(row.get("source") or ""), str(row.get("error") or "")))
         type_counts = Counter(str(row.get("type") or "unknown") for row in node_rows)
         edge_counts = Counter(str(row.get("type") or "unknown") for row in edge_rows)
         exact_trial_publication_links = edge_counts.get("registry-links-publication", 0)
@@ -521,16 +664,93 @@ class BiomedicalEvidenceGraphEngine:
         if errors:
             synthesis["evidence_gaps"].append("One or more upstream source families returned a contained error; graph coverage may be incomplete.")
 
+        source_status = {
+            "evidence-body": {
+                "state": "partial" if _list(body.get("errors")) else "ok",
+                "record_count": len(_list(body.get("literature"))) + len(_list(body.get("trials"))),
+                "error_count": len(_list(body.get("errors"))),
+            },
+            "medical-terminology": {
+                "state": "partial" if _list(terminology_payload.get("errors")) else "ok",
+                "record_count": sum(len(_list(_dict(group).get("results"))) for group in _list(terminology_payload.get("groups"))),
+                "error_count": len(_list(terminology_payload.get("errors"))),
+            },
+            "fda-regulatory": {
+                "state": "partial" if _list(regulatory_payload.get("errors")) else "ok",
+                "record_count": sum(len(_list(_dict(group).get("results"))) for group in _list(regulatory_payload.get("groups"))),
+                "error_count": len(_list(regulatory_payload.get("errors"))),
+            },
+        }
+        for err in errors:
+            source = str(err.get("source") or "unknown")
+            if source in source_status:
+                current = source_status[source]
+                current["error_count"] = max(int(current.get("error_count") or 0), 1)
+                current["state"] = "partial" if int(current.get("record_count") or 0) > 0 else "error"
+            else:
+                source_status[source] = {"state": "error", "record_count": 0, "error_count": 1}
+
+        node_missing_prov = sum(1 for row in node_rows if not _list(row.get("provenance_records")))
+        edge_missing_prov = sum(1 for row in edge_rows if not _list(row.get("provenance_records")))
+        node_ids = {str(row.get("id")) for row in node_rows}
+        dangling = sum(1 for edge in edge_rows if str(edge.get("source")) not in node_ids or str(edge.get("target")) not in node_ids)
+        duplicate_consolidations = sum(max(0, int(_dict(row.get("identity")).get("observations") or 1) - 1) for row in node_rows)
+        graph_view = {"directed": True, "nodes": node_rows, "edges": edge_rows}
+        content_fingerprint = _stable_digest(graph_view)
+        provenance_view = {
+            "nodes": {str(row["id"]): _list(row.get("provenance_records")) for row in node_rows},
+            "edges": {str(row["id"]): _list(row.get("provenance_records")) for row in edge_rows},
+        }
+        provenance_fingerprint = _stable_digest(provenance_view)
+        source_freshness = _source_freshness(node_rows)
+        reliability = {
+            "schema": "sc-biomedical-evidence-graph-reliability/1.0",
+            "canonical_identity_version": "1.0",
+            "edge_provenance_version": "1.0",
+            "deterministic_ordering": True,
+            "title_only_merge_used": False,
+            "duplicate_observation_consolidation_count": duplicate_consolidations,
+            "node_missing_provenance_count": node_missing_prov,
+            "edge_missing_provenance_count": edge_missing_prov,
+            "dangling_edge_count": dangling,
+            "partial_source_failure_count": sum(1 for row in source_status.values() if row.get("state") != "ok"),
+            "integrity_state": "pass" if node_missing_prov == 0 and edge_missing_prov == 0 and dangling == 0 else "review",
+        }
+        params = {
+            "literature_limit": literature_limit, "trial_limit": trial_limit,
+            "concept_limit": concept_limit, "regulatory_limit": regulatory_limit,
+        }
+        reproducibility = {
+            "schema": "sc-biomedical-evidence-graph-reproducibility/1.0",
+            "algorithm": "biomedical-evidence-graph",
+            "algorithm_version": "1.1",
+            "normalized_query": _normal_query(query),
+            "query_fingerprint": _stable_digest(_normal_query(query)),
+            "parameters": params,
+            "graph_content_fingerprint": content_fingerprint,
+            "provenance_fingerprint": provenance_fingerprint,
+            "volatile_retrieval_timestamps_excluded_from_fingerprints": True,
+            "same_fingerprint_means": "Same bounded normalized graph content under this algorithm version; it does not prove upstream sources were unchanged outside the retrieved window.",
+        }
+        graph_view["content_fingerprint"] = content_fingerprint
+        synthesis["coverage"]["duplicate_observation_consolidation_count"] = duplicate_consolidations
+        synthesis["coverage"]["partial_source_failure_count"] = reliability["partial_source_failure_count"]
+
         return {
-            "schema": "sc-biomedical-evidence-graph/1.0",
+            "schema": "sc-biomedical-evidence-graph/1.1",
             "query": query,
-            "graph": {"directed": True, "nodes": node_rows, "edges": edge_rows},
+            "graph": graph_view,
             "synthesis": synthesis,
             "source_payloads": {
                 "evidence_body_summary": _dict(body.get("summary")),
                 "terminology_crosswalk": _dict(terminology_payload.get("crosswalk")),
                 "regulatory_governance": _dict(regulatory_payload.get("governance")),
             },
+            "source_status": {k: source_status[k] for k in sorted(source_status)},
+            "source_freshness": source_freshness,
+            "provenance_ledger": provenance_view,
+            "reliability": reliability,
+            "reproducibility": reproducibility,
             "errors": errors,
             "governance": self.descriptor.to_dict()["governance"],
             "retrieved_at": _now(),
@@ -560,8 +780,35 @@ class BiomedicalEvidenceGraphEngine:
                 "node_count": len(_list(_dict(payload.get("graph")).get("nodes"))),
                 "edge_count": len(_list(_dict(payload.get("graph")).get("edges"))),
             },
+            "source_status": payload.get("source_status", {}),
+            "reliability": payload.get("reliability", {}),
+            "reproducibility": payload.get("reproducibility", {}),
             "errors": payload["errors"],
             "governance": payload["governance"],
+            "retrieved_at": payload["retrieved_at"],
+        }
+
+    def reproducibility_capsule(
+        self,
+        query: str,
+        *,
+        literature_limit: int = 8,
+        trial_limit: int = 8,
+        concept_limit: int = 3,
+        regulatory_limit: int = 2,
+    ) -> dict[str, Any]:
+        payload = self.build_graph(
+            query, literature_limit=literature_limit, trial_limit=trial_limit,
+            concept_limit=concept_limit, regulatory_limit=regulatory_limit,
+        )
+        return {
+            "schema": "sc-biomedical-evidence-graph-reproducibility-capsule/1.0",
+            "query": payload["query"],
+            "reproducibility": payload["reproducibility"],
+            "reliability": payload["reliability"],
+            "source_status": payload["source_status"],
+            "source_freshness": payload["source_freshness"],
+            "errors": payload["errors"],
             "retrieved_at": payload["retrieved_at"],
         }
 
@@ -572,11 +819,23 @@ class BiomedicalEvidenceGraphEngine:
         nodes: dict[str, dict[str, Any]] = {}
         edges: dict[str, dict[str, Any]] = {}
         center = self._add_trial_structure(nodes, edges, trial, None)
+        node_rows = sorted(nodes.values(), key=lambda row: str(row.get("id") or ""))
+        edge_rows = sorted(edges.values(), key=lambda row: str(row.get("id") or ""))
+        graph = {"directed": True, "nodes": node_rows, "edges": edge_rows}
+        fingerprint = _stable_digest(graph)
+        graph["content_fingerprint"] = fingerprint
         return {
-            "schema": "sc-biomedical-evidence-trial-neighborhood/1.0",
+            "schema": "sc-biomedical-evidence-trial-neighborhood/1.1",
             "center": center,
-            "graph": {"directed": True, "nodes": list(nodes.values()), "edges": list(edges.values())},
+            "graph": graph,
             "evidence_profile": trial["evidence_profile"],
+            "reliability": {
+                "deterministic_ordering": True,
+                "title_only_merge_used": False,
+                "node_missing_provenance_count": sum(1 for row in node_rows if not _list(row.get("provenance_records"))),
+                "edge_missing_provenance_count": sum(1 for row in edge_rows if not _list(row.get("provenance_records"))),
+            },
+            "reproducibility": {"algorithm_version": "1.1", "graph_content_fingerprint": fingerprint},
             "governance": self.descriptor.to_dict()["governance"],
             "retrieved_at": _now(),
         }

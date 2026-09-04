@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** v5.9.0 Biomedical Evidence Graph & Evidence Synthesis. */
+/** v5.9.1 Biomedical Evidence Graph Reliability & Provenance Repair. */
 final class SC_Library_Biomedical_Evidence_Graph {
-    public const VERSION = '5.9.0';
+    public const VERSION = '5.9.1';
     public const SHORTCODE = 'sc_biomedical_evidence_graph';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Biomedical_Evidence_Graph {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-biomedical-evidence-graph-v590', SC_LIBRARY_URL . 'assets/css/sc-library-biomedical-evidence-graph-v590.css', [], SC_LIBRARY_VERSION);
-        wp_register_script('sc-library-biomedical-evidence-graph-v590', SC_LIBRARY_URL . 'assets/js/sc-library-biomedical-evidence-graph-v590.js', [], SC_LIBRARY_VERSION, true);
+        wp_register_style('sc-library-biomedical-evidence-graph-v591', SC_LIBRARY_URL . 'assets/css/sc-library-biomedical-evidence-graph-v591.css', [], SC_LIBRARY_VERSION);
+        wp_register_script('sc-library-biomedical-evidence-graph-v591', SC_LIBRARY_URL . 'assets/js/sc-library-biomedical-evidence-graph-v591.js', [], SC_LIBRARY_VERSION, true);
     }
 
     public function register_routes(): void {
@@ -39,6 +39,14 @@ final class SC_Library_Biomedical_Evidence_Graph {
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
             'callback' => [$this, 'synthesis'],
+            'args' => [
+                'q' => ['sanitize_callback' => 'sanitize_text_field', 'required' => true],
+            ],
+        ]);
+        register_rest_route('sc-library/v1', '/biomedical-evidence-graph/reproducibility', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'reproducibility'],
             'args' => [
                 'q' => ['sanitize_callback' => 'sanitize_text_field', 'required' => true],
             ],
@@ -71,6 +79,12 @@ final class SC_Library_Biomedical_Evidence_Graph {
         ]);
     }
 
+    public function reproducibility(WP_REST_Request $request) {
+        return $this->proxy('/v1/biomedical-evidence-graph/reproducibility', [
+            'q' => (string)$request->get_param('q'),
+        ]);
+    }
+
     public function trial(WP_REST_Request $request) {
         return $this->proxy('/v1/biomedical-evidence-graph/trial/' . rawurlencode(strtoupper((string)$request['nct_id'])));
     }
@@ -96,10 +110,10 @@ final class SC_Library_Biomedical_Evidence_Graph {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Biomedical Evidence Graph & Evidence Synthesis',
-            'intro' => 'Connect biomedical literature, registered studies, outcomes, terminology candidates, and regulatory evidence through provenance-backed relationships, then summarize the evidence landscape without inventing causal or clinical conclusions.',
+            'intro' => 'Build a provenance-backed biomedical evidence graph with canonical identity, duplicate-observation consolidation, source freshness, deterministic fingerprints, and descriptive synthesis without inventing causal or clinical conclusions.',
         ], $atts, self::SHORTCODE);
-        wp_enqueue_style('sc-library-biomedical-evidence-graph-v590');
-        wp_enqueue_script('sc-library-biomedical-evidence-graph-v590');
+        wp_enqueue_style('sc-library-biomedical-evidence-graph-v591');
+        wp_enqueue_script('sc-library-biomedical-evidence-graph-v591');
         ob_start(); ?>
         <section class="sc-beg" data-sc-biomedical-evidence-graph data-build-endpoint="<?php echo esc_url(rest_url('sc-library/v1/biomedical-evidence-graph/build')); ?>">
           <header class="sc-beg__header">
@@ -118,6 +132,7 @@ final class SC_Library_Biomedical_Evidence_Graph {
           <p class="sc-beg__status" aria-live="polite"></p>
           <div class="sc-beg__summary" hidden></div>
           <div class="sc-beg__canvas" hidden><svg class="sc-beg__svg" viewBox="0 0 1000 560" role="img" aria-label="Biomedical evidence relationship graph"></svg></div>
+          <div class="sc-beg__reliability" hidden></div>
           <div class="sc-beg__synthesis" hidden></div>
           <div class="sc-beg__records"></div>
           <footer><?php esc_html_e('Research and evidence-review infrastructure only; not patient-specific diagnosis, treatment, or clinical decision support.', 'sustainable-catalyst-library'); ?></footer>

@@ -1,8 +1,14 @@
 ## Current release
 
-**v5.9.0 — Biomedical Evidence Graph & Evidence Synthesis** connects PubMed literature, ClinicalTrials.gov studies/results/publication references, terminology candidates, FDA regulatory context, and v5.8.4 evidence profiles into a provenance-backed graph. The Library backend is v1.8.0. Synthesis is descriptive and does not generate pooled effects, formal GRADE certainty, causal conclusions, comparative-effectiveness rankings, or clinical recommendations.
+**v5.9.1 — Biomedical Evidence Graph Reliability & Provenance Repair** hardens v5.9.0 with canonical graph identity, duplicate-observation consolidation, node/edge provenance ledgers, source freshness/status reporting, deterministic ordering, SHA-256 content/provenance fingerprints, and bounded partial-source failure containment. The Library backend is v1.9.0. Title-only identity merging, inferred staleness, semantic equivalence, causality, pooled effects, formal GRADE certainty, and clinical recommendations remain disabled.
 
 # Sustainable Catalyst Library
+
+## v5.9.1 — Biomedical Evidence Graph Reliability & Provenance Repair
+
+v5.9.1 makes biomedical evidence graphs reproducible and auditable. Exact identifiers drive consolidation; identical logical edges aggregate provenance; every node/edge is covered by a provenance ledger; graph output is deterministically sorted and fingerprinted; and incomplete upstream coverage is explicitly contained and reported. No PostgreSQL migration or new credentials are required.
+
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.9.1.md` and `BIOMEDICAL_EVIDENCE_GRAPH_RELIABILITY_PROVENANCE_v5.9.1.md`.
 
 ## v5.9.0 — Biomedical Evidence Graph & Evidence Synthesis
 

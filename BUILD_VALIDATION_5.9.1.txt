@@ -1,0 +1,13 @@
+Sustainable Catalyst Library v5.9.1 — Biomedical Evidence Graph Reliability & Provenance Repair
+
+Validation summary:
+17 passed — v5.9.1 backend reliability + WordPress release tests
+65 passed, 10 deselected — retained biomedical/institutional regression line
+26 passed, 3 deselected — retained Explorer/homepage/Publications line
+Python compileall: PASS
+PHP syntax: PASS
+JavaScript syntax: PASS
+
+Backend: v1.9.0
+Database migration: none
+New credentials: none

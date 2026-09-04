@@ -202,6 +202,10 @@ def health() -> dict[str, Any]:
             "regulatory_evidence_graph_context": True,
             "terminology_candidate_graph_context": True,
             "automated_pooled_effect": False,
+            "evidence_graph_reliability": True,
+            "graph_provenance_ledger": True,
+            "graph_content_fingerprint": True,
+            "graph_partial_failure_containment": True,
             "automated_clinical_recommendation": False,
         },
         "ingest_limits": {
@@ -525,6 +529,23 @@ def biomedical_evidence_graph_synthesis(
 ) -> dict[str, Any]:
     try:
         return biomedical_evidence_graph.synthesis(
+            q, literature_limit=literature_limit, trial_limit=trial_limit,
+            concept_limit=concept_limit, regulatory_limit=regulatory_limit,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/biomedical-evidence-graph/reproducibility")
+def biomedical_evidence_graph_reproducibility(
+    q: str = Query(..., min_length=1, max_length=500),
+    literature_limit: int = Query(default=8, ge=1, le=20),
+    trial_limit: int = Query(default=8, ge=1, le=20),
+    concept_limit: int = Query(default=3, ge=1, le=5),
+    regulatory_limit: int = Query(default=2, ge=1, le=5),
+) -> dict[str, Any]:
+    try:
+        return biomedical_evidence_graph.reproducibility_capsule(
             q, literature_limit=literature_limit, trial_limit=trial_limit,
             concept_limit=concept_limit, regulatory_limit=regulatory_limit,
         )
