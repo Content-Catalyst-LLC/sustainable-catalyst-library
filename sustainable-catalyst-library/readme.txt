@@ -375,6 +375,14 @@ Use [sc_carbon_nature_intelligence] to expose the Library-native measure explore
 
 == Changelog ==
 
+= 5.11.0 + Carbon & Nature Intelligence v0.3.0 =
+* Added Carbon Evidence & Methodology Graph with governed evidence records and methodology profiles.
+* Added typed graph relationships among concepts, measures, methodologies, and evidence records.
+* Added evidence and methodology search/detail REST proxy routes and graph neighborhood support.
+* Research-context packets now include methodology, evidence, and graph context.
+* Preserved non-inference, no automatic methodology selection, no project eligibility, no credit issuance, and no sequestration-calculation guardrails.
+
+
 = 5.9.0 =
 * Adds a provenance-backed biomedical evidence graph across PubMed, ClinicalTrials.gov, terminology candidates, FDA regulatory context, and evidence-profile metadata.
 * Adds exact registry PMID trial-publication edges plus trial-condition, intervention, and outcome relationships.

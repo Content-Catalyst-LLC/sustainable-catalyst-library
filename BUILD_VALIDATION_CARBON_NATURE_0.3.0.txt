@@ -1,0 +1,25 @@
+Sustainable Catalyst Carbon & Nature Intelligence v0.3.0
+Carbon Evidence & Methodology Graph
+
+PACKAGED VALIDATION
+- 15 v0.3.0 backend/interface tests passed
+- 120 retained Library/backend regression tests passed (14 historical release-identity assertions deselected)
+- 26 retained public-interface regression tests passed (3 historical release-identity assertions deselected)
+- Python compileall passed
+- PHP syntax validation passed for plugin main and Carbon & Nature module
+- Node syntax validation passed for v0.3.0 browser runtime
+
+TOTAL EXECUTED TESTS: 161 passed
+
+RELEASE BOUNDARIES
+- Library application version remains 5.11.0
+- Carbon & Nature subsystem version advances to 0.3.0
+- Library backend advances to 2.4.0
+- no PostgreSQL migration
+- no new credentials
+- no automatic methodology selection
+- no automatic evidence-quality grading or claim validation
+- no SOC or whole-farm GHG calculation
+- no project eligibility / credit issuance / certification
+
+STATUS: PASS

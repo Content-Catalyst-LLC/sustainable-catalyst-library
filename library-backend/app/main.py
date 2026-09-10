@@ -232,10 +232,17 @@ def health() -> dict[str, Any]:
             "private_cross_product_handoffs": True,
             "private_public_search_separation": True,
             "carbon_nature_intelligence": True,
-            "carbon_nature_domain_version": "0.2.0",
+            "carbon_nature_domain_version": "0.3.0",
             "carbon_sequestration_measure_registry": True,
             "carbon_measure_comparison_packets": True,
             "carbon_measure_research_context": True,
+            "carbon_evidence_registry": True,
+            "carbon_methodology_registry": True,
+            "carbon_evidence_methodology_graph": True,
+            "carbon_evidence_graph_neighborhoods": True,
+            "carbon_evidence_aware_research_context": True,
+            "automatic_carbon_methodology_selection": False,
+            "automatic_carbon_claim_validation": False,
             "afolu_knowledge_foundation": True,
             "nature_based_solutions_knowledge_foundation": True,
             "carbon_nature_relationship_registry": True,
@@ -752,6 +759,82 @@ def carbon_nature_measure(measure_key: str) -> dict[str, Any]:
         return carbon_nature.measure(measure_key)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="Carbon & Nature measure not found") from exc
+
+
+@app.get("/v1/carbon-nature/evidence")
+def carbon_nature_evidence(
+    q: str | None = Query(default=None, max_length=500),
+    record_type: str | None = Query(default=None, max_length=120),
+    authority_class: str | None = Query(default=None, max_length=160),
+    concept: str | None = Query(default=None, max_length=160),
+    measure: str | None = Query(default=None, max_length=160),
+    methodology: str | None = Query(default=None, max_length=160),
+    limit: int = Query(default=50, ge=1, le=100),
+) -> dict[str, Any]:
+    return carbon_nature.evidence_records(
+        q=q,
+        record_type=record_type,
+        authority_class=authority_class,
+        concept=concept,
+        measure=measure,
+        methodology=methodology,
+        limit=limit,
+    )
+
+
+@app.get("/v1/carbon-nature/evidence/{evidence_key}")
+def carbon_nature_evidence_record(evidence_key: str) -> dict[str, Any]:
+    try:
+        return carbon_nature.evidence_record(evidence_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Carbon & Nature evidence record not found") from exc
+
+
+@app.get("/v1/carbon-nature/methodologies")
+def carbon_nature_methodologies(
+    q: str | None = Query(default=None, max_length=500),
+    family: str | None = Query(default=None, max_length=120),
+    measure: str | None = Query(default=None, max_length=160),
+    outcome: str | None = Query(default=None, max_length=160),
+    limit: int = Query(default=50, ge=1, le=100),
+) -> dict[str, Any]:
+    return carbon_nature.methodologies(q=q, family=family, measure=measure, outcome=outcome, limit=limit)
+
+
+@app.get("/v1/carbon-nature/methodologies/{methodology_key}")
+def carbon_nature_methodology(methodology_key: str) -> dict[str, Any]:
+    try:
+        return carbon_nature.methodology(methodology_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Carbon & Nature methodology not found") from exc
+
+
+@app.get("/v1/carbon-nature/evidence-graph")
+def carbon_nature_evidence_graph(
+    node_type: str | None = Query(default=None, max_length=40),
+    node_key: str | None = Query(default=None, max_length=180),
+    predicate: str | None = Query(default=None, max_length=180),
+    limit: int = Query(default=200, ge=1, le=500),
+) -> dict[str, Any]:
+    return carbon_nature.evidence_graph(
+        node_type=node_type,
+        node_key=node_key,
+        predicate=predicate,
+        limit=limit,
+    )
+
+
+@app.get("/v1/carbon-nature/evidence-graph/neighborhood/{node_key}")
+def carbon_nature_evidence_graph_neighborhood(
+    node_key: str,
+    limit: int = Query(default=100, ge=1, le=300),
+) -> dict[str, Any]:
+    try:
+        return carbon_nature.evidence_graph_neighborhood(node_key, limit=limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Carbon & Nature evidence graph node not found") from exc
 
 
 @app.get("/v1/carbon-nature/research-context")
