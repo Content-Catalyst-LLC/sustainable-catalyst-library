@@ -1,0 +1,86 @@
+Sustainable Catalyst — Energy Systems Intelligence v0.3.0
+Energy Sustainability Indicators
+============================================================
+
+Release identity
+----------------
+Library application: 5.11.0 (preserved)
+Carbon & Nature Intelligence: 0.5.0 (preserved)
+Energy Systems Intelligence: 0.3.0
+Library Python backend: 2.9.0
+
+Source-grounded indicator foundation
+------------------------------------
+PASS: 30 EISD indicator definitions registered
+PASS: SOC1-SOC4 = 4 social indicators
+PASS: ECO1-ECO16 = 16 economic indicators
+PASS: ENV1-ENV10 = 10 environmental indicators
+PASS: 3 dimensions
+PASS: 7 themes
+PASS: 19 subthemes
+PASS: source provenance fixed to Vera & Langlois (2007) for indicator definitions
+PASS: methodology-sheet-required status retained for all 30 indicators
+PASS: official calculation status remains not-implemented for all 30 indicators
+
+Preservation
+------------
+PASS: 75 Energy Systems concepts preserved
+PASS: 63 typed relationships preserved
+PASS: 6 knowledge domains preserved
+PASS: 6 provenance sources preserved
+PASS: 9 module SDG mappings preserved
+PASS: 8 numeric registry units preserved
+PASS: 4 energy-unit conversion factors preserved
+PASS: 24 source-bound 2020 direct-carbon factors preserved
+PASS: 16 source-bound 2020 gross heat-content factors preserved
+PASS: Carbon & Nature v0.5.0 regression coverage retained
+
+New contracts and interfaces
+----------------------------
+PASS: indicator framework endpoint
+PASS: filtered indicator registry endpoint
+PASS: individual indicator endpoint
+PASS: indicator observation-template endpoint
+PASS: provenance-first observation contract for every indicator
+PASS: machine-readable indicator-definition JSON Schema
+PASS: machine-readable indicator-observation JSON Schema
+PASS: 30-record JSON registry export
+PASS: WordPress Sustainability Indicators tab
+PASS: indicator search and dimension filter
+PASS: observation-contract detail viewer
+PASS: all new WordPress routes are GET-only
+
+Methodology and decision boundaries
+-----------------------------------
+PASS: source table definition is not treated as the missing official methodology sheets
+PASS: no official EISD formula implementation is claimed
+PASS: no current country indicator values are bundled
+PASS: no automatic sustainability score
+PASS: no automatic country ranking
+PASS: no automatic technology ranking
+PASS: no automatic policy recommendation
+PASS: no scenario modeling
+PASS: historical v0.2.0 carbon factors remain source-bound and non-current
+
+Automated validation
+--------------------
+25 focused pytest checks passed:
+- library-backend/tests/test_energy_systems_v290.py
+- tests/test_energy_systems_intelligence_v030.py
+- tests/test_carbon_nature_intelligence_v050.py
+
+PASS: Python compilation for Energy Systems and main backend module
+PASS: PHP syntax for plugin main and Energy Systems class
+PASS: JavaScript syntax for v0.3.0 interface asset
+PASS: JSON parsing for registry export and both JSON Schemas
+PASS: JSON Schema Draft 2020-12 structural validation
+PASS: all 30 exported indicator definitions validate against the definition schema
+
+Build-environment boundary
+--------------------------
+The local build environment validates the Energy Systems module directly and runs
+focused regression tests. Full FastAPI startup is not claimed here because the
+container does not provide the production backend's complete runtime/database
+configuration. The bundled Contabo upgrader rebuilds the live Docker service and
+verifies /health, Carbon & Nature v0.5.0, Energy Systems v0.3.0, framework counts,
+all 30 indicators, an ECO13 observation contract, and a retained v0.2.0 conversion.

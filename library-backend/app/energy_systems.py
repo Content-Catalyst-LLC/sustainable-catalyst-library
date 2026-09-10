@@ -7,8 +7,8 @@ from decimal import Decimal, InvalidOperation, localcontext
 from typing import Any
 
 
-DOMAIN_VERSION = "0.2.0"
-SCHEMA_VERSION = "sc-energy-systems-conversion-registry/1.0"
+DOMAIN_VERSION = "0.3.0"
+SCHEMA_VERSION = "sc-energy-systems-sustainability-indicators/1.0"
 
 
 @dataclass(frozen=True)
@@ -99,13 +99,32 @@ class EnergyHeatContentFactorRecord:
     note: str
 
 
+@dataclass(frozen=True)
+class EnergyIndicatorDefinition:
+    code: str
+    label: str
+    dimension: str
+    theme: str
+    subtheme: str
+    statement: str
+    measure_type: str
+    observation_fields: tuple[str, ...]
+    related_concepts: tuple[str, ...]
+    source_key: str
+    source_year: int
+    methodology_status: str
+    calculation_status: str
+    note: str
+
+
 class EnergySystemsKnowledgeFoundation:
     """Governed sustainable-energy knowledge and source-bound numerical registry.
 
-    v0.2.0 preserves the v0.1.0 concept graph and adds versioned energy-unit,
-    direct-carbon, and gross-calorific-value factor registries from the supplied
-    2020 Carbon Trust/BEIS guide. Calculations are explicit-source, historical-
-    vintage calculations; they are never presented as current grid or inventory data.
+    v0.3.0 preserves the v0.1.0 concept graph and v0.2.0 source-bound numeric
+    registry, then adds the 30 Energy Indicators for Sustainable Development
+    represented in the supplied Vera & Langlois article as governed definitions
+    and observation contracts. Official EISD calculation methods remain disabled
+    because the article points to separate methodology sheets that were not supplied.
     """
 
     def __init__(self) -> None:
@@ -118,6 +137,7 @@ class EnergySystemsKnowledgeFoundation:
         self._conversion_factors = self._build_conversion_factors()
         self._carbon_factors = self._build_carbon_factors()
         self._heat_content_factors = self._build_heat_content_factors()
+        self._indicators = self._build_indicators()
         self._methodology_rules = self._build_methodology_rules()
         self._handoffs = self._build_handoffs()
         self._guardrails = self._build_guardrails()
@@ -446,6 +466,52 @@ class EnergySystemsKnowledgeFoundation:
         return {row.key: row for row in rows}
 
     @staticmethod
+    def _build_indicators() -> dict[str, EnergyIndicatorDefinition]:
+        """Build the 30-indicator EISD table reproduced in Vera & Langlois (2007).
+
+        The supplied article names and classifies the indicators, but points readers to
+        separate methodology sheets for exact definitions, construction methods, units,
+        data issues and sources. Those methodology sheets were not supplied. Therefore
+        v0.3.0 activates governed definitions and observation contracts only; it does not
+        claim to implement the official EISD formulas.
+        """
+        I = EnergyIndicatorDefinition
+        shared = ("geography", "period", "value", "unit", "data_source", "methodology_reference", "quality_note")
+        rows = [
+            I("SOC1", "Share of households (or population) without electricity or commercial energy, or heavily dependent on non-commercial energy", "social", "equity", "accessibility", "Accessibility of modern/commercial energy services.", "share", shared + ("population_or_household_basis", "access_definition"), ("energy-access", "global-energy-importance"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "The table supplies the indicator title; exact numerator, denominator and classification rules require the cited methodology sheet."),
+            I("SOC2", "Share of household income spent on fuel and electricity", "social", "equity", "affordability", "Household energy affordability expressed through the share of income spent on fuel and electricity.", "share", shared + ("income_group", "energy_expenditure_basis", "income_basis"), ("energy-affordability", "energy-access"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Income and expenditure definitions must remain explicit; the source article does not reproduce the methodology sheet."),
+            I("SOC3", "Household energy use for each income group and corresponding fuel mix", "social", "equity", "disparities", "Distribution of household energy use and fuel mix across income groups.", "disaggregated-profile", shared + ("income_group", "fuel_or_carrier", "energy_use_basis"), ("energy-access", "energy-mix"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "This is a disaggregated profile rather than a single universal scalar."),
+            I("SOC4", "Accident fatalities per energy produced by fuel chain", "social", "health", "safety", "Safety burden associated with energy fuel chains relative to energy produced.", "rate", shared + ("fuel_chain", "fatality_definition", "energy_production_basis"), ("energy-system",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Fuel-chain boundary and fatality inclusion criteria require the official methodology."),
+            I("ECO1", "Energy use per capita", "economic", "use-and-production-patterns", "overall-use", "Aggregate energy use normalized by population.", "intensity", shared + ("energy_use_basis", "population_basis"), ("energy-intensity", "global-energy-importance"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Primary/final energy scope and population conventions must be declared before calculation."),
+            I("ECO2", "Energy use per unit of GDP", "economic", "use-and-production-patterns", "overall-productivity", "Aggregate energy use relative to economic output.", "intensity", shared + ("energy_use_basis", "gdp_basis", "currency_price_basis"), ("energy-intensity", "decoupling"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "GDP price basis, purchasing-power treatment and energy boundary require explicit methodology."),
+            I("ECO3", "Efficiency of energy conversion and distribution", "economic", "use-and-production-patterns", "supply-efficiency", "Efficiency of transformation and distribution within the energy supply system.", "efficiency", shared + ("conversion_or_distribution_scope", "input_energy_basis", "output_energy_basis"), ("energy-efficiency", "energy-conversion"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "The article names the indicator but does not reproduce the official aggregation formula."),
+            I("ECO4", "Reserves-to-production ratio", "economic", "use-and-production-patterns", "production", "Relation between energy reserves and production.", "ratio", shared + ("reserve_definition", "production_definition", "resource_or_fuel"), ("reserves-to-production", "energy-reserve"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Reserve classification and production period must be sourced and explicit."),
+            I("ECO5", "Resources-to-production ratio", "economic", "use-and-production-patterns", "production", "Relation between energy resources and production.", "ratio", shared + ("resource_definition", "production_definition", "resource_or_fuel"), ("resources-to-production", "energy-resource"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Resource classification is methodology-sensitive and is not inferred."),
+            I("ECO6", "Industrial energy intensities", "economic", "use-and-production-patterns", "end-use", "Energy intensity of industrial activity.", "sector-intensity", shared + ("sector", "energy_use_basis", "activity_or_output_basis"), ("energy-intensity", "end-use"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Sector boundaries and activity denominators must be harmonized for comparison."),
+            I("ECO7", "Agricultural energy intensities", "economic", "use-and-production-patterns", "end-use", "Energy intensity of agricultural activity.", "sector-intensity", shared + ("sector", "energy_use_basis", "activity_or_output_basis"), ("energy-intensity", "end-use"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Sector boundaries and activity denominators must be harmonized for comparison."),
+            I("ECO8", "Service/commercial energy intensities", "economic", "use-and-production-patterns", "end-use", "Energy intensity of service and commercial activity.", "sector-intensity", shared + ("sector", "energy_use_basis", "activity_or_output_basis"), ("energy-intensity", "end-use"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Sector boundaries and activity denominators must be harmonized for comparison."),
+            I("ECO9", "Household energy intensities", "economic", "use-and-production-patterns", "end-use", "Energy intensity of household activity or services.", "sector-intensity", shared + ("household_basis", "energy_use_basis", "activity_or_service_basis"), ("energy-intensity", "end-use"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Household denominator and service basis require the official methodology."),
+            I("ECO10", "Transport energy intensities", "economic", "use-and-production-patterns", "end-use", "Energy intensity of transport activity.", "sector-intensity", shared + ("transport_mode", "energy_use_basis", "activity_basis"), ("energy-intensity", "end-use"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Passenger/freight and activity-unit definitions must be explicit."),
+            I("ECO11", "Fuel shares in energy and electricity", "economic", "use-and-production-patterns", "diversification-fuel-mix", "Fuel shares within energy use and electricity generation/capacity contexts.", "share-profile", shared + ("fuel_or_carrier", "energy_or_electricity_basis", "denominator_scope"), ("energy-mix",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "The observation contract supports multiple fuel shares; denominator scope must be declared."),
+            I("ECO12", "Non-carbon energy share in energy and electricity", "economic", "use-and-production-patterns", "diversification-fuel-mix", "Share of non-carbon energy within energy and electricity contexts.", "share", shared + ("non_carbon_definition", "energy_or_electricity_basis", "denominator_scope"), ("energy-mix",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "The source title is retained; classification of non-carbon sources requires the official methodology."),
+            I("ECO13", "Renewable energy share in energy and electricity", "economic", "use-and-production-patterns", "diversification-fuel-mix", "Share of renewable energy within energy and electricity contexts.", "share", shared + ("renewable_definition", "energy_or_electricity_basis", "denominator_scope"), ("renewable-energy-share", "renewable-energy", "energy-mix"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Renewable classification and denominator scope must be explicit and source-governed."),
+            I("ECO14", "End-use energy prices by fuel and by sector", "economic", "use-and-production-patterns", "prices", "End-use energy prices disaggregated by fuel and sector.", "price-profile", shared + ("fuel_or_carrier", "sector", "price_basis", "currency"), ("energy-affordability",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Taxes, subsidies, currency and real/nominal price treatment must be preserved."),
+            I("ECO15", "Net energy import dependency", "economic", "security", "imports", "Dependence of an energy system on net energy imports.", "dependency-ratio", shared + ("import_export_boundary", "energy_supply_basis", "fuel_or_carrier"), ("energy-security",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "The article does not reproduce the official denominator or treatment of negative net imports."),
+            I("ECO16", "Stocks of critical fuels per corresponding fuel consumption", "economic", "security", "strategic-fuel-stocks", "Availability of critical fuel stocks relative to corresponding fuel consumption.", "stock-to-use-ratio", shared + ("critical_fuel", "stock_definition", "consumption_basis"), ("energy-security",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Critical-fuel designation and stock coverage require explicit methodology."),
+            I("ENV1", "GHG emissions from energy production and use per capita and per unit of GDP", "environmental", "atmosphere", "climate-change", "Greenhouse-gas emissions from energy production and use normalized by population and/or GDP.", "emissions-intensity", shared + ("emissions_boundary", "gas_accounting_basis", "normalization_basis"), ("ghg-emissions", "co2e"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "v0.2.0 historical direct-carbon factors are not silently substituted for this indicator's full methodology."),
+            I("ENV2", "Ambient concentrations of air pollutants in urban areas", "environmental", "atmosphere", "air-quality", "Ambient urban air-pollutant concentrations relevant to energy-system impacts.", "concentration-profile", shared + ("pollutant", "monitoring_location", "concentration_basis"), ("air-quality-impact",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Monitoring design, averaging time and pollutant definitions require source methodology."),
+            I("ENV3", "Air-pollutant emissions from energy systems", "environmental", "atmosphere", "air-quality", "Air-pollutant emissions attributable to energy systems.", "emissions-profile", shared + ("pollutant", "energy_system_boundary", "emissions_basis"), ("air-quality-impact", "energy-system"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Pollutant inventory boundary and attribution method must be declared."),
+            I("ENV4", "Contaminant discharges in liquid effluents from energy systems", "environmental", "water", "water-quality", "Liquid-effluent contaminant discharges attributable to energy systems.", "discharge-profile", shared + ("contaminant", "effluent_boundary", "discharge_basis"), ("water-quality-impact", "energy-system"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Contaminant, discharge and system boundaries require explicit methodology."),
+            I("ENV5", "Soil area where acidification exceeds critical load", "environmental", "land", "soil-quality", "Soil area exceeding an acidification critical-load threshold.", "area-threshold", shared + ("critical_load_definition", "area_basis", "threshold_source"), ("land-impact",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Critical-load threshold and mapped-area methodology are not inferred."),
+            I("ENV6", "Rate of deforestation attributed to energy use", "environmental", "land", "forest", "Deforestation rate attributed to energy use.", "rate", shared + ("forest_definition", "attribution_method", "area_change_basis"), ("land-impact", "forest-ecology", "forest-carbon"), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Attribution of deforestation to energy use requires an explicit causal/accounting method."),
+            I("ENV7", "Ratio of solid-waste generation to units of energy produced", "environmental", "land", "solid-waste-generation-and-management", "Solid-waste generation relative to energy produced.", "waste-intensity", shared + ("solid_waste_boundary", "energy_production_basis"), ("energy-system",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Waste classification and energy-production denominator require the official methodology."),
+            I("ENV8", "Ratio of solid waste properly disposed of to total generated solid waste", "environmental", "land", "solid-waste-generation-and-management", "Share or ratio of generated solid waste that is properly disposed of.", "waste-management-ratio", shared + ("proper_disposal_definition", "solid_waste_boundary"), ("energy-system",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Proper-disposal classification must be source-defined."),
+            I("ENV9", "Ratio of solid radioactive waste to units of energy produced", "environmental", "land", "solid-waste-generation-and-management", "Solid radioactive waste relative to energy produced.", "radioactive-waste-intensity", shared + ("radioactive_waste_boundary", "energy_production_basis"), ("energy-system",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Radioactive-waste classification and energy denominator require the official methodology."),
+            I("ENV10", "Ratio of solid radioactive waste awaiting disposal to total generated solid radioactive waste", "environmental", "land", "solid-waste-generation-and-management", "Share or ratio of generated radioactive waste awaiting disposal.", "radioactive-waste-management-ratio", shared + ("awaiting_disposal_definition", "radioactive_waste_boundary"), ("energy-system",), "vera-langlois-2007", 2007, "methodology-sheet-required", "not-implemented", "Awaiting-disposal and total-generation definitions require the official methodology."),
+        ]
+        return {row.code: row for row in rows}
+
+    @staticmethod
     def _build_methodology_rules() -> list[dict[str, Any]]:
         return [
             {"key": "direct-emissions-boundary", "source_key": "carbon-trust-conversion-2020", "source_year": 2020, "rule": "Energy carbon factors in the guide are total direct kgCO2e per unit of fuel; direct emissions occur at fuel use or at electricity generation.", "current_default": False},
@@ -453,6 +519,9 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "co2e-combined-gases", "source_key": "carbon-trust-conversion-2020", "source_year": 2020, "rule": "The guide expresses the combined greenhouse effect of CO2, CH4 and N2O as kgCO2e using global warming potential.", "current_default": False},
             {"key": "renewable-electricity-accounting", "source_key": "carbon-trust-conversion-2020", "source_year": 2020, "rule": "For green-tariff electricity, the guide directs location-based reporting to the grid factor and market-based reporting to supplier-specific or residual-grid factors when applicable; v0.2.0 does not fabricate a universal renewable-electricity factor.", "current_default": False},
             {"key": "gross-calorific-basis", "source_key": "carbon-trust-conversion-2020", "source_year": 2020, "rule": "Fuel heat-content records are gross calorific values; the guide explains that net values exclude energy associated with water evaporation.", "current_default": False},
+            {"key": "eisd-table-definition-boundary", "source_key": "vera-langlois-2007", "source_year": 2007, "rule": "The supplied article identifies and classifies 30 EISD indicators across social, economic, and environmental dimensions; v0.3.0 preserves those names and classifications as source-grounded definitions.", "current_default": False},
+            {"key": "eisd-methodology-sheet-boundary", "source_key": "vera-langlois-2007", "source_year": 2007, "rule": "The article states that separate methodology sheets provide definitions, methods, components, units, construction instructions, data issues, sources, availability, and sustainable-development relevance. Those sheets were not supplied, so exact official formulas are not implemented.", "current_default": False},
+            {"key": "indicator-comparison-boundary", "source_key": "vera-langlois-2007", "source_year": 2007, "rule": "Indicator observations should retain geography, period, unit, denominator or disaggregation basis, source, and methodology so comparisons do not silently mix incompatible definitions or contexts.", "current_default": False},
         ]
 
     @staticmethod
@@ -486,7 +555,13 @@ class EnergySystemsKnowledgeFoundation:
             "historical_calculation_is_not_current_inventory": True,
             "calculation_requires_explicit_source_bound_inputs": True,
             "workbench_execution_activated": False,
+            "energy_indicator_definition_registry_activated": True,
+            "energy_indicator_observation_contracts_activated": True,
+            "official_eisd_methodology_sheets_loaded": False,
             "energy_indicator_calculation_activated": False,
+            "indicator_definition_is_not_observed_value": True,
+            "indicator_value_is_not_sustainability_score": True,
+            "cross_geography_comparison_requires_harmonized_methodology": True,
             "scenario_modeling_activated": False,
             "automatic_technology_ranking": False,
             "automatic_policy_recommendation": False,
@@ -526,6 +601,19 @@ class EnergySystemsKnowledgeFoundation:
             if factor.source_key not in allowed_sources or factor.unit not in self._units:
                 raise ValueError(f"Invalid heat-content factor: {factor.key}")
             self._positive_decimal(factor.kwh_per_unit, factor.key)
+        if len(self._indicators) != 30:
+            raise ValueError("Energy indicator registry must contain the 30 EISD indicators represented in the supplied article table")
+        expected_codes = {f"SOC{i}" for i in range(1, 5)} | {f"ECO{i}" for i in range(1, 17)} | {f"ENV{i}" for i in range(1, 11)}
+        if set(self._indicators) != expected_codes:
+            raise ValueError("Energy indicator codes do not match the source table")
+        for indicator in self._indicators.values():
+            if indicator.source_key not in allowed_sources:
+                raise ValueError(f"Unknown indicator source: {indicator.source_key}")
+            missing_concepts = set(indicator.related_concepts) - keys
+            if missing_concepts:
+                raise ValueError(f"Unknown related concepts for {indicator.code}: {sorted(missing_concepts)}")
+            if indicator.calculation_status != "not-implemented" or indicator.methodology_status != "methodology-sheet-required":
+                raise ValueError("v0.3.0 must not claim official EISD formula implementation")
 
     def _content_fingerprint(self) -> str:
         content = {
@@ -539,6 +627,7 @@ class EnergySystemsKnowledgeFoundation:
             "conversion_factors": [asdict(v) for v in self._conversion_factors.values()],
             "carbon_factors": [asdict(v) for v in self._carbon_factors.values()],
             "heat_content_factors": [asdict(v) for v in self._heat_content_factors.values()],
+            "indicators": [asdict(v) for v in self._indicators.values()],
             "methodology_rules": self._methodology_rules,
             "handoffs": self._handoffs,
             "guardrails": self._guardrails,
@@ -552,11 +641,11 @@ class EnergySystemsKnowledgeFoundation:
             "subsystem": {
                 "name": "Energy Systems Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Energy Units, Carbon Factors & Conversion Registry",
+                "release": "Energy Sustainability Indicators",
                 "library_version": "5.11.0",
-                "backend_version": "2.8.0",
+                "backend_version": "2.9.0",
                 "read_only": True,
-                "calculation_mode": "explicit-source-bound",
+                "calculation_mode": "source-bound-numeric-registry-plus-noncomputational-indicator-contracts",
             },
             "counts": {
                 "concepts": len(self._concepts),
@@ -569,13 +658,17 @@ class EnergySystemsKnowledgeFoundation:
                 "conversion_factors": len(self._conversion_factors),
                 "carbon_factors": len(self._carbon_factors),
                 "heat_content_factors": len(self._heat_content_factors),
+                "indicators": len(self._indicators),
+                "indicator_dimensions": 3,
+                "indicator_themes": 7,
+                "indicator_subthemes": 19,
+                "indicator_observation_contracts": len(self._indicators),
                 "methodology_rules": len(self._methodology_rules),
             },
             "knowledge_domains": self._knowledge_domains,
             "sdg_mappings": self._sdgs,
             "guardrails": self._guardrails,
             "roadmap": [
-                {"version": "0.3.0", "name": "Energy Sustainability Indicators"},
                 {"version": "0.4.0", "name": "Renewable Technology & Resource Model"},
                 {"version": "0.5.0", "name": "Energy Balance & Systems Modeling"},
                 {"version": "0.6.0", "name": "Energy Scenario Economics"},
@@ -631,7 +724,8 @@ class EnergySystemsKnowledgeFoundation:
             raise KeyError(key)
         concepts = [c.key for c in self._concepts.values() if key in c.source_keys]
         relationships = [asdict(r) for r in self._relationships if key in r.source_keys]
-        return {"ok": True, "schema": "sc-energy-source/1.0", "source": asdict(source), "concept_keys": concepts, "relationship_count": len(relationships), "content_fingerprint": self._fingerprint}
+        indicators = [i.code for i in self._indicators.values() if i.source_key == key]
+        return {"ok": True, "schema": "sc-energy-source/1.0", "source": asdict(source), "concept_keys": concepts, "relationship_count": len(relationships), "indicator_codes": indicators, "content_fingerprint": self._fingerprint}
 
     def knowledge_map(self) -> dict[str, Any]:
         grouped: dict[str, list[dict[str, Any]]] = {d["key"]: [] for d in self._knowledge_domains}
@@ -682,6 +776,7 @@ class EnergySystemsKnowledgeFoundation:
                 "conversion_factors": len(self._conversion_factors),
                 "carbon_factors": len(self._carbon_factors),
                 "heat_content_factors": len(self._heat_content_factors),
+                "indicators": len(self._indicators),
                 "methodology_rules": len(self._methodology_rules),
             },
             "methodology_rules": self._methodology_rules,
@@ -796,6 +891,105 @@ class EnergySystemsKnowledgeFoundation:
             "output": {"kwh_gross": self._decimal_text(result)},
             "status": "historical-source-bound-calculation",
             "guardrail": "This result uses the selected default gross calorific value from the supplied guide and is not a supplier-specific or net-calorific-value result.",
+        }
+
+    def indicator_framework(self) -> dict[str, Any]:
+        dimension_labels = {"social": "Social", "economic": "Economic", "environmental": "Environmental"}
+        grouped: dict[str, dict[str, dict[str, list[str]]]] = {}
+        for indicator in self._indicators.values():
+            grouped.setdefault(indicator.dimension, {}).setdefault(indicator.theme, {}).setdefault(indicator.subtheme, []).append(indicator.code)
+        dimensions = []
+        for dimension in ("social", "economic", "environmental"):
+            themes = []
+            for theme, subthemes in grouped.get(dimension, {}).items():
+                themes.append({
+                    "key": theme,
+                    "label": theme.replace("-", " ").title(),
+                    "subthemes": [{"key": subtheme, "label": subtheme.replace("-", " ").title(), "indicator_codes": codes} for subtheme, codes in subthemes.items()],
+                })
+            dimensions.append({"key": dimension, "label": dimension_labels[dimension], "themes": themes})
+        return {
+            "ok": True,
+            "schema": "sc-energy-indicator-framework/1.0",
+            "source_key": "vera-langlois-2007",
+            "source_year": 2007,
+            "counts": {"indicators": len(self._indicators), "dimensions": 3, "themes": 7, "subthemes": 19},
+            "dimensions": dimensions,
+            "methodology_status": "methodology-sheets-not-supplied",
+            "guardrail": "The supplied article provides the 30 indicator names and classification framework. Exact official construction methods require the separate EISD methodology sheets cited by the article; v0.3.0 does not invent those formulas.",
+            "content_fingerprint": self._fingerprint,
+        }
+
+    def indicators(self, *, q: str = "", dimension: str = "", theme: str = "", subtheme: str = "", limit: int = 100) -> dict[str, Any]:
+        qn = q.strip().lower()
+        rows: list[dict[str, Any]] = []
+        for indicator in self._indicators.values():
+            if dimension and indicator.dimension != dimension:
+                continue
+            if theme and indicator.theme != theme:
+                continue
+            if subtheme and indicator.subtheme != subtheme:
+                continue
+            haystack = " ".join((indicator.code, indicator.label, indicator.dimension, indicator.theme, indicator.subtheme, indicator.statement, indicator.measure_type, *indicator.related_concepts)).lower()
+            if qn and qn not in haystack:
+                continue
+            rows.append(asdict(indicator))
+            if len(rows) >= max(1, min(limit, 100)):
+                break
+        return {
+            "ok": True,
+            "schema": "sc-energy-indicators/1.0",
+            "count": len(rows),
+            "items": rows,
+            "guardrail": "Indicator definitions are source-grounded metadata, not observed values, official formula implementations, sustainability scores, or policy conclusions.",
+        }
+
+    def indicator(self, code: str) -> dict[str, Any]:
+        key = code.strip().upper()
+        indicator = self._indicators.get(key)
+        if indicator is None:
+            raise KeyError(key)
+        return {
+            "ok": True,
+            "schema": "sc-energy-indicator/1.0",
+            "indicator": asdict(indicator),
+            "observation_contract": self._indicator_observation_contract(indicator),
+            "content_fingerprint": self._fingerprint,
+        }
+
+    @staticmethod
+    def _indicator_observation_contract(indicator: EnergyIndicatorDefinition) -> dict[str, Any]:
+        return {
+            "schema": "sc-energy-indicator-observation/1.0",
+            "indicator_code": indicator.code,
+            "required_fields": list(indicator.observation_fields),
+            "provenance_required": True,
+            "methodology_reference_required": True,
+            "methodology_status": indicator.methodology_status,
+            "calculation_status": indicator.calculation_status,
+            "comparison_requirements": [
+                "same or explicitly reconciled indicator definition",
+                "compatible geography and period",
+                "compatible unit and denominator basis",
+                "documented source and methodology",
+            ],
+            "guardrail": "This contract structures an observation. It does not calculate the official EISD indicator and does not validate the scientific or statistical quality of submitted values.",
+        }
+
+    def indicator_observation_template(self, code: str) -> dict[str, Any]:
+        key = code.strip().upper()
+        indicator = self._indicators.get(key)
+        if indicator is None:
+            raise KeyError(key)
+        contract = self._indicator_observation_contract(indicator)
+        template = {field: None for field in indicator.observation_fields}
+        template.update({"indicator_code": indicator.code, "indicator_label": indicator.label})
+        return {
+            "ok": True,
+            "schema": "sc-energy-indicator-observation-template/1.0",
+            "indicator": asdict(indicator),
+            "contract": contract,
+            "template": template,
         }
 
     def handoffs(self) -> dict[str, Any]:

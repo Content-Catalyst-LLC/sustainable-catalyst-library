@@ -264,7 +264,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "0.2.0",
+            "energy_systems_domain_version": "0.3.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -280,6 +280,11 @@ def health() -> dict[str, Any]:
             "energy_source_bound_heat_content_calculator": True,
             "energy_current_factor_defaults": False,
             "energy_workbench_execution": False,
+            "energy_indicator_framework": True,
+            "energy_indicator_definition_registry": True,
+            "energy_indicator_observation_contracts": True,
+            "energy_indicator_official_methodology_loaded": False,
+            "energy_indicator_calculation": False,
             "energy_indicator_engine": False,
             "energy_scenario_modeling": False,
             "automatic_energy_technology_ranking": False,
@@ -826,6 +831,38 @@ def energy_systems_heat_content_factors(
 @app.get("/v1/energy-systems/methodology-rules")
 def energy_systems_methodology_rules() -> dict[str, Any]:
     return energy_systems.methodology_rules()
+
+
+@app.get("/v1/energy-systems/indicator-framework")
+def energy_systems_indicator_framework() -> dict[str, Any]:
+    return energy_systems.indicator_framework()
+
+
+@app.get("/v1/energy-systems/indicators")
+def energy_systems_indicators(
+    q: str = Query(default="", max_length=500),
+    dimension: str = Query(default="", max_length=80),
+    theme: str = Query(default="", max_length=120),
+    subtheme: str = Query(default="", max_length=160),
+    limit: int = Query(default=100, ge=1, le=100),
+) -> dict[str, Any]:
+    return energy_systems.indicators(q=q, dimension=dimension, theme=theme, subtheme=subtheme, limit=limit)
+
+
+@app.get("/v1/energy-systems/indicators/{indicator_code}")
+def energy_systems_indicator(indicator_code: str) -> dict[str, Any]:
+    try:
+        return energy_systems.indicator(indicator_code)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Energy sustainability indicator not found") from exc
+
+
+@app.get("/v1/energy-systems/indicator-observation-template/{indicator_code}")
+def energy_systems_indicator_observation_template(indicator_code: str) -> dict[str, Any]:
+    try:
+        return energy_systems.indicator_observation_template(indicator_code)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Energy sustainability indicator not found") from exc
 
 
 @app.get("/v1/energy-systems/convert")

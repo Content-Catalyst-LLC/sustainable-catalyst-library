@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-sustainability-indicator-observation.json",
+  "title": "Sustainable Catalyst Energy Sustainability Indicator Observation",
+  "description": "A provenance-first observation envelope. v0.3.0 does not calculate official EISD formulas or validate scientific/statistical quality.",
+  "type": "object",
+  "required": [
+    "indicator_code",
+    "geography",
+    "period",
+    "value",
+    "unit",
+    "data_source",
+    "methodology_reference",
+    "quality_note"
+  ],
+  "properties": {
+    "indicator_code": {
+      "type": "string",
+      "pattern": "^(SOC[1-4]|ECO(?:[1-9]|1[0-6])|ENV(?:[1-9]|10))$"
+    },
+    "indicator_label": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "geography": {
+      "type": [
+        "string",
+        "object"
+      ]
+    },
+    "period": {
+      "type": [
+        "string",
+        "object"
+      ]
+    },
+    "value": {
+      "type": [
+        "number",
+        "string",
+        "array",
+        "object",
+        "null"
+      ]
+    },
+    "unit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "data_source": {
+      "type": [
+        "string",
+        "object"
+      ]
+    },
+    "methodology_reference": {
+      "type": [
+        "string",
+        "object"
+      ]
+    },
+    "quality_note": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "disaggregation": {
+      "type": [
+        "object",
+        "array",
+        "null"
+      ]
+    },
+    "numerator": {
+      "type": [
+        "number",
+        "string",
+        "object",
+        "null"
+      ]
+    },
+    "denominator": {
+      "type": [
+        "number",
+        "string",
+        "object",
+        "null"
+      ]
+    },
+    "metadata": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

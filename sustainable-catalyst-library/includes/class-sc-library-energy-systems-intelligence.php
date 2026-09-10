@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v0.2.0 — Energy Units, Carbon Factors & Conversion Registry. */
+/** Energy Systems Intelligence v0.3.0 — Energy Sustainability Indicators. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '0.2.0';
+    public const VERSION = '0.3.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v020', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v020.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v020', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v020.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v030', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v030.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v030', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v030.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -67,6 +67,19 @@ final class SC_Library_Energy_Systems_Intelligence {
             ],
         ]);
         register_rest_route('sc-library/v1', '/energy-systems/methodology-rules', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'methodology_rules']]);
+        register_rest_route('sc-library/v1', '/energy-systems/indicator-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'indicator_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/indicators', [
+            'methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'indicators'],
+            'args' => [
+                'q' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+                'dimension' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'theme' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'subtheme' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'limit' => ['sanitize_callback' => 'absint', 'default' => 100],
+            ],
+        ]);
+        register_rest_route('sc-library/v1', '/energy-systems/indicator/(?P<code>[A-Za-z0-9]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'indicator']]);
+        register_rest_route('sc-library/v1', '/energy-systems/indicator-observation-template/(?P<code>[A-Za-z0-9]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'indicator_observation_template']]);
         register_rest_route('sc-library/v1', '/energy-systems/convert', [
             'methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'convert'],
             'args' => [
@@ -136,6 +149,22 @@ final class SC_Library_Energy_Systems_Intelligence {
         ], static fn($value) => $value !== ''));
     }
     public function methodology_rules(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/methodology-rules'); }
+    public function indicator_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/indicator-framework'); }
+    public function indicators(WP_REST_Request $request) {
+        return $this->proxy('/v1/energy-systems/indicators', array_filter([
+            'q' => trim((string)$request->get_param('q')),
+            'dimension' => sanitize_key((string)$request->get_param('dimension')),
+            'theme' => sanitize_key((string)$request->get_param('theme')),
+            'subtheme' => sanitize_key((string)$request->get_param('subtheme')),
+            'limit' => min(100, max(1, absint($request->get_param('limit') ?: 100))),
+        ], static fn($value) => $value !== ''));
+    }
+    public function indicator(WP_REST_Request $request) {
+        return $this->proxy('/v1/energy-systems/indicators/' . rawurlencode(strtoupper(sanitize_text_field((string)$request['code']))));
+    }
+    public function indicator_observation_template(WP_REST_Request $request) {
+        return $this->proxy('/v1/energy-systems/indicator-observation-template/' . rawurlencode(strtoupper(sanitize_text_field((string)$request['code']))));
+    }
     public function convert(WP_REST_Request $request) {
         return $this->proxy('/v1/energy-systems/convert', [
             'value' => trim((string)$request->get_param('value')),
@@ -177,11 +206,11 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Energy Systems Intelligence',
-            'intro' => 'Explore the sustainable-energy knowledge foundation and a source-bound registry for energy units, 2020 direct carbon factors, and gross calorific values.',
+            'intro' => 'Explore the sustainable-energy knowledge foundation, source-bound numeric registry, and the 30 social, economic, and environmental Energy Indicators for Sustainable Development represented in the supplied course sources.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v020');
-        wp_enqueue_script('sc-library-energy-systems-v020');
+        wp_enqueue_style('sc-library-energy-systems-v030');
+        wp_enqueue_script('sc-library-energy-systems-v030');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -196,11 +225,15 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-carbon-factors-endpoint="<?php echo esc_url($ep('/carbon-factors')); ?>"
             data-heat-factors-endpoint="<?php echo esc_url($ep('/heat-content-factors')); ?>"
             data-methodology-endpoint="<?php echo esc_url($ep('/methodology-rules')); ?>"
+            data-indicator-framework-endpoint="<?php echo esc_url($ep('/indicator-framework')); ?>"
+            data-indicators-endpoint="<?php echo esc_url($ep('/indicators')); ?>"
+            data-indicator-endpoint="<?php echo esc_url($ep('/indicator')); ?>"
+            data-indicator-template-endpoint="<?php echo esc_url($ep('/indicator-observation-template')); ?>"
             data-convert-endpoint="<?php echo esc_url($ep('/convert')); ?>"
             data-carbon-estimate-endpoint="<?php echo esc_url($ep('/carbon-estimate')); ?>"
             data-heat-estimate-endpoint="<?php echo esc_url($ep('/heat-content-estimate')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.2.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.3.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
@@ -210,19 +243,35 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__guardrail">
-                <strong><?php esc_html_e('Source-bound calculation ≠ current emissions inventory.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v0.2.0 activates only the numerical records explicitly supported by the supplied 2020 conversion guide. Every factor retains source, year, geography or source context, emissions boundary, and methodology. No factor is silently promoted to a current default.', 'sustainable-catalyst-library'); ?>
+                <strong><?php esc_html_e('Indicator definition ≠ observed value or sustainability score.', 'sustainable-catalyst-library'); ?></strong>
+                <?php esc_html_e('v0.3.0 preserves the source-bound v0.2.0 numeric registry and adds the 30 EISD indicator definitions reproduced in the supplied Vera & Langlois article. The article points to separate methodology sheets for exact construction methods; those sheets were not supplied, so official EISD formula execution remains disabled.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
-                <button type="button" class="sc-es__mode is-active" data-es-mode="registry" role="tab" aria-selected="true">Numeric Registry</button>
+                <button type="button" class="sc-es__mode is-active" data-es-mode="indicators" role="tab" aria-selected="true">Sustainability Indicators</button>
+                <button type="button" class="sc-es__mode" data-es-mode="registry" role="tab" aria-selected="false">Numeric Registry</button>
                 <button type="button" class="sc-es__mode" data-es-mode="map" role="tab" aria-selected="false">Knowledge Map</button>
                 <button type="button" class="sc-es__mode" data-es-mode="concepts" role="tab" aria-selected="false">Concept Registry</button>
                 <button type="button" class="sc-es__mode" data-es-mode="sources" role="tab" aria-selected="false">Sources &amp; Provenance</button>
                 <button type="button" class="sc-es__mode" data-es-mode="handoffs" role="tab" aria-selected="false">Platform Handoffs</button>
             </div>
 
-            <div class="sc-es__panel" data-es-panel="registry">
+            <div class="sc-es__panel" data-es-panel="indicators">
+                <div class="sc-es__panel-heading"><strong>Energy sustainability indicator framework</strong><span>Thirty source-grounded EISD definitions organized across social, economic, and environmental dimensions. Exact official formulas remain gated until the corresponding methodology sheets are loaded.</span></div>
+                <p class="sc-es__status" data-es-indicator-framework-status aria-live="polite">Loading indicator framework…</p>
+                <div class="sc-es__indicator-summary" data-es-indicator-summary></div>
+                <div class="sc-es__framework" data-es-indicator-framework></div>
+                <form class="sc-es__indicator-search" data-es-indicator-form role="search">
+                    <label><span>Indicator, topic or code</span><input type="search" name="q" maxlength="500" placeholder="e.g. ECO13, affordability, air quality"></label>
+                    <label><span>Dimension</span><select name="dimension"><option value="">All dimensions</option><option value="social">Social</option><option value="economic">Economic</option><option value="environmental">Environmental</option></select></label>
+                    <div class="sc-es__actions"><button type="submit">Filter Indicators</button><button type="reset" class="sc-es__secondary">Reset</button></div>
+                </form>
+                <p class="sc-es__status" data-es-indicator-status aria-live="polite"></p>
+                <div class="sc-es__cards sc-es__indicator-cards" data-es-indicator-results></div>
+                <div class="sc-es__indicator-detail" data-es-indicator-detail hidden></div>
+            </div>
+
+            <div class="sc-es__panel" data-es-panel="registry" hidden>
                 <div class="sc-es__panel-heading"><strong>Energy units, carbon factors &amp; conversion registry</strong><span>Reference calculations are bound to the selected source-vintage record. They do not imply present-day UK grid or fuel values.</span></div>
                 <p class="sc-es__status" data-es-registry-status aria-live="polite">Loading numerical registry…</p>
                 <div class="sc-es__registry-summary" data-es-registry-summary></div>
@@ -284,12 +333,12 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="handoffs" hidden>
-                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.2.0 exposes a Workbench-ready registry contract without claiming the separate Workbench product has been upgraded yet.</span></div>
+                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.3.0 preserves the Workbench numeric-registry contract and adds an indicator-packet contract for later Site Intelligence and Decision Studio integration without asserting current country data.</span></div>
                 <p class="sc-es__status" data-es-handoff-status aria-live="polite">Loading handoff registry…</p>
                 <div class="sc-es__cards" data-es-handoff-results></div>
             </div>
 
-            <footer><strong>Next:</strong> v0.3.0 — Energy Sustainability Indicators. The next release will operationalize governed social, economic, and environmental indicators while preserving the same source-vintage and methodology boundaries.</footer>
+            <footer><strong>Next:</strong> v0.4.0 — Renewable Technology &amp; Resource Model. The next release will structure renewable technologies, resource-potential concepts, technology characteristics, and evidence boundaries without turning technology presence into suitability or ranking.</footer>
         </section>
         <?php return (string)ob_get_clean();
     }

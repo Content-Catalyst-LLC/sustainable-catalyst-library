@@ -1,0 +1,901 @@
+{
+  "schema": "sc-energy-indicator-registry-export/1.0",
+  "version": "0.3.0",
+  "source_key": "vera-langlois-2007",
+  "source_year": 2007,
+  "methodology_status": "methodology-sheets-not-supplied",
+  "counts": {
+    "indicators": 30,
+    "dimensions": 3,
+    "themes": 7,
+    "subthemes": 19
+  },
+  "guardrail": "The supplied article provides the 30 indicator names and classification framework. Exact official construction methods require the separate EISD methodology sheets cited by the article; v0.3.0 does not invent those formulas.",
+  "indicators": [
+    {
+      "code": "SOC1",
+      "label": "Share of households (or population) without electricity or commercial energy, or heavily dependent on non-commercial energy",
+      "dimension": "social",
+      "theme": "equity",
+      "subtheme": "accessibility",
+      "statement": "Accessibility of modern/commercial energy services.",
+      "measure_type": "share",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "population_or_household_basis",
+        "access_definition"
+      ],
+      "related_concepts": [
+        "energy-access",
+        "global-energy-importance"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "The table supplies the indicator title; exact numerator, denominator and classification rules require the cited methodology sheet."
+    },
+    {
+      "code": "SOC2",
+      "label": "Share of household income spent on fuel and electricity",
+      "dimension": "social",
+      "theme": "equity",
+      "subtheme": "affordability",
+      "statement": "Household energy affordability expressed through the share of income spent on fuel and electricity.",
+      "measure_type": "share",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "income_group",
+        "energy_expenditure_basis",
+        "income_basis"
+      ],
+      "related_concepts": [
+        "energy-affordability",
+        "energy-access"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Income and expenditure definitions must remain explicit; the source article does not reproduce the methodology sheet."
+    },
+    {
+      "code": "SOC3",
+      "label": "Household energy use for each income group and corresponding fuel mix",
+      "dimension": "social",
+      "theme": "equity",
+      "subtheme": "disparities",
+      "statement": "Distribution of household energy use and fuel mix across income groups.",
+      "measure_type": "disaggregated-profile",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "income_group",
+        "fuel_or_carrier",
+        "energy_use_basis"
+      ],
+      "related_concepts": [
+        "energy-access",
+        "energy-mix"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "This is a disaggregated profile rather than a single universal scalar."
+    },
+    {
+      "code": "SOC4",
+      "label": "Accident fatalities per energy produced by fuel chain",
+      "dimension": "social",
+      "theme": "health",
+      "subtheme": "safety",
+      "statement": "Safety burden associated with energy fuel chains relative to energy produced.",
+      "measure_type": "rate",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "fuel_chain",
+        "fatality_definition",
+        "energy_production_basis"
+      ],
+      "related_concepts": [
+        "energy-system"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Fuel-chain boundary and fatality inclusion criteria require the official methodology."
+    },
+    {
+      "code": "ECO1",
+      "label": "Energy use per capita",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "overall-use",
+      "statement": "Aggregate energy use normalized by population.",
+      "measure_type": "intensity",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "energy_use_basis",
+        "population_basis"
+      ],
+      "related_concepts": [
+        "energy-intensity",
+        "global-energy-importance"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Primary/final energy scope and population conventions must be declared before calculation."
+    },
+    {
+      "code": "ECO2",
+      "label": "Energy use per unit of GDP",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "overall-productivity",
+      "statement": "Aggregate energy use relative to economic output.",
+      "measure_type": "intensity",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "energy_use_basis",
+        "gdp_basis",
+        "currency_price_basis"
+      ],
+      "related_concepts": [
+        "energy-intensity",
+        "decoupling"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "GDP price basis, purchasing-power treatment and energy boundary require explicit methodology."
+    },
+    {
+      "code": "ECO3",
+      "label": "Efficiency of energy conversion and distribution",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "supply-efficiency",
+      "statement": "Efficiency of transformation and distribution within the energy supply system.",
+      "measure_type": "efficiency",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "conversion_or_distribution_scope",
+        "input_energy_basis",
+        "output_energy_basis"
+      ],
+      "related_concepts": [
+        "energy-efficiency",
+        "energy-conversion"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "The article names the indicator but does not reproduce the official aggregation formula."
+    },
+    {
+      "code": "ECO4",
+      "label": "Reserves-to-production ratio",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "production",
+      "statement": "Relation between energy reserves and production.",
+      "measure_type": "ratio",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "reserve_definition",
+        "production_definition",
+        "resource_or_fuel"
+      ],
+      "related_concepts": [
+        "reserves-to-production",
+        "energy-reserve"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Reserve classification and production period must be sourced and explicit."
+    },
+    {
+      "code": "ECO5",
+      "label": "Resources-to-production ratio",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "production",
+      "statement": "Relation between energy resources and production.",
+      "measure_type": "ratio",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "resource_definition",
+        "production_definition",
+        "resource_or_fuel"
+      ],
+      "related_concepts": [
+        "resources-to-production",
+        "energy-resource"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Resource classification is methodology-sensitive and is not inferred."
+    },
+    {
+      "code": "ECO6",
+      "label": "Industrial energy intensities",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "end-use",
+      "statement": "Energy intensity of industrial activity.",
+      "measure_type": "sector-intensity",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "sector",
+        "energy_use_basis",
+        "activity_or_output_basis"
+      ],
+      "related_concepts": [
+        "energy-intensity",
+        "end-use"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Sector boundaries and activity denominators must be harmonized for comparison."
+    },
+    {
+      "code": "ECO7",
+      "label": "Agricultural energy intensities",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "end-use",
+      "statement": "Energy intensity of agricultural activity.",
+      "measure_type": "sector-intensity",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "sector",
+        "energy_use_basis",
+        "activity_or_output_basis"
+      ],
+      "related_concepts": [
+        "energy-intensity",
+        "end-use"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Sector boundaries and activity denominators must be harmonized for comparison."
+    },
+    {
+      "code": "ECO8",
+      "label": "Service/commercial energy intensities",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "end-use",
+      "statement": "Energy intensity of service and commercial activity.",
+      "measure_type": "sector-intensity",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "sector",
+        "energy_use_basis",
+        "activity_or_output_basis"
+      ],
+      "related_concepts": [
+        "energy-intensity",
+        "end-use"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Sector boundaries and activity denominators must be harmonized for comparison."
+    },
+    {
+      "code": "ECO9",
+      "label": "Household energy intensities",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "end-use",
+      "statement": "Energy intensity of household activity or services.",
+      "measure_type": "sector-intensity",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "household_basis",
+        "energy_use_basis",
+        "activity_or_service_basis"
+      ],
+      "related_concepts": [
+        "energy-intensity",
+        "end-use"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Household denominator and service basis require the official methodology."
+    },
+    {
+      "code": "ECO10",
+      "label": "Transport energy intensities",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "end-use",
+      "statement": "Energy intensity of transport activity.",
+      "measure_type": "sector-intensity",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "transport_mode",
+        "energy_use_basis",
+        "activity_basis"
+      ],
+      "related_concepts": [
+        "energy-intensity",
+        "end-use"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Passenger/freight and activity-unit definitions must be explicit."
+    },
+    {
+      "code": "ECO11",
+      "label": "Fuel shares in energy and electricity",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "diversification-fuel-mix",
+      "statement": "Fuel shares within energy use and electricity generation/capacity contexts.",
+      "measure_type": "share-profile",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "fuel_or_carrier",
+        "energy_or_electricity_basis",
+        "denominator_scope"
+      ],
+      "related_concepts": [
+        "energy-mix"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "The observation contract supports multiple fuel shares; denominator scope must be declared."
+    },
+    {
+      "code": "ECO12",
+      "label": "Non-carbon energy share in energy and electricity",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "diversification-fuel-mix",
+      "statement": "Share of non-carbon energy within energy and electricity contexts.",
+      "measure_type": "share",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "non_carbon_definition",
+        "energy_or_electricity_basis",
+        "denominator_scope"
+      ],
+      "related_concepts": [
+        "energy-mix"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "The source title is retained; classification of non-carbon sources requires the official methodology."
+    },
+    {
+      "code": "ECO13",
+      "label": "Renewable energy share in energy and electricity",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "diversification-fuel-mix",
+      "statement": "Share of renewable energy within energy and electricity contexts.",
+      "measure_type": "share",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "renewable_definition",
+        "energy_or_electricity_basis",
+        "denominator_scope"
+      ],
+      "related_concepts": [
+        "renewable-energy-share",
+        "renewable-energy",
+        "energy-mix"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Renewable classification and denominator scope must be explicit and source-governed."
+    },
+    {
+      "code": "ECO14",
+      "label": "End-use energy prices by fuel and by sector",
+      "dimension": "economic",
+      "theme": "use-and-production-patterns",
+      "subtheme": "prices",
+      "statement": "End-use energy prices disaggregated by fuel and sector.",
+      "measure_type": "price-profile",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "fuel_or_carrier",
+        "sector",
+        "price_basis",
+        "currency"
+      ],
+      "related_concepts": [
+        "energy-affordability"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Taxes, subsidies, currency and real/nominal price treatment must be preserved."
+    },
+    {
+      "code": "ECO15",
+      "label": "Net energy import dependency",
+      "dimension": "economic",
+      "theme": "security",
+      "subtheme": "imports",
+      "statement": "Dependence of an energy system on net energy imports.",
+      "measure_type": "dependency-ratio",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "import_export_boundary",
+        "energy_supply_basis",
+        "fuel_or_carrier"
+      ],
+      "related_concepts": [
+        "energy-security"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "The article does not reproduce the official denominator or treatment of negative net imports."
+    },
+    {
+      "code": "ECO16",
+      "label": "Stocks of critical fuels per corresponding fuel consumption",
+      "dimension": "economic",
+      "theme": "security",
+      "subtheme": "strategic-fuel-stocks",
+      "statement": "Availability of critical fuel stocks relative to corresponding fuel consumption.",
+      "measure_type": "stock-to-use-ratio",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "critical_fuel",
+        "stock_definition",
+        "consumption_basis"
+      ],
+      "related_concepts": [
+        "energy-security"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Critical-fuel designation and stock coverage require explicit methodology."
+    },
+    {
+      "code": "ENV1",
+      "label": "GHG emissions from energy production and use per capita and per unit of GDP",
+      "dimension": "environmental",
+      "theme": "atmosphere",
+      "subtheme": "climate-change",
+      "statement": "Greenhouse-gas emissions from energy production and use normalized by population and/or GDP.",
+      "measure_type": "emissions-intensity",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "emissions_boundary",
+        "gas_accounting_basis",
+        "normalization_basis"
+      ],
+      "related_concepts": [
+        "ghg-emissions",
+        "co2e"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "v0.2.0 historical direct-carbon factors are not silently substituted for this indicator's full methodology."
+    },
+    {
+      "code": "ENV2",
+      "label": "Ambient concentrations of air pollutants in urban areas",
+      "dimension": "environmental",
+      "theme": "atmosphere",
+      "subtheme": "air-quality",
+      "statement": "Ambient urban air-pollutant concentrations relevant to energy-system impacts.",
+      "measure_type": "concentration-profile",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "pollutant",
+        "monitoring_location",
+        "concentration_basis"
+      ],
+      "related_concepts": [
+        "air-quality-impact"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Monitoring design, averaging time and pollutant definitions require source methodology."
+    },
+    {
+      "code": "ENV3",
+      "label": "Air-pollutant emissions from energy systems",
+      "dimension": "environmental",
+      "theme": "atmosphere",
+      "subtheme": "air-quality",
+      "statement": "Air-pollutant emissions attributable to energy systems.",
+      "measure_type": "emissions-profile",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "pollutant",
+        "energy_system_boundary",
+        "emissions_basis"
+      ],
+      "related_concepts": [
+        "air-quality-impact",
+        "energy-system"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Pollutant inventory boundary and attribution method must be declared."
+    },
+    {
+      "code": "ENV4",
+      "label": "Contaminant discharges in liquid effluents from energy systems",
+      "dimension": "environmental",
+      "theme": "water",
+      "subtheme": "water-quality",
+      "statement": "Liquid-effluent contaminant discharges attributable to energy systems.",
+      "measure_type": "discharge-profile",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "contaminant",
+        "effluent_boundary",
+        "discharge_basis"
+      ],
+      "related_concepts": [
+        "water-quality-impact",
+        "energy-system"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Contaminant, discharge and system boundaries require explicit methodology."
+    },
+    {
+      "code": "ENV5",
+      "label": "Soil area where acidification exceeds critical load",
+      "dimension": "environmental",
+      "theme": "land",
+      "subtheme": "soil-quality",
+      "statement": "Soil area exceeding an acidification critical-load threshold.",
+      "measure_type": "area-threshold",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "critical_load_definition",
+        "area_basis",
+        "threshold_source"
+      ],
+      "related_concepts": [
+        "land-impact"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Critical-load threshold and mapped-area methodology are not inferred."
+    },
+    {
+      "code": "ENV6",
+      "label": "Rate of deforestation attributed to energy use",
+      "dimension": "environmental",
+      "theme": "land",
+      "subtheme": "forest",
+      "statement": "Deforestation rate attributed to energy use.",
+      "measure_type": "rate",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "forest_definition",
+        "attribution_method",
+        "area_change_basis"
+      ],
+      "related_concepts": [
+        "land-impact",
+        "forest-ecology",
+        "forest-carbon"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Attribution of deforestation to energy use requires an explicit causal/accounting method."
+    },
+    {
+      "code": "ENV7",
+      "label": "Ratio of solid-waste generation to units of energy produced",
+      "dimension": "environmental",
+      "theme": "land",
+      "subtheme": "solid-waste-generation-and-management",
+      "statement": "Solid-waste generation relative to energy produced.",
+      "measure_type": "waste-intensity",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "solid_waste_boundary",
+        "energy_production_basis"
+      ],
+      "related_concepts": [
+        "energy-system"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Waste classification and energy-production denominator require the official methodology."
+    },
+    {
+      "code": "ENV8",
+      "label": "Ratio of solid waste properly disposed of to total generated solid waste",
+      "dimension": "environmental",
+      "theme": "land",
+      "subtheme": "solid-waste-generation-and-management",
+      "statement": "Share or ratio of generated solid waste that is properly disposed of.",
+      "measure_type": "waste-management-ratio",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "proper_disposal_definition",
+        "solid_waste_boundary"
+      ],
+      "related_concepts": [
+        "energy-system"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Proper-disposal classification must be source-defined."
+    },
+    {
+      "code": "ENV9",
+      "label": "Ratio of solid radioactive waste to units of energy produced",
+      "dimension": "environmental",
+      "theme": "land",
+      "subtheme": "solid-waste-generation-and-management",
+      "statement": "Solid radioactive waste relative to energy produced.",
+      "measure_type": "radioactive-waste-intensity",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "radioactive_waste_boundary",
+        "energy_production_basis"
+      ],
+      "related_concepts": [
+        "energy-system"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Radioactive-waste classification and energy denominator require the official methodology."
+    },
+    {
+      "code": "ENV10",
+      "label": "Ratio of solid radioactive waste awaiting disposal to total generated solid radioactive waste",
+      "dimension": "environmental",
+      "theme": "land",
+      "subtheme": "solid-waste-generation-and-management",
+      "statement": "Share or ratio of generated radioactive waste awaiting disposal.",
+      "measure_type": "radioactive-waste-management-ratio",
+      "observation_fields": [
+        "geography",
+        "period",
+        "value",
+        "unit",
+        "data_source",
+        "methodology_reference",
+        "quality_note",
+        "awaiting_disposal_definition",
+        "radioactive_waste_boundary"
+      ],
+      "related_concepts": [
+        "energy-system"
+      ],
+      "source_key": "vera-langlois-2007",
+      "source_year": 2007,
+      "methodology_status": "methodology-sheet-required",
+      "calculation_status": "not-implemented",
+      "note": "Awaiting-disposal and total-generation definitions require the official methodology."
+    }
+  ]
+}

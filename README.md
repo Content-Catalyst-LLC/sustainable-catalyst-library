@@ -1,5 +1,15 @@
 # Sustainable Catalyst Library
 
+## Energy Systems Intelligence v0.3.0
+
+Adds **Energy Sustainability Indicators** while preserving Library v5.11.0, Carbon & Nature Intelligence v0.5.0, and the v0.2.0 source-bound numeric registry. The shared Python backend advances to v2.9.0. The release encodes the 30 Energy Indicators for Sustainable Development reproduced in the supplied Vera & Langlois (2007) article across 3 dimensions, 7 themes, and 19 subthemes.
+
+Each indicator has a governed definition, classification, provenance link, related concept links, and a provenance-first observation contract. The supplied article states that separate methodology sheets contain the exact definitions, construction methods, units, data issues, and sources; those sheets were not supplied, so v0.3.0 deliberately does **not** fabricate official EISD formulas, current indicator values, cross-country rankings, or sustainability scores.
+
+The `[sc_energy_systems_intelligence]` shortcode now opens on a Sustainability Indicators explorer with framework, filtering, and observation-contract detail, while retaining Numeric Registry, Knowledge Map, Concept Registry, Sources & Provenance, and Platform Handoffs.
+
+See `ENERGY_SYSTEMS_INTELLIGENCE_v0.3.0.md`, `RELEASE_NOTES_ENERGY_SYSTEMS_0.3.0.md`, and `DEPLOY_ENERGY_SYSTEMS_BACKEND_v2.9.0.md`.
+
 ## Energy Systems Intelligence v0.2.0
 
 Adds the source-bound **Energy Units, Carbon Factors & Conversion Registry** to the Library while retaining Library v5.11.0 and Carbon & Nature Intelligence v0.5.0. The shared Python backend advances to v2.8.0. Numerical records are explicitly bound to the supplied 2020 Carbon Trust/BEIS guide and are not current defaults.

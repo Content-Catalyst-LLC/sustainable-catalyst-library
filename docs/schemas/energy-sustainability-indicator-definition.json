@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-sustainability-indicator-definition.json",
+  "title": "Sustainable Catalyst Energy Sustainability Indicator Definition",
+  "type": "object",
+  "required": [
+    "code",
+    "label",
+    "dimension",
+    "theme",
+    "subtheme",
+    "statement",
+    "measure_type",
+    "observation_fields",
+    "source_key",
+    "source_year",
+    "methodology_status",
+    "calculation_status"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "pattern": "^(SOC[1-4]|ECO(?:[1-9]|1[0-6])|ENV(?:[1-9]|10))$"
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dimension": {
+      "enum": [
+        "social",
+        "economic",
+        "environmental"
+      ]
+    },
+    "theme": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subtheme": {
+      "type": "string",
+      "minLength": 1
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "measure_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observation_fields": {
+      "type": "array",
+      "minItems": 7,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "related_concepts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_key": {
+      "const": "vera-langlois-2007"
+    },
+    "source_year": {
+      "const": 2007
+    },
+    "methodology_status": {
+      "const": "methodology-sheet-required"
+    },
+    "calculation_status": {
+      "const": "not-implemented"
+    },
+    "note": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
