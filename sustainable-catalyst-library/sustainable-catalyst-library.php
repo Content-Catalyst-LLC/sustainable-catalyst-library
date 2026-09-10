@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.11.0 with Carbon & Nature Intelligence v0.1.0, adding the AFOLU & Nature-Based Solutions Knowledge Foundation alongside institutional, biomedical, and private organizational research infrastructure.
+ * Description: Sustainable Catalyst Library v5.11.0 with Carbon & Nature Intelligence v0.2.0, adding the Carbon Sequestration Measure Registry on the AFOLU & Nature-Based Solutions Knowledge Foundation alongside institutional, biomedical, and private organizational research infrastructure.
  * Version: 5.11.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
 }
 
 define('SC_LIBRARY_VERSION', '5.11.0');
-define('SC_CARBON_NATURE_VERSION', '0.1.0');
+define('SC_CARBON_NATURE_VERSION', '0.2.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

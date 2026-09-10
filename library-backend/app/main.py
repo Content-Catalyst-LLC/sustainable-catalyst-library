@@ -232,7 +232,10 @@ def health() -> dict[str, Any]:
             "private_cross_product_handoffs": True,
             "private_public_search_separation": True,
             "carbon_nature_intelligence": True,
-            "carbon_nature_domain_version": "0.1.0",
+            "carbon_nature_domain_version": "0.2.0",
+            "carbon_sequestration_measure_registry": True,
+            "carbon_measure_comparison_packets": True,
+            "carbon_measure_research_context": True,
             "afolu_knowledge_foundation": True,
             "nature_based_solutions_knowledge_foundation": True,
             "carbon_nature_relationship_registry": True,
@@ -713,6 +716,42 @@ def carbon_nature_relationships(
     object_key: str | None = Query(default=None, alias="object", max_length=120),
 ) -> dict[str, Any]:
     return carbon_nature.relationships(subject=subject, predicate=predicate, object_key=object_key)
+
+
+@app.get("/v1/carbon-nature/measures")
+def carbon_nature_measures(
+    q: str | None = Query(default=None, max_length=500),
+    family: str | None = Query(default=None, max_length=120),
+    system: str | None = Query(default=None, max_length=120),
+    pool: str | None = Query(default=None, max_length=120),
+    gas: str | None = Query(default=None, max_length=120),
+    mrv_family: str | None = Query(default=None, max_length=120),
+    limit: int = Query(default=50, ge=1, le=100),
+) -> dict[str, Any]:
+    return carbon_nature.measures(
+        q=q, family=family, system=system, pool=pool, gas=gas, mrv_family=mrv_family, limit=limit
+    )
+
+
+@app.get("/v1/carbon-nature/measures/compare")
+def carbon_nature_measure_comparison(
+    keys: str = Query(..., min_length=1, max_length=800),
+) -> dict[str, Any]:
+    requested = [item.strip() for item in keys.split(",") if item.strip()]
+    try:
+        return carbon_nature.compare_measures(requested)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Carbon & Nature measure not found") from exc
+
+
+@app.get("/v1/carbon-nature/measures/{measure_key}")
+def carbon_nature_measure(measure_key: str) -> dict[str, Any]:
+    try:
+        return carbon_nature.measure(measure_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Carbon & Nature measure not found") from exc
 
 
 @app.get("/v1/carbon-nature/research-context")

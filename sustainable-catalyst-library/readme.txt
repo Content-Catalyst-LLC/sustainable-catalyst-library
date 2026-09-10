@@ -369,9 +369,9 @@ The facade does not expose My Library, private Research Projects, notebook or Ev
 
 == Carbon & Nature Intelligence ==
 
-Subsystem version: 0.1.0 — AFOLU & Nature-Based Solutions Knowledge Foundation.
+Subsystem version: 0.2.0 — Carbon Sequestration Measure Registry.
 
-Use [sc_carbon_nature_intelligence] to expose the Library-native domain explorer. This foundation provides governed concepts and explicit relationships for AFOLU, nature-based solutions, carbon pools, greenhouse gases, soil organic carbon, land systems, interventions, indicators, MRV methodology families, integrity dimensions, co-benefits, risks, evidence, and policy/economic context. It does not calculate SOC, issue carbon credits, certify projects, determine additionality/permanence, or claim generic nature-positive outcomes.
+Use [sc_carbon_nature_intelligence] to expose the Library-native measure explorer. v0.2.0 preserves the governed AFOLU and Nature-Based Solutions foundation from v0.1.0 and adds structured measure profiles for improved rotations, cover crops, reduced/minimum tillage, residue management, soil and nutrient management, agroforestry, grassland restoration/management, woodland establishment, wetland restoration, and peatland restoration/rewetting. Each profile links land systems, carbon pools, relevant greenhouse gases, outcome types, MRV method families, integrity dimensions, co-benefit contexts, risks, and evidence requirements. The registry does not rank measures, calculate sequestration, select methodologies, determine eligibility/additionality/permanence, issue carbon credits, or certify projects.
 
 == Changelog ==
 

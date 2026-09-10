@@ -1,0 +1,34 @@
+Carbon & Nature Intelligence v0.2.0 — Carbon Sequestration Measure Registry
+
+Release boundary
+- Sustainable Catalyst Library application remains v5.11.0.
+- Carbon & Nature subsystem advances to v0.2.0.
+- Library backend advances to v2.3.0.
+
+Validated capabilities
+- deterministic structured measure registry
+- 10 initial AFOLU/NbS measure profiles
+- stable measure keys
+- concept-linked applicability, carbon pools, gases, MRV families, integrity dimensions, co-benefit contexts, risks, and evidence requirements
+- GET /v1/carbon-nature/measures
+- GET /v1/carbon-nature/measures/{measure_key}
+- GET /v1/carbon-nature/measures/compare
+- measure-aware /v1/carbon-nature/research-context
+- WordPress read-only proxy routes and updated [sc_carbon_nature_intelligence] interface
+- no Library application renumbering
+- no PostgreSQL migration
+- no new credentials
+
+Guardrails validated
+- no automatic measure ranking
+- no automatic measure suitability determination
+- no quantified sequestration potential
+- no carbon-credit issuance
+- no certification-body claim
+- no SOC calculation engine
+- no whole-farm GHG calculator
+- no automatic additionality or permanence determination
+- no automatic nature-positive score
+
+Next domain release
+v0.3.0 — Carbon Evidence & Methodology Graph

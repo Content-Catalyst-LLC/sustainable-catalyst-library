@@ -101,6 +101,6 @@ Automatic rotation stays within the primary tier until the additional fields are
 See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_4.2.0.md` and `HOMEPAGE_SPOTLIGHT_TWO_TIER_GUIDE_v4.2.0.md`.
 
 
-## Carbon & Nature Intelligence v0.1.0
+## Carbon & Nature Intelligence v0.2.0
 
-Carbon & Nature Intelligence is a Library-native subsystem with its own release line. v0.1.0 adds the AFOLU & Nature-Based Solutions Knowledge Foundation while the Library application remains v5.11.0. Backend v2.2.0 exposes governed concepts, explicit relationships, deterministic domain fingerprints, and Research Librarian context packets. No PostgreSQL migration or new credential is required. See `CARBON_NATURE_INTELLIGENCE_v0.1.0.md`.
+Carbon & Nature Intelligence is a Library-native subsystem with its own release line. v0.2.0 adds the Carbon Sequestration Measure Registry on the v0.1.0 AFOLU & Nature-Based Solutions Knowledge Foundation while the Library application remains v5.11.0. Backend v2.3.0 exposes structured measure discovery, measure detail, bounded non-ranking comparison, and measure-aware Research Librarian context packets. No PostgreSQL migration or new credential is required. See `CARBON_NATURE_INTELLIGENCE_v0.2.0.md`.
