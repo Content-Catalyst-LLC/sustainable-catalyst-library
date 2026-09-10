@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Carbon & Nature Intelligence v0.3.0 — Carbon Evidence & Methodology Graph. */
+/** Carbon & Nature Intelligence v0.4.0 — Carbon Project Object Model & Provenance. */
 final class SC_Library_Carbon_Nature_Intelligence {
-    public const VERSION = '0.3.0';
+    public const VERSION = '0.4.0';
     public const SHORTCODE = 'sc_carbon_nature_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Carbon_Nature_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-carbon-nature-v030', SC_LIBRARY_URL . 'assets/css/sc-library-carbon-nature-v030.css', [], self::VERSION);
-        wp_register_script('sc-library-carbon-nature-v030', SC_LIBRARY_URL . 'assets/js/sc-library-carbon-nature-v030.js', [], self::VERSION, true);
+        wp_register_style('sc-library-carbon-nature-v040', SC_LIBRARY_URL . 'assets/css/sc-library-carbon-nature-v040.css', [], self::VERSION);
+        wp_register_script('sc-library-carbon-nature-v040', SC_LIBRARY_URL . 'assets/js/sc-library-carbon-nature-v040.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -130,6 +130,31 @@ final class SC_Library_Carbon_Nature_Intelligence {
                 'limit' => ['sanitize_callback' => 'absint', 'default' => 100],
             ],
         ]);
+        register_rest_route('sc-library/v1', '/carbon-nature/project-object-model', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'project_object_model'],
+        ]);
+        register_rest_route('sc-library/v1', '/carbon-nature/project-object-types', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'project_object_types'],
+        ]);
+        register_rest_route('sc-library/v1', '/carbon-nature/project-object-type/(?P<key>[a-z0-9-]+)', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'project_object_type'],
+        ]);
+        register_rest_route('sc-library/v1', '/carbon-nature/provenance-event-types', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'provenance_event_types'],
+        ]);
+        register_rest_route('sc-library/v1', '/carbon-nature/project-packet-template', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'project_packet_template'],
+        ]);
         register_rest_route('sc-library/v1', '/carbon-nature/research-context', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
@@ -236,6 +261,30 @@ final class SC_Library_Carbon_Nature_Intelligence {
         );
     }
 
+    public function project_object_model(WP_REST_Request $request) {
+        unset($request);
+        return $this->proxy('/v1/carbon-nature/project-object-model');
+    }
+
+    public function project_object_types(WP_REST_Request $request) {
+        unset($request);
+        return $this->proxy('/v1/carbon-nature/project-object-types');
+    }
+
+    public function project_object_type(WP_REST_Request $request) {
+        return $this->proxy('/v1/carbon-nature/project-object-types/' . rawurlencode(sanitize_key((string)$request['key'])));
+    }
+
+    public function provenance_event_types(WP_REST_Request $request) {
+        unset($request);
+        return $this->proxy('/v1/carbon-nature/provenance-event-types');
+    }
+
+    public function project_packet_template(WP_REST_Request $request) {
+        unset($request);
+        return $this->proxy('/v1/carbon-nature/project-packet-template');
+    }
+
     public function research_context(WP_REST_Request $request) {
         return $this->proxy('/v1/carbon-nature/research-context', [
             'q' => trim((string)$request->get_param('q')),
@@ -264,38 +313,53 @@ final class SC_Library_Carbon_Nature_Intelligence {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Carbon & Nature Intelligence',
-            'intro' => 'Explore governed AFOLU and nature-based carbon measures together with methodology profiles, evidence records, and explicit evidence-method relationships. Associations support research discovery; they do not determine project eligibility or validate claims.',
+            'intro' => 'Explore governed AFOLU and nature-based carbon knowledge as reusable project objects with explicit lineage, provenance events, stable versions, and non-inferential links. Structural validation supports reproducible research; it does not establish project eligibility, verification, or credit issuance.',
         ], $atts, self::SHORTCODE);
-        wp_enqueue_style('sc-library-carbon-nature-v030');
-        wp_enqueue_script('sc-library-carbon-nature-v030');
+        wp_enqueue_style('sc-library-carbon-nature-v040');
+        wp_enqueue_script('sc-library-carbon-nature-v040');
         $measures = rest_url('sc-library/v1/carbon-nature/measures');
         $evidence = rest_url('sc-library/v1/carbon-nature/evidence');
         $methodologies = rest_url('sc-library/v1/carbon-nature/methodologies');
         $graph = rest_url('sc-library/v1/carbon-nature/evidence-graph');
         $context = rest_url('sc-library/v1/carbon-nature/research-context');
+        $object_model = rest_url('sc-library/v1/carbon-nature/project-object-model');
+        $packet_template = rest_url('sc-library/v1/carbon-nature/project-packet-template');
         ob_start(); ?>
         <section class="sc-cn" data-sc-carbon-nature
             data-measures-endpoint="<?php echo esc_url($measures); ?>"
             data-evidence-endpoint="<?php echo esc_url($evidence); ?>"
             data-methodologies-endpoint="<?php echo esc_url($methodologies); ?>"
             data-graph-endpoint="<?php echo esc_url($graph); ?>"
-            data-context-endpoint="<?php echo esc_url($context); ?>">
+            data-context-endpoint="<?php echo esc_url($context); ?>"
+            data-object-model-endpoint="<?php echo esc_url($object_model); ?>"
+            data-packet-template-endpoint="<?php echo esc_url($packet_template); ?>">
             <header class="sc-cn__header">
-                <p class="sc-cn__kicker"><?php esc_html_e('Library Domain Intelligence · v0.3.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-cn__kicker"><?php esc_html_e('Library Domain Intelligence · v0.4.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
 
             <div class="sc-cn__domains" aria-label="Carbon and Nature domains">
-                <span>AFOLU</span><span>Nature-Based Solutions</span><span>Carbon Farming</span><span>Soil Organic Carbon</span><span>MRV</span><span>Evidence</span>
+                <span>AFOLU</span><span>Nature-Based Solutions</span><span>Carbon Farming</span><span>Soil Organic Carbon</span><span>MRV</span><span>Evidence</span><span>Provenance</span>
             </div>
 
             <div class="sc-cn__modebar" role="tablist" aria-label="Carbon and Nature explorers">
-                <button type="button" class="sc-cn__mode is-active" data-cn-mode="graph" role="tab" aria-selected="true">Evidence &amp; Methodology Graph</button>
+                <button type="button" class="sc-cn__mode is-active" data-cn-mode="projects" role="tab" aria-selected="true">Project Objects &amp; Provenance</button>
+                <button type="button" class="sc-cn__mode" data-cn-mode="graph" role="tab" aria-selected="false">Evidence &amp; Methodology Graph</button>
                 <button type="button" class="sc-cn__mode" data-cn-mode="measures" role="tab" aria-selected="false">Measure Registry</button>
             </div>
 
-            <div class="sc-cn__panel" data-cn-panel="graph">
+            <div class="sc-cn__panel" data-cn-panel="projects">
+                <div class="sc-cn__registry-heading">
+                    <div><strong><?php esc_html_e('Carbon Project Object Model & Provenance', 'sustainable-catalyst-library'); ?></strong><span><?php esc_html_e('Versioned research objects, explicit links, event lineage, and deterministic integrity fingerprints.', 'sustainable-catalyst-library'); ?></span></div>
+                </div>
+                <div class="sc-cn__guardrail"><strong><?php esc_html_e('Object validation ≠ scientific verification.', 'sustainable-catalyst-library'); ?></strong> <?php esc_html_e('v0.4.0 defines and validates project structure and provenance. It does not persist project packets, approve MRV methods, establish additionality or permanence, calculate sequestration, verify a project, or issue credits.', 'sustainable-catalyst-library'); ?></div>
+                <p class="sc-cn__status" data-cn-project-status aria-live="polite"></p>
+                <div class="sc-cn__project-summary" data-cn-project-summary></div>
+                <div class="sc-cn__project-results" data-cn-project-results></div>
+            </div>
+
+            <div class="sc-cn__panel" data-cn-panel="graph" hidden>
                 <div class="sc-cn__registry-heading">
                     <div><strong><?php esc_html_e('Carbon Evidence & Methodology Graph', 'sustainable-catalyst-library'); ?></strong><span><?php esc_html_e('Typed relationships with explicit non-inference guardrails.', 'sustainable-catalyst-library'); ?></span></div>
                 </div>
@@ -304,7 +368,7 @@ final class SC_Library_Carbon_Nature_Intelligence {
                     <label><span><?php esc_html_e('Node type', 'sustainable-catalyst-library'); ?></span><select name="node_type"><option value="">All node types</option><option value="concept">Concept</option><option value="measure">Measure</option><option value="methodology">Methodology</option><option value="evidence">Evidence</option></select></label>
                     <div class="sc-cn__actions"><button type="submit"><?php esc_html_e('Explore Graph', 'sustainable-catalyst-library'); ?></button><button type="reset" class="sc-cn__secondary"><?php esc_html_e('Reset', 'sustainable-catalyst-library'); ?></button></div>
                 </form>
-                <div class="sc-cn__guardrail"><strong><?php esc_html_e('Graph edge ≠ proof or eligibility.', 'sustainable-catalyst-library'); ?></strong> <?php esc_html_e('v0.3.0 links governed concepts, measures, methodology profiles, and evidence records. It does not automatically validate a claim, select an approved methodology, determine project eligibility, or quantify sequestration.', 'sustainable-catalyst-library'); ?></div>
+                <div class="sc-cn__guardrail"><strong><?php esc_html_e('Graph edge ≠ proof or eligibility.', 'sustainable-catalyst-library'); ?></strong> <?php esc_html_e('v0.4.0 preserves governed concepts, measures, methodology profiles, and evidence records while adding project-object provenance context. It does not automatically validate a claim, select an approved methodology, determine project eligibility, or quantify sequestration.', 'sustainable-catalyst-library'); ?></div>
                 <p class="sc-cn__status" data-cn-graph-status aria-live="polite"></p>
                 <div class="sc-cn__graph-summary" data-cn-graph-summary></div>
                 <div class="sc-cn__graph-results" data-cn-graph-results></div>
@@ -326,7 +390,7 @@ final class SC_Library_Carbon_Nature_Intelligence {
                 <div class="sc-cn__results" data-cn-measure-results></div>
             </div>
 
-            <footer><?php esc_html_e('v0.3.0 establishes evidence and methodology graph structure. Project objects and provenance arrive in v0.4.0; AFOLU Research Librarian reasoning in v0.5.0; scientific calculation and project MRV remain later Lab/Workbench/Decision Studio capabilities.', 'sustainable-catalyst-library'); ?></footer>
+            <footer><?php esc_html_e('v0.4.0 establishes reusable Carbon Project objects and provenance without turning Library into the project calculator or certifier. AFOLU Research Librarian reasoning arrives in v0.5.0; scientific calculation, project MRV construction, economics, and decision analysis remain governed handoffs to later Lab, Workbench, and Decision Studio capabilities.', 'sustainable-catalyst-library'); ?></footer>
         </section>
         <?php return (string)ob_get_clean();
     }

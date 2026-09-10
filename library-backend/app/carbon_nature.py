@@ -7,12 +7,17 @@ import json
 from typing import Any, Iterable
 
 
-DOMAIN_VERSION = "0.3.0"
-SCHEMA_VERSION = "sc-carbon-nature-knowledge-foundation/1.2"
+DOMAIN_VERSION = "0.4.0"
+SCHEMA_VERSION = "sc-carbon-nature-knowledge-foundation/1.3"
 MEASURE_SCHEMA_VERSION = "sc-carbon-sequestration-measure-registry/1.0"
 EVIDENCE_SCHEMA_VERSION = "sc-carbon-evidence-registry/1.0"
 METHODOLOGY_SCHEMA_VERSION = "sc-carbon-methodology-registry/1.0"
 EVIDENCE_GRAPH_SCHEMA_VERSION = "sc-carbon-evidence-methodology-graph/1.0"
+PROJECT_OBJECT_MODEL_SCHEMA_VERSION = "sc-carbon-project-object-model/1.0"
+PROJECT_OBJECT_TYPE_SCHEMA_VERSION = "sc-carbon-project-object-type-registry/1.0"
+PROJECT_PROVENANCE_SCHEMA_VERSION = "sc-carbon-project-provenance/1.0"
+PROJECT_PACKET_SCHEMA_VERSION = "sc-carbon-project-packet/1.0"
+PROJECT_PACKET_VALIDATION_SCHEMA_VERSION = "sc-carbon-project-packet-validation/1.0"
 
 
 @dataclass(frozen=True)
@@ -138,6 +143,60 @@ class CarbonEvidenceGraphEdge:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+@dataclass(frozen=True)
+class CarbonProjectObjectTypeProfile:
+    key: str
+    label: str
+    purpose: str
+    required_payload_fields: tuple[str, ...]
+    optional_payload_fields: tuple[str, ...]
+    allowed_parent_types: tuple[str, ...]
+    external_reference_fields: tuple[str, ...]
+    provenance_expectations: tuple[str, ...]
+    lifecycle_states: tuple[str, ...] = ("draft", "review", "accepted", "superseded")
+
+    def to_dict(self) -> dict[str, Any]:
+        row = asdict(self)
+        for field in (
+            "required_payload_fields", "optional_payload_fields", "allowed_parent_types",
+            "external_reference_fields", "provenance_expectations", "lifecycle_states",
+        ):
+            row[field] = list(row[field])
+        return row
+
+
+@dataclass(frozen=True)
+class CarbonProvenanceEventTypeProfile:
+    key: str
+    label: str
+    purpose: str
+    required_fields: tuple[str, ...]
+    evidence_expectations: tuple[str, ...]
+    chain_semantics: str
+
+    def to_dict(self) -> dict[str, Any]:
+        row = asdict(self)
+        row["required_fields"] = list(self.required_fields)
+        row["evidence_expectations"] = list(self.evidence_expectations)
+        return row
+
+
+@dataclass(frozen=True)
+class CarbonProjectLinkTypeProfile:
+    key: str
+    label: str
+    purpose: str
+    subject_types: tuple[str, ...]
+    object_types: tuple[str, ...]
+    inference_allowed: bool = False
+
+    def to_dict(self) -> dict[str, Any]:
+        row = asdict(self)
+        row["subject_types"] = list(self.subject_types)
+        row["object_types"] = list(self.object_types)
+        return row
 
 
 def _now() -> str:
@@ -535,6 +594,104 @@ EVIDENCE_RECORDS: tuple[CarbonEvidenceRecord, ...] = (
 )
 
 
+
+PROJECT_OBJECT_TYPES: tuple[CarbonProjectObjectTypeProfile, ...] = (
+    CarbonProjectObjectTypeProfile(
+        "project", "Carbon Project", "Root research/project identity that defines scope, jurisdiction, boundary, and lineage.",
+        ("name", "jurisdiction", "boundary_statement"),
+        ("description", "program_ref", "owner_ref", "start_date", "end_date", "status_note"),
+        (), ("source_refs", "evidence_refs", "methodology_refs", "measure_refs"),
+        ("record project creation source", "retain boundary changes as superseding versions", "do not overwrite prior accepted project state"),
+    ),
+    CarbonProjectObjectTypeProfile(
+        "farm", "Farm / Management Unit", "Managed agricultural unit used to group parcels, practices, observations, and monitoring context.",
+        ("name", "management_scope"),
+        ("jurisdiction", "operator_ref", "land_use_summary", "area_value", "area_unit"),
+        ("project",), ("source_refs", "evidence_refs"),
+        ("record source of management-unit identity", "version material boundary or operator-scope changes"),
+    ),
+    CarbonProjectObjectTypeProfile(
+        "parcel", "Parcel / Spatial Unit", "Stable spatial research unit for land-use, intervention, sampling, and monitoring linkage.",
+        ("name", "land_use_system", "spatial_reference"),
+        ("area_value", "area_unit", "soil_context", "hydrology_context", "geometry_ref", "administrative_area"),
+        ("project", "farm"), ("source_refs", "evidence_refs"),
+        ("retain spatial source and geometry reference", "version material boundary changes", "do not silently replace parcel identity"),
+    ),
+    CarbonProjectObjectTypeProfile(
+        "baseline", "Baseline", "Explicit pre-intervention or counterfactual state with bounded period, basis, and supporting objects.",
+        ("baseline_period_start", "baseline_period_end", "baseline_basis"),
+        ("counterfactual_statement", "indicator_refs", "observation_refs", "model_run_refs", "uncertainty_note"),
+        ("project", "farm", "parcel"), ("source_refs", "evidence_refs", "methodology_refs"),
+        ("identify baseline basis and evidence", "record revisions rather than overwrite", "retain uncertainty and counterfactual assumptions"),
+    ),
+    CarbonProjectObjectTypeProfile(
+        "intervention", "Intervention", "Project-specific implementation record linked to a governed Carbon Sequestration Measure Registry entry.",
+        ("measure_key", "start_date", "implementation_status"),
+        ("end_date", "practice_description", "extent_value", "extent_unit", "implementation_evidence_refs", "deviation_note"),
+        ("project", "farm", "parcel"), ("source_refs", "evidence_refs", "methodology_refs", "measure_refs"),
+        ("retain measure registry key", "record implementation evidence", "version material practice changes"),
+    ),
+    CarbonProjectObjectTypeProfile(
+        "observation", "Observation", "Timestamped measured or reported value with unit, indicator, method context, and source lineage.",
+        ("indicator", "value", "unit", "observed_at"),
+        ("methodology_key", "instrument_ref", "quality_flag", "uncertainty_value", "uncertainty_unit", "notes"),
+        ("project", "farm", "parcel", "baseline", "intervention", "monitoring-record"), ("source_refs", "methodology_refs"),
+        ("retain observation time and source", "retain units exactly", "record corrections as new versions or superseding events"),
+    ),
+    CarbonProjectObjectTypeProfile(
+        "sample", "Sample", "Physical or analytical sample identity linking collection context, depth/horizon, laboratory results, and custody.",
+        ("sample_type", "collected_at", "sampling_method"),
+        ("depth_or_horizon", "location_ref", "laboratory_ref", "chain_of_custody_ref", "result_observation_refs", "storage_note"),
+        ("project", "farm", "parcel", "monitoring-record"), ("source_refs", "methodology_refs"),
+        ("preserve sample identifier", "record collection event", "retain chain-of-custody reference when available"),
+    ),
+    CarbonProjectObjectTypeProfile(
+        "model-run", "Model Run", "Reproducible model execution record preserving model identity, inputs, assumptions, outputs, and software context.",
+        ("model_name", "model_version", "run_at", "input_object_ids", "output_summary"),
+        ("code_ref", "environment_ref", "parameter_set", "assumption_refs", "output_object_ids", "uncertainty_summary"),
+        ("project", "baseline", "intervention", "monitoring-record"), ("source_refs", "evidence_refs", "methodology_refs"),
+        ("retain model and version", "retain input object fingerprints", "retain assumptions and software/code reference", "never replace prior model-run outputs in place"),
+    ),
+    CarbonProjectObjectTypeProfile(
+        "monitoring-record", "Monitoring Record", "Bounded monitoring-period record linking indicators, observations, samples, methodologies, and QA/QC context.",
+        ("monitoring_period_start", "monitoring_period_end", "indicators"),
+        ("observation_refs", "sample_refs", "methodology_refs", "qa_qc_note", "deviation_note", "review_status"),
+        ("project", "farm", "parcel", "intervention"), ("source_refs", "evidence_refs", "methodology_refs"),
+        ("retain monitoring period", "retain method versions", "record deviations and QA/QC review"),
+    ),
+    CarbonProjectObjectTypeProfile(
+        "verification-record", "Verification / Review Record", "Human review record capturing scope, reviewer identity reference, finding, evidence considered, and limitations.",
+        ("review_scope", "reviewed_at", "reviewer_ref", "finding"),
+        ("evidence_refs", "object_refs", "limitations", "follow_up_actions", "verification_standard_ref"),
+        ("project", "baseline", "intervention", "monitoring-record", "model-run"), ("source_refs", "evidence_refs", "methodology_refs"),
+        ("retain reviewer reference and review time", "retain evidence considered", "do not convert review presence into certification or credit issuance"),
+    ),
+)
+
+PROVENANCE_EVENT_TYPES: tuple[CarbonProvenanceEventTypeProfile, ...] = (
+    CarbonProvenanceEventTypeProfile("created", "Created", "Initial creation of a project object.", ("event_id", "object_id", "occurred_at", "actor_ref"), ("creation source or responsible system",), "May begin an object provenance chain."),
+    CarbonProvenanceEventTypeProfile("imported", "Imported", "Object or source data imported from an external system or file.", ("event_id", "object_id", "occurred_at", "actor_ref", "source_refs"), ("source identity", "import mechanism or file reference"), "Preserve source identity and import time; do not imply source endorsement."),
+    CarbonProvenanceEventTypeProfile("observed", "Observed", "Measurement or reported observation captured.", ("event_id", "object_id", "occurred_at", "actor_ref"), ("method/instrument or source reference",), "Links observation state to the event that produced it."),
+    CarbonProvenanceEventTypeProfile("sampled", "Sampled", "Physical or analytical sample collected.", ("event_id", "object_id", "occurred_at", "actor_ref"), ("sampling method", "collection source or custody reference"), "Preserve sample identity and collection lineage."),
+    CarbonProvenanceEventTypeProfile("transformed", "Transformed", "Derived object created from one or more input objects.", ("event_id", "object_id", "occurred_at", "actor_ref", "input_object_ids"), ("input object fingerprints", "transformation method"), "Derived state must reference inputs; transformation is not evidence validation."),
+    CarbonProvenanceEventTypeProfile("modeled", "Modeled", "Model execution or model-derived object recorded.", ("event_id", "object_id", "occurred_at", "actor_ref", "input_object_ids"), ("model identity/version", "input fingerprints", "assumptions"), "Model output remains distinct from direct observation."),
+    CarbonProvenanceEventTypeProfile("reviewed", "Reviewed", "Human or governed workflow review recorded.", ("event_id", "object_id", "occurred_at", "actor_ref"), ("review scope", "evidence considered"), "Review does not imply certification unless a separate authoritative record establishes it."),
+    CarbonProvenanceEventTypeProfile("verified", "Verified", "Verification activity recorded with explicit scope and authority context.", ("event_id", "object_id", "occurred_at", "actor_ref"), ("verification scope", "authority/standard reference when applicable"), "Verification event alone does not issue credits or establish regulatory eligibility."),
+    CarbonProvenanceEventTypeProfile("superseded", "Superseded", "Object version superseded by a later version without deleting prior state.", ("event_id", "object_id", "occurred_at", "actor_ref"), ("superseding object/version reference",), "Preserve prior version and chain continuity."),
+)
+
+PROJECT_LINK_TYPES: tuple[CarbonProjectLinkTypeProfile, ...] = (
+    CarbonProjectLinkTypeProfile("contains", "Contains", "Hierarchical containment of project research objects.", ("project", "farm", "parcel"), ("farm", "parcel", "baseline", "intervention", "monitoring-record", "verification-record")),
+    CarbonProjectLinkTypeProfile("baseline-for", "Baseline For", "Links a baseline to the scoped project unit or intervention it contextualizes.", ("baseline",), ("project", "farm", "parcel", "intervention")),
+    CarbonProjectLinkTypeProfile("intervention-on", "Intervention On", "Links an intervention to a managed or spatial unit.", ("intervention",), ("farm", "parcel")),
+    CarbonProjectLinkTypeProfile("observation-of", "Observation Of", "Links an observation to the object/context it describes.", ("observation",), ("farm", "parcel", "baseline", "intervention", "monitoring-record")),
+    CarbonProjectLinkTypeProfile("sample-of", "Sample Of", "Links a sample to its project/spatial/monitoring context.", ("sample",), ("farm", "parcel", "monitoring-record")),
+    CarbonProjectLinkTypeProfile("input-to-model-run", "Input To Model Run", "Links governed project objects used as model inputs.", ("baseline", "intervention", "observation", "sample", "monitoring-record"), ("model-run",)),
+    CarbonProjectLinkTypeProfile("derived-from", "Derived From", "Explicit non-causal derivation lineage between project objects.", ("observation", "model-run", "monitoring-record", "verification-record"), ("baseline", "intervention", "observation", "sample", "model-run", "monitoring-record")),
+    CarbonProjectLinkTypeProfile("monitoring-for", "Monitoring For", "Links a monitoring record to the scoped project or intervention.", ("monitoring-record",), ("project", "farm", "parcel", "intervention")),
+    CarbonProjectLinkTypeProfile("verification-of", "Verification Of", "Links a review/verification record to the reviewed object.", ("verification-record",), ("project", "baseline", "intervention", "model-run", "monitoring-record")),
+)
+
 def _build_evidence_graph_edges() -> tuple[CarbonEvidenceGraphEdge, ...]:
     edges: list[CarbonEvidenceGraphEdge] = []
     for methodology in METHODOLOGIES:
@@ -569,6 +726,9 @@ class CarbonNatureKnowledgeFoundation:
         self._methodologies = {item.key: item for item in METHODOLOGIES}
         self._evidence = {item.key: item for item in EVIDENCE_RECORDS}
         self._evidence_graph_edges = EVIDENCE_GRAPH_EDGES
+        self._project_object_types = {item.key: item for item in PROJECT_OBJECT_TYPES}
+        self._provenance_event_types = {item.key: item for item in PROVENANCE_EVENT_TYPES}
+        self._project_link_types = {item.key: item for item in PROJECT_LINK_TYPES}
         self._validate()
 
     def _validate(self) -> None:
@@ -616,6 +776,25 @@ class CarbonNatureKnowledgeFoundation:
             for key in evidence.methodology_keys:
                 if key not in self._methodologies:
                     raise RuntimeError(f"evidence {evidence.key} has unknown methodology: {key}")
+        if len(self._project_object_types) != len(PROJECT_OBJECT_TYPES):
+            raise RuntimeError("duplicate Carbon & Nature project object type key")
+        if len(self._provenance_event_types) != len(PROVENANCE_EVENT_TYPES):
+            raise RuntimeError("duplicate Carbon & Nature provenance event type key")
+        if len(self._project_link_types) != len(PROJECT_LINK_TYPES):
+            raise RuntimeError("duplicate Carbon & Nature project link type key")
+        for profile in PROJECT_OBJECT_TYPES:
+            if not profile.required_payload_fields:
+                raise RuntimeError(f"project object type {profile.key} has no required payload fields")
+            for parent_type in profile.allowed_parent_types:
+                if parent_type not in self._project_object_types:
+                    raise RuntimeError(f"project object type {profile.key} has unknown parent type: {parent_type}")
+        for link in PROJECT_LINK_TYPES:
+            if link.inference_allowed:
+                raise RuntimeError("Carbon project object links must remain non-inferential")
+            for kind in (*link.subject_types, *link.object_types):
+                if kind not in self._project_object_types:
+                    raise RuntimeError(f"project link {link.key} has unknown object type: {kind}")
+
         valid_node_sets = {
             "concept": set(self._concepts),
             "measure": set(self._measures),
@@ -628,7 +807,7 @@ class CarbonNatureKnowledgeFoundation:
             if edge.object_type not in valid_node_sets or edge.object_key not in valid_node_sets[edge.object_type]:
                 raise RuntimeError(f"evidence graph has unknown object: {edge.object_type}:{edge.object_key}")
             if edge.inference_allowed:
-                raise RuntimeError("Carbon & Nature v0.3.0 evidence graph edges must remain non-inferential")
+                raise RuntimeError("Carbon & Nature evidence graph edges must remain non-inferential")
 
     def manifest(self) -> dict[str, Any]:
         concepts = [item.to_dict() for item in CONCEPTS]
@@ -637,16 +816,19 @@ class CarbonNatureKnowledgeFoundation:
         methodologies = [item.to_dict() for item in METHODOLOGIES]
         evidence = [item.to_dict() for item in EVIDENCE_RECORDS]
         graph_edges = [item.to_dict() for item in EVIDENCE_GRAPH_EDGES]
+        project_object_types = [item.to_dict() for item in PROJECT_OBJECT_TYPES]
+        provenance_event_types = [item.to_dict() for item in PROVENANCE_EVENT_TYPES]
+        project_link_types = [item.to_dict() for item in PROJECT_LINK_TYPES]
         return {
             "schema": SCHEMA_VERSION,
             "subsystem": {
                 "key": "carbon-nature-intelligence",
                 "name": "Carbon & Nature Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Carbon Evidence & Methodology Graph",
+                "release": "Carbon Project Object Model & Provenance",
                 "primary_home": "Sustainable Catalyst Library",
                 "library_release_line": "5.11.x",
-                "backend_version": "2.4.0",
+                "backend_version": "2.5.0",
             },
             "coverage": {
                 "concept_count": len(concepts),
@@ -655,6 +837,9 @@ class CarbonNatureKnowledgeFoundation:
                 "methodology_count": len(methodologies),
                 "evidence_record_count": len(evidence),
                 "evidence_graph_edge_count": len(graph_edges),
+                "project_object_type_count": len(project_object_types),
+                "provenance_event_type_count": len(provenance_event_types),
+                "project_link_type_count": len(project_link_types),
                 "concept_types": sorted({item["concept_type"] for item in concepts}),
                 "domains": sorted({item["domain"] for item in concepts}),
                 "measure_families": sorted({item["measure_family"] for item in measures}),
@@ -682,6 +867,15 @@ class CarbonNatureKnowledgeFoundation:
                 "evidence-and-methodology-aware-research-context",
                 "library-evidence-linkage-ready",
                 "research-librarian-evidence-context-ready",
+                "carbon-project-object-type-registry",
+                "carbon-project-link-type-registry",
+                "carbon-project-provenance-event-model",
+                "versioned-project-object-envelope",
+                "deterministic-object-and-event-fingerprints",
+                "stateless-project-packet-validation",
+                "provenance-chain-continuity-validation",
+                "project-packet-template",
+                "project-object-model-research-context-ready",
             ],
             "governance": {
                 "normative_standard_claimed": False,
@@ -698,6 +892,11 @@ class CarbonNatureKnowledgeFoundation:
                 "automatic_permanence_determination": False,
                 "automatic_policy_equivalence": False,
                 "project_specific_mrv_protocol_builder": False,
+                "project_packet_persistence": False,
+                "automatic_project_claim_generation": False,
+                "automatic_project_eligibility_determination": False,
+                "cryptographic_attestation_or_signature_service": False,
+                "project_object_validation_is_not_verification": True,
                 "quantified_sequestration_potential": False,
                 "soc_calculation_engine": False,
                 "whole_farm_ghg_calculator": False,
@@ -708,7 +907,7 @@ class CarbonNatureKnowledgeFoundation:
                 "v0.1.0": "Domain ontology, concept identity, relationships, discovery, and context packets.",
                 "v0.2.0": "Structured Carbon Sequestration Measure Registry with bounded filtering and comparison.",
                 "v0.3.0": "Typed Carbon Evidence & Methodology Graph with evidence records, methodology profiles, neighborhoods, and research-context handoff.",
-                "v0.4.0": "Carbon Project Object Model & Provenance.",
+                "v0.4.0": "Versioned Carbon Project Object Model, project links, provenance events, deterministic fingerprints, and stateless packet validation.",
                 "v0.5.0": "AFOLU Research Librarian Intelligence.",
             },
             "content_fingerprint": _stable_hash({
@@ -718,6 +917,9 @@ class CarbonNatureKnowledgeFoundation:
                 "methodologies": methodologies,
                 "evidence": evidence,
                 "evidence_graph_edges": graph_edges,
+                "project_object_types": project_object_types,
+                "provenance_event_types": provenance_event_types,
+                "project_link_types": project_link_types,
             }),
             "retrieved_at": _now(),
         }
@@ -912,7 +1114,7 @@ class CarbonNatureKnowledgeFoundation:
                 "preferred_measure_selected": False,
                 "project_suitability_determined": False,
                 "quantified_climate_benefit_compared": False,
-                "note": "v0.3.0 preserves bounded comparison and adds evidence/methodology context without ranking measures or determining project suitability.",
+                "note": "v0.4.0 preserves bounded comparison and evidence/methodology context without ranking measures or determining project suitability.",
             },
             "content_fingerprint": _stable_hash({"keys": ordered, "measures": [measure.to_dict() for measure in measures]}),
         }
@@ -1159,6 +1361,347 @@ class CarbonNatureKnowledgeFoundation:
             "content_fingerprint": _stable_hash({"focus": matches, "edges": [edge.to_dict() for edge in edges]}),
         }
 
+
+    def project_object_types(self) -> dict[str, Any]:
+        rows = [item.to_dict() for item in PROJECT_OBJECT_TYPES]
+        return {
+            "schema": PROJECT_OBJECT_TYPE_SCHEMA_VERSION,
+            "subsystem_version": DOMAIN_VERSION,
+            "count": len(rows),
+            "object_types": rows,
+            "guardrails": {
+                "schema_presence_is_not_project_validation": True,
+                "object_type_is_not_methodology_eligibility": True,
+                "object_type_is_not_credit_eligibility": True,
+            },
+            "content_fingerprint": _stable_hash(rows),
+        }
+
+    def project_object_type(self, key: str) -> dict[str, Any]:
+        item = self._project_object_types.get(str(key or "").strip())
+        if item is None:
+            raise KeyError(key)
+        return {
+            "schema": "sc-carbon-project-object-type/1.0",
+            "subsystem_version": DOMAIN_VERSION,
+            "object_type": item.to_dict(),
+            "guardrails": {
+                "required_fields_are_structural_not_scientific_sufficiency": True,
+                "project_claims_require_evidence_and_human_review": True,
+            },
+            "content_fingerprint": _stable_hash(item.to_dict()),
+        }
+
+    def provenance_event_types(self) -> dict[str, Any]:
+        rows = [item.to_dict() for item in PROVENANCE_EVENT_TYPES]
+        return {
+            "schema": PROJECT_PROVENANCE_SCHEMA_VERSION,
+            "subsystem_version": DOMAIN_VERSION,
+            "count": len(rows),
+            "event_types": rows,
+            "chain_contract": {
+                "event_fingerprint": "sha256(canonical JSON of event excluding supplied fingerprint)",
+                "previous_event_fingerprint": "optional pointer to the immediately prior event fingerprint for the same object",
+                "immutability": "accepted prior events are retained; corrections should be represented by later events or object versions",
+            },
+            "guardrails": {
+                "fingerprint_is_not_digital_signature": True,
+                "provenance_chain_is_not_certification": True,
+                "actor_ref_is_an_identifier_not_identity_proof": True,
+            },
+            "content_fingerprint": _stable_hash(rows),
+        }
+
+    def project_object_model(self) -> dict[str, Any]:
+        object_types = [item.to_dict() for item in PROJECT_OBJECT_TYPES]
+        events = [item.to_dict() for item in PROVENANCE_EVENT_TYPES]
+        links = [item.to_dict() for item in PROJECT_LINK_TYPES]
+        return {
+            "schema": PROJECT_OBJECT_MODEL_SCHEMA_VERSION,
+            "subsystem_version": DOMAIN_VERSION,
+            "object_envelope": {
+                "required_fields": ["object_id", "object_type", "project_id", "version", "status", "payload", "source_refs", "provenance_refs"],
+                "optional_fields": ["parent_object_ids", "evidence_refs", "methodology_refs", "measure_refs", "created_at", "effective_at", "content_fingerprint"],
+                "identity_rules": [
+                    "object_id is stable across versions of the same logical object",
+                    "version is monotonically increasing for superseding states",
+                    "project_id resolves to the root project object_id",
+                    "content_fingerprint covers canonical object content excluding the supplied fingerprint",
+                ],
+            },
+            "project_packet": {
+                "schema": PROJECT_PACKET_SCHEMA_VERSION,
+                "required_fields": ["schema", "objects", "provenance", "links"],
+                "validation": "stateless; validation does not persist project data or establish scientific/regulatory validity",
+            },
+            "object_types": object_types,
+            "provenance_event_types": events,
+            "link_types": links,
+            "external_reference_namespaces": {
+                "measure_refs": MEASURE_SCHEMA_VERSION,
+                "methodology_refs": METHODOLOGY_SCHEMA_VERSION,
+                "evidence_refs": EVIDENCE_SCHEMA_VERSION,
+                "source_refs": "Library source/record identifiers or governed external source references",
+            },
+            "governance": {
+                "project_packet_persistence": False,
+                "automatic_project_claim_generation": False,
+                "automatic_project_eligibility_determination": False,
+                "automatic_mrv_protocol_approval": False,
+                "fingerprints_are_integrity_checks_not_signatures": True,
+                "validation_is_structural_and_provenance_validation_not_scientific_verification": True,
+            },
+            "content_fingerprint": _stable_hash({"objects": object_types, "events": events, "links": links}),
+        }
+
+    def project_packet_template(self) -> dict[str, Any]:
+        packet = {
+            "schema": PROJECT_PACKET_SCHEMA_VERSION,
+            "objects": [
+                {
+                    "object_id": "project:example-carbon-project",
+                    "object_type": "project",
+                    "project_id": "project:example-carbon-project",
+                    "version": 1,
+                    "status": "draft",
+                    "payload": {
+                        "name": "Example Carbon Project",
+                        "jurisdiction": "replace-with-project-jurisdiction",
+                        "boundary_statement": "replace-with-explicit-project-boundary",
+                    },
+                    "source_refs": [], "provenance_refs": ["event:project-created"],
+                    "parent_object_ids": [], "evidence_refs": [], "methodology_refs": [], "measure_refs": [],
+                },
+                {
+                    "object_id": "parcel:example-001",
+                    "object_type": "parcel",
+                    "project_id": "project:example-carbon-project",
+                    "version": 1,
+                    "status": "draft",
+                    "payload": {
+                        "name": "Example Parcel",
+                        "land_use_system": "cropland",
+                        "spatial_reference": "replace-with-governed-spatial-reference",
+                    },
+                    "source_refs": [], "provenance_refs": ["event:parcel-created"],
+                    "parent_object_ids": ["project:example-carbon-project"], "evidence_refs": [], "methodology_refs": [], "measure_refs": [],
+                },
+            ],
+            "provenance": [
+                {"event_id": "event:project-created", "event_type": "created", "object_id": "project:example-carbon-project", "occurred_at": "2026-01-01T00:00:00+00:00", "actor_ref": "system:replace-me", "source_refs": []},
+                {"event_id": "event:parcel-created", "event_type": "created", "object_id": "parcel:example-001", "occurred_at": "2026-01-01T00:00:00+00:00", "actor_ref": "system:replace-me", "source_refs": []},
+            ],
+            "links": [
+                {"link_id": "link:project-contains-parcel", "predicate": "contains", "subject_id": "project:example-carbon-project", "object_id": "parcel:example-001"}
+            ],
+        }
+        return {
+            "schema": "sc-carbon-project-packet-template/1.0",
+            "subsystem_version": DOMAIN_VERSION,
+            "template": packet,
+            "notes": [
+                "Replace placeholder content before use.",
+                "Add evidence_refs, methodology_refs, and measure_refs only when the references actually support the object.",
+                "Use new object versions and provenance events for corrections rather than overwriting accepted historical state.",
+            ],
+            "guardrails": {"template_is_not_a_valid_project_claim": True, "template_is_not_an_mrv_protocol": True},
+        }
+
+    @staticmethod
+    def _is_nonempty(value: Any) -> bool:
+        if value is None:
+            return False
+        if isinstance(value, str):
+            return bool(value.strip())
+        if isinstance(value, (list, tuple, dict, set)):
+            return bool(value)
+        return True
+
+    @staticmethod
+    def _parse_iso8601(value: Any) -> bool:
+        if not isinstance(value, str) or not value.strip():
+            return False
+        try:
+            datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+            return True
+        except ValueError:
+            return False
+
+    @staticmethod
+    def _validate_ref_list(value: Any) -> bool:
+        return isinstance(value, list) and all(isinstance(item, str) and bool(item.strip()) for item in value)
+
+    def validate_project_packet(self, packet: dict[str, Any]) -> dict[str, Any]:
+        errors: list[dict[str, Any]] = []
+        warnings: list[dict[str, Any]] = []
+        if not isinstance(packet, dict):
+            return {"schema": PROJECT_PACKET_VALIDATION_SCHEMA_VERSION, "subsystem_version": DOMAIN_VERSION, "valid": False, "errors": [{"code": "packet-not-object", "path": "$", "message": "Project packet must be a JSON object."}], "warnings": [], "guardrails": {"validation_is_not_verification": True}}
+        if packet.get("schema") != PROJECT_PACKET_SCHEMA_VERSION:
+            errors.append({"code": "schema-mismatch", "path": "$.schema", "message": f"Expected {PROJECT_PACKET_SCHEMA_VERSION}."})
+        objects = packet.get("objects")
+        provenance = packet.get("provenance")
+        links = packet.get("links")
+        if not isinstance(objects, list): errors.append({"code": "objects-not-list", "path": "$.objects", "message": "objects must be a list."}); objects = []
+        if not isinstance(provenance, list): errors.append({"code": "provenance-not-list", "path": "$.provenance", "message": "provenance must be a list."}); provenance = []
+        if not isinstance(links, list): errors.append({"code": "links-not-list", "path": "$.links", "message": "links must be a list."}); links = []
+        if len(objects) > 500: errors.append({"code": "too-many-objects", "path": "$.objects", "message": "Maximum 500 objects per validation packet."})
+        if len(provenance) > 1000: errors.append({"code": "too-many-events", "path": "$.provenance", "message": "Maximum 1000 provenance events per validation packet."})
+        if len(links) > 2000: errors.append({"code": "too-many-links", "path": "$.links", "message": "Maximum 2000 links per validation packet."})
+
+        object_index: dict[str, dict[str, Any]] = {}
+        object_fingerprints: dict[str, str] = {}
+        project_ids: list[str] = []
+        for idx, obj in enumerate(objects[:500]):
+            path = f"$.objects[{idx}]"
+            if not isinstance(obj, dict): errors.append({"code": "object-not-object", "path": path, "message": "Project object must be a JSON object."}); continue
+            object_id = str(obj.get("object_id") or "").strip()
+            object_type = str(obj.get("object_type") or "").strip()
+            if not object_id: errors.append({"code": "missing-object-id", "path": path + ".object_id", "message": "object_id is required."}); continue
+            if object_id in object_index: errors.append({"code": "duplicate-object-id", "path": path + ".object_id", "message": f"Duplicate object_id: {object_id}."}); continue
+            object_index[object_id] = obj
+            profile = self._project_object_types.get(object_type)
+            if profile is None:
+                errors.append({"code": "unknown-object-type", "path": path + ".object_type", "message": f"Unknown object_type: {object_type}."})
+            else:
+                payload = obj.get("payload")
+                if not isinstance(payload, dict):
+                    errors.append({"code": "payload-not-object", "path": path + ".payload", "message": "payload must be a JSON object."})
+                    payload = {}
+                for field in profile.required_payload_fields:
+                    if not self._is_nonempty(payload.get(field)):
+                        errors.append({"code": "missing-required-payload-field", "path": path + f".payload.{field}", "message": f"{object_type} requires payload field {field}."})
+                if object_type == "project": project_ids.append(object_id)
+            project_id = str(obj.get("project_id") or "").strip()
+            if not project_id: errors.append({"code": "missing-project-id", "path": path + ".project_id", "message": "project_id is required."})
+            version = obj.get("version")
+            if not isinstance(version, int) or isinstance(version, bool) or version < 1:
+                errors.append({"code": "invalid-version", "path": path + ".version", "message": "version must be an integer >= 1."})
+            status = str(obj.get("status") or "").strip()
+            if profile and status not in profile.lifecycle_states:
+                errors.append({"code": "invalid-status", "path": path + ".status", "message": f"status must be one of: {', '.join(profile.lifecycle_states)}."})
+            for field in ("source_refs", "provenance_refs"):
+                if not self._validate_ref_list(obj.get(field)):
+                    errors.append({"code": "invalid-ref-list", "path": path + f".{field}", "message": f"{field} must be a list of non-empty string identifiers."})
+            for field in ("parent_object_ids", "evidence_refs", "methodology_refs", "measure_refs"):
+                if field in obj and not self._validate_ref_list(obj.get(field)):
+                    errors.append({"code": "invalid-ref-list", "path": path + f".{field}", "message": f"{field} must be a list of non-empty string identifiers."})
+            for ref in obj.get("measure_refs", []) if isinstance(obj.get("measure_refs"), list) else []:
+                if ref not in self._measures: errors.append({"code": "unknown-measure-ref", "path": path + ".measure_refs", "message": f"Unknown measure reference: {ref}."})
+            payload = obj.get("payload") if isinstance(obj.get("payload"), dict) else {}
+            measure_key = payload.get("measure_key") if object_type == "intervention" else None
+            if measure_key and measure_key not in self._measures:
+                errors.append({"code": "unknown-measure-key", "path": path + ".payload.measure_key", "message": f"Unknown measure_key: {measure_key}."})
+            for ref in obj.get("methodology_refs", []) if isinstance(obj.get("methodology_refs"), list) else []:
+                if ref not in self._methodologies: errors.append({"code": "unknown-methodology-ref", "path": path + ".methodology_refs", "message": f"Unknown methodology reference: {ref}."})
+            for ref in obj.get("evidence_refs", []) if isinstance(obj.get("evidence_refs"), list) else []:
+                if ref not in self._evidence: warnings.append({"code": "unresolved-evidence-ref", "path": path + ".evidence_refs", "message": f"Evidence reference is not in the v0.3 seed registry: {ref}. It may resolve to a broader Library source."})
+            canonical_obj = {k: v for k, v in obj.items() if k != "content_fingerprint"}
+            computed = _stable_hash(canonical_obj)
+            object_fingerprints[object_id] = computed
+            supplied = str(obj.get("content_fingerprint") or "").strip()
+            if supplied and supplied != computed:
+                errors.append({"code": "object-fingerprint-mismatch", "path": path + ".content_fingerprint", "message": "Supplied object fingerprint does not match canonical object content."})
+
+        if len(project_ids) != 1:
+            errors.append({"code": "project-root-count", "path": "$.objects", "message": "Packet must contain exactly one project root object."})
+        root_project_id = project_ids[0] if len(project_ids) == 1 else None
+        if root_project_id:
+            for object_id, obj in object_index.items():
+                if str(obj.get("project_id") or "").strip() != root_project_id:
+                    errors.append({"code": "project-id-mismatch", "path": f"$.objects[{object_id}].project_id", "message": f"project_id must resolve to root project {root_project_id}."})
+            for object_id, obj in object_index.items():
+                profile = self._project_object_types.get(str(obj.get("object_type") or ""))
+                parents = obj.get("parent_object_ids", []) if isinstance(obj.get("parent_object_ids"), list) else []
+                for parent_id in parents:
+                    parent = object_index.get(parent_id)
+                    if parent is None:
+                        errors.append({"code": "unresolved-parent-object", "path": f"$.objects[{object_id}].parent_object_ids", "message": f"Unresolved parent object: {parent_id}."})
+                    elif profile and profile.allowed_parent_types and str(parent.get("object_type") or "") not in profile.allowed_parent_types:
+                        errors.append({"code": "invalid-parent-type", "path": f"$.objects[{object_id}].parent_object_ids", "message": f"Parent type {parent.get('object_type')} is not allowed for {profile.key}."})
+
+        event_index: dict[str, dict[str, Any]] = {}
+        event_fingerprints: dict[str, str] = {}
+        last_event_for_object: dict[str, str] = {}
+        for idx, event in enumerate(provenance[:1000]):
+            path = f"$.provenance[{idx}]"
+            if not isinstance(event, dict): errors.append({"code": "event-not-object", "path": path, "message": "Provenance event must be a JSON object."}); continue
+            event_id = str(event.get("event_id") or "").strip()
+            event_type = str(event.get("event_type") or "").strip()
+            object_id = str(event.get("object_id") or "").strip()
+            if not event_id: errors.append({"code": "missing-event-id", "path": path + ".event_id", "message": "event_id is required."}); continue
+            if event_id in event_index: errors.append({"code": "duplicate-event-id", "path": path + ".event_id", "message": f"Duplicate event_id: {event_id}."}); continue
+            event_index[event_id] = event
+            profile = self._provenance_event_types.get(event_type)
+            if profile is None: errors.append({"code": "unknown-event-type", "path": path + ".event_type", "message": f"Unknown provenance event_type: {event_type}."})
+            if object_id not in object_index: errors.append({"code": "unresolved-event-object", "path": path + ".object_id", "message": f"Provenance event object_id does not resolve: {object_id}."})
+            if not self._parse_iso8601(event.get("occurred_at")): errors.append({"code": "invalid-event-time", "path": path + ".occurred_at", "message": "occurred_at must be an ISO-8601 timestamp."})
+            if not str(event.get("actor_ref") or "").strip(): errors.append({"code": "missing-actor-ref", "path": path + ".actor_ref", "message": "actor_ref is required."})
+            if "source_refs" in event and not self._validate_ref_list(event.get("source_refs")): errors.append({"code": "invalid-event-source-refs", "path": path + ".source_refs", "message": "source_refs must be a list of non-empty strings."})
+            canonical_event = {k: v for k, v in event.items() if k != "event_fingerprint"}
+            computed = _stable_hash(canonical_event)
+            event_fingerprints[event_id] = computed
+            supplied = str(event.get("event_fingerprint") or "").strip()
+            if supplied and supplied != computed: errors.append({"code": "event-fingerprint-mismatch", "path": path + ".event_fingerprint", "message": "Supplied event fingerprint does not match canonical event content."})
+            previous = str(event.get("previous_event_fingerprint") or "").strip()
+            expected_previous = last_event_for_object.get(object_id)
+            if previous and previous != expected_previous:
+                errors.append({"code": "provenance-chain-break", "path": path + ".previous_event_fingerprint", "message": "previous_event_fingerprint does not match the immediately prior event for this object in packet order."})
+            last_event_for_object[object_id] = computed
+
+        for object_id, obj in object_index.items():
+            refs = obj.get("provenance_refs", []) if isinstance(obj.get("provenance_refs"), list) else []
+            for ref in refs:
+                if ref not in event_index:
+                    errors.append({"code": "unresolved-provenance-ref", "path": f"$.objects[{object_id}].provenance_refs", "message": f"Unresolved provenance event: {ref}."})
+                elif str(event_index[ref].get("object_id") or "") != object_id:
+                    errors.append({"code": "provenance-object-mismatch", "path": f"$.objects[{object_id}].provenance_refs", "message": f"Provenance event {ref} belongs to a different object."})
+
+        link_ids: set[str] = set()
+        normalized_links: list[dict[str, Any]] = []
+        for idx, link in enumerate(links[:2000]):
+            path = f"$.links[{idx}]"
+            if not isinstance(link, dict): errors.append({"code": "link-not-object", "path": path, "message": "Project link must be a JSON object."}); continue
+            link_id = str(link.get("link_id") or "").strip()
+            predicate = str(link.get("predicate") or "").strip()
+            subject_id = str(link.get("subject_id") or "").strip()
+            object_id = str(link.get("object_id") or "").strip()
+            if not link_id: errors.append({"code": "missing-link-id", "path": path + ".link_id", "message": "link_id is required."}); continue
+            if link_id in link_ids: errors.append({"code": "duplicate-link-id", "path": path + ".link_id", "message": f"Duplicate link_id: {link_id}."}); continue
+            link_ids.add(link_id)
+            profile = self._project_link_types.get(predicate)
+            if profile is None: errors.append({"code": "unknown-link-predicate", "path": path + ".predicate", "message": f"Unknown project link predicate: {predicate}."}); continue
+            subject = object_index.get(subject_id); target = object_index.get(object_id)
+            if subject is None: errors.append({"code": "unresolved-link-subject", "path": path + ".subject_id", "message": f"Unresolved subject object: {subject_id}."})
+            if target is None: errors.append({"code": "unresolved-link-object", "path": path + ".object_id", "message": f"Unresolved object: {object_id}."})
+            if subject and str(subject.get("object_type") or "") not in profile.subject_types: errors.append({"code": "invalid-link-subject-type", "path": path + ".subject_id", "message": f"{predicate} does not allow subject type {subject.get('object_type')}."})
+            if target and str(target.get("object_type") or "") not in profile.object_types: errors.append({"code": "invalid-link-object-type", "path": path + ".object_id", "message": f"{predicate} does not allow object type {target.get('object_type')}."})
+            normalized_links.append({"link_id": link_id, "predicate": predicate, "subject_id": subject_id, "object_id": object_id})
+
+        packet_fingerprint = _stable_hash({
+            "schema": packet.get("schema"),
+            "objects": sorted(object_fingerprints.items()),
+            "events": sorted(event_fingerprints.items()),
+            "links": sorted(normalized_links, key=lambda item: item["link_id"]),
+        }) if objects or provenance or links else None
+        return {
+            "schema": PROJECT_PACKET_VALIDATION_SCHEMA_VERSION,
+            "subsystem_version": DOMAIN_VERSION,
+            "valid": not errors,
+            "counts": {"objects": len(objects), "provenance_events": len(provenance), "links": len(links)},
+            "project_id": root_project_id,
+            "object_fingerprints": object_fingerprints,
+            "event_fingerprints": event_fingerprints,
+            "packet_fingerprint": packet_fingerprint,
+            "errors": errors,
+            "warnings": warnings,
+            "guardrails": {
+                "validation_is_not_scientific_verification": True,
+                "validation_is_not_carbon_credit_eligibility": True,
+                "fingerprints_are_not_digital_signatures": True,
+                "packet_not_persisted": True,
+            },
+        }
+
     @staticmethod
     def _score_text(query: str, text: str) -> int:
         tokens = [token.casefold() for token in query.replace("/", " ").replace("-", " ").split() if len(token) >= 2]
@@ -1224,6 +1767,15 @@ class CarbonNatureKnowledgeFoundation:
         scored_evidence.sort(key=lambda pair: (-pair[0], pair[1].title.casefold(), pair[1].key))
         selected_evidence = [item for _, item in scored_evidence[: min(bounded, 12)]]
 
+        scored_project_types: list[tuple[int, CarbonProjectObjectTypeProfile]] = []
+        for item in PROJECT_OBJECT_TYPES:
+            text = " ".join([item.key, item.label, item.purpose, *item.required_payload_fields, *item.optional_payload_fields, *item.provenance_expectations])
+            score = self._score_text(query, text)
+            if score:
+                scored_project_types.append((score, item))
+        scored_project_types.sort(key=lambda pair: (-pair[0], pair[1].label.casefold(), pair[1].key))
+        selected_project_types = [item for _, item in scored_project_types[: min(bounded, 10)]]
+
         selected_graph_keys = {
             *selected_keys,
             *(item.key for item in selected_measures),
@@ -1236,7 +1788,7 @@ class CarbonNatureKnowledgeFoundation:
         ][:200]
 
         return {
-            "schema": "sc-carbon-nature-research-context/1.2",
+            "schema": "sc-carbon-nature-research-context/1.3",
             "subsystem_version": DOMAIN_VERSION,
             "query": query,
             "concepts": [item.to_dict() for item in selected],
@@ -1245,6 +1797,14 @@ class CarbonNatureKnowledgeFoundation:
             "methodologies": [item.to_dict() for item in selected_methods],
             "evidence": [item.to_dict() for item in selected_evidence],
             "evidence_graph_edges": graph_edges,
+            "project_object_types": [item.to_dict() for item in selected_project_types],
+            "project_object_model": {
+                "schema": PROJECT_OBJECT_MODEL_SCHEMA_VERSION,
+                "packet_schema": PROJECT_PACKET_SCHEMA_VERSION,
+                "provenance_schema": PROJECT_PROVENANCE_SCHEMA_VERSION,
+                "stateless_validation_ready": True,
+                "persistence_enabled": False,
+            },
             "evidence_retrieval": {
                 "library_search_query": query,
                 "recommended_domains": _unique([item.domain for item in selected] + [item.primary_domain for item in selected_measures]),
@@ -1257,8 +1817,10 @@ class CarbonNatureKnowledgeFoundation:
                 "research_librarian_ready": True,
                 "measure_registry_context_enabled": True,
                 "evidence_methodology_graph_context_enabled": True,
+                "project_object_model_context_enabled": True,
+                "provenance_model_context_enabled": True,
                 "domain_aware_reasoning_enabled": False,
-                "note": "v0.3.0 supplies governed concept, measure, methodology, evidence, and graph packets; AFOLU-specific Research Librarian reasoning is reserved for v0.5.0.",
+                "note": "v0.4.0 adds governed project object and provenance packets to the v0.3 evidence/methodology context; AFOLU-specific Research Librarian reasoning is reserved for v0.5.0.",
             },
             "guardrails": {
                 "concept_match_is_not_evidence": True,
@@ -1268,6 +1830,8 @@ class CarbonNatureKnowledgeFoundation:
                 "methodology_match_is_not_methodology_eligibility": True,
                 "co_benefit_is_not_assumed": True,
                 "project_credit_eligibility_not_determined": True,
+                "project_object_validation_is_not_verification": True,
+                "project_packet_persistence_disabled": True,
                 "methodology_applicability_requires_review": True,
                 "quantified_sequestration_not_inferred": True,
             },
@@ -1278,6 +1842,7 @@ class CarbonNatureKnowledgeFoundation:
                 "measures": [item.key for item in selected_measures],
                 "methodologies": [item.key for item in selected_methods],
                 "evidence": [item.key for item in selected_evidence],
+                "project_object_types": [item.key for item in selected_project_types],
                 "evidence_graph_edges": graph_edges,
             }),
         }

@@ -1,0 +1,37 @@
+Sustainable Catalyst Carbon & Nature Intelligence v0.4.0
+Carbon Project Object Model & Provenance
+
+Library application: 5.11.0
+Library backend: 2.5.0
+Carbon & Nature subsystem: 0.4.0
+
+Validation gates:
+PASS  Carbon & Nature v0.4 backend/project-model tests: 16
+PASS  Retained backend/Library regression tests: 120 (14 historical identity tests deselected)
+PASS  Retained public-interface regression tests: 26 (3 historical identity tests deselected)
+PASS  Total executed tests in release validator: 162
+PASS  Python compileall
+PASS  WordPress plugin PHP syntax
+PASS  Carbon & Nature module PHP syntax
+PASS  Carbon & Nature v0.4 JavaScript syntax
+
+Object model:
+PASS  10 unique governed object types
+PASS  9 unique provenance-event types
+PASS  9 non-inferential project link types
+PASS  stable object/project identity contract
+PASS  lifecycle and parent-type constraints
+PASS  governed measure/methodology reference validation
+PASS  deterministic SHA-256 object/event/packet fingerprints
+PASS  optional provenance-chain continuity checks
+PASS  one-root-project packet continuity
+PASS  bounded stateless validation
+
+Guardrails:
+PASS  no project-packet persistence
+PASS  no automatic project claim or eligibility determination
+PASS  no digital-signature/attestation claim
+PASS  no automatic methodology selection or claim validation
+PASS  no sequestration/SOC/whole-farm GHG calculation
+PASS  no certification or carbon-credit issuance
+PASS  project-object validation explicitly not scientific verification

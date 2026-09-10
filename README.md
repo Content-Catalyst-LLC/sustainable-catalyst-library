@@ -1,9 +1,8 @@
 ## Current release
 
-## Carbon & Nature Intelligence v0.3.0
+## Carbon & Nature Intelligence v0.4.0
 
-Carbon & Nature advances to **v0.3.0 — Carbon Evidence & Methodology Graph** while Sustainable Catalyst Library remains on the v5.11.x application line and the Python Library backend advances to **v2.4.0**. The release preserves the v0.1.0 ontology and v0.2.0 Measure Registry and adds governed evidence records, methodology profiles, typed graph edges, neighborhood packets, and evidence-aware Research Librarian handoff context.
-
+Carbon & Nature advances to **v0.4.0 — Carbon Project Object Model & Provenance** while Sustainable Catalyst Library remains on the v5.11.x application line and the Python Library backend advances to **v2.5.0**. The release preserves the v0.1 ontology, v0.2 Measure Registry, and v0.3 Evidence & Methodology Graph while adding ten governed project object types, nine provenance-event types, nine explicit project link predicates, deterministic integrity fingerprints, a packet template, and bounded stateless project-packet validation.
 
 **v5.11.0 — Private Organizational Knowledge Foundation** adds a separate organization-scoped private knowledge plane alongside the public Library. Backend v2.1.0 stores private organizations, sources, records, version history, ingest events, and access events in dedicated PostgreSQL tables; every private read is server-signed, organization-scoped, and access-scope filtered. Public Library search, the institutional network, and biomedical evidence surfaces do not query the private tables. Controlled handoff packets preserve the private boundary for Research Librarian, Workspace, and Lab.
 

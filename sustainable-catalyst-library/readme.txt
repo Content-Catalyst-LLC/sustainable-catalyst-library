@@ -369,11 +369,19 @@ The facade does not expose My Library, private Research Projects, notebook or Ev
 
 == Carbon & Nature Intelligence ==
 
-Subsystem version: 0.2.0 — Carbon Sequestration Measure Registry.
+Subsystem version: 0.4.0 — Carbon Project Object Model & Provenance.
 
-Use [sc_carbon_nature_intelligence] to expose the Library-native measure explorer. v0.2.0 preserves the governed AFOLU and Nature-Based Solutions foundation from v0.1.0 and adds structured measure profiles for improved rotations, cover crops, reduced/minimum tillage, residue management, soil and nutrient management, agroforestry, grassland restoration/management, woodland establishment, wetland restoration, and peatland restoration/rewetting. Each profile links land systems, carbon pools, relevant greenhouse gases, outcome types, MRV method families, integrity dimensions, co-benefit contexts, risks, and evidence requirements. The registry does not rank measures, calculate sequestration, select methodologies, determine eligibility/additionality/permanence, issue carbon credits, or certify projects.
+Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.4.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, and Carbon Evidence & Methodology Graph, then adds versioned project, farm, parcel, baseline, intervention, observation, sample, model-run, monitoring, and verification object profiles plus explicit project links and provenance-event lineage. Deterministic fingerprints and bounded stateless validation support reproducible project packets without persisting project data or implying scientific verification, project eligibility, certification, carbon-credit issuance, or sequestration calculation.
 
 == Changelog ==
+
+= 5.11.0 + Carbon & Nature Intelligence v0.4.0 =
+* Added ten governed Carbon Project object types with stable versioned envelopes and explicit parent/reference contracts.
+* Added nine provenance-event types, deterministic object/event/packet fingerprints, and optional same-object provenance-chain continuity checks.
+* Added nine non-inferential project link predicates with subject/object type constraints.
+* Added read-only object-model, object-type, provenance-event, and packet-template routes plus signed stateless project-packet validation in backend v2.5.0.
+* Research-context packets now include project object-model and provenance handoff context.
+* Preserved no persistence, no automatic project claims/eligibility, no digital-signature claim, no sequestration calculation, no certification, and no carbon-credit issuance.
 
 = 5.11.0 + Carbon & Nature Intelligence v0.3.0 =
 * Added Carbon Evidence & Methodology Graph with governed evidence records and methodology profiles.

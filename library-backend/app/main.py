@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+import json
 from time import perf_counter
 from typing import Any
 
@@ -232,7 +233,7 @@ def health() -> dict[str, Any]:
             "private_cross_product_handoffs": True,
             "private_public_search_separation": True,
             "carbon_nature_intelligence": True,
-            "carbon_nature_domain_version": "0.3.0",
+            "carbon_nature_domain_version": "0.4.0",
             "carbon_sequestration_measure_registry": True,
             "carbon_measure_comparison_packets": True,
             "carbon_measure_research_context": True,
@@ -241,6 +242,13 @@ def health() -> dict[str, Any]:
             "carbon_evidence_methodology_graph": True,
             "carbon_evidence_graph_neighborhoods": True,
             "carbon_evidence_aware_research_context": True,
+            "carbon_project_object_model": True,
+            "carbon_project_provenance_model": True,
+            "carbon_project_packet_template": True,
+            "carbon_project_packet_validation": True,
+            "carbon_project_packet_persistence": False,
+            "automatic_carbon_project_claim_generation": False,
+            "automatic_carbon_project_eligibility_determination": False,
             "automatic_carbon_methodology_selection": False,
             "automatic_carbon_claim_validation": False,
             "afolu_knowledge_foundation": True,
@@ -835,6 +843,49 @@ def carbon_nature_evidence_graph_neighborhood(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="Carbon & Nature evidence graph node not found") from exc
+
+
+@app.get("/v1/carbon-nature/project-object-model")
+def carbon_nature_project_object_model() -> dict[str, Any]:
+    return carbon_nature.project_object_model()
+
+
+@app.get("/v1/carbon-nature/project-object-types")
+def carbon_nature_project_object_types() -> dict[str, Any]:
+    return carbon_nature.project_object_types()
+
+
+@app.get("/v1/carbon-nature/project-object-types/{object_type_key}")
+def carbon_nature_project_object_type(object_type_key: str) -> dict[str, Any]:
+    try:
+        return carbon_nature.project_object_type(object_type_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Carbon & Nature project object type not found") from exc
+
+
+@app.get("/v1/carbon-nature/provenance-event-types")
+def carbon_nature_provenance_event_types() -> dict[str, Any]:
+    return carbon_nature.provenance_event_types()
+
+
+@app.get("/v1/carbon-nature/project-packet-template")
+def carbon_nature_project_packet_template() -> dict[str, Any]:
+    return carbon_nature.project_packet_template()
+
+
+@app.post("/v1/carbon-nature/project-packets/validate")
+async def carbon_nature_validate_project_packet(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=422, detail="project packet must be valid UTF-8 JSON") from exc
+    return carbon_nature.validate_project_packet(payload)
 
 
 @app.get("/v1/carbon-nature/research-context")
