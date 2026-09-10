@@ -3,11 +3,12 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from hashlib import sha256
 import json
+from decimal import Decimal, InvalidOperation, localcontext
 from typing import Any
 
 
-DOMAIN_VERSION = "0.1.0"
-SCHEMA_VERSION = "sc-energy-systems-knowledge-foundation/1.0"
+DOMAIN_VERSION = "0.2.0"
+SCHEMA_VERSION = "sc-energy-systems-conversion-registry/1.0"
 
 
 @dataclass(frozen=True)
@@ -44,12 +45,67 @@ class EnergySourceRecord:
     numeric_status: str = "context-only"
 
 
-class EnergySystemsKnowledgeFoundation:
-    """Governed, source-grounded knowledge foundation for sustainable energy systems.
+@dataclass(frozen=True)
+class EnergyUnitRecord:
+    key: str
+    symbol: str
+    label: str
+    dimension: str
+    source_key: str
+    source_year: int
+    status: str
+    note: str
 
-    v0.1.0 deliberately exposes concepts, typed relationships, source provenance,
-    SDG mappings, and cross-platform handoffs. It does not calculate conversion
-    factors, rank technologies, infer resource potential, or execute scenarios.
+
+@dataclass(frozen=True)
+class EnergyConversionFactorRecord:
+    key: str
+    from_unit: str
+    to_unit: str
+    factor: str
+    source_key: str
+    source_year: int
+    geography: str
+    status: str
+    note: str
+
+
+@dataclass(frozen=True)
+class EnergyCarbonFactorRecord:
+    key: str
+    fuel: str
+    unit: str
+    kg_co2e_per_unit: str
+    source_key: str
+    source_year: int
+    geography: str
+    emissions_boundary: str
+    accounting_scope: str
+    status: str
+    note: str
+
+
+@dataclass(frozen=True)
+class EnergyHeatContentFactorRecord:
+    key: str
+    fuel: str
+    unit: str
+    kwh_per_unit: str
+    source_key: str
+    source_year: int
+    geography: str
+    calorific_basis: str
+    status: str
+    note: str
+
+
+class EnergySystemsKnowledgeFoundation:
+    """Governed sustainable-energy knowledge and source-bound numerical registry.
+
+    v0.2.0 preserves the v0.1.0 concept graph and adds versioned energy-unit,
+    direct-carbon, and gross-calorific-value factor registries from the supplied
+    2020 Carbon Trust/BEIS guide. Calculations are explicit-source, historical-
+    vintage calculations; they are never presented as current grid or inventory data.
     """
 
     def __init__(self) -> None:
@@ -58,6 +114,11 @@ class EnergySystemsKnowledgeFoundation:
         self._relationships = self._build_relationships()
         self._knowledge_domains = self._build_domains()
         self._sdgs = self._build_sdgs()
+        self._units = self._build_units()
+        self._conversion_factors = self._build_conversion_factors()
+        self._carbon_factors = self._build_carbon_factors()
+        self._heat_content_factors = self._build_heat_content_factors()
+        self._methodology_rules = self._build_methodology_rules()
         self._handoffs = self._build_handoffs()
         self._guardrails = self._build_guardrails()
         self._validate()
@@ -99,9 +160,9 @@ class EnergySystemsKnowledgeFoundation:
                 "Carbon Trust; factors based on BEIS 2020 data",
                 2020,
                 "technical-guide",
-                "future-conversion-registry-source",
-                "Provides historical conversion-factor examples and distinctions between direct and indirect emissions. Numerical values are provenance-only in v0.1.0 and are not activated as current factors.",
-                "inactive-historical-numeric-source",
+                "numeric-registry-source",
+                "Provides the v0.2.0 source-bound energy-unit, direct kgCO2e, and gross-calorific-value records. Values retain their 2020 vintage and UK/source methodology and are not treated as current defaults.",
+                "active-historical-reference-only",
             ),
             EnergySourceRecord(
                 "atkisson-2009",
@@ -136,8 +197,8 @@ class EnergySystemsKnowledgeFoundation:
             C("energy-system", "Energy system", "system", "resources-conversion-end-use", "A connected arrangement of energy sources, conversion processes, carriers or forms, distribution, and end uses.", ("mcdonnell-lecture-1",), ("flows", "conversion")),
             C("energy-source", "Energy source", "resource-concept", "resources-conversion-end-use", "An origin from which energy can be obtained and converted into useful forms or services.", ("mcdonnell-lecture-1",), ("resource",)),
             C("energy-resource", "Energy resource", "resource-concept", "resources-conversion-end-use", "An energy-bearing natural or technical resource considered for availability, estimation, production, or conversion.", ("ucd-module-sustainable-energy", "vera-langlois-2007"), ("resource-evaluation",)),
-            C("energy-resource-estimation", "Energy resource estimation and evaluation", "analysis-method", "resources-conversion-end-use", "Assessment of energy-resource availability and significance within a defined geography, technology, or planning context; v0.1.0 records the method concept without inferring resource values.", ("ucd-module-sustainable-energy", "vera-langlois-2007"), ("resource", "estimation", "evaluation")),
-            C("renewable-resource-potential", "Renewable resource potential", "resource-concept", "renewable-technologies", "Potential availability of a renewable resource for energy-system use; v0.1.0 does not calculate technical, economic, or deployable potential.", ("ucd-module-sustainable-energy",), ("resource", "potential")),
+            C("energy-resource-estimation", "Energy resource estimation and evaluation", "analysis-method", "resources-conversion-end-use", "Assessment of energy-resource availability and significance within a defined geography, technology, or planning context; v0.2.0 retains the method concept without inferring resource values.", ("ucd-module-sustainable-energy", "vera-langlois-2007"), ("resource", "estimation", "evaluation")),
+            C("renewable-resource-potential", "Renewable resource potential", "resource-concept", "renewable-technologies", "Potential availability of a renewable resource for energy-system use; v0.2.0 does not calculate technical, economic, or deployable potential.", ("ucd-module-sustainable-energy",), ("resource", "potential")),
             C("energy-reserve", "Energy reserve", "resource-concept", "resources-conversion-end-use", "A reserve concept used with production to assess the relationship between available reserves and current production.", ("vera-langlois-2007",), ("reserve-to-production",)),
             C("primary-energy", "Primary energy", "energy-form", "resources-conversion-end-use", "Energy present in an original source before conversion into secondary carriers or end-use forms.", ("mcdonnell-lecture-1",), ("energy-form",)),
             C("energy-carrier", "Energy carrier", "energy-form", "resources-conversion-end-use", "A form used to transfer energy from conversion processes toward end-use applications.", ("mcdonnell-lecture-1",), ("electricity", "fuels")),
@@ -174,7 +235,7 @@ class EnergySystemsKnowledgeFoundation:
             C("digestate", "Digestate", "biological-output", "biological-carbon-bioenergy", "Material output from anaerobic digestion considered in the module's biological carbon capture/storage scope.", ("ucd-module-sustainable-energy",), ("AD", "soil")),
             C("biochar", "Biochar", "carbon-pathway", "biological-carbon-bioenergy", "A biomass-derived carbon-management pathway explicitly included in the module scope.", ("ucd-module-sustainable-energy",), ("biomass", "carbon")),
             C("biomass-to-oil", "Biomass to oil", "conversion-pathway", "biological-carbon-bioenergy", "Conversion of biomass toward oil-like energy products, included in the module scope.", ("ucd-module-sustainable-energy",), ("biomass", "conversion")),
-            C("co2-to-energy", "CO₂ to energy", "conversion-pathway", "biological-carbon-bioenergy", "A CO₂-to-energy pathway named in the module's biological carbon capture/storage scope; v0.1.0 records the concept without selecting a specific process or claiming performance.", ("ucd-module-sustainable-energy",), ("CO2", "conversion")),
+            C("co2-to-energy", "CO₂ to energy", "conversion-pathway", "biological-carbon-bioenergy", "A CO₂-to-energy pathway named in the module's biological carbon capture/storage scope; v0.2.0 records the concept without selecting a specific process or claiming performance.", ("ucd-module-sustainable-energy",), ("CO2", "conversion")),
             C("energy-efficiency", "Energy efficiency", "analysis-concept", "efficiency-economics-analysis", "The relationship between useful energy service or output and energy input, used to evaluate technologies, processes, and systems.", ("mcdonnell-lecture-1", "vera-langlois-2007", "ucd-module-sustainable-energy"), ("efficiency",)),
             C("end-use-efficiency", "End-use efficiency", "analysis-concept", "efficiency-economics-analysis", "Efficiency at the point where energy is converted into useful services in sectors such as households, industry, transport, services, and agriculture.", ("mcdonnell-lecture-1", "vera-langlois-2007"), ("efficiency", "end-use")),
             C("energy-intensity", "Energy intensity", "indicator-concept", "efficiency-economics-analysis", "Energy use relative to an activity or economic measure; aggregate values require interpretation in light of sector structure, climate, geography, technology, fuel mix, and behavior.", ("vera-langlois-2007",), ("indicator", "GDP")),
@@ -190,9 +251,9 @@ class EnergySystemsKnowledgeFoundation:
             C("reserves-to-production", "Reserves-to-production ratio", "indicator-concept", "sustainability-metrics-impacts", "Ratio relating energy reserves to production, used as a production/reserve indicator.", ("vera-langlois-2007",), ("ECO4", "reserve")),
             C("ghg-emissions", "Greenhouse-gas emissions from energy", "environmental-indicator-concept", "sustainability-metrics-impacts", "Greenhouse-gas emissions associated with energy production and use, considered per capita, per economic output, or other defined denominators.", ("vera-langlois-2007", "carbon-trust-conversion-2020"), ("ENV1", "climate")),
             C("co2e", "Carbon dioxide equivalent", "measurement-concept", "sustainability-metrics-impacts", "A common greenhouse-gas reporting unit that expresses combined climate effects in CO₂-equivalent terms.", ("carbon-trust-conversion-2020",), ("GHG", "measurement")),
-            C("emission-factor", "Energy emission factor", "measurement-concept", "sustainability-metrics-impacts", "A factor relating a quantity of energy or fuel use to greenhouse-gas emissions under a stated source, year, geography, unit, and emissions boundary; historical factor values remain inactive in v0.1.0.", ("carbon-trust-conversion-2020",), ("conversion", "GHG", "provenance")),
+            C("emission-factor", "Energy emission factor", "measurement-concept", "sustainability-metrics-impacts", "A factor relating a quantity of energy or fuel use to greenhouse-gas emissions under a stated source, year, geography, unit, and emissions boundary; v0.2.0 activates only explicitly source-bound historical factors and does not treat them as current defaults.", ("carbon-trust-conversion-2020",), ("conversion", "GHG", "provenance")),
             C("energy-unit-conversion", "Energy unit conversion", "measurement-method", "resources-conversion-end-use", "Conversion among energy units using explicit source and unit definitions; numerical conversion services are reserved for the versioned v0.2.0 registry.", ("mcdonnell-lecture-1", "carbon-trust-conversion-2020"), ("units", "conversion")),
-            C("calorific-value", "Calorific value", "measurement-concept", "resources-conversion-end-use", "Energy content of a fuel under a stated gross or net basis; the historical guide provides examples but v0.1.0 does not activate those values as current factors.", ("carbon-trust-conversion-2020",), ("fuel", "heat-content", "gross", "net")),
+            C("calorific-value", "Calorific value", "measurement-concept", "resources-conversion-end-use", "Energy content of a fuel under a stated gross or net basis; v0.2.0 activates the unambiguous historical gross-calorific-value records while keeping them source-bound and non-current.", ("carbon-trust-conversion-2020",), ("fuel", "heat-content", "gross", "net")),
             C("direct-emissions", "Direct emissions", "emissions-boundary", "sustainability-metrics-impacts", "Emissions occurring at the point of fuel use or, for electricity, at the point of generation within the historical conversion guide's stated boundary.", ("carbon-trust-conversion-2020",), ("boundary", "scope")),
             C("indirect-emissions", "Indirect emissions", "emissions-boundary", "sustainability-metrics-impacts", "Upstream or other emissions outside the historical guide's direct-emissions boundary, such as extraction or refining examples.", ("carbon-trust-conversion-2020",), ("boundary", "lifecycle")),
             C("air-quality-impact", "Air-quality impact", "environmental-impact", "sustainability-metrics-impacts", "Air-pollution effects associated with energy systems and represented by ambient concentration and emissions indicators.", ("vera-langlois-2007",), ("air", "ENV2", "ENV3")),
@@ -281,7 +342,7 @@ class EnergySystemsKnowledgeFoundation:
         return [
             {"key": "energy-sustainable-development", "label": "Energy & Sustainable Development", "purpose": "Historic/current energy perspectives, human development, access, prosperity, environment, and trade-offs."},
             {"key": "resources-conversion-end-use", "label": "Resources, Conversion & End Use", "purpose": "Energy sources, resources/reserves, forms, conversion processes, carriers, services, and end uses."},
-            {"key": "renewable-technologies", "label": "Renewable Energy Technologies", "purpose": "Solar, wind, hydro, tidal, wave, bioenergy and related technology concepts without v0.1.0 performance ranking."},
+            {"key": "renewable-technologies", "label": "Renewable Energy Technologies", "purpose": "Solar, wind, hydro, tidal, wave, bioenergy and related technology concepts without v0.2.0 performance ranking."},
             {"key": "biological-carbon-bioenergy", "label": "Biological Carbon Capture, Storage & Bioenergy", "purpose": "Soil/forest carbon, forest ecology, anaerobic digestion and digestate, biochar, biomass-to-oil, and CO₂-to-energy concepts linked to Carbon & Nature where supported."},
             {"key": "efficiency-economics-analysis", "label": "Efficiency, Economics & Analysis", "purpose": "Energy efficiency, end-use efficiency, energy balance, cost-benefit, and cost-efficiency analytical concepts."},
             {"key": "sustainability-metrics-impacts", "label": "Sustainability Metrics & Environmental Impacts", "purpose": "Social/economic/environmental indicators, security, emissions boundaries, air/water/land impacts, and decoupling."},
@@ -299,7 +360,99 @@ class EnergySystemsKnowledgeFoundation:
             {"goal": 12, "name": "Responsible Consumption and Production", "coverage": 2, "source": "ucd-module-sustainable-energy"},
             {"goal": 13, "name": "Climate Action", "coverage": 1, "source": "ucd-module-sustainable-energy"},
             {"goal": 14, "name": "Life Below Water", "coverage": 3, "source": "ucd-module-sustainable-energy"},
-            {"goal": 15, "name": "Life on Land", "coverage": None, "source": "ucd-module-sustainable-energy", "note": "The supplied module excerpt lists the goal but does not show a coverage value; v0.1.0 does not infer one."},
+            {"goal": 15, "name": "Life on Land", "coverage": None, "source": "ucd-module-sustainable-energy", "note": "The supplied module excerpt lists the goal but does not show a coverage value; v0.2.0 does not infer one."},
+        ]
+
+    @staticmethod
+    def _build_units() -> dict[str, EnergyUnitRecord]:
+        U = EnergyUnitRecord
+        rows = [
+            U("kwh", "kWh", "kilowatt-hour", "energy", "carbon-trust-conversion-2020", 2020, "source-bound-reference", "Canonical target used by the supplied energy conversion table."),
+            U("therm", "therm", "therm", "energy", "carbon-trust-conversion-2020", 2020, "source-bound-reference", "The supplied guide provides a therm-to-kWh conversion factor."),
+            U("btu", "Btu", "British thermal unit", "energy", "carbon-trust-conversion-2020", 2020, "source-bound-reference", "The supplied guide provides a Btu-to-kWh conversion factor."),
+            U("mj", "MJ", "megajoule", "energy", "carbon-trust-conversion-2020", 2020, "source-bound-reference", "The supplied guide provides an MJ-to-kWh conversion factor."),
+            U("toe", "toe", "tonne of oil equivalent", "energy", "carbon-trust-conversion-2020", 2020, "source-bound-reference", "The supplied guide provides a toe-to-kWh conversion factor."),
+            U("tonne", "tonne", "tonne", "mass", "carbon-trust-conversion-2020", 2020, "source-bound-reference", "Used as a denominator in supplied fuel carbon and heat-content factors."),
+            U("litre", "L", "litre", "volume", "carbon-trust-conversion-2020", 2020, "source-bound-reference", "Used as a denominator in supplied fuel carbon and heat-content factors."),
+            U("cubic-metre", "m³", "cubic metre", "volume", "carbon-trust-conversion-2020", 2020, "source-bound-reference", "Used for the supplied natural-gas carbon factor."),
+        ]
+        return {row.key: row for row in rows}
+
+    @staticmethod
+    def _build_conversion_factors() -> dict[str, EnergyConversionFactorRecord]:
+        F = EnergyConversionFactorRecord
+        rows = [
+            F("therm-to-kwh-2020", "therm", "kwh", "29.307", "carbon-trust-conversion-2020", 2020, "United Kingdom/source guide", "historical-source-bound", "Quoted by the supplied guide as therms to kWh."),
+            F("btu-to-kwh-2020", "btu", "kwh", "0.0002931", "carbon-trust-conversion-2020", 2020, "United Kingdom/source guide", "historical-source-bound", "Quoted by the supplied guide as Btu to kWh."),
+            F("mj-to-kwh-2020", "mj", "kwh", "0.2778", "carbon-trust-conversion-2020", 2020, "United Kingdom/source guide", "historical-source-bound", "Quoted by the supplied guide as MJ to kWh."),
+            F("toe-to-kwh-2020", "toe", "kwh", "11630", "carbon-trust-conversion-2020", 2020, "United Kingdom/source guide", "historical-source-bound", "Quoted by the supplied guide as tonnes of oil equivalent to kWh."),
+        ]
+        return {row.key: row for row in rows}
+
+    @staticmethod
+    def _build_carbon_factors() -> dict[str, EnergyCarbonFactorRecord]:
+        F = EnergyCarbonFactorRecord
+        base = dict(source_key="carbon-trust-conversion-2020", source_year=2020, geography="United Kingdom", emissions_boundary="direct", accounting_scope="fuel-use or electricity-generation boundary", status="historical-source-bound")
+        rows = [
+            F("uk-grid-electricity-kwh-2020", "UK grid electricity", "kwh", "0.23314", accounting_scope="Scope 2 location-based generation factor; Scope 3 separate", note="The guide identifies this as electricity generated under the location-based method.", **{k:v for k,v in base.items() if k!='accounting_scope'}),
+            F("natural-gas-kwh-2020", "Natural gas", "kwh", "0.18387", note="Direct kgCO2e per kWh in the supplied 2020 guide.", **base),
+            F("natural-gas-therm-2020", "Natural gas", "therm", "5.388678", note="Direct kgCO2e per therm in the supplied 2020 guide.", **base),
+            F("natural-gas-cubic-metre-2020", "Natural gas", "cubic-metre", "2.02266", note="Direct kgCO2e per cubic metre in the supplied 2020 guide.", **base),
+            F("lpg-kwh-2020", "LPG", "kwh", "0.21448", note="Direct kgCO2e per kWh in the supplied 2020 guide.", **base),
+            F("lpg-therm-2020", "LPG", "therm", "6.285765", note="Direct kgCO2e per therm in the supplied 2020 guide.", **base),
+            F("lpg-litre-2020", "LPG", "litre", "1.55537", note="Direct kgCO2e per litre in the supplied 2020 guide.", **base),
+            F("gas-oil-tonne-2020", "Gas oil", "tonne", "3229.34", note="Direct kgCO2e per tonne in the supplied 2020 guide.", **base),
+            F("gas-oil-kwh-2020", "Gas oil", "kwh", "0.25672", note="Direct kgCO2e per kWh in the supplied 2020 guide.", **base),
+            F("gas-oil-litre-2020", "Gas oil", "litre", "2.75776", note="Direct kgCO2e per litre in the supplied 2020 guide.", **base),
+            F("fuel-oil-tonne-2020", "Fuel oil", "tonne", "3221.37", note="Direct kgCO2e per tonne in the supplied 2020 guide.", **base),
+            F("fuel-oil-kwh-2020", "Fuel oil", "kwh", "0.26775", note="Direct kgCO2e per kWh in the supplied 2020 guide.", **base),
+            F("burning-oil-tonne-2020", "Burning oil", "tonne", "3165.32", note="Direct kgCO2e per tonne in the supplied 2020 guide.", **base),
+            F("burning-oil-kwh-2020", "Burning oil", "kwh", "0.24666", note="Direct kgCO2e per kWh in the supplied 2020 guide.", **base),
+            F("diesel-tonne-2020", "Diesel", "tonne", "3028.61", note="Direct kgCO2e per tonne; source footnote describes standard forecourt fuel with typical biofuel content.", **base),
+            F("diesel-kwh-2020", "Diesel", "kwh", "0.24057", note="Direct kgCO2e per kWh; source footnote describes standard forecourt fuel with typical biofuel content.", **base),
+            F("diesel-litre-2020", "Diesel", "litre", "2.54603", note="Direct kgCO2e per litre; source footnote describes standard forecourt fuel with typical biofuel content.", **base),
+            F("petrol-tonne-2020", "Petrol", "tonne", "2942.05", note="Direct kgCO2e per tonne; source footnote describes standard forecourt fuel with typical biofuel content.", **base),
+            F("petrol-kwh-2020", "Petrol", "kwh", "0.22920", note="Direct kgCO2e per kWh; source footnote describes standard forecourt fuel with typical biofuel content.", **base),
+            F("petrol-litre-2020", "Petrol", "litre", "2.16802", note="Direct kgCO2e per litre; source footnote describes standard forecourt fuel with typical biofuel content.", **base),
+            F("industrial-coal-tonne-2020", "Industrial coal", "tonne", "2380.01", note="Direct kgCO2e per tonne in the supplied 2020 guide.", **base),
+            F("industrial-coal-kwh-2020", "Industrial coal", "kwh", "0.32040", note="Direct kgCO2e per kWh in the supplied 2020 guide.", **base),
+            F("wood-pellets-tonne-2020", "Wood pellets", "tonne", "72.29731", note="The guide states that its wood-pellet factor includes methane and nitrous oxide emitted during combustion.", **base),
+            F("wood-pellets-kwh-2020", "Wood pellets", "kwh", "0.01545", note="The guide states that its wood-pellet factor includes methane and nitrous oxide emitted during combustion.", **base),
+        ]
+        return {row.key: row for row in rows}
+
+    @staticmethod
+    def _build_heat_content_factors() -> dict[str, EnergyHeatContentFactorRecord]:
+        F = EnergyHeatContentFactorRecord
+        base = dict(source_key="carbon-trust-conversion-2020", source_year=2020, geography="United Kingdom/source guide", calorific_basis="gross calorific value", status="historical-source-bound")
+        rows = [
+            F("fuel-oil-kwh-per-tonne-2020", "Fuel oil", "tonne", "12031", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("fuel-oil-kwh-per-litre-2020", "Fuel oil", "litre", "11.89", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("lpg-kwh-per-tonne-2020", "LPG", "tonne", "13702", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("lpg-kwh-per-litre-2020", "LPG", "litre", "7.25", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("diesel-kwh-per-tonne-2020", "Diesel", "tonne", "12589", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("diesel-kwh-per-litre-2020", "Diesel", "litre", "10.58", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("gas-oil-kwh-per-tonne-2020", "Gas oil", "tonne", "12579", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("gas-oil-kwh-per-litre-2020", "Gas oil", "litre", "10.74", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("burning-oil-kwh-per-tonne-2020", "Burning oil", "tonne", "12833", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("burning-oil-kwh-per-litre-2020", "Burning oil", "litre", "10.30", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("petrol-kwh-per-tonne-2020", "Petrol", "tonne", "12836", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("petrol-kwh-per-litre-2020", "Petrol", "litre", "9.46", note="Default gross calorific value when fuel-specific supplier values are unavailable.", **base),
+            F("industrial-coal-kwh-per-tonne-2020", "Industrial coal", "tonne", "7428", note="Default gross calorific value in the supplied 2020 guide.", **base),
+            F("wood-pellets-kwh-per-tonne-2020", "Wood pellets", "tonne", "5080", note="Default gross calorific value in the supplied 2020 guide.", **base),
+            F("straw-kwh-per-tonne-2020", "Straw", "tonne", "4401", note="Default gross calorific value in the supplied 2020 guide.", **base),
+            F("natural-gas-kwh-per-tonne-2020", "Natural gas", "tonne", "13776", note="Only the unambiguous kWh-per-tonne value from the parsed supplied table is activated; ambiguous parsed volume fields are omitted.", **base),
+        ]
+        return {row.key: row for row in rows}
+
+    @staticmethod
+    def _build_methodology_rules() -> list[dict[str, Any]]:
+        return [
+            {"key": "direct-emissions-boundary", "source_key": "carbon-trust-conversion-2020", "source_year": 2020, "rule": "Energy carbon factors in the guide are total direct kgCO2e per unit of fuel; direct emissions occur at fuel use or at electricity generation.", "current_default": False},
+            {"key": "indirect-emissions-excluded", "source_key": "carbon-trust-conversion-2020", "source_year": 2020, "rule": "The supplied guide states that these factors do not include indirect emissions such as extraction or refining.", "current_default": False},
+            {"key": "co2e-combined-gases", "source_key": "carbon-trust-conversion-2020", "source_year": 2020, "rule": "The guide expresses the combined greenhouse effect of CO2, CH4 and N2O as kgCO2e using global warming potential.", "current_default": False},
+            {"key": "renewable-electricity-accounting", "source_key": "carbon-trust-conversion-2020", "source_year": 2020, "rule": "For green-tariff electricity, the guide directs location-based reporting to the grid factor and market-based reporting to supplier-specific or residual-grid factors when applicable; v0.2.0 does not fabricate a universal renewable-electricity factor.", "current_default": False},
+            {"key": "gross-calorific-basis", "source_key": "carbon-trust-conversion-2020", "source_year": 2020, "rule": "Fuel heat-content records are gross calorific values; the guide explains that net values exclude energy associated with water evaporation.", "current_default": False},
         ]
 
     @staticmethod
@@ -307,17 +460,17 @@ class EnergySystemsKnowledgeFoundation:
         return [
             {"key": "soil-carbon-to-carbon-nature", "source_concepts": ["soil-carbon"], "target": "Carbon & Nature Intelligence", "target_refs": ["soil-organic-carbon"], "status": "available", "boundary": "Semantic routing only; does not quantify sequestration or project suitability."},
             {"key": "forest-to-carbon-nature", "source_concepts": ["forest-carbon", "forest-ecology"], "target": "Carbon & Nature Intelligence", "target_refs": ["forest-woodland"], "status": "available", "boundary": "Semantic routing only; does not infer forest-carbon stocks, permanence, or project eligibility."},
-            {"key": "bioenergy-carbon-nature-extension", "source_concepts": ["anaerobic-digestion", "digestate", "biochar", "biomass-to-oil", "co2-to-energy"], "target": "Carbon & Nature Intelligence", "target_refs": [], "status": "planned-extension", "boundary": "No existing target is fabricated in v0.1.0; explicit Carbon & Nature objects are required before this handoff becomes active."},
-            {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "co2e"], "target": "Workbench", "target_refs": [], "status": "planned-v0.2-plus", "boundary": "No calculator execution in v0.1.0."},
-            {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity"], "target": "Lab", "target_refs": [], "status": "planned-v0.5-plus", "boundary": "No simulation, optimization, or scenario execution in v0.1.0."},
-            {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security"], "target": "Site Intelligence", "target_refs": [], "status": "planned-v0.8-plus", "boundary": "No current country values are asserted by this knowledge foundation."},
-            {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis"], "target": "Decision Studio", "target_refs": [], "status": "planned-v0.9-plus", "boundary": "No automatic policy or technology recommendation in v0.1.0."},
+            {"key": "bioenergy-carbon-nature-extension", "source_concepts": ["anaerobic-digestion", "digestate", "biochar", "biomass-to-oil", "co2-to-energy"], "target": "Carbon & Nature Intelligence", "target_refs": [], "status": "planned-extension", "boundary": "No existing target is fabricated in v0.2.0; explicit Carbon & Nature objects are required before this handoff becomes active."},
+            {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "co2e"], "target": "Workbench", "target_refs": ["energy-unit-conversion-registry", "historical-carbon-factor-registry"], "status": "contract-available", "boundary": "v0.2.0 exposes source-bound calculation contracts, but does not modify or execute the separate Workbench product."},
+            {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity"], "target": "Lab", "target_refs": [], "status": "planned-v0.5-plus", "boundary": "No simulation, optimization, or scenario execution in v0.2.0."},
+            {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security"], "target": "Site Intelligence", "target_refs": [], "status": "planned-v0.8-plus", "boundary": "No current country values are asserted by this source-bound registry."},
+            {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis"], "target": "Decision Studio", "target_refs": [], "status": "planned-v0.9-plus", "boundary": "No automatic policy or technology recommendation in v0.2.0."},
         ]
 
     @staticmethod
     def _build_guardrails() -> dict[str, Any]:
         return {
-            "knowledge_foundation_not_calculator": True,
+            "knowledge_foundation_preserved": True,
             "concept_match_is_not_evidence": True,
             "relationship_is_not_causal_proof": True,
             "technology_presence_is_not_technology_suitability": True,
@@ -326,7 +479,13 @@ class EnergySystemsKnowledgeFoundation:
             "historical_source_is_not_current_state": True,
             "current_policy_price_grid_or_emission_data_require_current_sources": True,
             "resource_or_reserve_values_not_inferred": True,
-            "conversion_factors_activated": False,
+            "conversion_factors_activated": True,
+            "carbon_factor_calculation_activated": True,
+            "heat_content_factor_calculation_activated": True,
+            "current_factor_defaults_activated": False,
+            "historical_calculation_is_not_current_inventory": True,
+            "calculation_requires_explicit_source_bound_inputs": True,
+            "workbench_execution_activated": False,
             "energy_indicator_calculation_activated": False,
             "scenario_modeling_activated": False,
             "automatic_technology_ranking": False,
@@ -351,7 +510,22 @@ class EnergySystemsKnowledgeFoundation:
             if missing:
                 raise ValueError(f"Unknown relationship source(s): {sorted(missing)}")
             if rel.inference_allowed:
-                raise ValueError("v0.1.0 relationships must remain non-inferential")
+                raise ValueError("Energy-system relationships must remain non-inferential")
+        for unit in self._units.values():
+            if unit.source_key not in allowed_sources:
+                raise ValueError(f"Unknown unit source: {unit.source_key}")
+        for factor in self._conversion_factors.values():
+            if factor.source_key not in allowed_sources or factor.from_unit not in self._units or factor.to_unit not in self._units:
+                raise ValueError(f"Invalid conversion factor: {factor.key}")
+            self._positive_decimal(factor.factor, factor.key)
+        for factor in self._carbon_factors.values():
+            if factor.source_key not in allowed_sources or factor.unit not in self._units:
+                raise ValueError(f"Invalid carbon factor: {factor.key}")
+            self._positive_decimal(factor.kg_co2e_per_unit, factor.key)
+        for factor in self._heat_content_factors.values():
+            if factor.source_key not in allowed_sources or factor.unit not in self._units:
+                raise ValueError(f"Invalid heat-content factor: {factor.key}")
+            self._positive_decimal(factor.kwh_per_unit, factor.key)
 
     def _content_fingerprint(self) -> str:
         content = {
@@ -361,6 +535,11 @@ class EnergySystemsKnowledgeFoundation:
             "relationships": [asdict(v) for v in self._relationships],
             "domains": self._knowledge_domains,
             "sdgs": self._sdgs,
+            "units": [asdict(v) for v in self._units.values()],
+            "conversion_factors": [asdict(v) for v in self._conversion_factors.values()],
+            "carbon_factors": [asdict(v) for v in self._carbon_factors.values()],
+            "heat_content_factors": [asdict(v) for v in self._heat_content_factors.values()],
+            "methodology_rules": self._methodology_rules,
             "handoffs": self._handoffs,
             "guardrails": self._guardrails,
         }
@@ -373,10 +552,11 @@ class EnergySystemsKnowledgeFoundation:
             "subsystem": {
                 "name": "Energy Systems Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Sustainable Energy Knowledge Foundation",
+                "release": "Energy Units, Carbon Factors & Conversion Registry",
                 "library_version": "5.11.0",
-                "backend_version": "2.7.0",
+                "backend_version": "2.8.0",
                 "read_only": True,
+                "calculation_mode": "explicit-source-bound",
             },
             "counts": {
                 "concepts": len(self._concepts),
@@ -385,12 +565,16 @@ class EnergySystemsKnowledgeFoundation:
                 "knowledge_domains": len(self._knowledge_domains),
                 "sdg_mappings": len(self._sdgs),
                 "handoffs": len(self._handoffs),
+                "units": len(self._units),
+                "conversion_factors": len(self._conversion_factors),
+                "carbon_factors": len(self._carbon_factors),
+                "heat_content_factors": len(self._heat_content_factors),
+                "methodology_rules": len(self._methodology_rules),
             },
             "knowledge_domains": self._knowledge_domains,
             "sdg_mappings": self._sdgs,
             "guardrails": self._guardrails,
             "roadmap": [
-                {"version": "0.2.0", "name": "Energy Units, Carbon Factors & Conversion Registry"},
                 {"version": "0.3.0", "name": "Energy Sustainability Indicators"},
                 {"version": "0.4.0", "name": "Renewable Technology & Resource Model"},
                 {"version": "0.5.0", "name": "Energy Balance & Systems Modeling"},
@@ -462,5 +646,157 @@ class EnergySystemsKnowledgeFoundation:
             "content_fingerprint": self._fingerprint,
         }
 
+    @staticmethod
+    def _positive_decimal(value: str, label: str = "value") -> Decimal:
+        try:
+            number = Decimal(str(value))
+        except (InvalidOperation, ValueError) as exc:
+            raise ValueError(f"{label} must be numeric") from exc
+        if not number.is_finite() or number < 0:
+            raise ValueError(f"{label} must be a finite non-negative number")
+        return number
+
+    @staticmethod
+    def _decimal_text(value: Decimal) -> str:
+        if value == 0:
+            return "0"
+        text = format(value.normalize(), "f")
+        if "." in text:
+            text = text.rstrip("0").rstrip(".")
+        return text
+
+    def registry(self) -> dict[str, Any]:
+        return {
+            "ok": True,
+            "schema": "sc-energy-numeric-registry/1.0",
+            "domain_version": DOMAIN_VERSION,
+            "source_binding": {
+                "source_key": "carbon-trust-conversion-2020",
+                "source_year": 2020,
+                "geography": "United Kingdom/source guide",
+                "status": "historical-source-bound",
+                "current_default": False,
+            },
+            "counts": {
+                "units": len(self._units),
+                "conversion_factors": len(self._conversion_factors),
+                "carbon_factors": len(self._carbon_factors),
+                "heat_content_factors": len(self._heat_content_factors),
+                "methodology_rules": len(self._methodology_rules),
+            },
+            "methodology_rules": self._methodology_rules,
+            "guardrail": "These records reproduce the supplied 2020 source within its stated boundary. They are not current grid, fuel, corporate-inventory, lifecycle, or policy defaults.",
+            "content_fingerprint": self._fingerprint,
+        }
+
+    def units(self) -> dict[str, Any]:
+        return {"ok": True, "schema": "sc-energy-units/1.0", "count": len(self._units), "items": [asdict(v) for v in self._units.values()], "guardrail": "Only units explicitly needed by the source-bound v0.2.0 registry are activated."}
+
+    def conversion_factors(self) -> dict[str, Any]:
+        return {"ok": True, "schema": "sc-energy-conversion-factors/1.0", "count": len(self._conversion_factors), "items": [asdict(v) for v in self._conversion_factors.values()], "guardrail": "Factors retain their 2020 source vintage; reverse conversions are derived arithmetically from the quoted source factor."}
+
+    def carbon_factors(self, *, q: str = "", fuel: str = "", unit: str = "", limit: int = 100) -> dict[str, Any]:
+        qn, fn = q.strip().lower(), fuel.strip().lower()
+        rows: list[dict[str, Any]] = []
+        for factor in self._carbon_factors.values():
+            if fn and factor.fuel.lower() != fn:
+                continue
+            if unit and factor.unit != unit:
+                continue
+            haystack = " ".join((factor.key, factor.fuel, factor.unit, factor.note, factor.emissions_boundary, factor.accounting_scope)).lower()
+            if qn and qn not in haystack:
+                continue
+            rows.append(asdict(factor))
+            if len(rows) >= max(1, min(limit, 250)):
+                break
+        return {"ok": True, "schema": "sc-energy-carbon-factors/1.0", "count": len(rows), "items": rows, "guardrail": "All listed values are source-bound 2020 direct-emissions factors, not current defaults or lifecycle factors."}
+
+    def heat_content_factors(self, *, q: str = "", fuel: str = "", unit: str = "", limit: int = 100) -> dict[str, Any]:
+        qn, fn = q.strip().lower(), fuel.strip().lower()
+        rows: list[dict[str, Any]] = []
+        for factor in self._heat_content_factors.values():
+            if fn and factor.fuel.lower() != fn:
+                continue
+            if unit and factor.unit != unit:
+                continue
+            haystack = " ".join((factor.key, factor.fuel, factor.unit, factor.note, factor.calorific_basis)).lower()
+            if qn and qn not in haystack:
+                continue
+            rows.append(asdict(factor))
+            if len(rows) >= max(1, min(limit, 250)):
+                break
+        return {"ok": True, "schema": "sc-energy-heat-content-factors/1.0", "count": len(rows), "items": rows, "guardrail": "These are gross calorific values from the supplied guide; supplier-specific values should take precedence where the source instructs."}
+
+    def methodology_rules(self) -> dict[str, Any]:
+        return {"ok": True, "schema": "sc-energy-methodology-rules/1.0", "count": len(self._methodology_rules), "items": self._methodology_rules}
+
+    def convert_energy(self, *, value: str, from_unit: str, to_unit: str) -> dict[str, Any]:
+        amount = self._positive_decimal(value, "value")
+        if from_unit not in self._units or to_unit not in self._units:
+            raise KeyError("unit")
+        if self._units[from_unit].dimension != "energy" or self._units[to_unit].dimension != "energy":
+            raise ValueError("energy conversion supports only the activated energy units")
+        if from_unit == to_unit:
+            result = amount
+            path = []
+        else:
+            factor_by_from = {row.from_unit: Decimal(row.factor) for row in self._conversion_factors.values()}
+            if from_unit != "kwh" and from_unit not in factor_by_from:
+                raise KeyError(from_unit)
+            if to_unit != "kwh" and to_unit not in factor_by_from:
+                raise KeyError(to_unit)
+            with localcontext() as ctx:
+                ctx.prec = 28
+                kwh = amount if from_unit == "kwh" else amount * factor_by_from[from_unit]
+                result = kwh if to_unit == "kwh" else kwh / factor_by_from[to_unit]
+            path = [from_unit, "kwh", to_unit] if from_unit != "kwh" and to_unit != "kwh" else [from_unit, to_unit]
+        return {
+            "ok": True,
+            "schema": "sc-energy-conversion-result/1.0",
+            "input": {"value": self._decimal_text(amount), "unit": from_unit},
+            "output": {"value": self._decimal_text(result), "unit": to_unit},
+            "path": path,
+            "source_key": "carbon-trust-conversion-2020",
+            "source_year": 2020,
+            "status": "historical-source-bound-calculation",
+            "guardrail": "This is an arithmetic conversion using the supplied 2020 guide's quoted factors; rounding and source-vintage limitations are preserved.",
+        }
+
+    def estimate_carbon(self, *, factor_key: str, quantity: str) -> dict[str, Any]:
+        factor = self._carbon_factors.get(factor_key)
+        if factor is None:
+            raise KeyError(factor_key)
+        amount = self._positive_decimal(quantity, "quantity")
+        with localcontext() as ctx:
+            ctx.prec = 28
+            result = amount * Decimal(factor.kg_co2e_per_unit)
+        return {
+            "ok": True,
+            "schema": "sc-energy-carbon-estimate/1.0",
+            "input": {"quantity": self._decimal_text(amount), "unit": factor.unit, "factor_key": factor.key},
+            "factor": asdict(factor),
+            "output": {"kg_co2e": self._decimal_text(result)},
+            "status": "historical-source-bound-calculation",
+            "guardrail": "This result applies the selected 2020 direct-emissions factor only. It is not a current, indirect, lifecycle, Scope 3, or complete corporate-inventory result.",
+        }
+
+    def estimate_heat_content(self, *, factor_key: str, quantity: str) -> dict[str, Any]:
+        factor = self._heat_content_factors.get(factor_key)
+        if factor is None:
+            raise KeyError(factor_key)
+        amount = self._positive_decimal(quantity, "quantity")
+        with localcontext() as ctx:
+            ctx.prec = 28
+            result = amount * Decimal(factor.kwh_per_unit)
+        return {
+            "ok": True,
+            "schema": "sc-energy-heat-content-estimate/1.0",
+            "input": {"quantity": self._decimal_text(amount), "unit": factor.unit, "factor_key": factor.key},
+            "factor": asdict(factor),
+            "output": {"kwh_gross": self._decimal_text(result)},
+            "status": "historical-source-bound-calculation",
+            "guardrail": "This result uses the selected default gross calorific value from the supplied guide and is not a supplier-specific or net-calorific-value result.",
+        }
+
     def handoffs(self) -> dict[str, Any]:
-        return {"ok": True, "schema": "sc-energy-handoffs/1.0", "count": len(self._handoffs), "items": self._handoffs, "guardrail": "Only handoffs marked available resolve to an existing governed target; planned handoffs do not imply current capability."}
+        return {"ok": True, "schema": "sc-energy-handoffs/1.0", "count": len(self._handoffs), "items": self._handoffs, "guardrail": "Only handoffs marked available or contract-available resolve to a governed target or contract; planned handoffs do not imply current capability."}

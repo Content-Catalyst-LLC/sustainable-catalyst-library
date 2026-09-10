@@ -1,0 +1,63 @@
+Sustainable Catalyst Energy Systems Intelligence v0.2.0
+Energy Units, Carbon Factors & Conversion Registry
+Build validation date: 2026-09-10
+
+BASELINE
+PASS: Sustainable Catalyst Library application remains v5.11.0
+PASS: Carbon & Nature Intelligence remains v0.5.0
+PASS: Energy Systems Intelligence advances from v0.1.0 to v0.2.0
+PASS: shared Library Python backend advances from v2.7.0 to v2.8.0
+
+KNOWLEDGE LINEAGE
+PASS: 75 governed Energy Systems concepts retained
+PASS: 63 typed source-grounded relationships retained
+PASS: 6 knowledge domains retained
+PASS: 6 provenance sources retained
+PASS: 9 supplied module SDG mappings retained
+
+NUMERIC REGISTRY
+PASS: 8 unit records
+PASS: 4 source-bound energy-unit conversion factors
+PASS: 24 direct kgCO2e factors
+PASS: 16 gross calorific-value factors
+PASS: 5 methodology boundary rules
+PASS: all numerical records preserve source year 2020
+PASS: current factor defaults remain disabled
+PASS: renewable-electricity universal factor is not fabricated
+PASS: ambiguous parsed natural-gas volume fields are not activated
+
+CALCULATION CONTRACTS
+PASS: 100000 Btu -> 29.31 kWh using the supplied source factor
+PASS: 100 kWh natural gas -> 18.387 kgCO2e using the selected 2020 direct factor
+PASS: 10 litres diesel -> 105.8 kWh gross using the selected 2020 calorific value
+PASS: negative, non-finite, and non-numeric inputs fail closed
+PASS: mass/volume units are not silently treated as energy units
+
+ROUTES / UI
+PASS: GET-only numeric registry routes are wired in FastAPI and WordPress
+PASS: Numeric Registry UI added to [sc_energy_systems_intelligence]
+PASS: energy conversion, direct-carbon, and gross-heat calculators are present
+PASS: Workbench handoff is contract-only; Workbench execution remains disabled
+PASS: EISD indicator calculation remains disabled
+PASS: scenario modeling remains disabled
+PASS: automatic technology ranking remains disabled
+PASS: automatic policy recommendation remains disabled
+
+FOCUSED REGRESSION SUITE
+PASS: 27 tests passed
+  - library-backend/tests/test_energy_systems_v280.py
+  - tests/test_energy_systems_intelligence_v020.py
+  - tests/test_carbon_nature_intelligence_v050.py
+
+SYNTAX / BUILD
+PASS: Python source compilation
+PASS: WordPress plugin main PHP syntax
+PASS: Energy Systems PHP syntax
+PASS: Energy Systems JavaScript syntax
+PASS: Contabo upgrade shell syntax
+PASS: clean-room tiny-patch installer simulation from v0.1.0 baseline
+PASS: installer generated local WordPress and backend deployment ZIPs
+PASS: installer created local release commit and annotated tag with --no-push
+
+VALIDATION BOUNDARY
+The build environment does not provide the backend's psycopg dependency, so importing the complete FastAPI application and executing live HTTP routes in this container was not possible. No live Contabo deployment was performed. The packaged Contabo upgrader rebuilds the actual Docker service and verifies health plus the Energy Systems manifest, registry, conversion, carbon-estimate, heat-content-estimate, and retained Carbon & Nature endpoints before reporting success.

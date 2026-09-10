@@ -1,0 +1,51 @@
+(function(){'use strict';
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c];});}
+function getJSON(url){return fetch(url,{credentials:'same-origin',headers:{Accept:'application/json'}}).then(function(r){return r.json().catch(function(){return{};}).then(function(j){if(!r.ok||j.ok===false){throw new Error(j.detail||('HTTP '+r.status));}return j;});});}
+function card(title,body,meta,extraClass){return '<article class="sc-es__card '+(extraClass||'')+'"><h3>'+esc(title)+'</h3><p>'+esc(body||'')+'</p>'+(meta&&meta.length?'<div class="sc-es__meta">'+meta.map(function(x){return'<span>'+esc(x)+'</span>';}).join('')+'</div>':'')+'</article>';}
+function setResult(node,html,isError){node.classList.toggle('is-error',!!isError);node.innerHTML=html;}
+function endpointWith(base,params){var u=new URL(base,window.location.href);Object.keys(params).forEach(function(k){var v=params[k];if(v!==''&&v!=null)u.searchParams.set(k,v);});return u.toString();}
+function boot(root){
+ var tabs=[].slice.call(root.querySelectorAll('[data-es-mode]')),panels=[].slice.call(root.querySelectorAll('[data-es-panel]'));
+ tabs.forEach(function(btn){btn.addEventListener('click',function(){var mode=btn.getAttribute('data-es-mode');tabs.forEach(function(b){var active=b===btn;b.classList.toggle('is-active',active);b.setAttribute('aria-selected',active?'true':'false');});panels.forEach(function(p){p.hidden=p.getAttribute('data-es-panel')!==mode;});});});
+
+ var registryStatus=root.querySelector('[data-es-registry-status]'),registrySummary=root.querySelector('[data-es-registry-summary]');
+ Promise.all([
+  getJSON(root.dataset.registryEndpoint),getJSON(root.dataset.unitsEndpoint),getJSON(root.dataset.conversionFactorsEndpoint),
+  getJSON(root.dataset.carbonFactorsEndpoint),getJSON(root.dataset.heatFactorsEndpoint),getJSON(root.dataset.methodologyEndpoint)
+ ]).then(function(all){
+  var registry=all[0],units=all[1].items||[],conversions=all[2].items||[],carbon=all[3].items||[],heat=all[4].items||[],rules=all[5].items||[];
+  var counts=registry.counts||{};
+  registryStatus.textContent='2020 source-bound registry · '+(counts.conversion_factors||0)+' energy conversions · '+(counts.carbon_factors||0)+' direct carbon factors · '+(counts.heat_content_factors||0)+' heat-content factors';
+  registrySummary.innerHTML='<div class="sc-es__registry-warning"><strong>Historical reference only</strong><span>'+esc(registry.guardrail||'')+'</span></div>'+
+   '<div class="sc-es__metric-row"><span><b>'+esc(counts.units||0)+'</b> units</span><span><b>'+esc(counts.carbon_factors||0)+'</b> carbon factors</span><span><b>'+esc(counts.heat_content_factors||0)+'</b> heat factors</span><span><b>'+esc(counts.methodology_rules||0)+'</b> methodology rules</span></div>';
+
+  var energyUnits=units.filter(function(u){return u.dimension==='energy';});
+  function fillUnits(sel,preferred){sel.innerHTML=energyUnits.map(function(u){return'<option value="'+esc(u.key)+'"'+(u.key===preferred?' selected':'')+'>'+esc(u.symbol)+' — '+esc(u.label)+'</option>';}).join('');}
+  fillUnits(root.querySelector('[data-es-unit-from]'),'btu');fillUnits(root.querySelector('[data-es-unit-to]'),'kwh');
+  var carbonSel=root.querySelector('[data-es-carbon-select]');
+  carbonSel.innerHTML=carbon.map(function(f){return'<option value="'+esc(f.key)+'">'+esc(f.fuel)+' · '+esc(f.kg_co2e_per_unit)+' kgCO₂e/'+esc(f.unit)+'</option>';}).join('');
+  var heatSel=root.querySelector('[data-es-heat-select]');
+  heatSel.innerHTML=heat.map(function(f){return'<option value="'+esc(f.key)+'">'+esc(f.fuel)+' · '+esc(f.kwh_per_unit)+' kWh/'+esc(f.unit)+'</option>';}).join('');
+  root.querySelector('[data-es-conversion-list]').innerHTML=conversions.map(function(f){return card(f.from_unit+' → '+f.to_unit,'× '+f.factor,[String(f.source_year),f.status]);}).join('');
+  root.querySelector('[data-es-carbon-list]').innerHTML=carbon.map(function(f){return card(f.fuel,f.kg_co2e_per_unit+' kgCO₂e per '+f.unit,[String(f.source_year),f.emissions_boundary,f.status]);}).join('');
+  root.querySelector('[data-es-heat-list]').innerHTML=heat.map(function(f){return card(f.fuel,f.kwh_per_unit+' kWh per '+f.unit,[String(f.source_year),f.calorific_basis,f.status]);}).join('');
+  root.querySelector('[data-es-methodology-list]').innerHTML=rules.map(function(r){return card(r.key,r.rule,[String(r.source_year),'current default: no']);}).join('');
+ }).catch(function(e){registryStatus.textContent='Numerical registry unavailable: '+e.message;});
+
+ var convertForm=root.querySelector('[data-es-convert-form]'),convertResult=root.querySelector('[data-es-convert-result]');
+ convertForm.addEventListener('submit',function(e){e.preventDefault();var fd=new FormData(convertForm);setResult(convertResult,'Calculating…',false);getJSON(endpointWith(root.dataset.convertEndpoint,{value:fd.get('value'),from:fd.get('from'),to:fd.get('to')})).then(function(d){setResult(convertResult,'<strong>'+esc(d.output.value)+' '+esc(d.output.unit)+'</strong><small>'+esc(d.status)+' · source '+esc(d.source_year)+'</small>',false);}).catch(function(err){setResult(convertResult,esc(err.message),true);});});
+ var carbonForm=root.querySelector('[data-es-carbon-form]'),carbonResult=root.querySelector('[data-es-carbon-result]');
+ carbonForm.addEventListener('submit',function(e){e.preventDefault();var fd=new FormData(carbonForm);setResult(carbonResult,'Calculating…',false);getJSON(endpointWith(root.dataset.carbonEstimateEndpoint,{factor_key:fd.get('factor_key'),quantity:fd.get('quantity')})).then(function(d){setResult(carbonResult,'<strong>'+esc(d.output.kg_co2e)+' kgCO₂e</strong><small>'+esc(d.factor.fuel)+' · direct · '+esc(d.factor.source_year)+'</small>',false);}).catch(function(err){setResult(carbonResult,esc(err.message),true);});});
+ var heatForm=root.querySelector('[data-es-heat-form]'),heatResult=root.querySelector('[data-es-heat-result]');
+ heatForm.addEventListener('submit',function(e){e.preventDefault();var fd=new FormData(heatForm);setResult(heatResult,'Calculating…',false);getJSON(endpointWith(root.dataset.heatEstimateEndpoint,{factor_key:fd.get('factor_key'),quantity:fd.get('quantity')})).then(function(d){setResult(heatResult,'<strong>'+esc(d.output.kwh_gross)+' kWh gross</strong><small>'+esc(d.factor.fuel)+' · '+esc(d.factor.calorific_basis)+' · '+esc(d.factor.source_year)+'</small>',false);}).catch(function(err){setResult(heatResult,esc(err.message),true);});});
+
+ var mapStatus=root.querySelector('[data-es-map-status]'),mapOut=root.querySelector('[data-es-map-results]');
+ getJSON(root.dataset.mapEndpoint).then(function(data){var html=(data.domains||[]).map(function(d){var items=(d.concepts||[]).slice(0,12);return '<article class="sc-es__card sc-es__domain-card"><h3>'+esc(d.label)+'</h3><p>'+esc(d.purpose)+'</p><ul>'+items.map(function(x){return'<li>'+esc(x.label)+'</li>';}).join('')+((d.concepts||[]).length>12?'<li>+'+((d.concepts||[]).length-12)+' more</li>':'')+'</ul><div class="sc-es__meta"><span>'+((d.concepts||[]).length)+' concepts</span></div></article>';}).join('');var sdgs=(data.sdg_mappings||[]).map(function(s){return'<span class="sc-es__sdg">SDG '+esc(s.goal)+' · '+esc(s.name)+' · coverage '+(s.coverage==null?'not supplied':esc(s.coverage))+'</span>';}).join('');mapOut.innerHTML=html+'<div class="sc-es__sdgs"><strong>Module SDG mapping</strong><div class="sc-es__sdg-grid">'+sdgs+'</div></div>';mapStatus.textContent=(data.domains||[]).length+' domains · '+(data.relationships||[]).length+' typed relationships';}).catch(function(e){mapStatus.textContent='Knowledge map unavailable: '+e.message;});
+ var form=root.querySelector('[data-es-concept-form]'),conceptStatus=root.querySelector('[data-es-concept-status]'),conceptOut=root.querySelector('[data-es-concept-results]');
+ function loadConcepts(){var fd=new FormData(form),u=new URL(root.dataset.conceptsEndpoint,window.location.href);['q','domain'].forEach(function(k){var v=String(fd.get(k)||'').trim();if(v)u.searchParams.set(k,v);});u.searchParams.set('limit','100');conceptStatus.textContent='Loading concepts…';getJSON(u.toString()).then(function(data){conceptOut.innerHTML=(data.items||[]).map(function(c){return card(c.label,c.definition,[c.concept_type,c.domain].concat(c.source_keys||[]));}).join('')||card('No matches','No governed concept matched this query.');conceptStatus.textContent=(data.count||0)+' concept'+((data.count||0)===1?'':'s')+' returned';}).catch(function(e){conceptStatus.textContent='Concept registry unavailable: '+e.message;});}
+ form.addEventListener('submit',function(e){e.preventDefault();loadConcepts();});form.addEventListener('reset',function(){setTimeout(loadConcepts,0);});loadConcepts();
+ var sourceStatus=root.querySelector('[data-es-source-status]'),sourceOut=root.querySelector('[data-es-source-results]');getJSON(root.dataset.sourcesEndpoint).then(function(data){sourceOut.innerHTML=(data.items||[]).map(function(s){return card(s.title,s.provenance_note,[s.creator,s.year||'year not supplied',s.source_type,s.numeric_status]);}).join('');sourceStatus.textContent=(data.count||0)+' provenance sources registered';}).catch(function(e){sourceStatus.textContent='Source registry unavailable: '+e.message;});
+ var handoffStatus=root.querySelector('[data-es-handoff-status]'),handoffOut=root.querySelector('[data-es-handoff-results]');getJSON(root.dataset.handoffsEndpoint).then(function(data){handoffOut.innerHTML=(data.items||[]).map(function(h){var refs=(h.target_refs||[]).length?'Targets: '+h.target_refs.join(', '):'No active target refs';return '<article class="sc-es__card"><h3>'+esc(h.target)+'</h3><p>'+esc(h.boundary)+'</p><div class="sc-es__meta"><span class="sc-es__status-pill '+((h.status==='available'||h.status==='contract-available')?'is-available':'')+'">'+esc(h.status)+'</span><span>'+esc(refs)+'</span></div></article>';}).join('');handoffStatus.textContent=(data.count||0)+' governed handoffs registered';}).catch(function(e){handoffStatus.textContent='Handoff registry unavailable: '+e.message;});
+}
+document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('[data-sc-energy-systems]').forEach(boot);});
+})();

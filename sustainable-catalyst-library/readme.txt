@@ -11,7 +11,7 @@ A unified WordPress Living Knowledge System for public discovery, research works
 
 == Description ==
 
-Energy Systems Intelligence v0.1.0 adds the `[sc_energy_systems_intelligence]` read-only Sustainable Energy Knowledge Foundation. It provides 75 governed concepts, 63 typed source-grounded relationships, six knowledge domains, six provenance source records, module SDG mappings, and bounded handoffs to Carbon & Nature, Workbench, Lab, Site Intelligence, and Decision Studio. v0.1.0 does not activate historical conversion factors, calculate indicators, infer resource potential, run scenarios, rank technologies, or recommend policy.
+Energy Systems Intelligence v0.2.0 advances the `[sc_energy_systems_intelligence]` surface with a source-bound Energy Units, Carbon Factors & Conversion Registry while preserving the v0.1.0 knowledge foundation. It activates 8 registry units, 4 energy-unit conversion factors, 24 direct kgCO2e factors, 16 gross calorific-value factors, 5 methodology rules, and read-only source-bound calculation endpoints. Every numerical record preserves its 2020 source vintage and boundary; no historical factor becomes a current default, and Workbench execution remains separate.
 
 Sustainable Catalyst Library v5.11.0 adds Private Organizational Knowledge Foundation: a physically separate organization-scoped private knowledge plane with signed server-only access, access scopes, private search, version lineage, provenance, audit events, and controlled Research Librarian/Workspace/Lab handoffs. v5.10.0 Institutional Research Network II remains intact. The current Research Library page remains the R3.2.1 capability-preserving baseline with Three Research Front Doors removed. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
 
@@ -371,7 +371,7 @@ The facade does not expose My Library, private Research Projects, notebook or Ev
 
 == Energy Systems Intelligence ==
 
-Use `[sc_energy_systems_intelligence]` to expose the Library-native Sustainable Energy Knowledge Foundation. v0.1.0 covers energy-system history and worldwide importance, sources/resources/reserves, conversion and end use, renewable technology families, biological carbon and bioenergy concepts, efficiency/economic-analysis concepts, and social/economic/environmental sustainability metrics. Source dates and evidence roles are preserved explicitly; the 2020 conversion-factor guide is provenance-only until a versioned numerical registry is introduced in v0.2.0.
+Use `[sc_energy_systems_intelligence]` to expose the Library-native Sustainable Energy Knowledge Foundation plus the v0.2.0 source-bound numeric registry. The surface now includes historical 2020 unit conversions, direct kgCO2e factors, gross calorific values, explicit methodology boundaries, and read-only calculators that require explicit units or factor keys. The registry never treats the 2020 records as current defaults.
 
 = 5.11.0 + Energy Systems Intelligence v0.1.0 =
 
@@ -390,6 +390,18 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= Energy Systems Intelligence 0.2.0 / Backend 2.8.0 =
+
+* Preserves the v0.1.0 Sustainable Energy Knowledge Foundation: 75 governed concepts, 63 typed relationships, six knowledge domains, six provenance sources, SDG mappings, and bounded platform handoffs.
+* Adds 8 source-bound unit records and 4 quoted energy-unit conversion factors from the supplied Carbon Trust/BEIS 2020 guide.
+* Adds 24 direct kgCO2e factors for UK grid electricity and listed fuels with explicit unit, source year, geography, emissions boundary, accounting scope, and status.
+* Adds 16 gross-calorific-value factors with supplier-specific and net-vs-gross guardrails.
+* Adds 5 methodology rules, including direct-versus-indirect boundary and location-based/market-based electricity accounting guidance.
+* Adds GET-only `/registry`, `/units`, `/conversion-factors`, `/carbon-factors`, `/heat-content-factors`, `/methodology-rules`, `/convert`, `/carbon-estimate`, and `/heat-content-estimate` backend and WordPress REST routes.
+* Adds a Numeric Registry tab with source-bound unit, carbon, and heat-content calculators.
+* Does not activate current-factor defaults, calculate EISD indicators, run scenarios, rank technologies, recommend policy, or claim that Workbench itself has been upgraded.
+
 
 = 5.11.0 + Carbon & Nature Intelligence v0.5.0 =
 

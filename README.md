@@ -1,5 +1,10 @@
 # Sustainable Catalyst Library
 
+## Energy Systems Intelligence v0.2.0
+
+Adds the source-bound **Energy Units, Carbon Factors & Conversion Registry** to the Library while retaining Library v5.11.0 and Carbon & Nature Intelligence v0.5.0. The shared Python backend advances to v2.8.0. Numerical records are explicitly bound to the supplied 2020 Carbon Trust/BEIS guide and are not current defaults.
+
+
 ## Energy Systems Intelligence v0.1.0
 
 **v0.1.0 — Sustainable Energy Knowledge Foundation** adds a governed, read-only Energy Systems Intelligence domain while Sustainable Catalyst Library remains on the **v5.11.0** application line and the Python Library backend advances to **v2.7.0**. The foundation contains 75 source-grounded concepts, 63 typed non-inferential relationships, six knowledge domains, six provenance source records, nine module SDG mappings, and seven explicit cross-platform handoffs.

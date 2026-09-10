@@ -264,14 +264,22 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "0.1.0",
+            "energy_systems_domain_version": "0.2.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
             "energy_source_provenance_registry": True,
             "energy_knowledge_map": True,
             "energy_platform_handoffs": True,
-            "energy_numeric_conversion_registry": False,
+            "energy_numeric_conversion_registry": True,
+            "energy_unit_registry": True,
+            "energy_carbon_factor_registry": True,
+            "energy_heat_content_registry": True,
+            "energy_source_bound_conversion_calculator": True,
+            "energy_source_bound_carbon_calculator": True,
+            "energy_source_bound_heat_content_calculator": True,
+            "energy_current_factor_defaults": False,
+            "energy_workbench_execution": False,
             "energy_indicator_engine": False,
             "energy_scenario_modeling": False,
             "automatic_energy_technology_ranking": False,
@@ -778,6 +786,86 @@ def energy_systems_knowledge_map() -> dict[str, Any]:
 @app.get("/v1/energy-systems/handoffs")
 def energy_systems_handoffs() -> dict[str, Any]:
     return energy_systems.handoffs()
+
+
+@app.get("/v1/energy-systems/registry")
+def energy_systems_registry() -> dict[str, Any]:
+    return energy_systems.registry()
+
+
+@app.get("/v1/energy-systems/units")
+def energy_systems_units() -> dict[str, Any]:
+    return energy_systems.units()
+
+
+@app.get("/v1/energy-systems/conversion-factors")
+def energy_systems_conversion_factors() -> dict[str, Any]:
+    return energy_systems.conversion_factors()
+
+
+@app.get("/v1/energy-systems/carbon-factors")
+def energy_systems_carbon_factors(
+    q: str = Query(default="", max_length=500),
+    fuel: str = Query(default="", max_length=120),
+    unit: str = Query(default="", max_length=80),
+    limit: int = Query(default=100, ge=1, le=250),
+) -> dict[str, Any]:
+    return energy_systems.carbon_factors(q=q, fuel=fuel, unit=unit, limit=limit)
+
+
+@app.get("/v1/energy-systems/heat-content-factors")
+def energy_systems_heat_content_factors(
+    q: str = Query(default="", max_length=500),
+    fuel: str = Query(default="", max_length=120),
+    unit: str = Query(default="", max_length=80),
+    limit: int = Query(default=100, ge=1, le=250),
+) -> dict[str, Any]:
+    return energy_systems.heat_content_factors(q=q, fuel=fuel, unit=unit, limit=limit)
+
+
+@app.get("/v1/energy-systems/methodology-rules")
+def energy_systems_methodology_rules() -> dict[str, Any]:
+    return energy_systems.methodology_rules()
+
+
+@app.get("/v1/energy-systems/convert")
+def energy_systems_convert(
+    value: str = Query(..., min_length=1, max_length=80),
+    from_unit: str = Query(..., alias="from", min_length=1, max_length=80),
+    to_unit: str = Query(..., alias="to", min_length=1, max_length=80),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.convert_energy(value=value, from_unit=from_unit, to_unit=to_unit)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Energy conversion unit not found") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/carbon-estimate")
+def energy_systems_carbon_estimate(
+    factor_key: str = Query(..., min_length=1, max_length=160),
+    quantity: str = Query(..., min_length=1, max_length=80),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.estimate_carbon(factor_key=factor_key, quantity=quantity)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Energy carbon factor not found") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/heat-content-estimate")
+def energy_systems_heat_content_estimate(
+    factor_key: str = Query(..., min_length=1, max_length=160),
+    quantity: str = Query(..., min_length=1, max_length=80),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.estimate_heat_content(factor_key=factor_key, quantity=quantity)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Energy heat-content factor not found") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.get("/v1/carbon-nature")
