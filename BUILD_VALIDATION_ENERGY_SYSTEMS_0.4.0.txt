@@ -1,0 +1,85 @@
+Sustainable Catalyst Library
+Energy Systems Intelligence v0.4.0 — Renewable Technology & Resource Model
+Build validation: 2026-09-10
+
+BASELINE
+- Sustainable Catalyst Library: 5.11.0
+- Carbon & Nature Intelligence: 0.5.0
+- Energy Systems Intelligence baseline: 0.3.0
+- Library backend baseline: 2.9.0
+
+RESULT
+PASS
+
+DOMAIN VALIDATION
+- Energy Systems Intelligence: 0.4.0
+- Library backend: 2.10.0
+- Preserved concepts: 75
+- Preserved typed relationships: 63
+- Preserved EISD indicators: 30
+- Preserved unit records: 8
+- Preserved energy conversion factors: 4
+- Preserved direct carbon factors: 24
+- Preserved gross heat-content factors: 16
+- Renewable technology objects: 7
+- Renewable technology families: 5
+- Renewable resource classes: 6
+- Technology assessment contracts: 7
+- Resource observation contracts: 6
+- Methodology rules: 10
+
+NEW TECHNOLOGY OBJECTS
+- solar-photovoltaic
+- solar-thermal
+- wind-energy
+- hydropower
+- tidal-energy
+- wave-energy
+- bioenergy
+
+NEW RESOURCE CLASSES
+- solar-resource
+- wind-resource
+- hydrological-resource
+- tidal-resource
+- wave-resource
+- biomass-resource
+
+GUARDRAILS VERIFIED
+- No populated universal renewable technology performance profiles
+- No live renewable resource-potential dataset
+- No automatic site-suitability determination
+- No automatic technology ranking
+- No scenario modeling
+- No automatic policy recommendation
+- Renewable classification is not treated as a zero-impact claim
+- Existing EISD official-formula execution remains disabled
+- Existing 2020 numeric factors remain source-bound historical references
+
+TESTS
+- Focused regression suite: 29 passed
+- Includes Energy Systems backend tests, WordPress/interface integration tests, JSON Schema validation, and Carbon & Nature v0.5.0 preservation tests
+- PHP syntax: PASS
+- JavaScript syntax: PASS
+- Python compilation: PASS
+- JSON export/schema parse: PASS
+- Contabo upgrader shell syntax: PASS
+
+INSTALLER VALIDATION
+- Clean Git checkout initialized from Energy Systems v0.3.0 / backend v2.9.0 baseline
+- v0.4.0 tiny-patch installer executed with --no-push
+- Baseline identity checks: PASS
+- Patch application: PASS
+- 29-test regression suite from installer: PASS
+- Local WordPress ZIP generation: PASS
+- Local backend ZIP generation: PASS
+- Git commit creation: PASS
+- Annotated energy-systems-v0.4.0 tag creation: PASS
+
+RUNTIME BOUNDARY
+- This build environment does not have the psycopg runtime package installed, so the complete FastAPI service was not started here.
+- The production Contabo upgrader rebuilds the Docker image with declared backend dependencies, waits for container health, and verifies the v0.4.0 HTTP endpoints before reporting success.
+- No live Contabo deployment was performed by this build process.
+
+NEXT RELEASE
+Energy Systems Intelligence v0.5.0 — Energy Balance & Systems Modeling

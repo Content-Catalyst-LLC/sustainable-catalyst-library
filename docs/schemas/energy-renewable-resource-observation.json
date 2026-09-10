@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-renewable-resource-observation.json",
+  "title": "Sustainable Catalyst Renewable Resource Observation",
+  "type": "object",
+  "required": ["resource_class", "geography", "period", "resource_metric", "value", "unit", "measurement_or_model_method", "data_source", "source_vintage", "uncertainty_or_quality_note", "provenance_reference"],
+  "properties": {
+    "resource_class": {"type": "string"}, "geography": {}, "period": {}, "resource_metric": {}, "value": {}, "unit": {}, "spatial_resolution": {}, "temporal_resolution": {}, "measurement_or_model_method": {}, "data_source": {}, "source_vintage": {}, "uncertainty_or_quality_note": {}, "constraints_note": {}, "provenance_reference": {}, "feedstock_type": {}, "feedstock_origin": {}, "competing_use_note": {}, "land_use_note": {}
+  },
+  "additionalProperties": true
+}

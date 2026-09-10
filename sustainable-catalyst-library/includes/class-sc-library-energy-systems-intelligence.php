@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v0.3.0 — Energy Sustainability Indicators. */
+/** Energy Systems Intelligence v0.4.0 — Renewable Technology & Resource Model. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '0.3.0';
+    public const VERSION = '0.4.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v030', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v030.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v030', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v030.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v040', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v040.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v040', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v040.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -80,6 +80,23 @@ final class SC_Library_Energy_Systems_Intelligence {
         ]);
         register_rest_route('sc-library/v1', '/energy-systems/indicator/(?P<code>[A-Za-z0-9]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'indicator']]);
         register_rest_route('sc-library/v1', '/energy-systems/indicator-observation-template/(?P<code>[A-Za-z0-9]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'indicator_observation_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/technology-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'technology_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/technologies', [
+            'methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'technologies'],
+            'args' => [
+                'q' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+                'family' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'output' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'resource_class' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'limit' => ['sanitize_callback' => 'absint', 'default' => 100],
+            ],
+        ]);
+        register_rest_route('sc-library/v1', '/energy-systems/technology/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'technology']]);
+        register_rest_route('sc-library/v1', '/energy-systems/resource-classes', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'resource_classes']]);
+        register_rest_route('sc-library/v1', '/energy-systems/resource-class/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'resource_class']]);
+        register_rest_route('sc-library/v1', '/energy-systems/technology-assessment-template/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'technology_assessment_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/resource-observation-template/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'resource_observation_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/technology-comparison-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'technology_comparison_template']]);
         register_rest_route('sc-library/v1', '/energy-systems/convert', [
             'methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'convert'],
             'args' => [
@@ -165,6 +182,22 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function indicator_observation_template(WP_REST_Request $request) {
         return $this->proxy('/v1/energy-systems/indicator-observation-template/' . rawurlencode(strtoupper(sanitize_text_field((string)$request['code']))));
     }
+    public function technology_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/technology-framework'); }
+    public function technologies(WP_REST_Request $request) {
+        return $this->proxy('/v1/energy-systems/technologies', array_filter([
+            'q' => trim((string)$request->get_param('q')),
+            'family' => sanitize_key((string)$request->get_param('family')),
+            'output' => sanitize_key((string)$request->get_param('output')),
+            'resource_class' => sanitize_key((string)$request->get_param('resource_class')),
+            'limit' => min(100, max(1, absint($request->get_param('limit') ?: 100))),
+        ], static fn($value) => $value !== ''));
+    }
+    public function technology(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/technologies/' . rawurlencode(sanitize_key((string)$request['key']))); }
+    public function resource_classes(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/resource-classes'); }
+    public function resource_class(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/resource-classes/' . rawurlencode(sanitize_key((string)$request['key']))); }
+    public function technology_assessment_template(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/technology-assessment-template/' . rawurlencode(sanitize_key((string)$request['key']))); }
+    public function resource_observation_template(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/resource-observation-template/' . rawurlencode(sanitize_key((string)$request['key']))); }
+    public function technology_comparison_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/technology-comparison-template'); }
     public function convert(WP_REST_Request $request) {
         return $this->proxy('/v1/energy-systems/convert', [
             'value' => trim((string)$request->get_param('value')),
@@ -206,11 +239,11 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Energy Systems Intelligence',
-            'intro' => 'Explore the sustainable-energy knowledge foundation, source-bound numeric registry, and the 30 social, economic, and environmental Energy Indicators for Sustainable Development represented in the supplied course sources.',
+            'intro' => 'Explore governed renewable technology and resource-potential objects alongside the sustainable-energy knowledge foundation, source-bound numeric registry, and Energy Indicators for Sustainable Development.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v030');
-        wp_enqueue_script('sc-library-energy-systems-v030');
+        wp_enqueue_style('sc-library-energy-systems-v040');
+        wp_enqueue_script('sc-library-energy-systems-v040');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -229,11 +262,19 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-indicators-endpoint="<?php echo esc_url($ep('/indicators')); ?>"
             data-indicator-endpoint="<?php echo esc_url($ep('/indicator')); ?>"
             data-indicator-template-endpoint="<?php echo esc_url($ep('/indicator-observation-template')); ?>"
+            data-technology-framework-endpoint="<?php echo esc_url($ep('/technology-framework')); ?>"
+            data-technologies-endpoint="<?php echo esc_url($ep('/technologies')); ?>"
+            data-technology-endpoint="<?php echo esc_url($ep('/technology')); ?>"
+            data-resource-classes-endpoint="<?php echo esc_url($ep('/resource-classes')); ?>"
+            data-resource-class-endpoint="<?php echo esc_url($ep('/resource-class')); ?>"
+            data-technology-assessment-endpoint="<?php echo esc_url($ep('/technology-assessment-template')); ?>"
+            data-resource-observation-endpoint="<?php echo esc_url($ep('/resource-observation-template')); ?>"
+            data-technology-comparison-endpoint="<?php echo esc_url($ep('/technology-comparison-template')); ?>"
             data-convert-endpoint="<?php echo esc_url($ep('/convert')); ?>"
             data-carbon-estimate-endpoint="<?php echo esc_url($ep('/carbon-estimate')); ?>"
             data-heat-estimate-endpoint="<?php echo esc_url($ep('/heat-content-estimate')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.3.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.4.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
@@ -243,12 +284,13 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__guardrail">
-                <strong><?php esc_html_e('Indicator definition ≠ observed value or sustainability score.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v0.3.0 preserves the source-bound v0.2.0 numeric registry and adds the 30 EISD indicator definitions reproduced in the supplied Vera & Langlois article. The article points to separate methodology sheets for exact construction methods; those sheets were not supplied, so official EISD formula execution remains disabled.', 'sustainable-catalyst-library'); ?>
+                <strong><?php esc_html_e('Technology class ≠ site suitability, performance claim, or preferred option.', 'sustainable-catalyst-library'); ?></strong>
+                <?php esc_html_e('v0.4.0 structures the renewable technologies and resource classes named by the module, but does not fabricate current resource potential, technology efficiency, capacity factor, cost, lifecycle impact, maturity, or project feasibility. Those values require explicit source-, geography-, period-, and methodology-bound evidence.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
-                <button type="button" class="sc-es__mode is-active" data-es-mode="indicators" role="tab" aria-selected="true">Sustainability Indicators</button>
+                <button type="button" class="sc-es__mode is-active" data-es-mode="technologies" role="tab" aria-selected="true">Technologies &amp; Resources</button>
+                <button type="button" class="sc-es__mode" data-es-mode="indicators" role="tab" aria-selected="false">Sustainability Indicators</button>
                 <button type="button" class="sc-es__mode" data-es-mode="registry" role="tab" aria-selected="false">Numeric Registry</button>
                 <button type="button" class="sc-es__mode" data-es-mode="map" role="tab" aria-selected="false">Knowledge Map</button>
                 <button type="button" class="sc-es__mode" data-es-mode="concepts" role="tab" aria-selected="false">Concept Registry</button>
@@ -256,7 +298,22 @@ final class SC_Library_Energy_Systems_Intelligence {
                 <button type="button" class="sc-es__mode" data-es-mode="handoffs" role="tab" aria-selected="false">Platform Handoffs</button>
             </div>
 
-            <div class="sc-es__panel" data-es-panel="indicators">
+            <div class="sc-es__panel" data-es-panel="technologies">
+                <div class="sc-es__panel-heading"><strong>Renewable technology &amp; resource model</strong><span>Seven governed renewable technology families and six normalized resource classes. The model structures evidence needed for later Lab, Site Intelligence, Workbench, and Decision Studio analysis without inventing universal performance values or suitability rankings.</span></div>
+                <p class="sc-es__status" data-es-technology-framework-status aria-live="polite">Loading technology framework…</p>
+                <div class="sc-es__technology-summary" data-es-technology-summary></div>
+                <form class="sc-es__technology-search" data-es-technology-form role="search">
+                    <label><span>Technology or resource</span><input type="search" name="q" maxlength="500" placeholder="e.g. photovoltaic, marine, bioenergy"></label>
+                    <label><span>Family</span><select name="family"><option value="">All families</option><option value="solar">Solar</option><option value="wind">Wind</option><option value="hydro">Hydro</option><option value="marine">Marine</option><option value="bioenergy">Bioenergy</option></select></label>
+                    <div class="sc-es__actions"><button type="submit">Explore Technologies</button><button type="reset" class="sc-es__secondary">Reset</button></div>
+                </form>
+                <p class="sc-es__status" data-es-technology-status aria-live="polite"></p>
+                <div class="sc-es__cards sc-es__technology-cards" data-es-technology-results></div>
+                <div class="sc-es__technology-detail" data-es-technology-detail hidden></div>
+                <div class="sc-es__resource-section"><div class="sc-es__panel-heading"><strong>Renewable resource classes</strong><span>Resource observations retain geography, period, metric, unit, method, source vintage, uncertainty, and provenance. A resource observation is not automatically technical or economic potential.</span></div><div class="sc-es__cards" data-es-resource-results></div></div>
+            </div>
+
+            <div class="sc-es__panel" data-es-panel="indicators" hidden>
                 <div class="sc-es__panel-heading"><strong>Energy sustainability indicator framework</strong><span>Thirty source-grounded EISD definitions organized across social, economic, and environmental dimensions. Exact official formulas remain gated until the corresponding methodology sheets are loaded.</span></div>
                 <p class="sc-es__status" data-es-indicator-framework-status aria-live="polite">Loading indicator framework…</p>
                 <div class="sc-es__indicator-summary" data-es-indicator-summary></div>
@@ -333,12 +390,12 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="handoffs" hidden>
-                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.3.0 preserves the Workbench numeric-registry contract and adds an indicator-packet contract for later Site Intelligence and Decision Studio integration without asserting current country data.</span></div>
+                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.4.0 preserves the Workbench numeric-registry and indicator contracts and adds renewable technology/resource assessment contracts for later Site Intelligence and Decision Studio integration without asserting current country data.</span></div>
                 <p class="sc-es__status" data-es-handoff-status aria-live="polite">Loading handoff registry…</p>
                 <div class="sc-es__cards" data-es-handoff-results></div>
             </div>
 
-            <footer><strong>Next:</strong> v0.4.0 — Renewable Technology &amp; Resource Model. The next release will structure renewable technologies, resource-potential concepts, technology characteristics, and evidence boundaries without turning technology presence into suitability or ranking.</footer>
+            <footer><strong>Next:</strong> v0.5.0 — Energy Balance &amp; Systems Modeling. The next release will make energy flows, conversion stages, losses, demand, and scenario balances computational while preserving explicit system boundaries and provenance.</footer>
         </section>
         <?php return (string)ob_get_clean();
     }

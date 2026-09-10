@@ -1,5 +1,13 @@
 # Sustainable Catalyst Library
 
+## Energy Systems Intelligence v0.4.0
+
+Adds **Renewable Technology & Resource Model** while preserving Library v5.11.0, Carbon & Nature Intelligence v0.5.0, the v0.2.0 source-bound numeric registry, and the v0.3.0 EISD indicator layer. The shared Python backend advances to v2.10.0.
+
+The release activates seven governed renewable-technology objects (solar photovoltaic, solar thermal, wind, hydropower, tidal, wave, and bioenergy) plus six normalized resource classes. It adds provenance-first technology-assessment and resource-observation contracts for later Lab, Site Intelligence, Workbench, and Decision Studio integration. No current resource-potential dataset, universal efficiency/cost/capacity-factor profile, maturity ranking, site suitability, or automatic technology ranking is fabricated.
+
+See `ENERGY_SYSTEMS_INTELLIGENCE_v0.4.0.md`, `RELEASE_NOTES_ENERGY_SYSTEMS_0.4.0.md`, and `DEPLOY_ENERGY_SYSTEMS_BACKEND_v2.10.0.md`.
+
 ## Energy Systems Intelligence v0.3.0
 
 Adds **Energy Sustainability Indicators** while preserving Library v5.11.0, Carbon & Nature Intelligence v0.5.0, and the v0.2.0 source-bound numeric registry. The shared Python backend advances to v2.9.0. The release encodes the 30 Energy Indicators for Sustainable Development reproduced in the supplied Vera & Langlois (2007) article across 3 dimensions, 7 themes, and 19 subthemes.

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-renewable-technology-assessment.json",
+  "title": "Sustainable Catalyst Renewable Technology Assessment Packet",
+  "type": "object",
+  "required": ["technology_key", "resource_class", "geography", "period", "methodology_reference", "data_sources", "assumptions", "uncertainty_or_quality_note"],
+  "properties": {
+    "geography": {}, "period": {}, "technology_key": {"type": "string"}, "technology_configuration": {}, "resource_class": {"type": "string"}, "resource_observation_reference": {}, "conversion_efficiency": {}, "capacity_factor": {}, "annual_energy_output": {}, "capital_cost": {}, "operating_cost": {}, "lifecycle_emissions": {}, "land_requirement": {}, "water_requirement": {}, "reliability_or_variability_note": {}, "environmental_constraints": {}, "social_or_institutional_constraints": {}, "grid_or_system_context": {}, "methodology_reference": {}, "data_sources": {}, "assumptions": {}, "uncertainty_or_quality_note": {}
+  },
+  "additionalProperties": true
+}

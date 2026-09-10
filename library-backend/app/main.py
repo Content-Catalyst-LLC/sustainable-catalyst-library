@@ -264,7 +264,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "0.3.0",
+            "energy_systems_domain_version": "0.4.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -286,6 +286,13 @@ def health() -> dict[str, Any]:
             "energy_indicator_official_methodology_loaded": False,
             "energy_indicator_calculation": False,
             "energy_indicator_engine": False,
+            "energy_renewable_technology_registry": True,
+            "energy_renewable_resource_class_registry": True,
+            "energy_renewable_technology_assessment_contracts": True,
+            "energy_renewable_resource_observation_contracts": True,
+            "energy_quantitative_technology_profiles_loaded": False,
+            "energy_live_resource_potential_datasets_loaded": False,
+            "energy_renewable_suitability_assessment": False,
             "energy_scenario_modeling": False,
             "automatic_energy_technology_ranking": False,
             "automatic_energy_policy_recommendation": False,
@@ -863,6 +870,64 @@ def energy_systems_indicator_observation_template(indicator_code: str) -> dict[s
         return energy_systems.indicator_observation_template(indicator_code)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="Energy sustainability indicator not found") from exc
+
+
+@app.get("/v1/energy-systems/technology-framework")
+def energy_systems_technology_framework() -> dict[str, Any]:
+    return energy_systems.technology_framework()
+
+
+@app.get("/v1/energy-systems/technologies")
+def energy_systems_technologies(
+    q: str = Query(default="", max_length=500),
+    family: str = Query(default="", max_length=100),
+    output: str = Query(default="", max_length=100),
+    resource_class: str = Query(default="", max_length=160),
+    limit: int = Query(default=100, ge=1, le=100),
+) -> dict[str, Any]:
+    return energy_systems.technologies(q=q, family=family, output=output, resource_class=resource_class, limit=limit)
+
+
+@app.get("/v1/energy-systems/technologies/{technology_key}")
+def energy_systems_technology(technology_key: str) -> dict[str, Any]:
+    try:
+        return energy_systems.technology(technology_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Renewable technology not found") from exc
+
+
+@app.get("/v1/energy-systems/resource-classes")
+def energy_systems_resource_classes() -> dict[str, Any]:
+    return energy_systems.resource_classes()
+
+
+@app.get("/v1/energy-systems/resource-classes/{resource_key}")
+def energy_systems_resource_class(resource_key: str) -> dict[str, Any]:
+    try:
+        return energy_systems.resource_class(resource_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Renewable resource class not found") from exc
+
+
+@app.get("/v1/energy-systems/technology-assessment-template/{technology_key}")
+def energy_systems_technology_assessment_template(technology_key: str) -> dict[str, Any]:
+    try:
+        return energy_systems.technology_assessment_template(technology_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Renewable technology not found") from exc
+
+
+@app.get("/v1/energy-systems/resource-observation-template/{resource_key}")
+def energy_systems_resource_observation_template(resource_key: str) -> dict[str, Any]:
+    try:
+        return energy_systems.resource_observation_template(resource_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Renewable resource class not found") from exc
+
+
+@app.get("/v1/energy-systems/technology-comparison-template")
+def energy_systems_technology_comparison_template() -> dict[str, Any]:
+    return energy_systems.technology_comparison_template()
 
 
 @app.get("/v1/energy-systems/convert")

@@ -1,0 +1,388 @@
+{
+  "schema": "sc-energy-renewable-technology-resource-export/1.0",
+  "version": "0.4.0",
+  "technologies": [
+    {
+      "key": "solar-photovoltaic",
+      "label": "Solar photovoltaic",
+      "family": "solar",
+      "resource_class": "solar-resource",
+      "primary_outputs": [
+        "electricity"
+      ],
+      "conversion_scope": "Photovoltaic conversion of solar radiation to electrical output.",
+      "related_concepts": [
+        "renewable-energy",
+        "solar-energy",
+        "solar-photovoltaics",
+        "renewable-resource-potential",
+        "renewable-technology-prospects"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy",
+        "mcdonnell-lecture-1"
+      ],
+      "evidence_status": "module-scope-plus-normalized-principle",
+      "quantitative_profile_status": "not-populated",
+      "suitability_status": "not-assessed",
+      "note": "v0.4.0 structures the technology family and evidence boundary; it does not assign efficiency, capacity factor, cost, lifecycle emissions, maturity, or site suitability."
+    },
+    {
+      "key": "solar-thermal",
+      "label": "Solar thermal",
+      "family": "solar",
+      "resource_class": "solar-resource",
+      "primary_outputs": [
+        "heat"
+      ],
+      "conversion_scope": "Capture of solar energy as useful heat or as thermal input to a downstream conversion process.",
+      "related_concepts": [
+        "renewable-energy",
+        "solar-energy",
+        "solar-thermal",
+        "renewable-resource-potential",
+        "renewable-technology-prospects"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy",
+        "mcdonnell-lecture-1"
+      ],
+      "evidence_status": "module-scope-plus-normalized-principle",
+      "quantitative_profile_status": "not-populated",
+      "suitability_status": "not-assessed",
+      "note": "The object intentionally leaves technology configuration and performance values to future source-backed profiles."
+    },
+    {
+      "key": "wind-energy",
+      "label": "Wind energy",
+      "family": "wind",
+      "resource_class": "wind-resource",
+      "primary_outputs": [
+        "electricity"
+      ],
+      "conversion_scope": "Conversion of the kinetic energy of moving air to mechanical and typically electrical output.",
+      "related_concepts": [
+        "renewable-energy",
+        "wind-energy",
+        "renewable-resource-potential",
+        "renewable-technology-prospects"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy"
+      ],
+      "evidence_status": "module-scope-plus-normalized-principle",
+      "quantitative_profile_status": "not-populated",
+      "suitability_status": "not-assessed",
+      "note": "Onshore/offshore distinctions, turbine classes, capacity factors, costs, and grid effects are not inferred in this release."
+    },
+    {
+      "key": "hydropower",
+      "label": "Hydropower",
+      "family": "hydro",
+      "resource_class": "hydrological-resource",
+      "primary_outputs": [
+        "electricity"
+      ],
+      "conversion_scope": "Conversion of gravitational and/or kinetic energy in water flows to useful power.",
+      "related_concepts": [
+        "renewable-energy",
+        "hydropower",
+        "renewable-resource-potential",
+        "renewable-technology-prospects"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy"
+      ],
+      "evidence_status": "module-scope-plus-normalized-principle",
+      "quantitative_profile_status": "not-populated",
+      "suitability_status": "not-assessed",
+      "note": "Run-of-river, reservoir, pumped-storage, ecological, and hydrological distinctions require explicit evidence in later releases."
+    },
+    {
+      "key": "tidal-energy",
+      "label": "Tidal energy",
+      "family": "marine",
+      "resource_class": "tidal-resource",
+      "primary_outputs": [
+        "electricity"
+      ],
+      "conversion_scope": "Conversion of tidal range and/or tidal-current motion to useful power.",
+      "related_concepts": [
+        "renewable-energy",
+        "tidal-energy",
+        "renewable-resource-potential",
+        "renewable-technology-prospects"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy"
+      ],
+      "evidence_status": "module-scope-plus-normalized-principle",
+      "quantitative_profile_status": "not-populated",
+      "suitability_status": "not-assessed",
+      "note": "Device type, marine impacts, resource magnitude, cost, and project feasibility are not assigned by the foundation."
+    },
+    {
+      "key": "wave-energy",
+      "label": "Wave energy",
+      "family": "marine",
+      "resource_class": "wave-resource",
+      "primary_outputs": [
+        "electricity"
+      ],
+      "conversion_scope": "Conversion of wave motion and wave-energy flux to useful power.",
+      "related_concepts": [
+        "renewable-energy",
+        "wave-energy",
+        "renewable-resource-potential",
+        "renewable-technology-prospects"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy"
+      ],
+      "evidence_status": "module-scope-plus-normalized-principle",
+      "quantitative_profile_status": "not-populated",
+      "suitability_status": "not-assessed",
+      "note": "Device architecture, survivability, resource magnitude, maturity, cost, and environmental performance require source-backed profiles."
+    },
+    {
+      "key": "bioenergy",
+      "label": "Bioenergy",
+      "family": "bioenergy",
+      "resource_class": "biomass-resource",
+      "primary_outputs": [
+        "heat",
+        "electricity",
+        "fuels"
+      ],
+      "conversion_scope": "Conversion of biological feedstocks through biological, thermal, or chemical pathways to useful energy carriers or services.",
+      "related_concepts": [
+        "renewable-energy",
+        "bioenergy",
+        "biomass",
+        "anaerobic-digestion",
+        "biomass-to-oil",
+        "renewable-resource-potential",
+        "renewable-technology-prospects"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy"
+      ],
+      "evidence_status": "module-scope-plus-normalized-principle",
+      "quantitative_profile_status": "not-populated",
+      "suitability_status": "not-assessed",
+      "note": "Feedstock sustainability, land-use effects, carbon accounting, conversion route, digestate/biochar co-products, and lifecycle performance remain explicit evidence questions rather than assumed benefits."
+    }
+  ],
+  "resource_classes": [
+    {
+      "key": "solar-resource",
+      "label": "Solar resource",
+      "resource_kind": "radiative",
+      "applicable_technologies": [
+        "solar-photovoltaic",
+        "solar-thermal"
+      ],
+      "observation_fields": [
+        "geography",
+        "period",
+        "resource_metric",
+        "value",
+        "unit",
+        "spatial_resolution",
+        "temporal_resolution",
+        "measurement_or_model_method",
+        "data_source",
+        "source_vintage",
+        "uncertainty_or_quality_note",
+        "constraints_note",
+        "provenance_reference"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy"
+      ],
+      "quantitative_dataset_status": "not-loaded",
+      "suitability_status": "not-assessed",
+      "note": "A resource observation may describe solar availability, but v0.4.0 does not select a universal metric or dataset."
+    },
+    {
+      "key": "wind-resource",
+      "label": "Wind resource",
+      "resource_kind": "atmospheric",
+      "applicable_technologies": [
+        "wind-energy"
+      ],
+      "observation_fields": [
+        "geography",
+        "period",
+        "resource_metric",
+        "value",
+        "unit",
+        "spatial_resolution",
+        "temporal_resolution",
+        "measurement_or_model_method",
+        "data_source",
+        "source_vintage",
+        "uncertainty_or_quality_note",
+        "constraints_note",
+        "provenance_reference"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy"
+      ],
+      "quantitative_dataset_status": "not-loaded",
+      "suitability_status": "not-assessed",
+      "note": "Wind-resource observations require explicit height, method, period, and geography before comparison or project use."
+    },
+    {
+      "key": "hydrological-resource",
+      "label": "Hydrological resource",
+      "resource_kind": "freshwater",
+      "applicable_technologies": [
+        "hydropower"
+      ],
+      "observation_fields": [
+        "geography",
+        "period",
+        "resource_metric",
+        "value",
+        "unit",
+        "spatial_resolution",
+        "temporal_resolution",
+        "measurement_or_model_method",
+        "data_source",
+        "source_vintage",
+        "uncertainty_or_quality_note",
+        "constraints_note",
+        "provenance_reference"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy"
+      ],
+      "quantitative_dataset_status": "not-loaded",
+      "suitability_status": "not-assessed",
+      "note": "Hydropower resource characterization requires explicit hydrological and site methodology; no flow/head assumptions are fabricated."
+    },
+    {
+      "key": "tidal-resource",
+      "label": "Tidal resource",
+      "resource_kind": "marine",
+      "applicable_technologies": [
+        "tidal-energy"
+      ],
+      "observation_fields": [
+        "geography",
+        "period",
+        "resource_metric",
+        "value",
+        "unit",
+        "spatial_resolution",
+        "temporal_resolution",
+        "measurement_or_model_method",
+        "data_source",
+        "source_vintage",
+        "uncertainty_or_quality_note",
+        "constraints_note",
+        "provenance_reference"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy"
+      ],
+      "quantitative_dataset_status": "not-loaded",
+      "suitability_status": "not-assessed",
+      "note": "Tidal range/current resource observations must identify the selected metric, location, period, and method."
+    },
+    {
+      "key": "wave-resource",
+      "label": "Wave resource",
+      "resource_kind": "marine",
+      "applicable_technologies": [
+        "wave-energy"
+      ],
+      "observation_fields": [
+        "geography",
+        "period",
+        "resource_metric",
+        "value",
+        "unit",
+        "spatial_resolution",
+        "temporal_resolution",
+        "measurement_or_model_method",
+        "data_source",
+        "source_vintage",
+        "uncertainty_or_quality_note",
+        "constraints_note",
+        "provenance_reference"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy"
+      ],
+      "quantitative_dataset_status": "not-loaded",
+      "suitability_status": "not-assessed",
+      "note": "Wave-resource observations must preserve the resource metric, location, time period, and data/model provenance."
+    },
+    {
+      "key": "biomass-resource",
+      "label": "Biomass feedstock resource",
+      "resource_kind": "biological",
+      "applicable_technologies": [
+        "bioenergy"
+      ],
+      "observation_fields": [
+        "geography",
+        "period",
+        "resource_metric",
+        "value",
+        "unit",
+        "spatial_resolution",
+        "temporal_resolution",
+        "measurement_or_model_method",
+        "data_source",
+        "source_vintage",
+        "uncertainty_or_quality_note",
+        "constraints_note",
+        "provenance_reference",
+        "feedstock_type",
+        "feedstock_origin",
+        "competing_use_note",
+        "land_use_note"
+      ],
+      "source_keys": [
+        "ucd-module-sustainable-energy"
+      ],
+      "quantitative_dataset_status": "not-loaded",
+      "suitability_status": "not-assessed",
+      "note": "Biomass quantity alone is not a sustainability determination; origin, competing uses, land/ecosystem context, and carbon-accounting boundaries remain required evidence."
+    }
+  ],
+  "comparison_template": {
+    "ok": true,
+    "schema": "sc-energy-renewable-technology-comparison/1.0",
+    "version": "0.4.0",
+    "candidate_technology_keys": [
+      "solar-photovoltaic",
+      "solar-thermal",
+      "wind-energy",
+      "hydropower",
+      "tidal-energy",
+      "wave-energy",
+      "bioenergy"
+    ],
+    "dimensions": [
+      "resource availability",
+      "conversion performance",
+      "energy output",
+      "cost",
+      "lifecycle emissions",
+      "land and water",
+      "reliability or variability",
+      "environmental constraints",
+      "social or institutional constraints",
+      "system or grid context",
+      "uncertainty and provenance"
+    ],
+    "values_loaded": false,
+    "ranking_enabled": false,
+    "guardrail": "This is a comparison schema only. v0.4.0 does not populate universal scores or choose a preferred renewable technology."
+  },
+  "content_fingerprint": "13fe09269956f179364551432dffc3adfa7ef2eb6036fe772898af26061f2073"
+}

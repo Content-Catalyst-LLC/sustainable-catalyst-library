@@ -6,9 +6,11 @@ import json
 from decimal import Decimal, InvalidOperation, localcontext
 from typing import Any
 
+from .energy_technologies import RenewableTechnologyResourceRegistry
 
-DOMAIN_VERSION = "0.3.0"
-SCHEMA_VERSION = "sc-energy-systems-sustainability-indicators/1.0"
+
+DOMAIN_VERSION = "0.4.0"
+SCHEMA_VERSION = "sc-energy-systems-renewable-technology-resource-model/1.0"
 
 
 @dataclass(frozen=True)
@@ -120,11 +122,11 @@ class EnergyIndicatorDefinition:
 class EnergySystemsKnowledgeFoundation:
     """Governed sustainable-energy knowledge and source-bound numerical registry.
 
-    v0.3.0 preserves the v0.1.0 concept graph and v0.2.0 source-bound numeric
-    registry, then adds the 30 Energy Indicators for Sustainable Development
-    represented in the supplied Vera & Langlois article as governed definitions
-    and observation contracts. Official EISD calculation methods remain disabled
-    because the article points to separate methodology sheets that were not supplied.
+    v0.4.0 preserves the v0.1.0 concept graph, v0.2.0 source-bound numeric
+    registry, and v0.3.0 EISD indicator definitions, then adds a governed renewable
+    technology and resource-potential object model. Quantitative technology profiles,
+    live resource datasets, automatic suitability, and technology ranking remain
+    disabled until explicit source-backed evidence is loaded.
     """
 
     def __init__(self) -> None:
@@ -138,6 +140,7 @@ class EnergySystemsKnowledgeFoundation:
         self._carbon_factors = self._build_carbon_factors()
         self._heat_content_factors = self._build_heat_content_factors()
         self._indicators = self._build_indicators()
+        self._technology_registry = RenewableTechnologyResourceRegistry()
         self._methodology_rules = self._build_methodology_rules()
         self._handoffs = self._build_handoffs()
         self._guardrails = self._build_guardrails()
@@ -522,6 +525,8 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "eisd-table-definition-boundary", "source_key": "vera-langlois-2007", "source_year": 2007, "rule": "The supplied article identifies and classifies 30 EISD indicators across social, economic, and environmental dimensions; v0.3.0 preserves those names and classifications as source-grounded definitions.", "current_default": False},
             {"key": "eisd-methodology-sheet-boundary", "source_key": "vera-langlois-2007", "source_year": 2007, "rule": "The article states that separate methodology sheets provide definitions, methods, components, units, construction instructions, data issues, sources, availability, and sustainable-development relevance. Those sheets were not supplied, so exact official formulas are not implemented.", "current_default": False},
             {"key": "indicator-comparison-boundary", "source_key": "vera-langlois-2007", "source_year": 2007, "rule": "Indicator observations should retain geography, period, unit, denominator or disaggregation basis, source, and methodology so comparisons do not silently mix incompatible definitions or contexts.", "current_default": False},
+            {"key": "renewable-technology-profile-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "The module identifies renewable technology families and requires understanding of physical/technological principles and future prospects, but the supplied material does not provide a current quantitative performance database. v0.4.0 therefore structures technology objects without universal efficiency, cost, capacity-factor, lifecycle-emissions, or maturity values.", "current_default": False},
+            {"key": "renewable-resource-potential-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "Resource estimation and evaluation require geography-, period-, metric-, method-, and source-specific evidence. A resource observation is not automatically gross, technical, economic, or sustainable potential and does not establish project suitability.", "current_default": False},
         ]
 
     @staticmethod
@@ -531,8 +536,8 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "forest-to-carbon-nature", "source_concepts": ["forest-carbon", "forest-ecology"], "target": "Carbon & Nature Intelligence", "target_refs": ["forest-woodland"], "status": "available", "boundary": "Semantic routing only; does not infer forest-carbon stocks, permanence, or project eligibility."},
             {"key": "bioenergy-carbon-nature-extension", "source_concepts": ["anaerobic-digestion", "digestate", "biochar", "biomass-to-oil", "co2-to-energy"], "target": "Carbon & Nature Intelligence", "target_refs": [], "status": "planned-extension", "boundary": "No existing target is fabricated in v0.2.0; explicit Carbon & Nature objects are required before this handoff becomes active."},
             {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "co2e"], "target": "Workbench", "target_refs": ["energy-unit-conversion-registry", "historical-carbon-factor-registry"], "status": "contract-available", "boundary": "v0.2.0 exposes source-bound calculation contracts, but does not modify or execute the separate Workbench product."},
-            {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity"], "target": "Lab", "target_refs": [], "status": "planned-v0.5-plus", "boundary": "No simulation, optimization, or scenario execution in v0.2.0."},
-            {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security"], "target": "Site Intelligence", "target_refs": [], "status": "planned-v0.8-plus", "boundary": "No current country values are asserted by this source-bound registry."},
+            {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity", "renewable-resource-potential"], "target": "Lab", "target_refs": ["renewable-technology-assessment-contract", "renewable-resource-observation-contract"], "status": "contract-available", "boundary": "v0.4.0 exposes renewable technology/resource assessment contracts for later Lab modeling; no simulation, optimization, or automatic suitability execution is enabled."},
+            {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security", "renewable-resource-potential"], "target": "Site Intelligence", "target_refs": ["renewable-resource-observation-contract"], "status": "contract-available", "boundary": "v0.4.0 defines the resource-observation packet Site Intelligence can populate later; no current country or site resource values are asserted."},
             {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis"], "target": "Decision Studio", "target_refs": [], "status": "planned-v0.9-plus", "boundary": "No automatic policy or technology recommendation in v0.2.0."},
         ]
 
@@ -562,6 +567,13 @@ class EnergySystemsKnowledgeFoundation:
             "indicator_definition_is_not_observed_value": True,
             "indicator_value_is_not_sustainability_score": True,
             "cross_geography_comparison_requires_harmonized_methodology": True,
+            "renewable_technology_registry_activated": True,
+            "renewable_resource_class_registry_activated": True,
+            "renewable_technology_assessment_contracts_activated": True,
+            "renewable_resource_observation_contracts_activated": True,
+            "quantitative_technology_profiles_loaded": False,
+            "live_resource_potential_datasets_loaded": False,
+            "renewable_suitability_assessment_activated": False,
             "scenario_modeling_activated": False,
             "automatic_technology_ranking": False,
             "automatic_policy_recommendation": False,
@@ -613,7 +625,10 @@ class EnergySystemsKnowledgeFoundation:
             if missing_concepts:
                 raise ValueError(f"Unknown related concepts for {indicator.code}: {sorted(missing_concepts)}")
             if indicator.calculation_status != "not-implemented" or indicator.methodology_status != "methodology-sheet-required":
-                raise ValueError("v0.3.0 must not claim official EISD formula implementation")
+                raise ValueError("v0.4.0 must not claim official EISD formula implementation")
+        technology_framework = self._technology_registry.framework()
+        if technology_framework["counts"]["technologies"] != 7 or technology_framework["counts"]["resource_classes"] != 6:
+            raise ValueError("Renewable technology/resource registry is incomplete")
 
     def _content_fingerprint(self) -> str:
         content = {
@@ -628,6 +643,7 @@ class EnergySystemsKnowledgeFoundation:
             "carbon_factors": [asdict(v) for v in self._carbon_factors.values()],
             "heat_content_factors": [asdict(v) for v in self._heat_content_factors.values()],
             "indicators": [asdict(v) for v in self._indicators.values()],
+            "renewable_technology_resource_model": self._technology_registry.export(),
             "methodology_rules": self._methodology_rules,
             "handoffs": self._handoffs,
             "guardrails": self._guardrails,
@@ -641,11 +657,11 @@ class EnergySystemsKnowledgeFoundation:
             "subsystem": {
                 "name": "Energy Systems Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Energy Sustainability Indicators",
+                "release": "Renewable Technology & Resource Model",
                 "library_version": "5.11.0",
-                "backend_version": "2.9.0",
+                "backend_version": "2.10.0",
                 "read_only": True,
-                "calculation_mode": "source-bound-numeric-registry-plus-noncomputational-indicator-contracts",
+                "calculation_mode": "source-bound-numeric-registry-plus-indicator-and-renewable-assessment-contracts",
             },
             "counts": {
                 "concepts": len(self._concepts),
@@ -663,13 +679,18 @@ class EnergySystemsKnowledgeFoundation:
                 "indicator_themes": 7,
                 "indicator_subthemes": 19,
                 "indicator_observation_contracts": len(self._indicators),
+                "renewable_technologies": self._technology_registry.framework()["counts"]["technologies"],
+                "renewable_technology_families": self._technology_registry.framework()["counts"]["technology_families"],
+                "renewable_resource_classes": self._technology_registry.framework()["counts"]["resource_classes"],
+                "renewable_technology_assessment_contracts": self._technology_registry.framework()["counts"]["technology_assessment_contracts"],
+                "renewable_resource_observation_contracts": self._technology_registry.framework()["counts"]["resource_observation_contracts"],
                 "methodology_rules": len(self._methodology_rules),
             },
             "knowledge_domains": self._knowledge_domains,
             "sdg_mappings": self._sdgs,
             "guardrails": self._guardrails,
+            "renewable_technology_resource_model": self._technology_registry.framework(),
             "roadmap": [
-                {"version": "0.4.0", "name": "Renewable Technology & Resource Model"},
                 {"version": "0.5.0", "name": "Energy Balance & Systems Modeling"},
                 {"version": "0.6.0", "name": "Energy Scenario Economics"},
             ],
@@ -725,7 +746,9 @@ class EnergySystemsKnowledgeFoundation:
         concepts = [c.key for c in self._concepts.values() if key in c.source_keys]
         relationships = [asdict(r) for r in self._relationships if key in r.source_keys]
         indicators = [i.code for i in self._indicators.values() if i.source_key == key]
-        return {"ok": True, "schema": "sc-energy-source/1.0", "source": asdict(source), "concept_keys": concepts, "relationship_count": len(relationships), "indicator_codes": indicators, "content_fingerprint": self._fingerprint}
+        technologies = [t["key"] for t in self._technology_registry.technologies(limit=100)["items"] if key in t["source_keys"]]
+        resources = [r["key"] for r in self._technology_registry.resource_classes()["items"] if key in r["source_keys"]]
+        return {"ok": True, "schema": "sc-energy-source/1.0", "source": asdict(source), "concept_keys": concepts, "relationship_count": len(relationships), "indicator_codes": indicators, "technology_keys": technologies, "resource_class_keys": resources, "content_fingerprint": self._fingerprint}
 
     def knowledge_map(self) -> dict[str, Any]:
         grouped: dict[str, list[dict[str, Any]]] = {d["key"]: [] for d in self._knowledge_domains}
@@ -737,6 +760,7 @@ class EnergySystemsKnowledgeFoundation:
             "domains": [{**domain, "concepts": grouped.get(domain["key"], [])} for domain in self._knowledge_domains],
             "relationships": [asdict(rel) for rel in self._relationships],
             "sdg_mappings": self._sdgs,
+            "renewable_technology_resource_model": self._technology_registry.framework(),
             "content_fingerprint": self._fingerprint,
         }
 
@@ -991,6 +1015,31 @@ class EnergySystemsKnowledgeFoundation:
             "contract": contract,
             "template": template,
         }
+
+
+    def technology_framework(self) -> dict[str, Any]:
+        return self._technology_registry.framework()
+
+    def technologies(self, *, q: str = "", family: str = "", output: str = "", resource_class: str = "", limit: int = 100) -> dict[str, Any]:
+        return self._technology_registry.technologies(q=q, family=family, output=output, resource_class=resource_class, limit=limit)
+
+    def technology(self, key: str) -> dict[str, Any]:
+        return self._technology_registry.technology(key)
+
+    def resource_classes(self) -> dict[str, Any]:
+        return self._technology_registry.resource_classes()
+
+    def resource_class(self, key: str) -> dict[str, Any]:
+        return self._technology_registry.resource_class(key)
+
+    def technology_assessment_template(self, key: str) -> dict[str, Any]:
+        return self._technology_registry.technology_assessment_template(key)
+
+    def resource_observation_template(self, key: str) -> dict[str, Any]:
+        return self._technology_registry.resource_observation_template(key)
+
+    def technology_comparison_template(self) -> dict[str, Any]:
+        return self._technology_registry.comparison_template()
 
     def handoffs(self) -> dict[str, Any]:
         return {"ok": True, "schema": "sc-energy-handoffs/1.0", "count": len(self._handoffs), "items": self._handoffs, "guardrail": "Only handoffs marked available or contract-available resolve to a governed target or contract; planned handoffs do not imply current capability."}
