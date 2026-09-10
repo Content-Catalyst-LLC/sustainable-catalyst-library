@@ -28,6 +28,7 @@ from .evidence_grading import EvidenceGradingEngine
 from .biomedical_evidence_graph import BiomedicalEvidenceGraphEngine
 from .institutional_research_network import InstitutionalResearchNetwork
 from .carbon_nature import CarbonNatureKnowledgeFoundation
+from .energy_systems import EnergySystemsKnowledgeFoundation
 from .private_knowledge import (
     PrivateHandoffRequest,
     PrivateKnowledgeIngestRequest,
@@ -70,6 +71,7 @@ biomedical_evidence_graph = BiomedicalEvidenceGraphEngine(evidence_grading, clin
 institutional_research_network = InstitutionalResearchNetwork(timeout_seconds=settings.institutional_source_timeout_seconds)
 private_organizational_knowledge = PrivateOrganizationalKnowledge()
 carbon_nature = CarbonNatureKnowledgeFoundation()
+energy_systems = EnergySystemsKnowledgeFoundation()
 
 
 app = FastAPI(
@@ -261,6 +263,19 @@ def health() -> dict[str, Any]:
             "afolu_evidence_gap_diagnostics": True,
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
+            "energy_systems_intelligence": True,
+            "energy_systems_domain_version": "0.1.0",
+            "sustainable_energy_knowledge_foundation": True,
+            "energy_concept_registry": True,
+            "energy_relationship_registry": True,
+            "energy_source_provenance_registry": True,
+            "energy_knowledge_map": True,
+            "energy_platform_handoffs": True,
+            "energy_numeric_conversion_registry": False,
+            "energy_indicator_engine": False,
+            "energy_scenario_modeling": False,
+            "automatic_energy_technology_ranking": False,
+            "automatic_energy_policy_recommendation": False,
             "automated_clinical_recommendation": False,
         },
         "ingest_limits": {
@@ -706,6 +721,63 @@ async def private_organizational_knowledge_handoff(
         raise HTTPException(status_code=422, detail=exc.errors()) from exc
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="private record not found or not authorized") from exc
+
+
+@app.get("/v1/energy-systems")
+def energy_systems_manifest() -> dict[str, Any]:
+    return energy_systems.manifest()
+
+
+@app.get("/v1/energy-systems/concepts")
+def energy_systems_concepts(
+    q: str = Query(default="", max_length=500),
+    concept_type: str = Query(default="", max_length=100),
+    domain: str = Query(default="", max_length=100),
+    source: str = Query(default="", max_length=160),
+    limit: int = Query(default=100, ge=1, le=250),
+) -> dict[str, Any]:
+    return energy_systems.concepts(q=q, concept_type=concept_type, domain=domain, source=source, limit=limit)
+
+
+@app.get("/v1/energy-systems/concepts/{concept_key}")
+def energy_systems_concept(concept_key: str) -> dict[str, Any]:
+    try:
+        return energy_systems.concept(concept_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Energy concept not found") from exc
+
+
+@app.get("/v1/energy-systems/relationships")
+def energy_systems_relationships(
+    subject: str = Query(default="", max_length=160),
+    predicate: str = Query(default="", max_length=160),
+    object_key: str = Query(default="", alias="object", max_length=160),
+    limit: int = Query(default=250, ge=1, le=500),
+) -> dict[str, Any]:
+    return energy_systems.relationships(subject=subject, predicate=predicate, object_key=object_key, limit=limit)
+
+
+@app.get("/v1/energy-systems/sources")
+def energy_systems_sources() -> dict[str, Any]:
+    return energy_systems.sources()
+
+
+@app.get("/v1/energy-systems/sources/{source_key}")
+def energy_systems_source(source_key: str) -> dict[str, Any]:
+    try:
+        return energy_systems.source(source_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Energy source not found") from exc
+
+
+@app.get("/v1/energy-systems/knowledge-map")
+def energy_systems_knowledge_map() -> dict[str, Any]:
+    return energy_systems.knowledge_map()
+
+
+@app.get("/v1/energy-systems/handoffs")
+def energy_systems_handoffs() -> dict[str, Any]:
+    return energy_systems.handoffs()
 
 
 @app.get("/v1/carbon-nature")

@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,7 +21,9 @@ def test_subsystem_identity_advances_without_renumbering_library_release():
     assert "Version: 5.11.0" in main
     assert "SC_LIBRARY_VERSION', '5.11.0'" in main
     assert "SC_CARBON_NATURE_VERSION', '0.5.0'" in main
-    assert '__version__ = "2.6.0"' in text(ROOT / "library-backend/app/__init__.py")
+    backend_init = text(ROOT / "library-backend/app/__init__.py")
+    match = re.search(r'__version__\s*=\s*"(\d+)\.(\d+)\.(\d+)"', backend_init)
+    assert match and tuple(map(int, match.groups())) >= (2, 6, 0)
 
 
 def test_afolu_research_librarian_routes_are_wired_end_to_end():

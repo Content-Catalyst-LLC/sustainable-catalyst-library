@@ -1,0 +1,28 @@
+Sustainable Catalyst Library
+Energy Systems Intelligence v0.1.0 — Sustainable Energy Knowledge Foundation
+Backend v2.7.0
+Validation date: 2026-09-10
+
+PASS: Python compile — library-backend/app/energy_systems.py
+PASS: Python compile — library-backend/app/main.py
+PASS: PHP syntax — sustainable-catalyst-library.php
+PASS: PHP syntax — class-sc-library-energy-systems-intelligence.php
+PASS: JavaScript syntax — sc-library-energy-systems-v010.js
+PASS: backend Energy Systems tests — 8 passed
+PASS: repository/WordPress Energy Systems tests — 6 passed
+PASS: retained Carbon & Nature backend v0.5.0 tests — 14 passed
+PASS: retained Carbon & Nature WordPress/repository tests — 8 passed after forward-compatible backend-shell version assertion
+PASS: deterministic Energy Systems manifest fingerprint — 021b0ca4e8ddae6819016244bfb6af004f91ef978ddc05e3e9c2bc05d9891a8e
+PASS: knowledge inventory — 75 concepts / 63 typed relationships / 6 sources / 6 domains / 9 SDG mappings / 7 handoffs
+PASS: source-vintage guardrail — historical sources retain their publication year/role
+PASS: historical conversion factors inactive — no 2020 fuel-factor numeric table embedded in v0.1.0 domain module
+PASS: SDG 15 coverage remains null because no numeric coverage value was supplied
+PASS: Carbon & Nature handoff boundary — soil-organic-carbon and forest-woodland available; other bioenergy/carbon targets remain planned
+PASS: no write routes in Energy Systems WordPress surface
+PASS: automatic technology ranking disabled
+PASS: automatic policy recommendation disabled
+PASS: indicator calculation disabled
+PASS: scenario modeling disabled
+
+Environment limitation:
+The build environment does not include the Library backend's psycopg dependency, so the full FastAPI application was not started here. The packaged Contabo upgrader performs in-container runtime checks against /health, retained Carbon & Nature routes, and all new Energy Systems routes after rebuilding the production Docker service.

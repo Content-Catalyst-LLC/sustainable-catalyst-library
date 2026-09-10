@@ -1,5 +1,13 @@
 # Sustainable Catalyst Library
 
+## Energy Systems Intelligence v0.1.0
+
+**v0.1.0 — Sustainable Energy Knowledge Foundation** adds a governed, read-only Energy Systems Intelligence domain while Sustainable Catalyst Library remains on the **v5.11.0** application line and the Python Library backend advances to **v2.7.0**. The foundation contains 75 source-grounded concepts, 63 typed non-inferential relationships, six knowledge domains, six provenance source records, nine module SDG mappings, and seven explicit cross-platform handoffs.
+
+The primary shortcode is `[sc_energy_systems_intelligence]`. It exposes Knowledge Map, Concept Registry, Sources & Provenance, and Platform Handoffs views. Historical conversion factors are registered only as source provenance in v0.1.0; numerical factors, indicator calculation, scenario modeling, technology ranking, and policy recommendation remain intentionally disabled. Existing Carbon & Nature Intelligence v0.5.0 is preserved, with active semantic handoffs for soil carbon and forest/woodland concepts and explicit planned-extension status for biochar, digestate/anaerobic digestion, biomass-to-oil, and CO₂-to-energy until governed Carbon & Nature targets exist.
+
+See `ENERGY_SYSTEMS_INTELLIGENCE_v0.1.0.md`, `RELEASE_NOTES_ENERGY_SYSTEMS_0.1.0.md`, and `DEPLOY_ENERGY_SYSTEMS_BACKEND_v2.7.0.md`.
+
 ## Carbon & Nature Intelligence v0.5.0
 
 Carbon & Nature advances to **v0.5.0 — AFOLU Research Librarian Intelligence** while Sustainable Catalyst Library remains on the v5.11.x application line and the Python Library backend advances to **v2.6.0**. The release preserves the v0.1 ontology, v0.2 Measure Registry, v0.3 Evidence & Methodology Graph, and v0.4 Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, question framing, source-role planning, evidence-gap diagnostics, freshness review, governed handoffs, and Project-Aware Research Librarian packet augmentation.

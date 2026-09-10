@@ -11,6 +11,8 @@ A unified WordPress Living Knowledge System for public discovery, research works
 
 == Description ==
 
+Energy Systems Intelligence v0.1.0 adds the `[sc_energy_systems_intelligence]` read-only Sustainable Energy Knowledge Foundation. It provides 75 governed concepts, 63 typed source-grounded relationships, six knowledge domains, six provenance source records, module SDG mappings, and bounded handoffs to Carbon & Nature, Workbench, Lab, Site Intelligence, and Decision Studio. v0.1.0 does not activate historical conversion factors, calculate indicators, infer resource potential, run scenarios, rank technologies, or recommend policy.
+
 Sustainable Catalyst Library v5.11.0 adds Private Organizational Knowledge Foundation: a physically separate organization-scoped private knowledge plane with signed server-only access, access scopes, private search, version lineage, provenance, audit events, and controlled Research Librarian/Workspace/Lab handoffs. v5.10.0 Institutional Research Network II remains intact. The current Research Library page remains the R3.2.1 capability-preserving baseline with Three Research Front Doors removed. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
 
 = Public Evidence & Claim Navigation =
@@ -366,6 +368,20 @@ Use `[sc_library_api_interoperability]` for the integration console and `[sc_lib
 
 The facade does not expose My Library, private Research Projects, notebook or Evidence Matrix bodies, Research Room or Team Library membership, credentials, tokens, Workspace state, or authenticated federation governance. It performs no cross-site writes, publication, federation acceptance, evidence promotion, or Workspace writes.
 
+
+== Energy Systems Intelligence ==
+
+Use `[sc_energy_systems_intelligence]` to expose the Library-native Sustainable Energy Knowledge Foundation. v0.1.0 covers energy-system history and worldwide importance, sources/resources/reserves, conversion and end use, renewable technology families, biological carbon and bioenergy concepts, efficiency/economic-analysis concepts, and social/economic/environmental sustainability metrics. Source dates and evidence roles are preserved explicitly; the 2020 conversion-factor guide is provenance-only until a versioned numerical registry is introduced in v0.2.0.
+
+= 5.11.0 + Energy Systems Intelligence v0.1.0 =
+
+* Added a 75-concept Sustainable Energy Knowledge Foundation and 63 typed relationships.
+* Added source provenance for UCD module material, Lecture 1, Vera & Langlois (2007), Carbon Trust/BEIS conversion guidance (2020), AtKisson (2009), and UN DESA sustainable consumption/production material (2010).
+* Added six knowledge domains and nine module SDG mappings; SDG 15 coverage remains unset because the supplied module excerpt did not provide a numeric coverage value.
+* Added available Carbon & Nature handoffs for soil carbon and forest/woodland plus explicit planned-extension status for biochar, digestate/AD, biomass-to-oil, and CO₂-to-energy.
+* Added GET-only backend and WordPress REST routes plus the `[sc_energy_systems_intelligence]` interface.
+* Advanced the Library Python backend to v2.7.0 while retaining Library v5.11.0 and Carbon & Nature v0.5.0.
+* Kept conversion-factor execution, indicator calculation, scenario modeling, automatic technology ranking, automatic policy recommendation, and sustainability scoring disabled.
 
 == Carbon & Nature Intelligence ==
 
