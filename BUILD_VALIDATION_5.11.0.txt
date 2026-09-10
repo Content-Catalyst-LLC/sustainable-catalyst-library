@@ -1,0 +1,36 @@
+Sustainable Catalyst Library v5.11.0 — Private Organizational Knowledge Foundation
+Validation date: 2026-09-04
+
+New v5.11.0 private knowledge tests:
+22 passed
+
+Retained institutional / biomedical tests:
+100 passed, 12 deselected
+
+Retained Dynamic Explorer / homepage / Publications tests:
+26 passed, 3 deselected
+
+Additional gates:
+Python compileall: PASS
+PHP syntax: PASS
+JavaScript syntax: PASS
+
+Validated boundaries:
+- canonical WordPress release identity 5.11.0
+- backend release identity 2.1.0
+- physically separate library_private_* PostgreSQL schema
+- organization-scoped private identity
+- signed server-only private data routes
+- restricted/project access-scope enforcement
+- public query module does not reference private tables
+- private version lineage and audit-event schema
+- raw private search query not written to access audit events
+- Research Librarian / Workspace / Lab handoff boundary
+- Lab handoff requires data-like record plus explicit analysis_allowed metadata
+- backend API key not exposed to JavaScript
+- v5.10.0 institutional network retained
+- v5.9.x biomedical graph/reliability retained
+- v5.8.x biomedical/clinical layers retained
+- Dynamic Explorer, homepage console, and Publications regressions retained
+
+PASS: Sustainable Catalyst Library v5.11.0 Private Organizational Knowledge Foundation validation

@@ -26,6 +26,13 @@ from .clinical_trials import ClinicalTrialIntelligence, ClinicalTrialIntelligenc
 from .evidence_grading import EvidenceGradingEngine
 from .biomedical_evidence_graph import BiomedicalEvidenceGraphEngine
 from .institutional_research_network import InstitutionalResearchNetwork
+from .private_knowledge import (
+    PrivateHandoffRequest,
+    PrivateKnowledgeIngestRequest,
+    PrivateKnowledgeSearchRequest,
+    PrivateOrganizationalKnowledge,
+    PrivateRecordRequest,
+)
 
 
 @asynccontextmanager
@@ -59,6 +66,7 @@ clinical_trials = ClinicalTrialIntelligence(settings.clinical_trial_timeout_seco
 evidence_grading = EvidenceGradingEngine(biomedical_sources, clinical_trials)
 biomedical_evidence_graph = BiomedicalEvidenceGraphEngine(evidence_grading, clinical_trials, medical_terminology, fda_regulatory_sources)
 institutional_research_network = InstitutionalResearchNetwork(timeout_seconds=settings.institutional_source_timeout_seconds)
+private_organizational_knowledge = PrivateOrganizationalKnowledge()
 
 
 app = FastAPI(
@@ -214,6 +222,13 @@ def health() -> dict[str, Any]:
             "institutional_provenance_ledger": True,
             "institutional_source_failure_containment": True,
             "institutional_graph_fingerprint": True,
+            "private_organizational_knowledge": True,
+            "private_organization_scoping": True,
+            "private_access_scope_enforcement": True,
+            "private_version_lineage": True,
+            "private_audit_events": True,
+            "private_cross_product_handoffs": True,
+            "private_public_search_separation": True,
             "automated_clinical_recommendation": False,
         },
         "ingest_limits": {
@@ -571,6 +586,94 @@ def biomedical_evidence_graph_trial(nct_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="clinical trial not found") from exc
     except ClinicalTrialIntelligenceError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/private-organizational-knowledge")
+def private_organizational_knowledge_manifest() -> dict[str, Any]:
+    return private_organizational_knowledge.manifest()
+
+
+@app.post("/v1/private-organizational-knowledge/ingest")
+async def private_organizational_knowledge_ingest(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        packet = PrivateKnowledgeIngestRequest.model_validate_json(body)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=exc.errors()) from exc
+    if len(packet.records) > settings.max_batch_records:
+        raise HTTPException(status_code=413, detail="private record batch exceeds configured maximum")
+    return private_organizational_knowledge.ingest(packet, sha256_hex(body))
+
+
+@app.post("/v1/private-organizational-knowledge/search")
+async def private_organizational_knowledge_search(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        packet = PrivateKnowledgeSearchRequest.model_validate_json(body)
+        return private_organizational_knowledge.search(packet)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=exc.errors()) from exc
+
+
+@app.post("/v1/private-organizational-knowledge/record")
+async def private_organizational_knowledge_record(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        packet = PrivateRecordRequest.model_validate_json(body)
+        return private_organizational_knowledge.get_record(packet)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=exc.errors()) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="private record not found or not authorized") from exc
+
+
+@app.post("/v1/private-organizational-knowledge/versions")
+async def private_organizational_knowledge_versions(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        packet = PrivateRecordRequest.model_validate_json(body)
+        return private_organizational_knowledge.versions(packet)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=exc.errors()) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="private record not found or not authorized") from exc
+
+
+@app.post("/v1/private-organizational-knowledge/handoff")
+async def private_organizational_knowledge_handoff(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        packet = PrivateHandoffRequest.model_validate_json(body)
+        return private_organizational_knowledge.handoff(packet)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=exc.errors()) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="private record not found or not authorized") from exc
 
 
 @app.get("/v1/institutional-research-network")

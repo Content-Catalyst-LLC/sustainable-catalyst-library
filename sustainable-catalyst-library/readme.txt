@@ -4,14 +4,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.10.0
+Stable tag: 5.11.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.10.0 adds Institutional Research Network II: governed cross-repository discovery across DSpace@MIT, Harvard Dataverse, the Johns Hopkins Research Data Repository, and Research Repository UCD with normalized institutional research objects, conservative identity resolution, provenance ledgers, rights observations, deterministic fingerprints, and source-local failure containment. The current Research Library page remains the R3.2.1 capability-preserving baseline with Three Research Front Doors removed. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
+Sustainable Catalyst Library v5.11.0 adds Private Organizational Knowledge Foundation: a physically separate organization-scoped private knowledge plane with signed server-only access, access scopes, private search, version lineage, provenance, audit events, and controlled Research Librarian/Workspace/Lab handoffs. v5.10.0 Institutional Research Network II remains intact. The current Research Library page remains the R3.2.1 capability-preserving baseline with Three Research Front Doors removed. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
 
 = Public Evidence & Claim Navigation =
 

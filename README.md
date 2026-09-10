@@ -1,8 +1,14 @@
 ## Current release
 
-**v5.10.0 — Institutional Research Network II** generalizes the Library's provenance-first architecture across DSpace@MIT, Harvard Dataverse, the Johns Hopkins Research Data Repository, and Research Repository UCD. Backend v2.0.0 adds a normalized institutional research object, exact-DOI duplicate consolidation, source-local identity, per-record rights observations, source-local failure containment, deterministic fingerprints, and an institution→repository→record graph. Repository discovery remains metadata discovery only: it does not imply entitlement, reuse permission, affiliation, partnership, or endorsement.
+**v5.11.0 — Private Organizational Knowledge Foundation** adds a separate organization-scoped private knowledge plane alongside the public Library. Backend v2.1.0 stores private organizations, sources, records, version history, ingest events, and access events in dedicated PostgreSQL tables; every private read is server-signed, organization-scoped, and access-scope filtered. Public Library search, the institutional network, and biomedical evidence surfaces do not query the private tables. Controlled handoff packets preserve the private boundary for Research Librarian, Workspace, and Lab.
 
 # Sustainable Catalyst Library
+
+## v5.11.0 — Private Organizational Knowledge Foundation
+
+v5.11.0 establishes the enterprise-private side of Library without weakening the public research architecture. It accepts normalized extracted-text records from internal documents and data sources, preserves source ownership/provenance and deterministic version lineage, supports organization/restricted/project access levels, records privacy-minimized audit events, and exposes private search/detail/version/handoff endpoints only through signed server-to-server requests. PDF/DOCX binary parsing is not newly claimed; existing Library conversion/OCR paths can feed normalized text into the private ingest API.
+
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.11.0.md` and `PRIVATE_ORGANIZATIONAL_KNOWLEDGE_FOUNDATION_v5.11.0.md`.
 
 ## v5.10.0 — Institutional Research Network II
 

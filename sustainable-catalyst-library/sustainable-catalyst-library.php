@@ -3,7 +3,7 @@
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
  * Description: Sustainable Catalyst Library v5.10.0 adds Institutional Research Network II with governed cross-repository discovery, normalized institutional research objects, provenance, rights observations, and deterministic research graphs.
- * Version: 5.10.0
+ * Version: 5.11.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.10.0');
+define('SC_LIBRARY_VERSION', '5.11.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -70,6 +70,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-clinical-trial-intellig
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence-grading.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence-graph.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-institutional-research-network.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-private-organizational-knowledge.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
 register_deactivation_hook(__FILE__, ['SC_Library_Activator', 'deactivate']);
@@ -138,6 +139,7 @@ final class SC_Library_Plugin {
         $biomedical_evidence_grading = new SC_Library_Biomedical_Evidence_Grading();
         $biomedical_evidence_graph = new SC_Library_Biomedical_Evidence_Graph();
         $institutional_research_network = new SC_Library_Institutional_Research_Network();
+        $private_organizational_knowledge = new SC_Library_Private_Organizational_Knowledge();
 
         // v4.2.0 is an optional, contained editorial surface. A Spotlight
         // startup failure must not terminate the public Research Library.
@@ -212,6 +214,7 @@ final class SC_Library_Plugin {
         $biomedical_evidence_grading->register_hooks();
         $biomedical_evidence_graph->register_hooks();
         $institutional_research_network->register_hooks();
+        $private_organizational_knowledge->register_hooks();
     }
 }
 
