@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.10.0 adds Institutional Research Network II with governed cross-repository discovery, normalized institutional research objects, provenance, rights observations, and deterministic research graphs.
+ * Description: Sustainable Catalyst Library v5.11.0 with Carbon & Nature Intelligence v0.1.0, adding the AFOLU & Nature-Based Solutions Knowledge Foundation alongside institutional, biomedical, and private organizational research infrastructure.
  * Version: 5.11.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
@@ -16,6 +16,7 @@ if (!defined('ABSPATH')) {
 }
 
 define('SC_LIBRARY_VERSION', '5.11.0');
+define('SC_CARBON_NATURE_VERSION', '0.1.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));
@@ -71,6 +72,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence-gra
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence-graph.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-institutional-research-network.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-private-organizational-knowledge.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-carbon-nature-intelligence.php';
 
 register_activation_hook(__FILE__, ['SC_Library_Activator', 'activate']);
 register_deactivation_hook(__FILE__, ['SC_Library_Activator', 'deactivate']);
@@ -140,6 +142,7 @@ final class SC_Library_Plugin {
         $biomedical_evidence_graph = new SC_Library_Biomedical_Evidence_Graph();
         $institutional_research_network = new SC_Library_Institutional_Research_Network();
         $private_organizational_knowledge = new SC_Library_Private_Organizational_Knowledge();
+        $carbon_nature_intelligence = new SC_Library_Carbon_Nature_Intelligence();
 
         // v4.2.0 is an optional, contained editorial surface. A Spotlight
         // startup failure must not terminate the public Research Library.
@@ -215,6 +218,7 @@ final class SC_Library_Plugin {
         $biomedical_evidence_graph->register_hooks();
         $institutional_research_network->register_hooks();
         $private_organizational_knowledge->register_hooks();
+        $carbon_nature_intelligence->register_hooks();
     }
 }
 

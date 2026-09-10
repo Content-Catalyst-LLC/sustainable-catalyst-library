@@ -99,3 +99,8 @@ The recommended topic structure is:
 Automatic rotation stays within the primary tier until the additional fields are opened. Existing topic pages without tier metadata remain primary, and no articles are populated or backfilled automatically.
 
 See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_4.2.0.md` and `HOMEPAGE_SPOTLIGHT_TWO_TIER_GUIDE_v4.2.0.md`.
+
+
+## Carbon & Nature Intelligence v0.1.0
+
+Carbon & Nature Intelligence is a Library-native subsystem with its own release line. v0.1.0 adds the AFOLU & Nature-Based Solutions Knowledge Foundation while the Library application remains v5.11.0. Backend v2.2.0 exposes governed concepts, explicit relationships, deterministic domain fingerprints, and Research Librarian context packets. No PostgreSQL migration or new credential is required. See `CARBON_NATURE_INTELLIGENCE_v0.1.0.md`.

@@ -26,6 +26,7 @@ from .clinical_trials import ClinicalTrialIntelligence, ClinicalTrialIntelligenc
 from .evidence_grading import EvidenceGradingEngine
 from .biomedical_evidence_graph import BiomedicalEvidenceGraphEngine
 from .institutional_research_network import InstitutionalResearchNetwork
+from .carbon_nature import CarbonNatureKnowledgeFoundation
 from .private_knowledge import (
     PrivateHandoffRequest,
     PrivateKnowledgeIngestRequest,
@@ -67,6 +68,7 @@ evidence_grading = EvidenceGradingEngine(biomedical_sources, clinical_trials)
 biomedical_evidence_graph = BiomedicalEvidenceGraphEngine(evidence_grading, clinical_trials, medical_terminology, fda_regulatory_sources)
 institutional_research_network = InstitutionalResearchNetwork(timeout_seconds=settings.institutional_source_timeout_seconds)
 private_organizational_knowledge = PrivateOrganizationalKnowledge()
+carbon_nature = CarbonNatureKnowledgeFoundation()
 
 
 app = FastAPI(
@@ -229,6 +231,12 @@ def health() -> dict[str, Any]:
             "private_audit_events": True,
             "private_cross_product_handoffs": True,
             "private_public_search_separation": True,
+            "carbon_nature_intelligence": True,
+            "carbon_nature_domain_version": "0.1.0",
+            "afolu_knowledge_foundation": True,
+            "nature_based_solutions_knowledge_foundation": True,
+            "carbon_nature_relationship_registry": True,
+            "carbon_nature_research_context_packets": True,
             "automated_clinical_recommendation": False,
         },
         "ingest_limits": {
@@ -674,6 +682,48 @@ async def private_organizational_knowledge_handoff(
         raise HTTPException(status_code=422, detail=exc.errors()) from exc
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="private record not found or not authorized") from exc
+
+
+@app.get("/v1/carbon-nature")
+def carbon_nature_manifest() -> dict[str, Any]:
+    return carbon_nature.manifest()
+
+
+@app.get("/v1/carbon-nature/concepts")
+def carbon_nature_concepts(
+    concept_type: str | None = Query(default=None, max_length=80),
+    domain: str | None = Query(default=None, max_length=120),
+    q: str | None = Query(default=None, max_length=500),
+) -> dict[str, Any]:
+    return carbon_nature.concepts(concept_type=concept_type, domain=domain, q=q)
+
+
+@app.get("/v1/carbon-nature/concepts/{concept_key}")
+def carbon_nature_concept(concept_key: str) -> dict[str, Any]:
+    try:
+        return carbon_nature.concept(concept_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Carbon & Nature concept not found") from exc
+
+
+@app.get("/v1/carbon-nature/relationships")
+def carbon_nature_relationships(
+    subject: str | None = Query(default=None, max_length=120),
+    predicate: str | None = Query(default=None, max_length=120),
+    object_key: str | None = Query(default=None, alias="object", max_length=120),
+) -> dict[str, Any]:
+    return carbon_nature.relationships(subject=subject, predicate=predicate, object_key=object_key)
+
+
+@app.get("/v1/carbon-nature/research-context")
+def carbon_nature_research_context(
+    q: str = Query(..., min_length=1, max_length=500),
+    limit: int = Query(default=12, ge=1, le=30),
+) -> dict[str, Any]:
+    try:
+        return carbon_nature.research_context(q, limit=limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.get("/v1/institutional-research-network")

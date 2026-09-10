@@ -1,0 +1,45 @@
+Sustainable Catalyst — Carbon & Nature Intelligence v0.1.0
+AFOLU & Nature-Based Solutions Knowledge Foundation
+Validation date: 2026-09-10
+
+Release identities
+- Sustainable Catalyst Library application: 5.11.0 (preserved)
+- Carbon & Nature Intelligence subsystem: 0.1.0
+- Library backend: 2.2.0
+
+Validation results
+- 14 new Carbon & Nature backend/WordPress tests: PASS
+- 120 retained private/institutional/biomedical tests: PASS (14 historical release-identity tests deselected)
+- 26 retained Explorer/homepage/Publications tests: PASS (3 historical release-identity tests deselected)
+- Python compileall: PASS
+- PHP syntax: PASS
+- JavaScript syntax: PASS
+
+Foundation coverage
+- AFOLU, Nature-Based Solutions, Carbon Farming, Soil Organic Carbon, MRV, evidence, and policy/economic domains
+- CO2, CH4, N2O
+- SOC, aboveground biomass, belowground biomass, dead wood, litter
+- cropland, grassland, forest/woodland, wetlands, peatlands, agroforestry, livestock systems
+- rotations, reduced/minimum tillage, residue management, cover crops, soil/nutrient management, agroforestry, grassland restoration, woodland establishment, wetland restoration, peatland restoration
+- SOC stock/concentration, bulk density, depth
+- measurement/sampling/proxy/modeling/hybrid MRV methodology families
+- additionality, leakage, permanence, reversal risk, uncertainty
+- water, biodiversity, erosion, resilience, income, and employment co-benefit concepts
+- national GHG inventory, carbon market, result-based/action-based/hybrid scheme context
+
+Guardrails
+- No carbon-credit issuance
+- No certification-body claim
+- No automatic "nature positive" score
+- No automatic additionality or permanence determination
+- No SOC calculation engine in v0.1.0
+- No whole-farm GHG calculator in v0.1.0
+- No project-specific MRV protocol builder in v0.1.0
+- Concept relationships are not causal proof
+- Research Librarian context packets are ready, but AFOLU-specific reasoning remains reserved for v0.5.0
+
+Database
+- No PostgreSQL migration
+- No new backend credential
+
+Production verification is included in upgrade_library_backend_v2_2_0_contabo.sh and checks the live /health, /v1/carbon-nature, and /v1/carbon-nature/research-context routes after Docker deployment.

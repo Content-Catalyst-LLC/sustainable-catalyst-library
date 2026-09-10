@@ -366,6 +366,13 @@ Use `[sc_library_api_interoperability]` for the integration console and `[sc_lib
 
 The facade does not expose My Library, private Research Projects, notebook or Evidence Matrix bodies, Research Room or Team Library membership, credentials, tokens, Workspace state, or authenticated federation governance. It performs no cross-site writes, publication, federation acceptance, evidence promotion, or Workspace writes.
 
+
+== Carbon & Nature Intelligence ==
+
+Subsystem version: 0.1.0 — AFOLU & Nature-Based Solutions Knowledge Foundation.
+
+Use [sc_carbon_nature_intelligence] to expose the Library-native domain explorer. This foundation provides governed concepts and explicit relationships for AFOLU, nature-based solutions, carbon pools, greenhouse gases, soil organic carbon, land systems, interventions, indicators, MRV methodology families, integrity dimensions, co-benefits, risks, evidence, and policy/economic context. It does not calculate SOC, issue carbon credits, certify projects, determine additionality/permanence, or claim generic nature-positive outcomes.
+
 == Changelog ==
 
 = 5.9.0 =
