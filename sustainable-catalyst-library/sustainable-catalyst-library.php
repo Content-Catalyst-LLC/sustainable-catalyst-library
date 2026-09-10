@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
 }
 
 define('SC_LIBRARY_VERSION', '5.11.0');
-define('SC_CARBON_NATURE_VERSION', '0.4.0');
+define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

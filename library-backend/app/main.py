@@ -233,7 +233,7 @@ def health() -> dict[str, Any]:
             "private_cross_product_handoffs": True,
             "private_public_search_separation": True,
             "carbon_nature_intelligence": True,
-            "carbon_nature_domain_version": "0.4.0",
+            "carbon_nature_domain_version": "0.5.0",
             "carbon_sequestration_measure_registry": True,
             "carbon_measure_comparison_packets": True,
             "carbon_measure_research_context": True,
@@ -255,6 +255,12 @@ def health() -> dict[str, Any]:
             "nature_based_solutions_knowledge_foundation": True,
             "carbon_nature_relationship_registry": True,
             "carbon_nature_research_context_packets": True,
+            "afolu_research_librarian_intelligence": True,
+            "afolu_research_intent_classification": True,
+            "afolu_research_source_planning": True,
+            "afolu_evidence_gap_diagnostics": True,
+            "afolu_policy_market_freshness_flags": True,
+            "automatic_afolu_research_conclusion_generation": False,
             "automated_clinical_recommendation": False,
         },
         "ingest_limits": {
@@ -886,6 +892,32 @@ async def carbon_nature_validate_project_packet(
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise HTTPException(status_code=422, detail="project packet must be valid UTF-8 JSON") from exc
     return carbon_nature.validate_project_packet(payload)
+
+
+@app.get("/v1/carbon-nature/research-librarian")
+def carbon_nature_research_librarian_manifest() -> dict[str, Any]:
+    return carbon_nature.research_librarian_manifest()
+
+
+@app.get("/v1/carbon-nature/research-librarian/intents")
+def carbon_nature_research_intents() -> dict[str, Any]:
+    return carbon_nature.research_intents()
+
+
+@app.get("/v1/carbon-nature/research-librarian/source-roles")
+def carbon_nature_research_source_roles() -> dict[str, Any]:
+    return carbon_nature.research_source_roles()
+
+
+@app.get("/v1/carbon-nature/research-librarian/guidance")
+def carbon_nature_research_guidance(
+    q: str = Query(..., min_length=1, max_length=500),
+    limit: int = Query(default=12, ge=1, le=30),
+) -> dict[str, Any]:
+    try:
+        return carbon_nature.research_guidance(q, limit=limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.get("/v1/carbon-nature/research-context")

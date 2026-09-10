@@ -369,11 +369,20 @@ The facade does not expose My Library, private Research Projects, notebook or Ev
 
 == Carbon & Nature Intelligence ==
 
-Subsystem version: 0.4.0 — Carbon Project Object Model & Provenance.
+Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 
-Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.4.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, and Carbon Evidence & Methodology Graph, then adds versioned project, farm, parcel, baseline, intervention, observation, sample, model-run, monitoring, and verification object profiles plus explicit project links and provenance-event lineage. Deterministic fingerprints and bounded stateless validation support reproducible project packets without persisting project data or implying scientific verification, project eligibility, certification, carbon-credit issuance, or sequestration calculation.
+Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= 5.11.0 + Carbon & Nature Intelligence v0.5.0 =
+
+* Added AFOLU Research Librarian Intelligence with 11 governed intents and 8 source roles.
+* Added deterministic research-question framing, source planning, evidence-gap diagnostics, freshness flags, and governed handoffs.
+* Added backend v2.6.0 Research Librarian manifest, intent, source-role, and guidance routes plus enriched research-context packets.
+* Added question-only Carbon & Nature augmentation to the private Project-Aware Research Librarian packet without forwarding private project context.
+* Preserved v0.1-v0.4 knowledge, measure, evidence/methodology, project-object, provenance, and stateless validation capabilities.
+* No PostgreSQL migration or new credentials are required.
 
 = 5.11.0 + Carbon & Nature Intelligence v0.4.0 =
 * Added ten governed Carbon Project object types with stable versioned envelopes and explicit parent/reference contracts.

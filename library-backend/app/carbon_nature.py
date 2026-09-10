@@ -7,8 +7,8 @@ import json
 from typing import Any, Iterable
 
 
-DOMAIN_VERSION = "0.4.0"
-SCHEMA_VERSION = "sc-carbon-nature-knowledge-foundation/1.3"
+DOMAIN_VERSION = "0.5.0"
+SCHEMA_VERSION = "sc-carbon-nature-knowledge-foundation/1.4"
 MEASURE_SCHEMA_VERSION = "sc-carbon-sequestration-measure-registry/1.0"
 EVIDENCE_SCHEMA_VERSION = "sc-carbon-evidence-registry/1.0"
 METHODOLOGY_SCHEMA_VERSION = "sc-carbon-methodology-registry/1.0"
@@ -18,6 +18,10 @@ PROJECT_OBJECT_TYPE_SCHEMA_VERSION = "sc-carbon-project-object-type-registry/1.0
 PROJECT_PROVENANCE_SCHEMA_VERSION = "sc-carbon-project-provenance/1.0"
 PROJECT_PACKET_SCHEMA_VERSION = "sc-carbon-project-packet/1.0"
 PROJECT_PACKET_VALIDATION_SCHEMA_VERSION = "sc-carbon-project-packet-validation/1.0"
+AFOLU_RESEARCH_LIBRARIAN_SCHEMA_VERSION = "sc-afolu-research-librarian-intelligence/1.0"
+AFOLU_RESEARCH_GUIDANCE_SCHEMA_VERSION = "sc-afolu-research-guidance/1.0"
+AFOLU_RESEARCH_INTENT_SCHEMA_VERSION = "sc-afolu-research-intent-registry/1.0"
+AFOLU_SOURCE_ROLE_SCHEMA_VERSION = "sc-afolu-research-source-role-registry/1.0"
 
 
 @dataclass(frozen=True)
@@ -196,6 +200,41 @@ class CarbonProjectLinkTypeProfile:
         row = asdict(self)
         row["subject_types"] = list(self.subject_types)
         row["object_types"] = list(self.object_types)
+        return row
+
+
+@dataclass(frozen=True)
+class AFOLUResearchIntentProfile:
+    key: str
+    label: str
+    purpose: str
+    trigger_terms: tuple[str, ...]
+    research_questions: tuple[str, ...]
+    evidence_roles: tuple[str, ...]
+    handoff_targets: tuple[str, ...]
+    caution_flags: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        row = asdict(self)
+        for field in ("trigger_terms", "research_questions", "evidence_roles", "handoff_targets", "caution_flags"):
+            row[field] = list(row[field])
+        return row
+
+
+@dataclass(frozen=True)
+class AFOLUSourceRoleProfile:
+    key: str
+    label: str
+    purpose: str
+    preferred_authority_classes: tuple[str, ...]
+    record_types: tuple[str, ...]
+    minimum_requirements: tuple[str, ...]
+    freshness_sensitive: bool = False
+
+    def to_dict(self) -> dict[str, Any]:
+        row = asdict(self)
+        for field in ("preferred_authority_classes", "record_types", "minimum_requirements"):
+            row[field] = list(row[field])
         return row
 
 
@@ -692,6 +731,168 @@ PROJECT_LINK_TYPES: tuple[CarbonProjectLinkTypeProfile, ...] = (
     CarbonProjectLinkTypeProfile("verification-of", "Verification Of", "Links a review/verification record to the reviewed object.", ("verification-record",), ("project", "baseline", "intervention", "model-run", "monitoring-record")),
 )
 
+
+AFOLU_SOURCE_ROLES: tuple[AFOLUSourceRoleProfile, ...] = (
+    AFOLUSourceRoleProfile(
+        "authoritative-methodology-guidance", "Authoritative Methodology & Technical Guidance",
+        "Establish definitions, accounting rules, method boundaries, measurement requirements, and versioned technical context.",
+        ("intergovernmental-guidance", "government-guidance", "standards-body", "technical-guidance"),
+        ("methodology-document", "inventory-guidance", "technical-guidance", "standard"),
+        ("capture publisher and version", "retain publication/revision date", "distinguish guidance from project eligibility"), True,
+    ),
+    AFOLUSourceRoleProfile(
+        "peer-reviewed-research", "Peer-Reviewed Research",
+        "Assess empirical effects, mechanisms, heterogeneity, uncertainty, co-benefits, harms, and external validity.",
+        ("peer-reviewed-research", "systematic-review", "research-institution"),
+        ("research-evidence", "review", "meta-analysis", "dataset-publication"),
+        ("capture study design", "retain geography and land-system context", "record uncertainty and limitations"), False,
+    ),
+    AFOLUSourceRoleProfile(
+        "national-inventory-policy", "National Inventory & Policy Sources",
+        "Interpret jurisdiction-specific GHG inventory treatment, land-use categories, mitigation targets, and policy context.",
+        ("national-inventory-authority", "government-policy", "intergovernmental-guidance"),
+        ("inventory-guidance", "national-inventory-report", "policy-document", "target-document"),
+        ("record jurisdiction", "record reporting year/version", "do not equate project claims with national inventory accounting"), True,
+    ),
+    AFOLUSourceRoleProfile(
+        "program-market-rules", "Program, Market & Payment Rules",
+        "Interpret result-based payment, carbon-market, crediting, buffer, permanence, and transaction requirements for a named program.",
+        ("program-owner", "registry", "regulator", "market-standard"),
+        ("program-rulebook", "methodology-document", "registry-rule", "market-guidance"),
+        ("name the program", "record current rule version", "separate market eligibility from scientific plausibility"), True,
+    ),
+    AFOLUSourceRoleProfile(
+        "project-primary-data", "Project Primary Data",
+        "Ground parcel, baseline, intervention, observation, sample, model-run, monitoring, and verification questions in project-specific records.",
+        ("project-owner", "laboratory", "monitoring-system", "verifier"),
+        ("project-object", "observation", "sample", "model-run", "monitoring-record", "verification-record"),
+        ("retain stable object identity", "retain units and methods", "retain provenance and version history"), False,
+    ),
+    AFOLUSourceRoleProfile(
+        "spatial-environmental-data", "Spatial & Environmental Context",
+        "Characterize land cover, soils, climate, hydrology, peat/wetland status, disturbance risk, and other spatial constraints.",
+        ("earth-observation", "government-dataset", "research-dataset"),
+        ("geospatial-dataset", "soil-dataset", "climate-dataset", "hydrology-dataset"),
+        ("record spatial resolution", "record observation period", "record uncertainty and coverage gaps"), True,
+    ),
+    AFOLUSourceRoleProfile(
+        "economic-finance-data", "Economic & Finance Evidence",
+        "Support cost, price, transaction-cost, adoption, opportunity-cost, payment, and financial viability analysis.",
+        ("official-statistics", "program-owner", "peer-reviewed-research", "market-data"),
+        ("economic-dataset", "market-data", "cost-study", "program-payment-schedule"),
+        ("record currency and price year", "separate observed prices from scenarios", "retain transaction and MRV costs"), True,
+    ),
+    AFOLUSourceRoleProfile(
+        "safeguards-stakeholder-evidence", "Safeguards & Stakeholder Evidence",
+        "Assess biodiversity, water, food security, livelihoods, rights, implementation burden, social acceptability, and unintended effects.",
+        ("local-authority", "community-evidence", "peer-reviewed-research", "conservation-authority"),
+        ("safeguard-assessment", "stakeholder-record", "biodiversity-data", "water-data", "socioeconomic-study"),
+        ("do not assume co-benefits", "record affected groups and geography", "seek negative and distributional effects"), False,
+    ),
+)
+
+AFOLU_RESEARCH_INTENTS: tuple[AFOLUResearchIntentProfile, ...] = (
+    AFOLUResearchIntentProfile(
+        "measure-identification", "Identify AFOLU / NbS Measures",
+        "Identify governed measure families relevant to a stated land system or research problem without ranking or declaring suitability.",
+        ("identify", "options", "measure", "practice", "intervention", "sequestration option", "what can", "what could"),
+        ("What land-use system and project boundary are in scope?", "Which carbon pools and greenhouse gases could plausibly be affected?", "Which governed measures match that scope and what evidence is required for each?"),
+        ("authoritative-methodology-guidance", "peer-reviewed-research", "spatial-environmental-data"),
+        ("library", "site-intelligence", "research-librarian"),
+        ("measure-match-is-not-suitability",),
+    ),
+    AFOLUResearchIntentProfile(
+        "viability-assessment", "Assess Measure Viability",
+        "Frame scientific, operational, measurement, integrity, and adoption evidence needed to assess viability.",
+        ("viable", "viability", "feasible", "feasibility", "suitable", "scalable", "practical", "barrier", "adoption"),
+        ("What baseline and counterfactual define the question?", "What biophysical and operational constraints could limit performance?", "What MRV burden, uncertainty, permanence, leakage, and stakeholder constraints need evidence?"),
+        ("peer-reviewed-research", "project-primary-data", "spatial-environmental-data", "safeguards-stakeholder-evidence"),
+        ("research-librarian", "site-intelligence", "lab", "decision-studio"),
+        ("viability-requires-project-context", "no-automatic-ranking"),
+    ),
+    AFOLUResearchIntentProfile(
+        "measure-comparison", "Compare Measures",
+        "Structure a non-ranking comparison of mechanisms, pools, gases, evidence, MRV burden, uncertainty, risks, and co-benefit contexts.",
+        ("compare", "comparison", "versus", " vs ", "trade-off", "tradeoff", "which measure", "better"),
+        ("Are the candidate measures being compared on the same boundary and outcome?", "How do mechanisms, target pools/gases, MRV requirements, uncertainty, risks, and co-benefit evidence differ?", "Which evidence gaps prevent a defensible comparison?"),
+        ("peer-reviewed-research", "authoritative-methodology-guidance", "safeguards-stakeholder-evidence"),
+        ("research-librarian", "lab", "decision-studio"),
+        ("comparison-is-not-ranking", "common-boundary-required"),
+    ),
+    AFOLUResearchIntentProfile(
+        "mrv-methodology", "Interpret MRV & Methodology",
+        "Route monitoring, measurement, reporting, verification, sampling, modeling, and detectability questions to versioned method evidence.",
+        ("mrv", "monitoring", "measurement", "reporting", "verification", "sampling", "methodology", "method", "detectable", "uncertainty"),
+        ("What outcome and reporting unit must be measured?", "Is direct measurement, modeling, proxy, or hybrid evidence appropriate to investigate?", "What sampling, QA/QC, uncertainty, frequency, and verification requirements must be resolved?"),
+        ("authoritative-methodology-guidance", "peer-reviewed-research", "project-primary-data"),
+        ("research-librarian", "lab"),
+        ("methodology-match-is-not-eligibility", "verification-record-is-not-certification"),
+    ),
+    AFOLUResearchIntentProfile(
+        "evidence-assessment", "Assess Evidence & Uncertainty",
+        "Identify evidence types, contradictory findings, scope conditions, uncertainty, provenance, and source gaps needed for a research conclusion.",
+        ("evidence", "research", "study", "studies", "support", "uncertainty", "confidence", "proof", "literature"),
+        ("What claim is actually being investigated?", "What evidence supports, qualifies, contradicts, or fails to address the claim?", "How transferable are results across soils, climates, management systems, and time horizons?"),
+        ("peer-reviewed-research", "authoritative-methodology-guidance"),
+        ("library", "research-librarian"),
+        ("evidence-match-is-not-claim-validation", "seek-counterevidence"),
+    ),
+    AFOLUResearchIntentProfile(
+        "inventory-accounting", "Interpret National GHG Inventory Accounting",
+        "Frame project results against current jurisdiction-specific inventory categories, gases, pools, methods, factors, and reporting years without asserting equivalence.",
+        ("inventory", "ipcc", "national greenhouse", "ghg inventory", "emission factor", "tier", "land-use category", "nir", "crf"),
+        ("Which jurisdiction, reporting year, land-use category, carbon pool, and gas are in scope?", "Which current inventory method and factor set applies?", "How should project-scale evidence be kept distinct from national inventory reporting and target accounting?"),
+        ("national-inventory-policy", "authoritative-methodology-guidance"),
+        ("research-librarian", "decision-studio"),
+        ("project-credit-is-not-national-inventory-reduction", "current-rule-check-required"),
+    ),
+    AFOLUResearchIntentProfile(
+        "policy-target-contribution", "Assess Policy / Mitigation Target Contribution",
+        "Structure research on whether and how a measure or program could contribute to a named policy or mitigation target.",
+        ("policy", "target", "mitigation target", "ndc", "national target", "climate plan", "contribution"),
+        ("What policy instrument and target definition are in scope?", "What accounting boundary and implementation pathway connects the intervention to the target?", "What current legal, inventory, and program evidence is required before claiming contribution?"),
+        ("national-inventory-policy", "authoritative-methodology-guidance", "peer-reviewed-research"),
+        ("research-librarian", "decision-studio"),
+        ("policy-equivalence-not-automatic", "current-rule-check-required"),
+    ),
+    AFOLUResearchIntentProfile(
+        "monetisation-finance", "Interpret Monetisation & Carbon Finance",
+        "Route carbon-price, result-based payment, crediting, buffer, permanence, transaction-cost, and financial viability questions to named current rules and economic evidence.",
+        ("monet", "credit", "carbon market", "payment", "price", "finance", "result-based", "result based", "buffer", "revenue"),
+        ("Which program, market, payment instrument, or scenario is being considered?", "What quantified outcome, eligibility rule, MRV cost, transaction cost, buffer/risk treatment, and payment timing are required?", "Which assumptions belong in scenario analysis rather than factual claims?"),
+        ("program-market-rules", "economic-finance-data", "authoritative-methodology-guidance"),
+        ("research-librarian", "workbench", "decision-studio"),
+        ("market-rule-version-required", "crediting-not-implied"),
+    ),
+    AFOLUResearchIntentProfile(
+        "nature-based-co-benefits", "Assess Nature-Based Solution Co-Benefits & Safeguards",
+        "Frame evidence for biodiversity, water, food security, health, disaster-risk reduction, adaptation, livelihoods, trade-offs, and do-no-harm safeguards.",
+        ("nature-based", "nature based", "nbs", "biodiversity", "water security", "food security", "health", "disaster", "co-benefit", "cobenefit", "livelihood"),
+        ("Which societal challenge and ecosystem outcome are being claimed?", "What indicators and counterfactual evidence would demonstrate the co-benefit?", "What negative, distributional, biodiversity, water, or livelihood effects must also be investigated?"),
+        ("peer-reviewed-research", "safeguards-stakeholder-evidence", "spatial-environmental-data"),
+        ("research-librarian", "site-intelligence", "decision-studio"),
+        ("co-benefit-is-not-assumed", "do-no-harm-review-required"),
+    ),
+    AFOLUResearchIntentProfile(
+        "project-provenance", "Structure Project Data & Provenance",
+        "Route baseline, parcel, intervention, observation, sample, model-run, monitoring, verification, and lineage questions into the governed project object model.",
+        ("baseline", "parcel", "project object", "provenance", "sample", "observation", "model run", "monitoring record", "verification record", "lineage"),
+        ("Which project objects are required and how are they linked?", "Which source/provenance event establishes each object state?", "Which object versions and fingerprints must be retained for reproducibility?"),
+        ("project-primary-data", "authoritative-methodology-guidance"),
+        ("library", "workspace", "research-librarian"),
+        ("structural-validation-is-not-scientific-verification",),
+    ),
+    AFOLUResearchIntentProfile(
+        "negative-emissions-scope", "Compare Natural & Engineered Removal Scope",
+        "Recognize negative-emissions questions while explicitly routing engineered-removal comparison to a later governed registry rather than fabricating missing coverage.",
+        ("negative emissions", "carbon removal", "engineered removal", "dac", "direct air capture", "beccs", "bioenergy with carbon capture"),
+        ("Is the question limited to AFOLU/NbS or does it require engineered removal technologies?", "Which common comparison dimensions are required: permanence, land, energy, cost, maturity, uncertainty, biodiversity, water, scalability?", "Which evidence must be added before cross-technology comparison is defensible?"),
+        ("peer-reviewed-research", "authoritative-methodology-guidance", "economic-finance-data"),
+        ("research-librarian", "lab", "decision-studio"),
+        ("engineered-removal-registry-not-yet-present", "do-not-fill-missing-registry-with-assumptions"),
+    ),
+)
+
 def _build_evidence_graph_edges() -> tuple[CarbonEvidenceGraphEdge, ...]:
     edges: list[CarbonEvidenceGraphEdge] = []
     for methodology in METHODOLOGIES:
@@ -729,6 +930,8 @@ class CarbonNatureKnowledgeFoundation:
         self._project_object_types = {item.key: item for item in PROJECT_OBJECT_TYPES}
         self._provenance_event_types = {item.key: item for item in PROVENANCE_EVENT_TYPES}
         self._project_link_types = {item.key: item for item in PROJECT_LINK_TYPES}
+        self._research_intents = {item.key: item for item in AFOLU_RESEARCH_INTENTS}
+        self._source_roles = {item.key: item for item in AFOLU_SOURCE_ROLES}
         self._validate()
 
     def _validate(self) -> None:
@@ -795,6 +998,17 @@ class CarbonNatureKnowledgeFoundation:
                 if kind not in self._project_object_types:
                     raise RuntimeError(f"project link {link.key} has unknown object type: {kind}")
 
+        if len(self._research_intents) != len(AFOLU_RESEARCH_INTENTS):
+            raise RuntimeError("duplicate AFOLU Research Librarian intent key")
+        if len(self._source_roles) != len(AFOLU_SOURCE_ROLES):
+            raise RuntimeError("duplicate AFOLU Research Librarian source-role key")
+        for intent in AFOLU_RESEARCH_INTENTS:
+            for role in intent.evidence_roles:
+                if role not in self._source_roles:
+                    raise RuntimeError(f"research intent {intent.key} has unknown evidence role: {role}")
+            if not intent.trigger_terms or not intent.research_questions:
+                raise RuntimeError(f"research intent {intent.key} is incomplete")
+
         valid_node_sets = {
             "concept": set(self._concepts),
             "measure": set(self._measures),
@@ -819,16 +1033,18 @@ class CarbonNatureKnowledgeFoundation:
         project_object_types = [item.to_dict() for item in PROJECT_OBJECT_TYPES]
         provenance_event_types = [item.to_dict() for item in PROVENANCE_EVENT_TYPES]
         project_link_types = [item.to_dict() for item in PROJECT_LINK_TYPES]
+        research_intents = [item.to_dict() for item in AFOLU_RESEARCH_INTENTS]
+        source_roles = [item.to_dict() for item in AFOLU_SOURCE_ROLES]
         return {
             "schema": SCHEMA_VERSION,
             "subsystem": {
                 "key": "carbon-nature-intelligence",
                 "name": "Carbon & Nature Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Carbon Project Object Model & Provenance",
+                "release": "AFOLU Research Librarian Intelligence",
                 "primary_home": "Sustainable Catalyst Library",
                 "library_release_line": "5.11.x",
-                "backend_version": "2.5.0",
+                "backend_version": "2.6.0",
             },
             "coverage": {
                 "concept_count": len(concepts),
@@ -840,6 +1056,8 @@ class CarbonNatureKnowledgeFoundation:
                 "project_object_type_count": len(project_object_types),
                 "provenance_event_type_count": len(provenance_event_types),
                 "project_link_type_count": len(project_link_types),
+                "research_intent_count": len(research_intents),
+                "research_source_role_count": len(source_roles),
                 "concept_types": sorted({item["concept_type"] for item in concepts}),
                 "domains": sorted({item["domain"] for item in concepts}),
                 "measure_families": sorted({item["measure_family"] for item in measures}),
@@ -876,6 +1094,13 @@ class CarbonNatureKnowledgeFoundation:
                 "provenance-chain-continuity-validation",
                 "project-packet-template",
                 "project-object-model-research-context-ready",
+                "afolu-research-intent-classification",
+                "afolu-domain-aware-research-guidance",
+                "afolu-source-role-planning",
+                "afolu-evidence-gap-diagnostics",
+                "afolu-policy-and-market-freshness-flags",
+                "afolu-cross-product-research-routing",
+                "afolu-project-aware-research-librarian-handoff",
             ],
             "governance": {
                 "normative_standard_claimed": False,
@@ -891,6 +1116,10 @@ class CarbonNatureKnowledgeFoundation:
                 "automatic_additionality_determination": False,
                 "automatic_permanence_determination": False,
                 "automatic_policy_equivalence": False,
+                "automatic_research_conclusion_generation": False,
+                "automatic_source_authority_determination": False,
+                "automatic_current_rule_assertion": False,
+                "research_guidance_is_deterministic_routing": True,
                 "project_specific_mrv_protocol_builder": False,
                 "project_packet_persistence": False,
                 "automatic_project_claim_generation": False,
@@ -908,7 +1137,8 @@ class CarbonNatureKnowledgeFoundation:
                 "v0.2.0": "Structured Carbon Sequestration Measure Registry with bounded filtering and comparison.",
                 "v0.3.0": "Typed Carbon Evidence & Methodology Graph with evidence records, methodology profiles, neighborhoods, and research-context handoff.",
                 "v0.4.0": "Versioned Carbon Project Object Model, project links, provenance events, deterministic fingerprints, and stateless packet validation.",
-                "v0.5.0": "AFOLU Research Librarian Intelligence.",
+                "v0.5.0": "Deterministic AFOLU Research Librarian intent detection, question framing, source-role planning, evidence-gap diagnostics, freshness flags, and governed handoffs.",
+                "v0.6.0": "Soil Organic Carbon Lab Foundation.",
             },
             "content_fingerprint": _stable_hash({
                 "concepts": concepts,
@@ -920,6 +1150,8 @@ class CarbonNatureKnowledgeFoundation:
                 "project_object_types": project_object_types,
                 "provenance_event_types": provenance_event_types,
                 "project_link_types": project_link_types,
+                "research_intents": research_intents,
+                "source_roles": source_roles,
             }),
             "retrieved_at": _now(),
         }
@@ -1711,7 +1943,7 @@ class CarbonNatureKnowledgeFoundation:
             score += 4
         return score
 
-    def research_context(self, query: str, *, limit: int = 12) -> dict[str, Any]:
+    def _research_context_base(self, query: str, *, limit: int = 12) -> dict[str, Any]:
         query = str(query or "").strip()
         if not query:
             raise ValueError("query is required")
@@ -1788,7 +2020,7 @@ class CarbonNatureKnowledgeFoundation:
         ][:200]
 
         return {
-            "schema": "sc-carbon-nature-research-context/1.3",
+            "schema": "sc-carbon-nature-research-context/1.4",
             "subsystem_version": DOMAIN_VERSION,
             "query": query,
             "concepts": [item.to_dict() for item in selected],
@@ -1819,8 +2051,9 @@ class CarbonNatureKnowledgeFoundation:
                 "evidence_methodology_graph_context_enabled": True,
                 "project_object_model_context_enabled": True,
                 "provenance_model_context_enabled": True,
-                "domain_aware_reasoning_enabled": False,
-                "note": "v0.4.0 adds governed project object and provenance packets to the v0.3 evidence/methodology context; AFOLU-specific Research Librarian reasoning is reserved for v0.5.0.",
+                "domain_aware_reasoning_enabled": True,
+                "afolu_research_librarian_intelligence_enabled": True,
+                "note": "v0.5.0 adds deterministic AFOLU intent detection, evidence/source planning, gap diagnostics, freshness review, and governed handoffs while preserving non-inference boundaries.",
             },
             "guardrails": {
                 "concept_match_is_not_evidence": True,
@@ -1846,4 +2079,263 @@ class CarbonNatureKnowledgeFoundation:
                 "evidence_graph_edges": graph_edges,
             }),
         }
+
+    def _intent_score(self, query: str, profile: AFOLUResearchIntentProfile) -> int:
+        folded = f" {str(query or '').casefold()} "
+        score = 0
+        for term in profile.trigger_terms:
+            needle = str(term).casefold().strip()
+            if not needle:
+                continue
+            if needle in folded:
+                score += 5 if " " in needle else 3
+        score += min(4, self._score_text(query, " ".join([profile.label, profile.purpose, *profile.research_questions])))
+        return score
+
+    def _detect_research_intents(self, query: str, *, limit: int = 4) -> list[dict[str, Any]]:
+        scored: list[tuple[int, AFOLUResearchIntentProfile]] = []
+        for profile in AFOLU_RESEARCH_INTENTS:
+            score = self._intent_score(query, profile)
+            if score:
+                scored.append((score, profile))
+        scored.sort(key=lambda item: (-item[0], item[1].label.casefold(), item[1].key))
+        if not scored:
+            fallback = self._research_intents["evidence-assessment"]
+            scored = [(1, fallback)]
+        maximum = max(score for score, _ in scored) or 1
+        return [
+            {**profile.to_dict(), "match_score": score, "relative_match": round(score / maximum, 3)}
+            for score, profile in scored[: max(1, min(int(limit), 6))]
+        ]
+
+    def research_intents(self) -> dict[str, Any]:
+        return {
+            "schema": AFOLU_RESEARCH_INTENT_SCHEMA_VERSION,
+            "subsystem_version": DOMAIN_VERSION,
+            "count": len(AFOLU_RESEARCH_INTENTS),
+            "intents": [item.to_dict() for item in AFOLU_RESEARCH_INTENTS],
+            "guardrails": {
+                "intent_match_is_not_answer": True,
+                "intent_match_is_not_project_suitability": True,
+                "intent_match_is_not_methodology_eligibility": True,
+            },
+            "content_fingerprint": _stable_hash([item.to_dict() for item in AFOLU_RESEARCH_INTENTS]),
+        }
+
+    def research_source_roles(self) -> dict[str, Any]:
+        return {
+            "schema": AFOLU_SOURCE_ROLE_SCHEMA_VERSION,
+            "subsystem_version": DOMAIN_VERSION,
+            "count": len(AFOLU_SOURCE_ROLES),
+            "source_roles": [item.to_dict() for item in AFOLU_SOURCE_ROLES],
+            "guardrails": {
+                "source_role_is_not_source_endorsement": True,
+                "authority_requires_source_specific_review": True,
+                "freshness_flag_requires_current_source_check": True,
+            },
+            "content_fingerprint": _stable_hash([item.to_dict() for item in AFOLU_SOURCE_ROLES]),
+        }
+
+    def research_librarian_manifest(self) -> dict[str, Any]:
+        return {
+            "schema": AFOLU_RESEARCH_LIBRARIAN_SCHEMA_VERSION,
+            "subsystem_version": DOMAIN_VERSION,
+            "name": "AFOLU Research Librarian Intelligence",
+            "mode": "deterministic-domain-research-routing",
+            "intent_count": len(AFOLU_RESEARCH_INTENTS),
+            "source_role_count": len(AFOLU_SOURCE_ROLES),
+            "inputs": ["research question", "governed Carbon & Nature registries", "optional project-aware Research Librarian packet"],
+            "outputs": ["detected intents", "research question frame", "source-role plan", "evidence gaps", "freshness review", "cross-product handoffs", "guardrails"],
+            "integration": {
+                "library_research_context": True,
+                "project_aware_research_librarian_packet_augmentation": True,
+                "private_project_notes_sent_to_library_backend": False,
+                "project_aware_augmentation_sends_question_only": True,
+                "optional_remote_synthesis_receives_domain_packet": False,
+            },
+            "guardrails": {
+                "automatic_research_conclusion_generation": False,
+                "automatic_measure_ranking": False,
+                "automatic_methodology_selection": False,
+                "automatic_current_rule_assertion": False,
+                "automatic_project_eligibility_determination": False,
+                "automatic_carbon_credit_issuance": False,
+            },
+            "content_fingerprint": _stable_hash({
+                "intents": [item.to_dict() for item in AFOLU_RESEARCH_INTENTS],
+                "source_roles": [item.to_dict() for item in AFOLU_SOURCE_ROLES],
+            }),
+        }
+
+    def research_guidance(self, query: str, *, limit: int = 12) -> dict[str, Any]:
+        query = str(query or "").strip()
+        if not query:
+            raise ValueError("query is required")
+        bounded = max(1, min(int(limit), 30))
+        context = self._research_context_base(query, limit=bounded)
+        intents = self._detect_research_intents(query, limit=4)
+        intent_keys = [item["key"] for item in intents]
+
+        source_role_keys = _unique(role for item in intents for role in item.get("evidence_roles", []))
+        source_roles = [self._source_roles[key].to_dict() for key in source_role_keys if key in self._source_roles]
+        questions = _unique(question for item in intents for question in item.get("research_questions", []))[:12]
+        caution_flags = _unique(flag for item in intents for flag in item.get("caution_flags", []))
+        handoff_keys = _unique(target for item in intents for target in item.get("handoff_targets", []))
+
+        concepts = context.get("concepts", [])
+        measures = context.get("measures", [])
+        methods = context.get("methodologies", [])
+        evidence = context.get("evidence", [])
+        project_types = context.get("project_object_types", [])
+        current_year = datetime.now(timezone.utc).year
+        freshness_cutoff = current_year - 2
+        freshness_sensitive = any(self._source_roles[key].freshness_sensitive for key in source_role_keys if key in self._source_roles)
+        stale_records = [
+            {"key": item.get("key"), "title": item.get("title"), "publication_year": item.get("publication_year"), "version_context": item.get("version_context")}
+            for item in evidence
+            if isinstance(item.get("publication_year"), int) and item["publication_year"] < freshness_cutoff
+        ]
+
+        gaps: list[dict[str, Any]] = []
+        if not evidence:
+            gaps.append({"code": "no-matched-evidence-records", "severity": "high", "message": "No governed evidence record matched the question; retrieve source-specific evidence before synthesis."})
+        elif all(str(item.get("evidence_status", "")) in {"reference-seed", "template"} for item in evidence):
+            gaps.append({"code": "reference-seeds-require-source-retrieval", "severity": "medium", "message": "Matched registry records are routing/reference seeds; source text and current versions still need retrieval and review."})
+        if any(key in intent_keys for key in ("mrv-methodology", "inventory-accounting")) and not methods:
+            gaps.append({"code": "methodology-context-missing", "severity": "high", "message": "The question requires method or accounting interpretation but no methodology profile matched."})
+        if any(key in intent_keys for key in ("viability-assessment", "monetisation-finance", "policy-target-contribution")):
+            gaps.append({"code": "project-or-jurisdiction-specific-evidence-required", "severity": "medium", "message": "A defensible answer requires project, jurisdiction, program, or scenario evidence beyond the domain registry."})
+        if "negative-emissions-scope" in intent_keys:
+            gaps.append({"code": "engineered-removal-registry-not-yet-built", "severity": "high", "message": "The current Carbon & Nature registry is AFOLU/NbS-first; engineered removal comparison remains a later governed capability."})
+        if freshness_sensitive and stale_records:
+            gaps.append({"code": "current-rule-or-data-check-required", "severity": "high", "message": "One or more matched sources predate the current freshness window. Verify current policy, inventory, market, program, or dataset versions before making present-tense claims."})
+        if measures and not evidence:
+            gaps.append({"code": "measure-match-without-evidence", "severity": "high", "message": "Measure matches are discovery context only until linked evidence is retrieved and reviewed."})
+
+        domain_scope = {
+            "domains": _unique([item.get("domain", "") for item in concepts] + [item.get("primary_domain", "") for item in measures]),
+            "concept_keys": [item.get("key") for item in concepts],
+            "measure_keys": [item.get("key") for item in measures],
+            "methodology_keys": [item.get("key") for item in methods],
+            "evidence_keys": [item.get("key") for item in evidence],
+            "project_object_types": [item.get("key") for item in project_types],
+            "carbon_pools": [item.get("key") for item in concepts if item.get("concept_type") == "carbon-pool"],
+            "greenhouse_gases": [item.get("key") for item in concepts if item.get("concept_type") == "greenhouse-gas"],
+            "land_use_systems": [item.get("key") for item in concepts if item.get("concept_type") == "land-use-system"],
+        }
+
+        handoff_purpose = {
+            "library": "Retrieve and organize governed sources, evidence records, methodologies, and project-object definitions.",
+            "research-librarian": "Synthesize retrieved evidence with explicit uncertainty, contradiction, provenance, and scope limits.",
+            "site-intelligence": "Add parcel, land-use, soils, climate, hydrology, ecosystem, and disturbance context.",
+            "lab": "Perform governed SOC/GHG modeling, uncertainty propagation, sensitivity analysis, and later MRV calculations.",
+            "workbench": "Run economic, unit, financial, and scenario calculations with explicit inputs.",
+            "decision-studio": "Assess feasibility, integrity, trade-offs, policy/market implications, and decision boundaries.",
+            "workspace": "Persist project work, notes, source bundles, model artifacts, and reproducible analysis packets.",
+        }
+        handoffs = [{"target": key, "purpose": handoff_purpose.get(key, "Continue the governed research workflow.")} for key in handoff_keys]
+
+        coverage_points = len(concepts) + len(measures) * 2 + len(methods) * 2 + len(evidence) * 2
+        coverage = "strong-routing-context" if coverage_points >= 12 else ("partial-routing-context" if coverage_points >= 5 else "thin-routing-context")
+
+        packet = {
+            "schema": AFOLU_RESEARCH_GUIDANCE_SCHEMA_VERSION,
+            "subsystem_version": DOMAIN_VERSION,
+            "query": query,
+            "reasoning_mode": "deterministic-domain-research-routing",
+            "detected_intents": intents,
+            "routing_context_coverage": coverage,
+            "domain_scope": domain_scope,
+            "research_question_frame": questions,
+            "source_plan": {
+                "roles": source_roles,
+                "priority_role_keys": source_role_keys,
+                "library_search_query": context.get("evidence_retrieval", {}).get("library_search_query", query),
+                "recommended_evidence_object_types": context.get("evidence_retrieval", {}).get("evidence_object_types", []),
+            },
+            "matched_context": {
+                "concept_count": len(concepts),
+                "measure_count": len(measures),
+                "methodology_count": len(methods),
+                "evidence_count": len(evidence),
+                "project_object_type_count": len(project_types),
+                "concepts": concepts[:bounded],
+                "measures": measures[: min(bounded, 12)],
+                "methodologies": methods[: min(bounded, 10)],
+                "evidence": evidence[: min(bounded, 10)],
+                "project_object_types": project_types[: min(bounded, 10)],
+            },
+            "evidence_gaps": gaps,
+            "freshness_review": {
+                "current_year": current_year,
+                "freshness_cutoff_year": freshness_cutoff,
+                "freshness_sensitive_intent": freshness_sensitive,
+                "older_matched_records": stale_records,
+                "current_source_check_required": bool(freshness_sensitive and stale_records),
+            },
+            "handoffs": handoffs,
+            "answer_contract": {
+                "may": [
+                    "identify governed domain concepts and candidate measures",
+                    "frame research questions and evidence needs",
+                    "distinguish measurement, modeling, evidence, policy, and project-object roles",
+                    "surface uncertainty, provenance, freshness, contradiction, and scope gaps",
+                    "route analysis to appropriate Sustainable Catalyst components",
+                ],
+                "may_not": [
+                    "invent sequestration rates or project outcomes",
+                    "rank or declare a measure suitable without project evidence",
+                    "declare a methodology eligible or approved",
+                    "assert current policy, inventory, program, or market rules without current source verification",
+                    "assume nature-based co-benefits",
+                    "verify or certify a carbon project",
+                    "issue or imply carbon credits",
+                ],
+                "caution_flags": caution_flags,
+            },
+            "guardrails": {
+                "deterministic_guidance_is_not_research_conclusion": True,
+                "intent_match_is_not_answer": True,
+                "measure_match_is_not_project_suitability": True,
+                "methodology_match_is_not_methodology_eligibility": True,
+                "evidence_match_is_not_claim_validation": True,
+                "project_object_validation_is_not_verification": True,
+                "policy_and_market_freshness_requires_current_sources": True,
+                "co_benefit_is_not_assumed": True,
+                "quantified_sequestration_not_inferred": True,
+                "carbon_credit_eligibility_not_determined": True,
+            },
+        }
+        packet["content_fingerprint"] = _stable_hash({
+            "query": query.casefold(),
+            "intent_keys": intent_keys,
+            "domain_scope": domain_scope,
+            "source_role_keys": source_role_keys,
+            "questions": questions,
+            "gaps": gaps,
+            "handoffs": handoffs,
+        })
+        return packet
+
+    def research_context(self, query: str, *, limit: int = 12) -> dict[str, Any]:
+        context = self._research_context_base(query, limit=limit)
+        guidance = self.research_guidance(query, limit=limit)
+        context["research_librarian"] = {
+            "schema": AFOLU_RESEARCH_LIBRARIAN_SCHEMA_VERSION,
+            "guidance_schema": AFOLU_RESEARCH_GUIDANCE_SCHEMA_VERSION,
+            "detected_intents": guidance["detected_intents"],
+            "research_question_frame": guidance["research_question_frame"],
+            "source_plan": guidance["source_plan"],
+            "evidence_gaps": guidance["evidence_gaps"],
+            "freshness_review": guidance["freshness_review"],
+            "handoffs": guidance["handoffs"],
+            "answer_contract": guidance["answer_contract"],
+            "guardrails": guidance["guardrails"],
+            "content_fingerprint": guidance["content_fingerprint"],
+        }
+        context["content_fingerprint"] = _stable_hash({
+            "base": context.get("content_fingerprint"),
+            "research_librarian": context["research_librarian"],
+        })
+        return context
 

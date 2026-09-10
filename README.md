@@ -1,3 +1,13 @@
+# Sustainable Catalyst Library
+
+## Carbon & Nature Intelligence v0.5.0
+
+Carbon & Nature advances to **v0.5.0 — AFOLU Research Librarian Intelligence** while Sustainable Catalyst Library remains on the v5.11.x application line and the Python Library backend advances to **v2.6.0**. The release preserves the v0.1 ontology, v0.2 Measure Registry, v0.3 Evidence & Methodology Graph, and v0.4 Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, question framing, source-role planning, evidence-gap diagnostics, freshness review, governed handoffs, and Project-Aware Research Librarian packet augmentation.
+
+The primary shortcode remains `[sc_carbon_nature_intelligence]`. v0.5.0 opens on the AFOLU Research Librarian view and retains the prior Project Objects & Provenance, Evidence & Methodology Graph, and Measure Registry views. Research guidance is routing/context intelligence rather than an automatic scientific conclusion, suitability decision, methodology approval, current-rule assertion, verification, certification, or credit issuance.
+
+See `CARBON_NATURE_INTELLIGENCE_v0.5.0.md`, `RELEASE_NOTES_CARBON_NATURE_0.5.0.md`, and `DEPLOY_CARBON_NATURE_BACKEND_v2.6.0.md`.
+
 ## Current release
 
 ## Carbon & Nature Intelligence v0.4.0
