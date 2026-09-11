@@ -1,0 +1,54 @@
+Sustainable Catalyst — Energy Systems Intelligence v1.0.0
+Integrated Sustainable Energy Systems Platform
+
+Release identity
+----------------
+Library:                  5.11.0
+Carbon & Nature:          0.5.0
+Energy Systems:           1.0.0
+Library backend:          2.16.0
+Database migration:       none
+New environment secrets:  none
+
+Integrated platform
+-------------------
+Release layers:           9 (v0.1.0 through v0.9.0)
+Cross-product contracts:  6
+Integrated-study contract:1
+Structural certification: 20/20 checks passing
+
+Preserved core counts
+---------------------
+Concepts:                 75
+Relationships:            63
+Units:                     8
+Conversion factors:       4
+Historical carbon factors:24
+Heat-content factors:     16
+EISD definitions:         30
+Renewable technologies:   7
+Renewable resources:      6
+Executable balance models:3
+Executable economic models:6
+Bioenergy pathways:       6
+Global Energy metrics:    9
+Live Global connectors:   1
+Decision criteria:        12
+
+Validation
+----------
+Focused regression suite: 49 passed
+JSON Schema Draft 2020-12 checks: PASS
+Platform export validation: PASS
+PHP syntax: PASS
+JavaScript syntax: PASS
+Python compilation: PASS
+Contabo upgrader shell syntax: PASS
+
+Certification boundary
+----------------------
+The v1.0.0 structural certification validates expected repository/domain release identities,
+counts, contracts and governance boundaries. It is not scientific validation, external-data
+validation, site-suitability assessment, financial advice, or a live deployment audit.
+Separate Research Librarian, Lab, Workbench, Site Intelligence and Decision Studio runtimes
+are not modified or certified as executing the new contracts by this Library release.

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-integrated-study.json",
+  "title": "Integrated Energy Study Contract",
+  "type": "object",
+  "required": ["identity", "research_context", "numeric_registry", "sustainability_indicators", "technologies_and_resources", "energy_balance", "economics", "bioenergy_and_carbon", "global_context", "decision", "uncertainty", "provenance", "review"],
+  "properties": {
+    "identity": {"type": "object", "required": ["study_id", "title", "question", "geography", "period", "created_by"], "additionalProperties": true},
+    "research_context": {"type": "object"},
+    "numeric_registry": {"type": "object"},
+    "sustainability_indicators": {"type": "array"},
+    "technologies_and_resources": {"type": "object"},
+    "energy_balance": {"type": "object"},
+    "economics": {"type": "object"},
+    "bioenergy_and_carbon": {"type": "object"},
+    "global_context": {"type": "object"},
+    "decision": {"type": "object"},
+    "uncertainty": {"type": "array"},
+    "provenance": {"type": "array"},
+    "review": {"type": "object"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-platform-certification.json",
+  "title": "Energy Platform Structural Certification",
+  "type": "object",
+  "required": ["ok", "schema", "version", "certification_scope", "status", "counts", "checks", "guardrails", "interpretation"],
+  "properties": {
+    "ok": {"type": "boolean"},
+    "schema": {"const": "sc-energy-platform-certification/1.0"},
+    "version": {"const": "1.0.0"},
+    "certification_scope": {"const": "repository-and-domain-contract-coherence"},
+    "status": {"enum": ["pass", "fail"]},
+    "counts": {"type": "object", "required": ["checks", "passed", "failed"], "properties": {"checks": {"type": "integer", "minimum": 1}, "passed": {"type": "integer", "minimum": 0}, "failed": {"type": "integer", "minimum": 0}}, "additionalProperties": false},
+    "checks": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["key", "label", "status", "actual", "expected"], "properties": {"key": {"type": "string"}, "label": {"type": "string"}, "status": {"enum": ["pass", "fail"]}}, "additionalProperties": true}},
+    "guardrails": {"type": "object"},
+    "interpretation": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": false
+}

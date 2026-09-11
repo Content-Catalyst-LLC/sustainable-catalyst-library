@@ -1,5 +1,13 @@
 # Sustainable Catalyst Library
 
+## Energy Systems Intelligence v1.0.0
+
+v1.0.0 is the **Integrated Sustainable Energy Systems Platform** certification release. It preserves the complete v0.1.0-v0.9.0 Energy Systems stack and adds a governed platform registry, six cross-product contracts, a portable integrated-study contract, and a repository/domain-contract structural certification report. Library remains v5.11.0, Carbon & Nature remains v0.5.0, and the shared Python backend advances to v2.16.0.
+
+The six cross-product contracts cover Library, Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio. Library is the active host runtime; the other targets are contract-ready only. v1.0.0 does not claim that separate products execute the contracts, and platform certification is not scientific validation, site-suitability assessment, financial advice, or a live deployment audit.
+
+See `ENERGY_SYSTEMS_INTELLIGENCE_v1.0.0.md`, `RELEASE_NOTES_ENERGY_SYSTEMS_1.0.0.md`, and `DEPLOY_ENERGY_SYSTEMS_BACKEND_v2.16.0.md`.
+
 ## Energy Systems Intelligence v0.9.0
 
 v0.9.0 adds **Energy Decision Intelligence**: twelve governed decision criteria across nine dimensions, a portable energy-decision packet contract, a neutral comparison-matrix model, and a readiness inspector for completeness, provenance, uncertainty, unit compatibility, and period compatibility. The release preserves Global Energy Intelligence v0.8.0 and all prior Energy Systems layers. It does not normalize unlike quantities, assign hidden weights, create a composite sustainability score, rank alternatives, select a winner, or make investment or policy recommendations.

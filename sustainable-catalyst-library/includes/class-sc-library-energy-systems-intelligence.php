@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v0.9.0 — Energy Decision Intelligence. */
+/** Energy Systems Intelligence v1.0.0 — Integrated Sustainable Energy Systems Platform. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '0.9.0';
+    public const VERSION = '1.0.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,14 +13,18 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v090', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v090.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v090', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v090.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v100', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v100.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v100', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v100.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
         $readable = WP_REST_Server::READABLE;
         $open = '__return_true';
         register_rest_route('sc-library/v1', '/energy-systems', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'manifest']]);
+        register_rest_route('sc-library/v1', '/energy-systems/platform-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'platform_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/platform-contracts', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'platform_contracts']]);
+        register_rest_route('sc-library/v1', '/energy-systems/platform-study-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'platform_study_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/platform-certification', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'platform_certification']]);
         register_rest_route('sc-library/v1', '/energy-systems/concepts', [
             'methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'concepts'],
             'args' => [
@@ -310,6 +314,11 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function levelized_energy_cost(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/levelized-energy-cost', $this->numeric_params($request, ['initial_cost','annual_operating_cost','annual_energy_kwh','discount_rate_pct','years','residual_value','currency'])); }
     public function economic_scenario_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/economic-scenario-template'); }
 
+    public function platform_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/platform-framework'); }
+    public function platform_contracts(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/platform-contracts'); }
+    public function platform_study_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/platform-study-template'); }
+    public function platform_certification(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/platform-certification'); }
+
     public function global_energy_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/global-energy-framework'); }
     public function global_energy_sources(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/global-energy-sources'); }
     public function global_energy_metrics(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/global-energy-metrics', array_filter(['q'=>trim((string)$request->get_param('q')),'category'=>sanitize_key((string)$request->get_param('category')),'limit'=>min(100,max(1,absint($request->get_param('limit') ?: 100)))], static fn($value)=>$value!=='')); }
@@ -353,11 +362,11 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Energy Systems Intelligence',
-            'intro' => 'Compare energy alternatives through governed evidence packets, transparent criteria, provenance, uncertainty and compatibility checks while preserving the full Global Energy, bioenergy, economics, balance, technology and indicator stack.',
+            'intro' => 'Use one governed energy platform spanning research context, source-bound calculations, sustainability indicators, renewable resources, system balances, economics, biological carbon and bioenergy, live dated global context, and neutral decision packets.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v090');
-        wp_enqueue_script('sc-library-energy-systems-v090');
+        wp_enqueue_style('sc-library-energy-systems-v100');
+        wp_enqueue_script('sc-library-energy-systems-v100');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -406,6 +415,10 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-global-energy-profile-template-endpoint="<?php echo esc_url($ep('/global-energy-profile-template')); ?>"
             data-global-energy-country-profile-endpoint="<?php echo esc_url($ep('/global-energy-country-profile')); ?>"
             data-global-energy-compare-endpoint="<?php echo esc_url($ep('/global-energy-compare')); ?>"
+            data-platform-framework-endpoint="<?php echo esc_url($ep('/platform-framework')); ?>"
+            data-platform-contracts-endpoint="<?php echo esc_url($ep('/platform-contracts')); ?>"
+            data-platform-study-template-endpoint="<?php echo esc_url($ep('/platform-study-template')); ?>"
+            data-platform-certification-endpoint="<?php echo esc_url($ep('/platform-certification')); ?>"
             data-decision-framework-endpoint="<?php echo esc_url($ep('/decision-framework')); ?>"
             data-decision-criteria-endpoint="<?php echo esc_url($ep('/decision-criteria')); ?>"
             data-decision-packet-template-endpoint="<?php echo esc_url($ep('/decision-packet-template')); ?>"
@@ -421,22 +434,23 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-biomass-to-oil-energy-endpoint="<?php echo esc_url($ep('/biomass-to-oil-energy-estimate')); ?>"
             data-bioenergy-scenario-endpoint="<?php echo esc_url($ep('/bioenergy-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.9.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Integrated Energy Platform · v1.0.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
 
             <div class="sc-es__domains" aria-label="Energy Systems knowledge domains">
-                <span>Decision Intelligence</span><span>Global Energy</span><span>Energy Systems</span><span>Resources &amp; Conversion</span><span>Renewables</span><span>Bioenergy &amp; Carbon</span><span>Efficiency &amp; Economics</span><span>Sustainability Metrics</span>
+                <span>Integrated Platform</span><span>Decision Intelligence</span><span>Global Energy</span><span>Energy Systems</span><span>Resources &amp; Conversion</span><span>Renewables</span><span>Bioenergy &amp; Carbon</span><span>Efficiency &amp; Economics</span><span>Sustainability Metrics</span>
             </div>
 
             <div class="sc-es__guardrail">
-                <strong><?php esc_html_e('Comparison matrix ≠ decision, score, ranking, winner, or recommendation.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v0.8.0 preserves each provider indicator code and observation year, omits missing values rather than interpolating them, and does not silently harmonize different source methodologies. Live country data can inform analysis without becoming an automatic score, ranking, or policy recommendation.', 'sustainable-catalyst-library'); ?>
+                <strong><?php esc_html_e('Integration ≠ automated judgment.', 'sustainable-catalyst-library'); ?></strong>
+                <?php esc_html_e('v1.0.0 preserves source vintages, explicit assumptions, missing values, uncertainty, and cross-layer boundaries. Platform certification means repository and contract coherence—not scientific validation, site suitability, financial advice, live deployment certification, ranking, winner selection, or policy recommendation.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
-                <button type="button" class="sc-es__mode is-active" data-es-mode="decision" role="tab" aria-selected="true">Decision Intelligence</button>
+                <button type="button" class="sc-es__mode is-active" data-es-mode="platform" role="tab" aria-selected="true">Integrated Platform</button>
+                <button type="button" class="sc-es__mode" data-es-mode="decision" role="tab" aria-selected="false">Decision Intelligence</button>
                 <button type="button" class="sc-es__mode" data-es-mode="global" role="tab" aria-selected="false">Global Intelligence</button>
                 <button type="button" class="sc-es__mode" data-es-mode="bioenergy" role="tab" aria-selected="false">Bioenergy &amp; Carbon</button>
                 <button type="button" class="sc-es__mode" data-es-mode="economics" role="tab" aria-selected="false">Scenario Economics</button>
@@ -450,7 +464,26 @@ final class SC_Library_Energy_Systems_Intelligence {
                 <button type="button" class="sc-es__mode" data-es-mode="handoffs" role="tab" aria-selected="false">Platform Handoffs</button>
             </div>
 
-            <div class="sc-es__panel" data-es-panel="decision">
+            <div class="sc-es__panel" data-es-panel="platform">
+                <div class="sc-es__panel-heading"><strong>Integrated Sustainable Energy Systems Platform</strong><span>v1.0.0 certifies the complete v0.1.0–v0.9.0 Library-hosted capability stack and publishes governed handoff contracts for Research Librarian, Lab, Workbench, Site Intelligence and Decision Studio. Contract availability does not imply execution in those separate runtimes.</span></div>
+                <p class="sc-es__status" data-es-platform-status aria-live="polite">Loading integrated platform…</p>
+                <div class="sc-es__platform-summary" data-es-platform-summary></div>
+                <div class="sc-es__platform-grid">
+                    <div><h3>Release lineage</h3><div class="sc-es__cards" data-es-platform-layers></div></div>
+                    <div><h3>Cross-product contracts</h3><div class="sc-es__cards" data-es-platform-contracts></div></div>
+                </div>
+                <div class="sc-es__platform-certification">
+                    <h3>Structural certification</h3>
+                    <div class="sc-es__result" data-es-platform-certification aria-live="polite"></div>
+                </div>
+                <div class="sc-es__platform-study-wrap">
+                    <div><h3>Integrated study contract</h3><p class="sc-es__microcopy">Portable evidence package spanning research context, numeric registries, indicators, resources, balance models, economics, bioenergy/carbon, global observations, decision context, uncertainty and review. v1.0.0 does not persist this package.</p></div>
+                    <textarea class="sc-es__platform-study" data-es-platform-study rows="20" spellcheck="false" aria-label="Integrated energy study contract JSON"></textarea>
+                    <div class="sc-es__actions"><button type="button" data-es-load-platform-study>Load blank integrated study</button></div>
+                </div>
+            </div>
+
+            <div class="sc-es__panel" data-es-panel="decision" hidden>
                 <div class="sc-es__panel-heading"><strong>Energy decision intelligence</strong><span>Build evidence-bound comparison packets across system performance, economics, access, security, climate, ecosystems, integration and implementation. Sustainable Catalyst does not normalize unlike quantities, assign hidden weights, rank alternatives or select a winner.</span></div>
                 <p class="sc-es__status" data-es-decision-framework-status aria-live="polite">Loading decision framework…</p>
                 <div class="sc-es__decision-summary" data-es-decision-summary></div>
@@ -669,7 +702,7 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="handoffs" hidden>
-                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.9.0 adds a governed Energy Decision Intelligence packet, neutral comparison matrix, and readiness inspection to the existing Decision Studio handoff while preserving Global Energy, bioenergy/carbon, economics, balance, resource, indicator, Lab, Workbench, and Site Intelligence contracts. Separate products are not modified by this Library release.</span></div>
+                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v1.0.0 certifies the integrated Library-hosted Energy Systems stack and publishes explicit cross-product contracts for Research Librarian, Lab, Workbench, Site Intelligence and Decision Studio. Separate products are not modified or certified as executing those contracts by this Library release.</span></div>
                 <p class="sc-es__status" data-es-handoff-status aria-live="polite">Loading handoff registry…</p>
                 <div class="sc-es__cards" data-es-handoff-results></div>
             </div>

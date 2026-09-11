@@ -265,7 +265,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "0.9.0",
+            "energy_systems_domain_version": "1.0.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -346,6 +346,14 @@ def health() -> dict[str, Any]:
             "energy_decision_automatic_ranking": False,
             "energy_decision_winner_selection": False,
             "energy_decision_studio_execution": False,
+            "energy_integrated_platform": True,
+            "energy_integrated_platform_release_layers": 9,
+            "energy_cross_product_contract_registry": True,
+            "energy_integrated_study_contract": True,
+            "energy_platform_structural_certification": True,
+            "energy_platform_scientific_validation": False,
+            "energy_platform_live_deployment_audit": False,
+            "energy_cross_product_execution_claimed": False,
             "energy_site_intelligence_execution": False,
             "automatic_energy_technology_ranking": False,
             "automatic_energy_policy_recommendation": False,
@@ -799,6 +807,26 @@ async def private_organizational_knowledge_handoff(
 @app.get("/v1/energy-systems")
 def energy_systems_manifest() -> dict[str, Any]:
     return energy_systems.manifest()
+
+
+@app.get("/v1/energy-systems/platform-framework")
+def energy_systems_platform_framework() -> dict[str, Any]:
+    return energy_systems.platform_framework()
+
+
+@app.get("/v1/energy-systems/platform-contracts")
+def energy_systems_platform_contracts() -> dict[str, Any]:
+    return energy_systems.platform_contracts()
+
+
+@app.get("/v1/energy-systems/platform-study-template")
+def energy_systems_platform_study_template() -> dict[str, Any]:
+    return energy_systems.platform_study_template()
+
+
+@app.get("/v1/energy-systems/platform-certification")
+def energy_systems_platform_certification() -> dict[str, Any]:
+    return energy_systems.platform_certification()
 
 
 @app.get("/v1/energy-systems/concepts")

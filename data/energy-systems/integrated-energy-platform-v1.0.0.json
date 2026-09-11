@@ -1,0 +1,500 @@
+{
+  "certification": {
+    "certification_scope": "repository-and-domain-contract-coherence",
+    "checks": [
+      {
+        "actual": "1.0.0",
+        "expected": "1.0.0",
+        "key": "energy-version",
+        "label": "Energy Systems release identity",
+        "status": "pass"
+      },
+      {
+        "actual": "2.16.0",
+        "expected": "2.16.0",
+        "key": "backend-version",
+        "label": "Shared Library backend identity",
+        "status": "pass"
+      },
+      {
+        "actual": 75,
+        "expected": 75,
+        "key": "concept-registry",
+        "label": "Knowledge concept registry preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 63,
+        "expected": 63,
+        "key": "relationship-registry",
+        "label": "Knowledge relationship registry preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 8,
+        "expected": 8,
+        "key": "numeric-units",
+        "label": "Unit registry preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 4,
+        "expected": 4,
+        "key": "numeric-conversions",
+        "label": "Conversion-factor registry preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 30,
+        "expected": 30,
+        "key": "sustainability-indicators",
+        "label": "EISD definition registry preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 7,
+        "expected": 7,
+        "key": "renewable-technologies",
+        "label": "Renewable technology registry preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 6,
+        "expected": 6,
+        "key": "renewable-resources",
+        "label": "Renewable resource classes preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 3,
+        "expected": 3,
+        "key": "balance-models",
+        "label": "Executable energy-balance models preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 6,
+        "expected": 6,
+        "key": "economic-models",
+        "label": "Executable economic models preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 6,
+        "expected": 6,
+        "key": "bioenergy-pathways",
+        "label": "Bioenergy pathways preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 9,
+        "expected": 9,
+        "key": "global-metrics",
+        "label": "Global Energy metric registry preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 1,
+        "expected": 1,
+        "key": "global-live-connectors",
+        "label": "Governed live Global Energy connector preserved",
+        "status": "pass"
+      },
+      {
+        "actual": 12,
+        "expected": 12,
+        "key": "decision-criteria",
+        "label": "Decision criteria registry preserved",
+        "status": "pass"
+      },
+      {
+        "actual": false,
+        "expected": false,
+        "key": "no-current-factor-promotion",
+        "label": "Historic factors remain non-current defaults",
+        "status": "pass"
+      },
+      {
+        "actual": false,
+        "expected": false,
+        "key": "no-biomass-neutrality-assumption",
+        "label": "Biomass neutrality remains disabled",
+        "status": "pass"
+      },
+      {
+        "actual": false,
+        "expected": false,
+        "key": "no-decision-ranking",
+        "label": "Automatic decision ranking remains disabled",
+        "status": "pass"
+      },
+      {
+        "actual": true,
+        "expected": true,
+        "key": "no-current-year-assumption",
+        "label": "Latest Global Energy observation is not treated as current-year fact",
+        "status": "pass"
+      },
+      {
+        "actual": false,
+        "expected": false,
+        "key": "cross-product-execution-boundary",
+        "label": "Separate product execution is not claimed by v1.0.0",
+        "status": "pass"
+      }
+    ],
+    "counts": {
+      "checks": 20,
+      "failed": 0,
+      "passed": 20
+    },
+    "guardrails": {
+      "financial_advice": false,
+      "live_deployment_audit": false,
+      "scientific_validation": false,
+      "separate_product_runtime_certification": false,
+      "site_suitability_assessment": false
+    },
+    "interpretation": "A passing report means the v1.0.0 Library repository exposes the expected Energy Systems release layers, counts, contracts and governance boundaries. It does not validate external data quality, scientific conclusions, site suitability, financial outcomes or live deployment state.",
+    "ok": true,
+    "schema": "sc-energy-platform-certification/1.0",
+    "status": "pass",
+    "version": "1.0.0"
+  },
+  "contracts": [
+    {
+      "availability": "available",
+      "boundary": "Library is the active host for v1.0.0. This does not imply that every referenced external source or separate Sustainable Catalyst product is live.",
+      "contract_refs": [
+        "energy-systems-manifest",
+        "integrated-energy-study-contract",
+        "energy-platform-certification-report"
+      ],
+      "execution_state": "host-runtime-active",
+      "key": "energy-to-library",
+      "purpose": "Host the governed Energy Systems knowledge, registry, model and contract surface.",
+      "target": "Library"
+    },
+    {
+      "availability": "contract-available",
+      "boundary": "The contract can supply research context; v1.0.0 does not modify or certify the Research Librarian runtime.",
+      "contract_refs": [
+        "energy-source-provenance-registry",
+        "energy-indicator-observation-contract",
+        "global-energy-country-profile-contract",
+        "energy-decision-packet-contract"
+      ],
+      "execution_state": "not-activated-by-this-release",
+      "key": "energy-to-research-librarian",
+      "purpose": "Route energy research questions through sources, concepts, indicators, global context and declared evidence gaps.",
+      "target": "Research Librarian"
+    },
+    {
+      "availability": "contract-available",
+      "boundary": "The Library defines portable contracts; Lab execution, simulation and uncertainty propagation require separate integration.",
+      "contract_refs": [
+        "energy-balance-scenario-contract",
+        "energy-economic-scenario-contract",
+        "bioenergy-carbon-scenario-contract",
+        "renewable-resource-observation-contract"
+      ],
+      "execution_state": "not-activated-by-this-release",
+      "key": "energy-to-lab",
+      "purpose": "Transfer explicit scenarios, uncertainty-bearing inputs and evidence references for modeling.",
+      "target": "Lab"
+    },
+    {
+      "availability": "contract-available",
+      "boundary": "Workbench is not modified by this release and must preserve each model's source and input boundaries when integrated.",
+      "contract_refs": [
+        "energy-conversion-contract",
+        "conversion-chain-model",
+        "capacity-factor-generation-estimate",
+        "energy-npv-result",
+        "energy-cost-efficiency-result"
+      ],
+      "execution_state": "not-activated-by-this-release",
+      "key": "energy-to-workbench",
+      "purpose": "Expose source-bound calculators and explicit-input model contracts for interactive calculation.",
+      "target": "Workbench"
+    },
+    {
+      "availability": "contract-available",
+      "boundary": "A contract exists for spatial presentation; v1.0.0 does not add maps, geospatial inference or Site Intelligence runtime code.",
+      "contract_refs": [
+        "global-energy-country-profile-contract",
+        "global-energy-comparison-contract",
+        "renewable-resource-observation-contract"
+      ],
+      "execution_state": "not-activated-by-this-release",
+      "key": "energy-to-site-intelligence",
+      "purpose": "Expose dated country-energy observations and renewable-resource observation contracts for spatial context.",
+      "target": "Site Intelligence"
+    },
+    {
+      "availability": "contract-available",
+      "boundary": "Decision Studio may consume the packet contract later; this release does not rank alternatives or make decisions.",
+      "contract_refs": [
+        "energy-decision-packet-contract",
+        "energy-decision-comparison-matrix",
+        "energy-decision-readiness-contract",
+        "integrated-energy-study-contract"
+      ],
+      "execution_state": "not-activated-by-this-release",
+      "key": "energy-to-decision-studio",
+      "purpose": "Transfer neutral energy decision packets, compatibility flags and evidence gaps into broader decision workflows.",
+      "target": "Decision Studio"
+    }
+  ],
+  "framework": {
+    "content_fingerprint": "fdf212ea139c5c2b40d6ba1420dd0ba13db95d680498a68dd6a6cbe1ae2426c6",
+    "counts": {
+      "cross_product_contracts": 6,
+      "integrated_study_contracts": 1,
+      "release_layers": 9,
+      "structural_certification_models": 1
+    },
+    "cross_product_targets": [
+      "Library",
+      "Research Librarian",
+      "Lab",
+      "Workbench",
+      "Site Intelligence",
+      "Decision Studio"
+    ],
+    "guardrails": {
+      "automatic_alternative_ranking": false,
+      "automatic_normalization": false,
+      "automatic_weight_assignment": false,
+      "automatic_winner_selection": false,
+      "biomass_carbon_neutrality_assumed": false,
+      "certification_is_financial_advice": false,
+      "certification_is_live_deployment_audit": false,
+      "certification_is_scientific_validation": false,
+      "certification_is_site_suitability_assessment": false,
+      "cross_product_contract_registry_activated": true,
+      "cross_product_execution_claimed_by_this_release": false,
+      "dispatch_or_grid_adequacy_inferred": false,
+      "economic_assumptions_inferred": false,
+      "historical_factors_promoted_to_current_defaults": false,
+      "integrated_platform_activated": true,
+      "integrated_study_contract_activated": true,
+      "investment_recommendation": false,
+      "missing_values_preserved": true,
+      "official_eisd_methodology_inferred": false,
+      "policy_recommendation": false,
+      "provenance_boundaries_preserved": true,
+      "release_lineage_preserved": true,
+      "repository_structural_certification_activated": true,
+      "resource_suitability_inferred": false,
+      "separate_product_runtimes_modified_by_this_release": false
+    },
+    "ok": true,
+    "release": "Integrated Sustainable Energy Systems Platform",
+    "release_layers": [
+      {
+        "boundary": "Knowledge objects organize source-supported context; they are not current-state measurements or recommendations.",
+        "capability": "Concepts, relationships, sources, knowledge domains and SDG context",
+        "execution_state": "active-in-library",
+        "key": "knowledge-foundation",
+        "label": "Sustainable Energy Knowledge Foundation",
+        "primary_contracts": [
+          "energy-concept-registry",
+          "energy-relationship-registry",
+          "energy-source-provenance-registry"
+        ],
+        "version": "0.1.0"
+      },
+      {
+        "boundary": "Historical factors remain source-year bound and are never promoted to current defaults.",
+        "capability": "Source-bound unit conversions, historic direct carbon factors and heat-content factors",
+        "execution_state": "active-in-library",
+        "key": "numeric-registry",
+        "label": "Energy Units, Carbon Factors & Conversion Registry",
+        "primary_contracts": [
+          "energy-numeric-registry",
+          "energy-conversion-contract",
+          "energy-carbon-estimate-contract",
+          "energy-heat-content-estimate-contract"
+        ],
+        "version": "0.2.0"
+      },
+      {
+        "boundary": "Official methodology sheets are not loaded; indicator definitions are not observed values or sustainability scores.",
+        "capability": "Thirty EISD definitions with provenance-first observation contracts",
+        "execution_state": "active-in-library",
+        "key": "sustainability-indicators",
+        "label": "Energy Sustainability Indicators",
+        "primary_contracts": [
+          "energy-indicator-framework",
+          "energy-indicator-observation-contract"
+        ],
+        "version": "0.3.0"
+      },
+      {
+        "boundary": "Technology presence does not imply resource availability, site suitability, performance, cost, maturity or ranking.",
+        "capability": "Renewable technology families, resource classes and assessment contracts",
+        "execution_state": "active-in-library",
+        "key": "renewable-technologies",
+        "label": "Renewable Technology & Resource Model",
+        "primary_contracts": [
+          "renewable-technology-assessment-contract",
+          "renewable-resource-observation-contract"
+        ],
+        "version": "0.4.0"
+      },
+      {
+        "boundary": "Scenario arithmetic is not dispatch, grid adequacy, storage physics or a forecast.",
+        "capability": "Explicit-input conversion chains, supply-demand accounting and generation estimation",
+        "execution_state": "active-in-library",
+        "key": "energy-balance",
+        "label": "Energy Balance & Systems Modeling",
+        "primary_contracts": [
+          "energy-balance-scenario-contract",
+          "conversion-chain-model",
+          "supply-demand-balance-model",
+          "capacity-factor-generation-estimate"
+        ],
+        "version": "0.5.0"
+      },
+      {
+        "boundary": "Prices, discount rates, lifetimes, financing assumptions and non-market values are explicit inputs, not inferred defaults.",
+        "capability": "Cost comparison, payback, NPV, cost-benefit, cost-efficiency and levelized energy cost",
+        "execution_state": "active-in-library",
+        "key": "scenario-economics",
+        "label": "Energy Scenario Economics",
+        "primary_contracts": [
+          "energy-economic-scenario-contract",
+          "energy-npv-result",
+          "energy-cost-benefit-result",
+          "energy-cost-efficiency-result"
+        ],
+        "version": "0.6.0"
+      },
+      {
+        "boundary": "Biomass carbon neutrality, avoided emissions, additionality, permanence, leakage and credit eligibility are not assumed.",
+        "capability": "Bioenergy pathways, explicit-input models and Carbon & Nature bridges",
+        "execution_state": "active-in-library",
+        "key": "bioenergy-carbon",
+        "label": "Biological Carbon & Bioenergy Integration",
+        "primary_contracts": [
+          "bioenergy-carbon-scenario-contract",
+          "carbon-nature-accounting-handoff"
+        ],
+        "version": "0.7.0"
+      },
+      {
+        "boundary": "Latest available observation does not mean current-year fact; missing values are not interpolated and cross-source harmonization is not assumed.",
+        "capability": "Governed country metrics and live, dated World Bank observations",
+        "execution_state": "active-in-library",
+        "key": "global-energy",
+        "label": "Global Energy Intelligence",
+        "primary_contracts": [
+          "global-energy-country-profile-contract",
+          "global-energy-comparison-contract",
+          "world-bank-wdi-live-connector"
+        ],
+        "version": "0.8.0"
+      },
+      {
+        "boundary": "Comparison is not ranking: no hidden weights, composite score, winner selection, investment recommendation or policy recommendation.",
+        "capability": "Evidence-bound decision packets, neutral comparison matrices and readiness inspection",
+        "execution_state": "active-in-library",
+        "key": "decision-intelligence",
+        "label": "Energy Decision Intelligence",
+        "primary_contracts": [
+          "energy-decision-packet-contract",
+          "energy-decision-comparison-matrix",
+          "energy-decision-readiness-contract"
+        ],
+        "version": "0.9.0"
+      }
+    ],
+    "schema": "sc-integrated-sustainable-energy-platform/1.0",
+    "version": "1.0.0"
+  },
+  "manifest_summary": {
+    "backend_version": "2.16.0",
+    "carbon_nature_version": "0.5.0",
+    "energy_systems_version": "1.0.0",
+    "library_version": "5.11.0"
+  },
+  "schema": "sc-integrated-sustainable-energy-platform-export/1.0",
+  "study_template": {
+    "contract": {
+      "automatic_ranking": false,
+      "automatic_recommendation": false,
+      "cross_product_handoff_ready": true,
+      "missing_values_preserved": true,
+      "persistence_status": "not-implemented",
+      "provenance_required": true,
+      "source_years_preserved": true,
+      "uncertainty_visible": true
+    },
+    "guardrail": "The integrated study contract packages evidence and model outputs without converting them into a composite score, ranking, winner or recommendation.",
+    "ok": true,
+    "schema": "sc-integrated-energy-study/1.0",
+    "study": {
+      "bioenergy_and_carbon": {
+        "carbon_nature_refs": [],
+        "pathway_refs": [],
+        "results": []
+      },
+      "decision": {
+        "comparison_matrix_ref": "",
+        "decision_packet_ref": "",
+        "readiness_ref": ""
+      },
+      "economics": {
+        "assumptions": [],
+        "results": [],
+        "scenario_refs": []
+      },
+      "energy_balance": {
+        "results": [],
+        "scenario_refs": []
+      },
+      "global_context": {
+        "country_profile_refs": [],
+        "missing_value_notes": [],
+        "observation_years": []
+      },
+      "identity": {
+        "created_by": "",
+        "geography": "",
+        "period": "",
+        "question": "",
+        "study_id": "",
+        "title": ""
+      },
+      "numeric_registry": {
+        "carbon_factor_refs": [],
+        "conversion_refs": [],
+        "heat_content_refs": [],
+        "source_years_acknowledged": true
+      },
+      "provenance": [],
+      "research_context": {
+        "concept_refs": [],
+        "evidence_gaps": [],
+        "research_questions": [],
+        "source_refs": []
+      },
+      "review": {
+        "assumptions": [],
+        "limitations": [],
+        "open_questions": [],
+        "reviewer_notes": ""
+      },
+      "sustainability_indicators": [],
+      "technologies_and_resources": {
+        "resource_observations": [],
+        "site_suitability_status": "not-inferred",
+        "technology_refs": []
+      },
+      "uncertainty": []
+    },
+    "version": "1.0.0"
+  },
+  "version": "1.0.0"
+}

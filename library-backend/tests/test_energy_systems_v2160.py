@@ -7,8 +7,8 @@ def engine():
 
 def test_manifest_versions_and_bioenergy_counts():
     d = engine().manifest()
-    assert d["subsystem"]["version"] == "0.9.0"
-    assert d["subsystem"]["backend_version"] == "2.15.0"
+    assert d["subsystem"]["version"] == "1.0.0"
+    assert d["subsystem"]["backend_version"] == "2.16.0"
     assert d["counts"]["bioenergy_feedstock_classes"] == 5
     assert d["counts"]["bioenergy_pathways"] == 6
     assert d["counts"]["carbon_nature_bridges"] == 6
@@ -392,3 +392,68 @@ def test_v080_global_energy_remains_preserved_under_decision_layer():
     assert e.bioenergy_framework()["version"] == "0.7.0"
     assert e.economics_framework()["version"] == "0.6.0"
     assert e.balance_framework()["version"] == "0.5.0"
+
+
+
+def test_v100_integrated_platform_framework():
+    d = engine().platform_framework()
+    assert d["version"] == "1.0.0"
+    assert d["release"] == "Integrated Sustainable Energy Systems Platform"
+    assert d["counts"] == {
+        "release_layers": 9,
+        "cross_product_contracts": 6,
+        "integrated_study_contracts": 1,
+        "structural_certification_models": 1,
+    }
+    assert [x["version"] for x in d["release_layers"]] == ["0.1.0","0.2.0","0.3.0","0.4.0","0.5.0","0.6.0","0.7.0","0.8.0","0.9.0"]
+    assert d["guardrails"]["cross_product_execution_claimed_by_this_release"] is False
+    assert d["guardrails"]["certification_is_scientific_validation"] is False
+
+
+def test_v100_cross_product_contracts_are_available_without_execution_claims():
+    d = engine().platform_contracts()
+    assert d["count"] == 6
+    rows = {x["target"]: x for x in d["items"]}
+    assert set(rows) == {"Library","Research Librarian","Lab","Workbench","Site Intelligence","Decision Studio"}
+    assert rows["Library"]["execution_state"] == "host-runtime-active"
+    for name in ["Research Librarian","Lab","Workbench","Site Intelligence","Decision Studio"]:
+        assert rows[name]["availability"] == "contract-available"
+        assert rows[name]["execution_state"] == "not-activated-by-this-release"
+
+
+def test_v100_integrated_study_contract_is_blank_provenance_first_and_nonranking():
+    d = engine().platform_study_template()
+    assert d["version"] == "1.0.0"
+    study = d["study"]
+    assert study["identity"]["study_id"] == ""
+    assert study["research_context"]["source_refs"] == []
+    assert study["global_context"]["observation_years"] == []
+    assert study["decision"]["decision_packet_ref"] == ""
+    assert d["contract"]["provenance_required"] is True
+    assert d["contract"]["automatic_ranking"] is False
+    assert d["contract"]["automatic_recommendation"] is False
+    assert d["contract"]["persistence_status"] == "not-implemented"
+
+
+def test_v100_structural_certification_passes_expected_contract_stack():
+    d = engine().platform_certification()
+    assert d["ok"] is True
+    assert d["status"] == "pass"
+    assert d["counts"] == {"checks": 20, "passed": 20, "failed": 0}
+    assert all(x["status"] == "pass" for x in d["checks"])
+    assert d["guardrails"]["scientific_validation"] is False
+    assert d["guardrails"]["live_deployment_audit"] is False
+    assert "repository" in d["interpretation"].lower()
+
+
+def test_v100_manifest_integrates_without_replacing_prior_layers():
+    d = engine().manifest()
+    assert d["counts"]["integrated_platform_release_layers"] == 9
+    assert d["counts"]["integrated_platform_cross_product_contracts"] == 6
+    assert d["counts"]["methodology_rules"] == 15
+    assert d["energy_decision_intelligence"]["version"] == "0.9.0"
+    assert d["global_energy_intelligence"]["version"] == "0.8.0"
+    assert d["biological_carbon_bioenergy_integration"]["version"] == "0.7.0"
+    assert d["energy_scenario_economics"]["version"] == "0.6.0"
+    assert d["energy_balance_systems_model"]["version"] == "0.5.0"
+    assert d["renewable_technology_resource_model"]["version"] == "0.4.0"
