@@ -264,7 +264,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "0.5.0",
+            "energy_systems_domain_version": "0.6.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -304,6 +304,18 @@ def health() -> dict[str, Any]:
             "energy_storage_physics_simulation": False,
             "energy_economic_optimization": False,
             "energy_scenario_persistence": False,
+            "energy_scenario_economics": True,
+            "energy_cost_comparison": True,
+            "energy_simple_payback": True,
+            "energy_net_present_value": True,
+            "energy_cost_benefit_analysis": True,
+            "energy_cost_efficiency_analysis": True,
+            "energy_levelized_cost_estimate": True,
+            "energy_economic_scenario_contracts": True,
+            "energy_external_price_feed": False,
+            "energy_technology_cost_database": False,
+            "energy_discount_rate_inference": False,
+            "energy_investment_recommendation": False,
             "automatic_energy_technology_ranking": False,
             "automatic_energy_policy_recommendation": False,
             "automated_clinical_recommendation": False,
@@ -1038,6 +1050,44 @@ def energy_systems_generation_estimate(
 @app.get("/v1/energy-systems/balance-scenario-template")
 def energy_systems_balance_scenario_template() -> dict[str, Any]:
     return energy_systems.balance_scenario_template()
+
+@app.get("/v1/energy-systems/economics-framework")
+def energy_systems_economics_framework() -> dict[str, Any]:
+    return energy_systems.economics_framework()
+
+@app.get("/v1/energy-systems/energy-cost-comparison")
+def energy_systems_energy_cost_comparison(baseline_energy_kwh: str = Query(..., min_length=1, max_length=80), baseline_price_per_kwh: str = Query(..., min_length=1, max_length=80), candidate_energy_kwh: str = Query(..., min_length=1, max_length=80), candidate_price_per_kwh: str = Query(..., min_length=1, max_length=80), baseline_fixed_cost: str = Query(default="0", max_length=80), candidate_fixed_cost: str = Query(default="0", max_length=80), currency: str = Query(default="currency-unit", max_length=24)) -> dict[str, Any]:
+    try: return energy_systems.energy_cost_comparison(baseline_energy_kwh=baseline_energy_kwh, baseline_price_per_kwh=baseline_price_per_kwh, candidate_energy_kwh=candidate_energy_kwh, candidate_price_per_kwh=candidate_price_per_kwh, baseline_fixed_cost=baseline_fixed_cost, candidate_fixed_cost=candidate_fixed_cost, currency=currency)
+    except ValueError as exc: raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/v1/energy-systems/simple-payback")
+def energy_systems_simple_payback(initial_cost: str = Query(..., min_length=1, max_length=80), annual_net_savings: str = Query(..., min_length=1, max_length=80), currency: str = Query(default="currency-unit", max_length=24)) -> dict[str, Any]:
+    try: return energy_systems.simple_payback(initial_cost=initial_cost, annual_net_savings=annual_net_savings, currency=currency)
+    except ValueError as exc: raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/v1/energy-systems/npv")
+def energy_systems_npv(initial_cost: str = Query(..., min_length=1, max_length=80), annual_net_cash_flow: str = Query(..., min_length=1, max_length=80), discount_rate_pct: str = Query(..., min_length=1, max_length=80), years: str = Query(..., min_length=1, max_length=8), residual_value: str = Query(default="0", max_length=80), currency: str = Query(default="currency-unit", max_length=24)) -> dict[str, Any]:
+    try: return energy_systems.npv(initial_cost=initial_cost, annual_net_cash_flow=annual_net_cash_flow, discount_rate_pct=discount_rate_pct, years=years, residual_value=residual_value, currency=currency)
+    except ValueError as exc: raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/v1/energy-systems/cost-benefit")
+def energy_systems_cost_benefit(initial_cost: str = Query(..., min_length=1, max_length=80), annual_cost: str = Query(..., min_length=1, max_length=80), annual_benefit: str = Query(..., min_length=1, max_length=80), discount_rate_pct: str = Query(..., min_length=1, max_length=80), years: str = Query(..., min_length=1, max_length=8), residual_value: str = Query(default="0", max_length=80), currency: str = Query(default="currency-unit", max_length=24)) -> dict[str, Any]:
+    try: return energy_systems.cost_benefit(initial_cost=initial_cost, annual_cost=annual_cost, annual_benefit=annual_benefit, discount_rate_pct=discount_rate_pct, years=years, residual_value=residual_value, currency=currency)
+    except ValueError as exc: raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/v1/energy-systems/cost-efficiency")
+def energy_systems_cost_efficiency(total_cost: str = Query(..., min_length=1, max_length=80), energy_saved_kwh: str = Query(default="0", max_length=80), co2e_avoided_kg: str = Query(default="0", max_length=80), currency: str = Query(default="currency-unit", max_length=24)) -> dict[str, Any]:
+    try: return energy_systems.cost_efficiency(total_cost=total_cost, energy_saved_kwh=energy_saved_kwh, co2e_avoided_kg=co2e_avoided_kg, currency=currency)
+    except ValueError as exc: raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/v1/energy-systems/levelized-energy-cost")
+def energy_systems_levelized_energy_cost(initial_cost: str = Query(..., min_length=1, max_length=80), annual_operating_cost: str = Query(..., min_length=1, max_length=80), annual_energy_kwh: str = Query(..., min_length=1, max_length=80), discount_rate_pct: str = Query(..., min_length=1, max_length=80), years: str = Query(..., min_length=1, max_length=8), residual_value: str = Query(default="0", max_length=80), currency: str = Query(default="currency-unit", max_length=24)) -> dict[str, Any]:
+    try: return energy_systems.levelized_energy_cost(initial_cost=initial_cost, annual_operating_cost=annual_operating_cost, annual_energy_kwh=annual_energy_kwh, discount_rate_pct=discount_rate_pct, years=years, residual_value=residual_value, currency=currency)
+    except ValueError as exc: raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/v1/energy-systems/economic-scenario-template")
+def energy_systems_economic_scenario_template() -> dict[str, Any]:
+    return energy_systems.economic_scenario_template()
 
 
 @app.get("/v1/carbon-nature")

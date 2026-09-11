@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-cost-comparison-result.json",
+  "title": "Energy cost comparison result",
+  "type": "object",
+  "required": [
+    "ok",
+    "schema",
+    "model_version",
+    "input",
+    "output",
+    "boundary"
+  ],
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "schema": {
+      "type": "string"
+    },
+    "model_version": {
+      "const": "0.6.0"
+    },
+    "input": {
+      "type": "object",
+      "required": [
+        "baseline_energy_kwh",
+        "baseline_price_per_kwh",
+        "candidate_energy_kwh",
+        "candidate_price_per_kwh"
+      ]
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "baseline_cost": {
+          "type": "string"
+        },
+        "candidate_cost": {
+          "type": "string"
+        },
+        "absolute_savings": {
+          "type": "string"
+        },
+        "savings_pct_of_baseline": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "boundary": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

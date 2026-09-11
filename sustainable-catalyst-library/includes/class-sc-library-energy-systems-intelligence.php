@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v0.5.0 — Energy Balance & Systems Modeling. */
+/** Energy Systems Intelligence v0.6.0 — Energy Scenario Economics. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '0.5.0';
+    public const VERSION = '0.6.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v050', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v050.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v050', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v050.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v060', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v060.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v060', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v060.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -150,6 +150,14 @@ final class SC_Library_Energy_Systems_Intelligence {
             ],
         ]);
         register_rest_route('sc-library/v1', '/energy-systems/balance-scenario-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'balance_scenario_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/economics-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'economics_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/energy-cost-comparison', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'energy_cost_comparison']]);
+        register_rest_route('sc-library/v1', '/energy-systems/simple-payback', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'simple_payback']]);
+        register_rest_route('sc-library/v1', '/energy-systems/npv', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'npv']]);
+        register_rest_route('sc-library/v1', '/energy-systems/cost-benefit', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'cost_benefit']]);
+        register_rest_route('sc-library/v1', '/energy-systems/cost-efficiency', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'cost_efficiency']]);
+        register_rest_route('sc-library/v1', '/energy-systems/levelized-energy-cost', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'levelized_energy_cost']]);
+        register_rest_route('sc-library/v1', '/energy-systems/economic-scenario-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'economic_scenario_template']]);
     }
 
     public function manifest(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems'); }
@@ -271,6 +279,15 @@ final class SC_Library_Energy_Systems_Intelligence {
         ]);
     }
     public function balance_scenario_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/balance-scenario-template'); }
+    public function economics_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/economics-framework'); }
+    private function numeric_params(WP_REST_Request $request, array $keys): array { $params=[]; foreach($keys as $key){ $params[$key]=trim((string)$request->get_param($key)); } return $params; }
+    public function energy_cost_comparison(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/energy-cost-comparison', $this->numeric_params($request, ['baseline_energy_kwh','baseline_price_per_kwh','candidate_energy_kwh','candidate_price_per_kwh','baseline_fixed_cost','candidate_fixed_cost','currency'])); }
+    public function simple_payback(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/simple-payback', $this->numeric_params($request, ['initial_cost','annual_net_savings','currency'])); }
+    public function npv(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/npv', $this->numeric_params($request, ['initial_cost','annual_net_cash_flow','discount_rate_pct','years','residual_value','currency'])); }
+    public function cost_benefit(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/cost-benefit', $this->numeric_params($request, ['initial_cost','annual_cost','annual_benefit','discount_rate_pct','years','residual_value','currency'])); }
+    public function cost_efficiency(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/cost-efficiency', $this->numeric_params($request, ['total_cost','energy_saved_kwh','co2e_avoided_kg','currency'])); }
+    public function levelized_energy_cost(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/levelized-energy-cost', $this->numeric_params($request, ['initial_cost','annual_operating_cost','annual_energy_kwh','discount_rate_pct','years','residual_value','currency'])); }
+    public function economic_scenario_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/economic-scenario-template'); }
 
     private function proxy(string $path, array $params = []) {
         if (!SC_Library_Python_Backend::configured()) {
@@ -293,11 +310,11 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Energy Systems Intelligence',
-            'intro' => 'Model explicit energy flows and balances while retaining governed renewable technology, sustainability indicators, source-bound numeric factors, and the sustainable-energy knowledge foundation.',
+            'intro' => 'Compare explicit energy-scenario economics with transparent cost, payback, discounted cash-flow, cost-benefit, cost-efficiency, and levelized-unit-cost calculations while preserving the full energy knowledge and modeling stack.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v050');
-        wp_enqueue_script('sc-library-energy-systems-v050');
+        wp_enqueue_style('sc-library-energy-systems-v060');
+        wp_enqueue_script('sc-library-energy-systems-v060');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -331,9 +348,17 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-conversion-chain-endpoint="<?php echo esc_url($ep('/conversion-chain')); ?>"
             data-supply-demand-balance-endpoint="<?php echo esc_url($ep('/supply-demand-balance')); ?>"
             data-generation-estimate-endpoint="<?php echo esc_url($ep('/generation-estimate')); ?>"
-            data-balance-scenario-endpoint="<?php echo esc_url($ep('/balance-scenario-template')); ?>">
+            data-balance-scenario-endpoint="<?php echo esc_url($ep('/balance-scenario-template')); ?>"
+            data-economics-framework-endpoint="<?php echo esc_url($ep('/economics-framework')); ?>"
+            data-energy-cost-comparison-endpoint="<?php echo esc_url($ep('/energy-cost-comparison')); ?>"
+            data-simple-payback-endpoint="<?php echo esc_url($ep('/simple-payback')); ?>"
+            data-npv-endpoint="<?php echo esc_url($ep('/npv')); ?>"
+            data-cost-benefit-endpoint="<?php echo esc_url($ep('/cost-benefit')); ?>"
+            data-cost-efficiency-endpoint="<?php echo esc_url($ep('/cost-efficiency')); ?>"
+            data-levelized-cost-endpoint="<?php echo esc_url($ep('/levelized-energy-cost')); ?>"
+            data-economic-scenario-endpoint="<?php echo esc_url($ep('/economic-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.5.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.6.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
@@ -343,12 +368,13 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__guardrail">
-                <strong><?php esc_html_e('Scenario arithmetic ≠ forecast, dispatch model, or preferred energy pathway.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v0.5.0 calculates only from explicit scenario inputs. It does not infer technology efficiency, capacity factor, resource availability, storage behavior, grid reliability, costs, or preferred technologies. Those remain evidence- and model-dependent.', 'sustainable-catalyst-library'); ?>
+                <strong><?php esc_html_e('Economic scenario arithmetic ≠ forecast, investment advice, or preferred energy pathway.', 'sustainable-catalyst-library'); ?></strong>
+                <?php esc_html_e('v0.6.0 requires explicit prices, costs, benefits, discount rates, lifetimes, savings, and outcomes. It does not infer market prices, financing, tax, subsidy, technology costs, carbon prices, or preferred investments.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
-                <button type="button" class="sc-es__mode is-active" data-es-mode="balance" role="tab" aria-selected="true">Energy Balance</button>
+                <button type="button" class="sc-es__mode is-active" data-es-mode="economics" role="tab" aria-selected="true">Scenario Economics</button>
+                <button type="button" class="sc-es__mode" data-es-mode="balance" role="tab" aria-selected="false">Energy Balance</button>
                 <button type="button" class="sc-es__mode" data-es-mode="technologies" role="tab" aria-selected="false">Technologies &amp; Resources</button>
                 <button type="button" class="sc-es__mode" data-es-mode="indicators" role="tab" aria-selected="false">Sustainability Indicators</button>
                 <button type="button" class="sc-es__mode" data-es-mode="registry" role="tab" aria-selected="false">Numeric Registry</button>
@@ -358,7 +384,20 @@ final class SC_Library_Energy_Systems_Intelligence {
                 <button type="button" class="sc-es__mode" data-es-mode="handoffs" role="tab" aria-selected="false">Platform Handoffs</button>
             </div>
 
-            <div class="sc-es__panel" data-es-panel="balance">
+            <div class="sc-es__panel" data-es-panel="economics">
+                <div class="sc-es__panel-heading"><strong>Energy scenario economics</strong><span>Run transparent economic comparisons from explicit assumptions. No price feed, technology-cost database, financing model, or automatic investment recommendation is used.</span></div>
+                <p class="sc-es__status" data-es-economics-framework-status aria-live="polite">Loading economics framework…</p><div class="sc-es__economics-summary" data-es-economics-summary></div>
+                <div class="sc-es__calc-grid sc-es__calc-grid--economics">
+                    <form class="sc-es__calculator" data-es-cost-compare-form><h3>Energy cost comparison</h3><div class="sc-es__field-grid sc-es__field-grid--economics"><label><span>Baseline energy (kWh)</span><input name="baseline_energy_kwh" value="10000" inputmode="decimal" required></label><label><span>Baseline price / kWh</span><input name="baseline_price_per_kwh" value="0.15" inputmode="decimal" required></label><label><span>Candidate energy (kWh)</span><input name="candidate_energy_kwh" value="8000" inputmode="decimal" required></label><label><span>Candidate price / kWh</span><input name="candidate_price_per_kwh" value="0.15" inputmode="decimal" required></label></div><button type="submit">Compare costs</button><div class="sc-es__result" data-es-cost-compare-result aria-live="polite"></div></form>
+                    <form class="sc-es__calculator" data-es-payback-form><h3>Simple payback</h3><label><span>Initial cost</span><input name="initial_cost" value="5000" inputmode="decimal" required></label><label><span>Annual net savings</span><input name="annual_net_savings" value="1000" inputmode="decimal" required></label><button type="submit">Calculate payback</button><div class="sc-es__result" data-es-payback-result aria-live="polite"></div></form>
+                    <form class="sc-es__calculator" data-es-npv-form><h3>Net present value</h3><label><span>Initial cost</span><input name="initial_cost" value="5000" inputmode="decimal" required></label><label><span>Annual net cash flow</span><input name="annual_net_cash_flow" value="1200" inputmode="decimal" required></label><label><span>Discount rate (%)</span><input name="discount_rate_pct" value="5" inputmode="decimal" required></label><label><span>Years</span><input name="years" value="10" inputmode="numeric" required></label><button type="submit">Calculate NPV</button><div class="sc-es__result" data-es-npv-result aria-live="polite"></div></form>
+                    <form class="sc-es__calculator" data-es-cba-form><h3>Cost-benefit analysis</h3><label><span>Initial cost</span><input name="initial_cost" value="5000" inputmode="decimal" required></label><label><span>Annual cost</span><input name="annual_cost" value="200" inputmode="decimal" required></label><label><span>Annual benefit</span><input name="annual_benefit" value="1400" inputmode="decimal" required></label><label><span>Discount rate / years</span><div class="sc-es__inline-fields"><input name="discount_rate_pct" value="5" inputmode="decimal" required><input name="years" value="10" inputmode="numeric" required></div></label><button type="submit">Run cost-benefit</button><div class="sc-es__result" data-es-cba-result aria-live="polite"></div></form>
+                    <form class="sc-es__calculator" data-es-cost-efficiency-form><h3>Cost efficiency</h3><label><span>Total cost</span><input name="total_cost" value="5000" inputmode="decimal" required></label><label><span>Energy saved (kWh)</span><input name="energy_saved_kwh" value="25000" inputmode="decimal"></label><label><span>CO₂e avoided (kg)</span><input name="co2e_avoided_kg" value="10000" inputmode="decimal"></label><button type="submit">Calculate ratios</button><div class="sc-es__result" data-es-cost-efficiency-result aria-live="polite"></div></form>
+                    <form class="sc-es__calculator" data-es-levelized-form><h3>Levelized energy cost</h3><label><span>Initial cost</span><input name="initial_cost" value="100000" inputmode="decimal" required></label><label><span>Annual operating cost</span><input name="annual_operating_cost" value="3000" inputmode="decimal" required></label><label><span>Annual energy (kWh)</span><input name="annual_energy_kwh" value="50000" inputmode="decimal" required></label><label><span>Discount rate / years</span><div class="sc-es__inline-fields"><input name="discount_rate_pct" value="5" inputmode="decimal" required><input name="years" value="20" inputmode="numeric" required></div></label><button type="submit">Calculate levelized cost</button><div class="sc-es__result" data-es-levelized-result aria-live="polite"></div></form>
+                </div><div class="sc-es__economic-contract" data-es-economic-scenario-contract></div>
+            </div>
+
+            <div class="sc-es__panel" data-es-panel="balance" hidden>
                 <div class="sc-es__panel-heading"><strong>Energy balance &amp; systems modeling</strong><span>Run deterministic, transparent calculations from explicit inputs. The model keeps supply, conversion, losses, storage accounting, demand, and generation assumptions visible instead of silently assigning technology performance.</span></div>
                 <p class="sc-es__status" data-es-balance-framework-status aria-live="polite">Loading balance framework…</p>
                 <div class="sc-es__balance-summary" data-es-balance-summary></div>
@@ -494,12 +533,12 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="handoffs" hidden>
-                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.5.0 adds portable energy-balance and conversion-chain contracts for later Lab and Workbench integration while preserving renewable-resource, indicator, and Decision Studio handoffs. The separate products are not modified by this Library release.</span></div>
+                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.6.0 adds portable scenario-economics contracts alongside energy-balance and conversion-chain contracts for later Lab and Workbench integration while preserving renewable-resource, indicator, and Decision Studio handoffs. The separate products are not modified by this Library release.</span></div>
                 <p class="sc-es__status" data-es-handoff-status aria-live="polite">Loading handoff registry…</p>
                 <div class="sc-es__cards" data-es-handoff-results></div>
             </div>
 
-            <footer><strong>Next:</strong> v0.6.0 — Energy Scenario Economics. The next release will add cost, payback, NPV, cost-benefit, and cost-efficiency contracts without turning model output into an automatic investment or policy recommendation.</footer>
+            <footer><strong>Next:</strong> v0.7.0 — Biological Carbon &amp; Bioenergy Integration. The next release will connect anaerobic digestion, digestate, biochar, biomass-to-oil, CO₂-to-energy, soil carbon, and forest carbon across Energy Systems and Carbon &amp; Nature without treating bioenergy as automatically carbon neutral.</footer>
         </section>
         <?php return (string)ob_get_clean();
     }

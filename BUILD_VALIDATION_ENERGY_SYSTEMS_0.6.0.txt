@@ -1,0 +1,41 @@
+Sustainable Catalyst — Energy Systems Intelligence v0.6.0
+Energy Scenario Economics
+
+Release identity
+- Sustainable Catalyst Library: 5.11.0
+- Carbon & Nature Intelligence: 0.5.0
+- Energy Systems Intelligence: 0.6.0
+- Shared Library backend: 2.12.0
+
+Validation completed in build environment
+- Python compile: PASS
+- PHP syntax: PASS
+- JavaScript syntax (Node --check): PASS
+- Shell syntax: PASS
+- JSON Schema / JSON export checks: PASS
+- Focused regression suite: 41 passed
+
+Focused regression suite covers
+- Energy Systems v0.6.0 economic model registry and release identity
+- energy-cost comparison
+- simple payback, including non-positive-savings boundary
+- net present value
+- cost-benefit analysis
+- cost-efficiency ratios
+- simplified levelized energy cost
+- portable economic-scenario contract and guardrails
+- Decision Studio economic handoff contract
+- preservation of Energy Systems v0.5.0 balance models
+- preservation of v0.4.0 renewable technology/resource model
+- preservation of v0.3.0 EISD indicator framework
+- preservation of v0.2.0 conversion registry
+- WordPress GET-only facade and Scenario Economics interface
+- JSON Schemas and machine-readable export
+- retained Carbon & Nature v0.5.0 backend and WordPress regression suites
+
+Boundaries
+- Inputs are explicit; no price, technology-cost, discount-rate, lifetime, inflation, escalation, financing, tax, subsidy, carbon-price, or non-market-benefit values are inferred.
+- Results are deterministic scenario arithmetic, not forecasts, sustainability scores, technology rankings, policy recommendations, or financial/investment advice.
+- No database migration or new secret is required.
+- Full live FastAPI startup was not exercised in this build container because the runtime PostgreSQL/psycopg dependency is not installed here.
+- No live Contabo deployment was performed during build validation. The included Contabo upgrader performs Docker health and endpoint checks against the deployed service.

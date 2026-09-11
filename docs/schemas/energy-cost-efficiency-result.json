@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-cost-efficiency-result.json",
+  "title": "Energy cost-efficiency result",
+  "type": "object",
+  "required": [
+    "ok",
+    "schema",
+    "model_version",
+    "input",
+    "output",
+    "boundary"
+  ],
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "schema": {
+      "type": "string"
+    },
+    "model_version": {
+      "const": "0.6.0"
+    },
+    "input": {
+      "type": "object",
+      "required": [
+        "total_cost",
+        "energy_saved_kwh",
+        "co2e_avoided_kg"
+      ]
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "cost_per_kwh_saved": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cost_per_mwh_saved": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cost_per_tonne_co2e_avoided": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "boundary": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

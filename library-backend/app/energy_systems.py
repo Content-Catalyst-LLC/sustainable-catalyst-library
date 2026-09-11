@@ -8,10 +8,11 @@ from typing import Any
 
 from .energy_technologies import RenewableTechnologyResourceRegistry
 from .energy_balances import EnergyBalanceSystemsModel
+from .energy_economics import EnergyScenarioEconomics
 
 
-DOMAIN_VERSION = "0.5.0"
-SCHEMA_VERSION = "sc-energy-systems-balance-model/1.0"
+DOMAIN_VERSION = "0.6.0"
+SCHEMA_VERSION = "sc-energy-systems-scenario-economics/1.0"
 
 
 @dataclass(frozen=True)
@@ -123,10 +124,10 @@ class EnergyIndicatorDefinition:
 class EnergySystemsKnowledgeFoundation:
     """Governed sustainable-energy knowledge and source-bound numerical registry.
 
-    v0.5.0 preserves the knowledge, numeric, indicator, and renewable technology/resource
-    layers, then activates bounded energy-balance and systems arithmetic using explicit
-    scenario inputs. Technology-specific performance inference, dispatch, reliability,
-    optimization, ranking, and policy recommendation remain disabled.
+    v0.6.0 preserves the knowledge, numeric, indicator, renewable technology/resource,
+    and energy-balance layers, then activates bounded scenario-economics arithmetic using
+    explicit assumptions. Current prices, technology costs, financing, optimization,
+    ranking, investment advice, and policy recommendation remain disabled.
     """
 
     def __init__(self) -> None:
@@ -142,6 +143,7 @@ class EnergySystemsKnowledgeFoundation:
         self._indicators = self._build_indicators()
         self._technology_registry = RenewableTechnologyResourceRegistry()
         self._balance_model = EnergyBalanceSystemsModel(technology_keys=[x["key"] for x in self._technology_registry.technologies(limit=100)["items"]])
+        self._economics_model = EnergyScenarioEconomics()
         self._methodology_rules = self._build_methodology_rules()
         self._handoffs = self._build_handoffs()
         self._guardrails = self._build_guardrails()
@@ -528,6 +530,7 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "indicator-comparison-boundary", "source_key": "vera-langlois-2007", "source_year": 2007, "rule": "Indicator observations should retain geography, period, unit, denominator or disaggregation basis, source, and methodology so comparisons do not silently mix incompatible definitions or contexts.", "current_default": False},
             {"key": "renewable-technology-profile-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "The module identifies renewable technology families and requires understanding of physical/technological principles and future prospects, but the supplied material does not provide a current quantitative performance database. v0.4.0 therefore structures technology objects without universal efficiency, cost, capacity-factor, lifecycle-emissions, or maturity values.", "current_default": False},
             {"key": "renewable-resource-potential-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "Resource estimation and evaluation require geography-, period-, metric-, method-, and source-specific evidence. A resource observation is not automatically gross, technical, economic, or sustainable potential and does not establish project suitability.", "current_default": False},
+            {"key": "energy-economics-formula-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "The supplied module scope requires energy balance, cost-benefit, and cost-efficiency analysis but does not provide a current price database or complete financial methodology. v0.6.0 therefore treats prices, costs, lifetimes, discount rates, benefits, savings, and outcomes as explicit scenario assumptions and labels its formulas as Sustainable Catalyst implementation arithmetic rather than source-attributed universal defaults.", "current_default": False},
         ]
 
     @staticmethod
@@ -535,11 +538,11 @@ class EnergySystemsKnowledgeFoundation:
         return [
             {"key": "soil-carbon-to-carbon-nature", "source_concepts": ["soil-carbon"], "target": "Carbon & Nature Intelligence", "target_refs": ["soil-organic-carbon"], "status": "available", "boundary": "Semantic routing only; does not quantify sequestration or project suitability."},
             {"key": "forest-to-carbon-nature", "source_concepts": ["forest-carbon", "forest-ecology"], "target": "Carbon & Nature Intelligence", "target_refs": ["forest-woodland"], "status": "available", "boundary": "Semantic routing only; does not infer forest-carbon stocks, permanence, or project eligibility."},
-            {"key": "bioenergy-carbon-nature-extension", "source_concepts": ["anaerobic-digestion", "digestate", "biochar", "biomass-to-oil", "co2-to-energy"], "target": "Carbon & Nature Intelligence", "target_refs": [], "status": "planned-extension", "boundary": "No existing target is fabricated in v0.2.0; explicit Carbon & Nature objects are required before this handoff becomes active."},
-            {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "co2e"], "target": "Workbench", "target_refs": ["energy-unit-conversion-registry", "historical-carbon-factor-registry", "energy-balance-calculation-contract"], "status": "computational-contract-available", "boundary": "v0.5.0 exposes deterministic energy-balance calculation contracts, but does not modify or execute the separate Workbench product."},
-            {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity", "renewable-resource-potential"], "target": "Lab", "target_refs": ["renewable-technology-assessment-contract", "renewable-resource-observation-contract", "energy-balance-scenario-contract", "conversion-chain-model"], "status": "computational-contract-available", "boundary": "v0.5.0 exposes portable energy-balance scenario and conversion-chain contracts for later Lab integration; the separate Lab product is not modified and no dispatch, optimization, or automatic suitability execution is enabled."},
-            {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security", "renewable-resource-potential"], "target": "Site Intelligence", "target_refs": ["renewable-resource-observation-contract"], "status": "contract-available", "boundary": "v0.4.0 defines the resource-observation packet Site Intelligence can populate later; no current country or site resource values are asserted."},
-            {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis"], "target": "Decision Studio", "target_refs": [], "status": "planned-v0.9-plus", "boundary": "No automatic policy or technology recommendation in v0.2.0."},
+            {"key": "bioenergy-carbon-nature-extension", "source_concepts": ["anaerobic-digestion", "digestate", "biochar", "biomass-to-oil", "co2-to-energy"], "target": "Carbon & Nature Intelligence", "target_refs": [], "status": "planned-extension", "boundary": "No existing target is fabricated in v0.6.0; explicit Carbon & Nature objects are required before this handoff becomes active."},
+            {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "cost-benefit-analysis", "cost-efficiency-analysis", "co2e"], "target": "Workbench", "target_refs": ["energy-unit-conversion-registry", "historical-carbon-factor-registry", "energy-balance-calculation-contract", "energy-scenario-economics-calculation-contract"], "status": "computational-contract-available", "boundary": "v0.6.0 exposes deterministic energy-balance and scenario-economics calculation contracts, but does not modify or execute the separate Workbench product."},
+            {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity", "renewable-resource-potential", "cost-benefit-analysis", "cost-efficiency-analysis"], "target": "Lab", "target_refs": ["renewable-technology-assessment-contract", "renewable-resource-observation-contract", "energy-balance-scenario-contract", "conversion-chain-model", "energy-economic-scenario-contract", "discounted-cash-flow-results"], "status": "computational-contract-available", "boundary": "v0.6.0 exposes portable energy-balance and economic scenario contracts for later Lab sensitivity and uncertainty work; the separate Lab product is not modified and no optimization or automatic suitability execution is enabled."},
+            {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security", "renewable-resource-potential"], "target": "Site Intelligence", "target_refs": ["renewable-resource-observation-contract"], "status": "contract-available", "boundary": "The resource-observation packet can later be populated by Site Intelligence; no current country/site resource or price values are asserted."},
+            {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis"], "target": "Decision Studio", "target_refs": ["energy-economic-scenario-contract", "energy-cost-benefit-result", "energy-cost-efficiency-result", "energy-npv-result"], "status": "decision-contract-available", "boundary": "v0.6.0 exposes evidence-bearing economic result contracts for later decision packets. It does not rank technologies, recommend investments, or make policy choices."},
         ]
 
     @staticmethod
@@ -587,6 +590,20 @@ class EnergySystemsKnowledgeFoundation:
             "storage_physics_simulation_activated": False,
             "economic_optimization_activated": False,
             "scenario_persistence_activated": False,
+            "energy_scenario_economics_activated": True,
+            "energy_cost_comparison_activated": True,
+            "energy_simple_payback_activated": True,
+            "energy_npv_activated": True,
+            "energy_cost_benefit_activated": True,
+            "energy_cost_efficiency_activated": True,
+            "energy_levelized_cost_estimate_activated": True,
+            "energy_economic_scenario_contract_activated": True,
+            "external_energy_price_feed_loaded": False,
+            "technology_cost_database_loaded": False,
+            "discount_rate_inference_activated": False,
+            "technology_lifetime_inference_activated": False,
+            "tax_subsidy_financing_model_activated": False,
+            "investment_recommendation_activated": False,
             "automatic_technology_ranking": False,
             "automatic_policy_recommendation": False,
             "automatic_sustainability_score": False,
@@ -644,6 +661,9 @@ class EnergySystemsKnowledgeFoundation:
         balance_framework = self._balance_model.framework()
         if balance_framework["counts"]["models"] != 4 or balance_framework["counts"]["executable_models"] != 3:
             raise ValueError("Energy balance/systems model registry is incomplete")
+        economics_framework = self._economics_model.framework()
+        if economics_framework["counts"]["models"] != 7 or economics_framework["counts"]["executable_models"] != 6:
+            raise ValueError("Energy scenario economics model registry is incomplete")
 
     def _content_fingerprint(self) -> str:
         content = {
@@ -660,6 +680,7 @@ class EnergySystemsKnowledgeFoundation:
             "indicators": [asdict(v) for v in self._indicators.values()],
             "renewable_technology_resource_model": self._technology_registry.export(),
             "energy_balance_systems_model": self._balance_model.export(),
+            "energy_scenario_economics": self._economics_model.export(),
             "methodology_rules": self._methodology_rules,
             "handoffs": self._handoffs,
             "guardrails": self._guardrails,
@@ -673,11 +694,11 @@ class EnergySystemsKnowledgeFoundation:
             "subsystem": {
                 "name": "Energy Systems Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Energy Balance & Systems Modeling",
+                "release": "Energy Scenario Economics",
                 "library_version": "5.11.0",
-                "backend_version": "2.11.0",
+                "backend_version": "2.12.0",
                 "read_only": True,
-                "calculation_mode": "source-bound-registry-plus-explicit-input-energy-balance-modeling",
+                "calculation_mode": "source-bound-registry-plus-explicit-input-energy-balance-and-scenario-economics",
             },
             "counts": {
                 "concepts": len(self._concepts),
@@ -703,6 +724,9 @@ class EnergySystemsKnowledgeFoundation:
                 "energy_balance_models": self._balance_model.framework()["counts"]["models"],
                 "energy_balance_executable_models": self._balance_model.framework()["counts"]["executable_models"],
                 "energy_balance_scenario_contracts": self._balance_model.framework()["counts"]["scenario_contracts"],
+                "energy_economic_models": self._economics_model.framework()["counts"]["models"],
+                "energy_economic_executable_models": self._economics_model.framework()["counts"]["executable_models"],
+                "energy_economic_scenario_contracts": self._economics_model.framework()["counts"]["scenario_contracts"],
                 "methodology_rules": len(self._methodology_rules),
             },
             "knowledge_domains": self._knowledge_domains,
@@ -710,9 +734,10 @@ class EnergySystemsKnowledgeFoundation:
             "guardrails": self._guardrails,
             "renewable_technology_resource_model": self._technology_registry.framework(),
             "energy_balance_systems_model": self._balance_model.framework(),
+            "energy_scenario_economics": self._economics_model.framework(),
             "roadmap": [
-                {"version": "0.6.0", "name": "Energy Scenario Economics"},
                 {"version": "0.7.0", "name": "Biological Carbon & Bioenergy Integration"},
+                {"version": "0.8.0", "name": "Global Energy Intelligence"},
             ],
             "content_fingerprint": self._fingerprint,
         }
@@ -1075,6 +1100,30 @@ class EnergySystemsKnowledgeFoundation:
 
     def balance_scenario_template(self) -> dict[str, Any]:
         return self._balance_model.scenario_template()
+
+    def economics_framework(self) -> dict[str, Any]:
+        return self._economics_model.framework()
+
+    def energy_cost_comparison(self, **kwargs: str) -> dict[str, Any]:
+        return self._economics_model.energy_cost_comparison(**kwargs)
+
+    def simple_payback(self, **kwargs: str) -> dict[str, Any]:
+        return self._economics_model.simple_payback(**kwargs)
+
+    def npv(self, **kwargs: str) -> dict[str, Any]:
+        return self._economics_model.npv(**kwargs)
+
+    def cost_benefit(self, **kwargs: str) -> dict[str, Any]:
+        return self._economics_model.cost_benefit(**kwargs)
+
+    def cost_efficiency(self, **kwargs: str) -> dict[str, Any]:
+        return self._economics_model.cost_efficiency(**kwargs)
+
+    def levelized_energy_cost(self, **kwargs: str) -> dict[str, Any]:
+        return self._economics_model.levelized_energy_cost(**kwargs)
+
+    def economic_scenario_template(self) -> dict[str, Any]:
+        return self._economics_model.scenario_template()
 
     def handoffs(self) -> dict[str, Any]:
         return {"ok": True, "schema": "sc-energy-handoffs/1.0", "count": len(self._handoffs), "items": self._handoffs, "guardrail": "Only handoffs marked available or contract-available resolve to a governed target or contract; planned handoffs do not imply current capability."}

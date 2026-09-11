@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-economic-scenario.json",
+  "title": "Energy economic scenario",
+  "type": "object",
+  "required": [
+    "scenario_id",
+    "name",
+    "energy_scenario_ref",
+    "currency",
+    "period",
+    "economic_assumptions",
+    "cash_flows",
+    "outcomes",
+    "evidence",
+    "uncertainty"
+  ],
+  "properties": {
+    "scenario_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "energy_scenario_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "currency": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "period": {
+      "type": "object"
+    },
+    "economic_assumptions": {
+      "type": "object"
+    },
+    "cash_flows": {
+      "type": "object"
+    },
+    "outcomes": {
+      "type": "object"
+    },
+    "evidence": {
+      "type": "object"
+    },
+    "uncertainty": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}

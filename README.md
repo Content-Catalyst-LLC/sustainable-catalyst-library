@@ -157,3 +157,7 @@ See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_4.2.0.md` and `HOMEPAGE_SPOTLIGHT_TWO_TIER_
 ## Carbon & Nature Intelligence v0.2.0
 
 Carbon & Nature Intelligence is a Library-native subsystem with its own release line. v0.2.0 adds the Carbon Sequestration Measure Registry on the v0.1.0 AFOLU & Nature-Based Solutions Knowledge Foundation while the Library application remains v5.11.0. Backend v2.3.0 exposes structured measure discovery, measure detail, bounded non-ranking comparison, and measure-aware Research Librarian context packets. No PostgreSQL migration or new credential is required. See `CARBON_NATURE_INTELLIGENCE_v0.2.0.md`.
+
+
+## Energy Systems Intelligence v0.6.0
+Adds explicit-assumption scenario economics: cost comparison, payback, NPV, cost-benefit, cost-efficiency, simplified levelized energy cost, and portable economic scenario contracts.

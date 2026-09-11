@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-cost-benefit-result.json",
+  "title": "Energy cost-benefit result",
+  "type": "object",
+  "required": [
+    "ok",
+    "schema",
+    "model_version",
+    "input",
+    "output",
+    "boundary"
+  ],
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "schema": {
+      "type": "string"
+    },
+    "model_version": {
+      "const": "0.6.0"
+    },
+    "input": {
+      "type": "object",
+      "required": [
+        "initial_cost",
+        "annual_cost",
+        "annual_benefit",
+        "discount_rate_pct",
+        "years"
+      ]
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "present_value_costs": {
+          "type": "string"
+        },
+        "present_value_benefits": {
+          "type": "string"
+        },
+        "net_present_benefit": {
+          "type": "string"
+        },
+        "benefit_cost_ratio": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "boundary": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

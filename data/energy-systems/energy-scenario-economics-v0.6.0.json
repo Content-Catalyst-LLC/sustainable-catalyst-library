@@ -1,0 +1,287 @@
+{
+  "schema": "sc-energy-scenario-economics-export/1.0",
+  "version": "0.6.0",
+  "framework": {
+    "ok": true,
+    "schema": "sc-energy-scenario-economics/1.0",
+    "version": "0.6.0",
+    "release": "Energy Scenario Economics",
+    "counts": {
+      "models": 7,
+      "executable_models": 6,
+      "scenario_contracts": 1
+    },
+    "models": [
+      {
+        "key": "energy-cost-comparison",
+        "label": "Energy cost comparison",
+        "model_type": "deterministic-cost-arithmetic",
+        "inputs": [
+          "baseline_energy_kwh",
+          "baseline_price_per_kwh",
+          "candidate_energy_kwh",
+          "candidate_price_per_kwh",
+          "baseline_fixed_cost",
+          "candidate_fixed_cost",
+          "currency"
+        ],
+        "outputs": [
+          "baseline_cost",
+          "candidate_cost",
+          "absolute_savings",
+          "savings_pct_of_baseline"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "execution_status": "active-explicit-input-arithmetic",
+        "boundary": "Prices and energy quantities are explicit scenario inputs. This is a direct cost comparison, not a tariff forecast, bill model, or technology recommendation."
+      },
+      {
+        "key": "simple-payback",
+        "label": "Simple payback",
+        "model_type": "undiscounted-payback-arithmetic",
+        "inputs": [
+          "initial_cost",
+          "annual_net_savings",
+          "currency"
+        ],
+        "outputs": [
+          "payback_years",
+          "payback_status"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "execution_status": "active-explicit-input-arithmetic",
+        "boundary": "Simple payback ignores discounting, escalation, financing, taxes, residual value, and post-payback cash flows. A non-positive annual saving does not yield a finite payback."
+      },
+      {
+        "key": "net-present-value",
+        "label": "Net present value",
+        "model_type": "discounted-cash-flow-arithmetic",
+        "inputs": [
+          "initial_cost",
+          "annual_net_cash_flow",
+          "discount_rate_pct",
+          "years",
+          "residual_value",
+          "currency"
+        ],
+        "outputs": [
+          "present_value_cash_flows",
+          "present_value_residual",
+          "npv"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "execution_status": "active-explicit-input-arithmetic",
+        "boundary": "Uses a constant annual net cash flow and explicit discount rate/lifetime. It does not infer escalation, degradation, tax, subsidy, financing, or risk-adjusted discount rates."
+      },
+      {
+        "key": "cost-benefit",
+        "label": "Cost-benefit analysis",
+        "model_type": "discounted-cost-benefit-arithmetic",
+        "inputs": [
+          "initial_cost",
+          "annual_cost",
+          "annual_benefit",
+          "discount_rate_pct",
+          "years",
+          "residual_value",
+          "currency"
+        ],
+        "outputs": [
+          "present_value_costs",
+          "present_value_benefits",
+          "net_present_benefit",
+          "benefit_cost_ratio"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "execution_status": "active-explicit-input-arithmetic",
+        "boundary": "All monetized costs and benefits are explicit inputs. Non-market impacts not monetized by the user are not silently valued or converted into a sustainability conclusion."
+      },
+      {
+        "key": "cost-efficiency",
+        "label": "Cost-efficiency analysis",
+        "model_type": "ratio-arithmetic",
+        "inputs": [
+          "total_cost",
+          "energy_saved_kwh",
+          "co2e_avoided_kg",
+          "currency"
+        ],
+        "outputs": [
+          "cost_per_kwh_saved",
+          "cost_per_mwh_saved",
+          "cost_per_tonne_co2e_avoided"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "execution_status": "active-explicit-input-arithmetic",
+        "boundary": "Cost-efficiency ratios require user-supplied cost and outcome quantities. They do not establish welfare, equity, feasibility, additionality, or policy desirability."
+      },
+      {
+        "key": "levelized-energy-cost",
+        "label": "Levelized energy cost estimate",
+        "model_type": "discounted-unit-cost-arithmetic",
+        "inputs": [
+          "initial_cost",
+          "annual_operating_cost",
+          "annual_energy_kwh",
+          "discount_rate_pct",
+          "years",
+          "residual_value",
+          "currency"
+        ],
+        "outputs": [
+          "present_value_costs",
+          "present_value_energy_kwh",
+          "levelized_cost_per_kwh"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "execution_status": "active-explicit-input-arithmetic",
+        "boundary": "A simplified levelized unit-cost estimate with constant annual output and operating cost. It does not infer degradation, replacements, financing, tax, incentives, curtailment, or technology-specific cost data."
+      },
+      {
+        "key": "economic-scenario-contract",
+        "label": "Energy economic scenario contract",
+        "model_type": "scenario-object-contract",
+        "inputs": [
+          "identity",
+          "energy_scenario_ref",
+          "economic_assumptions",
+          "cash_flows",
+          "outcomes",
+          "evidence",
+          "uncertainty"
+        ],
+        "outputs": [
+          "portable_economic_scenario_packet"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "execution_status": "contract-active-no-persistence",
+        "boundary": "Organizes economics for later Lab, Workbench, and Decision Studio use. v0.6.0 does not persist, optimize, rank, recommend, or make investment decisions."
+      }
+    ],
+    "formula_boundary": "The supplied module scope requires cost-benefit and cost-efficiency analysis but does not provide a full finance methodology or current cost database. v0.6.0 therefore exposes transparent implementation arithmetic with explicit assumptions rather than source-attributed universal defaults.",
+    "guardrails": {
+      "explicit_user_inputs_required": true,
+      "external_price_feed_loaded": false,
+      "technology_cost_database_loaded": false,
+      "discount_rate_inference": false,
+      "technology_lifetime_inference": false,
+      "inflation_or_escalation_inference": false,
+      "tax_subsidy_or_financing_model": false,
+      "carbon_price_inference": false,
+      "non_market_benefit_monetization": false,
+      "economic_optimization": false,
+      "technology_ranking": false,
+      "investment_recommendation": false,
+      "policy_recommendation": false,
+      "scenario_persistence": false,
+      "result_is_not_financial_advice": true,
+      "result_is_not_sustainability_score": true
+    },
+    "content_fingerprint": "76941768a33793e49109b83b8bc645ee0c1fe5183e44badf53dfb109c8b144ff"
+  },
+  "scenario_template": {
+    "ok": true,
+    "schema": "sc-energy-economic-scenario/1.0",
+    "model_version": "0.6.0",
+    "contract": {
+      "required_structure": [
+        "scenario_id",
+        "name",
+        "energy_scenario_ref",
+        "currency",
+        "period",
+        "economic_assumptions",
+        "cash_flows",
+        "outcomes",
+        "evidence",
+        "uncertainty"
+      ],
+      "persistence_status": "not-implemented",
+      "optimization_status": "not-implemented",
+      "ranking_status": "not-implemented",
+      "recommendation_status": "not-implemented",
+      "provenance_required": true
+    },
+    "template": {
+      "scenario_id": null,
+      "name": null,
+      "energy_scenario_ref": null,
+      "currency": null,
+      "period": {
+        "years": null,
+        "start": null,
+        "end": null
+      },
+      "economic_assumptions": {
+        "initial_cost": null,
+        "discount_rate_pct": null,
+        "residual_value": null,
+        "price_assumptions": [],
+        "cost_assumptions": [],
+        "benefit_assumptions": []
+      },
+      "cash_flows": {
+        "annual_cost": null,
+        "annual_benefit": null,
+        "annual_net_cash_flow": null,
+        "annual_net_savings": null
+      },
+      "outcomes": {
+        "energy_saved_kwh": null,
+        "energy_generated_kwh": null,
+        "co2e_avoided_kg": null,
+        "cost_comparison_ref": null,
+        "payback_ref": null,
+        "npv_ref": null,
+        "cost_benefit_ref": null,
+        "cost_efficiency_ref": null,
+        "levelized_cost_ref": null
+      },
+      "evidence": {
+        "source_refs": [],
+        "price_refs": [],
+        "technology_cost_refs": [],
+        "energy_model_refs": [],
+        "carbon_factor_refs": [],
+        "methodology_refs": []
+      },
+      "uncertainty": {
+        "assumptions": [],
+        "sensitivity_parameters": [],
+        "quality_notes": []
+      }
+    },
+    "guardrails": {
+      "explicit_user_inputs_required": true,
+      "external_price_feed_loaded": false,
+      "technology_cost_database_loaded": false,
+      "discount_rate_inference": false,
+      "technology_lifetime_inference": false,
+      "inflation_or_escalation_inference": false,
+      "tax_subsidy_or_financing_model": false,
+      "carbon_price_inference": false,
+      "non_market_benefit_monetization": false,
+      "economic_optimization": false,
+      "technology_ranking": false,
+      "investment_recommendation": false,
+      "policy_recommendation": false,
+      "scenario_persistence": false,
+      "result_is_not_financial_advice": true,
+      "result_is_not_sustainability_score": true
+    }
+  }
+}

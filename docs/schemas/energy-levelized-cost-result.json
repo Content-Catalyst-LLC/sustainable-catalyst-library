@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-levelized-cost-result.json",
+  "title": "Energy levelized cost result",
+  "type": "object",
+  "required": [
+    "ok",
+    "schema",
+    "model_version",
+    "input",
+    "output",
+    "boundary"
+  ],
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "schema": {
+      "type": "string"
+    },
+    "model_version": {
+      "const": "0.6.0"
+    },
+    "input": {
+      "type": "object",
+      "required": [
+        "initial_cost",
+        "annual_operating_cost",
+        "annual_energy_kwh",
+        "discount_rate_pct",
+        "years"
+      ]
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "present_value_costs": {
+          "type": "string"
+        },
+        "present_value_energy_kwh": {
+          "type": "string"
+        },
+        "levelized_cost_per_kwh": {
+          "type": "string"
+        }
+      }
+    },
+    "boundary": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}
