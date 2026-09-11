@@ -1,0 +1,64 @@
+Sustainable Catalyst — Energy Systems Intelligence v0.7.0
+Build validation summary
+
+Release identity
+- Sustainable Catalyst Library: 5.11.0
+- Carbon & Nature Intelligence: 0.5.0
+- Energy Systems Intelligence: 0.7.0
+- Library backend: 2.13.0
+- Database migration: none
+- New secrets/environment variables: none
+
+Focused regression suite
+- 46 tests passed
+- Energy Systems backend v2.13.0 tests
+- Energy Systems WordPress/repository v0.7.0 tests
+- Carbon & Nature backend v2.6.0 / domain v0.5.0 regression tests
+- Carbon & Nature WordPress/repository v0.5.0 regression tests
+
+Validated v0.7.0 capability
+- 5 bioenergy feedstock classes
+- 6 biological-carbon/bioenergy pathway objects
+- 6 validated Energy Systems ↔ Carbon & Nature bridge contracts
+- 4 explicit-input executable models
+- 1 portable bioenergy-carbon scenario contract
+- feedstock energy example: 10 t × 4000 kWh/t × 80% = 32,000 kWh useful
+- AD example: 10 t × 100 m3/t × 60% methane × 10 kWh/m3 × 40% = 2,400 kWh useful
+- biochar example: 1000 kg × 70% C × 80% stable = 560 kg stable C; 44/12 stoichiometric conversion retained
+- biomass-to-oil example: 10 t × 30% yield × 9000 kWh/t × 90% = 24,300 kWh useful
+
+Governance checks
+- no default biogas yield
+- no default methane fraction
+- no default biomass energy content
+- no default biochar carbon or stable fraction
+- no default biomass-to-oil yield
+- biomass carbon neutrality is not assumed
+- avoided emissions are not inferred
+- digestate climate benefit is not inferred
+- soil/forest carbon change is not inferred
+- lifecycle emissions and land-use change are not inferred
+- additionality, permanence, leakage, verification, issuance, and carbon-credit eligibility are not determined
+- Carbon & Nature v0.5.0 target concept/methodology keys are validated at runtime
+
+Static validation
+- PHP syntax: pass
+- JavaScript syntax: pass
+- Python compile: pass
+- JSON exports: pass
+- JSON Schemas: pass
+- Contabo upgrader shell syntax: pass
+
+Deployment note
+- Full local FastAPI HTTP execution was not performed in the build environment because the broader Library service requires its PostgreSQL/psycopg runtime stack.
+- No live Contabo deployment was performed during build validation.
+- The v2.13.0 upgrader contains a targeted repair for an unwritable/root-owned /opt/sustainable-catalyst/backups directory before taking the pre-deployment backup.
+
+Clean-room installer validation
+- Tested against a fresh Git repository created from the v0.6.0 repository package.
+- Installer invoked with --no-push.
+- 46 tests passed during installer execution.
+- WordPress v0.7.0 and backend v2.13.0 deployment ZIPs were generated.
+- Release commit was created successfully.
+- Annotated tag energy-systems-v0.7.0 was created successfully.
+- No remote push occurred in the clean-room test.

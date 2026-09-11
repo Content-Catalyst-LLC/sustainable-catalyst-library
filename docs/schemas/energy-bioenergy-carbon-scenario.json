@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-bioenergy-carbon-scenario.json",
+  "title": "Energy Bioenergy Carbon Scenario",
+  "type": "object",
+  "required": [
+    "scenario_id",
+    "name",
+    "pathway",
+    "feedstock",
+    "energy",
+    "carbon_accounting",
+    "carbon_nature_handoffs",
+    "economics",
+    "evidence",
+    "uncertainty"
+  ],
+  "properties": {
+    "scenario_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pathway": {
+      "type": "object"
+    },
+    "feedstock": {
+      "type": "object"
+    },
+    "energy": {
+      "type": "object"
+    },
+    "carbon_accounting": {
+      "type": "object"
+    },
+    "carbon_nature_handoffs": {
+      "type": "object"
+    },
+    "economics": {
+      "type": "object"
+    },
+    "evidence": {
+      "type": "object"
+    },
+    "uncertainty": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}

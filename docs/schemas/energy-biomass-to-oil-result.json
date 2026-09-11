@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "ok",
+    "schema",
+    "model_version",
+    "input",
+    "output",
+    "boundary"
+  ],
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "schema": {
+      "const": "sc-energy-biomass-to-oil-result/1.0"
+    },
+    "model_version": {
+      "const": "0.7.0"
+    },
+    "input": {
+      "type": "object"
+    },
+    "output": {
+      "type": "object",
+      "required": [
+        "oil_product_mass_tonnes",
+        "gross_product_energy_kwh",
+        "useful_energy_kwh"
+      ],
+      "properties": {
+        "oil_product_mass_tonnes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gross_product_energy_kwh": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "useful_energy_kwh": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "ok",
+    "schema",
+    "model_version",
+    "input",
+    "output",
+    "boundary"
+  ],
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "schema": {
+      "const": "sc-energy-anaerobic-digestion-energy-result/1.0"
+    },
+    "model_version": {
+      "const": "0.7.0"
+    },
+    "input": {
+      "type": "object"
+    },
+    "output": {
+      "type": "object",
+      "required": [
+        "biogas_volume_m3",
+        "methane_volume_m3",
+        "gross_methane_energy_kwh",
+        "useful_energy_kwh"
+      ],
+      "properties": {
+        "biogas_volume_m3": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "methane_volume_m3": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gross_methane_energy_kwh": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "useful_energy_kwh": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

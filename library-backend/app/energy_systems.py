@@ -9,10 +9,11 @@ from typing import Any
 from .energy_technologies import RenewableTechnologyResourceRegistry
 from .energy_balances import EnergyBalanceSystemsModel
 from .energy_economics import EnergyScenarioEconomics
+from .energy_bioenergy import BiologicalCarbonBioenergyIntegration
 
 
-DOMAIN_VERSION = "0.6.0"
-SCHEMA_VERSION = "sc-energy-systems-scenario-economics/1.0"
+DOMAIN_VERSION = "0.7.0"
+SCHEMA_VERSION = "sc-energy-systems-biological-carbon-bioenergy/1.0"
 
 
 @dataclass(frozen=True)
@@ -124,10 +125,11 @@ class EnergyIndicatorDefinition:
 class EnergySystemsKnowledgeFoundation:
     """Governed sustainable-energy knowledge and source-bound numerical registry.
 
-    v0.6.0 preserves the knowledge, numeric, indicator, renewable technology/resource,
-    and energy-balance layers, then activates bounded scenario-economics arithmetic using
-    explicit assumptions. Current prices, technology costs, financing, optimization,
-    ranking, investment advice, and policy recommendation remain disabled.
+    v0.7.0 preserves the knowledge, numeric, indicator, renewable technology/resource,
+    energy-balance, and scenario-economics layers, then activates a governed Biological
+    Carbon & Bioenergy integration layer. Quantitative bioenergy calculations require
+    explicit inputs; carbon-neutrality, lifecycle benefit, additionality, permanence,
+    credit eligibility, optimization, ranking, and policy recommendation remain disabled.
     """
 
     def __init__(self) -> None:
@@ -144,6 +146,7 @@ class EnergySystemsKnowledgeFoundation:
         self._technology_registry = RenewableTechnologyResourceRegistry()
         self._balance_model = EnergyBalanceSystemsModel(technology_keys=[x["key"] for x in self._technology_registry.technologies(limit=100)["items"]])
         self._economics_model = EnergyScenarioEconomics()
+        self._bioenergy_model = BiologicalCarbonBioenergyIntegration()
         self._methodology_rules = self._build_methodology_rules()
         self._handoffs = self._build_handoffs()
         self._guardrails = self._build_guardrails()
@@ -531,18 +534,19 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "renewable-technology-profile-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "The module identifies renewable technology families and requires understanding of physical/technological principles and future prospects, but the supplied material does not provide a current quantitative performance database. v0.4.0 therefore structures technology objects without universal efficiency, cost, capacity-factor, lifecycle-emissions, or maturity values.", "current_default": False},
             {"key": "renewable-resource-potential-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "Resource estimation and evaluation require geography-, period-, metric-, method-, and source-specific evidence. A resource observation is not automatically gross, technical, economic, or sustainable potential and does not establish project suitability.", "current_default": False},
             {"key": "energy-economics-formula-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "The supplied module scope requires energy balance, cost-benefit, and cost-efficiency analysis but does not provide a current price database or complete financial methodology. v0.6.0 therefore treats prices, costs, lifetimes, discount rates, benefits, savings, and outcomes as explicit scenario assumptions and labels its formulas as Sustainable Catalyst implementation arithmetic rather than source-attributed universal defaults.", "current_default": False},
+            {"key": "biological-carbon-bioenergy-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "The supplied module explicitly includes soil carbon, CO2-to-energy, forests/forest ecology, digestate from anaerobic digestion, biochar, biomass-to-oil, and bioenergy. It does not supply universal yields, carbon fractions, stable fractions, lifecycle factors, avoided-emissions factors, or carbon-credit rules; v0.7.0 therefore requires explicit quantitative assumptions and whole-system carbon boundaries.", "current_default": False},
         ]
 
     @staticmethod
     def _build_handoffs() -> list[dict[str, Any]]:
         return [
-            {"key": "soil-carbon-to-carbon-nature", "source_concepts": ["soil-carbon"], "target": "Carbon & Nature Intelligence", "target_refs": ["soil-organic-carbon"], "status": "available", "boundary": "Semantic routing only; does not quantify sequestration or project suitability."},
-            {"key": "forest-to-carbon-nature", "source_concepts": ["forest-carbon", "forest-ecology"], "target": "Carbon & Nature Intelligence", "target_refs": ["forest-woodland"], "status": "available", "boundary": "Semantic routing only; does not infer forest-carbon stocks, permanence, or project eligibility."},
-            {"key": "bioenergy-carbon-nature-extension", "source_concepts": ["anaerobic-digestion", "digestate", "biochar", "biomass-to-oil", "co2-to-energy"], "target": "Carbon & Nature Intelligence", "target_refs": [], "status": "planned-extension", "boundary": "No existing target is fabricated in v0.6.0; explicit Carbon & Nature objects are required before this handoff becomes active."},
-            {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "cost-benefit-analysis", "cost-efficiency-analysis", "co2e"], "target": "Workbench", "target_refs": ["energy-unit-conversion-registry", "historical-carbon-factor-registry", "energy-balance-calculation-contract", "energy-scenario-economics-calculation-contract"], "status": "computational-contract-available", "boundary": "v0.6.0 exposes deterministic energy-balance and scenario-economics calculation contracts, but does not modify or execute the separate Workbench product."},
-            {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity", "renewable-resource-potential", "cost-benefit-analysis", "cost-efficiency-analysis"], "target": "Lab", "target_refs": ["renewable-technology-assessment-contract", "renewable-resource-observation-contract", "energy-balance-scenario-contract", "conversion-chain-model", "energy-economic-scenario-contract", "discounted-cash-flow-results"], "status": "computational-contract-available", "boundary": "v0.6.0 exposes portable energy-balance and economic scenario contracts for later Lab sensitivity and uncertainty work; the separate Lab product is not modified and no optimization or automatic suitability execution is enabled."},
-            {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security", "renewable-resource-potential"], "target": "Site Intelligence", "target_refs": ["renewable-resource-observation-contract"], "status": "contract-available", "boundary": "The resource-observation packet can later be populated by Site Intelligence; no current country/site resource or price values are asserted."},
-            {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis"], "target": "Decision Studio", "target_refs": ["energy-economic-scenario-contract", "energy-cost-benefit-result", "energy-cost-efficiency-result", "energy-npv-result"], "status": "decision-contract-available", "boundary": "v0.6.0 exposes evidence-bearing economic result contracts for later decision packets. It does not rank technologies, recommend investments, or make policy choices."},
+            {"key": "soil-carbon-to-carbon-nature", "source_concepts": ["soil-carbon"], "target": "Carbon & Nature Intelligence", "target_refs": ["soil-organic-carbon", "whole-system-ghg-accounting"], "status": "cross-domain-contract-available", "boundary": "v0.7.0 resolves the Energy Systems soil-carbon concept to Carbon & Nature soil-organic-carbon and whole-system accounting context; it does not quantify sequestration, permanence, additionality, or project suitability."},
+            {"key": "forest-to-carbon-nature", "source_concepts": ["forest-carbon", "forest-ecology", "biomass"], "target": "Carbon & Nature Intelligence", "target_refs": ["forest-woodland", "aboveground-biomass", "belowground-biomass", "biomass-inventory-measurement", "whole-system-ghg-accounting"], "status": "cross-domain-contract-available", "boundary": "Forest/biomass energy questions resolve to governed land-system, biomass-pool, and accounting contexts; biomass carbon neutrality, stock change, permanence, harvest/regrowth balance, leakage, and project eligibility are not inferred."},
+            {"key": "bioenergy-carbon-nature-extension", "source_concepts": ["anaerobic-digestion", "digestate", "biochar", "biomass-to-oil", "co2-to-energy", "bioenergy", "biomass"], "target": "Carbon & Nature Intelligence", "target_refs": ["soil-organic-carbon", "forest-woodland", "aboveground-biomass", "belowground-biomass", "carbon-dioxide", "methane", "nitrous-oxide", "whole-system-ghg-accounting"], "status": "cross-domain-contract-available", "boundary": "v0.7.0 activates validated semantic/accounting bridges to existing Carbon & Nature concepts and methodologies. It does not transfer or fabricate quantitative carbon benefits, lifecycle results, avoided emissions, or crediting claims."},
+            {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "cost-benefit-analysis", "cost-efficiency-analysis", "co2e", "bioenergy", "anaerobic-digestion", "biochar", "biomass-to-oil"], "target": "Workbench", "target_refs": ["energy-unit-conversion-registry", "historical-carbon-factor-registry", "energy-balance-calculation-contract", "energy-scenario-economics-calculation-contract", "bioenergy-explicit-input-calculation-contract"], "status": "computational-contract-available", "boundary": "v0.7.0 exposes deterministic energy-balance, economics, and bioenergy calculation contracts, but does not modify or execute the separate Workbench product."},
+            {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity", "renewable-resource-potential", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "soil-carbon", "forest-carbon"], "target": "Lab", "target_refs": ["renewable-technology-assessment-contract", "renewable-resource-observation-contract", "energy-balance-scenario-contract", "conversion-chain-model", "energy-economic-scenario-contract", "discounted-cash-flow-results", "bioenergy-carbon-scenario-contract", "carbon-nature-bridge-registry"], "status": "computational-contract-available", "boundary": "v0.7.0 exposes portable bioenergy/carbon scenario contracts for later Lab sensitivity, uncertainty, lifecycle, and carbon-model integration; the separate Lab product is not modified and no optimization or automatic sustainability execution is enabled."},
+            {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security", "renewable-resource-potential", "bioenergy", "forest-carbon"], "target": "Site Intelligence", "target_refs": ["renewable-resource-observation-contract", "biomass-feedstock-observation-contract", "bioenergy-geography-contract"], "status": "contract-available", "boundary": "Site Intelligence may later populate geographic resource/feedstock context. v0.7.0 asserts no current biomass availability, land suitability, forest stock, project potential, or country-specific bioenergy result."},
+            {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "biological-carbon-capture-storage"], "target": "Decision Studio", "target_refs": ["energy-economic-scenario-contract", "energy-cost-benefit-result", "energy-cost-efficiency-result", "energy-npv-result", "bioenergy-carbon-scenario-contract", "carbon-nature-accounting-handoff"], "status": "decision-contract-available", "boundary": "v0.7.0 adds bioenergy/carbon evidence and accounting contracts for later decision packets. It does not rank technologies, recommend projects or investments, or make policy choices."},
         ]
 
     @staticmethod
@@ -604,6 +608,18 @@ class EnergySystemsKnowledgeFoundation:
             "technology_lifetime_inference_activated": False,
             "tax_subsidy_financing_model_activated": False,
             "investment_recommendation_activated": False,
+            "biological_carbon_bioenergy_integration_activated": True,
+            "bioenergy_feedstock_registry_activated": True,
+            "bioenergy_pathway_registry_activated": True,
+            "carbon_nature_bridge_registry_activated": True,
+            "bioenergy_explicit_input_calculators_activated": True,
+            "bioenergy_carbon_scenario_contract_activated": True,
+            "biomass_carbon_neutrality_assumed": False,
+            "bioenergy_lifecycle_emissions_inferred": False,
+            "bioenergy_avoided_emissions_inferred": False,
+            "digestate_climate_benefit_inferred": False,
+            "biochar_permanence_or_credit_eligibility_inferred": False,
+            "soil_or_forest_carbon_change_inferred_from_bioenergy": False,
             "automatic_technology_ranking": False,
             "automatic_policy_recommendation": False,
             "automatic_sustainability_score": False,
@@ -681,6 +697,7 @@ class EnergySystemsKnowledgeFoundation:
             "renewable_technology_resource_model": self._technology_registry.export(),
             "energy_balance_systems_model": self._balance_model.export(),
             "energy_scenario_economics": self._economics_model.export(),
+            "biological_carbon_bioenergy_integration": self._bioenergy_model.export(),
             "methodology_rules": self._methodology_rules,
             "handoffs": self._handoffs,
             "guardrails": self._guardrails,
@@ -694,11 +711,11 @@ class EnergySystemsKnowledgeFoundation:
             "subsystem": {
                 "name": "Energy Systems Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Energy Scenario Economics",
+                "release": "Biological Carbon & Bioenergy Integration",
                 "library_version": "5.11.0",
-                "backend_version": "2.12.0",
+                "backend_version": "2.13.0",
                 "read_only": True,
-                "calculation_mode": "source-bound-registry-plus-explicit-input-energy-balance-and-scenario-economics",
+                "calculation_mode": "source-bound-registry-plus-explicit-input-energy-balance-economics-and-bioenergy-carbon",
             },
             "counts": {
                 "concepts": len(self._concepts),
@@ -727,6 +744,11 @@ class EnergySystemsKnowledgeFoundation:
                 "energy_economic_models": self._economics_model.framework()["counts"]["models"],
                 "energy_economic_executable_models": self._economics_model.framework()["counts"]["executable_models"],
                 "energy_economic_scenario_contracts": self._economics_model.framework()["counts"]["scenario_contracts"],
+                "bioenergy_feedstock_classes": self._bioenergy_model.framework()["counts"]["feedstock_classes"],
+                "bioenergy_pathways": self._bioenergy_model.framework()["counts"]["pathways"],
+                "carbon_nature_bridges": self._bioenergy_model.framework()["counts"]["carbon_nature_bridges"],
+                "bioenergy_executable_models": self._bioenergy_model.framework()["counts"]["executable_models"],
+                "bioenergy_scenario_contracts": self._bioenergy_model.framework()["counts"]["scenario_contracts"],
                 "methodology_rules": len(self._methodology_rules),
             },
             "knowledge_domains": self._knowledge_domains,
@@ -735,9 +757,11 @@ class EnergySystemsKnowledgeFoundation:
             "renewable_technology_resource_model": self._technology_registry.framework(),
             "energy_balance_systems_model": self._balance_model.framework(),
             "energy_scenario_economics": self._economics_model.framework(),
+            "biological_carbon_bioenergy_integration": self._bioenergy_model.framework(),
             "roadmap": [
-                {"version": "0.7.0", "name": "Biological Carbon & Bioenergy Integration"},
                 {"version": "0.8.0", "name": "Global Energy Intelligence"},
+                {"version": "0.9.0", "name": "Energy Decision Intelligence"},
+                {"version": "1.0.0", "name": "Integrated Sustainable Energy Systems Platform"},
             ],
             "content_fingerprint": self._fingerprint,
         }
@@ -1124,6 +1148,36 @@ class EnergySystemsKnowledgeFoundation:
 
     def economic_scenario_template(self) -> dict[str, Any]:
         return self._economics_model.scenario_template()
+
+    def bioenergy_framework(self) -> dict[str, Any]:
+        return self._bioenergy_model.framework()
+
+    def bioenergy_feedstocks(self, *, q: str = "", limit: int = 100) -> dict[str, Any]:
+        return self._bioenergy_model.feedstocks(q=q, limit=limit)
+
+    def bioenergy_pathways(self, *, q: str = "", family: str = "", limit: int = 100) -> dict[str, Any]:
+        return self._bioenergy_model.pathways(q=q, family=family, limit=limit)
+
+    def bioenergy_pathway(self, key: str) -> dict[str, Any]:
+        return self._bioenergy_model.pathway(key)
+
+    def biological_carbon_bridges(self) -> dict[str, Any]:
+        return self._bioenergy_model.carbon_nature_bridges()
+
+    def feedstock_energy_estimate(self, **kwargs: str) -> dict[str, Any]:
+        return self._bioenergy_model.feedstock_energy_estimate(**kwargs)
+
+    def anaerobic_digestion_energy_estimate(self, **kwargs: str) -> dict[str, Any]:
+        return self._bioenergy_model.anaerobic_digestion_energy_estimate(**kwargs)
+
+    def biochar_carbon_estimate(self, **kwargs: str) -> dict[str, Any]:
+        return self._bioenergy_model.biochar_carbon_estimate(**kwargs)
+
+    def biomass_to_oil_energy_estimate(self, **kwargs: str) -> dict[str, Any]:
+        return self._bioenergy_model.biomass_to_oil_energy_estimate(**kwargs)
+
+    def bioenergy_scenario_template(self) -> dict[str, Any]:
+        return self._bioenergy_model.scenario_template()
 
     def handoffs(self) -> dict[str, Any]:
         return {"ok": True, "schema": "sc-energy-handoffs/1.0", "count": len(self._handoffs), "items": self._handoffs, "guardrail": "Only handoffs marked available or contract-available resolve to a governed target or contract; planned handoffs do not imply current capability."}

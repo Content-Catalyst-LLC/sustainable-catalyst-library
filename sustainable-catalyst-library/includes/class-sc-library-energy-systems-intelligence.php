@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v0.6.0 — Energy Scenario Economics. */
+/** Energy Systems Intelligence v0.7.0 — Biological Carbon & Bioenergy Integration. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '0.6.0';
+    public const VERSION = '0.7.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v060', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v060.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v060', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v060.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v070', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v070.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v070', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v070.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -158,6 +158,16 @@ final class SC_Library_Energy_Systems_Intelligence {
         register_rest_route('sc-library/v1', '/energy-systems/cost-efficiency', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'cost_efficiency']]);
         register_rest_route('sc-library/v1', '/energy-systems/levelized-energy-cost', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'levelized_energy_cost']]);
         register_rest_route('sc-library/v1', '/energy-systems/economic-scenario-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'economic_scenario_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/bioenergy-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'bioenergy_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/bioenergy-feedstocks', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'bioenergy_feedstocks']]);
+        register_rest_route('sc-library/v1', '/energy-systems/bioenergy-pathways', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'bioenergy_pathways']]);
+        register_rest_route('sc-library/v1', '/energy-systems/bioenergy-pathway/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'bioenergy_pathway']]);
+        register_rest_route('sc-library/v1', '/energy-systems/biological-carbon-bridges', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'biological_carbon_bridges']]);
+        register_rest_route('sc-library/v1', '/energy-systems/feedstock-energy-estimate', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'feedstock_energy_estimate']]);
+        register_rest_route('sc-library/v1', '/energy-systems/anaerobic-digestion-energy-estimate', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'anaerobic_digestion_energy_estimate']]);
+        register_rest_route('sc-library/v1', '/energy-systems/biochar-carbon-estimate', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'biochar_carbon_estimate']]);
+        register_rest_route('sc-library/v1', '/energy-systems/biomass-to-oil-energy-estimate', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'biomass_to_oil_energy_estimate']]);
+        register_rest_route('sc-library/v1', '/energy-systems/bioenergy-scenario-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'bioenergy_scenario_template']]);
     }
 
     public function manifest(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems'); }
@@ -289,6 +299,17 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function levelized_energy_cost(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/levelized-energy-cost', $this->numeric_params($request, ['initial_cost','annual_operating_cost','annual_energy_kwh','discount_rate_pct','years','residual_value','currency'])); }
     public function economic_scenario_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/economic-scenario-template'); }
 
+    public function bioenergy_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/bioenergy-framework'); }
+    public function bioenergy_feedstocks(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/bioenergy-feedstocks', ['q' => trim((string)$request->get_param('q')), 'limit' => min(100, max(1, absint($request->get_param('limit') ?: 100)))]); }
+    public function bioenergy_pathways(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/bioenergy-pathways', ['q' => trim((string)$request->get_param('q')), 'family' => sanitize_key((string)$request->get_param('family')), 'limit' => min(100, max(1, absint($request->get_param('limit') ?: 100)))]); }
+    public function bioenergy_pathway(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/bioenergy-pathways/' . rawurlencode(sanitize_key((string)$request['key']))); }
+    public function biological_carbon_bridges(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/biological-carbon-bridges'); }
+    public function feedstock_energy_estimate(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/feedstock-energy-estimate', $this->numeric_params($request, ['mass_tonnes','energy_content_kwh_per_tonne','conversion_efficiency_pct'])); }
+    public function anaerobic_digestion_energy_estimate(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/anaerobic-digestion-energy-estimate', $this->numeric_params($request, ['feedstock_mass_tonnes','biogas_yield_m3_per_tonne','methane_fraction_pct','methane_energy_kwh_per_m3','conversion_efficiency_pct'])); }
+    public function biochar_carbon_estimate(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/biochar-carbon-estimate', $this->numeric_params($request, ['biochar_mass_kg','carbon_fraction_pct','stable_fraction_pct'])); }
+    public function biomass_to_oil_energy_estimate(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/biomass-to-oil-energy-estimate', $this->numeric_params($request, ['feedstock_mass_tonnes','oil_yield_mass_pct','oil_energy_content_kwh_per_tonne','downstream_conversion_efficiency_pct'])); }
+    public function bioenergy_scenario_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/bioenergy-scenario-template'); }
+
     private function proxy(string $path, array $params = []) {
         if (!SC_Library_Python_Backend::configured()) {
             return new WP_Error('sc_library_backend_not_configured', __('Library backend is not configured.', 'sustainable-catalyst-library'), ['status' => 503]);
@@ -310,11 +331,11 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Energy Systems Intelligence',
-            'intro' => 'Compare explicit energy-scenario economics with transparent cost, payback, discounted cash-flow, cost-benefit, cost-efficiency, and levelized-unit-cost calculations while preserving the full energy knowledge and modeling stack.',
+            'intro' => 'Connect bioenergy pathways, explicit-input energy calculations, and biological carbon accounting to governed Carbon & Nature concepts while preserving the full Energy Systems knowledge, balance, technology, indicator, and economics stack.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v060');
-        wp_enqueue_script('sc-library-energy-systems-v060');
+        wp_enqueue_style('sc-library-energy-systems-v070');
+        wp_enqueue_script('sc-library-energy-systems-v070');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -356,9 +377,18 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-cost-benefit-endpoint="<?php echo esc_url($ep('/cost-benefit')); ?>"
             data-cost-efficiency-endpoint="<?php echo esc_url($ep('/cost-efficiency')); ?>"
             data-levelized-cost-endpoint="<?php echo esc_url($ep('/levelized-energy-cost')); ?>"
-            data-economic-scenario-endpoint="<?php echo esc_url($ep('/economic-scenario-template')); ?>">
+            data-economic-scenario-endpoint="<?php echo esc_url($ep('/economic-scenario-template')); ?>"
+            data-bioenergy-framework-endpoint="<?php echo esc_url($ep('/bioenergy-framework')); ?>"
+            data-bioenergy-feedstocks-endpoint="<?php echo esc_url($ep('/bioenergy-feedstocks')); ?>"
+            data-bioenergy-pathways-endpoint="<?php echo esc_url($ep('/bioenergy-pathways')); ?>"
+            data-biological-carbon-bridges-endpoint="<?php echo esc_url($ep('/biological-carbon-bridges')); ?>"
+            data-feedstock-energy-endpoint="<?php echo esc_url($ep('/feedstock-energy-estimate')); ?>"
+            data-anaerobic-digestion-energy-endpoint="<?php echo esc_url($ep('/anaerobic-digestion-energy-estimate')); ?>"
+            data-biochar-carbon-endpoint="<?php echo esc_url($ep('/biochar-carbon-estimate')); ?>"
+            data-biomass-to-oil-energy-endpoint="<?php echo esc_url($ep('/biomass-to-oil-energy-estimate')); ?>"
+            data-bioenergy-scenario-endpoint="<?php echo esc_url($ep('/bioenergy-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.6.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.7.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
@@ -368,12 +398,13 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__guardrail">
-                <strong><?php esc_html_e('Economic scenario arithmetic ≠ forecast, investment advice, or preferred energy pathway.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v0.6.0 requires explicit prices, costs, benefits, discount rates, lifetimes, savings, and outcomes. It does not infer market prices, financing, tax, subsidy, technology costs, carbon prices, or preferred investments.', 'sustainable-catalyst-library'); ?>
+                <strong><?php esc_html_e('Bioenergy output ≠ carbon neutrality, verified removal, or project eligibility.', 'sustainable-catalyst-library'); ?></strong>
+                <?php esc_html_e('v0.7.0 requires explicit yields, energy values, fractions, efficiencies, baselines, lifecycle boundaries, and evidence. It does not infer avoided emissions, digestate benefit, soil or forest carbon change, additionality, permanence, leakage, or carbon-credit eligibility.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
-                <button type="button" class="sc-es__mode is-active" data-es-mode="economics" role="tab" aria-selected="true">Scenario Economics</button>
+                <button type="button" class="sc-es__mode is-active" data-es-mode="bioenergy" role="tab" aria-selected="true">Bioenergy &amp; Carbon</button>
+                <button type="button" class="sc-es__mode" data-es-mode="economics" role="tab" aria-selected="false">Scenario Economics</button>
                 <button type="button" class="sc-es__mode" data-es-mode="balance" role="tab" aria-selected="false">Energy Balance</button>
                 <button type="button" class="sc-es__mode" data-es-mode="technologies" role="tab" aria-selected="false">Technologies &amp; Resources</button>
                 <button type="button" class="sc-es__mode" data-es-mode="indicators" role="tab" aria-selected="false">Sustainability Indicators</button>
@@ -384,7 +415,25 @@ final class SC_Library_Energy_Systems_Intelligence {
                 <button type="button" class="sc-es__mode" data-es-mode="handoffs" role="tab" aria-selected="false">Platform Handoffs</button>
             </div>
 
-            <div class="sc-es__panel" data-es-panel="economics">
+            <div class="sc-es__panel" data-es-panel="bioenergy">
+                <div class="sc-es__panel-heading"><strong>Biological carbon &amp; bioenergy integration</strong><span>Link anaerobic digestion and digestate, biochar, biomass-to-oil, generic biomass energy, soil/forest carbon, and CO₂-to-energy to explicit-input energy accounting and governed Carbon &amp; Nature contexts.</span></div>
+                <p class="sc-es__status" data-es-bioenergy-framework-status aria-live="polite">Loading bioenergy framework…</p>
+                <div class="sc-es__bioenergy-summary" data-es-bioenergy-summary></div>
+
+                <div class="sc-es__calc-grid sc-es__calc-grid--bioenergy">
+                    <form class="sc-es__calculator" data-es-feedstock-energy-form><h3>Feedstock energy</h3><label><span>Feedstock mass (tonnes)</span><input name="mass_tonnes" value="10" inputmode="decimal" required></label><label><span>Energy content (kWh/tonne)</span><input name="energy_content_kwh_per_tonne" value="4000" inputmode="decimal" required></label><label><span>Conversion efficiency (%)</span><input name="conversion_efficiency_pct" value="80" inputmode="decimal" required></label><button type="submit">Estimate useful energy</button><div class="sc-es__result" data-es-feedstock-energy-result aria-live="polite"></div></form>
+                    <form class="sc-es__calculator" data-es-ad-energy-form><h3>Anaerobic digestion energy</h3><label><span>Feedstock mass (tonnes)</span><input name="feedstock_mass_tonnes" value="10" inputmode="decimal" required></label><label><span>Biogas yield (m³/tonne)</span><input name="biogas_yield_m3_per_tonne" value="100" inputmode="decimal" required></label><label><span>Methane fraction (%)</span><input name="methane_fraction_pct" value="60" inputmode="decimal" required></label><label><span>Methane energy (kWh/m³)</span><input name="methane_energy_kwh_per_m3" value="10" inputmode="decimal" required></label><label><span>Conversion efficiency (%)</span><input name="conversion_efficiency_pct" value="40" inputmode="decimal" required></label><button type="submit">Estimate AD energy</button><div class="sc-es__result" data-es-ad-energy-result aria-live="polite"></div></form>
+                    <form class="sc-es__calculator" data-es-biochar-form><h3>Biochar carbon accounting</h3><label><span>Biochar mass (kg)</span><input name="biochar_mass_kg" value="1000" inputmode="decimal" required></label><label><span>Carbon fraction (%)</span><input name="carbon_fraction_pct" value="70" inputmode="decimal" required></label><label><span>Stable fraction (%)</span><input name="stable_fraction_pct" value="80" inputmode="decimal" required></label><button type="submit">Estimate carbon equivalent</button><div class="sc-es__result" data-es-biochar-result aria-live="polite"></div></form>
+                    <form class="sc-es__calculator" data-es-biomass-oil-form><h3>Biomass-to-oil energy</h3><label><span>Feedstock mass (tonnes)</span><input name="feedstock_mass_tonnes" value="10" inputmode="decimal" required></label><label><span>Oil yield by mass (%)</span><input name="oil_yield_mass_pct" value="30" inputmode="decimal" required></label><label><span>Oil energy content (kWh/tonne)</span><input name="oil_energy_content_kwh_per_tonne" value="9000" inputmode="decimal" required></label><label><span>Downstream efficiency (%)</span><input name="downstream_conversion_efficiency_pct" value="90" inputmode="decimal" required></label><button type="submit">Estimate product energy</button><div class="sc-es__result" data-es-biomass-oil-result aria-live="polite"></div></form>
+                </div>
+
+                <div class="sc-es__bioenergy-section"><div class="sc-es__panel-heading"><strong>Bioenergy pathways</strong><span>Pathway objects separate energy conversion from lifecycle and carbon claims.</span></div><div class="sc-es__cards" data-es-bioenergy-pathways></div></div>
+                <div class="sc-es__bioenergy-section"><div class="sc-es__panel-heading"><strong>Feedstock classes</strong><span>Normalized feedstock objects require origin, mass/moisture basis, competing-use, land-use, and provenance context.</span></div><div class="sc-es__cards" data-es-bioenergy-feedstocks></div></div>
+                <div class="sc-es__bioenergy-section"><div class="sc-es__panel-heading"><strong>Carbon &amp; Nature bridges</strong><span>Validated links resolve to existing Carbon &amp; Nature concepts and methodologies without importing quantitative carbon claims.</span></div><div class="sc-es__cards" data-es-biological-carbon-bridges></div></div>
+                <div class="sc-es__bioenergy-contract" data-es-bioenergy-scenario-contract></div>
+            </div>
+
+            <div class="sc-es__panel" data-es-panel="economics" hidden>
                 <div class="sc-es__panel-heading"><strong>Energy scenario economics</strong><span>Run transparent economic comparisons from explicit assumptions. No price feed, technology-cost database, financing model, or automatic investment recommendation is used.</span></div>
                 <p class="sc-es__status" data-es-economics-framework-status aria-live="polite">Loading economics framework…</p><div class="sc-es__economics-summary" data-es-economics-summary></div>
                 <div class="sc-es__calc-grid sc-es__calc-grid--economics">
@@ -533,12 +582,12 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="handoffs" hidden>
-                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.6.0 adds portable scenario-economics contracts alongside energy-balance and conversion-chain contracts for later Lab and Workbench integration while preserving renewable-resource, indicator, and Decision Studio handoffs. The separate products are not modified by this Library release.</span></div>
+                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.7.0 adds validated Energy Systems ↔ Carbon & Nature bioenergy/carbon bridges plus portable bioenergy-carbon scenario contracts while preserving economics, balance, renewable-resource, indicator, Lab, Workbench, Site Intelligence, and Decision Studio handoffs. Separate products are not modified by this Library release.</span></div>
                 <p class="sc-es__status" data-es-handoff-status aria-live="polite">Loading handoff registry…</p>
                 <div class="sc-es__cards" data-es-handoff-results></div>
             </div>
 
-            <footer><strong>Next:</strong> v0.7.0 — Biological Carbon &amp; Bioenergy Integration. The next release will connect anaerobic digestion, digestate, biochar, biomass-to-oil, CO₂-to-energy, soil carbon, and forest carbon across Energy Systems and Carbon &amp; Nature without treating bioenergy as automatically carbon neutral.</footer>
+            <footer><strong>Next:</strong> v0.8.0 — Global Energy Intelligence. The next release should connect governed current energy datasets, geography, country/system profiles, generation and consumption trends, resource observations, and source freshness to Site Intelligence without treating historical course sources as current operational data.</footer>
         </section>
         <?php return (string)ob_get_clean();
     }

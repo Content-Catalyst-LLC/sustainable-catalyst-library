@@ -11,7 +11,7 @@ A unified WordPress Living Knowledge System for public discovery, research works
 
 == Description ==
 
-Energy Systems Intelligence v0.5.0 adds deterministic Energy Balance & Systems Modeling while preserving the knowledge foundation, source-bound numeric registry, EISD indicators, and renewable technology/resource model. Explicit-input conversion-chain, supply-demand balance, and capacity-factor generation calculations are now available with a portable balance-scenario contract. Dispatch, storage physics, reliability/adequacy modeling, economic optimization, automatic ranking, and policy conclusions remain disabled.
+Energy Systems Intelligence v0.7.0 adds Biological Carbon & Bioenergy Integration while preserving the knowledge foundation, numeric registry, EISD indicators, renewable technology/resource model, energy-balance models, and scenario economics. Five feedstock classes, six pathway definitions, six validated Carbon & Nature bridge contracts, four explicit-input calculations, and a portable bioenergy-carbon scenario contract are now available. Biomass carbon neutrality, avoided emissions, lifecycle benefit, soil/forest carbon change, additionality, permanence, leakage, and carbon-credit eligibility are not inferred.
 
 Sustainable Catalyst Library v5.11.0 adds Private Organizational Knowledge Foundation: a physically separate organization-scoped private knowledge plane with signed server-only access, access scopes, private search, version lineage, provenance, audit events, and controlled Research Librarian/Workspace/Lab handoffs. v5.10.0 Institutional Research Network II remains intact. The current Research Library page remains the R3.2.1 capability-preserving baseline with Three Research Front Doors removed. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
 
@@ -371,7 +371,7 @@ The facade does not expose My Library, private Research Projects, notebook or Ev
 
 == Energy Systems Intelligence ==
 
-Use `[sc_energy_systems_intelligence]` to expose the Library-native Sustainable Energy Knowledge Foundation, source-bound numeric registry, EISD indicator framework, renewable technology/resource model, and v0.5.0 Energy Balance & Systems Modeling layer. The surface now opens on Energy Balance with explicit-input conversion-chain, supply-demand accounting, and capacity-factor generation tools plus a portable scenario contract. These calculations are scenario arithmetic, not forecasts, dispatch, reliability models, suitability determinations, rankings, or policy recommendations.
+Use `[sc_energy_systems_intelligence]` to expose the Library-native Sustainable Energy Knowledge Foundation, source-bound numeric registry, EISD indicator framework, renewable technology/resource model, energy-balance models, scenario economics, and v0.7.0 Biological Carbon & Bioenergy Integration. The surface opens on Bioenergy & Carbon with explicit-input feedstock, anaerobic-digestion, biochar carbon-accounting, and biomass-to-oil calculations plus validated Carbon & Nature bridges and a portable bioenergy-carbon scenario contract. Energy output is not treated as carbon neutrality, avoided emissions, verified removal, project eligibility, ranking, or policy recommendation.
 
 = 5.11.0 + Energy Systems Intelligence v0.1.0 =
 
@@ -390,6 +390,22 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= Energy Systems Intelligence 0.7.0 / Backend 2.13.0 =
+
+* Preserves Library v5.11.0, Carbon & Nature Intelligence v0.5.0, and the complete Energy Systems v0.1.0–v0.6.0 stack.
+* Adds five normalized bioenergy feedstock classes and six bioenergy/biological-carbon pathway objects.
+* Adds six validated Energy Systems ↔ Carbon & Nature bridge contracts resolving to existing carbon pools, greenhouse gases, land-system concepts, biomass measurement, and whole-system GHG accounting.
+* Adds explicit-input feedstock-energy, anaerobic-digestion-energy, biochar stoichiometric carbon-equivalent, and biomass-to-oil energy calculations.
+* Adds a portable bioenergy-carbon scenario contract linking pathway, feedstock, energy, carbon accounting, Carbon & Nature handoffs, evidence, uncertainty, and economics.
+* Does not embed default yields, methane fractions, heating values, biochar carbon/stability fractions, lifecycle factors, avoided-emission factors, or carbon-credit rules.
+* Does not assume biomass carbon neutrality or infer digestate climate benefit, soil/forest carbon change, additionality, permanence, leakage, verification, issuance, or project eligibility.
+* Hardens the Contabo upgrader so a root-owned `/opt/sustainable-catalyst/backups` directory is repaired before the pre-deployment backup.
+
+= Energy Systems Intelligence 0.6.0 / Backend 2.12.0 =
+
+* Added explicit-assumption scenario economics: cost comparison, simple payback, NPV, cost-benefit, cost-efficiency, simplified levelized energy cost, and a portable economic scenario contract.
+* Preserved all v0.1.0–v0.5.0 Energy Systems capabilities and kept external price feeds, technology cost databases, discount-rate inference, financing/tax/subsidy modeling, investment recommendations, optimization, ranking, and policy recommendation disabled.
 
 = Energy Systems Intelligence 0.5.0 / Backend 2.11.0 =
 

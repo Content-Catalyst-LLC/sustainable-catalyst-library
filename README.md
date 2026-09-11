@@ -1,5 +1,13 @@
 # Sustainable Catalyst Library
 
+## Energy Systems Intelligence v0.7.0
+
+Adds **Biological Carbon & Bioenergy Integration** while preserving Library v5.11.0, Carbon & Nature Intelligence v0.5.0, and Energy Systems v0.1.0–v0.6.0. The shared Python backend advances to v2.13.0.
+
+v0.7.0 adds five normalized feedstock classes, six bioenergy/biological-carbon pathway objects, six validated cross-domain bridges into the existing Carbon & Nature concept/methodology registries, four explicit-input calculations, and a portable bioenergy-carbon scenario contract. It explicitly does not assume biomass carbon neutrality or infer lifecycle benefits, avoided emissions, digestate benefits, soil/forest carbon change, additionality, permanence, leakage, verification, issuance, or carbon-credit eligibility.
+
+See `ENERGY_SYSTEMS_INTELLIGENCE_v0.7.0.md`, `RELEASE_NOTES_ENERGY_SYSTEMS_0.7.0.md`, and `DEPLOY_ENERGY_SYSTEMS_BACKEND_v2.13.0.md`.
+
 ## Energy Systems Intelligence v0.5.0
 
 Adds **Energy Balance & Systems Modeling** while preserving Library v5.11.0, Carbon & Nature Intelligence v0.5.0, the source-bound numeric registry, all 30 EISD indicators, and the v0.4.0 renewable technology/resource model. The shared Python backend advances to v2.11.0.

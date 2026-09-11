@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "ok",
+    "schema",
+    "model_version",
+    "input",
+    "output",
+    "boundary"
+  ],
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "schema": {
+      "const": "sc-energy-biochar-carbon-result/1.0"
+    },
+    "model_version": {
+      "const": "0.7.0"
+    },
+    "input": {
+      "type": "object"
+    },
+    "output": {
+      "type": "object",
+      "required": [
+        "carbon_mass_kg_c",
+        "stable_carbon_mass_kg_c",
+        "stoichiometric_co2_equivalent_kg"
+      ],
+      "properties": {
+        "carbon_mass_kg_c": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stable_carbon_mass_kg_c": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stoichiometric_co2_equivalent_kg": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

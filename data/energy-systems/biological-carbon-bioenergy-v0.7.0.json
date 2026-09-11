@@ -1,0 +1,627 @@
+{
+  "schema": "sc-energy-biological-carbon-bioenergy-export/1.0",
+  "version": "0.7.0",
+  "framework": {
+    "ok": true,
+    "schema": "sc-energy-biological-carbon-bioenergy/1.0",
+    "version": "0.7.0",
+    "counts": {
+      "feedstock_classes": 5,
+      "pathways": 6,
+      "carbon_nature_bridges": 6,
+      "executable_models": 4,
+      "scenario_contracts": 1
+    },
+    "capabilities": [
+      "bioenergy-feedstock-class-registry",
+      "bioenergy-pathway-registry",
+      "energy-carbon-nature-cross-domain-bridge-registry",
+      "explicit-input-feedstock-energy-estimate",
+      "explicit-input-anaerobic-digestion-energy-estimate",
+      "explicit-input-biochar-stoichiometric-carbon-estimate",
+      "explicit-input-biomass-to-oil-energy-estimate",
+      "bioenergy-carbon-scenario-contract"
+    ],
+    "source_boundary": "The module supplies pathway scope, not universal quantitative defaults. Arithmetic models are Sustainable Catalyst implementation formulas using explicit caller-supplied assumptions.",
+    "guardrails": {
+      "explicit_quantitative_inputs_required": true,
+      "default_biogas_yield_loaded": false,
+      "default_methane_fraction_loaded": false,
+      "default_biomass_energy_content_loaded": false,
+      "default_biochar_carbon_fraction_loaded": false,
+      "default_biochar_stable_fraction_loaded": false,
+      "default_biomass_to_oil_yield_loaded": false,
+      "biomass_carbon_neutrality_assumed": false,
+      "avoided_emissions_inferred": false,
+      "digestate_climate_benefit_inferred": false,
+      "soil_carbon_change_inferred": false,
+      "forest_carbon_change_inferred": false,
+      "lifecycle_emissions_inferred": false,
+      "land_use_change_inferred": false,
+      "additionality_determined": false,
+      "permanence_determined": false,
+      "leakage_determined": false,
+      "carbon_credit_eligibility_determined": false,
+      "biochar_co2e_estimate_is_stoichiometric_only": true,
+      "cross_domain_carbon_nature_targets_validated": true
+    },
+    "content_fingerprint": "4ba51d3a323f4d90aecea246d242e593b7957358d1cade069b58cbf7af33882f"
+  },
+  "feedstocks": {
+    "ok": true,
+    "schema": "sc-energy-bioenergy-feedstocks/1.0",
+    "version": "0.7.0",
+    "count": 5,
+    "items": [
+      {
+        "key": "biomass-generic",
+        "label": "Biomass — generic",
+        "physical_form": "variable",
+        "moisture_context": "must-be-declared",
+        "applicable_pathways": [
+          "biomass-energy-conversion",
+          "biochar-production",
+          "biomass-to-oil"
+        ],
+        "required_characterization": [
+          "feedstock identity",
+          "mass basis",
+          "moisture basis",
+          "energy content basis",
+          "origin",
+          "competing uses",
+          "land-use context",
+          "source/provenance"
+        ],
+        "carbon_nature_context": [
+          "aboveground-biomass",
+          "belowground-biomass",
+          "forest-woodland"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "status": "evidence-required",
+        "note": "Generic biomass is a transport object, not a sustainability classification. Feedstock origin, moisture, land-use context, competing uses, and accounting boundary remain explicit evidence questions."
+      },
+      {
+        "key": "wet-organic-biomass",
+        "label": "Wet organic biomass",
+        "physical_form": "wet-organic",
+        "moisture_context": "explicit-moisture-or-solids-basis",
+        "applicable_pathways": [
+          "anaerobic-digestion-biogas"
+        ],
+        "required_characterization": [
+          "feedstock identity",
+          "wet mass or dry-solids basis",
+          "moisture/solids content",
+          "biogas-yield basis",
+          "origin",
+          "source/provenance"
+        ],
+        "carbon_nature_context": [
+          "methane",
+          "nitrous-oxide"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "status": "evidence-required",
+        "note": "This normalized implementation category supports anaerobic-digestion scenario accounting; the supplied module does not define a universal feedstock taxonomy or biogas yield."
+      },
+      {
+        "key": "woody-biomass",
+        "label": "Woody biomass",
+        "physical_form": "solid-biological",
+        "moisture_context": "must-be-declared",
+        "applicable_pathways": [
+          "biomass-energy-conversion",
+          "biochar-production",
+          "biomass-to-oil"
+        ],
+        "required_characterization": [
+          "biomass source",
+          "forest/land-use context",
+          "mass basis",
+          "moisture basis",
+          "energy content basis",
+          "harvest/residue status",
+          "source/provenance"
+        ],
+        "carbon_nature_context": [
+          "forest-woodland",
+          "aboveground-biomass",
+          "belowground-biomass",
+          "dead-wood",
+          "litter"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "status": "evidence-required",
+        "note": "Forest or woody origin does not establish renewable, carbon-neutral, additional, or sustainable status; land, biomass-pool, harvest, displacement, and regrowth boundaries remain explicit."
+      },
+      {
+        "key": "agricultural-biomass",
+        "label": "Agricultural biomass",
+        "physical_form": "solid-or-wet-biological",
+        "moisture_context": "must-be-declared",
+        "applicable_pathways": [
+          "biomass-energy-conversion",
+          "anaerobic-digestion-biogas",
+          "biochar-production",
+          "biomass-to-oil"
+        ],
+        "required_characterization": [
+          "feedstock identity",
+          "production/residue status",
+          "mass basis",
+          "moisture basis",
+          "energy or yield basis",
+          "cropland context",
+          "competing uses",
+          "source/provenance"
+        ],
+        "carbon_nature_context": [
+          "cropland",
+          "soil-organic-carbon",
+          "methane",
+          "nitrous-oxide"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "status": "evidence-required",
+        "note": "Agricultural biomass may interact with residue, soil-carbon, nutrient, methane, nitrous-oxide, and displacement accounting; no benefit is inferred from the category alone."
+      },
+      {
+        "key": "organic-waste-biomass",
+        "label": "Organic waste biomass",
+        "physical_form": "variable-organic",
+        "moisture_context": "must-be-declared",
+        "applicable_pathways": [
+          "anaerobic-digestion-biogas",
+          "biomass-energy-conversion"
+        ],
+        "required_characterization": [
+          "waste identity",
+          "mass basis",
+          "moisture/solids basis",
+          "baseline management",
+          "energy/yield basis",
+          "contaminants/quality context",
+          "source/provenance"
+        ],
+        "carbon_nature_context": [
+          "methane",
+          "nitrous-oxide"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "status": "evidence-required",
+        "note": "Waste classification does not by itself establish avoided emissions; a baseline/counterfactual and whole-system accounting boundary are required."
+      }
+    ],
+    "guardrail": "Feedstock class is not a sustainability, carbon-neutrality, or project-suitability determination."
+  },
+  "pathways": {
+    "ok": true,
+    "schema": "sc-energy-bioenergy-pathways/1.0",
+    "version": "0.7.0",
+    "count": 6,
+    "items": [
+      {
+        "key": "anaerobic-digestion-biogas",
+        "label": "Anaerobic digestion → biogas",
+        "pathway_family": "biological-conversion",
+        "input_classes": [
+          "wet-organic-biomass",
+          "agricultural-biomass",
+          "organic-waste-biomass"
+        ],
+        "primary_outputs": [
+          "biogas",
+          "energy"
+        ],
+        "coproducts": [
+          "digestate"
+        ],
+        "related_energy_concepts": [
+          "anaerobic-digestion",
+          "digestate",
+          "bioenergy",
+          "biomass"
+        ],
+        "carbon_nature_targets": [
+          "methane",
+          "nitrous-oxide",
+          "soil-organic-carbon"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "quantitative_profile_status": "explicit-assumptions-required",
+        "lifecycle_accounting_status": "whole-system-accounting-required",
+        "note": "The module explicitly names anaerobic digestion and digestate. v0.7.0 does not supply default biogas yield, methane fraction, heating value, conversion efficiency, digestate benefit, or avoided-methane factor."
+      },
+      {
+        "key": "digestate-management",
+        "label": "Digestate management",
+        "pathway_family": "bioenergy-coproduct-management",
+        "input_classes": [
+          "wet-organic-biomass"
+        ],
+        "primary_outputs": [
+          "managed-digestate"
+        ],
+        "coproducts": [],
+        "related_energy_concepts": [
+          "digestate",
+          "anaerobic-digestion",
+          "soil-carbon"
+        ],
+        "carbon_nature_targets": [
+          "soil-organic-carbon",
+          "methane",
+          "nitrous-oxide"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "quantitative_profile_status": "no-universal-profile",
+        "lifecycle_accounting_status": "whole-system-accounting-required",
+        "note": "Digestate is represented as a governed co-product pathway. Soil-carbon, nutrient, methane, nitrous-oxide, substitution, transport, storage, and application effects must be evidenced rather than assumed."
+      },
+      {
+        "key": "biochar-production",
+        "label": "Biochar production",
+        "pathway_family": "biomass-carbon-pathway",
+        "input_classes": [
+          "biomass-generic",
+          "woody-biomass",
+          "agricultural-biomass"
+        ],
+        "primary_outputs": [
+          "biochar"
+        ],
+        "coproducts": [
+          "energy-or-gaseous-liquid-coproducts-if-declared"
+        ],
+        "related_energy_concepts": [
+          "biochar",
+          "biomass",
+          "biological-carbon-capture-storage"
+        ],
+        "carbon_nature_targets": [
+          "soil-organic-carbon",
+          "carbon-dioxide"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "quantitative_profile_status": "explicit-assumptions-required",
+        "lifecycle_accounting_status": "whole-system-accounting-required",
+        "note": "The module explicitly includes biochar but does not provide a production technology, carbon fraction, stable fraction, soil response, permanence rule, lifecycle factor, or crediting methodology. Those remain explicit inputs/evidence."
+      },
+      {
+        "key": "biomass-to-oil",
+        "label": "Biomass to oil",
+        "pathway_family": "biomass-conversion",
+        "input_classes": [
+          "biomass-generic",
+          "woody-biomass",
+          "agricultural-biomass"
+        ],
+        "primary_outputs": [
+          "oil-like-energy-product"
+        ],
+        "coproducts": [
+          "conversion-coproducts-if-declared"
+        ],
+        "related_energy_concepts": [
+          "biomass-to-oil",
+          "biomass",
+          "bioenergy"
+        ],
+        "carbon_nature_targets": [
+          "aboveground-biomass",
+          "forest-woodland",
+          "soil-organic-carbon"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "quantitative_profile_status": "explicit-assumptions-required",
+        "lifecycle_accounting_status": "whole-system-accounting-required",
+        "note": "The supplied module names biomass-to-oil but gives no universal yield, product heating value, conversion route, lifecycle-emissions factor, or land-use result."
+      },
+      {
+        "key": "biomass-energy-conversion",
+        "label": "Biomass → useful energy",
+        "pathway_family": "generic-energy-conversion",
+        "input_classes": [
+          "biomass-generic",
+          "woody-biomass",
+          "agricultural-biomass",
+          "organic-waste-biomass"
+        ],
+        "primary_outputs": [
+          "heat",
+          "electricity",
+          "fuel"
+        ],
+        "coproducts": [],
+        "related_energy_concepts": [
+          "bioenergy",
+          "biomass",
+          "energy-conversion",
+          "energy-efficiency"
+        ],
+        "carbon_nature_targets": [
+          "aboveground-biomass",
+          "forest-woodland",
+          "soil-organic-carbon",
+          "carbon-dioxide"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "quantitative_profile_status": "explicit-assumptions-required",
+        "lifecycle_accounting_status": "whole-system-accounting-required",
+        "note": "This normalized generic pathway links the module's bioenergy coverage to the existing energy-balance model. Biomass combustion or conversion is not assumed carbon neutral."
+      },
+      {
+        "key": "co2-to-energy",
+        "label": "CO₂ to energy",
+        "pathway_family": "carbon-utilization-energy",
+        "input_classes": [],
+        "primary_outputs": [
+          "energy-carrier-or-fuel-if-specified"
+        ],
+        "coproducts": [],
+        "related_energy_concepts": [
+          "co2-to-energy",
+          "biological-carbon-capture-storage",
+          "energy-conversion"
+        ],
+        "carbon_nature_targets": [
+          "carbon-dioxide"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "quantitative_profile_status": "technology-and-inputs-required",
+        "lifecycle_accounting_status": "whole-system-accounting-required",
+        "note": "CO₂-to-energy is explicitly named in the module scope. v0.7.0 records the pathway but does not assume a technology, energy source, conversion efficiency, permanence, or net climate benefit."
+      }
+    ],
+    "guardrail": "Pathway presence does not establish yield, lifecycle benefit, renewable status, or carbon-credit eligibility."
+  },
+  "carbon_nature_bridges": {
+    "ok": true,
+    "schema": "sc-energy-carbon-nature-bridges/1.0",
+    "version": "0.7.0",
+    "count": 6,
+    "items": [
+      {
+        "key": "soil-carbon-bridge",
+        "energy_concepts": [
+          "soil-carbon"
+        ],
+        "carbon_nature_concepts": [
+          "soil-organic-carbon"
+        ],
+        "carbon_nature_methodologies": [
+          "whole-system-ghg-accounting"
+        ],
+        "purpose": "Resolve the Energy Systems soil-carbon concept to the governed Carbon & Nature soil-organic-carbon pool and accounting context.",
+        "boundary": "Semantic/accounting bridge only; no SOC stock change, sequestration rate, additionality, permanence, or credit eligibility is inferred.",
+        "status": "cross-domain-contract-available"
+      },
+      {
+        "key": "forest-carbon-bridge",
+        "energy_concepts": [
+          "forest-carbon",
+          "forest-ecology",
+          "biomass"
+        ],
+        "carbon_nature_concepts": [
+          "forest-woodland",
+          "aboveground-biomass",
+          "belowground-biomass",
+          "dead-wood",
+          "litter"
+        ],
+        "carbon_nature_methodologies": [
+          "biomass-inventory-measurement",
+          "whole-system-ghg-accounting"
+        ],
+        "purpose": "Connect forest/biomass energy questions to Carbon & Nature land-system and biomass-pool objects.",
+        "boundary": "Forest biomass used for energy is not presumed renewable or carbon neutral; harvest, regrowth, displacement, leakage, stocks, time horizon, and system boundaries must be explicit.",
+        "status": "cross-domain-contract-available"
+      },
+      {
+        "key": "anaerobic-digestion-digestate-bridge",
+        "energy_concepts": [
+          "anaerobic-digestion",
+          "digestate"
+        ],
+        "carbon_nature_concepts": [
+          "methane",
+          "nitrous-oxide",
+          "soil-organic-carbon"
+        ],
+        "carbon_nature_methodologies": [
+          "whole-system-ghg-accounting"
+        ],
+        "purpose": "Connect anaerobic-digestion energy and digestate questions to gas, soil-carbon, and whole-system Carbon & Nature accounting.",
+        "boundary": "No avoided-methane, fertilizer-substitution, soil-carbon, or digestate climate benefit is inferred without an explicit baseline and evidence.",
+        "status": "cross-domain-contract-available"
+      },
+      {
+        "key": "biochar-bridge",
+        "energy_concepts": [
+          "biochar",
+          "biomass"
+        ],
+        "carbon_nature_concepts": [
+          "soil-organic-carbon",
+          "carbon-dioxide"
+        ],
+        "carbon_nature_methodologies": [
+          "whole-system-ghg-accounting"
+        ],
+        "purpose": "Provide a governed cross-domain context for biochar carbon accounting using existing Carbon & Nature pools and GHG accounting methods.",
+        "boundary": "A stoichiometric carbon-to-CO2e estimate is not a permanence, additionality, lifecycle, soil-response, project-credit, or verified-removal determination.",
+        "status": "cross-domain-contract-available"
+      },
+      {
+        "key": "biomass-conversion-bridge",
+        "energy_concepts": [
+          "bioenergy",
+          "biomass",
+          "biomass-to-oil"
+        ],
+        "carbon_nature_concepts": [
+          "aboveground-biomass",
+          "forest-woodland",
+          "soil-organic-carbon",
+          "carbon-dioxide"
+        ],
+        "carbon_nature_methodologies": [
+          "whole-system-ghg-accounting"
+        ],
+        "purpose": "Link biomass conversion scenarios to source-pool, land, and whole-system greenhouse-gas accounting context.",
+        "boundary": "Energy output and carbon outcome are separate accounting questions; displaced activity, land-use effects, feedstock counterfactuals, and lifecycle boundaries must be stated.",
+        "status": "cross-domain-contract-available"
+      },
+      {
+        "key": "co2-to-energy-bridge",
+        "energy_concepts": [
+          "co2-to-energy"
+        ],
+        "carbon_nature_concepts": [
+          "carbon-dioxide"
+        ],
+        "carbon_nature_methodologies": [
+          "whole-system-ghg-accounting"
+        ],
+        "purpose": "Link CO2-to-energy scenarios to explicit carbon-dioxide and whole-system accounting context.",
+        "boundary": "CO2 utilization does not by itself establish removal, storage, permanence, or net emissions reduction; energy input and downstream release must be included when relevant.",
+        "status": "cross-domain-contract-available"
+      }
+    ],
+    "guardrail": "Cross-domain links resolve governed Carbon & Nature concepts/methodologies but do not transfer or infer quantitative carbon claims."
+  },
+  "scenario_template": {
+    "ok": true,
+    "schema": "sc-energy-bioenergy-carbon-scenario/1.0",
+    "model_version": "0.7.0",
+    "contract": {
+      "required_structure": [
+        "scenario_id",
+        "name",
+        "pathway",
+        "feedstock",
+        "energy",
+        "carbon_accounting",
+        "carbon_nature_handoffs",
+        "evidence",
+        "uncertainty"
+      ],
+      "provenance_required": true,
+      "energy_balance_handoff_ready": true,
+      "economic_scenario_handoff_ready": true,
+      "carbon_nature_handoff_ready": true,
+      "project_crediting_status": "not-implemented",
+      "lifecycle_assessment_status": "not-implemented",
+      "optimization_status": "not-implemented"
+    },
+    "template": {
+      "scenario_id": null,
+      "name": null,
+      "pathway": {
+        "pathway_key": null,
+        "technology_or_process_detail": null,
+        "geography": null,
+        "period": null
+      },
+      "feedstock": {
+        "feedstock_class": null,
+        "feedstock_identity": null,
+        "origin": null,
+        "mass_basis": null,
+        "moisture_basis": null,
+        "quantity": null,
+        "unit": null,
+        "competing_use_note": null,
+        "land_use_note": null
+      },
+      "energy": {
+        "input_energy_kwh": null,
+        "gross_output_energy_kwh": null,
+        "useful_output_energy_kwh": null,
+        "conversion_efficiency_pct": null,
+        "energy_balance_ref": null
+      },
+      "carbon_accounting": {
+        "included_gases": [],
+        "included_carbon_pools": [],
+        "baseline_or_counterfactual": null,
+        "lifecycle_boundary": null,
+        "direct_emissions": [],
+        "indirect_emissions": [],
+        "stock_changes": [],
+        "avoided_emissions": [],
+        "co2e_gwp_context": null
+      },
+      "carbon_nature_handoffs": {
+        "bridge_keys": [],
+        "concept_refs": [],
+        "methodology_refs": [],
+        "project_object_refs": []
+      },
+      "economics": {
+        "economic_scenario_ref": null,
+        "cost_result_refs": []
+      },
+      "evidence": {
+        "source_refs": [],
+        "factor_refs": [],
+        "methodology_refs": [],
+        "dataset_refs": [],
+        "assumption_refs": []
+      },
+      "uncertainty": {
+        "input_uncertainties": [],
+        "model_uncertainties": [],
+        "boundary_uncertainties": [],
+        "sensitivity_parameters": []
+      }
+    },
+    "guardrails": {
+      "explicit_quantitative_inputs_required": true,
+      "default_biogas_yield_loaded": false,
+      "default_methane_fraction_loaded": false,
+      "default_biomass_energy_content_loaded": false,
+      "default_biochar_carbon_fraction_loaded": false,
+      "default_biochar_stable_fraction_loaded": false,
+      "default_biomass_to_oil_yield_loaded": false,
+      "biomass_carbon_neutrality_assumed": false,
+      "avoided_emissions_inferred": false,
+      "digestate_climate_benefit_inferred": false,
+      "soil_carbon_change_inferred": false,
+      "forest_carbon_change_inferred": false,
+      "lifecycle_emissions_inferred": false,
+      "land_use_change_inferred": false,
+      "additionality_determined": false,
+      "permanence_determined": false,
+      "leakage_determined": false,
+      "carbon_credit_eligibility_determined": false,
+      "biochar_co2e_estimate_is_stoichiometric_only": true,
+      "cross_domain_carbon_nature_targets_validated": true
+    }
+  }
+}

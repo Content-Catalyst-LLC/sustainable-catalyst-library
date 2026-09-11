@@ -264,7 +264,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "0.6.0",
+            "energy_systems_domain_version": "0.7.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -316,6 +316,16 @@ def health() -> dict[str, Any]:
             "energy_technology_cost_database": False,
             "energy_discount_rate_inference": False,
             "energy_investment_recommendation": False,
+            "energy_biological_carbon_bioenergy_integration": True,
+            "energy_bioenergy_feedstock_registry": True,
+            "energy_bioenergy_pathway_registry": True,
+            "energy_carbon_nature_bridge_registry": True,
+            "energy_bioenergy_explicit_input_calculators": True,
+            "energy_bioenergy_carbon_scenario_contract": True,
+            "energy_biomass_carbon_neutrality_assumed": False,
+            "energy_bioenergy_lifecycle_emissions_inferred": False,
+            "energy_bioenergy_avoided_emissions_inferred": False,
+            "energy_carbon_credit_eligibility_determined": False,
             "automatic_energy_technology_ranking": False,
             "automatic_energy_policy_recommendation": False,
             "automated_clinical_recommendation": False,
@@ -1088,6 +1098,97 @@ def energy_systems_levelized_energy_cost(initial_cost: str = Query(..., min_leng
 @app.get("/v1/energy-systems/economic-scenario-template")
 def energy_systems_economic_scenario_template() -> dict[str, Any]:
     return energy_systems.economic_scenario_template()
+
+
+@app.get("/v1/energy-systems/bioenergy-framework")
+def energy_systems_bioenergy_framework() -> dict[str, Any]:
+    return energy_systems.bioenergy_framework()
+
+
+@app.get("/v1/energy-systems/bioenergy-feedstocks")
+def energy_systems_bioenergy_feedstocks(
+    q: str = Query(default="", max_length=500),
+    limit: int = Query(default=100, ge=1, le=100),
+) -> dict[str, Any]:
+    return energy_systems.bioenergy_feedstocks(q=q, limit=limit)
+
+
+@app.get("/v1/energy-systems/bioenergy-pathways")
+def energy_systems_bioenergy_pathways(
+    q: str = Query(default="", max_length=500),
+    family: str = Query(default="", max_length=120),
+    limit: int = Query(default=100, ge=1, le=100),
+) -> dict[str, Any]:
+    return energy_systems.bioenergy_pathways(q=q, family=family, limit=limit)
+
+
+@app.get("/v1/energy-systems/bioenergy-pathways/{pathway_key}")
+def energy_systems_bioenergy_pathway(pathway_key: str) -> dict[str, Any]:
+    try:
+        return energy_systems.bioenergy_pathway(pathway_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Bioenergy pathway not found") from exc
+
+
+@app.get("/v1/energy-systems/biological-carbon-bridges")
+def energy_systems_biological_carbon_bridges() -> dict[str, Any]:
+    return energy_systems.biological_carbon_bridges()
+
+
+@app.get("/v1/energy-systems/feedstock-energy-estimate")
+def energy_systems_feedstock_energy_estimate(
+    mass_tonnes: str = Query(..., min_length=1, max_length=80),
+    energy_content_kwh_per_tonne: str = Query(..., min_length=1, max_length=80),
+    conversion_efficiency_pct: str = Query(default="100", min_length=1, max_length=80),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.feedstock_energy_estimate(mass_tonnes=mass_tonnes, energy_content_kwh_per_tonne=energy_content_kwh_per_tonne, conversion_efficiency_pct=conversion_efficiency_pct)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/anaerobic-digestion-energy-estimate")
+def energy_systems_anaerobic_digestion_energy_estimate(
+    feedstock_mass_tonnes: str = Query(..., min_length=1, max_length=80),
+    biogas_yield_m3_per_tonne: str = Query(..., min_length=1, max_length=80),
+    methane_fraction_pct: str = Query(..., min_length=1, max_length=80),
+    methane_energy_kwh_per_m3: str = Query(..., min_length=1, max_length=80),
+    conversion_efficiency_pct: str = Query(default="100", min_length=1, max_length=80),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.anaerobic_digestion_energy_estimate(feedstock_mass_tonnes=feedstock_mass_tonnes, biogas_yield_m3_per_tonne=biogas_yield_m3_per_tonne, methane_fraction_pct=methane_fraction_pct, methane_energy_kwh_per_m3=methane_energy_kwh_per_m3, conversion_efficiency_pct=conversion_efficiency_pct)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/biochar-carbon-estimate")
+def energy_systems_biochar_carbon_estimate(
+    biochar_mass_kg: str = Query(..., min_length=1, max_length=80),
+    carbon_fraction_pct: str = Query(..., min_length=1, max_length=80),
+    stable_fraction_pct: str = Query(..., min_length=1, max_length=80),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.biochar_carbon_estimate(biochar_mass_kg=biochar_mass_kg, carbon_fraction_pct=carbon_fraction_pct, stable_fraction_pct=stable_fraction_pct)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/biomass-to-oil-energy-estimate")
+def energy_systems_biomass_to_oil_energy_estimate(
+    feedstock_mass_tonnes: str = Query(..., min_length=1, max_length=80),
+    oil_yield_mass_pct: str = Query(..., min_length=1, max_length=80),
+    oil_energy_content_kwh_per_tonne: str = Query(..., min_length=1, max_length=80),
+    downstream_conversion_efficiency_pct: str = Query(default="100", min_length=1, max_length=80),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.biomass_to_oil_energy_estimate(feedstock_mass_tonnes=feedstock_mass_tonnes, oil_yield_mass_pct=oil_yield_mass_pct, oil_energy_content_kwh_per_tonne=oil_energy_content_kwh_per_tonne, downstream_conversion_efficiency_pct=downstream_conversion_efficiency_pct)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/bioenergy-scenario-template")
+def energy_systems_bioenergy_scenario_template() -> dict[str, Any]:
+    return energy_systems.bioenergy_scenario_template()
 
 
 @app.get("/v1/carbon-nature")
