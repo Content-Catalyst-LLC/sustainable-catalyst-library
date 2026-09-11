@@ -1,0 +1,53 @@
+Sustainable Catalyst Energy Systems Intelligence v1.1.0
+Cross-Product Runtime Activation Gateway
+
+Release identity
+- Library: 5.11.0
+- Carbon & Nature: 0.5.0
+- Energy Systems: 1.1.0
+- Library backend: 2.17.0
+
+New governed runtime layer
+- External runtime targets: 5
+- Target packet builders: 5
+- Pull handoff contracts: 5
+- Target runtimes certified active: 0
+- Platform handoffs: 8
+- Methodology rules: 16
+
+Target gateways
+- Research Librarian
+- Lab
+- Workbench
+- Site Intelligence
+- Decision Studio
+
+Boundaries
+- stateless packet building: enabled
+- pull-oriented JSON handoff: enabled
+- outbound push delivery: disabled
+- cross-product persistence: disabled
+- credential forwarding: disabled
+- automatic target execution: disabled
+- target runtime consumption certification: disabled
+- automatic ranking/winner/recommendation: disabled
+
+Preservation
+- v1.0.0 platform certification baseline: 20/20 PASS
+- v0.9.0 decision layer preserved
+- v0.8.0 global layer preserved
+- v0.7.0 bioenergy layer preserved
+- v0.6.0 economics preserved
+- v0.5.0 balance layer preserved
+- v0.4.0 renewable technology/resource layer preserved
+- v0.3.0 indicator registry preserved
+- v0.2.0 numeric registry/calculators preserved
+- v0.1.0 knowledge foundation preserved
+
+Validation
+- focused pytest/jsonschema suite: 57 passed
+- PHP syntax: PASS
+- JavaScript syntax: PASS
+- Python compilation: PASS
+- JSON/JSON Schema validation: PASS
+- shell syntax: PASS (after packaging)

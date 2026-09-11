@@ -265,7 +265,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "1.0.0",
+            "energy_systems_domain_version": "1.1.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -354,6 +354,13 @@ def health() -> dict[str, Any]:
             "energy_platform_scientific_validation": False,
             "energy_platform_live_deployment_audit": False,
             "energy_cross_product_execution_claimed": False,
+            "energy_cross_product_runtime_activation_gateway": True,
+            "energy_cross_product_runtime_targets": 5,
+            "energy_cross_product_handoff_packet_builders": 5,
+            "energy_cross_product_pull_transport": True,
+            "energy_cross_product_target_consumption_certified": False,
+            "energy_cross_product_outbound_push_delivery": False,
+            "energy_cross_product_persistence": False,
             "energy_site_intelligence_execution": False,
             "automatic_energy_technology_ranking": False,
             "automatic_energy_policy_recommendation": False,
@@ -827,6 +834,58 @@ def energy_systems_platform_study_template() -> dict[str, Any]:
 @app.get("/v1/energy-systems/platform-certification")
 def energy_systems_platform_certification() -> dict[str, Any]:
     return energy_systems.platform_certification()
+
+
+@app.get("/v1/energy-systems/runtime-framework")
+def energy_systems_runtime_framework() -> dict[str, Any]:
+    return energy_systems.runtime_framework()
+
+
+@app.get("/v1/energy-systems/runtime-targets")
+def energy_systems_runtime_targets() -> dict[str, Any]:
+    return energy_systems.runtime_targets()
+
+
+@app.get("/v1/energy-systems/runtime-targets/{target_key}")
+def energy_systems_runtime_target(target_key: str) -> dict[str, Any]:
+    try:
+        return energy_systems.runtime_target(target_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Energy runtime target not found") from exc
+
+
+@app.get("/v1/energy-systems/runtime-handoff-template/{target_key}")
+def energy_systems_runtime_handoff_template(target_key: str) -> dict[str, Any]:
+    try:
+        return energy_systems.runtime_handoff_template(target_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Energy runtime target not found") from exc
+
+
+@app.get("/v1/energy-systems/runtime-handoff/{target_key}")
+def energy_systems_runtime_handoff(
+    target_key: str,
+    study: str = Query(..., min_length=2, max_length=12000),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.runtime_handoff(target_key=target_key, study_json=study)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Energy runtime target not found") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/runtime-readiness/{target_key}")
+def energy_systems_runtime_readiness(
+    target_key: str,
+    study: str = Query(..., min_length=2, max_length=12000),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.runtime_readiness(target_key=target_key, study_json=study)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Energy runtime target not found") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.get("/v1/energy-systems/concepts")

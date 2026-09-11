@@ -13,10 +13,11 @@ from .energy_bioenergy import BiologicalCarbonBioenergyIntegration
 from .energy_global import GlobalEnergyIntelligence
 from .energy_decision import EnergyDecisionIntelligence
 from .energy_platform import IntegratedSustainableEnergyPlatform
+from .energy_runtime import EnergyCrossProductRuntimeActivation
 
 
-DOMAIN_VERSION = "1.0.0"
-SCHEMA_VERSION = "sc-energy-systems-integrated-platform/1.0"
+DOMAIN_VERSION = "1.1.0"
+SCHEMA_VERSION = "sc-energy-systems-cross-product-runtime-activation/1.0"
 
 
 @dataclass(frozen=True)
@@ -155,6 +156,7 @@ class EnergySystemsKnowledgeFoundation:
         self._global_energy = GlobalEnergyIntelligence()
         self._decision_intelligence = EnergyDecisionIntelligence()
         self._integrated_platform = IntegratedSustainableEnergyPlatform()
+        self._runtime_activation = EnergyCrossProductRuntimeActivation()
         self._methodology_rules = self._build_methodology_rules()
         self._handoffs = self._build_handoffs()
         self._guardrails = self._build_guardrails()
@@ -556,6 +558,7 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "global-energy-live-observation-boundary", "source_key": "world-bank-indicators-api", "source_year": 2026, "rule": "v0.8.0 may retrieve live country observations for selected World Bank indicator codes, but the observation's own year and source semantics remain authoritative. Latest available is not relabeled as current-year data; missing values are not interpolated; World Bank metric semantics are not asserted to be official EISD formula equivalents.", "current_default": False},
             {"key": "energy-decision-comparison-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "The module scope calls for multidisciplinary energy-system analysis, efficiency, cost-benefit, cost-efficiency, renewable technologies, biological carbon, and sustainability context. v0.9.0 uses those dimensions to organize evidence but treats the decision packet, comparison matrix, readiness inspection, and no-ranking/no-hidden-weighting rules as Sustainable Catalyst implementation governance rather than source-attributed decision methodology.", "current_default": False},
             {"key": "integrated-platform-certification-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "v1.0.0 integrates the previously implemented Energy Systems layers into a single governed platform contract and repository-coherence certification. The certification validates expected release identities, counts, contracts, and guardrails; it is Sustainable Catalyst implementation governance, not scientific validation, live deployment certification, site suitability, or financial advice.", "current_default": False},
+            {"key": "cross-product-runtime-activation-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "v1.1.0 activates a stateless Library-side gateway that transforms the integrated energy study into target-shaped handoff packets for Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio. Gateway activation does not prove that those separate runtimes currently consume, persist, execute, or validate the packets.", "current_default": False},
         ]
 
     @staticmethod
@@ -564,10 +567,11 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "soil-carbon-to-carbon-nature", "source_concepts": ["soil-carbon"], "target": "Carbon & Nature Intelligence", "target_refs": ["soil-organic-carbon", "whole-system-ghg-accounting"], "status": "cross-domain-contract-available", "boundary": "v0.8.0 preserves the v0.7.0 Energy Systems soil-carbon bridge to Carbon & Nature; it does not quantify sequestration, permanence, additionality, or project suitability."},
             {"key": "forest-to-carbon-nature", "source_concepts": ["forest-carbon", "forest-ecology", "biomass"], "target": "Carbon & Nature Intelligence", "target_refs": ["forest-woodland", "aboveground-biomass", "belowground-biomass", "biomass-inventory-measurement", "whole-system-ghg-accounting"], "status": "cross-domain-contract-available", "boundary": "Forest/biomass energy questions preserve governed land-system, biomass-pool, and accounting contexts; biomass carbon neutrality, stock change, permanence, harvest/regrowth balance, leakage, and project eligibility are not inferred."},
             {"key": "bioenergy-carbon-nature-extension", "source_concepts": ["anaerobic-digestion", "digestate", "biochar", "biomass-to-oil", "co2-to-energy", "bioenergy", "biomass"], "target": "Carbon & Nature Intelligence", "target_refs": ["soil-organic-carbon", "forest-woodland", "aboveground-biomass", "belowground-biomass", "carbon-dioxide", "methane", "nitrous-oxide", "whole-system-ghg-accounting"], "status": "cross-domain-contract-available", "boundary": "v0.8.0 preserves the validated v0.7.0 semantic/accounting bridges without fabricating quantitative carbon benefits, lifecycle results, avoided emissions, or crediting claims."},
-            {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "cost-benefit-analysis", "cost-efficiency-analysis", "co2e", "bioenergy", "anaerobic-digestion", "biochar", "biomass-to-oil"], "target": "Workbench", "target_refs": ["energy-unit-conversion-registry", "historical-carbon-factor-registry", "energy-balance-calculation-contract", "energy-scenario-economics-calculation-contract", "bioenergy-explicit-input-calculation-contract", "global-energy-country-profile-contract"], "status": "computational-contract-available", "boundary": "v0.8.0 adds source-year-governed global observations to the existing deterministic calculation contracts, but does not modify or execute the separate Workbench product."},
-            {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity", "renewable-resource-potential", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "soil-carbon", "forest-carbon"], "target": "Lab", "target_refs": ["renewable-technology-assessment-contract", "renewable-resource-observation-contract", "energy-balance-scenario-contract", "conversion-chain-model", "energy-economic-scenario-contract", "discounted-cash-flow-results", "bioenergy-carbon-scenario-contract", "carbon-nature-bridge-registry", "global-energy-country-profile-contract"], "status": "computational-contract-available", "boundary": "Global Energy Intelligence observations are portable inputs for later Lab trend, sensitivity, uncertainty, and scenario work. v0.8.0 does not modify the separate Lab product or enable cross-country causal inference, optimization, or automatic sustainability scoring."},
-            {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security", "renewable-resource-potential", "bioenergy", "forest-carbon"], "target": "Site Intelligence", "target_refs": ["global-energy-country-profile-contract", "global-energy-metric-observation", "world-bank-wdi-live-connector", "renewable-resource-observation-contract", "biomass-feedstock-observation-contract", "bioenergy-geography-contract"], "status": "live-data-contract-available", "boundary": "v0.8.0 activates a governed read-only World Bank country-energy observation connector and a country-profile contract suitable for Site Intelligence. It does not modify Site Intelligence itself, infer project suitability, or hide observation-year lag."},
-            {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "biological-carbon-capture-storage", "energy-security", "energy-access"], "target": "Decision Studio", "target_refs": ["energy-decision-packet-contract", "energy-decision-comparison-matrix", "energy-decision-readiness-contract", "energy-economic-scenario-contract", "energy-cost-benefit-result", "energy-cost-efficiency-result", "energy-npv-result", "bioenergy-carbon-scenario-contract", "carbon-nature-accounting-handoff", "global-energy-country-profile-contract", "global-energy-comparison-contract"], "status": "decision-packet-contract-available", "boundary": "v0.9.0 adds a governed Energy Decision Intelligence packet, neutral comparison matrix, and readiness inspection suitable for Decision Studio handoff. It does not normalize unlike evidence, assign hidden weights, rank alternatives, select a winner, recommend investments, or make policy choices."},
+            {"key": "energy-to-research-librarian", "source_concepts": ["energy-system", "sustainable-energy", "energy-access", "renewable-energy-share", "energy-security", "energy-indicator"], "target": "Research Librarian", "target_refs": ["energy-runtime-research-librarian-handoff", "energy-source-provenance-registry", "energy-indicator-observation-contract", "global-energy-country-profile-contract", "energy-decision-packet-contract"], "status": "runtime-gateway-active-target-consumer-pending", "boundary": "v1.1.0 activates a stateless Library-side research handoff builder. It does not claim that the separate Research Librarian runtime currently consumes, persists, or executes the packet."},
+            {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "cost-benefit-analysis", "cost-efficiency-analysis", "co2e", "bioenergy", "anaerobic-digestion", "biochar", "biomass-to-oil"], "target": "Workbench", "target_refs": ["energy-runtime-workbench-handoff", "energy-unit-conversion-registry", "historical-carbon-factor-registry", "energy-balance-calculation-contract", "energy-scenario-economics-calculation-contract", "bioenergy-explicit-input-calculation-contract", "global-energy-country-profile-contract"], "status": "runtime-gateway-active-target-consumer-pending", "boundary": "v1.1.0 activates a stateless Library-side Workbench handoff builder while preserving explicit inputs and source boundaries. It does not claim the separate Workbench runtime consumes or executes the packet."},
+            {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity", "renewable-resource-potential", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "soil-carbon", "forest-carbon"], "target": "Lab", "target_refs": ["renewable-technology-assessment-contract", "renewable-resource-observation-contract", "energy-balance-scenario-contract", "conversion-chain-model", "energy-economic-scenario-contract", "discounted-cash-flow-results", "bioenergy-carbon-scenario-contract", "carbon-nature-bridge-registry", "global-energy-country-profile-contract"], "status": "runtime-gateway-active-target-consumer-pending", "boundary": "v1.1.0 activates a stateless Library-side Lab handoff builder for scenarios, evidence, economics and uncertainty. It does not claim the separate Lab runtime consumes or executes the packet or enable automatic scoring."},
+            {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security", "renewable-resource-potential", "bioenergy", "forest-carbon"], "target": "Site Intelligence", "target_refs": ["global-energy-country-profile-contract", "global-energy-metric-observation", "world-bank-wdi-live-connector", "renewable-resource-observation-contract", "biomass-feedstock-observation-contract", "bioenergy-geography-contract"], "status": "runtime-gateway-active-target-consumer-pending", "boundary": "v1.1.0 activates a stateless Library-side Site Intelligence handoff builder for dated country-energy and resource observations. It does not claim Site Intelligence consumes the packet, infer project suitability, or hide observation-year lag."},
+            {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "biological-carbon-capture-storage", "energy-security", "energy-access"], "target": "Decision Studio", "target_refs": ["energy-decision-packet-contract", "energy-decision-comparison-matrix", "energy-decision-readiness-contract", "energy-economic-scenario-contract", "energy-cost-benefit-result", "energy-cost-efficiency-result", "energy-npv-result", "bioenergy-carbon-scenario-contract", "carbon-nature-accounting-handoff", "global-energy-country-profile-contract", "global-energy-comparison-contract"], "status": "runtime-gateway-active-target-consumer-pending", "boundary": "v1.1.0 activates a stateless Library-side Decision Studio handoff builder around the governed Energy Decision Intelligence packet. It does not normalize unlike evidence, assign hidden weights, rank alternatives, select a winner, recommend investments, or make policy choices, and it does not claim target-side execution."},
         ]
 
     @staticmethod
@@ -664,10 +668,17 @@ class EnergySystemsKnowledgeFoundation:
             "energy_decision_winner_selection": False,
             "energy_decision_studio_execution": False,
             "integrated_platform_activated": True,
+            "cross_product_runtime_activation_gateway_activated": True,
+            "cross_product_target_packet_builders_activated": True,
+            "cross_product_pull_handoff_transport_activated": True,
+            "cross_product_target_runtime_consumption_certified": False,
+            "cross_product_outbound_push_delivery_activated": False,
+            "cross_product_persistence_activated": False,
             "integrated_study_contract_activated": True,
             "platform_structural_certification_activated": True,
             "cross_product_contract_registry_activated": True,
             "cross_product_execution_claimed_by_this_release": False,
+            "target_product_runtimes_modified_by_this_release": False,
             "platform_certification_is_scientific_validation": False,
             "platform_certification_is_live_deployment_audit": False,
             "automatic_technology_ranking": False,
@@ -739,6 +750,9 @@ class EnergySystemsKnowledgeFoundation:
         decision_framework = self._decision_intelligence.framework()
         if decision_framework["counts"]["criteria"] != 12 or decision_framework["counts"]["decision_packet_contracts"] != 1:
             raise ValueError("Energy Decision Intelligence registry is incomplete")
+        runtime_framework = self._runtime_activation.framework()
+        if runtime_framework["counts"]["external_runtime_targets"] != 5 or runtime_framework["counts"]["target_packet_builders"] != 5:
+            raise ValueError("Cross-product runtime activation gateway is incomplete")
 
     def _content_fingerprint(self) -> str:
         content = {
@@ -760,6 +774,7 @@ class EnergySystemsKnowledgeFoundation:
             "global_energy_intelligence": self._global_energy.export(),
             "energy_decision_intelligence": self._decision_intelligence.export(),
             "integrated_sustainable_energy_platform": self._integrated_platform.export(),
+            "cross_product_runtime_activation": self._runtime_activation.export(),
             "methodology_rules": self._methodology_rules,
             "handoffs": self._handoffs,
             "guardrails": self._guardrails,
@@ -773,11 +788,11 @@ class EnergySystemsKnowledgeFoundation:
             "subsystem": {
                 "name": "Energy Systems Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Integrated Sustainable Energy Systems Platform",
+                "release": "Cross-Product Runtime Activation Gateway",
                 "library_version": "5.11.0",
-                "backend_version": "2.16.0",
+                "backend_version": "2.17.0",
                 "read_only": True,
-                "calculation_mode": "integrated-provenance-bound-energy-platform-with-explicit-input-models-live-dated-observations-neutral-decision-packets-and-cross-product-contracts",
+                "calculation_mode": "integrated-provenance-bound-energy-platform-with-stateless-target-shaped-cross-product-handoff-packets",
             },
             "counts": {
                 "concepts": len(self._concepts),
@@ -825,6 +840,10 @@ class EnergySystemsKnowledgeFoundation:
                 "integrated_platform_cross_product_contracts": self._integrated_platform.framework()["counts"]["cross_product_contracts"],
                 "integrated_platform_study_contracts": self._integrated_platform.framework()["counts"]["integrated_study_contracts"],
                 "integrated_platform_structural_certification_models": self._integrated_platform.framework()["counts"]["structural_certification_models"],
+                "runtime_activation_targets": self._runtime_activation.framework()["counts"]["external_runtime_targets"],
+                "runtime_handoff_packet_builders": self._runtime_activation.framework()["counts"]["target_packet_builders"],
+                "runtime_pull_handoff_contracts": self._runtime_activation.framework()["counts"]["pull_handoff_contracts"],
+                "runtime_target_runtimes_certified_active": self._runtime_activation.framework()["counts"]["target_runtimes_certified_active"],
                 "methodology_rules": len(self._methodology_rules),
             },
             "knowledge_domains": self._knowledge_domains,
@@ -837,8 +856,10 @@ class EnergySystemsKnowledgeFoundation:
             "global_energy_intelligence": self._global_energy.framework(),
             "energy_decision_intelligence": self._decision_intelligence.framework(),
             "integrated_sustainable_energy_platform": self._integrated_platform.framework(),
+            "cross_product_runtime_activation": self._runtime_activation.framework(),
             "roadmap": [
-                {"version": "1.0.0", "name": "Integrated Sustainable Energy Systems Platform", "status": "current"},
+                {"version": "1.0.0", "name": "Integrated Sustainable Energy Systems Platform", "status": "certified-baseline"},
+                {"version": "1.1.0", "name": "Cross-Product Runtime Activation Gateway", "status": "current"},
             ],
             "content_fingerprint": self._fingerprint,
         }
@@ -1299,7 +1320,38 @@ class EnergySystemsKnowledgeFoundation:
         return self._integrated_platform.study_template()
 
     def platform_certification(self) -> dict[str, Any]:
-        return self._integrated_platform.certification(self.manifest())
+        # v1.0.0 certification remains available as the certified integration baseline.
+        manifest = self.manifest()
+        baseline = json.loads(json.dumps(manifest))
+        baseline["subsystem"]["version"] = "1.0.0"
+        baseline["subsystem"]["backend_version"] = "2.16.0"
+        return self._integrated_platform.certification(baseline)
+
+    def runtime_framework(self) -> dict[str, Any]:
+        return self._runtime_activation.framework()
+
+    def runtime_targets(self) -> dict[str, Any]:
+        return self._runtime_activation.targets()
+
+    def runtime_target(self, target_key: str) -> dict[str, Any]:
+        return self._runtime_activation.target(target_key)
+
+    def runtime_handoff_template(self, target_key: str) -> dict[str, Any]:
+        return self._runtime_activation.handoff_template(target_key)
+
+    def runtime_handoff(self, *, target_key: str, study_json: str) -> dict[str, Any]:
+        try:
+            study = json.loads(study_json)
+        except json.JSONDecodeError as exc:
+            raise ValueError("study must be valid JSON") from exc
+        return self._runtime_activation.build_handoff(target_key, study)
+
+    def runtime_readiness(self, *, target_key: str, study_json: str) -> dict[str, Any]:
+        try:
+            study = json.loads(study_json)
+        except json.JSONDecodeError as exc:
+            raise ValueError("study must be valid JSON") from exc
+        return self._runtime_activation.readiness(target_key, study)
 
     def handoffs(self) -> dict[str, Any]:
         return {"ok": True, "schema": "sc-energy-handoffs/1.0", "count": len(self._handoffs), "items": self._handoffs, "guardrail": "Only handoffs marked available or contract-available resolve to a governed target or contract; planned handoffs do not imply current capability."}

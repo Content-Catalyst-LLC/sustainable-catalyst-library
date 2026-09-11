@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-runtime-readiness.json",
+  "title": "Energy Runtime Readiness",
+  "type": "object",
+  "required": [
+    "status",
+    "populated_sections",
+    "empty_sections",
+    "issues"
+  ],
+  "properties": {
+    "status": {
+      "enum": [
+        "ready",
+        "ready-with-warnings",
+        "template"
+      ]
+    },
+    "populated_sections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "empty_sections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "key",
+          "severity",
+          "message"
+        ]
+      }
+    }
+  },
+  "additionalProperties": true
+}

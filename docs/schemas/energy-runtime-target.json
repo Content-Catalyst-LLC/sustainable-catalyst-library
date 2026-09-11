@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-runtime-target.json",
+  "title": "Energy Runtime Target",
+  "type": "object",
+  "required": [
+    "key",
+    "target",
+    "purpose",
+    "source_contracts",
+    "payload_sections",
+    "consumer_contract",
+    "transport",
+    "gateway_state",
+    "target_runtime_state",
+    "boundary"
+  ],
+  "properties": {
+    "key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_contracts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "payload_sections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "consumer_contract": {
+      "type": "string",
+      "minLength": 1
+    },
+    "transport": {
+      "const": "pull-get-json"
+    },
+    "gateway_state": {
+      "const": "library-gateway-active"
+    },
+    "target_runtime_state": {
+      "const": "target-consumer-not-certified"
+    },
+    "boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

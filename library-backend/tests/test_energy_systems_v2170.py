@@ -7,8 +7,8 @@ def engine():
 
 def test_manifest_versions_and_bioenergy_counts():
     d = engine().manifest()
-    assert d["subsystem"]["version"] == "1.0.0"
-    assert d["subsystem"]["backend_version"] == "2.16.0"
+    assert d["subsystem"]["version"] == "1.1.0"
+    assert d["subsystem"]["backend_version"] == "2.17.0"
     assert d["counts"]["bioenergy_feedstock_classes"] == 5
     assert d["counts"]["bioenergy_pathways"] == 6
     assert d["counts"]["carbon_nature_bridges"] == 6
@@ -267,7 +267,7 @@ def test_global_profile_contract_handoff_flags():
 def test_global_handoff_promotes_site_intelligence_contract():
     lookup={x["key"]:x for x in engine().handoffs()["items"]}
     h=lookup["energy-to-site-intelligence"]
-    assert h["status"] == "live-data-contract-available"
+    assert h["status"] == "runtime-gateway-active-target-consumer-pending"
     assert "global-energy-country-profile-contract" in h["target_refs"]
     assert "world-bank-wdi-live-connector" in h["target_refs"]
 
@@ -450,10 +450,133 @@ def test_v100_manifest_integrates_without_replacing_prior_layers():
     d = engine().manifest()
     assert d["counts"]["integrated_platform_release_layers"] == 9
     assert d["counts"]["integrated_platform_cross_product_contracts"] == 6
-    assert d["counts"]["methodology_rules"] == 15
+    assert d["counts"]["methodology_rules"] == 16
     assert d["energy_decision_intelligence"]["version"] == "0.9.0"
     assert d["global_energy_intelligence"]["version"] == "0.8.0"
     assert d["biological_carbon_bioenergy_integration"]["version"] == "0.7.0"
     assert d["energy_scenario_economics"]["version"] == "0.6.0"
     assert d["energy_balance_systems_model"]["version"] == "0.5.0"
     assert d["renewable_technology_resource_model"]["version"] == "0.4.0"
+
+
+
+def populated_runtime_study():
+    d = engine().platform_study_template()["study"]
+    d["identity"].update({"study_id":"study-001","title":"Runtime activation study","question":"How should the energy scenario be evaluated?","geography":"Example region","period":"2030"})
+    d["research_context"]["source_refs"]=["source-1"]
+    d["research_context"]["research_questions"]=["What evidence is missing?"]
+    d["numeric_registry"]["conversion_refs"]=["btu-to-kwh"]
+    d["technologies_and_resources"]["technology_refs"]=["solar-photovoltaic"]
+    d["technologies_and_resources"]["resource_observations"]=[{"ref":"resource-1"}]
+    d["energy_balance"]["scenario_refs"]=["balance-1"]
+    d["economics"]["scenario_refs"]=["econ-1"]
+    d["global_context"]["country_profile_refs"]=["USA"]
+    d["global_context"]["observation_years"]=[2024]
+    d["decision"]["decision_packet_ref"]="decision-1"
+    d["uncertainty"]=[{"ref":"u-1"}]
+    d["provenance"]=[{"source_ref":"source-1"}]
+    return d
+
+
+def test_v110_runtime_activation_framework():
+    d=engine().runtime_framework()
+    assert d["version"]=="1.1.0"
+    assert d["release"]=="Cross-Product Runtime Activation Gateway"
+    assert d["counts"]=={
+        "external_runtime_targets":5,
+        "target_packet_builders":5,
+        "pull_handoff_contracts":5,
+        "target_runtimes_certified_active":0,
+    }
+    assert set(d["targets"])=={"Research Librarian","Lab","Workbench","Site Intelligence","Decision Studio"}
+    assert d["guardrails"]["outbound_push_delivery_activated"] is False
+    assert d["guardrails"]["target_runtime_consumption_certified"] is False
+
+
+def test_v110_runtime_target_registry_is_gateway_active_without_execution_claims():
+    d=engine().runtime_targets()
+    assert d["count"]==5
+    rows={x["key"]:x for x in d["items"]}
+    assert set(rows)=={"research-librarian","lab","workbench","site-intelligence","decision-studio"}
+    assert all(x["gateway_state"]=="library-gateway-active" for x in rows.values())
+    assert all(x["target_runtime_state"]=="target-consumer-not-certified" for x in rows.values())
+    assert rows["lab"]["consumer_contract"]=="sc-energy-runtime-lab-handoff/1.0"
+    assert "global-energy-country-profile-contract" in rows["site-intelligence"]["source_contracts"]
+
+
+def test_v110_handoff_builder_is_deterministic_target_shaped_and_stateless():
+    import json
+    study=populated_runtime_study()
+    a=engine().runtime_handoff(target_key="lab",study_json=json.dumps(study))
+    b=engine().runtime_handoff(target_key="lab",study_json=json.dumps(study,indent=2))
+    assert a["packet"]["handoff_id"]==b["packet"]["handoff_id"]
+    assert a["packet"]["target"]["product"]=="Lab"
+    assert set(a["packet"]["payload"])=={"identity","technologies_and_resources","energy_balance","economics","bioenergy_and_carbon","uncertainty","provenance","review"}
+    assert a["packet"]["validation"]["status"]=="ready"
+    assert a["delivery"]=={"mode":"pull-only","outbound_delivery_performed":False,"persistence_performed":False,"target_execution_claimed":False}
+
+
+def test_v110_target_payloads_select_only_governed_sections():
+    import json
+    study=populated_runtime_study()
+    expected={
+        "research-librarian":{"identity","research_context","sustainability_indicators","global_context","provenance","review"},
+        "workbench":{"identity","numeric_registry","energy_balance","economics","bioenergy_and_carbon","provenance","review"},
+        "site-intelligence":{"identity","technologies_and_resources","global_context","provenance","review"},
+        "decision-studio":{"identity","decision","economics","sustainability_indicators","global_context","uncertainty","provenance","review"},
+    }
+    for key,sections in expected.items():
+        d=engine().runtime_handoff(target_key=key,study_json=json.dumps(study))
+        assert set(d["packet"]["payload"])==sections
+        assert d["packet"]["validation"]["status"]=="ready"
+
+
+def test_v110_runtime_readiness_surfaces_missing_context_without_scoring():
+    import json
+    blank=engine().platform_study_template()["study"]
+    d=engine().runtime_readiness(target_key="site-intelligence",study_json=json.dumps(blank))
+    assert d["status"]=="ready-with-warnings"
+    keys={x["key"] for x in d["issues"]}
+    assert {"missing-study-id","missing-question","missing-provenance","missing-spatial-energy-context"}.issubset(keys)
+    assert "decision quality" in d["interpretation"]
+
+
+def test_v110_runtime_input_validation_fails_closed():
+    import json
+    try:
+        engine().runtime_handoff(target_key="unknown",study_json="{}")
+        assert False
+    except KeyError:
+        pass
+    try:
+        engine().runtime_handoff(target_key="lab",study_json="not-json")
+        assert False
+    except ValueError as exc:
+        assert "valid JSON" in str(exc)
+    bad=populated_runtime_study(); bad["unexpected"]={}
+    try:
+        engine().runtime_handoff(target_key="lab",study_json=json.dumps(bad))
+        assert False
+    except ValueError as exc:
+        assert "unknown top-level" in str(exc)
+
+
+def test_v110_manifest_adds_runtime_activation_without_overwriting_v100_certification_baseline():
+    d=engine().manifest()
+    assert d["subsystem"]["version"]=="1.1.0"
+    assert d["subsystem"]["backend_version"]=="2.17.0"
+    assert d["counts"]["runtime_activation_targets"]==5
+    assert d["counts"]["runtime_handoff_packet_builders"]==5
+    assert d["counts"]["runtime_target_runtimes_certified_active"]==0
+    assert d["cross_product_runtime_activation"]["version"]=="1.1.0"
+    cert=engine().platform_certification()
+    assert cert["version"]=="1.0.0"
+    assert cert["status"]=="pass"
+    assert cert["counts"]=={"checks":20,"passed":20,"failed":0}
+
+
+def test_v110_platform_handoffs_promote_gateway_status_without_claiming_target_consumption():
+    rows={x["key"]:x for x in engine().handoffs()["items"]}
+    for key in ["energy-to-research-librarian","energy-to-workbench","energy-to-lab","energy-to-site-intelligence","energy-to-decision-studio"]:
+        assert rows[key]["status"]=="runtime-gateway-active-target-consumer-pending"
+    assert len(rows)==8

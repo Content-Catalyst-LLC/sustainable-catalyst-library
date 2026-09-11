@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v1.0.0 — Integrated Sustainable Energy Systems Platform. */
+/** Energy Systems Intelligence v1.1.0 — Cross-Product Runtime Activation Gateway. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '1.0.0';
+    public const VERSION = '1.1.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v100', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v100.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v100', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v100.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v110', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v110.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v110', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v110.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -25,6 +25,12 @@ final class SC_Library_Energy_Systems_Intelligence {
         register_rest_route('sc-library/v1', '/energy-systems/platform-contracts', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'platform_contracts']]);
         register_rest_route('sc-library/v1', '/energy-systems/platform-study-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'platform_study_template']]);
         register_rest_route('sc-library/v1', '/energy-systems/platform-certification', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'platform_certification']]);
+        register_rest_route('sc-library/v1', '/energy-systems/runtime-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/runtime-targets', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_targets']]);
+        register_rest_route('sc-library/v1', '/energy-systems/runtime-target/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_target']]);
+        register_rest_route('sc-library/v1', '/energy-systems/runtime-handoff-template/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_handoff_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/runtime-handoff/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_handoff'], 'args' => ['study' => ['required' => true]]]);
+        register_rest_route('sc-library/v1', '/energy-systems/runtime-readiness/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_readiness'], 'args' => ['study' => ['required' => true]]]);
         register_rest_route('sc-library/v1', '/energy-systems/concepts', [
             'methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'concepts'],
             'args' => [
@@ -318,6 +324,12 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function platform_contracts(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/platform-contracts'); }
     public function platform_study_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/platform-study-template'); }
     public function platform_certification(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/platform-certification'); }
+    public function runtime_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-framework'); }
+    public function runtime_targets(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-targets'); }
+    public function runtime_target(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/runtime-targets/' . rawurlencode(sanitize_key((string)$request['key']))); }
+    public function runtime_handoff_template(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/runtime-handoff-template/' . rawurlencode(sanitize_key((string)$request['key']))); }
+    public function runtime_handoff(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/runtime-handoff/' . rawurlencode(sanitize_key((string)$request['key'])), ['study' => (string)$request->get_param('study')]); }
+    public function runtime_readiness(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/runtime-readiness/' . rawurlencode(sanitize_key((string)$request['key'])), ['study' => (string)$request->get_param('study')]); }
 
     public function global_energy_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/global-energy-framework'); }
     public function global_energy_sources(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/global-energy-sources'); }
@@ -362,11 +374,11 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Energy Systems Intelligence',
-            'intro' => 'Use one governed energy platform spanning research context, source-bound calculations, sustainability indicators, renewable resources, system balances, economics, biological carbon and bioenergy, live dated global context, and neutral decision packets.',
+            'intro' => 'Use one governed energy platform with an active Library-side runtime gateway for target-shaped handoffs into Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v100');
-        wp_enqueue_script('sc-library-energy-systems-v100');
+        wp_enqueue_style('sc-library-energy-systems-v110');
+        wp_enqueue_script('sc-library-energy-systems-v110');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -419,6 +431,11 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-platform-contracts-endpoint="<?php echo esc_url($ep('/platform-contracts')); ?>"
             data-platform-study-template-endpoint="<?php echo esc_url($ep('/platform-study-template')); ?>"
             data-platform-certification-endpoint="<?php echo esc_url($ep('/platform-certification')); ?>"
+            data-runtime-framework-endpoint="<?php echo esc_url($ep('/runtime-framework')); ?>"
+            data-runtime-targets-endpoint="<?php echo esc_url($ep('/runtime-targets')); ?>"
+            data-runtime-handoff-template-endpoint="<?php echo esc_url($ep('/runtime-handoff-template')); ?>"
+            data-runtime-handoff-endpoint="<?php echo esc_url($ep('/runtime-handoff')); ?>"
+            data-runtime-readiness-endpoint="<?php echo esc_url($ep('/runtime-readiness')); ?>"
             data-decision-framework-endpoint="<?php echo esc_url($ep('/decision-framework')); ?>"
             data-decision-criteria-endpoint="<?php echo esc_url($ep('/decision-criteria')); ?>"
             data-decision-packet-template-endpoint="<?php echo esc_url($ep('/decision-packet-template')); ?>"
@@ -434,22 +451,23 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-biomass-to-oil-energy-endpoint="<?php echo esc_url($ep('/biomass-to-oil-energy-estimate')); ?>"
             data-bioenergy-scenario-endpoint="<?php echo esc_url($ep('/bioenergy-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Integrated Energy Platform · v1.0.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Runtime Activation Gateway · v1.1.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
 
             <div class="sc-es__domains" aria-label="Energy Systems knowledge domains">
-                <span>Integrated Platform</span><span>Decision Intelligence</span><span>Global Energy</span><span>Energy Systems</span><span>Resources &amp; Conversion</span><span>Renewables</span><span>Bioenergy &amp; Carbon</span><span>Efficiency &amp; Economics</span><span>Sustainability Metrics</span>
+                <span>Runtime Activation</span><span>Integrated Platform</span><span>Decision Intelligence</span><span>Global Energy</span><span>Energy Systems</span><span>Resources &amp; Conversion</span><span>Renewables</span><span>Bioenergy &amp; Carbon</span><span>Efficiency &amp; Economics</span><span>Sustainability Metrics</span>
             </div>
 
             <div class="sc-es__guardrail">
-                <strong><?php esc_html_e('Integration ≠ automated judgment.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v1.0.0 preserves source vintages, explicit assumptions, missing values, uncertainty, and cross-layer boundaries. Platform certification means repository and contract coherence—not scientific validation, site suitability, financial advice, live deployment certification, ranking, winner selection, or policy recommendation.', 'sustainable-catalyst-library'); ?>
+                <strong><?php esc_html_e('Gateway activation ≠ target execution.', 'sustainable-catalyst-library'); ?></strong>
+                <?php esc_html_e('v1.1.0 can build target-shaped, stateless handoff packets from the integrated study contract. It does not claim that separate product runtimes consume, persist, execute, or validate those packets, and it does not enable ranking or recommendation.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
-                <button type="button" class="sc-es__mode is-active" data-es-mode="platform" role="tab" aria-selected="true">Integrated Platform</button>
+                <button type="button" class="sc-es__mode is-active" data-es-mode="runtime" role="tab" aria-selected="true">Runtime Activation</button>
+                <button type="button" class="sc-es__mode" data-es-mode="platform" role="tab" aria-selected="false">Integrated Platform</button>
                 <button type="button" class="sc-es__mode" data-es-mode="decision" role="tab" aria-selected="false">Decision Intelligence</button>
                 <button type="button" class="sc-es__mode" data-es-mode="global" role="tab" aria-selected="false">Global Intelligence</button>
                 <button type="button" class="sc-es__mode" data-es-mode="bioenergy" role="tab" aria-selected="false">Bioenergy &amp; Carbon</button>
@@ -464,8 +482,28 @@ final class SC_Library_Energy_Systems_Intelligence {
                 <button type="button" class="sc-es__mode" data-es-mode="handoffs" role="tab" aria-selected="false">Platform Handoffs</button>
             </div>
 
-            <div class="sc-es__panel" data-es-panel="platform">
-                <div class="sc-es__panel-heading"><strong>Integrated Sustainable Energy Systems Platform</strong><span>v1.0.0 certifies the complete v0.1.0–v0.9.0 Library-hosted capability stack and publishes governed handoff contracts for Research Librarian, Lab, Workbench, Site Intelligence and Decision Studio. Contract availability does not imply execution in those separate runtimes.</span></div>
+            <div class="sc-es__panel" data-es-panel="runtime">
+                <div class="sc-es__panel-heading"><strong>Cross-Product Runtime Activation Gateway</strong><span>v1.1.0 converts the integrated energy study into deterministic, target-shaped handoff packets for Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio. Packets are built inside the Library gateway and are not pushed or persisted.</span></div>
+                <p class="sc-es__status" data-es-runtime-status aria-live="polite">Loading runtime activation gateway…</p>
+                <div class="sc-es__runtime-summary" data-es-runtime-summary></div>
+                <div class="sc-es__cards sc-es__runtime-targets" data-es-runtime-targets></div>
+                <div class="sc-es__runtime-builder">
+                    <div>
+                        <h3>Integrated study input</h3>
+                        <p class="sc-es__microcopy">Load the blank v1.0 integrated study, add evidence or model references, choose a target, then build a target-specific packet or inspect gateway readiness.</p>
+                        <textarea class="sc-es__platform-study" data-es-runtime-study rows="20" spellcheck="false" aria-label="Integrated energy study JSON for runtime handoff"></textarea>
+                    </div>
+                    <div class="sc-es__runtime-controls">
+                        <label><span>Target runtime</span><select data-es-runtime-target-select></select></label>
+                        <div class="sc-es__actions"><button type="button" data-es-load-runtime-study>Load blank study</button><button type="button" class="sc-es__secondary" data-es-runtime-readiness>Inspect readiness</button><button type="button" class="sc-es__secondary" data-es-build-runtime-handoff>Build handoff</button></div>
+                        <div class="sc-es__result" data-es-runtime-readiness-result aria-live="polite"></div>
+                    </div>
+                </div>
+                <div class="sc-es__runtime-output"><h3>Target-shaped handoff packet</h3><textarea class="sc-es__platform-study" data-es-runtime-output rows="18" spellcheck="false" readonly aria-label="Runtime handoff packet JSON"></textarea></div>
+            </div>
+
+            <div class="sc-es__panel" data-es-panel="platform" hidden>
+                <div class="sc-es__panel-heading"><strong>Integrated Sustainable Energy Systems Platform</strong><span>v1.0.0 remains the certified baseline for the complete v0.1.0–v0.9.0 Library-hosted capability stack and publishes governed handoff contracts for Research Librarian, Lab, Workbench, Site Intelligence and Decision Studio. Contract availability does not imply execution in those separate runtimes.</span></div>
                 <p class="sc-es__status" data-es-platform-status aria-live="polite">Loading integrated platform…</p>
                 <div class="sc-es__platform-summary" data-es-platform-summary></div>
                 <div class="sc-es__platform-grid">

@@ -1,3 +1,9 @@
+## Energy Systems Intelligence v1.1.0
+
+v1.1.0 is the **Cross-Product Runtime Activation Gateway** release. It preserves the v1.0.0 Integrated Sustainable Energy Systems Platform certification baseline and adds five deterministic, stateless Library-side packet builders for Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio. The gateway can build target-shaped handoff packets and inspect packet readiness without persisting data, performing outbound delivery, forwarding credentials, or claiming target-side execution. Library remains v5.11.0, Carbon & Nature remains v0.5.0, and the shared Python backend advances to v2.17.0.
+
+See `ENERGY_SYSTEMS_INTELLIGENCE_v1.1.0.md`, `RELEASE_NOTES_ENERGY_SYSTEMS_1.1.0.md`, and `DEPLOY_ENERGY_SYSTEMS_BACKEND_v2.17.0.md`.
+
 # Sustainable Catalyst Library
 
 ## Energy Systems Intelligence v1.0.0

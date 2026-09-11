@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-runtime-handoff.json",
+  "title": "Energy Runtime Handoff Packet",
+  "type": "object",
+  "required": [
+    "handoff_id",
+    "source",
+    "target",
+    "transport",
+    "contract_refs",
+    "payload",
+    "validation",
+    "guardrails"
+  ],
+  "properties": {
+    "handoff_id": {
+      "type": "string",
+      "pattern": "^es-[a-f0-9]{20}$"
+    },
+    "source": {
+      "type": "object"
+    },
+    "target": {
+      "type": "object"
+    },
+    "transport": {
+      "const": "pull-get-json"
+    },
+    "contract_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "payload": {
+      "type": "object"
+    },
+    "validation": {
+      "type": "object",
+      "required": [
+        "status",
+        "populated_sections",
+        "empty_sections",
+        "issues"
+      ]
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}
