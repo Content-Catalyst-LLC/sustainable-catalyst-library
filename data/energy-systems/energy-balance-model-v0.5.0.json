@@ -1,0 +1,255 @@
+{
+  "schema": "sc-energy-balance-model-export/1.0",
+  "version": "0.5.0",
+  "framework": {
+    "ok": true,
+    "schema": "sc-energy-balance-systems-model/1.0",
+    "version": "0.5.0",
+    "release": "Energy Balance & Systems Modeling",
+    "counts": {
+      "models": 4,
+      "executable_models": 3,
+      "scenario_contracts": 1,
+      "renewable_technology_references": 7
+    },
+    "system_boundary": {
+      "flow": [
+        "supply",
+        "conversion",
+        "distribution/accounting",
+        "final demand/end use"
+      ],
+      "canonical_energy_unit": "kWh-equivalent for v0.5.0 arithmetic",
+      "balance_identity": "available supply = accounted outflows + residual",
+      "conversion_identity": "stage output = stage input × efficiency; stage loss = stage input − stage output",
+      "generation_identity": "generation = capacity × hours × capacity factor"
+    },
+    "models": [
+      {
+        "key": "conversion-chain",
+        "label": "Conversion chain",
+        "model_type": "deterministic-stage-balance",
+        "inputs": [
+          "input_kwh",
+          "stage_efficiencies_pct",
+          "optional_stage_labels"
+        ],
+        "outputs": [
+          "stage_outputs",
+          "stage_losses",
+          "final_output_kwh",
+          "total_loss_kwh",
+          "overall_efficiency_pct"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy",
+          "mcdonnell-lecture-1"
+        ],
+        "execution_status": "active-user-input-arithmetic",
+        "boundary": "Efficiencies are explicit scenario inputs. No technology-specific efficiency is supplied or inferred by this model."
+      },
+      {
+        "key": "supply-demand-balance",
+        "label": "Supply–demand balance",
+        "model_type": "accounting-identity",
+        "inputs": [
+          "domestic_supply_kwh",
+          "imports_kwh",
+          "storage_discharge_kwh",
+          "final_demand_kwh",
+          "exports_kwh",
+          "storage_charge_kwh",
+          "losses_kwh",
+          "tolerance_kwh"
+        ],
+        "outputs": [
+          "available_supply_kwh",
+          "accounted_outflows_kwh",
+          "residual_kwh",
+          "residual_pct_of_supply",
+          "balanced"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "execution_status": "active-user-input-arithmetic",
+        "boundary": "This is an energy accounting identity, not a grid dispatch, adequacy, reliability, or market-clearing model."
+      },
+      {
+        "key": "capacity-factor-generation",
+        "label": "Capacity-factor generation estimate",
+        "model_type": "deterministic-generation-arithmetic",
+        "inputs": [
+          "capacity_kw",
+          "capacity_factor_pct",
+          "hours"
+        ],
+        "outputs": [
+          "generation_kwh",
+          "average_output_kw"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy"
+        ],
+        "execution_status": "active-user-input-arithmetic",
+        "boundary": "Capacity factor and hours are explicit scenario inputs. The calculation is not a forecast and does not infer a technology-specific capacity factor."
+      },
+      {
+        "key": "balance-scenario-contract",
+        "label": "Energy balance scenario contract",
+        "model_type": "scenario-object-contract",
+        "inputs": [
+          "identity",
+          "scope",
+          "supply",
+          "conversion",
+          "demand",
+          "accounting",
+          "evidence",
+          "uncertainty"
+        ],
+        "outputs": [
+          "portable_scenario_packet"
+        ],
+        "source_keys": [
+          "ucd-module-sustainable-energy",
+          "vera-langlois-2007"
+        ],
+        "execution_status": "contract-active-no-persistence",
+        "boundary": "The contract organizes a scenario for later Lab/Workbench/Decision Studio use; v0.5.0 does not persist, optimize, rank, or recommend scenarios."
+      }
+    ],
+    "guardrails": {
+      "explicit_user_inputs_required": true,
+      "technology_specific_efficiency_inference": false,
+      "capacity_factor_inference": false,
+      "resource_availability_inference": false,
+      "time_series_dispatch_simulation": false,
+      "storage_physics_simulation": false,
+      "grid_reliability_or_adequacy_model": false,
+      "economic_optimization": false,
+      "technology_ranking": false,
+      "policy_recommendation": false,
+      "scenario_persistence": false,
+      "result_is_not_forecast": true,
+      "result_is_not_suitability_determination": true
+    },
+    "content_fingerprint": "fa876b9ad50c386b616847cd03e00cb6d444384e9fb75e4b6f5c85dbe4652e32"
+  },
+  "scenario_template": {
+    "ok": true,
+    "schema": "sc-energy-balance-scenario/1.0",
+    "model_version": "0.5.0",
+    "contract": {
+      "required_structure": [
+        "scenario_id",
+        "name",
+        "geography",
+        "period",
+        "energy_unit",
+        "supply",
+        "conversion",
+        "demand",
+        "accounting",
+        "evidence",
+        "uncertainty"
+      ],
+      "canonical_unit": "kwh",
+      "technology_references": [
+        "bioenergy",
+        "hydropower",
+        "solar-photovoltaic",
+        "solar-thermal",
+        "tidal-energy",
+        "wave-energy",
+        "wind-energy"
+      ],
+      "persistence_status": "not-implemented",
+      "optimization_status": "not-implemented",
+      "ranking_status": "not-implemented",
+      "provenance_required": true
+    },
+    "template": {
+      "scenario_id": null,
+      "name": null,
+      "geography": null,
+      "period": {
+        "start": null,
+        "end": null,
+        "hours": null
+      },
+      "energy_unit": "kwh",
+      "supply": {
+        "domestic_supply_kwh": null,
+        "imports_kwh": null,
+        "storage_discharge_kwh": null,
+        "technology_entries": [
+          {
+            "technology_key": null,
+            "capacity_kw": null,
+            "capacity_factor_pct": null,
+            "hours": null,
+            "generation_kwh": null,
+            "evidence_refs": []
+          }
+        ]
+      },
+      "conversion": {
+        "chains": [
+          {
+            "name": null,
+            "input_kwh": null,
+            "stages": [
+              {
+                "label": null,
+                "efficiency_pct": null
+              }
+            ],
+            "result_ref": null
+          }
+        ],
+        "losses_kwh": null
+      },
+      "demand": {
+        "final_demand_kwh": null,
+        "exports_kwh": null,
+        "storage_charge_kwh": null,
+        "end_use_breakdown": []
+      },
+      "accounting": {
+        "tolerance_kwh": "0.001",
+        "available_supply_kwh": null,
+        "accounted_outflows_kwh": null,
+        "residual_kwh": null,
+        "balanced": null
+      },
+      "evidence": {
+        "source_refs": [],
+        "methodology_refs": [],
+        "factor_refs": [],
+        "resource_observation_refs": [],
+        "indicator_observation_refs": []
+      },
+      "uncertainty": {
+        "assumptions": [],
+        "sensitivity_parameters": [],
+        "quality_notes": []
+      }
+    },
+    "guardrails": {
+      "explicit_user_inputs_required": true,
+      "technology_specific_efficiency_inference": false,
+      "capacity_factor_inference": false,
+      "resource_availability_inference": false,
+      "time_series_dispatch_simulation": false,
+      "storage_physics_simulation": false,
+      "grid_reliability_or_adequacy_model": false,
+      "economic_optimization": false,
+      "technology_ranking": false,
+      "policy_recommendation": false,
+      "scenario_persistence": false,
+      "result_is_not_forecast": true,
+      "result_is_not_suitability_determination": true
+    }
+  }
+}

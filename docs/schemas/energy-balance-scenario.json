@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-balance-scenario.json",
+  "title": "Sustainable Catalyst Energy Balance Scenario Packet",
+  "type": "object",
+  "required": [
+    "scenario_id",
+    "name",
+    "geography",
+    "period",
+    "energy_unit",
+    "supply",
+    "conversion",
+    "demand",
+    "accounting",
+    "evidence",
+    "uncertainty"
+  ],
+  "properties": {
+    "scenario_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "geography": {},
+    "period": {
+      "type": "object"
+    },
+    "energy_unit": {
+      "const": "kwh"
+    },
+    "supply": {
+      "type": "object"
+    },
+    "conversion": {
+      "type": "object"
+    },
+    "demand": {
+      "type": "object"
+    },
+    "accounting": {
+      "type": "object"
+    },
+    "evidence": {
+      "type": "object"
+    },
+    "uncertainty": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

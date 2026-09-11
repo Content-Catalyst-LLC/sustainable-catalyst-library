@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-generation-estimate-result.json",
+  "title": "Sustainable Catalyst Capacity Factor Generation Estimate",
+  "type": "object",
+  "required": [
+    "ok",
+    "schema",
+    "model_version",
+    "model_key",
+    "input",
+    "output",
+    "provenance",
+    "boundary"
+  ],
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "schema": {
+      "const": "sc-energy-generation-estimate-result/1.0"
+    },
+    "model_version": {
+      "const": "0.5.0"
+    },
+    "model_key": {
+      "const": "capacity-factor-generation"
+    },
+    "input": {
+      "type": "object",
+      "required": [
+        "capacity_kw",
+        "capacity_factor_pct",
+        "hours"
+      ],
+      "properties": {
+        "capacity_kw": {
+          "type": "string"
+        },
+        "capacity_factor_pct": {
+          "type": "string"
+        },
+        "hours": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "output": {
+      "type": "object",
+      "required": [
+        "generation_kwh",
+        "average_output_kw"
+      ],
+      "properties": {
+        "generation_kwh": {
+          "type": "string"
+        },
+        "average_output_kw": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

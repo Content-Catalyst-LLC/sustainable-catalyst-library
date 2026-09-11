@@ -11,7 +11,7 @@ A unified WordPress Living Knowledge System for public discovery, research works
 
 == Description ==
 
-Energy Systems Intelligence v0.4.0 adds a governed Renewable Technology & Resource Model while preserving the v0.1.0 knowledge foundation, v0.2.0 source-bound numeric registry, and v0.3.0 Energy Sustainability Indicators. Seven renewable technology objects and six resource classes now expose provenance-first assessment/observation contracts. Current resource-potential datasets, universal performance profiles, site suitability, maturity rankings, technology rankings, scenario execution, and automated policy conclusions remain disabled.
+Energy Systems Intelligence v0.5.0 adds deterministic Energy Balance & Systems Modeling while preserving the knowledge foundation, source-bound numeric registry, EISD indicators, and renewable technology/resource model. Explicit-input conversion-chain, supply-demand balance, and capacity-factor generation calculations are now available with a portable balance-scenario contract. Dispatch, storage physics, reliability/adequacy modeling, economic optimization, automatic ranking, and policy conclusions remain disabled.
 
 Sustainable Catalyst Library v5.11.0 adds Private Organizational Knowledge Foundation: a physically separate organization-scoped private knowledge plane with signed server-only access, access scopes, private search, version lineage, provenance, audit events, and controlled Research Librarian/Workspace/Lab handoffs. v5.10.0 Institutional Research Network II remains intact. The current Research Library page remains the R3.2.1 capability-preserving baseline with Three Research Front Doors removed. The public `[sc_library]` front door can now use the Python/PostgreSQL research index for bounded search, topic/type/source/year filters, progressive record previews, related research, provenance, and timelines without rendering the entire catalog or private research workspace inline. Explicit legacy modes remain available, and a WordPress-local fallback protects public discovery when the Python service is unavailable.
 
@@ -371,7 +371,7 @@ The facade does not expose My Library, private Research Projects, notebook or Ev
 
 == Energy Systems Intelligence ==
 
-Use `[sc_energy_systems_intelligence]` to expose the Library-native Sustainable Energy Knowledge Foundation, source-bound numeric registry, EISD indicator framework, and v0.4.0 Renewable Technology & Resource Model. The surface now opens on Technologies & Resources with seven governed renewable technology classes, six normalized resource classes, and explicit assessment/observation contracts. Exact EISD formula execution and renewable technology/resource suitability remain disabled until the necessary methodology and current evidence sources are loaded.
+Use `[sc_energy_systems_intelligence]` to expose the Library-native Sustainable Energy Knowledge Foundation, source-bound numeric registry, EISD indicator framework, renewable technology/resource model, and v0.5.0 Energy Balance & Systems Modeling layer. The surface now opens on Energy Balance with explicit-input conversion-chain, supply-demand accounting, and capacity-factor generation tools plus a portable scenario contract. These calculations are scenario arithmetic, not forecasts, dispatch, reliability models, suitability determinations, rankings, or policy recommendations.
 
 = 5.11.0 + Energy Systems Intelligence v0.1.0 =
 
@@ -390,6 +390,17 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= Energy Systems Intelligence 0.5.0 / Backend 2.11.0 =
+
+* Preserves the 75-concept/63-relationship energy foundation, source-bound numeric registry, all 30 EISD indicator definitions/contracts, seven renewable technology objects, and six resource classes.
+* Adds a governed four-model Energy Balance & Systems framework with three executable explicit-input calculations and one portable scenario contract.
+* Adds deterministic conversion-chain calculations with stage input, efficiency, output, loss, final output, total loss, and overall efficiency.
+* Adds supply-demand accounting across domestic supply, imports, storage discharge, final demand, exports, storage charge, declared losses, tolerance, and residual.
+* Adds capacity-factor generation arithmetic from explicit capacity, capacity factor, and hours without inferring technology-specific performance.
+* Adds an Energy Balance interface, GET-only backend routes, WordPress REST facades, JSON Schemas, and a machine-readable balance-model export.
+* Activates computational handoff contracts for later Lab and Workbench integration without modifying those separate products.
+* Does not perform time-series dispatch, storage-physics simulation, grid reliability/adequacy analysis, economic optimization, scenario persistence, automatic ranking, or policy recommendation.
 
 = Energy Systems Intelligence 0.4.0 / Backend 2.10.0 =
 

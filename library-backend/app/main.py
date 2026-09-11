@@ -264,7 +264,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "0.4.0",
+            "energy_systems_domain_version": "0.5.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -293,7 +293,17 @@ def health() -> dict[str, Any]:
             "energy_quantitative_technology_profiles_loaded": False,
             "energy_live_resource_potential_datasets_loaded": False,
             "energy_renewable_suitability_assessment": False,
-            "energy_scenario_modeling": False,
+            "energy_scenario_modeling": True,
+            "energy_balance_framework": True,
+            "energy_conversion_chain_model": True,
+            "energy_supply_demand_balance_model": True,
+            "energy_capacity_factor_generation_estimate": True,
+            "energy_balance_scenario_contracts": True,
+            "energy_time_series_dispatch_simulation": False,
+            "energy_grid_reliability_or_adequacy_model": False,
+            "energy_storage_physics_simulation": False,
+            "energy_economic_optimization": False,
+            "energy_scenario_persistence": False,
             "automatic_energy_technology_ranking": False,
             "automatic_energy_policy_recommendation": False,
             "automated_clinical_recommendation": False,
@@ -968,6 +978,66 @@ def energy_systems_heat_content_estimate(
         raise HTTPException(status_code=404, detail="Energy heat-content factor not found") from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/balance-framework")
+def energy_systems_balance_framework() -> dict[str, Any]:
+    return energy_systems.balance_framework()
+
+
+@app.get("/v1/energy-systems/conversion-chain")
+def energy_systems_conversion_chain(
+    input_kwh: str = Query(..., min_length=1, max_length=80),
+    efficiencies: str = Query(..., min_length=1, max_length=500),
+    labels: str = Query(default="", max_length=500),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.conversion_chain(input_kwh=input_kwh, efficiencies=efficiencies, labels=labels)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/supply-demand-balance")
+def energy_systems_supply_demand_balance(
+    domestic_supply_kwh: str = Query(default="0", max_length=80),
+    imports_kwh: str = Query(default="0", max_length=80),
+    storage_discharge_kwh: str = Query(default="0", max_length=80),
+    final_demand_kwh: str = Query(default="0", max_length=80),
+    exports_kwh: str = Query(default="0", max_length=80),
+    storage_charge_kwh: str = Query(default="0", max_length=80),
+    losses_kwh: str = Query(default="0", max_length=80),
+    tolerance_kwh: str = Query(default="0.001", max_length=80),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.supply_demand_balance(
+            domestic_supply_kwh=domestic_supply_kwh,
+            imports_kwh=imports_kwh,
+            storage_discharge_kwh=storage_discharge_kwh,
+            final_demand_kwh=final_demand_kwh,
+            exports_kwh=exports_kwh,
+            storage_charge_kwh=storage_charge_kwh,
+            losses_kwh=losses_kwh,
+            tolerance_kwh=tolerance_kwh,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/generation-estimate")
+def energy_systems_generation_estimate(
+    capacity_kw: str = Query(..., min_length=1, max_length=80),
+    capacity_factor_pct: str = Query(..., min_length=1, max_length=80),
+    hours: str = Query(default="8760", min_length=1, max_length=80),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.generation_estimate(capacity_kw=capacity_kw, capacity_factor_pct=capacity_factor_pct, hours=hours)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/balance-scenario-template")
+def energy_systems_balance_scenario_template() -> dict[str, Any]:
+    return energy_systems.balance_scenario_template()
 
 
 @app.get("/v1/carbon-nature")

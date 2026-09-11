@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v0.4.0 — Renewable Technology & Resource Model. */
+/** Energy Systems Intelligence v0.5.0 — Energy Balance & Systems Modeling. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '0.4.0';
+    public const VERSION = '0.5.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v040', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v040.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v040', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v040.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v050', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v050.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v050', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v050.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -119,6 +119,37 @@ final class SC_Library_Energy_Systems_Intelligence {
                 'quantity' => ['required' => true, 'sanitize_callback' => 'sanitize_text_field'],
             ],
         ]);
+        register_rest_route('sc-library/v1', '/energy-systems/balance-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'balance_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/conversion-chain', [
+            'methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'conversion_chain'],
+            'args' => [
+                'input_kwh' => ['required' => true, 'sanitize_callback' => 'sanitize_text_field'],
+                'efficiencies' => ['required' => true, 'sanitize_callback' => 'sanitize_text_field'],
+                'labels' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+            ],
+        ]);
+        register_rest_route('sc-library/v1', '/energy-systems/supply-demand-balance', [
+            'methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'supply_demand_balance'],
+            'args' => [
+                'domestic_supply_kwh' => ['sanitize_callback' => 'sanitize_text_field', 'default' => '0'],
+                'imports_kwh' => ['sanitize_callback' => 'sanitize_text_field', 'default' => '0'],
+                'storage_discharge_kwh' => ['sanitize_callback' => 'sanitize_text_field', 'default' => '0'],
+                'final_demand_kwh' => ['sanitize_callback' => 'sanitize_text_field', 'default' => '0'],
+                'exports_kwh' => ['sanitize_callback' => 'sanitize_text_field', 'default' => '0'],
+                'storage_charge_kwh' => ['sanitize_callback' => 'sanitize_text_field', 'default' => '0'],
+                'losses_kwh' => ['sanitize_callback' => 'sanitize_text_field', 'default' => '0'],
+                'tolerance_kwh' => ['sanitize_callback' => 'sanitize_text_field', 'default' => '0.001'],
+            ],
+        ]);
+        register_rest_route('sc-library/v1', '/energy-systems/generation-estimate', [
+            'methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'generation_estimate'],
+            'args' => [
+                'capacity_kw' => ['required' => true, 'sanitize_callback' => 'sanitize_text_field'],
+                'capacity_factor_pct' => ['required' => true, 'sanitize_callback' => 'sanitize_text_field'],
+                'hours' => ['sanitize_callback' => 'sanitize_text_field', 'default' => '8760'],
+            ],
+        ]);
+        register_rest_route('sc-library/v1', '/energy-systems/balance-scenario-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'balance_scenario_template']]);
     }
 
     public function manifest(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems'); }
@@ -217,6 +248,29 @@ final class SC_Library_Energy_Systems_Intelligence {
             'quantity' => trim((string)$request->get_param('quantity')),
         ]);
     }
+    public function balance_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/balance-framework'); }
+    public function conversion_chain(WP_REST_Request $request) {
+        return $this->proxy('/v1/energy-systems/conversion-chain', [
+            'input_kwh' => trim((string)$request->get_param('input_kwh')),
+            'efficiencies' => trim((string)$request->get_param('efficiencies')),
+            'labels' => trim((string)$request->get_param('labels')),
+        ]);
+    }
+    public function supply_demand_balance(WP_REST_Request $request) {
+        $params = [];
+        foreach (['domestic_supply_kwh','imports_kwh','storage_discharge_kwh','final_demand_kwh','exports_kwh','storage_charge_kwh','losses_kwh','tolerance_kwh'] as $key) {
+            $params[$key] = trim((string)$request->get_param($key));
+        }
+        return $this->proxy('/v1/energy-systems/supply-demand-balance', $params);
+    }
+    public function generation_estimate(WP_REST_Request $request) {
+        return $this->proxy('/v1/energy-systems/generation-estimate', [
+            'capacity_kw' => trim((string)$request->get_param('capacity_kw')),
+            'capacity_factor_pct' => trim((string)$request->get_param('capacity_factor_pct')),
+            'hours' => trim((string)$request->get_param('hours')),
+        ]);
+    }
+    public function balance_scenario_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/balance-scenario-template'); }
 
     private function proxy(string $path, array $params = []) {
         if (!SC_Library_Python_Backend::configured()) {
@@ -239,11 +293,11 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Energy Systems Intelligence',
-            'intro' => 'Explore governed renewable technology and resource-potential objects alongside the sustainable-energy knowledge foundation, source-bound numeric registry, and Energy Indicators for Sustainable Development.',
+            'intro' => 'Model explicit energy flows and balances while retaining governed renewable technology, sustainability indicators, source-bound numeric factors, and the sustainable-energy knowledge foundation.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v040');
-        wp_enqueue_script('sc-library-energy-systems-v040');
+        wp_enqueue_style('sc-library-energy-systems-v050');
+        wp_enqueue_script('sc-library-energy-systems-v050');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -272,9 +326,14 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-technology-comparison-endpoint="<?php echo esc_url($ep('/technology-comparison-template')); ?>"
             data-convert-endpoint="<?php echo esc_url($ep('/convert')); ?>"
             data-carbon-estimate-endpoint="<?php echo esc_url($ep('/carbon-estimate')); ?>"
-            data-heat-estimate-endpoint="<?php echo esc_url($ep('/heat-content-estimate')); ?>">
+            data-heat-estimate-endpoint="<?php echo esc_url($ep('/heat-content-estimate')); ?>"
+            data-balance-framework-endpoint="<?php echo esc_url($ep('/balance-framework')); ?>"
+            data-conversion-chain-endpoint="<?php echo esc_url($ep('/conversion-chain')); ?>"
+            data-supply-demand-balance-endpoint="<?php echo esc_url($ep('/supply-demand-balance')); ?>"
+            data-generation-estimate-endpoint="<?php echo esc_url($ep('/generation-estimate')); ?>"
+            data-balance-scenario-endpoint="<?php echo esc_url($ep('/balance-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.4.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.5.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
@@ -284,12 +343,13 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__guardrail">
-                <strong><?php esc_html_e('Technology class ≠ site suitability, performance claim, or preferred option.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v0.4.0 structures the renewable technologies and resource classes named by the module, but does not fabricate current resource potential, technology efficiency, capacity factor, cost, lifecycle impact, maturity, or project feasibility. Those values require explicit source-, geography-, period-, and methodology-bound evidence.', 'sustainable-catalyst-library'); ?>
+                <strong><?php esc_html_e('Scenario arithmetic ≠ forecast, dispatch model, or preferred energy pathway.', 'sustainable-catalyst-library'); ?></strong>
+                <?php esc_html_e('v0.5.0 calculates only from explicit scenario inputs. It does not infer technology efficiency, capacity factor, resource availability, storage behavior, grid reliability, costs, or preferred technologies. Those remain evidence- and model-dependent.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
-                <button type="button" class="sc-es__mode is-active" data-es-mode="technologies" role="tab" aria-selected="true">Technologies &amp; Resources</button>
+                <button type="button" class="sc-es__mode is-active" data-es-mode="balance" role="tab" aria-selected="true">Energy Balance</button>
+                <button type="button" class="sc-es__mode" data-es-mode="technologies" role="tab" aria-selected="false">Technologies &amp; Resources</button>
                 <button type="button" class="sc-es__mode" data-es-mode="indicators" role="tab" aria-selected="false">Sustainability Indicators</button>
                 <button type="button" class="sc-es__mode" data-es-mode="registry" role="tab" aria-selected="false">Numeric Registry</button>
                 <button type="button" class="sc-es__mode" data-es-mode="map" role="tab" aria-selected="false">Knowledge Map</button>
@@ -298,7 +358,51 @@ final class SC_Library_Energy_Systems_Intelligence {
                 <button type="button" class="sc-es__mode" data-es-mode="handoffs" role="tab" aria-selected="false">Platform Handoffs</button>
             </div>
 
-            <div class="sc-es__panel" data-es-panel="technologies">
+            <div class="sc-es__panel" data-es-panel="balance">
+                <div class="sc-es__panel-heading"><strong>Energy balance &amp; systems modeling</strong><span>Run deterministic, transparent calculations from explicit inputs. The model keeps supply, conversion, losses, storage accounting, demand, and generation assumptions visible instead of silently assigning technology performance.</span></div>
+                <p class="sc-es__status" data-es-balance-framework-status aria-live="polite">Loading balance framework…</p>
+                <div class="sc-es__balance-summary" data-es-balance-summary></div>
+
+                <div class="sc-es__calc-grid sc-es__calc-grid--balance">
+                    <form class="sc-es__calculator" data-es-chain-form>
+                        <h3>Conversion chain</h3>
+                        <label><span>Starting energy (kWh)</span><input name="input_kwh" inputmode="decimal" placeholder="1000" required></label>
+                        <label><span>Stage efficiencies (%)</span><input name="efficiencies" placeholder="90, 95, 97" required></label>
+                        <label><span>Stage labels (optional)</span><input name="labels" placeholder="Conversion, Distribution, End use"></label>
+                        <button type="submit">Run chain</button>
+                        <div class="sc-es__result" data-es-chain-result aria-live="polite"></div>
+                    </form>
+
+                    <form class="sc-es__calculator sc-es__calculator--wide" data-es-balance-form>
+                        <h3>Supply–demand balance</h3>
+                        <div class="sc-es__field-grid">
+                            <label><span>Domestic supply (kWh)</span><input name="domestic_supply_kwh" inputmode="decimal" placeholder="1000" required></label>
+                            <label><span>Imports</span><input name="imports_kwh" inputmode="decimal" value="0"></label>
+                            <label><span>Storage discharge</span><input name="storage_discharge_kwh" inputmode="decimal" value="0"></label>
+                            <label><span>Final demand</span><input name="final_demand_kwh" inputmode="decimal" placeholder="900" required></label>
+                            <label><span>Exports</span><input name="exports_kwh" inputmode="decimal" value="0"></label>
+                            <label><span>Storage charge</span><input name="storage_charge_kwh" inputmode="decimal" value="0"></label>
+                            <label><span>Losses</span><input name="losses_kwh" inputmode="decimal" value="0"></label>
+                            <label><span>Balance tolerance (kWh)</span><input name="tolerance_kwh" inputmode="decimal" value="0.001"></label>
+                        </div>
+                        <button type="submit">Check balance</button>
+                        <div class="sc-es__result" data-es-balance-result aria-live="polite"></div>
+                    </form>
+
+                    <form class="sc-es__calculator" data-es-generation-form>
+                        <h3>Generation from capacity factor</h3>
+                        <label><span>Capacity (kW)</span><input name="capacity_kw" inputmode="decimal" placeholder="1000" required></label>
+                        <label><span>Capacity factor (%)</span><input name="capacity_factor_pct" inputmode="decimal" placeholder="35" required></label>
+                        <label><span>Hours</span><input name="hours" inputmode="decimal" value="8760" required></label>
+                        <button type="submit">Estimate generation</button>
+                        <div class="sc-es__result" data-es-generation-result aria-live="polite"></div>
+                    </form>
+                </div>
+
+                <div class="sc-es__scenario-contract" data-es-scenario-contract></div>
+            </div>
+
+            <div class="sc-es__panel" data-es-panel="technologies" hidden>
                 <div class="sc-es__panel-heading"><strong>Renewable technology &amp; resource model</strong><span>Seven governed renewable technology families and six normalized resource classes. The model structures evidence needed for later Lab, Site Intelligence, Workbench, and Decision Studio analysis without inventing universal performance values or suitability rankings.</span></div>
                 <p class="sc-es__status" data-es-technology-framework-status aria-live="polite">Loading technology framework…</p>
                 <div class="sc-es__technology-summary" data-es-technology-summary></div>
@@ -390,12 +494,12 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="handoffs" hidden>
-                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.4.0 preserves the Workbench numeric-registry and indicator contracts and adds renewable technology/resource assessment contracts for later Site Intelligence and Decision Studio integration without asserting current country data.</span></div>
+                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.5.0 adds portable energy-balance and conversion-chain contracts for later Lab and Workbench integration while preserving renewable-resource, indicator, and Decision Studio handoffs. The separate products are not modified by this Library release.</span></div>
                 <p class="sc-es__status" data-es-handoff-status aria-live="polite">Loading handoff registry…</p>
                 <div class="sc-es__cards" data-es-handoff-results></div>
             </div>
 
-            <footer><strong>Next:</strong> v0.5.0 — Energy Balance &amp; Systems Modeling. The next release will make energy flows, conversion stages, losses, demand, and scenario balances computational while preserving explicit system boundaries and provenance.</footer>
+            <footer><strong>Next:</strong> v0.6.0 — Energy Scenario Economics. The next release will add cost, payback, NPV, cost-benefit, and cost-efficiency contracts without turning model output into an automatic investment or policy recommendation.</footer>
         </section>
         <?php return (string)ob_get_clean();
     }

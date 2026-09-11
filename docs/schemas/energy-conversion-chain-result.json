@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-conversion-chain-result.json",
+  "title": "Sustainable Catalyst Energy Conversion Chain Result",
+  "type": "object",
+  "required": [
+    "ok",
+    "schema",
+    "model_version",
+    "model_key",
+    "input",
+    "stages",
+    "output",
+    "provenance",
+    "boundary"
+  ],
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "schema": {
+      "const": "sc-energy-conversion-chain-result/1.0"
+    },
+    "model_version": {
+      "const": "0.5.0"
+    },
+    "model_key": {
+      "const": "conversion-chain"
+    },
+    "input": {
+      "type": "object",
+      "required": [
+        "input_kwh",
+        "stage_efficiencies_pct",
+        "stage_labels"
+      ],
+      "properties": {
+        "input_kwh": {
+          "type": "string"
+        },
+        "stage_efficiencies_pct": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "string"
+          }
+        },
+        "stage_labels": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "required": [
+          "stage",
+          "label",
+          "input_kwh",
+          "efficiency_pct",
+          "output_kwh",
+          "loss_kwh"
+        ],
+        "properties": {
+          "stage": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "input_kwh": {
+            "type": "string"
+          },
+          "efficiency_pct": {
+            "type": "string"
+          },
+          "output_kwh": {
+            "type": "string"
+          },
+          "loss_kwh": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "output": {
+      "type": "object",
+      "required": [
+        "final_output_kwh",
+        "total_loss_kwh",
+        "overall_efficiency_pct"
+      ],
+      "properties": {
+        "final_output_kwh": {
+          "type": "string"
+        },
+        "total_loss_kwh": {
+          "type": "string"
+        },
+        "overall_efficiency_pct": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

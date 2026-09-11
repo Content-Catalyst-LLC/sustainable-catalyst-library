@@ -1,0 +1,88 @@
+Sustainable Catalyst Library
+Energy Systems Intelligence v0.5.0 — Energy Balance & Systems Modeling
+Build validation: 2026-09-10
+
+BASELINE
+- Sustainable Catalyst Library: 5.11.0
+- Carbon & Nature Intelligence: 0.5.0
+- Energy Systems Intelligence baseline: 0.4.0
+- Library backend baseline: 2.10.0
+
+RESULT
+PASS
+
+DOMAIN VALIDATION
+- Energy Systems Intelligence: 0.5.0
+- Library backend: 2.11.0
+- Preserved concepts: 75
+- Preserved typed relationships: 63
+- Preserved EISD indicators: 30
+- Preserved renewable technology objects: 7
+- Preserved renewable resource classes: 6
+- Preserved unit records: 8
+- Preserved energy conversion factors: 4
+- Preserved direct carbon factors: 24
+- Preserved gross heat-content factors: 16
+- Energy balance model definitions: 4
+- Executable deterministic balance models: 3
+- Portable balance scenario contracts: 1
+
+NEW COMPUTATIONAL MODELS
+- Conversion chain: explicit input energy + one or more explicit stage efficiencies
+- Supply–demand balance: explicit supply, imports/storage discharge, demand, exports/storage charge, losses, and tolerance
+- Capacity-factor generation estimate: explicit capacity, capacity factor, and hours
+- Balance scenario contract: portable structured packet for later Lab, Workbench, and Decision Studio use
+
+REGRESSION EXAMPLES VERIFIED
+- Conversion chain: 1,000 kWh through 90%, 95%, 97% stages -> 829.35 kWh final output; 170.65 kWh total loss; 82.935% overall efficiency
+- Supply–demand balance: 1,000 kWh domestic + 150 kWh imports vs 1,000 kWh demand + 50 kWh exports + 100 kWh declared losses -> 0 kWh residual; balanced
+- Capacity-factor generation: 1,000 kW × 35% × 8,760 h -> 3,066,000 kWh; 350 kW average output
+- Prior numeric regression: 100,000 Btu -> 29.31 kWh
+
+GUARDRAILS VERIFIED
+- Explicit user inputs are required for executable v0.5.0 calculations
+- Technology-specific efficiency is not inferred
+- Capacity factor is not inferred
+- Resource availability is not inferred
+- Calculation output is not treated as a forecast
+- No time-series dispatch simulation
+- No grid reliability or adequacy model
+- No storage physics simulation
+- No economic optimization
+- No scenario persistence
+- No automatic technology ranking
+- No automatic policy recommendation
+- Existing EISD official-formula execution remains disabled
+- Existing 2020 numeric factors remain source-bound historical references
+
+TESTS
+- Focused regression suite: 30 passed
+- Includes Energy Systems backend tests, WordPress/interface integration tests, JSON Schema validation, deterministic calculation tests, prior Energy Systems regression, and Carbon & Nature v0.5.0 preservation tests
+- PHP syntax: PASS
+- JavaScript syntax: PASS
+- Python compilation: PASS
+- JSON export/schema parse: PASS
+- Contabo upgrader shell syntax: PASS
+
+INSTALLER VALIDATION
+- Clean Git checkout initialized from Energy Systems v0.4.0 / backend v2.10.0 baseline
+- v0.5.0 tiny-patch installer executed with --no-push
+- Baseline identity checks: PASS
+- Patch application: PASS
+- 30-test regression suite from installer: PASS
+- Local WordPress ZIP generation: PASS
+- Local backend ZIP generation: PASS
+- Git commit creation: PASS
+- Annotated energy-systems-v0.5.0 tag creation: PASS
+
+PACKAGE INTEGRITY
+- Full v0.5.0 repository package re-extracted after packaging
+- 30-test regression suite from packaged repository: PASS
+
+RUNTIME BOUNDARY
+- This build environment does not have the psycopg runtime package installed, so the complete FastAPI service was not started here.
+- The production Contabo upgrader rebuilds the Docker image with declared backend dependencies, waits for container health, and verifies the v0.5.0 HTTP endpoints before reporting success.
+- No live Contabo deployment was performed by this build process.
+
+NEXT RELEASE
+Energy Systems Intelligence v0.6.0 — Energy Scenario Economics

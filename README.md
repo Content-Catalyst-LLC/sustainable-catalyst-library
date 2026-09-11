@@ -1,5 +1,13 @@
 # Sustainable Catalyst Library
 
+## Energy Systems Intelligence v0.5.0
+
+Adds **Energy Balance & Systems Modeling** while preserving Library v5.11.0, Carbon & Nature Intelligence v0.5.0, the source-bound numeric registry, all 30 EISD indicators, and the v0.4.0 renewable technology/resource model. The shared Python backend advances to v2.11.0.
+
+The release activates explicit-input conversion-chain arithmetic, supply-demand energy accounting, a capacity-factor generation estimate, and a portable scenario contract. These are transparent scenario calculations rather than forecasts: technology performance, resource availability, dispatch, storage physics, reliability/adequacy, economic optimization, ranking, and policy recommendation are not inferred or activated.
+
+See `ENERGY_SYSTEMS_INTELLIGENCE_v0.5.0.md`, `RELEASE_NOTES_ENERGY_SYSTEMS_0.5.0.md`, and `DEPLOY_ENERGY_SYSTEMS_BACKEND_v2.11.0.md`.
+
 ## Energy Systems Intelligence v0.4.0
 
 Adds **Renewable Technology & Resource Model** while preserving Library v5.11.0, Carbon & Nature Intelligence v0.5.0, the v0.2.0 source-bound numeric registry, and the v0.3.0 EISD indicator layer. The shared Python backend advances to v2.10.0.

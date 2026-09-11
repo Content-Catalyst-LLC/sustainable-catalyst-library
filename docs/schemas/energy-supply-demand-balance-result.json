@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-supply-demand-balance-result.json",
+  "title": "Sustainable Catalyst Supply Demand Balance Result",
+  "type": "object",
+  "required": [
+    "ok",
+    "schema",
+    "model_version",
+    "model_key",
+    "input",
+    "output",
+    "accounting",
+    "provenance",
+    "boundary"
+  ],
+  "properties": {
+    "ok": {
+      "const": true
+    },
+    "schema": {
+      "const": "sc-energy-supply-demand-balance-result/1.0"
+    },
+    "model_version": {
+      "const": "0.5.0"
+    },
+    "model_key": {
+      "const": "supply-demand-balance"
+    },
+    "input": {
+      "type": "object",
+      "required": [
+        "domestic_supply_kwh",
+        "imports_kwh",
+        "storage_discharge_kwh",
+        "final_demand_kwh",
+        "exports_kwh",
+        "storage_charge_kwh",
+        "losses_kwh",
+        "tolerance_kwh"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "output": {
+      "type": "object",
+      "required": [
+        "available_supply_kwh",
+        "accounted_outflows_kwh",
+        "residual_kwh",
+        "residual_pct_of_supply",
+        "balanced"
+      ],
+      "properties": {
+        "available_supply_kwh": {
+          "type": "string"
+        },
+        "accounted_outflows_kwh": {
+          "type": "string"
+        },
+        "residual_kwh": {
+          "type": "string"
+        },
+        "residual_pct_of_supply": {
+          "type": "string"
+        },
+        "balanced": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "accounting": {
+      "type": "object"
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}
