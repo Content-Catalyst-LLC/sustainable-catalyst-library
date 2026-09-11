@@ -7,8 +7,8 @@ def engine():
 
 def test_manifest_versions_and_bioenergy_counts():
     d = engine().manifest()
-    assert d["subsystem"]["version"] == "0.8.0"
-    assert d["subsystem"]["backend_version"] == "2.14.0"
+    assert d["subsystem"]["version"] == "0.9.0"
+    assert d["subsystem"]["backend_version"] == "2.15.0"
     assert d["counts"]["bioenergy_feedstock_classes"] == 5
     assert d["counts"]["bioenergy_pathways"] == 6
     assert d["counts"]["carbon_nature_bridges"] == 6
@@ -280,3 +280,115 @@ def test_v070_and_prior_remain_preserved_under_global_layer():
     assert e.technology_framework()["version"] == "0.4.0"
     assert e.indicator_framework()["schema"] == "sc-energy-indicator-framework/1.0"
     assert e.registry()["schema"] == "sc-energy-numeric-registry/1.0"
+
+
+
+def decision_packet(unit_b="USD", period_b="2030", source_b="source-b"):
+    return {
+        "identity": {"decision_id":"energy-2030","title":"Energy options","question":"How do alternatives compare?","geography":"Example","period":"2030"},
+        "decision_context": {"objectives":["reliable service"],"constraints":[],"stakeholders":[],"notes":""},
+        "alternatives": [
+            {"key":"option-a","label":"Option A","description":"","technology_refs":["solar-pv"],"scenario_refs":["scenario-a"],"evidence_refs":[],"uncertainty_note":"",
+             "criteria_observations":[
+                {"criterion_key":"capital-cost","value":"100000","unit":"USD","period":"2030","source_ref":"source-a","methodology_ref":"cost-model-a","uncertainty":"±10%","notes":""},
+                {"criterion_key":"renewable-energy-share","value":"60","unit":"%","period":"2030","source_ref":"source-a","methodology_ref":"mix-model-a","uncertainty":"scenario range","notes":""}
+             ]},
+            {"key":"option-b","label":"Option B","description":"","technology_refs":["wind"],"scenario_refs":["scenario-b"],"evidence_refs":[],"uncertainty_note":"",
+             "criteria_observations":[
+                {"criterion_key":"capital-cost","value":"120000","unit":unit_b,"period":period_b,"source_ref":source_b,"methodology_ref":"cost-model-b","uncertainty":"±15%","notes":""},
+                {"criterion_key":"renewable-energy-share","value":"70","unit":"%","period":"2030","source_ref":"source-b","methodology_ref":"mix-model-b","uncertainty":"scenario range","notes":""}
+             ]}
+        ],
+        "review": {"assumptions":[],"evidence_gaps":["reliability model"],"open_questions":[],"reviewer_notes":""}
+    }
+
+
+def test_decision_framework_counts_and_guardrails():
+    d=engine().decision_framework()
+    assert d["version"] == "0.9.0"
+    assert d["counts"]["criteria"] == 12
+    assert d["counts"]["dimensions"] == 9
+    assert d["counts"]["decision_packet_contracts"] == 1
+    assert d["guardrails"]["automatic_alternative_ranking"] is False
+    assert d["guardrails"]["composite_sustainability_score"] is False
+    assert d["guardrails"]["matrix_is_not_decision"] is True
+
+
+def test_decision_criteria_cover_prior_energy_layers():
+    rows={x["key"]:x for x in engine().decision_criteria()["items"]}
+    assert len(rows)==12
+    assert "energy-npv-result" in rows["net-present-value"]["evidence_refs"]
+    assert "net-energy-import-dependency" in rows["energy-security-import-dependency"]["evidence_refs"]
+    assert "whole-system-ghg-accounting" in rows["ghg-emissions"]["evidence_refs"]
+    assert rows["reliability-flexibility"]["comparison_semantics"] == "context-only"
+
+
+def test_decision_packet_template_is_blank_and_non_persistent():
+    d=engine().decision_packet_template()
+    assert d["version"] == "0.9.0"
+    assert len(d["packet"]["alternatives"]) == 2
+    assert d["packet"]["alternatives"][0]["criteria_observations"] == []
+    assert d["guardrails"]["scenario_persistence"] is False
+    assert d["guardrails"]["decision_studio_execution"] is False
+
+
+def test_decision_comparison_matrix_neutral_and_provenance_visible():
+    import json
+    d=engine().decision_comparison_matrix(packet_json=json.dumps(decision_packet()))
+    assert len(d["alternatives"]) == 2
+    assert len(d["rows"]) == 2
+    capital=next(x for x in d["rows"] if x["criterion"]["key"]=="capital-cost")
+    assert [x["value"] for x in capital["cells"]] == ["100000","120000"]
+    assert capital["cells"][0]["source_ref"] == "source-a"
+    assert d["incompatibilities"] == []
+    assert d["guardrails"]["no_ranking"] is True
+    assert d["guardrails"]["no_composite_score"] is True
+
+
+def test_decision_matrix_flags_unit_and_period_mismatch_without_harmonizing():
+    import json
+    d=engine().decision_comparison_matrix(packet_json=json.dumps(decision_packet(unit_b="EUR",period_b="2031")))
+    capital=next(x for x in d["rows"] if x["criterion"]["key"]=="capital-cost")
+    assert set(capital["comparison_flags"]) == {"unit-mismatch","period-mismatch"}
+    assert d["incompatibilities"][0]["units"] == ["EUR","USD"]
+    assert d["incompatibilities"][0]["periods"] == ["2030","2031"]
+
+
+def test_decision_readiness_reports_completeness_not_merit():
+    import json
+    d=engine().decision_readiness(packet_json=json.dumps(decision_packet()))
+    assert d["identity"]["complete"] is True
+    assert d["criteria"]["observed_count"] == 2
+    assert d["declared_evidence_gap_count"] == 1
+    assert all(x["provenance_coverage_pct"] == 100.0 for x in d["alternatives"])
+    assert "not a merit score" in d["readiness_interpretation"]
+
+
+def test_decision_packet_unknown_criterion_fails_closed():
+    import json
+    p=decision_packet(); p["alternatives"][0]["criteria_observations"][0]["criterion_key"]="invented-score"
+    try:
+        engine().decision_readiness(packet_json=json.dumps(p))
+        assert False
+    except ValueError as exc:
+        assert "unknown decision criterion" in str(exc)
+
+
+def test_decision_packet_requires_two_unique_alternatives():
+    import json
+    p=decision_packet(); p["alternatives"]=p["alternatives"][:1]
+    try:
+        engine().decision_readiness(packet_json=json.dumps(p)); assert False
+    except ValueError as exc: assert "at least two alternatives" in str(exc)
+    p=decision_packet(); p["alternatives"][1]["key"]="option-a"
+    try:
+        engine().decision_readiness(packet_json=json.dumps(p)); assert False
+    except ValueError as exc: assert "alternative keys must be unique" in str(exc)
+
+
+def test_v080_global_energy_remains_preserved_under_decision_layer():
+    e=engine()
+    assert e.global_energy_framework()["version"] == "0.8.0"
+    assert e.bioenergy_framework()["version"] == "0.7.0"
+    assert e.economics_framework()["version"] == "0.6.0"
+    assert e.balance_framework()["version"] == "0.5.0"

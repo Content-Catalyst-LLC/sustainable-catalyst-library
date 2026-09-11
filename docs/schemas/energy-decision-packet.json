@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-decision-packet.json",
+  "title": "Energy Decision Packet",
+  "type": "object",
+  "required": ["identity", "decision_context", "alternatives", "review"],
+  "properties": {
+    "identity": {
+      "type": "object",
+      "required": ["decision_id", "title", "question", "geography", "period"],
+      "properties": {
+        "decision_id": {"type": "string"}, "title": {"type": "string"}, "question": {"type": "string"},
+        "geography": {"type": "string"}, "period": {"type": "string"}
+      }
+    },
+    "decision_context": {
+      "type": "object",
+      "required": ["objectives", "constraints", "stakeholders", "notes"],
+      "properties": {
+        "objectives": {"type": "array"}, "constraints": {"type": "array"}, "stakeholders": {"type": "array"}, "notes": {"type": "string"}
+      }
+    },
+    "alternatives": {
+      "type": "array", "minItems": 2, "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["key", "label", "description", "technology_refs", "scenario_refs", "criteria_observations", "evidence_refs", "uncertainty_note"],
+        "properties": {
+          "key": {"type": "string", "minLength": 1}, "label": {"type": "string"}, "description": {"type": "string"},
+          "technology_refs": {"type": "array"}, "scenario_refs": {"type": "array"}, "evidence_refs": {"type": "array"}, "uncertainty_note": {"type": "string"},
+          "criteria_observations": {
+            "type": "array", "maxItems": 50,
+            "items": {
+              "type": "object",
+              "required": ["criterion_key", "value", "unit", "period", "source_ref", "methodology_ref", "uncertainty", "notes"],
+              "properties": {
+                "criterion_key": {"type": "string", "minLength": 1},
+                "value": {},
+                "unit": {"type": "string"}, "period": {"type": "string"}, "source_ref": {"type": "string"},
+                "methodology_ref": {"type": "string"}, "uncertainty": {"type": "string"}, "notes": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": ["assumptions", "evidence_gaps", "open_questions", "reviewer_notes"],
+      "properties": {
+        "assumptions": {"type": "array"}, "evidence_gaps": {"type": "array"}, "open_questions": {"type": "array"}, "reviewer_notes": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,0 +1,447 @@
+{
+  "schema": "sc-energy-decision-intelligence-export/1.0",
+  "version": "0.9.0",
+  "framework": {
+    "ok": true,
+    "schema": "sc-energy-decision-intelligence/1.0",
+    "version": "0.9.0",
+    "release": "Energy Decision Intelligence",
+    "counts": {
+      "criteria": 12,
+      "dimensions": 9,
+      "decision_packet_contracts": 1,
+      "comparison_matrix_models": 1,
+      "readiness_models": 1
+    },
+    "dimensions": [
+      "economics",
+      "energy-mix",
+      "energy-security",
+      "environment-climate",
+      "environment-resource",
+      "implementation",
+      "social-access",
+      "system-integration",
+      "system-performance"
+    ],
+    "criteria": [
+      {
+        "key": "annual-energy-service",
+        "label": "Annual energy service / useful output",
+        "dimension": "system-performance",
+        "value_type": "number",
+        "canonical_unit": "explicit",
+        "comparison_semantics": "magnitude-only",
+        "evidence_refs": [
+          "energy-balance-scenario-contract",
+          "capacity-factor-generation-estimate"
+        ],
+        "boundary": "The unit and service boundary must be explicit. More output is not automatically preferable if demand, quality, cost, or impacts differ."
+      },
+      {
+        "key": "system-efficiency",
+        "label": "System efficiency",
+        "dimension": "system-performance",
+        "value_type": "number",
+        "canonical_unit": "%",
+        "comparison_semantics": "magnitude-only",
+        "evidence_refs": [
+          "conversion-chain-model",
+          "supply-demand-balance-model",
+          "ECO3"
+        ],
+        "boundary": "Efficiency must preserve the conversion/system boundary. It is not interchangeable with capacity factor, reliability, or total energy use."
+      },
+      {
+        "key": "capital-cost",
+        "label": "Capital cost",
+        "dimension": "economics",
+        "value_type": "number",
+        "canonical_unit": "currency",
+        "comparison_semantics": "magnitude-only",
+        "evidence_refs": [
+          "energy-economic-scenario-contract",
+          "energy-cost-comparison-result"
+        ],
+        "boundary": "Currency, price year, included cost categories, financing treatment, and system scope must be declared before comparison."
+      },
+      {
+        "key": "net-present-value",
+        "label": "Net present value",
+        "dimension": "economics",
+        "value_type": "number",
+        "canonical_unit": "currency",
+        "comparison_semantics": "magnitude-only",
+        "evidence_refs": [
+          "energy-npv-result"
+        ],
+        "boundary": "NPV is only comparable when discount rate, lifetime, cash-flow boundary, currency, price basis, and residual-value treatment are compatible."
+      },
+      {
+        "key": "cost-efficiency",
+        "label": "Cost efficiency",
+        "dimension": "economics",
+        "value_type": "number",
+        "canonical_unit": "explicit",
+        "comparison_semantics": "magnitude-only",
+        "evidence_refs": [
+          "energy-cost-efficiency-result"
+        ],
+        "boundary": "The outcome denominator must be identical or reconciled across alternatives; cost per kWh saved and cost per tonne CO2e avoided are different criteria."
+      },
+      {
+        "key": "energy-access-affordability",
+        "label": "Energy access / affordability context",
+        "dimension": "social-access",
+        "value_type": "number-or-text",
+        "canonical_unit": "explicit",
+        "comparison_semantics": "context-only",
+        "evidence_refs": [
+          "SOC1",
+          "SOC2",
+          "electricity-access",
+          "energy-affordability"
+        ],
+        "boundary": "Country access indicators and project/user affordability evidence are context inputs, not interchangeable measures or automatic equity conclusions."
+      },
+      {
+        "key": "energy-security-import-dependency",
+        "label": "Energy security / import dependency context",
+        "dimension": "energy-security",
+        "value_type": "number-or-text",
+        "canonical_unit": "explicit",
+        "comparison_semantics": "context-only",
+        "evidence_refs": [
+          "ECO15",
+          "ECO16",
+          "net-energy-import-dependency"
+        ],
+        "boundary": "Import dependency is one security dimension. Negative values, stock coverage, supplier concentration, infrastructure, and resilience must retain source semantics."
+      },
+      {
+        "key": "renewable-energy-share",
+        "label": "Renewable-energy share context",
+        "dimension": "energy-mix",
+        "value_type": "number",
+        "canonical_unit": "%",
+        "comparison_semantics": "context-only",
+        "evidence_refs": [
+          "ECO13",
+          "renewable-final-energy-share",
+          "renewable-electricity-share"
+        ],
+        "boundary": "Renewable electricity share and renewable final-energy share have different denominators and must not be silently substituted."
+      },
+      {
+        "key": "ghg-emissions",
+        "label": "Greenhouse-gas emissions / removals",
+        "dimension": "environment-climate",
+        "value_type": "number",
+        "canonical_unit": "explicit",
+        "comparison_semantics": "magnitude-only",
+        "evidence_refs": [
+          "ENV1",
+          "whole-system-ghg-accounting",
+          "bioenergy-carbon-scenario-contract"
+        ],
+        "boundary": "Direct, lifecycle, avoided, biogenic, land-carbon, and removal accounting boundaries must be explicit. Biomass carbon neutrality is never assumed."
+      },
+      {
+        "key": "land-water-biodiversity",
+        "label": "Land, water, biodiversity and ecosystem context",
+        "dimension": "environment-resource",
+        "value_type": "number-or-text",
+        "canonical_unit": "explicit",
+        "comparison_semantics": "context-only",
+        "evidence_refs": [
+          "ENV4",
+          "ENV5",
+          "ENV6",
+          "renewable-resource-observation-contract",
+          "carbon-nature-accounting-handoff"
+        ],
+        "boundary": "Environmental dimensions are not collapsed into a single impact score. Geography, baseline, threshold, attribution, and ecosystem context must be preserved."
+      },
+      {
+        "key": "reliability-flexibility",
+        "label": "Reliability, adequacy and flexibility context",
+        "dimension": "system-integration",
+        "value_type": "number-or-text",
+        "canonical_unit": "explicit",
+        "comparison_semantics": "context-only",
+        "evidence_refs": [
+          "energy-balance-scenario-contract",
+          "renewable-technology-assessment-contract"
+        ],
+        "boundary": "v0.9.0 can carry supplied reliability/flexibility evidence but does not run dispatch, adequacy, grid-stability, or storage-physics models."
+      },
+      {
+        "key": "implementation-governance",
+        "label": "Implementation, governance and delivery context",
+        "dimension": "implementation",
+        "value_type": "text",
+        "canonical_unit": "n/a",
+        "comparison_semantics": "context-only",
+        "evidence_refs": [
+          "energy-economic-scenario-contract",
+          "global-energy-country-profile-contract"
+        ],
+        "boundary": "Permitting, institutions, supply chains, workforce, acceptance, policy, and delivery risk require explicit evidence and are not inferred from technology labels."
+      }
+    ],
+    "guardrails": {
+      "decision_packet_contract_activated": true,
+      "neutral_comparison_matrix_activated": true,
+      "readiness_inspection_activated": true,
+      "explicit_alternative_inputs_required": true,
+      "provenance_visibility_required": true,
+      "uncertainty_visibility_required": true,
+      "unit_compatibility_checked": true,
+      "period_compatibility_checked": true,
+      "missing_values_preserved": true,
+      "automatic_normalization": false,
+      "automatic_weight_assignment": false,
+      "composite_sustainability_score": false,
+      "automatic_alternative_ranking": false,
+      "automatic_winner_selection": false,
+      "investment_recommendation": false,
+      "policy_recommendation": false,
+      "scenario_persistence": false,
+      "decision_studio_execution": false,
+      "matrix_is_not_decision": true,
+      "readiness_is_not_merit_score": true
+    },
+    "content_fingerprint": "e84983ba70e69206a197a128b4d5596aee9fb58d79c71df5a66d1dbac058fa9f"
+  },
+  "criteria": [
+    {
+      "key": "annual-energy-service",
+      "label": "Annual energy service / useful output",
+      "dimension": "system-performance",
+      "value_type": "number",
+      "canonical_unit": "explicit",
+      "comparison_semantics": "magnitude-only",
+      "evidence_refs": [
+        "energy-balance-scenario-contract",
+        "capacity-factor-generation-estimate"
+      ],
+      "boundary": "The unit and service boundary must be explicit. More output is not automatically preferable if demand, quality, cost, or impacts differ."
+    },
+    {
+      "key": "system-efficiency",
+      "label": "System efficiency",
+      "dimension": "system-performance",
+      "value_type": "number",
+      "canonical_unit": "%",
+      "comparison_semantics": "magnitude-only",
+      "evidence_refs": [
+        "conversion-chain-model",
+        "supply-demand-balance-model",
+        "ECO3"
+      ],
+      "boundary": "Efficiency must preserve the conversion/system boundary. It is not interchangeable with capacity factor, reliability, or total energy use."
+    },
+    {
+      "key": "capital-cost",
+      "label": "Capital cost",
+      "dimension": "economics",
+      "value_type": "number",
+      "canonical_unit": "currency",
+      "comparison_semantics": "magnitude-only",
+      "evidence_refs": [
+        "energy-economic-scenario-contract",
+        "energy-cost-comparison-result"
+      ],
+      "boundary": "Currency, price year, included cost categories, financing treatment, and system scope must be declared before comparison."
+    },
+    {
+      "key": "net-present-value",
+      "label": "Net present value",
+      "dimension": "economics",
+      "value_type": "number",
+      "canonical_unit": "currency",
+      "comparison_semantics": "magnitude-only",
+      "evidence_refs": [
+        "energy-npv-result"
+      ],
+      "boundary": "NPV is only comparable when discount rate, lifetime, cash-flow boundary, currency, price basis, and residual-value treatment are compatible."
+    },
+    {
+      "key": "cost-efficiency",
+      "label": "Cost efficiency",
+      "dimension": "economics",
+      "value_type": "number",
+      "canonical_unit": "explicit",
+      "comparison_semantics": "magnitude-only",
+      "evidence_refs": [
+        "energy-cost-efficiency-result"
+      ],
+      "boundary": "The outcome denominator must be identical or reconciled across alternatives; cost per kWh saved and cost per tonne CO2e avoided are different criteria."
+    },
+    {
+      "key": "energy-access-affordability",
+      "label": "Energy access / affordability context",
+      "dimension": "social-access",
+      "value_type": "number-or-text",
+      "canonical_unit": "explicit",
+      "comparison_semantics": "context-only",
+      "evidence_refs": [
+        "SOC1",
+        "SOC2",
+        "electricity-access",
+        "energy-affordability"
+      ],
+      "boundary": "Country access indicators and project/user affordability evidence are context inputs, not interchangeable measures or automatic equity conclusions."
+    },
+    {
+      "key": "energy-security-import-dependency",
+      "label": "Energy security / import dependency context",
+      "dimension": "energy-security",
+      "value_type": "number-or-text",
+      "canonical_unit": "explicit",
+      "comparison_semantics": "context-only",
+      "evidence_refs": [
+        "ECO15",
+        "ECO16",
+        "net-energy-import-dependency"
+      ],
+      "boundary": "Import dependency is one security dimension. Negative values, stock coverage, supplier concentration, infrastructure, and resilience must retain source semantics."
+    },
+    {
+      "key": "renewable-energy-share",
+      "label": "Renewable-energy share context",
+      "dimension": "energy-mix",
+      "value_type": "number",
+      "canonical_unit": "%",
+      "comparison_semantics": "context-only",
+      "evidence_refs": [
+        "ECO13",
+        "renewable-final-energy-share",
+        "renewable-electricity-share"
+      ],
+      "boundary": "Renewable electricity share and renewable final-energy share have different denominators and must not be silently substituted."
+    },
+    {
+      "key": "ghg-emissions",
+      "label": "Greenhouse-gas emissions / removals",
+      "dimension": "environment-climate",
+      "value_type": "number",
+      "canonical_unit": "explicit",
+      "comparison_semantics": "magnitude-only",
+      "evidence_refs": [
+        "ENV1",
+        "whole-system-ghg-accounting",
+        "bioenergy-carbon-scenario-contract"
+      ],
+      "boundary": "Direct, lifecycle, avoided, biogenic, land-carbon, and removal accounting boundaries must be explicit. Biomass carbon neutrality is never assumed."
+    },
+    {
+      "key": "land-water-biodiversity",
+      "label": "Land, water, biodiversity and ecosystem context",
+      "dimension": "environment-resource",
+      "value_type": "number-or-text",
+      "canonical_unit": "explicit",
+      "comparison_semantics": "context-only",
+      "evidence_refs": [
+        "ENV4",
+        "ENV5",
+        "ENV6",
+        "renewable-resource-observation-contract",
+        "carbon-nature-accounting-handoff"
+      ],
+      "boundary": "Environmental dimensions are not collapsed into a single impact score. Geography, baseline, threshold, attribution, and ecosystem context must be preserved."
+    },
+    {
+      "key": "reliability-flexibility",
+      "label": "Reliability, adequacy and flexibility context",
+      "dimension": "system-integration",
+      "value_type": "number-or-text",
+      "canonical_unit": "explicit",
+      "comparison_semantics": "context-only",
+      "evidence_refs": [
+        "energy-balance-scenario-contract",
+        "renewable-technology-assessment-contract"
+      ],
+      "boundary": "v0.9.0 can carry supplied reliability/flexibility evidence but does not run dispatch, adequacy, grid-stability, or storage-physics models."
+    },
+    {
+      "key": "implementation-governance",
+      "label": "Implementation, governance and delivery context",
+      "dimension": "implementation",
+      "value_type": "text",
+      "canonical_unit": "n/a",
+      "comparison_semantics": "context-only",
+      "evidence_refs": [
+        "energy-economic-scenario-contract",
+        "global-energy-country-profile-contract"
+      ],
+      "boundary": "Permitting, institutions, supply chains, workforce, acceptance, policy, and delivery risk require explicit evidence and are not inferred from technology labels."
+    }
+  ],
+  "decision_packet_template": {
+    "identity": {
+      "decision_id": "",
+      "title": "",
+      "question": "",
+      "geography": "",
+      "period": ""
+    },
+    "decision_context": {
+      "objectives": [],
+      "constraints": [],
+      "stakeholders": [],
+      "notes": ""
+    },
+    "alternatives": [
+      {
+        "key": "alternative-a",
+        "label": "Alternative A",
+        "description": "",
+        "technology_refs": [],
+        "scenario_refs": [],
+        "criteria_observations": [],
+        "evidence_refs": [],
+        "uncertainty_note": ""
+      },
+      {
+        "key": "alternative-b",
+        "label": "Alternative B",
+        "description": "",
+        "technology_refs": [],
+        "scenario_refs": [],
+        "criteria_observations": [],
+        "evidence_refs": [],
+        "uncertainty_note": ""
+      }
+    ],
+    "review": {
+      "assumptions": [],
+      "evidence_gaps": [],
+      "open_questions": [],
+      "reviewer_notes": ""
+    }
+  },
+  "guardrails": {
+    "decision_packet_contract_activated": true,
+    "neutral_comparison_matrix_activated": true,
+    "readiness_inspection_activated": true,
+    "explicit_alternative_inputs_required": true,
+    "provenance_visibility_required": true,
+    "uncertainty_visibility_required": true,
+    "unit_compatibility_checked": true,
+    "period_compatibility_checked": true,
+    "missing_values_preserved": true,
+    "automatic_normalization": false,
+    "automatic_weight_assignment": false,
+    "composite_sustainability_score": false,
+    "automatic_alternative_ranking": false,
+    "automatic_winner_selection": false,
+    "investment_recommendation": false,
+    "policy_recommendation": false,
+    "scenario_persistence": false,
+    "decision_studio_execution": false,
+    "matrix_is_not_decision": true,
+    "readiness_is_not_merit_score": true
+  },
+  "content_fingerprint": "e84983ba70e69206a197a128b4d5596aee9fb58d79c71df5a66d1dbac058fa9f"
+}

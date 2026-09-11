@@ -1,0 +1,39 @@
+Sustainable Catalyst — Energy Systems Intelligence v0.9.0
+Build: Energy Decision Intelligence
+Library: 5.11.0
+Carbon & Nature: 0.5.0
+Backend: 2.15.0
+
+Validation summary
+- Energy Decision Intelligence model: PASS
+- 12 governed criteria / 9 dimensions: PASS
+- Decision packet contract: PASS
+- Neutral comparison matrix: PASS
+- Readiness inspection: PASS
+- Unit/period incompatibility detection: PASS
+- No normalization / hidden weights / composite score / ranking / winner selection: PASS
+- Global Energy Intelligence v0.8.0 preservation: PASS
+- Bioenergy v0.7.0 preservation: PASS
+- Scenario Economics v0.6.0 preservation: PASS
+- Energy Balance v0.5.0 preservation: PASS
+- Renewable Technology/Resource v0.4.0 preservation: PASS
+- EISD indicators v0.3.0 preservation: PASS
+- Numeric registry v0.2.0 preservation: PASS
+- Carbon & Nature v0.5.0 regression: PASS
+- PHP syntax: PASS
+- JavaScript syntax: PASS
+- Python compilation: PASS
+- JSON / JSON Schema validation: PASS
+- Shell syntax: PASS
+- Focused test suite: 44 passed
+- Clean-room Mac installer simulation from v0.8.0 baseline: PASS
+- Installer-created commit: PASS
+- Installer-created annotated tag energy-systems-v0.9.0: PASS
+- Installer-generated WordPress/backend/upgrader artifacts: PASS
+
+Deployment
+- Database migration: none
+- New environment secret/API key: none
+- Contabo upgrader includes backup-directory ownership repair
+- v0.9.0 deployment has no external-provider smoke-test dependency
+- Live Contabo deployment was not performed by the build environment

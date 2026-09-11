@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.11.0 with Carbon & Nature Intelligence v0.5.0 and Energy Systems Intelligence v0.8.0, adding Global Energy Intelligence with live dated country observations, source/freshness governance, country profiles and same-indicator comparisons while preserving bioenergy, scenario economics, energy balances, renewable technologies, sustainability indicators, and the source-bound numeric registry.
+ * Description: Sustainable Catalyst Library v5.11.0 with Carbon & Nature Intelligence v0.5.0 and Energy Systems Intelligence v0.9.0, adding Energy Decision Intelligence with governed criteria, portable decision packets, neutral comparison matrices, readiness inspection, provenance and uncertainty visibility while preserving Global Energy Intelligence and the full prior Energy Systems stack.
  * Version: 5.11.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 
 define('SC_LIBRARY_VERSION', '5.11.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
-define('SC_ENERGY_SYSTEMS_VERSION', '0.8.0');
+define('SC_ENERGY_SYSTEMS_VERSION', '0.9.0');
 define('SC_LIBRARY_FILE', __FILE__);
 define('SC_LIBRARY_DIR', plugin_dir_path(__FILE__));
 define('SC_LIBRARY_URL', plugin_dir_url(__FILE__));

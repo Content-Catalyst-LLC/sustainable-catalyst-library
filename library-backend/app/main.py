@@ -265,7 +265,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "0.8.0",
+            "energy_systems_domain_version": "0.9.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -335,6 +335,17 @@ def health() -> dict[str, Any]:
             "energy_global_energy_embedded_current_values": False,
             "energy_global_energy_latest_observation_is_current_assumed": False,
             "energy_global_energy_cross_source_harmonization_assumed": False,
+            "energy_decision_intelligence": True,
+            "energy_decision_criterion_registry": True,
+            "energy_decision_packet_contract": True,
+            "energy_decision_comparison_matrix": True,
+            "energy_decision_readiness_inspection": True,
+            "energy_decision_automatic_normalization": False,
+            "energy_decision_automatic_weight_assignment": False,
+            "energy_decision_composite_score": False,
+            "energy_decision_automatic_ranking": False,
+            "energy_decision_winner_selection": False,
+            "energy_decision_studio_execution": False,
             "energy_site_intelligence_execution": False,
             "automatic_energy_technology_ranking": False,
             "automatic_energy_policy_recommendation": False,
@@ -1166,6 +1177,45 @@ def energy_systems_global_energy_compare(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except GlobalEnergyDataError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/decision-framework")
+def energy_systems_decision_framework() -> dict[str, Any]:
+    return energy_systems.decision_framework()
+
+
+@app.get("/v1/energy-systems/decision-criteria")
+def energy_systems_decision_criteria(
+    q: str = Query(default="", max_length=500),
+    dimension: str = Query(default="", max_length=80),
+    limit: int = Query(default=100, ge=1, le=100),
+) -> dict[str, Any]:
+    return energy_systems.decision_criteria(q=q, dimension=dimension, limit=limit)
+
+
+@app.get("/v1/energy-systems/decision-packet-template")
+def energy_systems_decision_packet_template() -> dict[str, Any]:
+    return energy_systems.decision_packet_template()
+
+
+@app.get("/v1/energy-systems/decision-comparison-matrix")
+def energy_systems_decision_comparison_matrix(
+    packet: str = Query(..., min_length=2, max_length=7000),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.decision_comparison_matrix(packet_json=packet)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/decision-readiness")
+def energy_systems_decision_readiness(
+    packet: str = Query(..., min_length=2, max_length=7000),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.decision_readiness(packet_json=packet)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.get("/v1/energy-systems/bioenergy-framework")

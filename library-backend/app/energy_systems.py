@@ -11,10 +11,11 @@ from .energy_balances import EnergyBalanceSystemsModel
 from .energy_economics import EnergyScenarioEconomics
 from .energy_bioenergy import BiologicalCarbonBioenergyIntegration
 from .energy_global import GlobalEnergyIntelligence
+from .energy_decision import EnergyDecisionIntelligence
 
 
-DOMAIN_VERSION = "0.8.0"
-SCHEMA_VERSION = "sc-energy-systems-global-energy-intelligence/1.0"
+DOMAIN_VERSION = "0.9.0"
+SCHEMA_VERSION = "sc-energy-systems-energy-decision-intelligence/1.0"
 
 
 @dataclass(frozen=True)
@@ -126,12 +127,12 @@ class EnergyIndicatorDefinition:
 class EnergySystemsKnowledgeFoundation:
     """Governed sustainable-energy knowledge and source-bound numerical registry.
 
-    v0.8.0 preserves the complete v0.1.0–v0.7.0 stack and activates governed Global
-    Energy Intelligence. One read-only, no-auth World Bank Indicators API v2 connector
-    can retrieve country observations for nine energy metrics while preserving source year,
-    source semantics, missing values, and provider provenance. Latest available data are not
-    relabeled as current-year values; cross-source harmonization, scoring, optimization,
-    ranking, and policy recommendation remain disabled.
+    v0.9.0 preserves the complete v0.1.0–v0.8.0 stack and activates Energy Decision
+    Intelligence: governed criteria, portable decision packets, neutral comparison matrices,
+    and packet-readiness inspection. It never normalizes unlike quantities, assigns hidden
+    weights, creates a composite sustainability score, ranks alternatives, selects a winner,
+    or makes investment/policy recommendations. Global Energy Intelligence remains live and
+    dated; source year, semantics, missing values, and provenance are preserved.
     """
 
     def __init__(self) -> None:
@@ -150,6 +151,7 @@ class EnergySystemsKnowledgeFoundation:
         self._economics_model = EnergyScenarioEconomics()
         self._bioenergy_model = BiologicalCarbonBioenergyIntegration()
         self._global_energy = GlobalEnergyIntelligence()
+        self._decision_intelligence = EnergyDecisionIntelligence()
         self._methodology_rules = self._build_methodology_rules()
         self._handoffs = self._build_handoffs()
         self._guardrails = self._build_guardrails()
@@ -549,6 +551,7 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "energy-economics-formula-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "The supplied module scope requires energy balance, cost-benefit, and cost-efficiency analysis but does not provide a current price database or complete financial methodology. v0.6.0 therefore treats prices, costs, lifetimes, discount rates, benefits, savings, and outcomes as explicit scenario assumptions and labels its formulas as Sustainable Catalyst implementation arithmetic rather than source-attributed universal defaults.", "current_default": False},
             {"key": "biological-carbon-bioenergy-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "The supplied module explicitly includes soil carbon, CO2-to-energy, forests/forest ecology, digestate from anaerobic digestion, biochar, biomass-to-oil, and bioenergy. It does not supply universal yields, carbon fractions, stable fractions, lifecycle factors, avoided-emissions factors, or carbon-credit rules; v0.7.0 therefore requires explicit quantitative assumptions and whole-system carbon boundaries.", "current_default": False},
             {"key": "global-energy-live-observation-boundary", "source_key": "world-bank-indicators-api", "source_year": 2026, "rule": "v0.8.0 may retrieve live country observations for selected World Bank indicator codes, but the observation's own year and source semantics remain authoritative. Latest available is not relabeled as current-year data; missing values are not interpolated; World Bank metric semantics are not asserted to be official EISD formula equivalents.", "current_default": False},
+            {"key": "energy-decision-comparison-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "The module scope calls for multidisciplinary energy-system analysis, efficiency, cost-benefit, cost-efficiency, renewable technologies, biological carbon, and sustainability context. v0.9.0 uses those dimensions to organize evidence but treats the decision packet, comparison matrix, readiness inspection, and no-ranking/no-hidden-weighting rules as Sustainable Catalyst implementation governance rather than source-attributed decision methodology.", "current_default": False},
         ]
 
     @staticmethod
@@ -560,7 +563,7 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "cost-benefit-analysis", "cost-efficiency-analysis", "co2e", "bioenergy", "anaerobic-digestion", "biochar", "biomass-to-oil"], "target": "Workbench", "target_refs": ["energy-unit-conversion-registry", "historical-carbon-factor-registry", "energy-balance-calculation-contract", "energy-scenario-economics-calculation-contract", "bioenergy-explicit-input-calculation-contract", "global-energy-country-profile-contract"], "status": "computational-contract-available", "boundary": "v0.8.0 adds source-year-governed global observations to the existing deterministic calculation contracts, but does not modify or execute the separate Workbench product."},
             {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity", "renewable-resource-potential", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "soil-carbon", "forest-carbon"], "target": "Lab", "target_refs": ["renewable-technology-assessment-contract", "renewable-resource-observation-contract", "energy-balance-scenario-contract", "conversion-chain-model", "energy-economic-scenario-contract", "discounted-cash-flow-results", "bioenergy-carbon-scenario-contract", "carbon-nature-bridge-registry", "global-energy-country-profile-contract"], "status": "computational-contract-available", "boundary": "Global Energy Intelligence observations are portable inputs for later Lab trend, sensitivity, uncertainty, and scenario work. v0.8.0 does not modify the separate Lab product or enable cross-country causal inference, optimization, or automatic sustainability scoring."},
             {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security", "renewable-resource-potential", "bioenergy", "forest-carbon"], "target": "Site Intelligence", "target_refs": ["global-energy-country-profile-contract", "global-energy-metric-observation", "world-bank-wdi-live-connector", "renewable-resource-observation-contract", "biomass-feedstock-observation-contract", "bioenergy-geography-contract"], "status": "live-data-contract-available", "boundary": "v0.8.0 activates a governed read-only World Bank country-energy observation connector and a country-profile contract suitable for Site Intelligence. It does not modify Site Intelligence itself, infer project suitability, or hide observation-year lag."},
-            {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "biological-carbon-capture-storage", "energy-security", "energy-access"], "target": "Decision Studio", "target_refs": ["energy-economic-scenario-contract", "energy-cost-benefit-result", "energy-cost-efficiency-result", "energy-npv-result", "bioenergy-carbon-scenario-contract", "carbon-nature-accounting-handoff", "global-energy-country-profile-contract", "global-energy-comparison-contract"], "status": "decision-contract-available", "boundary": "v0.8.0 exposes dated country observations and same-indicator comparison contracts for later decision packets. It does not rank countries or technologies, recommend investments, or make policy choices."},
+            {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "biological-carbon-capture-storage", "energy-security", "energy-access"], "target": "Decision Studio", "target_refs": ["energy-decision-packet-contract", "energy-decision-comparison-matrix", "energy-decision-readiness-contract", "energy-economic-scenario-contract", "energy-cost-benefit-result", "energy-cost-efficiency-result", "energy-npv-result", "bioenergy-carbon-scenario-contract", "carbon-nature-accounting-handoff", "global-energy-country-profile-contract", "global-energy-comparison-contract"], "status": "decision-packet-contract-available", "boundary": "v0.9.0 adds a governed Energy Decision Intelligence packet, neutral comparison matrix, and readiness inspection suitable for Decision Studio handoff. It does not normalize unlike evidence, assign hidden weights, rank alternatives, select a winner, recommend investments, or make policy choices."},
         ]
 
     @staticmethod
@@ -645,6 +648,17 @@ class EnergySystemsKnowledgeFoundation:
             "provider_failure_fabricated_fallback": False,
             "world_bank_metric_is_official_eisd_formula_assumed": False,
             "embedded_current_country_values": False,
+            "energy_decision_intelligence_activated": True,
+            "energy_decision_criterion_registry_activated": True,
+            "energy_decision_packet_contract_activated": True,
+            "energy_decision_comparison_matrix_activated": True,
+            "energy_decision_readiness_inspection_activated": True,
+            "energy_decision_automatic_normalization": False,
+            "energy_decision_automatic_weight_assignment": False,
+            "energy_decision_composite_score": False,
+            "energy_decision_automatic_ranking": False,
+            "energy_decision_winner_selection": False,
+            "energy_decision_studio_execution": False,
             "automatic_technology_ranking": False,
             "automatic_policy_recommendation": False,
             "automatic_sustainability_score": False,
@@ -711,6 +725,9 @@ class EnergySystemsKnowledgeFoundation:
         global_framework = self._global_energy.framework()
         if global_framework["counts"]["metrics"] != 9 or global_framework["counts"]["sources"] != 4 or global_framework["counts"]["live_connectors"] != 1:
             raise ValueError("Global Energy Intelligence registry is incomplete")
+        decision_framework = self._decision_intelligence.framework()
+        if decision_framework["counts"]["criteria"] != 12 or decision_framework["counts"]["decision_packet_contracts"] != 1:
+            raise ValueError("Energy Decision Intelligence registry is incomplete")
 
     def _content_fingerprint(self) -> str:
         content = {
@@ -730,6 +747,7 @@ class EnergySystemsKnowledgeFoundation:
             "energy_scenario_economics": self._economics_model.export(),
             "biological_carbon_bioenergy_integration": self._bioenergy_model.export(),
             "global_energy_intelligence": self._global_energy.export(),
+            "energy_decision_intelligence": self._decision_intelligence.export(),
             "methodology_rules": self._methodology_rules,
             "handoffs": self._handoffs,
             "guardrails": self._guardrails,
@@ -743,11 +761,11 @@ class EnergySystemsKnowledgeFoundation:
             "subsystem": {
                 "name": "Energy Systems Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Global Energy Intelligence",
+                "release": "Energy Decision Intelligence",
                 "library_version": "5.11.0",
-                "backend_version": "2.14.0",
+                "backend_version": "2.15.0",
                 "read_only": True,
-                "calculation_mode": "source-bound-registry-plus-explicit-input-models-plus-live-dated-global-observations",
+                "calculation_mode": "source-bound-registry-plus-explicit-input-models-plus-live-dated-global-observations-plus-neutral-decision-packets",
             },
             "counts": {
                 "concepts": len(self._concepts),
@@ -786,6 +804,11 @@ class EnergySystemsKnowledgeFoundation:
                 "global_energy_live_connectors": self._global_energy.framework()["counts"]["live_connectors"],
                 "global_energy_profile_contracts": self._global_energy.framework()["counts"]["profile_contracts"],
                 "global_energy_comparison_contracts": self._global_energy.framework()["counts"]["comparison_contracts"],
+                "energy_decision_criteria": self._decision_intelligence.framework()["counts"]["criteria"],
+                "energy_decision_dimensions": self._decision_intelligence.framework()["counts"]["dimensions"],
+                "energy_decision_packet_contracts": self._decision_intelligence.framework()["counts"]["decision_packet_contracts"],
+                "energy_decision_comparison_matrix_models": self._decision_intelligence.framework()["counts"]["comparison_matrix_models"],
+                "energy_decision_readiness_models": self._decision_intelligence.framework()["counts"]["readiness_models"],
                 "methodology_rules": len(self._methodology_rules),
             },
             "knowledge_domains": self._knowledge_domains,
@@ -796,8 +819,8 @@ class EnergySystemsKnowledgeFoundation:
             "energy_scenario_economics": self._economics_model.framework(),
             "biological_carbon_bioenergy_integration": self._bioenergy_model.framework(),
             "global_energy_intelligence": self._global_energy.framework(),
+            "energy_decision_intelligence": self._decision_intelligence.framework(),
             "roadmap": [
-                {"version": "0.9.0", "name": "Energy Decision Intelligence"},
                 {"version": "1.0.0", "name": "Integrated Sustainable Energy Systems Platform"},
             ],
             "content_fingerprint": self._fingerprint,
@@ -1233,6 +1256,21 @@ class EnergySystemsKnowledgeFoundation:
 
     def global_energy_compare(self, *, countries: str, metric_key: str, start_year: int | None = None, end_year: int | None = None) -> dict[str, Any]:
         return self._global_energy.compare(countries=countries, metric_key=metric_key, start_year=start_year, end_year=end_year)
+
+    def decision_framework(self) -> dict[str, Any]:
+        return self._decision_intelligence.framework()
+
+    def decision_criteria(self, *, q: str = "", dimension: str = "", limit: int = 100) -> dict[str, Any]:
+        return self._decision_intelligence.criteria(q=q, dimension=dimension, limit=limit)
+
+    def decision_packet_template(self) -> dict[str, Any]:
+        return self._decision_intelligence.packet_template()
+
+    def decision_comparison_matrix(self, *, packet_json: str) -> dict[str, Any]:
+        return self._decision_intelligence.comparison_matrix(packet_json=packet_json)
+
+    def decision_readiness(self, *, packet_json: str) -> dict[str, Any]:
+        return self._decision_intelligence.readiness(packet_json=packet_json)
 
     def handoffs(self) -> dict[str, Any]:
         return {"ok": True, "schema": "sc-energy-handoffs/1.0", "count": len(self._handoffs), "items": self._handoffs, "guardrail": "Only handoffs marked available or contract-available resolve to a governed target or contract; planned handoffs do not imply current capability."}

@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v0.8.0 — Global Energy Intelligence. */
+/** Energy Systems Intelligence v0.9.0 — Energy Decision Intelligence. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '0.8.0';
+    public const VERSION = '0.9.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v080', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v080.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v080', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v080.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v090', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v090.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v090', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v090.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -164,6 +164,11 @@ final class SC_Library_Energy_Systems_Intelligence {
         register_rest_route('sc-library/v1', '/energy-systems/global-energy-profile-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'global_energy_profile_template']]);
         register_rest_route('sc-library/v1', '/energy-systems/global-energy-country-profile', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'global_energy_country_profile']]);
         register_rest_route('sc-library/v1', '/energy-systems/global-energy-compare', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'global_energy_compare']]);
+        register_rest_route('sc-library/v1', '/energy-systems/decision-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'decision_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/decision-criteria', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'decision_criteria']]);
+        register_rest_route('sc-library/v1', '/energy-systems/decision-packet-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'decision_packet_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/decision-comparison-matrix', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'decision_comparison_matrix']]);
+        register_rest_route('sc-library/v1', '/energy-systems/decision-readiness', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'decision_readiness']]);
         register_rest_route('sc-library/v1', '/energy-systems/bioenergy-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'bioenergy_framework']]);
         register_rest_route('sc-library/v1', '/energy-systems/bioenergy-feedstocks', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'bioenergy_feedstocks']]);
         register_rest_route('sc-library/v1', '/energy-systems/bioenergy-pathways', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'bioenergy_pathways']]);
@@ -311,6 +316,11 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function global_energy_profile_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/global-energy-profile-template'); }
     public function global_energy_country_profile(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/global-energy-country-profile', array_filter(['country'=>strtoupper(sanitize_text_field((string)$request->get_param('country'))),'start_year'=>absint($request->get_param('start_year')) ?: '','end_year'=>absint($request->get_param('end_year')) ?: '','include_series'=>'true'], static fn($value)=>$value!=='')); }
     public function global_energy_compare(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/global-energy-compare', array_filter(['countries'=>strtoupper(sanitize_text_field((string)$request->get_param('countries'))),'metric'=>sanitize_key((string)$request->get_param('metric')),'start_year'=>absint($request->get_param('start_year')) ?: '','end_year'=>absint($request->get_param('end_year')) ?: ''], static fn($value)=>$value!=='')); }
+    public function decision_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/decision-framework'); }
+    public function decision_criteria(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/decision-criteria', array_filter(['q'=>trim((string)$request->get_param('q')),'dimension'=>sanitize_key((string)$request->get_param('dimension')),'limit'=>min(100,max(1,absint($request->get_param('limit') ?: 100)))], static fn($value)=>$value!=='')); }
+    public function decision_packet_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/decision-packet-template'); }
+    public function decision_comparison_matrix(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/decision-comparison-matrix', ['packet'=>(string)$request->get_param('packet')]); }
+    public function decision_readiness(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/decision-readiness', ['packet'=>(string)$request->get_param('packet')]); }
     public function bioenergy_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/bioenergy-framework'); }
     public function bioenergy_feedstocks(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/bioenergy-feedstocks', ['q' => trim((string)$request->get_param('q')), 'limit' => min(100, max(1, absint($request->get_param('limit') ?: 100)))]); }
     public function bioenergy_pathways(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/bioenergy-pathways', ['q' => trim((string)$request->get_param('q')), 'family' => sanitize_key((string)$request->get_param('family')), 'limit' => min(100, max(1, absint($request->get_param('limit') ?: 100)))]); }
@@ -343,11 +353,11 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Energy Systems Intelligence',
-            'intro' => 'Explore dated country-level energy observations with explicit freshness and provenance while preserving the full Energy Systems knowledge, bioenergy, balance, technology, indicator, and economics stack.',
+            'intro' => 'Compare energy alternatives through governed evidence packets, transparent criteria, provenance, uncertainty and compatibility checks while preserving the full Global Energy, bioenergy, economics, balance, technology and indicator stack.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v080');
-        wp_enqueue_script('sc-library-energy-systems-v080');
+        wp_enqueue_style('sc-library-energy-systems-v090');
+        wp_enqueue_script('sc-library-energy-systems-v090');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -396,6 +406,11 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-global-energy-profile-template-endpoint="<?php echo esc_url($ep('/global-energy-profile-template')); ?>"
             data-global-energy-country-profile-endpoint="<?php echo esc_url($ep('/global-energy-country-profile')); ?>"
             data-global-energy-compare-endpoint="<?php echo esc_url($ep('/global-energy-compare')); ?>"
+            data-decision-framework-endpoint="<?php echo esc_url($ep('/decision-framework')); ?>"
+            data-decision-criteria-endpoint="<?php echo esc_url($ep('/decision-criteria')); ?>"
+            data-decision-packet-template-endpoint="<?php echo esc_url($ep('/decision-packet-template')); ?>"
+            data-decision-comparison-matrix-endpoint="<?php echo esc_url($ep('/decision-comparison-matrix')); ?>"
+            data-decision-readiness-endpoint="<?php echo esc_url($ep('/decision-readiness')); ?>"
             data-bioenergy-framework-endpoint="<?php echo esc_url($ep('/bioenergy-framework')); ?>"
             data-bioenergy-feedstocks-endpoint="<?php echo esc_url($ep('/bioenergy-feedstocks')); ?>"
             data-bioenergy-pathways-endpoint="<?php echo esc_url($ep('/bioenergy-pathways')); ?>"
@@ -406,22 +421,23 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-biomass-to-oil-energy-endpoint="<?php echo esc_url($ep('/biomass-to-oil-energy-estimate')); ?>"
             data-bioenergy-scenario-endpoint="<?php echo esc_url($ep('/bioenergy-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.8.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.9.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
 
             <div class="sc-es__domains" aria-label="Energy Systems knowledge domains">
-                <span>Global Energy</span><span>Energy Systems</span><span>Resources &amp; Conversion</span><span>Renewables</span><span>Bioenergy &amp; Carbon</span><span>Efficiency &amp; Economics</span><span>Sustainability Metrics</span>
+                <span>Decision Intelligence</span><span>Global Energy</span><span>Energy Systems</span><span>Resources &amp; Conversion</span><span>Renewables</span><span>Bioenergy &amp; Carbon</span><span>Efficiency &amp; Economics</span><span>Sustainability Metrics</span>
             </div>
 
             <div class="sc-es__guardrail">
-                <strong><?php esc_html_e('Latest available observation ≠ current-year fact or sustainability verdict.', 'sustainable-catalyst-library'); ?></strong>
+                <strong><?php esc_html_e('Comparison matrix ≠ decision, score, ranking, winner, or recommendation.', 'sustainable-catalyst-library'); ?></strong>
                 <?php esc_html_e('v0.8.0 preserves each provider indicator code and observation year, omits missing values rather than interpolating them, and does not silently harmonize different source methodologies. Live country data can inform analysis without becoming an automatic score, ranking, or policy recommendation.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
-                <button type="button" class="sc-es__mode is-active" data-es-mode="global" role="tab" aria-selected="true">Global Intelligence</button>
+                <button type="button" class="sc-es__mode is-active" data-es-mode="decision" role="tab" aria-selected="true">Decision Intelligence</button>
+                <button type="button" class="sc-es__mode" data-es-mode="global" role="tab" aria-selected="false">Global Intelligence</button>
                 <button type="button" class="sc-es__mode" data-es-mode="bioenergy" role="tab" aria-selected="false">Bioenergy &amp; Carbon</button>
                 <button type="button" class="sc-es__mode" data-es-mode="economics" role="tab" aria-selected="false">Scenario Economics</button>
                 <button type="button" class="sc-es__mode" data-es-mode="balance" role="tab" aria-selected="false">Energy Balance</button>
@@ -434,7 +450,33 @@ final class SC_Library_Energy_Systems_Intelligence {
                 <button type="button" class="sc-es__mode" data-es-mode="handoffs" role="tab" aria-selected="false">Platform Handoffs</button>
             </div>
 
-            <div class="sc-es__panel" data-es-panel="global">
+            <div class="sc-es__panel" data-es-panel="decision">
+                <div class="sc-es__panel-heading"><strong>Energy decision intelligence</strong><span>Build evidence-bound comparison packets across system performance, economics, access, security, climate, ecosystems, integration and implementation. Sustainable Catalyst does not normalize unlike quantities, assign hidden weights, rank alternatives or select a winner.</span></div>
+                <p class="sc-es__status" data-es-decision-framework-status aria-live="polite">Loading decision framework…</p>
+                <div class="sc-es__decision-summary" data-es-decision-summary></div>
+                <div class="sc-es__decision-layout">
+                    <div>
+                        <h3>Governed decision criteria</h3>
+                        <div class="sc-es__cards sc-es__decision-criteria" data-es-decision-criteria></div>
+                    </div>
+                    <div>
+                        <h3>Decision packet</h3>
+                        <p class="sc-es__microcopy">Start from the blank contract, add explicit observations and provenance, then inspect readiness or build a neutral matrix. v0.9.0 uses a bounded GET contract and does not persist packets.</p>
+                        <textarea class="sc-es__decision-packet" data-es-decision-packet rows="22" spellcheck="false" aria-label="Energy decision packet JSON"></textarea>
+                        <div class="sc-es__actions sc-es__decision-actions">
+                            <button type="button" data-es-load-decision-template>Load blank packet</button>
+                            <button type="button" class="sc-es__secondary" data-es-inspect-decision>Inspect readiness</button>
+                            <button type="button" class="sc-es__secondary" data-es-build-decision-matrix>Build matrix</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="sc-es__decision-results">
+                    <div><h3>Readiness</h3><div class="sc-es__result" data-es-decision-readiness-result aria-live="polite"></div></div>
+                    <div><h3>Comparison matrix</h3><div class="sc-es__decision-matrix" data-es-decision-matrix-result aria-live="polite"></div></div>
+                </div>
+            </div>
+
+            <div class="sc-es__panel" data-es-panel="global" hidden>
                 <div class="sc-es__panel-heading"><strong>Global Energy Intelligence</strong><span>Retrieve live, read-only country observations from the World Bank Indicators API v2. Values remain tied to their provider metric, observation year, and source semantics; latest available never means current year.</span></div>
                 <p class="sc-es__status" data-es-global-framework-status aria-live="polite">Loading global energy framework…</p>
                 <div class="sc-es__global-summary" data-es-global-summary></div>
@@ -627,12 +669,12 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="handoffs" hidden>
-                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.7.0 adds validated Energy Systems ↔ Carbon & Nature bioenergy/carbon bridges plus portable bioenergy-carbon scenario contracts while preserving economics, balance, renewable-resource, indicator, Lab, Workbench, Site Intelligence, and Decision Studio handoffs. Separate products are not modified by this Library release.</span></div>
+                <div class="sc-es__panel-heading"><strong>Cross-platform handoffs</strong><span>v0.9.0 adds a governed Energy Decision Intelligence packet, neutral comparison matrix, and readiness inspection to the existing Decision Studio handoff while preserving Global Energy, bioenergy/carbon, economics, balance, resource, indicator, Lab, Workbench, and Site Intelligence contracts. Separate products are not modified by this Library release.</span></div>
                 <p class="sc-es__status" data-es-handoff-status aria-live="polite">Loading handoff registry…</p>
                 <div class="sc-es__cards" data-es-handoff-results></div>
             </div>
 
-            <footer><strong>Next:</strong> v0.8.0 — Global Energy Intelligence. The next release should connect governed current energy datasets, geography, country/system profiles, generation and consumption trends, resource observations, and source freshness to Site Intelligence without treating historical course sources as current operational data.</footer>
+            <footer><strong>Next:</strong> v1.0.0 — Integrated Sustainable Energy Systems Platform. The next release should consolidate the knowledge, numerical registry, indicators, renewable-resource model, balance models, economics, biological carbon/bioenergy, global observations, and decision packets into a certified cross-platform Energy Systems release line.</footer>
         </section>
         <?php return (string)ob_get_clean();
     }

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-decision-readiness.json",
+  "title": "Energy Decision Readiness Result",
+  "type": "object",
+  "required": ["ok", "schema", "version", "identity", "alternatives", "criteria", "comparability", "readiness_interpretation", "guardrails"],
+  "properties": {
+    "ok": {"const": true}, "schema": {"const": "sc-energy-decision-readiness/1.0"}, "version": {"const": "0.9.0"},
+    "identity": {"type": "object"}, "alternatives": {"type": "array", "minItems": 2}, "criteria": {"type": "object"},
+    "comparability": {"type": "object"}, "declared_evidence_gap_count": {"type": "integer", "minimum": 0},
+    "readiness_interpretation": {"type": "string", "minLength": 1}, "guardrails": {"type": "object"}
+  }
+}

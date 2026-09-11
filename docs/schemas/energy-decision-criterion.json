@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-decision-criterion.json",
+  "title": "Energy Decision Criterion",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["key", "label", "dimension", "value_type", "canonical_unit", "comparison_semantics", "evidence_refs", "boundary"],
+  "properties": {
+    "key": {"type": "string", "minLength": 1},
+    "label": {"type": "string", "minLength": 1},
+    "dimension": {"type": "string", "minLength": 1},
+    "value_type": {"type": "string", "minLength": 1},
+    "canonical_unit": {"type": "string", "minLength": 1},
+    "comparison_semantics": {"enum": ["magnitude-only", "context-only"]},
+    "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+    "boundary": {"type": "string", "minLength": 1}
+  }
+}
