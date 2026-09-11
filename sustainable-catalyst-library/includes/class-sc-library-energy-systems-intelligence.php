@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v0.7.0 — Biological Carbon & Bioenergy Integration. */
+/** Energy Systems Intelligence v0.8.0 — Global Energy Intelligence. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '0.7.0';
+    public const VERSION = '0.8.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v070', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v070.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v070', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v070.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v080', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v080.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v080', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v080.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -158,6 +158,12 @@ final class SC_Library_Energy_Systems_Intelligence {
         register_rest_route('sc-library/v1', '/energy-systems/cost-efficiency', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'cost_efficiency']]);
         register_rest_route('sc-library/v1', '/energy-systems/levelized-energy-cost', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'levelized_energy_cost']]);
         register_rest_route('sc-library/v1', '/energy-systems/economic-scenario-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'economic_scenario_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/global-energy-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'global_energy_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/global-energy-sources', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'global_energy_sources']]);
+        register_rest_route('sc-library/v1', '/energy-systems/global-energy-metrics', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'global_energy_metrics']]);
+        register_rest_route('sc-library/v1', '/energy-systems/global-energy-profile-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'global_energy_profile_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/global-energy-country-profile', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'global_energy_country_profile']]);
+        register_rest_route('sc-library/v1', '/energy-systems/global-energy-compare', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'global_energy_compare']]);
         register_rest_route('sc-library/v1', '/energy-systems/bioenergy-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'bioenergy_framework']]);
         register_rest_route('sc-library/v1', '/energy-systems/bioenergy-feedstocks', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'bioenergy_feedstocks']]);
         register_rest_route('sc-library/v1', '/energy-systems/bioenergy-pathways', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'bioenergy_pathways']]);
@@ -299,6 +305,12 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function levelized_energy_cost(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/levelized-energy-cost', $this->numeric_params($request, ['initial_cost','annual_operating_cost','annual_energy_kwh','discount_rate_pct','years','residual_value','currency'])); }
     public function economic_scenario_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/economic-scenario-template'); }
 
+    public function global_energy_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/global-energy-framework'); }
+    public function global_energy_sources(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/global-energy-sources'); }
+    public function global_energy_metrics(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/global-energy-metrics', array_filter(['q'=>trim((string)$request->get_param('q')),'category'=>sanitize_key((string)$request->get_param('category')),'limit'=>min(100,max(1,absint($request->get_param('limit') ?: 100)))], static fn($value)=>$value!=='')); }
+    public function global_energy_profile_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/global-energy-profile-template'); }
+    public function global_energy_country_profile(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/global-energy-country-profile', array_filter(['country'=>strtoupper(sanitize_text_field((string)$request->get_param('country'))),'start_year'=>absint($request->get_param('start_year')) ?: '','end_year'=>absint($request->get_param('end_year')) ?: '','include_series'=>'true'], static fn($value)=>$value!=='')); }
+    public function global_energy_compare(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/global-energy-compare', array_filter(['countries'=>strtoupper(sanitize_text_field((string)$request->get_param('countries'))),'metric'=>sanitize_key((string)$request->get_param('metric')),'start_year'=>absint($request->get_param('start_year')) ?: '','end_year'=>absint($request->get_param('end_year')) ?: ''], static fn($value)=>$value!=='')); }
     public function bioenergy_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/bioenergy-framework'); }
     public function bioenergy_feedstocks(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/bioenergy-feedstocks', ['q' => trim((string)$request->get_param('q')), 'limit' => min(100, max(1, absint($request->get_param('limit') ?: 100)))]); }
     public function bioenergy_pathways(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/bioenergy-pathways', ['q' => trim((string)$request->get_param('q')), 'family' => sanitize_key((string)$request->get_param('family')), 'limit' => min(100, max(1, absint($request->get_param('limit') ?: 100)))]); }
@@ -331,11 +343,11 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function shortcode(array $atts = []): string {
         $atts = shortcode_atts([
             'title' => 'Energy Systems Intelligence',
-            'intro' => 'Connect bioenergy pathways, explicit-input energy calculations, and biological carbon accounting to governed Carbon & Nature concepts while preserving the full Energy Systems knowledge, balance, technology, indicator, and economics stack.',
+            'intro' => 'Explore dated country-level energy observations with explicit freshness and provenance while preserving the full Energy Systems knowledge, bioenergy, balance, technology, indicator, and economics stack.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v070');
-        wp_enqueue_script('sc-library-energy-systems-v070');
+        wp_enqueue_style('sc-library-energy-systems-v080');
+        wp_enqueue_script('sc-library-energy-systems-v080');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -378,6 +390,12 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-cost-efficiency-endpoint="<?php echo esc_url($ep('/cost-efficiency')); ?>"
             data-levelized-cost-endpoint="<?php echo esc_url($ep('/levelized-energy-cost')); ?>"
             data-economic-scenario-endpoint="<?php echo esc_url($ep('/economic-scenario-template')); ?>"
+            data-global-energy-framework-endpoint="<?php echo esc_url($ep('/global-energy-framework')); ?>"
+            data-global-energy-sources-endpoint="<?php echo esc_url($ep('/global-energy-sources')); ?>"
+            data-global-energy-metrics-endpoint="<?php echo esc_url($ep('/global-energy-metrics')); ?>"
+            data-global-energy-profile-template-endpoint="<?php echo esc_url($ep('/global-energy-profile-template')); ?>"
+            data-global-energy-country-profile-endpoint="<?php echo esc_url($ep('/global-energy-country-profile')); ?>"
+            data-global-energy-compare-endpoint="<?php echo esc_url($ep('/global-energy-compare')); ?>"
             data-bioenergy-framework-endpoint="<?php echo esc_url($ep('/bioenergy-framework')); ?>"
             data-bioenergy-feedstocks-endpoint="<?php echo esc_url($ep('/bioenergy-feedstocks')); ?>"
             data-bioenergy-pathways-endpoint="<?php echo esc_url($ep('/bioenergy-pathways')); ?>"
@@ -388,22 +406,23 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-biomass-to-oil-energy-endpoint="<?php echo esc_url($ep('/biomass-to-oil-energy-estimate')); ?>"
             data-bioenergy-scenario-endpoint="<?php echo esc_url($ep('/bioenergy-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.7.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Library Domain Intelligence · v0.8.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
 
             <div class="sc-es__domains" aria-label="Energy Systems knowledge domains">
-                <span>Energy Systems</span><span>Resources &amp; Conversion</span><span>Renewables</span><span>Bioenergy &amp; Carbon</span><span>Efficiency &amp; Economics</span><span>Sustainability Metrics</span>
+                <span>Global Energy</span><span>Energy Systems</span><span>Resources &amp; Conversion</span><span>Renewables</span><span>Bioenergy &amp; Carbon</span><span>Efficiency &amp; Economics</span><span>Sustainability Metrics</span>
             </div>
 
             <div class="sc-es__guardrail">
-                <strong><?php esc_html_e('Bioenergy output ≠ carbon neutrality, verified removal, or project eligibility.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v0.7.0 requires explicit yields, energy values, fractions, efficiencies, baselines, lifecycle boundaries, and evidence. It does not infer avoided emissions, digestate benefit, soil or forest carbon change, additionality, permanence, leakage, or carbon-credit eligibility.', 'sustainable-catalyst-library'); ?>
+                <strong><?php esc_html_e('Latest available observation ≠ current-year fact or sustainability verdict.', 'sustainable-catalyst-library'); ?></strong>
+                <?php esc_html_e('v0.8.0 preserves each provider indicator code and observation year, omits missing values rather than interpolating them, and does not silently harmonize different source methodologies. Live country data can inform analysis without becoming an automatic score, ranking, or policy recommendation.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
-                <button type="button" class="sc-es__mode is-active" data-es-mode="bioenergy" role="tab" aria-selected="true">Bioenergy &amp; Carbon</button>
+                <button type="button" class="sc-es__mode is-active" data-es-mode="global" role="tab" aria-selected="true">Global Intelligence</button>
+                <button type="button" class="sc-es__mode" data-es-mode="bioenergy" role="tab" aria-selected="false">Bioenergy &amp; Carbon</button>
                 <button type="button" class="sc-es__mode" data-es-mode="economics" role="tab" aria-selected="false">Scenario Economics</button>
                 <button type="button" class="sc-es__mode" data-es-mode="balance" role="tab" aria-selected="false">Energy Balance</button>
                 <button type="button" class="sc-es__mode" data-es-mode="technologies" role="tab" aria-selected="false">Technologies &amp; Resources</button>
@@ -415,7 +434,33 @@ final class SC_Library_Energy_Systems_Intelligence {
                 <button type="button" class="sc-es__mode" data-es-mode="handoffs" role="tab" aria-selected="false">Platform Handoffs</button>
             </div>
 
-            <div class="sc-es__panel" data-es-panel="bioenergy">
+            <div class="sc-es__panel" data-es-panel="global">
+                <div class="sc-es__panel-heading"><strong>Global Energy Intelligence</strong><span>Retrieve live, read-only country observations from the World Bank Indicators API v2. Values remain tied to their provider metric, observation year, and source semantics; latest available never means current year.</span></div>
+                <p class="sc-es__status" data-es-global-framework-status aria-live="polite">Loading global energy framework…</p>
+                <div class="sc-es__global-summary" data-es-global-summary></div>
+                <div class="sc-es__global-grid">
+                    <form class="sc-es__calculator sc-es__global-profile-form" data-es-global-profile-form>
+                        <h3>Country energy profile</h3>
+                        <label><span>Country code</span><input name="country" placeholder="USA, IRL, KEN" maxlength="3" required></label>
+                        <div class="sc-es__inline-fields"><label><span>Start year</span><input name="start_year" inputmode="numeric" placeholder="optional"></label><label><span>End year</span><input name="end_year" inputmode="numeric" placeholder="optional"></label></div>
+                        <button type="submit">Load country profile</button>
+                        <p class="sc-es__boundary-note">Default window: 15 years. Missing observations are omitted, not filled.</p>
+                    </form>
+                    <form class="sc-es__calculator sc-es__global-compare-form" data-es-global-compare-form>
+                        <h3>Same-indicator country comparison</h3>
+                        <label><span>Country codes</span><input name="countries" placeholder="USA,IRL,KEN" required></label>
+                        <label><span>Metric</span><select name="metric" data-es-global-metric-select></select></label>
+                        <button type="submit">Compare countries</button>
+                        <p class="sc-es__boundary-note">Comparison keeps one provider indicator constant and shows each country's latest observation year.</p>
+                    </form>
+                </div>
+                <div class="sc-es__global-profile" data-es-global-profile-results></div>
+                <div class="sc-es__global-comparison" data-es-global-compare-results></div>
+                <div class="sc-es__global-section"><div class="sc-es__panel-heading"><strong>Governed global metrics</strong><span>Nine source-coded energy indicators covering access, consumption, energy mix, security, system efficiency, and economic efficiency.</span></div><div class="sc-es__cards" data-es-global-metrics></div></div>
+                <div class="sc-es__global-section"><div class="sc-es__panel-heading"><strong>Source connectors</strong><span>One live no-auth connector is active in v0.8.0; additional authoritative sources remain explicit connector contracts until their access and licensing requirements are configured.</span></div><div class="sc-es__cards" data-es-global-sources></div></div>
+            </div>
+
+            <div class="sc-es__panel" data-es-panel="bioenergy" hidden>
                 <div class="sc-es__panel-heading"><strong>Biological carbon &amp; bioenergy integration</strong><span>Link anaerobic digestion and digestate, biochar, biomass-to-oil, generic biomass energy, soil/forest carbon, and CO₂-to-energy to explicit-input energy accounting and governed Carbon &amp; Nature contexts.</span></div>
                 <p class="sc-es__status" data-es-bioenergy-framework-status aria-live="polite">Loading bioenergy framework…</p>
                 <div class="sc-es__bioenergy-summary" data-es-bioenergy-summary></div>

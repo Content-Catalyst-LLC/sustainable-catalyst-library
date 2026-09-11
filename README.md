@@ -1,5 +1,13 @@
 # Sustainable Catalyst Library
 
+## Energy Systems Intelligence v0.8.0
+
+v0.8.0 adds **Global Energy Intelligence**: a governed country-level energy observation layer with nine explicit World Bank indicator contracts, four source/connector contracts, one active no-auth live connector, source-year preservation, missing-value fail-open handling without interpolation, and handoff contracts for Site Intelligence, Lab, Workbench, and Decision Studio. The release embeds no current country values. A provider's latest available observation is never relabeled as a current-year fact, and the selected World Bank series are treated as contextual energy metrics rather than official EISD methodology-sheet equivalents.
+
+The live connector is read-only and uses the World Bank Indicators API v2. Ember and EIA are represented as future API-key connector contracts, while IEA data explorers are registered as an authoritative reference/future-connector family. v0.8.0 requires no new secrets and no database migration.
+
+See `ENERGY_SYSTEMS_INTELLIGENCE_v0.8.0.md`, `RELEASE_NOTES_ENERGY_SYSTEMS_0.8.0.md`, and `DEPLOY_ENERGY_SYSTEMS_BACKEND_v2.14.0.md`.
+
 ## Energy Systems Intelligence v0.7.0
 
 Adds **Biological Carbon & Bioenergy Integration** while preserving Library v5.11.0, Carbon & Nature Intelligence v0.5.0, and Energy Systems v0.1.0–v0.6.0. The shared Python backend advances to v2.13.0.

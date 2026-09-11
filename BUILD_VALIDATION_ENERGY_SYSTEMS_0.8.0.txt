@@ -1,0 +1,55 @@
+SUSTAINABLE CATALYST — ENERGY SYSTEMS INTELLIGENCE v0.8.0 BUILD VALIDATION
+
+Release identity
+----------------
+Library:                  5.11.0
+Carbon & Nature:          0.5.0
+Energy Systems:           0.8.0
+Shared Library backend:   2.14.0
+Release:                  Global Energy Intelligence
+Database migration:       none
+New secrets:              none
+
+Focused regression suite
+------------------------
+PASS: 57 tests
+Command: ./tests/run_energy_systems_v080_validation.sh
+Coverage includes:
+- Global Energy Intelligence metric/source registry
+- deterministic World Bank response parsing fixtures
+- country profiles, missing-value behavior, and source-year preservation
+- country comparisons with differing latest years
+- provider-failure fail-closed behavior
+- read-only WordPress proxy surface
+- JSON Schema / machine-readable export validation
+- Energy Systems v0.1.0–v0.7.0 preservation
+- Carbon & Nature Intelligence v0.5.0 preservation
+
+Static / syntax validation
+--------------------------
+PASS: PHP syntax — plugin main
+PASS: PHP syntax — Energy Systems interface class
+PASS: Node syntax — sc-library-energy-systems-v080.js
+PASS: Python compile — global, energy, bioenergy, economics, balances, technologies, FastAPI main
+PASS: bash -n — Contabo backend upgrader
+PASS: JSON parse — global-energy-intelligence-v0.8.0.json
+PASS: Draft 2020-12 JSON Schema syntax — all three new schemas
+
+Runtime boundary
+----------------
+The full FastAPI application was not imported in the build environment because the container does not include the repository runtime dependency `psycopg` (ModuleNotFoundError). The release's domain modules and route source compile successfully, and the final Contabo upgrader performs the full Docker-backed runtime and endpoint verification.
+
+External-data boundary
+----------------------
+No outbound World Bank API request was made from the build container. Live connector behavior is covered by deterministic provider-response fixtures. No current country values are embedded in the repository or release. The Contabo upgrader performs a non-fatal live World Bank smoke request by default and can be made strict with SC_VERIFY_LIVE_GLOBAL_ENERGY=1.
+
+Release guardrails
+------------------
+PASS: latest available observation is not treated as current-year fact
+PASS: missing values are not interpolated
+PASS: provider failure has no fabricated fallback
+PASS: cross-source harmonization is not assumed
+PASS: World Bank metrics are not claimed as official EISD formulas
+PASS: automatic sustainability scoring disabled
+PASS: automatic policy recommendation disabled
+PASS: embedded current country values absent

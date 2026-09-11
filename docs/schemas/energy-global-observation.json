@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-global-observation.json",
+  "title": "Energy Global Observation",
+  "type": "object",
+  "required": ["metric_key","metric_label","source_indicator","source_indicator_label","country_code","country_name","year","value","unit","observation_status","source_key","provider","current_state_claim"],
+  "properties": {
+    "metric_key":{"type":"string","minLength":1},
+    "metric_label":{"type":"string","minLength":1},
+    "source_indicator":{"type":"string","minLength":1},
+    "source_indicator_label":{"type":"string"},
+    "country_code":{"type":"string"},
+    "country_name":{"type":"string"},
+    "year":{"type":"integer","minimum":1960,"maximum":2100},
+    "value":{"type":["number","string"]},
+    "unit":{"type":"string","minLength":1},
+    "observation_status":{"type":"string"},
+    "decimal":{"type":["integer","null"]},
+    "source_key":{"type":"string","const":"world-bank-wdi"},
+    "provider":{"type":"string","const":"World Bank Indicators API v2"},
+    "current_state_claim":{"type":"boolean","const":false}
+  },
+  "additionalProperties": false
+}

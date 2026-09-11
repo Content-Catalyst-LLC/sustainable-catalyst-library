@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/energy-global-country-profile.json",
+  "title": "Energy Global Country Profile",
+  "type": "object",
+  "required": ["ok","schema","version","provider","source_key","requested_country_code","country_code","country_name","period","retrieved_at","metrics","guardrails"],
+  "properties": {
+    "ok":{"type":"boolean","const":true},
+    "schema":{"type":"string","const":"sc-energy-global-country-profile/1.0"},
+    "version":{"type":"string","const":"0.8.0"},
+    "provider":{"type":"string","const":"World Bank Indicators API v2"},
+    "source_key":{"type":"string","const":"world-bank-wdi"},
+    "requested_country_code":{"type":"string"},
+    "country_code":{"type":"string"},
+    "country_name":{"type":"string"},
+    "period":{"type":"object","required":["start_year","end_year"],"properties":{"start_year":{"type":"integer"},"end_year":{"type":"integer"}},"additionalProperties":false},
+    "retrieved_at":{"type":"string"},
+    "source_response_metadata":{"type":"object"},
+    "metrics":{"type":"array","items":{"type":"object"}},
+    "guardrails":{"type":"object"}
+  },
+  "additionalProperties": false
+}

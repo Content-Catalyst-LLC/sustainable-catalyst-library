@@ -29,6 +29,7 @@ from .biomedical_evidence_graph import BiomedicalEvidenceGraphEngine
 from .institutional_research_network import InstitutionalResearchNetwork
 from .carbon_nature import CarbonNatureKnowledgeFoundation
 from .energy_systems import EnergySystemsKnowledgeFoundation
+from .energy_global import GlobalEnergyDataError
 from .private_knowledge import (
     PrivateHandoffRequest,
     PrivateKnowledgeIngestRequest,
@@ -264,7 +265,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "0.7.0",
+            "energy_systems_domain_version": "0.8.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -326,6 +327,15 @@ def health() -> dict[str, Any]:
             "energy_bioenergy_lifecycle_emissions_inferred": False,
             "energy_bioenergy_avoided_emissions_inferred": False,
             "energy_carbon_credit_eligibility_determined": False,
+            "energy_global_energy_intelligence": True,
+            "energy_global_energy_metric_registry": True,
+            "energy_global_energy_live_world_bank": True,
+            "energy_global_energy_country_profiles": True,
+            "energy_global_energy_country_comparison": True,
+            "energy_global_energy_embedded_current_values": False,
+            "energy_global_energy_latest_observation_is_current_assumed": False,
+            "energy_global_energy_cross_source_harmonization_assumed": False,
+            "energy_site_intelligence_execution": False,
             "automatic_energy_technology_ranking": False,
             "automatic_energy_policy_recommendation": False,
             "automated_clinical_recommendation": False,
@@ -1098,6 +1108,64 @@ def energy_systems_levelized_energy_cost(initial_cost: str = Query(..., min_leng
 @app.get("/v1/energy-systems/economic-scenario-template")
 def energy_systems_economic_scenario_template() -> dict[str, Any]:
     return energy_systems.economic_scenario_template()
+
+
+@app.get("/v1/energy-systems/global-energy-framework")
+def energy_systems_global_energy_framework() -> dict[str, Any]:
+    return energy_systems.global_energy_framework()
+
+
+@app.get("/v1/energy-systems/global-energy-sources")
+def energy_systems_global_energy_sources() -> dict[str, Any]:
+    return energy_systems.global_energy_sources()
+
+
+@app.get("/v1/energy-systems/global-energy-metrics")
+def energy_systems_global_energy_metrics(
+    q: str = Query(default="", max_length=500),
+    category: str = Query(default="", max_length=80),
+    limit: int = Query(default=100, ge=1, le=100),
+) -> dict[str, Any]:
+    return energy_systems.global_energy_metrics(q=q, category=category, limit=limit)
+
+
+@app.get("/v1/energy-systems/global-energy-profile-template")
+def energy_systems_global_energy_profile_template() -> dict[str, Any]:
+    return energy_systems.global_energy_profile_template()
+
+
+@app.get("/v1/energy-systems/global-energy-country-profile")
+def energy_systems_global_energy_country_profile(
+    country: str = Query(..., min_length=2, max_length=3),
+    start_year: int | None = Query(default=None, ge=1960, le=2100),
+    end_year: int | None = Query(default=None, ge=1960, le=2100),
+    include_series: bool = Query(default=True),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.global_energy_country_profile(
+            country=country, start_year=start_year, end_year=end_year, include_series=include_series
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except GlobalEnergyDataError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/energy-systems/global-energy-compare")
+def energy_systems_global_energy_compare(
+    countries: str = Query(..., min_length=2, max_length=80),
+    metric: str = Query(..., min_length=1, max_length=100),
+    start_year: int | None = Query(default=None, ge=1960, le=2100),
+    end_year: int | None = Query(default=None, ge=1960, le=2100),
+) -> dict[str, Any]:
+    try:
+        return energy_systems.global_energy_compare(
+            countries=countries, metric_key=metric, start_year=start_year, end_year=end_year
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except GlobalEnergyDataError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @app.get("/v1/energy-systems/bioenergy-framework")

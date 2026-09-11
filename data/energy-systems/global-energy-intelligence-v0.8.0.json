@@ -1,0 +1,257 @@
+{
+  "embedded_current_country_values": [],
+  "framework": {
+    "active_live_source": "world-bank-wdi",
+    "cache": {
+      "persistence": false,
+      "scope": "in-process-read-cache",
+      "ttl_seconds": 900
+    },
+    "categories": [
+      "access",
+      "consumption",
+      "economic-efficiency",
+      "electricity-mix",
+      "energy-mix",
+      "security",
+      "system-efficiency"
+    ],
+    "counts": {
+      "comparison_contracts": 1,
+      "live_connectors": 1,
+      "metrics": 9,
+      "profile_contracts": 1,
+      "sources": 4
+    },
+    "guardrails": {
+      "automatic_policy_recommendation": false,
+      "automatic_sustainability_score": false,
+      "cross_source_harmonization_assumed": false,
+      "eisd_formula_equivalence_assumed": false,
+      "embedded_current_country_values": false,
+      "latest_available_is_not_current_year": true,
+      "missing_values_interpolated": false,
+      "provider_failure_fabricated_fallback": false,
+      "source_year_preserved": true
+    },
+    "name": "Global Energy Intelligence",
+    "ok": true,
+    "schema": "sc-energy-global-intelligence/1.0",
+    "version": "0.8.0"
+  },
+  "metrics": [
+    {
+      "category": "access",
+      "current_state_claim": false,
+      "interpretation": "Tracks the share of population with electricity access. This is useful context for EISD accessibility but is not asserted to be the official SOC1 formula.",
+      "key": "electricity-access",
+      "label": "Access to electricity",
+      "related_eisd": [
+        "SOC1"
+      ],
+      "source_indicator": "EG.ELC.ACCS.ZS",
+      "source_key": "world-bank-wdi",
+      "source_semantics": "World Bank indicator semantics and source metadata control interpretation.",
+      "unit": "% of population"
+    },
+    {
+      "category": "energy-mix",
+      "current_state_claim": false,
+      "interpretation": "Tracks renewable energy in total final energy consumption; denominator and classification follow the source indicator.",
+      "key": "renewable-final-energy-share",
+      "label": "Renewable energy consumption",
+      "related_eisd": [
+        "ECO13"
+      ],
+      "source_indicator": "EG.FEC.RNEW.ZS",
+      "source_key": "world-bank-wdi",
+      "source_semantics": "Related to EISD renewable share, but not substituted for the unavailable official EISD methodology sheet.",
+      "unit": "% of total final energy consumption"
+    },
+    {
+      "category": "security",
+      "current_state_claim": false,
+      "interpretation": "Tracks net energy imports relative to energy use. Negative values may indicate net exports and must not be clamped or reinterpreted.",
+      "key": "net-energy-import-dependency",
+      "label": "Energy imports, net",
+      "related_eisd": [
+        "ECO15"
+      ],
+      "source_indicator": "EG.IMP.CONS.ZS",
+      "source_key": "world-bank-wdi",
+      "source_semantics": "Related to EISD import dependency; source definition remains authoritative for this observation series.",
+      "unit": "% of energy use"
+    },
+    {
+      "category": "consumption",
+      "current_state_claim": false,
+      "interpretation": "Country-level energy-use intensity normalized by population, retaining the source's primary-energy accounting conventions.",
+      "key": "energy-use-per-capita",
+      "label": "Energy use per capita",
+      "related_eisd": [
+        "ECO1"
+      ],
+      "source_indicator": "EG.USE.PCAP.KG.OE",
+      "source_key": "world-bank-wdi",
+      "source_semantics": "Related to EISD ECO1 without claiming official EISD methodological equivalence.",
+      "unit": "kg of oil equivalent per capita"
+    },
+    {
+      "category": "energy-mix",
+      "current_state_claim": false,
+      "interpretation": "Tracks fossil-fuel share of total energy use and should be read alongside other fuel-mix metrics rather than as a standalone sustainability score.",
+      "key": "fossil-fuel-energy-share",
+      "label": "Fossil fuel energy consumption",
+      "related_eisd": [
+        "ECO11",
+        "ECO12"
+      ],
+      "source_indicator": "EG.USE.COMM.FO.ZS",
+      "source_key": "world-bank-wdi",
+      "source_semantics": "Source indicator classification and accounting basis control the observation.",
+      "unit": "% of total energy use"
+    },
+    {
+      "category": "electricity-mix",
+      "current_state_claim": false,
+      "interpretation": "Tracks renewable output in electricity generation; it is distinct from renewable share of total final energy consumption.",
+      "key": "renewable-electricity-share",
+      "label": "Renewable electricity output",
+      "related_eisd": [
+        "ECO13"
+      ],
+      "source_indicator": "EG.ELC.RNEW.ZS",
+      "source_key": "world-bank-wdi",
+      "source_semantics": "Electricity-output share must not be substituted for whole-energy-system renewable share.",
+      "unit": "% of total electricity output"
+    },
+    {
+      "category": "consumption",
+      "current_state_claim": false,
+      "interpretation": "Tracks per-capita electricity consumption; it is narrower than total energy use per capita.",
+      "key": "electricity-consumption-per-capita",
+      "label": "Electric power consumption per capita",
+      "related_eisd": [
+        "ECO1"
+      ],
+      "source_indicator": "EG.USE.ELEC.KH.PC",
+      "source_key": "world-bank-wdi",
+      "source_semantics": "Electricity and total-energy metrics remain separate accounting scopes.",
+      "unit": "kWh per capita"
+    },
+    {
+      "category": "system-efficiency",
+      "current_state_claim": false,
+      "interpretation": "Tracks electricity transmission and distribution losses relative to output as a system-efficiency context metric.",
+      "key": "transmission-distribution-losses",
+      "label": "Electric power transmission and distribution losses",
+      "related_eisd": [
+        "ECO3"
+      ],
+      "source_indicator": "EG.ELC.LOSS.ZS",
+      "source_key": "world-bank-wdi",
+      "source_semantics": "Related to EISD conversion/distribution efficiency without asserting formula equivalence.",
+      "unit": "% of output"
+    },
+    {
+      "category": "economic-efficiency",
+      "current_state_claim": false,
+      "interpretation": "Tracks economic output per unit of energy use. It is the reciprocal-style productivity framing of energy intensity, not the same quantity as energy use per unit of GDP.",
+      "key": "energy-productivity",
+      "label": "GDP per unit of energy use",
+      "related_eisd": [
+        "ECO2"
+      ],
+      "source_indicator": "EG.GDP.PUSE.KO.PP.KD",
+      "source_key": "world-bank-wdi",
+      "source_semantics": "Do not invert or compare against ECO2 without preserving price basis, energy basis, and methodology.",
+      "unit": "constant 2021 PPP $ per kg of oil equivalent"
+    }
+  ],
+  "profile_template": {
+    "contract": {
+      "country_code_format": "ISO-like 2- or 3-letter code accepted by source provider",
+      "country_code_required": true,
+      "decision_studio_handoff_ready": true,
+      "default_window": "15 years ending in the runtime current year",
+      "freshness_policy": "report latest observed year and lag; never relabel as current-year data",
+      "lab_handoff_ready": true,
+      "max_window_years": 40,
+      "metrics": [
+        "electricity-access",
+        "renewable-final-energy-share",
+        "net-energy-import-dependency",
+        "energy-use-per-capita",
+        "fossil-fuel-energy-share",
+        "renewable-electricity-share",
+        "electricity-consumption-per-capita",
+        "transmission-distribution-losses",
+        "energy-productivity"
+      ],
+      "missing_value_policy": "omit-null-observation-no-interpolation",
+      "observation_status_preserved": true,
+      "provenance_required": true,
+      "site_intelligence_handoff_ready": true,
+      "source_year_required": true
+    },
+    "ok": true,
+    "schema": "sc-energy-global-country-profile-template/1.0",
+    "version": "0.8.0"
+  },
+  "schema": "sc-energy-global-intelligence-export/1.0",
+  "sources": [
+    {
+      "authentication": "none",
+      "base_url": "https://api.worldbank.org/v2",
+      "coverage": "Country/region time-series indicators surfaced through World Development Indicators and related World Bank datasets.",
+      "key": "world-bank-wdi",
+      "label": "World Bank Indicators API v2 \u2014 energy indicators",
+      "license_context": "Indicator-specific source and licensing metadata must be preserved; do not infer one universal license from the API transport layer.",
+      "mode": "live-read-only",
+      "note": "The v2 Indicators API is used as the first live global-energy connector because it requires no API key. Selected metrics are explicit source codes, not Sustainable Catalyst estimates.",
+      "provider": "World Bank",
+      "status": "active",
+      "update_context": "Observation years differ by indicator and country; the API exposes historical time series and metadata. v0.8.0 preserves each returned observation year."
+    },
+    {
+      "authentication": "api-key-required",
+      "base_url": "https://api.ember-energy.org/v1",
+      "coverage": "Curated electricity generation, electricity demand, power-sector emissions, carbon intensity, and installed-capacity datasets.",
+      "key": "ember-api",
+      "label": "Ember Energy Data API",
+      "license_context": "Ember documents its API data under CC BY 4.0; attribution must be preserved.",
+      "mode": "connector-contract",
+      "note": "v0.8.0 records the connector contract but does not add or require an Ember API key, so no live Ember request is executed by this release.",
+      "provider": "Ember",
+      "status": "contract-ready-not-activated",
+      "update_context": "Temporal coverage and freshness vary by endpoint; yearly and monthly datasets are available for supported series."
+    },
+    {
+      "authentication": "api-key-required",
+      "base_url": "https://api.eia.gov/v2",
+      "coverage": "Hierarchical energy datasets including international and U.S. energy series, depending on route and facets.",
+      "key": "eia-api-v2",
+      "label": "U.S. Energy Information Administration API v2",
+      "license_context": "Reuse terms are source-specific and must be retained with dataset metadata.",
+      "mode": "connector-contract",
+      "note": "The API v2 contract is registered, but v0.8.0 does not require an EIA API key and does not execute the connector.",
+      "provider": "U.S. Energy Information Administration",
+      "status": "contract-ready-not-activated",
+      "update_context": "Dataset periodicity and update cadence vary by route; metadata is route-specific."
+    },
+    {
+      "authentication": "dataset-dependent",
+      "base_url": "https://www.iea.org/data-and-statistics",
+      "coverage": "Country-level energy, efficiency, prices, emissions, and related energy-system datasets through IEA data products and explorers.",
+      "key": "iea-data-explorers",
+      "label": "International Energy Agency data explorers",
+      "license_context": "License and access terms are dataset-specific and must be checked before automated reuse.",
+      "mode": "reference-and-future-connector",
+      "note": "v0.8.0 recognizes IEA as a primary energy-data authority but does not assume a universal public API or universal reuse terms across IEA products.",
+      "provider": "International Energy Agency",
+      "status": "reference-only",
+      "update_context": "Freshness and access mode are dataset-specific; some current data products expose recent 2026 updates."
+    }
+  ],
+  "version": "0.8.0"
+}
