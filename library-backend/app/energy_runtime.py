@@ -5,8 +5,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-MODEL_VERSION = "1.1.0"
-SCHEMA_VERSION = "sc-energy-cross-product-runtime-activation/1.0"
+MODEL_VERSION = "1.2.0"
+SCHEMA_VERSION = "sc-energy-cross-product-runtime-activation/1.1"
 
 
 @dataclass(frozen=True)
@@ -20,17 +20,18 @@ class EnergyRuntimeTarget:
     transport: str
     gateway_state: str
     target_runtime_state: str
+    minimum_target_version: str
+    consumer_status_route: str
+    consumer_intake_route: str
     boundary: str
 
 
 class EnergyCrossProductRuntimeActivation:
-    """Stateless cross-product handoff gateway for Energy Systems Intelligence v1.1.0.
+    """Stateless cross-product handoff gateway for Energy Systems Intelligence v1.2.0.
 
     The Library now does more than publish static cross-product contracts: it can build
     deterministic, target-shaped handoff packets from the v1.0.0 integrated study
-    contract.  This is a pull-oriented activation gateway.  It does not claim that the
-    separate target products have been modified, that they consume the packets, or that
-    any outbound write/delivery has occurred.
+    contract.  This remains a pull-oriented Library gateway, now paired with certified target-side contract-intake consumers. The Library does not perform outbound delivery, persistence, or target execution.
     """
 
     def __init__(self) -> None:
@@ -47,7 +48,7 @@ class EnergyCrossProductRuntimeActivation:
                 "Route an energy research question with source references, indicator context, dated global observations, evidence gaps and review notes.",
                 ("energy-source-provenance-registry", "energy-indicator-observation-contract", "global-energy-country-profile-contract", "energy-decision-packet-contract"),
                 ("identity", "research_context", "sustainability_indicators", "global_context", "provenance", "review"),
-                "sc-energy-runtime-research-librarian-handoff/1.0", "pull-get-json", "library-gateway-active", "target-consumer-not-certified",
+                "sc-energy-runtime-research-librarian-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "8.1.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
                 "The packet provides research context only. It does not generate conclusions, citations, or source-quality judgments on behalf of Research Librarian.",
             ),
             T(
@@ -55,7 +56,7 @@ class EnergyCrossProductRuntimeActivation:
                 "Transfer explicit energy scenarios, resource observations, uncertainty, economics and biological-carbon context into a modeling-ready packet.",
                 ("energy-balance-scenario-contract", "energy-economic-scenario-contract", "bioenergy-carbon-scenario-contract", "renewable-resource-observation-contract"),
                 ("identity", "technologies_and_resources", "energy_balance", "economics", "bioenergy_and_carbon", "uncertainty", "provenance", "review"),
-                "sc-energy-runtime-lab-handoff/1.0", "pull-get-json", "library-gateway-active", "target-consumer-not-certified",
+                "sc-energy-runtime-lab-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "0.101.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
                 "The packet is modeling-ready evidence transport, not simulation execution. Lab remains responsible for model assumptions, diagnostics and outputs.",
             ),
             T(
@@ -63,7 +64,7 @@ class EnergyCrossProductRuntimeActivation:
                 "Transfer source-bound numerical references and explicit-input calculation scenarios for interactive calculation.",
                 ("energy-conversion-contract", "conversion-chain-model", "capacity-factor-generation-estimate", "energy-npv-result", "energy-cost-efficiency-result"),
                 ("identity", "numeric_registry", "energy_balance", "economics", "bioenergy_and_carbon", "provenance", "review"),
-                "sc-energy-runtime-workbench-handoff/1.0", "pull-get-json", "library-gateway-active", "target-consumer-not-certified",
+                "sc-energy-runtime-workbench-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "6.1.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
                 "The packet carries explicit inputs and provenance. It does not authorize Workbench to substitute hidden defaults or change source boundaries.",
             ),
             T(
@@ -71,7 +72,7 @@ class EnergyCrossProductRuntimeActivation:
                 "Transfer dated country-energy context and renewable-resource observations for spatial presentation and geospatial joining.",
                 ("global-energy-country-profile-contract", "global-energy-comparison-contract", "renewable-resource-observation-contract"),
                 ("identity", "technologies_and_resources", "global_context", "provenance", "review"),
-                "sc-energy-runtime-site-intelligence-handoff/1.0", "pull-get-json", "library-gateway-active", "target-consumer-not-certified",
+                "sc-energy-runtime-site-intelligence-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "4.40.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
                 "Spatial display does not establish site suitability, technical potential, causal attribution or current-year status when observations are older.",
             ),
             T(
@@ -79,21 +80,21 @@ class EnergyCrossProductRuntimeActivation:
                 "Transfer neutral decision packets, economic results, indicator context, country observations, uncertainty and evidence gaps into broader decision workflows.",
                 ("energy-decision-packet-contract", "energy-decision-comparison-matrix", "energy-decision-readiness-contract", "integrated-energy-study-contract"),
                 ("identity", "decision", "economics", "sustainability_indicators", "global_context", "uncertainty", "provenance", "review"),
-                "sc-energy-runtime-decision-studio-handoff/1.0", "pull-get-json", "library-gateway-active", "target-consumer-not-certified",
+                "sc-energy-runtime-decision-studio-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "2.3.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
                 "Decision Studio may compare evidence but the handoff must not create hidden weights, composite scores, rankings, winners, investment recommendations or policy recommendations.",
             ),
         )
 
     def _validate_registry(self) -> None:
         if len(self._targets) != 5:
-            raise ValueError("Energy Systems v1.1.0 requires five external runtime targets")
+            raise ValueError("Energy Systems v1.2.0 requires five external runtime targets")
         if len({x.key for x in self._targets}) != len(self._targets):
             raise ValueError("Runtime target keys must be unique")
         for target in self._targets:
             if target.gateway_state != "library-gateway-active":
-                raise ValueError("Every v1.1.0 target must expose an active Library gateway")
-            if target.target_runtime_state == "certified-active":
-                raise ValueError("v1.1.0 must not certify target-product execution without target-side evidence")
+                raise ValueError("Every v1.2.0 target must expose an active Library gateway")
+            if target.target_runtime_state != "certified-contract-intake":
+                raise ValueError("Every v1.2.0 target must expose certified contract intake")
 
     def guardrails(self) -> dict[str, Any]:
         return {
@@ -101,7 +102,7 @@ class EnergyCrossProductRuntimeActivation:
             "target_specific_packet_builders_activated": True,
             "pull_oriented_handoff_transport_activated": True,
             "stateless_packet_building": True,
-            "target_runtime_consumption_certified": False,
+            "target_runtime_consumption_certified": True,
             "outbound_push_delivery_activated": False,
             "cross_product_persistence_activated": False,
             "credential_forwarding_activated": False,
@@ -111,6 +112,9 @@ class EnergyCrossProductRuntimeActivation:
             "automatic_winner_selection": False,
             "automatic_recommendation": False,
             "study_payload_mutated": False,
+            "target_product_runtimes_modified_by_this_release": True,
+            "target_contract_intake_certified": True,
+            "target_model_execution_certified": False,
         }
 
     def _content_fingerprint(self) -> str:
@@ -122,15 +126,15 @@ class EnergyCrossProductRuntimeActivation:
             "ok": True,
             "schema": SCHEMA_VERSION,
             "version": MODEL_VERSION,
-            "release": "Cross-Product Runtime Activation Gateway",
+            "release": "Target-Side Runtime Consumers",
             "counts": {
                 "external_runtime_targets": len(self._targets),
                 "target_packet_builders": len(self._targets),
                 "pull_handoff_contracts": len(self._targets),
-                "target_runtimes_certified_active": 0,
+                "target_runtimes_certified_active": len(self._targets),
             },
             "targets": [x.target for x in self._targets],
-            "transport": "stateless-pull-oriented-json",
+            "transport": "stateless-pull-oriented-json-with-target-intake",
             "guardrails": self.guardrails(),
             "content_fingerprint": self._fingerprint,
         }
@@ -142,7 +146,7 @@ class EnergyCrossProductRuntimeActivation:
             "version": MODEL_VERSION,
             "count": len(self._targets),
             "items": [asdict(x) for x in self._targets],
-            "guardrail": "Library gateway activation means a target-shaped handoff can be built. It does not prove the separate target runtime currently consumes or executes it.",
+            "guardrail": "Target-side contract intake is certified at the minimum versions listed. Intake validates and receipts packets; it does not execute models, persist studies, rank alternatives, or prove scientific validity.",
         }
 
     def target(self, key: str) -> dict[str, Any]:
@@ -181,7 +185,7 @@ class EnergyCrossProductRuntimeActivation:
             "packet": {
                 "handoff_id": "",
                 "source": {"product": "Library", "subsystem": "Energy Systems Intelligence", "version": MODEL_VERSION},
-                "target": {"key": target["key"], "product": target["target"], "consumer_contract": target["consumer_contract"]},
+                "target": {"key": target["key"], "product": target["target"], "consumer_contract": target["consumer_contract"], "minimum_target_version": target["minimum_target_version"]},
                 "transport": target["transport"],
                 "contract_refs": target["source_contracts"],
                 "payload": selected,
@@ -276,7 +280,7 @@ class EnergyCrossProductRuntimeActivation:
             "version": MODEL_VERSION,
             "target": {"key": target_obj.key, "product": target_obj.target},
             **result,
-            "interpretation": "Runtime readiness reports packet completeness for the Library gateway only. It does not certify target-side availability, execution, scientific validity or decision quality.",
+            "interpretation": "Runtime readiness reports packet completeness. v1.2.0 certifies target-side contract intake at the listed minimum versions, but not target execution, persistence, scientific validity, or decision quality.",
         }
 
     def build_handoff(self, key: str, study: dict[str, Any]) -> dict[str, Any]:
@@ -291,7 +295,7 @@ class EnergyCrossProductRuntimeActivation:
         packet = {
             "handoff_id": handoff_id,
             "source": {"product": "Library", "subsystem": "Energy Systems Intelligence", "version": MODEL_VERSION},
-            "target": {"key": target_obj.key, "product": target_obj.target, "consumer_contract": target_obj.consumer_contract},
+            "target": {"key": target_obj.key, "product": target_obj.target, "consumer_contract": target_obj.consumer_contract, "minimum_target_version": target_obj.minimum_target_version},
             "transport": target_obj.transport,
             "contract_refs": list(target_obj.source_contracts),
             "payload": payload,
@@ -305,6 +309,25 @@ class EnergyCrossProductRuntimeActivation:
             "packet": packet,
             "delivery": {"mode": "pull-only", "outbound_delivery_performed": False, "persistence_performed": False, "target_execution_claimed": False},
             "guardrail": target_obj.boundary,
+        }
+
+    def consumers(self) -> dict[str, Any]:
+        return {
+            "ok": True,
+            "schema": "sc-energy-runtime-consumer-registry/1.0",
+            "version": MODEL_VERSION,
+            "count": len(self._targets),
+            "items": [
+                {
+                    "target_key": x.key, "product": x.target,
+                    "minimum_target_version": x.minimum_target_version,
+                    "consumer_contract": x.consumer_contract,
+                    "status_route": x.consumer_status_route,
+                    "intake_route": x.consumer_intake_route,
+                    "state": x.target_runtime_state,
+                } for x in self._targets
+            ],
+            "certification_scope": "Schema/target/payload intake, deterministic receipt, provenance preservation, and no-execution/no-persistence guardrails only.",
         }
 
     def export(self) -> dict[str, Any]:

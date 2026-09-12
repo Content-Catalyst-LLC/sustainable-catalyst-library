@@ -1,0 +1,693 @@
+{
+  "schema": "sc-energy-cross-product-runtime-activation-export/1.0",
+  "version": "1.2.0",
+  "framework": {
+    "ok": true,
+    "schema": "sc-energy-cross-product-runtime-activation/1.1",
+    "version": "1.2.0",
+    "release": "Target-Side Runtime Consumers",
+    "counts": {
+      "external_runtime_targets": 5,
+      "target_packet_builders": 5,
+      "pull_handoff_contracts": 5,
+      "target_runtimes_certified_active": 5
+    },
+    "targets": [
+      "Research Librarian",
+      "Lab",
+      "Workbench",
+      "Site Intelligence",
+      "Decision Studio"
+    ],
+    "transport": "stateless-pull-oriented-json-with-target-intake",
+    "guardrails": {
+      "runtime_activation_gateway_activated": true,
+      "target_specific_packet_builders_activated": true,
+      "pull_oriented_handoff_transport_activated": true,
+      "stateless_packet_building": true,
+      "target_runtime_consumption_certified": true,
+      "outbound_push_delivery_activated": false,
+      "cross_product_persistence_activated": false,
+      "credential_forwarding_activated": false,
+      "automatic_target_execution": false,
+      "automatic_model_execution": false,
+      "automatic_decision_ranking": false,
+      "automatic_winner_selection": false,
+      "automatic_recommendation": false,
+      "study_payload_mutated": false,
+      "target_product_runtimes_modified_by_this_release": true,
+      "target_contract_intake_certified": true,
+      "target_model_execution_certified": false
+    },
+    "content_fingerprint": "1a7f59030db76e36def6a6440668d9378696d16ba9d9c8cfaf3629c3da707824"
+  },
+  "targets": [
+    {
+      "key": "research-librarian",
+      "target": "Research Librarian",
+      "purpose": "Route an energy research question with source references, indicator context, dated global observations, evidence gaps and review notes.",
+      "source_contracts": [
+        "energy-source-provenance-registry",
+        "energy-indicator-observation-contract",
+        "global-energy-country-profile-contract",
+        "energy-decision-packet-contract"
+      ],
+      "payload_sections": [
+        "identity",
+        "research_context",
+        "sustainability_indicators",
+        "global_context",
+        "provenance",
+        "review"
+      ],
+      "consumer_contract": "sc-energy-runtime-research-librarian-handoff/1.0",
+      "transport": "pull-get-json",
+      "gateway_state": "library-gateway-active",
+      "target_runtime_state": "certified-contract-intake",
+      "minimum_target_version": "8.1.0",
+      "consumer_status_route": "/v1/energy-runtime/consumer",
+      "consumer_intake_route": "/v1/energy-runtime/consume",
+      "boundary": "The packet provides research context only. It does not generate conclusions, citations, or source-quality judgments on behalf of Research Librarian."
+    },
+    {
+      "key": "lab",
+      "target": "Lab",
+      "purpose": "Transfer explicit energy scenarios, resource observations, uncertainty, economics and biological-carbon context into a modeling-ready packet.",
+      "source_contracts": [
+        "energy-balance-scenario-contract",
+        "energy-economic-scenario-contract",
+        "bioenergy-carbon-scenario-contract",
+        "renewable-resource-observation-contract"
+      ],
+      "payload_sections": [
+        "identity",
+        "technologies_and_resources",
+        "energy_balance",
+        "economics",
+        "bioenergy_and_carbon",
+        "uncertainty",
+        "provenance",
+        "review"
+      ],
+      "consumer_contract": "sc-energy-runtime-lab-handoff/1.0",
+      "transport": "pull-get-json",
+      "gateway_state": "library-gateway-active",
+      "target_runtime_state": "certified-contract-intake",
+      "minimum_target_version": "0.101.0",
+      "consumer_status_route": "/v1/energy-runtime/consumer",
+      "consumer_intake_route": "/v1/energy-runtime/consume",
+      "boundary": "The packet is modeling-ready evidence transport, not simulation execution. Lab remains responsible for model assumptions, diagnostics and outputs."
+    },
+    {
+      "key": "workbench",
+      "target": "Workbench",
+      "purpose": "Transfer source-bound numerical references and explicit-input calculation scenarios for interactive calculation.",
+      "source_contracts": [
+        "energy-conversion-contract",
+        "conversion-chain-model",
+        "capacity-factor-generation-estimate",
+        "energy-npv-result",
+        "energy-cost-efficiency-result"
+      ],
+      "payload_sections": [
+        "identity",
+        "numeric_registry",
+        "energy_balance",
+        "economics",
+        "bioenergy_and_carbon",
+        "provenance",
+        "review"
+      ],
+      "consumer_contract": "sc-energy-runtime-workbench-handoff/1.0",
+      "transport": "pull-get-json",
+      "gateway_state": "library-gateway-active",
+      "target_runtime_state": "certified-contract-intake",
+      "minimum_target_version": "6.1.0",
+      "consumer_status_route": "/v1/energy-runtime/consumer",
+      "consumer_intake_route": "/v1/energy-runtime/consume",
+      "boundary": "The packet carries explicit inputs and provenance. It does not authorize Workbench to substitute hidden defaults or change source boundaries."
+    },
+    {
+      "key": "site-intelligence",
+      "target": "Site Intelligence",
+      "purpose": "Transfer dated country-energy context and renewable-resource observations for spatial presentation and geospatial joining.",
+      "source_contracts": [
+        "global-energy-country-profile-contract",
+        "global-energy-comparison-contract",
+        "renewable-resource-observation-contract"
+      ],
+      "payload_sections": [
+        "identity",
+        "technologies_and_resources",
+        "global_context",
+        "provenance",
+        "review"
+      ],
+      "consumer_contract": "sc-energy-runtime-site-intelligence-handoff/1.0",
+      "transport": "pull-get-json",
+      "gateway_state": "library-gateway-active",
+      "target_runtime_state": "certified-contract-intake",
+      "minimum_target_version": "4.40.0",
+      "consumer_status_route": "/v1/energy-runtime/consumer",
+      "consumer_intake_route": "/v1/energy-runtime/consume",
+      "boundary": "Spatial display does not establish site suitability, technical potential, causal attribution or current-year status when observations are older."
+    },
+    {
+      "key": "decision-studio",
+      "target": "Decision Studio",
+      "purpose": "Transfer neutral decision packets, economic results, indicator context, country observations, uncertainty and evidence gaps into broader decision workflows.",
+      "source_contracts": [
+        "energy-decision-packet-contract",
+        "energy-decision-comparison-matrix",
+        "energy-decision-readiness-contract",
+        "integrated-energy-study-contract"
+      ],
+      "payload_sections": [
+        "identity",
+        "decision",
+        "economics",
+        "sustainability_indicators",
+        "global_context",
+        "uncertainty",
+        "provenance",
+        "review"
+      ],
+      "consumer_contract": "sc-energy-runtime-decision-studio-handoff/1.0",
+      "transport": "pull-get-json",
+      "gateway_state": "library-gateway-active",
+      "target_runtime_state": "certified-contract-intake",
+      "minimum_target_version": "2.3.0",
+      "consumer_status_route": "/v1/energy-runtime/consumer",
+      "consumer_intake_route": "/v1/energy-runtime/consume",
+      "boundary": "Decision Studio may compare evidence but the handoff must not create hidden weights, composite scores, rankings, winners, investment recommendations or policy recommendations."
+    }
+  ],
+  "templates": {
+    "research-librarian": {
+      "handoff_id": "",
+      "source": {
+        "product": "Library",
+        "subsystem": "Energy Systems Intelligence",
+        "version": "1.2.0"
+      },
+      "target": {
+        "key": "research-librarian",
+        "product": "Research Librarian",
+        "consumer_contract": "sc-energy-runtime-research-librarian-handoff/1.0",
+        "minimum_target_version": "8.1.0"
+      },
+      "transport": "pull-get-json",
+      "contract_refs": [
+        "energy-source-provenance-registry",
+        "energy-indicator-observation-contract",
+        "global-energy-country-profile-contract",
+        "energy-decision-packet-contract"
+      ],
+      "payload": {
+        "identity": {
+          "study_id": "",
+          "title": "",
+          "question": "",
+          "geography": "",
+          "period": "",
+          "created_by": ""
+        },
+        "research_context": {
+          "concept_refs": [],
+          "source_refs": [],
+          "research_questions": [],
+          "evidence_gaps": []
+        },
+        "sustainability_indicators": [],
+        "global_context": {
+          "country_profile_refs": [],
+          "observation_years": [],
+          "missing_value_notes": []
+        },
+        "provenance": [],
+        "review": {
+          "assumptions": [],
+          "limitations": [],
+          "open_questions": [],
+          "reviewer_notes": ""
+        }
+      },
+      "validation": {
+        "status": "template",
+        "populated_sections": [],
+        "empty_sections": [
+          "identity",
+          "research_context",
+          "sustainability_indicators",
+          "global_context",
+          "provenance",
+          "review"
+        ],
+        "issues": []
+      },
+      "guardrails": {
+        "runtime_activation_gateway_activated": true,
+        "target_specific_packet_builders_activated": true,
+        "pull_oriented_handoff_transport_activated": true,
+        "stateless_packet_building": true,
+        "target_runtime_consumption_certified": true,
+        "outbound_push_delivery_activated": false,
+        "cross_product_persistence_activated": false,
+        "credential_forwarding_activated": false,
+        "automatic_target_execution": false,
+        "automatic_model_execution": false,
+        "automatic_decision_ranking": false,
+        "automatic_winner_selection": false,
+        "automatic_recommendation": false,
+        "study_payload_mutated": false,
+        "target_product_runtimes_modified_by_this_release": true,
+        "target_contract_intake_certified": true,
+        "target_model_execution_certified": false
+      }
+    },
+    "lab": {
+      "handoff_id": "",
+      "source": {
+        "product": "Library",
+        "subsystem": "Energy Systems Intelligence",
+        "version": "1.2.0"
+      },
+      "target": {
+        "key": "lab",
+        "product": "Lab",
+        "consumer_contract": "sc-energy-runtime-lab-handoff/1.0",
+        "minimum_target_version": "0.101.0"
+      },
+      "transport": "pull-get-json",
+      "contract_refs": [
+        "energy-balance-scenario-contract",
+        "energy-economic-scenario-contract",
+        "bioenergy-carbon-scenario-contract",
+        "renewable-resource-observation-contract"
+      ],
+      "payload": {
+        "identity": {
+          "study_id": "",
+          "title": "",
+          "question": "",
+          "geography": "",
+          "period": "",
+          "created_by": ""
+        },
+        "technologies_and_resources": {
+          "technology_refs": [],
+          "resource_observations": [],
+          "site_suitability_status": "not-inferred"
+        },
+        "energy_balance": {
+          "scenario_refs": [],
+          "results": []
+        },
+        "economics": {
+          "scenario_refs": [],
+          "results": [],
+          "assumptions": []
+        },
+        "bioenergy_and_carbon": {
+          "pathway_refs": [],
+          "carbon_nature_refs": [],
+          "results": []
+        },
+        "uncertainty": [],
+        "provenance": [],
+        "review": {
+          "assumptions": [],
+          "limitations": [],
+          "open_questions": [],
+          "reviewer_notes": ""
+        }
+      },
+      "validation": {
+        "status": "template",
+        "populated_sections": [],
+        "empty_sections": [
+          "identity",
+          "technologies_and_resources",
+          "energy_balance",
+          "economics",
+          "bioenergy_and_carbon",
+          "uncertainty",
+          "provenance",
+          "review"
+        ],
+        "issues": []
+      },
+      "guardrails": {
+        "runtime_activation_gateway_activated": true,
+        "target_specific_packet_builders_activated": true,
+        "pull_oriented_handoff_transport_activated": true,
+        "stateless_packet_building": true,
+        "target_runtime_consumption_certified": true,
+        "outbound_push_delivery_activated": false,
+        "cross_product_persistence_activated": false,
+        "credential_forwarding_activated": false,
+        "automatic_target_execution": false,
+        "automatic_model_execution": false,
+        "automatic_decision_ranking": false,
+        "automatic_winner_selection": false,
+        "automatic_recommendation": false,
+        "study_payload_mutated": false,
+        "target_product_runtimes_modified_by_this_release": true,
+        "target_contract_intake_certified": true,
+        "target_model_execution_certified": false
+      }
+    },
+    "workbench": {
+      "handoff_id": "",
+      "source": {
+        "product": "Library",
+        "subsystem": "Energy Systems Intelligence",
+        "version": "1.2.0"
+      },
+      "target": {
+        "key": "workbench",
+        "product": "Workbench",
+        "consumer_contract": "sc-energy-runtime-workbench-handoff/1.0",
+        "minimum_target_version": "6.1.0"
+      },
+      "transport": "pull-get-json",
+      "contract_refs": [
+        "energy-conversion-contract",
+        "conversion-chain-model",
+        "capacity-factor-generation-estimate",
+        "energy-npv-result",
+        "energy-cost-efficiency-result"
+      ],
+      "payload": {
+        "identity": {
+          "study_id": "",
+          "title": "",
+          "question": "",
+          "geography": "",
+          "period": "",
+          "created_by": ""
+        },
+        "numeric_registry": {
+          "conversion_refs": [],
+          "carbon_factor_refs": [],
+          "heat_content_refs": [],
+          "source_years_acknowledged": true
+        },
+        "energy_balance": {
+          "scenario_refs": [],
+          "results": []
+        },
+        "economics": {
+          "scenario_refs": [],
+          "results": [],
+          "assumptions": []
+        },
+        "bioenergy_and_carbon": {
+          "pathway_refs": [],
+          "carbon_nature_refs": [],
+          "results": []
+        },
+        "provenance": [],
+        "review": {
+          "assumptions": [],
+          "limitations": [],
+          "open_questions": [],
+          "reviewer_notes": ""
+        }
+      },
+      "validation": {
+        "status": "template",
+        "populated_sections": [],
+        "empty_sections": [
+          "identity",
+          "numeric_registry",
+          "energy_balance",
+          "economics",
+          "bioenergy_and_carbon",
+          "provenance",
+          "review"
+        ],
+        "issues": []
+      },
+      "guardrails": {
+        "runtime_activation_gateway_activated": true,
+        "target_specific_packet_builders_activated": true,
+        "pull_oriented_handoff_transport_activated": true,
+        "stateless_packet_building": true,
+        "target_runtime_consumption_certified": true,
+        "outbound_push_delivery_activated": false,
+        "cross_product_persistence_activated": false,
+        "credential_forwarding_activated": false,
+        "automatic_target_execution": false,
+        "automatic_model_execution": false,
+        "automatic_decision_ranking": false,
+        "automatic_winner_selection": false,
+        "automatic_recommendation": false,
+        "study_payload_mutated": false,
+        "target_product_runtimes_modified_by_this_release": true,
+        "target_contract_intake_certified": true,
+        "target_model_execution_certified": false
+      }
+    },
+    "site-intelligence": {
+      "handoff_id": "",
+      "source": {
+        "product": "Library",
+        "subsystem": "Energy Systems Intelligence",
+        "version": "1.2.0"
+      },
+      "target": {
+        "key": "site-intelligence",
+        "product": "Site Intelligence",
+        "consumer_contract": "sc-energy-runtime-site-intelligence-handoff/1.0",
+        "minimum_target_version": "4.40.0"
+      },
+      "transport": "pull-get-json",
+      "contract_refs": [
+        "global-energy-country-profile-contract",
+        "global-energy-comparison-contract",
+        "renewable-resource-observation-contract"
+      ],
+      "payload": {
+        "identity": {
+          "study_id": "",
+          "title": "",
+          "question": "",
+          "geography": "",
+          "period": "",
+          "created_by": ""
+        },
+        "technologies_and_resources": {
+          "technology_refs": [],
+          "resource_observations": [],
+          "site_suitability_status": "not-inferred"
+        },
+        "global_context": {
+          "country_profile_refs": [],
+          "observation_years": [],
+          "missing_value_notes": []
+        },
+        "provenance": [],
+        "review": {
+          "assumptions": [],
+          "limitations": [],
+          "open_questions": [],
+          "reviewer_notes": ""
+        }
+      },
+      "validation": {
+        "status": "template",
+        "populated_sections": [],
+        "empty_sections": [
+          "identity",
+          "technologies_and_resources",
+          "global_context",
+          "provenance",
+          "review"
+        ],
+        "issues": []
+      },
+      "guardrails": {
+        "runtime_activation_gateway_activated": true,
+        "target_specific_packet_builders_activated": true,
+        "pull_oriented_handoff_transport_activated": true,
+        "stateless_packet_building": true,
+        "target_runtime_consumption_certified": true,
+        "outbound_push_delivery_activated": false,
+        "cross_product_persistence_activated": false,
+        "credential_forwarding_activated": false,
+        "automatic_target_execution": false,
+        "automatic_model_execution": false,
+        "automatic_decision_ranking": false,
+        "automatic_winner_selection": false,
+        "automatic_recommendation": false,
+        "study_payload_mutated": false,
+        "target_product_runtimes_modified_by_this_release": true,
+        "target_contract_intake_certified": true,
+        "target_model_execution_certified": false
+      }
+    },
+    "decision-studio": {
+      "handoff_id": "",
+      "source": {
+        "product": "Library",
+        "subsystem": "Energy Systems Intelligence",
+        "version": "1.2.0"
+      },
+      "target": {
+        "key": "decision-studio",
+        "product": "Decision Studio",
+        "consumer_contract": "sc-energy-runtime-decision-studio-handoff/1.0",
+        "minimum_target_version": "2.3.0"
+      },
+      "transport": "pull-get-json",
+      "contract_refs": [
+        "energy-decision-packet-contract",
+        "energy-decision-comparison-matrix",
+        "energy-decision-readiness-contract",
+        "integrated-energy-study-contract"
+      ],
+      "payload": {
+        "identity": {
+          "study_id": "",
+          "title": "",
+          "question": "",
+          "geography": "",
+          "period": "",
+          "created_by": ""
+        },
+        "decision": {
+          "decision_packet_ref": "",
+          "comparison_matrix_ref": "",
+          "readiness_ref": ""
+        },
+        "economics": {
+          "scenario_refs": [],
+          "results": [],
+          "assumptions": []
+        },
+        "sustainability_indicators": [],
+        "global_context": {
+          "country_profile_refs": [],
+          "observation_years": [],
+          "missing_value_notes": []
+        },
+        "uncertainty": [],
+        "provenance": [],
+        "review": {
+          "assumptions": [],
+          "limitations": [],
+          "open_questions": [],
+          "reviewer_notes": ""
+        }
+      },
+      "validation": {
+        "status": "template",
+        "populated_sections": [],
+        "empty_sections": [
+          "identity",
+          "decision",
+          "economics",
+          "sustainability_indicators",
+          "global_context",
+          "uncertainty",
+          "provenance",
+          "review"
+        ],
+        "issues": []
+      },
+      "guardrails": {
+        "runtime_activation_gateway_activated": true,
+        "target_specific_packet_builders_activated": true,
+        "pull_oriented_handoff_transport_activated": true,
+        "stateless_packet_building": true,
+        "target_runtime_consumption_certified": true,
+        "outbound_push_delivery_activated": false,
+        "cross_product_persistence_activated": false,
+        "credential_forwarding_activated": false,
+        "automatic_target_execution": false,
+        "automatic_model_execution": false,
+        "automatic_decision_ranking": false,
+        "automatic_winner_selection": false,
+        "automatic_recommendation": false,
+        "study_payload_mutated": false,
+        "target_product_runtimes_modified_by_this_release": true,
+        "target_contract_intake_certified": true,
+        "target_model_execution_certified": false
+      }
+    }
+  },
+  "guardrails": {
+    "runtime_activation_gateway_activated": true,
+    "target_specific_packet_builders_activated": true,
+    "pull_oriented_handoff_transport_activated": true,
+    "stateless_packet_building": true,
+    "target_runtime_consumption_certified": true,
+    "outbound_push_delivery_activated": false,
+    "cross_product_persistence_activated": false,
+    "credential_forwarding_activated": false,
+    "automatic_target_execution": false,
+    "automatic_model_execution": false,
+    "automatic_decision_ranking": false,
+    "automatic_winner_selection": false,
+    "automatic_recommendation": false,
+    "study_payload_mutated": false,
+    "target_product_runtimes_modified_by_this_release": true,
+    "target_contract_intake_certified": true,
+    "target_model_execution_certified": false
+  },
+  "consumers": {
+    "ok": true,
+    "schema": "sc-energy-runtime-consumer-registry/1.0",
+    "version": "1.2.0",
+    "count": 5,
+    "items": [
+      {
+        "target_key": "research-librarian",
+        "product": "Research Librarian",
+        "minimum_target_version": "8.1.0",
+        "consumer_contract": "sc-energy-runtime-research-librarian-handoff/1.0",
+        "status_route": "/v1/energy-runtime/consumer",
+        "intake_route": "/v1/energy-runtime/consume",
+        "state": "certified-contract-intake"
+      },
+      {
+        "target_key": "lab",
+        "product": "Lab",
+        "minimum_target_version": "0.101.0",
+        "consumer_contract": "sc-energy-runtime-lab-handoff/1.0",
+        "status_route": "/v1/energy-runtime/consumer",
+        "intake_route": "/v1/energy-runtime/consume",
+        "state": "certified-contract-intake"
+      },
+      {
+        "target_key": "workbench",
+        "product": "Workbench",
+        "minimum_target_version": "6.1.0",
+        "consumer_contract": "sc-energy-runtime-workbench-handoff/1.0",
+        "status_route": "/v1/energy-runtime/consumer",
+        "intake_route": "/v1/energy-runtime/consume",
+        "state": "certified-contract-intake"
+      },
+      {
+        "target_key": "site-intelligence",
+        "product": "Site Intelligence",
+        "minimum_target_version": "4.40.0",
+        "consumer_contract": "sc-energy-runtime-site-intelligence-handoff/1.0",
+        "status_route": "/v1/energy-runtime/consumer",
+        "intake_route": "/v1/energy-runtime/consume",
+        "state": "certified-contract-intake"
+      },
+      {
+        "target_key": "decision-studio",
+        "product": "Decision Studio",
+        "minimum_target_version": "2.3.0",
+        "consumer_contract": "sc-energy-runtime-decision-studio-handoff/1.0",
+        "status_route": "/v1/energy-runtime/consumer",
+        "intake_route": "/v1/energy-runtime/consume",
+        "state": "certified-contract-intake"
+      }
+    ],
+    "certification_scope": "Schema/target/payload intake, deterministic receipt, provenance preservation, and no-execution/no-persistence guardrails only."
+  }
+}

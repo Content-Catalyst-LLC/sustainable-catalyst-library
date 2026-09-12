@@ -265,7 +265,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "1.1.0",
+            "energy_systems_domain_version": "1.2.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -358,7 +358,7 @@ def health() -> dict[str, Any]:
             "energy_cross_product_runtime_targets": 5,
             "energy_cross_product_handoff_packet_builders": 5,
             "energy_cross_product_pull_transport": True,
-            "energy_cross_product_target_consumption_certified": False,
+            "energy_cross_product_target_consumption_certified": True,
             "energy_cross_product_outbound_push_delivery": False,
             "energy_cross_product_persistence": False,
             "energy_site_intelligence_execution": False,
@@ -839,6 +839,13 @@ def energy_systems_platform_certification() -> dict[str, Any]:
 @app.get("/v1/energy-systems/runtime-framework")
 def energy_systems_runtime_framework() -> dict[str, Any]:
     return energy_systems.runtime_framework()
+
+
+
+
+@app.get("/v1/energy-systems/runtime-consumers")
+def energy_systems_runtime_consumers() -> dict[str, Any]:
+    return energy_systems.runtime_consumers()
 
 
 @app.get("/v1/energy-systems/runtime-targets")

@@ -12,9 +12,9 @@ PLATFORM = ROOT / 'library-backend/app/energy_platform.py'
 RUNTIME = ROOT / 'library-backend/app/energy_runtime.py'
 GLOBAL = ROOT / 'library-backend/app/energy_global.py'
 DECISION = ROOT / 'library-backend/app/energy_decision.py'
-JS = ROOT / 'sustainable-catalyst-library/assets/js/sc-library-energy-systems-v110.js'
-CSS = ROOT / 'sustainable-catalyst-library/assets/css/sc-library-energy-systems-v110.css'
-EXPORT = ROOT / 'data/energy-systems/runtime-activation-v1.1.0.json'
+JS = ROOT / 'sustainable-catalyst-library/assets/js/sc-library-energy-systems-v120.js'
+CSS = ROOT / 'sustainable-catalyst-library/assets/css/sc-library-energy-systems-v120.css'
+EXPORT = ROOT / 'data/energy-systems/runtime-consumers-v1.2.0.json'
 SCHEMAS = [ROOT/'docs/schemas'/n for n in ['energy-runtime-target.json','energy-runtime-handoff.json','energy-runtime-readiness.json']]
 
 def read(p): return p.read_text(encoding='utf-8')
@@ -23,33 +23,34 @@ def test_versions():
     p=read(PLUGIN)
     assert 'Version: 5.11.0' in p
     assert "SC_CARBON_NATURE_VERSION', '0.5.0'" in p
-    assert "SC_ENERGY_SYSTEMS_VERSION', '1.1.0'" in p
-    assert '__version__ = "2.17.0"' in read(INIT)
-    assert 'DOMAIN_VERSION = "1.1.0"' in read(ENERGY)
+    assert "SC_ENERGY_SYSTEMS_VERSION', '1.2.0'" in p
+    assert '__version__ = "2.18.0"' in read(INIT)
+    assert 'DOMAIN_VERSION = "1.2.0"' in read(ENERGY)
     assert 'MODEL_VERSION = "1.0.0"' in read(PLATFORM)
-    assert 'MODEL_VERSION = "1.1.0"' in read(RUNTIME)
+    assert 'MODEL_VERSION = "1.2.0"' in read(RUNTIME)
 
 def test_backend_runtime_routes_and_capabilities():
     m=read(MAIN)
     for path in [
         '/v1/energy-systems/runtime-framework',
         '/v1/energy-systems/runtime-targets',
+        '/v1/energy-systems/runtime-consumers',
         '/v1/energy-systems/runtime-targets/{target_key}',
         '/v1/energy-systems/runtime-handoff-template/{target_key}',
         '/v1/energy-systems/runtime-handoff/{target_key}',
         '/v1/energy-systems/runtime-readiness/{target_key}',
         '/v1/energy-systems/platform-certification',
     ]: assert path in m
-    assert '"energy_systems_domain_version": "1.1.0"' in m
+    assert '"energy_systems_domain_version": "1.2.0"' in m
     assert '"energy_cross_product_runtime_activation_gateway": True' in m
     assert '"energy_cross_product_runtime_targets": 5' in m
-    assert '"energy_cross_product_target_consumption_certified": False' in m
+    assert '"energy_cross_product_target_consumption_certified": True' in m
     assert '"energy_cross_product_outbound_push_delivery": False' in m
 
 def test_wp_surface_is_runtime_first_and_read_only():
     p=read(PHP)
-    assert "public const VERSION = '1.1.0'" in p
-    assert 'Runtime Activation Gateway · v1.1.0' in p
+    assert "public const VERSION = '1.2.0'" in p
+    assert 'Target-Side Runtime Consumers · v1.2.0' in p
     assert 'Gateway activation ≠ target execution.' in p
     assert 'data-es-mode="runtime"' in p
     assert 'data-es-panel="runtime"' in p
@@ -73,9 +74,9 @@ def test_runtime_export_and_schemas_validate():
     for schema in schemas: Draft202012Validator.check_schema(schema)
     e=json.loads(read(EXPORT))
     assert e['schema']=='sc-energy-cross-product-runtime-activation-export/1.0'
-    assert e['version']=='1.1.0'
+    assert e['version']=='1.2.0'
     assert e['framework']['counts']['external_runtime_targets']==5
-    assert e['framework']['counts']['target_runtimes_certified_active']==0
+    assert e['framework']['counts']['target_runtimes_certified_active']==5
     target_validator=Draft202012Validator(schemas[0])
     for target in e['targets']: target_validator.validate(target)
     assert set(e['templates'])=={'research-librarian','lab','workbench','site-intelligence','decision-studio'}

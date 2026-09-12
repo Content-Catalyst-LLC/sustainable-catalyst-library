@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v1.1.0 — Cross-Product Runtime Activation Gateway. */
+/** Energy Systems Intelligence v1.2.0 — Target-Side Runtime Consumers. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '1.1.0';
+    public const VERSION = '1.2.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v110', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v110.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v110', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v110.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v120', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v120.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v120', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v120.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -27,6 +27,7 @@ final class SC_Library_Energy_Systems_Intelligence {
         register_rest_route('sc-library/v1', '/energy-systems/platform-certification', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'platform_certification']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_framework']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-targets', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_targets']]);
+        register_rest_route('sc-library/v1', '/energy-systems/runtime-consumers', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_consumers']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-target/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_target']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-handoff-template/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_handoff_template']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-handoff/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_handoff'], 'args' => ['study' => ['required' => true]]]);
@@ -326,6 +327,7 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function platform_certification(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/platform-certification'); }
     public function runtime_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-framework'); }
     public function runtime_targets(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-targets'); }
+    public function runtime_consumers(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-consumers'); }
     public function runtime_target(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/runtime-targets/' . rawurlencode(sanitize_key((string)$request['key']))); }
     public function runtime_handoff_template(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/runtime-handoff-template/' . rawurlencode(sanitize_key((string)$request['key']))); }
     public function runtime_handoff(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/runtime-handoff/' . rawurlencode(sanitize_key((string)$request['key'])), ['study' => (string)$request->get_param('study')]); }
@@ -377,8 +379,8 @@ final class SC_Library_Energy_Systems_Intelligence {
             'intro' => 'Use one governed energy platform with an active Library-side runtime gateway for target-shaped handoffs into Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v110');
-        wp_enqueue_script('sc-library-energy-systems-v110');
+        wp_enqueue_style('sc-library-energy-systems-v120');
+        wp_enqueue_script('sc-library-energy-systems-v120');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -451,7 +453,7 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-biomass-to-oil-energy-endpoint="<?php echo esc_url($ep('/biomass-to-oil-energy-estimate')); ?>"
             data-bioenergy-scenario-endpoint="<?php echo esc_url($ep('/bioenergy-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Runtime Activation Gateway · v1.1.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Target-Side Runtime Consumers · v1.2.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
@@ -462,7 +464,7 @@ final class SC_Library_Energy_Systems_Intelligence {
 
             <div class="sc-es__guardrail">
                 <strong><?php esc_html_e('Gateway activation ≠ target execution.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v1.1.0 can build target-shaped, stateless handoff packets from the integrated study contract. It does not claim that separate product runtimes consume, persist, execute, or validate those packets, and it does not enable ranking or recommendation.', 'sustainable-catalyst-library'); ?>
+                <?php esc_html_e('v1.2.0 pairs the Library gateway with validated target-side contract-intake consumers in Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio. Intake remains ephemeral and does not automatically execute models, persist studies, rank alternatives, or issue recommendations.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
@@ -483,7 +485,7 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="runtime">
-                <div class="sc-es__panel-heading"><strong>Cross-Product Runtime Activation Gateway</strong><span>v1.1.0 converts the integrated energy study into deterministic, target-shaped handoff packets for Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio. Packets are built inside the Library gateway and are not pushed or persisted.</span></div>
+                <div class="sc-es__panel-heading"><strong>Target-Side Runtime Consumers</strong><span>v1.2.0 certifies deterministic packet intake in all five target runtimes while the Library remains pull-oriented. Packets can be validated and receipted by the target without automatic execution or persistence.</span></div>
                 <p class="sc-es__status" data-es-runtime-status aria-live="polite">Loading runtime activation gateway…</p>
                 <div class="sc-es__runtime-summary" data-es-runtime-summary></div>
                 <div class="sc-es__cards sc-es__runtime-targets" data-es-runtime-targets></div>

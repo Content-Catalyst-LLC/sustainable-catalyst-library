@@ -1424,3 +1424,7 @@ Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature
 * Adds Biomedical & Clinical Evidence Intelligence Foundation with PubMed, PMC, ClinicalTrials.gov, MeSH 2026, and RxNorm.
 * Adds governed evidence and terminology normalization plus Research Librarian/Lab handoff metadata.
 * Adds [sc_biomedical_evidence] and backend v1.3.0.
+
+
+= Energy Systems Intelligence 1.2.0 =
+Adds target-side runtime consumer compatibility metadata and certified contract-intake baselines for five Sustainable Catalyst applications.

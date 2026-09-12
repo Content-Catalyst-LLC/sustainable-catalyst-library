@@ -13,6 +13,9 @@
     "transport",
     "gateway_state",
     "target_runtime_state",
+    "minimum_target_version",
+    "consumer_status_route",
+    "consumer_intake_route",
     "boundary"
   ],
   "properties": {
@@ -51,11 +54,21 @@
       "const": "library-gateway-active"
     },
     "target_runtime_state": {
-      "const": "target-consumer-not-certified"
+      "const": "certified-contract-intake"
     },
     "boundary": {
       "type": "string",
       "minLength": 1
+    },
+    "minimum_target_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consumer_status_route": {
+      "const": "/v1/energy-runtime/consumer"
+    },
+    "consumer_intake_route": {
+      "const": "/v1/energy-runtime/consume"
     }
   },
   "additionalProperties": false

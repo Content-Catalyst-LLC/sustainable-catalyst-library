@@ -7,8 +7,8 @@ def engine():
 
 def test_manifest_versions_and_bioenergy_counts():
     d = engine().manifest()
-    assert d["subsystem"]["version"] == "1.1.0"
-    assert d["subsystem"]["backend_version"] == "2.17.0"
+    assert d["subsystem"]["version"] == "1.2.0"
+    assert d["subsystem"]["backend_version"] == "2.18.0"
     assert d["counts"]["bioenergy_feedstock_classes"] == 5
     assert d["counts"]["bioenergy_pathways"] == 6
     assert d["counts"]["carbon_nature_bridges"] == 6
@@ -267,7 +267,7 @@ def test_global_profile_contract_handoff_flags():
 def test_global_handoff_promotes_site_intelligence_contract():
     lookup={x["key"]:x for x in engine().handoffs()["items"]}
     h=lookup["energy-to-site-intelligence"]
-    assert h["status"] == "runtime-gateway-active-target-consumer-pending"
+    assert h["status"] == "runtime-gateway-active-target-consumer-certified"
     assert "global-energy-country-profile-contract" in h["target_refs"]
     assert "world-bank-wdi-live-connector" in h["target_refs"]
 
@@ -480,17 +480,17 @@ def populated_runtime_study():
 
 def test_v110_runtime_activation_framework():
     d=engine().runtime_framework()
-    assert d["version"]=="1.1.0"
-    assert d["release"]=="Cross-Product Runtime Activation Gateway"
+    assert d["version"]=="1.2.0"
+    assert d["release"]=="Target-Side Runtime Consumers"
     assert d["counts"]=={
         "external_runtime_targets":5,
         "target_packet_builders":5,
         "pull_handoff_contracts":5,
-        "target_runtimes_certified_active":0,
+        "target_runtimes_certified_active":5,
     }
     assert set(d["targets"])=={"Research Librarian","Lab","Workbench","Site Intelligence","Decision Studio"}
     assert d["guardrails"]["outbound_push_delivery_activated"] is False
-    assert d["guardrails"]["target_runtime_consumption_certified"] is False
+    assert d["guardrails"]["target_runtime_consumption_certified"] is True
 
 
 def test_v110_runtime_target_registry_is_gateway_active_without_execution_claims():
@@ -499,7 +499,7 @@ def test_v110_runtime_target_registry_is_gateway_active_without_execution_claims
     rows={x["key"]:x for x in d["items"]}
     assert set(rows)=={"research-librarian","lab","workbench","site-intelligence","decision-studio"}
     assert all(x["gateway_state"]=="library-gateway-active" for x in rows.values())
-    assert all(x["target_runtime_state"]=="target-consumer-not-certified" for x in rows.values())
+    assert all(x["target_runtime_state"]=="certified-contract-intake" for x in rows.values())
     assert rows["lab"]["consumer_contract"]=="sc-energy-runtime-lab-handoff/1.0"
     assert "global-energy-country-profile-contract" in rows["site-intelligence"]["source_contracts"]
 
@@ -563,12 +563,12 @@ def test_v110_runtime_input_validation_fails_closed():
 
 def test_v110_manifest_adds_runtime_activation_without_overwriting_v100_certification_baseline():
     d=engine().manifest()
-    assert d["subsystem"]["version"]=="1.1.0"
-    assert d["subsystem"]["backend_version"]=="2.17.0"
+    assert d["subsystem"]["version"]=="1.2.0"
+    assert d["subsystem"]["backend_version"]=="2.18.0"
     assert d["counts"]["runtime_activation_targets"]==5
     assert d["counts"]["runtime_handoff_packet_builders"]==5
-    assert d["counts"]["runtime_target_runtimes_certified_active"]==0
-    assert d["cross_product_runtime_activation"]["version"]=="1.1.0"
+    assert d["counts"]["runtime_target_runtimes_certified_active"]==5
+    assert d["cross_product_runtime_activation"]["version"]=="1.2.0"
     cert=engine().platform_certification()
     assert cert["version"]=="1.0.0"
     assert cert["status"]=="pass"
@@ -578,5 +578,17 @@ def test_v110_manifest_adds_runtime_activation_without_overwriting_v100_certific
 def test_v110_platform_handoffs_promote_gateway_status_without_claiming_target_consumption():
     rows={x["key"]:x for x in engine().handoffs()["items"]}
     for key in ["energy-to-research-librarian","energy-to-workbench","energy-to-lab","energy-to-site-intelligence","energy-to-decision-studio"]:
-        assert rows[key]["status"]=="runtime-gateway-active-target-consumer-pending"
+        assert rows[key]["status"]=="runtime-gateway-active-target-consumer-certified"
     assert len(rows)==8
+
+
+def test_v120_runtime_consumers_certified():
+    e=engine()
+    c=e.runtime_consumers()
+    assert c["count"] == 5
+    assert {i["minimum_target_version"] for i in c["items"]} == {"8.1.0", "0.101.0", "6.1.0", "4.40.0", "2.3.0"}
+    assert all(i["state"] == "certified-contract-intake" for i in c["items"])
+    f=e.runtime_framework()
+    assert f["counts"]["target_runtimes_certified_active"] == 5
+    assert f["guardrails"]["target_contract_intake_certified"] is True
+    assert f["guardrails"]["target_model_execution_certified"] is False
