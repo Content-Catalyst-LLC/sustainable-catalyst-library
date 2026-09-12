@@ -16,8 +16,8 @@ from .energy_platform import IntegratedSustainableEnergyPlatform
 from .energy_runtime import EnergyCrossProductRuntimeActivation
 
 
-DOMAIN_VERSION = "1.2.0"
-SCHEMA_VERSION = "sc-energy-systems-target-runtime-consumers/1.0"
+DOMAIN_VERSION = "1.3.0"
+SCHEMA_VERSION = "sc-energy-systems-energy-workbench-runtime/1.0"
 
 
 @dataclass(frozen=True)
@@ -559,6 +559,7 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "energy-decision-comparison-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "The module scope calls for multidisciplinary energy-system analysis, efficiency, cost-benefit, cost-efficiency, renewable technologies, biological carbon, and sustainability context. v0.9.0 uses those dimensions to organize evidence but treats the decision packet, comparison matrix, readiness inspection, and no-ranking/no-hidden-weighting rules as Sustainable Catalyst implementation governance rather than source-attributed decision methodology.", "current_default": False},
             {"key": "integrated-platform-certification-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "v1.0.0 integrates the previously implemented Energy Systems layers into a single governed platform contract and repository-coherence certification. The certification validates expected release identities, counts, contracts, and guardrails; it is Sustainable Catalyst implementation governance, not scientific validation, live deployment certification, site suitability, or financial advice.", "current_default": False},
             {"key": "cross-product-runtime-activation-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "v1.2.0 activates target-side contract-intake consumers in Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio. Certification covers validation and deterministic receipt only; it does not certify model execution, persistence, scientific validity, ranking, or recommendation.", "current_default": False},
+            {"key": "energy-workbench-runtime-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "v1.3.0 certifies explicit-input arithmetic execution in Workbench v6.2.0 for unit conversion, energy balances, generation, scenario economics, and bioenergy/carbon calculations. The runtime does not infer missing inputs, fetch market data, persist studies, rank alternatives, recommend a winner, or convert stoichiometric carbon equivalence into a carbon-credit claim.", "current_default": False},
         ]
 
     @staticmethod
@@ -568,7 +569,7 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "forest-to-carbon-nature", "source_concepts": ["forest-carbon", "forest-ecology", "biomass"], "target": "Carbon & Nature Intelligence", "target_refs": ["forest-woodland", "aboveground-biomass", "belowground-biomass", "biomass-inventory-measurement", "whole-system-ghg-accounting"], "status": "cross-domain-contract-available", "boundary": "Forest/biomass energy questions preserve governed land-system, biomass-pool, and accounting contexts; biomass carbon neutrality, stock change, permanence, harvest/regrowth balance, leakage, and project eligibility are not inferred."},
             {"key": "bioenergy-carbon-nature-extension", "source_concepts": ["anaerobic-digestion", "digestate", "biochar", "biomass-to-oil", "co2-to-energy", "bioenergy", "biomass"], "target": "Carbon & Nature Intelligence", "target_refs": ["soil-organic-carbon", "forest-woodland", "aboveground-biomass", "belowground-biomass", "carbon-dioxide", "methane", "nitrous-oxide", "whole-system-ghg-accounting"], "status": "cross-domain-contract-available", "boundary": "v0.8.0 preserves the validated v0.7.0 semantic/accounting bridges without fabricating quantitative carbon benefits, lifecycle results, avoided emissions, or crediting claims."},
             {"key": "energy-to-research-librarian", "source_concepts": ["energy-system", "sustainable-energy", "energy-access", "renewable-energy-share", "energy-security", "energy-indicator"], "target": "Research Librarian", "target_refs": ["energy-runtime-research-librarian-handoff", "energy-source-provenance-registry", "energy-indicator-observation-contract", "global-energy-country-profile-contract", "energy-decision-packet-contract"], "status": "runtime-gateway-active-target-consumer-certified", "boundary": "v1.2.0 certifies Research Librarian v8.1.0 contract intake. The consumer treats the packet as research context, not verified evidence, truth, or publication approval."},
-            {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "cost-benefit-analysis", "cost-efficiency-analysis", "co2e", "bioenergy", "anaerobic-digestion", "biochar", "biomass-to-oil"], "target": "Workbench", "target_refs": ["energy-runtime-workbench-handoff", "energy-unit-conversion-registry", "historical-carbon-factor-registry", "energy-balance-calculation-contract", "energy-scenario-economics-calculation-contract", "bioenergy-explicit-input-calculation-contract", "global-energy-country-profile-contract"], "status": "runtime-gateway-active-target-consumer-certified", "boundary": "v1.2.0 certifies Workbench v6.1.0 contract intake while preserving explicit inputs and source boundaries. Intake does not automatically execute calculations or substitute hidden defaults."},
+            {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "cost-benefit-analysis", "cost-efficiency-analysis", "co2e", "bioenergy", "anaerobic-digestion", "biochar", "biomass-to-oil"], "target": "Workbench", "target_refs": ["energy-runtime-workbench-handoff", "energy-workbench-runtime/1.0", "energy-unit-conversion-registry", "historical-carbon-factor-registry", "energy-balance-calculation-contract", "energy-scenario-economics-calculation-contract", "bioenergy-explicit-input-calculation-contract", "global-energy-country-profile-contract"], "status": "runtime-gateway-active-explicit-execution-certified", "boundary": "v1.3.0 certifies Workbench v6.2.0 explicit-input ephemeral arithmetic execution. /consume remains non-executing; /execute must be called explicitly. Hidden defaults, automatic persistence, ranking, recommendations, market-data substitution, avoided-emissions inference, and carbon-credit claims remain prohibited."},
             {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity", "renewable-resource-potential", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "soil-carbon", "forest-carbon"], "target": "Lab", "target_refs": ["renewable-technology-assessment-contract", "renewable-resource-observation-contract", "energy-balance-scenario-contract", "conversion-chain-model", "energy-economic-scenario-contract", "discounted-cash-flow-results", "bioenergy-carbon-scenario-contract", "carbon-nature-bridge-registry", "global-energy-country-profile-contract"], "status": "runtime-gateway-active-target-consumer-certified", "boundary": "v1.2.0 certifies Lab v0.101.0 contract intake for scenarios, evidence, economics and uncertainty. Intake does not execute models or establish scientific validity."},
             {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security", "renewable-resource-potential", "bioenergy", "forest-carbon"], "target": "Site Intelligence", "target_refs": ["global-energy-country-profile-contract", "global-energy-metric-observation", "world-bank-wdi-live-connector", "renewable-resource-observation-contract", "biomass-feedstock-observation-contract", "bioenergy-geography-contract"], "status": "runtime-gateway-active-target-consumer-certified", "boundary": "v1.2.0 certifies Site Intelligence v4.40.0 contract intake for dated country-energy and resource observations. Intake does not infer project suitability or hide observation-year lag."},
             {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "biological-carbon-capture-storage", "energy-security", "energy-access"], "target": "Decision Studio", "target_refs": ["energy-decision-packet-contract", "energy-decision-comparison-matrix", "energy-decision-readiness-contract", "energy-economic-scenario-contract", "energy-cost-benefit-result", "energy-cost-efficiency-result", "energy-npv-result", "bioenergy-carbon-scenario-contract", "carbon-nature-accounting-handoff", "global-energy-country-profile-contract", "global-energy-comparison-contract"], "status": "runtime-gateway-active-target-consumer-certified", "boundary": "v1.2.0 certifies Decision Studio v2.3.0 contract intake around the governed Energy Decision Intelligence packet. Intake does not normalize unlike evidence, assign hidden weights, rank alternatives, select a winner, recommend investments, or make policy choices."},
@@ -592,7 +593,12 @@ class EnergySystemsKnowledgeFoundation:
             "current_factor_defaults_activated": False,
             "historical_calculation_is_not_current_inventory": True,
             "calculation_requires_explicit_source_bound_inputs": True,
-            "workbench_execution_activated": False,
+            "workbench_execution_activated": True,
+            "workbench_explicit_input_execution_only": True,
+            "workbench_automatic_execution_activated": False,
+            "workbench_automatic_persistence_activated": False,
+            "workbench_automatic_ranking_activated": False,
+            "workbench_automatic_recommendation_activated": False,
             "energy_indicator_definition_registry_activated": True,
             "energy_indicator_observation_contracts_activated": True,
             "official_eisd_methodology_sheets_loaded": False,
@@ -790,11 +796,11 @@ class EnergySystemsKnowledgeFoundation:
             "subsystem": {
                 "name": "Energy Systems Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Cross-Product Runtime Activation Gateway",
+                "release": "Energy Workbench Runtime",
                 "library_version": "5.11.0",
-                "backend_version": "2.18.0",
+                "backend_version": "2.19.0",
                 "read_only": True,
-                "calculation_mode": "integrated-provenance-bound-energy-platform-with-stateless-target-shaped-cross-product-handoff-packets",
+                "calculation_mode": "integrated-provenance-bound-energy-platform-with-explicit-workbench-execution",
             },
             "counts": {
                 "concepts": len(self._concepts),
@@ -862,7 +868,8 @@ class EnergySystemsKnowledgeFoundation:
             "roadmap": [
                 {"version": "1.0.0", "name": "Integrated Sustainable Energy Systems Platform", "status": "certified-baseline"},
                 {"version": "1.1.0", "name": "Cross-Product Runtime Activation Gateway", "status": "complete"},
-                {"version": "1.2.0", "name": "Target-Side Runtime Consumers", "status": "current"},
+                {"version": "1.2.0", "name": "Target-Side Runtime Consumers", "status": "complete"},
+                {"version": "1.3.0", "name": "Energy Workbench Runtime", "status": "current"},
             ],
             "content_fingerprint": self._fingerprint,
         }

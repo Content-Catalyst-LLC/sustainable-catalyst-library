@@ -193,6 +193,11 @@ Carbon & Nature Intelligence is a Library-native subsystem with its own release 
 Adds explicit-assumption scenario economics: cost comparison, payback, NPV, cost-benefit, cost-efficiency, simplified levelized energy cost, and portable economic scenario contracts.
 
 
+## Energy Systems Intelligence v1.3.0 — Energy Workbench Runtime
+
+Adds explicit-input Energy Systems execution in Workbench v6.2.0 while preserving the v1.2 five-target handoff/intake layer. Fourteen calculations cover unit conversion, energy balances, generation, scenario economics, and bioenergy/carbon arithmetic. Intake remains non-executing; `/execute` must be called explicitly. Automatic persistence, hidden defaults, rankings, recommendations, market-price fetching, avoided-emissions inference, and carbon-credit claims remain disabled. Library backend advances to v2.19.0.
+
+
 ## Energy Systems Intelligence v1.2.0 — Target-Side Runtime Consumers
 
 Adds certified, stateless contract intake to Research Librarian 8.1.0, Lab 0.101.0, Workbench 6.1.0, Site Intelligence 4.40.0, and Decision Studio 2.3.0. Target consumers validate and receipt handoffs without automatic execution or persistence.

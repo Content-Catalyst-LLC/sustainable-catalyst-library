@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v1.2.0 — Target-Side Runtime Consumers. */
+/** Energy Systems Intelligence v1.3.0 — Energy Workbench Runtime. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '1.2.0';
+    public const VERSION = '1.3.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v120', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v120.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v120', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v120.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v130', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v130.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v130', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v130.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -379,8 +379,8 @@ final class SC_Library_Energy_Systems_Intelligence {
             'intro' => 'Use one governed energy platform with an active Library-side runtime gateway for target-shaped handoffs into Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v120');
-        wp_enqueue_script('sc-library-energy-systems-v120');
+        wp_enqueue_style('sc-library-energy-systems-v130');
+        wp_enqueue_script('sc-library-energy-systems-v130');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -453,7 +453,7 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-biomass-to-oil-energy-endpoint="<?php echo esc_url($ep('/biomass-to-oil-energy-estimate')); ?>"
             data-bioenergy-scenario-endpoint="<?php echo esc_url($ep('/bioenergy-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Target-Side Runtime Consumers · v1.2.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Energy Workbench Runtime · v1.3.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
@@ -464,7 +464,7 @@ final class SC_Library_Energy_Systems_Intelligence {
 
             <div class="sc-es__guardrail">
                 <strong><?php esc_html_e('Gateway activation ≠ target execution.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v1.2.0 pairs the Library gateway with validated target-side contract-intake consumers in Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio. Intake remains ephemeral and does not automatically execute models, persist studies, rank alternatives, or issue recommendations.', 'sustainable-catalyst-library'); ?>
+                <?php esc_html_e('v1.3.0 adds explicit-input, ephemeral energy calculation execution in Workbench v6.2.0 while preserving the five-target runtime gateway. Workbench execution is never automatic and does not persist studies, infer hidden defaults, rank alternatives, or issue recommendations.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
@@ -485,7 +485,7 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="runtime">
-                <div class="sc-es__panel-heading"><strong>Target-Side Runtime Consumers</strong><span>v1.2.0 certifies deterministic packet intake in all five target runtimes while the Library remains pull-oriented. Packets can be validated and receipted by the target without automatic execution or persistence.</span></div>
+                <div class="sc-es__panel-heading"><strong>Energy Workbench Runtime</strong><span>v1.3.0 preserves deterministic packet intake across all five targets and certifies explicit-input arithmetic execution in Workbench v6.2.0. Execution requires an explicit Workbench call and remains ephemeral, non-ranking, and non-recommending.</span></div>
                 <p class="sc-es__status" data-es-runtime-status aria-live="polite">Loading runtime activation gateway…</p>
                 <div class="sc-es__runtime-summary" data-es-runtime-summary></div>
                 <div class="sc-es__cards sc-es__runtime-targets" data-es-runtime-targets></div>

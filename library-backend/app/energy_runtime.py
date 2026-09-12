@@ -5,8 +5,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-MODEL_VERSION = "1.2.0"
-SCHEMA_VERSION = "sc-energy-cross-product-runtime-activation/1.1"
+MODEL_VERSION = "1.3.0"
+SCHEMA_VERSION = "sc-energy-cross-product-runtime-activation/1.2"
 
 
 @dataclass(frozen=True)
@@ -24,14 +24,19 @@ class EnergyRuntimeTarget:
     consumer_status_route: str
     consumer_intake_route: str
     boundary: str
+    execution_state: str = "not-certified"
+    execution_framework_route: str = ""
+    execution_plan_route: str = ""
+    execution_route: str = ""
+    result_validation_route: str = ""
 
 
 class EnergyCrossProductRuntimeActivation:
-    """Stateless cross-product handoff gateway for Energy Systems Intelligence v1.2.0.
+    """Stateless cross-product handoff gateway for Energy Systems Intelligence v1.3.0.
 
     The Library now does more than publish static cross-product contracts: it can build
     deterministic, target-shaped handoff packets from the v1.0.0 integrated study
-    contract.  This remains a pull-oriented Library gateway, now paired with certified target-side contract-intake consumers. The Library does not perform outbound delivery, persistence, or target execution.
+    contract. The Library remains a pull-oriented gateway. v1.3.0 additionally certifies explicit-input arithmetic execution in Workbench v6.2.0; the Library itself does not perform outbound delivery, persistence, or execution.
     """
 
     def __init__(self) -> None:
@@ -64,8 +69,13 @@ class EnergyCrossProductRuntimeActivation:
                 "Transfer source-bound numerical references and explicit-input calculation scenarios for interactive calculation.",
                 ("energy-conversion-contract", "conversion-chain-model", "capacity-factor-generation-estimate", "energy-npv-result", "energy-cost-efficiency-result"),
                 ("identity", "numeric_registry", "energy_balance", "economics", "bioenergy_and_carbon", "provenance", "review"),
-                "sc-energy-runtime-workbench-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "6.1.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
-                "The packet carries explicit inputs and provenance. It does not authorize Workbench to substitute hidden defaults or change source boundaries.",
+                "sc-energy-runtime-workbench-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "6.2.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
+                "The packet carries explicit inputs and provenance. Execution requires an explicit Workbench /execute request and does not authorize hidden defaults, ranking, recommendations, persistence, or source-boundary changes.",
+                "certified-explicit-input-calculation-execution",
+                "/v1/energy-runtime/execution-framework",
+                "/v1/energy-runtime/plan",
+                "/v1/energy-runtime/execute",
+                "/v1/energy-runtime/validate-result",
             ),
             T(
                 "site-intelligence", "Site Intelligence",
@@ -87,14 +97,14 @@ class EnergyCrossProductRuntimeActivation:
 
     def _validate_registry(self) -> None:
         if len(self._targets) != 5:
-            raise ValueError("Energy Systems v1.2.0 requires five external runtime targets")
+            raise ValueError("Energy Systems v1.3.0 requires five external runtime targets")
         if len({x.key for x in self._targets}) != len(self._targets):
             raise ValueError("Runtime target keys must be unique")
         for target in self._targets:
             if target.gateway_state != "library-gateway-active":
-                raise ValueError("Every v1.2.0 target must expose an active Library gateway")
+                raise ValueError("Every v1.3.0 target must expose an active Library gateway")
             if target.target_runtime_state != "certified-contract-intake":
-                raise ValueError("Every v1.2.0 target must expose certified contract intake")
+                raise ValueError("Every v1.3.0 target must expose certified contract intake")
 
     def guardrails(self) -> dict[str, Any]:
         return {
@@ -115,6 +125,9 @@ class EnergyCrossProductRuntimeActivation:
             "target_product_runtimes_modified_by_this_release": True,
             "target_contract_intake_certified": True,
             "target_model_execution_certified": False,
+            "workbench_explicit_calculation_execution_certified": True,
+            "workbench_minimum_runtime_version": "6.2.0",
+            "automatic_workbench_execution": False,
         }
 
     def _content_fingerprint(self) -> str:
@@ -126,15 +139,16 @@ class EnergyCrossProductRuntimeActivation:
             "ok": True,
             "schema": SCHEMA_VERSION,
             "version": MODEL_VERSION,
-            "release": "Target-Side Runtime Consumers",
+            "release": "Energy Workbench Runtime",
             "counts": {
                 "external_runtime_targets": len(self._targets),
                 "target_packet_builders": len(self._targets),
                 "pull_handoff_contracts": len(self._targets),
                 "target_runtimes_certified_active": len(self._targets),
+                "explicit_execution_targets": 1,
             },
             "targets": [x.target for x in self._targets],
-            "transport": "stateless-pull-oriented-json-with-target-intake",
+            "transport": "stateless-pull-oriented-json-with-target-intake-and-explicit-workbench-execution",
             "guardrails": self.guardrails(),
             "content_fingerprint": self._fingerprint,
         }
@@ -160,12 +174,12 @@ class EnergyCrossProductRuntimeActivation:
         return {
             "identity": {"study_id": "", "title": "", "question": "", "geography": "", "period": "", "created_by": ""},
             "research_context": {"concept_refs": [], "source_refs": [], "research_questions": [], "evidence_gaps": []},
-            "numeric_registry": {"conversion_refs": [], "carbon_factor_refs": [], "heat_content_refs": [], "source_years_acknowledged": True},
+            "numeric_registry": {"conversion_refs": [], "carbon_factor_refs": [], "heat_content_refs": [], "source_years_acknowledged": True, "calculation_requests": []},
             "sustainability_indicators": [],
             "technologies_and_resources": {"technology_refs": [], "resource_observations": [], "site_suitability_status": "not-inferred"},
-            "energy_balance": {"scenario_refs": [], "results": []},
-            "economics": {"scenario_refs": [], "results": [], "assumptions": []},
-            "bioenergy_and_carbon": {"pathway_refs": [], "carbon_nature_refs": [], "results": []},
+            "energy_balance": {"scenario_refs": [], "results": [], "calculation_requests": []},
+            "economics": {"scenario_refs": [], "results": [], "assumptions": [], "calculation_requests": []},
+            "bioenergy_and_carbon": {"pathway_refs": [], "carbon_nature_refs": [], "results": [], "calculation_requests": []},
             "global_context": {"country_profile_refs": [], "observation_years": [], "missing_value_notes": []},
             "decision": {"decision_packet_ref": "", "comparison_matrix_ref": "", "readiness_ref": ""},
             "uncertainty": [],
@@ -260,9 +274,11 @@ class EnergyCrossProductRuntimeActivation:
                 self._is_populated(nr.get("conversion_refs")), self._is_populated(nr.get("carbon_factor_refs")), self._is_populated(nr.get("heat_content_refs")),
                 self._is_populated(eb.get("scenario_refs")), self._is_populated(eb.get("results")),
                 self._is_populated(ec.get("scenario_refs")), self._is_populated(ec.get("results")),
+                self._is_populated(nr.get("calculation_requests")), self._is_populated(eb.get("calculation_requests")),
+                self._is_populated(ec.get("calculation_requests")), self._is_populated(study.get("bioenergy_and_carbon", {}).get("calculation_requests")),
             ))
             if not has_calculation_context:
-                issues.append({"key": "missing-calculation-context", "severity": "warning", "message": "No numeric registry, energy-balance, or economic calculation context is present"})
+                issues.append({"key": "missing-calculation-context", "severity": "warning", "message": "No numeric registry, energy-balance, economic, bioenergy, or explicit calculation-request context is present"})
         if target.key == "research-librarian" and not self._is_populated(study.get("research_context")):
             issues.append({"key": "missing-research-context", "severity": "warning", "message": "No research questions, source references, concepts or evidence gaps are present"})
         status = "ready-with-warnings" if issues else "ready"
@@ -280,7 +296,11 @@ class EnergyCrossProductRuntimeActivation:
             "version": MODEL_VERSION,
             "target": {"key": target_obj.key, "product": target_obj.target},
             **result,
-            "interpretation": "Runtime readiness reports packet completeness. v1.2.0 certifies target-side contract intake at the listed minimum versions, but not target execution, persistence, scientific validity, or decision quality.",
+            "interpretation": (
+                "Runtime readiness reports packet completeness. Workbench v6.2.0 is certified for explicit-input Energy Systems arithmetic when execution is explicitly requested; other targets remain intake-only. No automatic execution, persistence, ranking, recommendation, scientific validity, or decision quality is certified."
+                if target_obj.key == "workbench" else
+                "Runtime readiness reports packet completeness. Target-side contract intake is certified at the listed minimum version; execution, persistence, scientific validity, ranking, recommendation, and decision quality are not certified."
+            ),
         }
 
     def build_handoff(self, key: str, study: dict[str, Any]) -> dict[str, Any]:
@@ -307,7 +327,7 @@ class EnergyCrossProductRuntimeActivation:
             "schema": "sc-energy-runtime-handoff/1.0",
             "version": MODEL_VERSION,
             "packet": packet,
-            "delivery": {"mode": "pull-only", "outbound_delivery_performed": False, "persistence_performed": False, "target_execution_claimed": False},
+            "delivery": {"mode": "pull-only", "outbound_delivery_performed": False, "persistence_performed": False, "target_execution_claimed": key == "workbench", "execution_is_automatic": False},
             "guardrail": target_obj.boundary,
         }
 
@@ -325,9 +345,17 @@ class EnergyCrossProductRuntimeActivation:
                     "status_route": x.consumer_status_route,
                     "intake_route": x.consumer_intake_route,
                     "state": x.target_runtime_state,
+                    "execution": {
+                        "state": x.execution_state,
+                        "framework_route": x.execution_framework_route,
+                        "plan_route": x.execution_plan_route,
+                        "execute_route": x.execution_route,
+                        "validate_result_route": x.result_validation_route,
+                        "automatic": False,
+                    },
                 } for x in self._targets
             ],
-            "certification_scope": "Schema/target/payload intake, deterministic receipt, provenance preservation, and no-execution/no-persistence guardrails only.",
+            "certification_scope": "All five targets: schema/target/payload intake, deterministic receipt, and provenance preservation. Workbench v6.2.0 additionally certifies explicit-input ephemeral calculation execution through its execution routes; automatic execution, persistence, ranking, recommendation, and scientific assurance remain excluded.",
         }
 
     def export(self) -> dict[str, Any]:

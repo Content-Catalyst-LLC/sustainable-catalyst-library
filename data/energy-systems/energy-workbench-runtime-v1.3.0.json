@@ -1,0 +1,212 @@
+{
+  "schema": "sc-energy-workbench-runtime-registry/1.0",
+  "version": "1.3.0",
+  "release": "Energy Workbench Runtime",
+  "workbench_version": "6.2.0",
+  "library_backend_version": "2.19.0",
+  "consumer_contract": "sc-energy-runtime-workbench-handoff/1.0",
+  "request_schema": "sc-energy-workbench-calculation-request/1.0",
+  "plan_schema": "sc-energy-workbench-execution-plan/1.0",
+  "result_schema": "sc-energy-workbench-execution-result/1.0",
+  "result_packet_schema": "sc-energy-workbench-result-packet/1.0",
+  "routes": {
+    "consumer": "/v1/energy-runtime/consumer",
+    "intake": "/v1/energy-runtime/consume",
+    "execution_framework": "/v1/energy-runtime/execution-framework",
+    "plan": "/v1/energy-runtime/plan",
+    "execute": "/v1/energy-runtime/execute",
+    "validate_result": "/v1/energy-runtime/validate-result"
+  },
+  "operations": [
+    {
+      "key": "unit-conversion",
+      "section": "numeric_registry",
+      "required": [
+        "value",
+        "from_unit",
+        "to_unit"
+      ],
+      "formula": "result = convert(value, from_unit, to_unit)",
+      "contract": "energy-conversion-contract"
+    },
+    {
+      "key": "conversion-chain",
+      "section": "energy_balance",
+      "required": [
+        "input_kwh",
+        "stage_efficiencies_pct"
+      ],
+      "formula": "stage_output = stage_input \u00d7 efficiency; loss = stage_input \u2212 stage_output",
+      "contract": "conversion-chain-model"
+    },
+    {
+      "key": "supply-demand-balance",
+      "section": "energy_balance",
+      "required": [
+        "domestic_supply_kwh",
+        "imports_kwh",
+        "storage_discharge_kwh",
+        "final_demand_kwh",
+        "exports_kwh",
+        "storage_charge_kwh",
+        "losses_kwh",
+        "tolerance_kwh"
+      ],
+      "formula": "available_supply = domestic + imports + discharge; residual = available_supply \u2212 accounted_outflows",
+      "contract": "energy-balance-calculation-contract"
+    },
+    {
+      "key": "capacity-factor-generation",
+      "section": "energy_balance",
+      "required": [
+        "capacity_kw",
+        "capacity_factor_pct",
+        "hours"
+      ],
+      "formula": "generation_kwh = capacity_kw \u00d7 hours \u00d7 capacity_factor_pct / 100",
+      "contract": "capacity-factor-generation-estimate"
+    },
+    {
+      "key": "energy-cost-comparison",
+      "section": "economics",
+      "required": [
+        "baseline_energy_kwh",
+        "baseline_price_per_kwh",
+        "candidate_energy_kwh",
+        "candidate_price_per_kwh",
+        "baseline_fixed_cost",
+        "candidate_fixed_cost",
+        "currency"
+      ],
+      "formula": "cost = energy \u00d7 unit_price + fixed_cost",
+      "contract": "energy-cost-comparison-result"
+    },
+    {
+      "key": "simple-payback",
+      "section": "economics",
+      "required": [
+        "initial_cost",
+        "annual_net_savings",
+        "currency"
+      ],
+      "formula": "payback_years = initial_cost / annual_net_savings when savings > 0",
+      "contract": "energy-simple-payback-result"
+    },
+    {
+      "key": "net-present-value",
+      "section": "economics",
+      "required": [
+        "initial_cost",
+        "annual_net_cash_flow",
+        "discount_rate_pct",
+        "years",
+        "residual_value",
+        "currency"
+      ],
+      "formula": "NPV = \u2212initial_cost + \u03a3(cash_flow/(1+r)^t) + residual/(1+r)^n",
+      "contract": "energy-npv-result"
+    },
+    {
+      "key": "cost-benefit",
+      "section": "economics",
+      "required": [
+        "initial_cost",
+        "annual_cost",
+        "annual_benefit",
+        "discount_rate_pct",
+        "years",
+        "residual_value",
+        "currency"
+      ],
+      "formula": "net_present_benefit = PV(benefits + residual) \u2212 PV(initial + annual costs)",
+      "contract": "energy-cost-benefit-result"
+    },
+    {
+      "key": "cost-efficiency",
+      "section": "economics",
+      "required": [
+        "total_cost",
+        "energy_saved_kwh",
+        "co2e_avoided_kg",
+        "currency"
+      ],
+      "formula": "unit_cost = total_cost / explicit outcome denominator",
+      "contract": "energy-cost-efficiency-result"
+    },
+    {
+      "key": "levelized-energy-cost",
+      "section": "economics",
+      "required": [
+        "initial_cost",
+        "annual_operating_cost",
+        "annual_energy_kwh",
+        "discount_rate_pct",
+        "years",
+        "residual_value",
+        "currency"
+      ],
+      "formula": "levelized_cost = PV(costs \u2212 residual_credit) / PV(energy)",
+      "contract": "energy-levelized-cost-result"
+    },
+    {
+      "key": "feedstock-energy",
+      "section": "bioenergy_and_carbon",
+      "required": [
+        "mass_tonnes",
+        "energy_content_kwh_per_tonne",
+        "conversion_efficiency_pct"
+      ],
+      "formula": "useful_energy = mass \u00d7 energy_content \u00d7 efficiency / 100",
+      "contract": "bioenergy-explicit-input-calculation-contract"
+    },
+    {
+      "key": "anaerobic-digestion-energy",
+      "section": "bioenergy_and_carbon",
+      "required": [
+        "feedstock_mass_tonnes",
+        "biogas_yield_m3_per_tonne",
+        "methane_fraction_pct",
+        "methane_energy_kwh_per_m3",
+        "conversion_efficiency_pct"
+      ],
+      "formula": "useful_energy = mass \u00d7 biogas_yield \u00d7 methane_fraction \u00d7 methane_energy \u00d7 efficiency",
+      "contract": "bioenergy-explicit-input-calculation-contract"
+    },
+    {
+      "key": "biochar-carbon",
+      "section": "bioenergy_and_carbon",
+      "required": [
+        "biochar_mass_kg",
+        "carbon_fraction_pct",
+        "stable_fraction_pct"
+      ],
+      "formula": "stoichiometric_CO2e = biochar_mass \u00d7 carbon_fraction \u00d7 stable_fraction \u00d7 44/12",
+      "contract": "bioenergy-explicit-input-calculation-contract"
+    },
+    {
+      "key": "biomass-to-oil-energy",
+      "section": "bioenergy_and_carbon",
+      "required": [
+        "feedstock_mass_tonnes",
+        "oil_yield_mass_pct",
+        "oil_energy_content_kwh_per_tonne",
+        "downstream_conversion_efficiency_pct"
+      ],
+      "formula": "useful_energy = feedstock_mass \u00d7 oil_yield \u00d7 oil_energy_content \u00d7 downstream_efficiency",
+      "contract": "bioenergy-explicit-input-calculation-contract"
+    }
+  ],
+  "guardrails": {
+    "explicit_inputs_required": true,
+    "automatic_execution": false,
+    "hidden_defaults": false,
+    "automatic_persistence": false,
+    "automatic_ranking": false,
+    "automatic_recommendation": false,
+    "external_market_data_fetch": false,
+    "avoided_emissions_inference": false,
+    "carbon_credit_claiming": false
+  },
+  "boundary": "Workbench executes only explicit caller-supplied arithmetic. It does not infer missing inputs, select technology assumptions, rank alternatives, recommend a winner, claim avoided emissions, create carbon credits, fetch market prices, or persist the study automatically.",
+  "source_boundary": "The UCD Sustainable Energy module supports the analytical scope (energy systems, renewables, biological carbon, energy balance, cost-benefit and cost-efficiency). The executable formulas and API/runtime contract are Sustainable Catalyst implementation logic and are not represented as UCD-authored methodology."
+}

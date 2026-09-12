@@ -7,8 +7,8 @@ def engine():
 
 def test_manifest_versions_and_bioenergy_counts():
     d = engine().manifest()
-    assert d["subsystem"]["version"] == "1.2.0"
-    assert d["subsystem"]["backend_version"] == "2.18.0"
+    assert d["subsystem"]["version"] == "1.3.0"
+    assert d["subsystem"]["backend_version"] == "2.19.0"
     assert d["counts"]["bioenergy_feedstock_classes"] == 5
     assert d["counts"]["bioenergy_pathways"] == 6
     assert d["counts"]["carbon_nature_bridges"] == 6
@@ -450,7 +450,7 @@ def test_v100_manifest_integrates_without_replacing_prior_layers():
     d = engine().manifest()
     assert d["counts"]["integrated_platform_release_layers"] == 9
     assert d["counts"]["integrated_platform_cross_product_contracts"] == 6
-    assert d["counts"]["methodology_rules"] == 16
+    assert d["counts"]["methodology_rules"] == 17
     assert d["energy_decision_intelligence"]["version"] == "0.9.0"
     assert d["global_energy_intelligence"]["version"] == "0.8.0"
     assert d["biological_carbon_bioenergy_integration"]["version"] == "0.7.0"
@@ -480,13 +480,14 @@ def populated_runtime_study():
 
 def test_v110_runtime_activation_framework():
     d=engine().runtime_framework()
-    assert d["version"]=="1.2.0"
-    assert d["release"]=="Target-Side Runtime Consumers"
+    assert d["version"]=="1.3.0"
+    assert d["release"]=="Energy Workbench Runtime"
     assert d["counts"]=={
         "external_runtime_targets":5,
         "target_packet_builders":5,
         "pull_handoff_contracts":5,
         "target_runtimes_certified_active":5,
+        "explicit_execution_targets":1,
     }
     assert set(d["targets"])=={"Research Librarian","Lab","Workbench","Site Intelligence","Decision Studio"}
     assert d["guardrails"]["outbound_push_delivery_activated"] is False
@@ -513,7 +514,7 @@ def test_v110_handoff_builder_is_deterministic_target_shaped_and_stateless():
     assert a["packet"]["target"]["product"]=="Lab"
     assert set(a["packet"]["payload"])=={"identity","technologies_and_resources","energy_balance","economics","bioenergy_and_carbon","uncertainty","provenance","review"}
     assert a["packet"]["validation"]["status"]=="ready"
-    assert a["delivery"]=={"mode":"pull-only","outbound_delivery_performed":False,"persistence_performed":False,"target_execution_claimed":False}
+    assert a["delivery"]=={"mode":"pull-only","outbound_delivery_performed":False,"persistence_performed":False,"target_execution_claimed":False,"execution_is_automatic":False}
 
 
 def test_v110_target_payloads_select_only_governed_sections():
@@ -563,12 +564,12 @@ def test_v110_runtime_input_validation_fails_closed():
 
 def test_v110_manifest_adds_runtime_activation_without_overwriting_v100_certification_baseline():
     d=engine().manifest()
-    assert d["subsystem"]["version"]=="1.2.0"
-    assert d["subsystem"]["backend_version"]=="2.18.0"
+    assert d["subsystem"]["version"]=="1.3.0"
+    assert d["subsystem"]["backend_version"]=="2.19.0"
     assert d["counts"]["runtime_activation_targets"]==5
     assert d["counts"]["runtime_handoff_packet_builders"]==5
     assert d["counts"]["runtime_target_runtimes_certified_active"]==5
-    assert d["cross_product_runtime_activation"]["version"]=="1.2.0"
+    assert d["cross_product_runtime_activation"]["version"]=="1.3.0"
     cert=engine().platform_certification()
     assert cert["version"]=="1.0.0"
     assert cert["status"]=="pass"
@@ -577,8 +578,9 @@ def test_v110_manifest_adds_runtime_activation_without_overwriting_v100_certific
 
 def test_v110_platform_handoffs_promote_gateway_status_without_claiming_target_consumption():
     rows={x["key"]:x for x in engine().handoffs()["items"]}
-    for key in ["energy-to-research-librarian","energy-to-workbench","energy-to-lab","energy-to-site-intelligence","energy-to-decision-studio"]:
+    for key in ["energy-to-research-librarian","energy-to-lab","energy-to-site-intelligence","energy-to-decision-studio"]:
         assert rows[key]["status"]=="runtime-gateway-active-target-consumer-certified"
+    assert rows["energy-to-workbench"]["status"]=="runtime-gateway-active-explicit-execution-certified"
     assert len(rows)==8
 
 
@@ -586,7 +588,7 @@ def test_v120_runtime_consumers_certified():
     e=engine()
     c=e.runtime_consumers()
     assert c["count"] == 5
-    assert {i["minimum_target_version"] for i in c["items"]} == {"8.1.0", "0.101.0", "6.1.0", "4.40.0", "2.3.0"}
+    assert {i["minimum_target_version"] for i in c["items"]} == {"8.1.0", "0.101.0", "6.2.0", "4.40.0", "2.3.0"}
     assert all(i["state"] == "certified-contract-intake" for i in c["items"])
     f=e.runtime_framework()
     assert f["counts"]["target_runtimes_certified_active"] == 5

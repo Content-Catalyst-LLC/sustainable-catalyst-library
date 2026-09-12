@@ -1,3 +1,5 @@
+Energy Systems Intelligence v1.3.0 adds the Energy Workbench Runtime. Workbench v6.2.0 can explicitly execute fourteen source-bound calculation operations for unit conversion, energy balances, generation, economics, and bioenergy/carbon arithmetic. Handoff intake remains non-executing; execution must be explicitly requested. Hidden defaults, automatic persistence, ranking, winner selection, recommendations, market-price fetching, avoided-emissions inference, and carbon-credit claims remain disabled.
+
 === Sustainable Catalyst Library ===
 Contributors: contentcatalyst
 Tags: knowledge-base, knowledge-graph, relationships, provenance, research-workspace, postgresql
