@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v1.5.0 — Spatial & Global Energy Intelligence. */
+/** Energy Systems Intelligence v1.6.0 — Grid, Storage & Reliability Analysis. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '1.5.0';
+    public const VERSION = '1.6.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v150', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v150.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v150', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v150.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v160', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v160.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v160', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v160.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -30,6 +30,9 @@ final class SC_Library_Energy_Systems_Intelligence {
         register_rest_route('sc-library/v1', '/energy-systems/uncertainty-study-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'uncertainty_study_template']]);
         register_rest_route('sc-library/v1', '/energy-systems/spatial-global-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'spatial_global_framework']]);
         register_rest_route('sc-library/v1', '/energy-systems/spatial-profile-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'spatial_profile_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/grid-storage-reliability-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'grid_storage_reliability_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/storage-scenario-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'storage_scenario_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/reliability-scenario-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'reliability_scenario_template']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-targets', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_targets']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-consumers', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_consumers']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-target/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_target']]);
@@ -334,6 +337,9 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function uncertainty_study_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/uncertainty-study-template'); }
     public function spatial_global_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/spatial-global-framework'); }
     public function spatial_profile_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/spatial-profile-template'); }
+    public function grid_storage_reliability_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/grid-storage-reliability-framework'); }
+    public function storage_scenario_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/storage-scenario-template'); }
+    public function reliability_scenario_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/reliability-scenario-template'); }
     public function runtime_targets(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-targets'); }
     public function runtime_consumers(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-consumers'); }
     public function runtime_target(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/runtime-targets/' . rawurlencode(sanitize_key((string)$request['key']))); }
@@ -387,8 +393,8 @@ final class SC_Library_Energy_Systems_Intelligence {
             'intro' => 'Use one governed energy platform with an active Library-side runtime gateway for target-shaped handoffs into Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v150');
-        wp_enqueue_script('sc-library-energy-systems-v150');
+        wp_enqueue_style('sc-library-energy-systems-v160');
+        wp_enqueue_script('sc-library-energy-systems-v160');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -459,9 +465,12 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-anaerobic-digestion-energy-endpoint="<?php echo esc_url($ep('/anaerobic-digestion-energy-estimate')); ?>"
             data-biochar-carbon-endpoint="<?php echo esc_url($ep('/biochar-carbon-estimate')); ?>"
             data-biomass-to-oil-energy-endpoint="<?php echo esc_url($ep('/biomass-to-oil-energy-estimate')); ?>"
+            data-grid-storage-framework-endpoint="<?php echo esc_url($ep('/grid-storage-reliability-framework')); ?>"
+            data-storage-scenario-endpoint="<?php echo esc_url($ep('/storage-scenario-template')); ?>"
+            data-reliability-scenario-endpoint="<?php echo esc_url($ep('/reliability-scenario-template')); ?>"
             data-bioenergy-scenario-endpoint="<?php echo esc_url($ep('/bioenergy-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Spatial & Global Energy Intelligence · v1.5.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Grid, Storage & Reliability Analysis · v1.6.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
@@ -472,11 +481,12 @@ final class SC_Library_Energy_Systems_Intelligence {
 
             <div class="sc-es__guardrail">
                 <strong><?php esc_html_e('Gateway activation ≠ target execution.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v1.5.0 activates provenance-bound spatial and global energy intelligence in Site Intelligence v4.41.0 while retaining Workbench v6.2.0 calculation execution and Lab v0.102.0 uncertainty analysis. Spatial evidence does not establish site suitability, technical potential, grid reliability, outage status, technology rankings, or recommendations.', 'sustainable-catalyst-library'); ?>
+                <?php esc_html_e('v1.6.0 adds explicit grid, storage and adequacy contracts with Workbench v6.3.0 deterministic execution and Lab v0.103.0 seeded reliability uncertainty analysis. Site Intelligence v4.41.0 remains the spatial evidence source. Metrics never become an automatic real-grid reliability declaration, outage prediction, technology ranking or recommendation.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
-                <button type="button" class="sc-es__mode is-active" data-es-mode="uncertainty" role="tab" aria-selected="true">Modeling &amp; Uncertainty</button>
+                <button type="button" class="sc-es__mode is-active" data-es-mode="grid" role="tab" aria-selected="true">Grid, Storage &amp; Reliability</button>
+                <button type="button" class="sc-es__mode" data-es-mode="uncertainty" role="tab" aria-selected="false">Modeling &amp; Uncertainty</button>
                 <button type="button" class="sc-es__mode" data-es-mode="runtime" role="tab" aria-selected="false">Runtime Activation</button>
                 <button type="button" class="sc-es__mode" data-es-mode="platform" role="tab" aria-selected="false">Integrated Platform</button>
                 <button type="button" class="sc-es__mode" data-es-mode="decision" role="tab" aria-selected="false">Decision Intelligence</button>
@@ -493,8 +503,18 @@ final class SC_Library_Energy_Systems_Intelligence {
                 <button type="button" class="sc-es__mode" data-es-mode="handoffs" role="tab" aria-selected="false">Platform Handoffs</button>
             </div>
 
-            <div class="sc-es__panel is-active" data-es-panel="uncertainty">
-                <div class="sc-es__panel-heading"><strong>Energy Modeling &amp; Uncertainty</strong><span>Design reproducible uncertainty studies in Lab v0.102.0 around explicit Workbench v6.2.0 calculations. Distributions, sampling seed, calculation inputs, and output path remain explicit.</span></div>
+            <div class="sc-es__panel is-active" data-es-panel="grid">
+                <div class="sc-es__panel-heading"><strong>Grid, Storage &amp; Reliability Analysis</strong><span>Structure explicit storage and adequacy scenarios, execute deterministic metrics in Workbench v6.3.0, and examine seeded uncertainty in Lab v0.103.0. Site Intelligence v4.41.0 contributes source-bound spatial evidence without declaring reliability.</span></div>
+                <div class="sc-es__cards">
+                    <article><h3>Storage operation</h3><p>Round-trip energy and state-of-charge trajectories use explicit capacity, power, efficiency, minimum-SOC and timestep inputs. No technology defaults are inferred.</p></article>
+                    <article><h3>Adequacy metrics</h3><p>Reserve margin, peak-demand coverage, loss-of-load events/hours, energy not served and maximum shortfall are calculated only from supplied scenario series.</p></article>
+                    <article><h3>Reliability uncertainty</h3><p>Seeded Monte Carlo and Latin-hypercube studies can vary declared demand, renewable output, storage availability and firm forced-outage assumptions without predicting real outages.</p></article>
+                </div>
+                <p class="sc-es__microcopy">A scenario metric is not a real-world reliability certification. The platform does not infer missing forced-outage rates, storage efficiencies, dispatch behavior, or operational status.</p>
+            </div>
+
+            <div class="sc-es__panel" data-es-panel="uncertainty" hidden>
+                <div class="sc-es__panel-heading"><strong>Energy Modeling &amp; Uncertainty</strong><span>Design reproducible uncertainty studies in Lab v0.103.0 around explicit Workbench v6.3.0 calculations. Distributions, sampling seed, calculation inputs, and output path remain explicit.</span></div>
                 <div class="sc-es__cards">
                     <article><h3>Seeded sampling</h3><p>Monte Carlo and Latin hypercube designs using uniform, normal, lognormal, or triangular input distributions.</p></article>
                     <article><h3>Uncertainty analysis</h3><p>Empirical distributions, central intervals, threshold probabilities, and reproducible result identities.</p></article>
@@ -504,7 +524,7 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="runtime" hidden>
-                <div class="sc-es__panel-heading"><strong>Cross-product runtime activation</strong><span>v1.5.0 preserves deterministic packet intake across all five targets and adds certified Site Intelligence spatial/global profiling. Workbench execution, Lab uncertainty analysis, and spatial profiling remain explicit and non-automatic.</span></div>
+                <div class="sc-es__panel-heading"><strong>Cross-product runtime activation</strong><span>v1.6.0 preserves deterministic packet intake across all five targets and adds certified Workbench/Lab grid-storage-reliability analysis while retaining Site Intelligence spatial/global profiling. Workbench execution, Lab uncertainty analysis, and spatial profiling remain explicit and non-automatic.</span></div>
                 <p class="sc-es__status" data-es-runtime-status aria-live="polite">Loading runtime activation gateway…</p>
                 <div class="sc-es__runtime-summary" data-es-runtime-summary></div>
                 <div class="sc-es__cards sc-es__runtime-targets" data-es-runtime-targets></div>

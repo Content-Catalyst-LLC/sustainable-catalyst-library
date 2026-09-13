@@ -265,7 +265,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "1.5.0",
+            "energy_systems_domain_version": "1.6.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -289,6 +289,11 @@ def health() -> dict[str, Any]:
             "energy_spatial_global_site_intelligence_minimum_version": "4.41.0",
             "energy_spatial_global_site_suitability_scoring": False,
             "energy_spatial_global_automatic_external_fetch": False,
+            "energy_grid_storage_reliability": True,
+            "energy_grid_storage_workbench_minimum_version": "6.3.0",
+            "energy_grid_storage_lab_minimum_version": "0.103.0",
+            "energy_grid_storage_real_grid_reliability_declaration": False,
+            "energy_grid_storage_missing_parameter_inference": False,
             "energy_indicator_framework": True,
             "energy_indicator_definition_registry": True,
             "energy_indicator_observation_contracts": True,
@@ -870,6 +875,21 @@ def energy_systems_spatial_global_framework() -> dict[str, Any]:
 @app.get("/v1/energy-systems/spatial-profile-template")
 def energy_systems_spatial_profile_template() -> dict[str, Any]:
     return energy_systems.spatial_profile_template()
+
+
+@app.get("/v1/energy-systems/grid-storage-reliability-framework")
+def energy_systems_grid_storage_reliability_framework() -> dict[str, Any]:
+    return energy_systems.grid_storage_reliability_framework()
+
+
+@app.get("/v1/energy-systems/storage-scenario-template")
+def energy_systems_storage_scenario_template() -> dict[str, Any]:
+    return energy_systems.storage_scenario_template()
+
+
+@app.get("/v1/energy-systems/reliability-scenario-template")
+def energy_systems_reliability_scenario_template() -> dict[str, Any]:
+    return energy_systems.reliability_scenario_template()
 
 
 

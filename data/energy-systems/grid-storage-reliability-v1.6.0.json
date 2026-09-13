@@ -1,0 +1,25 @@
+{
+  "schema": "sc-energy-grid-storage-reliability-registry/1.0",
+  "version": "1.6.0",
+  "release": "Grid, Storage & Reliability Analysis",
+  "library_backend": "2.22.0",
+  "workbench": "6.3.0",
+  "lab": "0.103.0",
+  "site_intelligence": "4.41.0",
+  "operations": [
+    "storage-round-trip",
+    "storage-soc-trajectory",
+    "reserve-margin",
+    "peak-demand-coverage",
+    "loss-of-load-events",
+    "energy-not-served",
+    "adequacy-timeseries"
+  ],
+  "guardrails": {
+    "missing_parameter_inference": false,
+    "real_grid_reliability_declaration": false,
+    "automatic_outage_prediction": false,
+    "automatic_ranking": false,
+    "automatic_recommendation": false
+  }
+}

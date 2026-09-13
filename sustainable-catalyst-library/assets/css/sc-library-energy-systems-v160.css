@@ -1,0 +1,100 @@
+.sc-es{--es-ink:#111;--es-muted:#5a625d;--es-line:#d9dedb;--es-soft:#f4f7f5;--es-green:#177245;--es-green-dark:#0d4f30;font-family:Montserrat,Arial,sans-serif;color:var(--es-ink);background:#fff;border:1px solid var(--es-line);border-radius:18px;padding:clamp(20px,3vw,38px);box-shadow:0 16px 50px rgba(0,0,0,.06);max-width:1180px;margin:0 auto}.sc-es *{box-sizing:border-box}.sc-es__header{max-width:880px}.sc-es__kicker{font-family:Spartan,Montserrat,Arial,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:700;color:var(--es-green);margin:0 0 10px}.sc-es h2{font-family:Spartan,Montserrat,Arial,sans-serif;font-size:clamp(1.75rem,3vw,2.7rem);line-height:1.08;margin:0 0 12px}.sc-es__header>p:last-child{color:var(--es-muted);font-size:1.02rem;line-height:1.7;margin:0}.sc-es__domains{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 18px}.sc-es__domains span{padding:7px 11px;border:1px solid var(--es-line);border-radius:999px;font-size:.78rem;font-weight:600;background:#fff}.sc-es__guardrail{border-left:4px solid var(--es-green);background:var(--es-soft);padding:14px 16px;line-height:1.55;font-size:.9rem;margin:0 0 22px}.sc-es__guardrail strong{display:block;margin-bottom:3px}.sc-es__modebar{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--es-line);padding-bottom:12px;margin-bottom:20px}.sc-es__mode,.sc-es__actions button,.sc-es__calculator button{appearance:none;border:1px solid var(--es-line);background:#fff;color:var(--es-ink);border-radius:9px;padding:10px 14px;font:600 .85rem Montserrat,Arial,sans-serif;cursor:pointer}.sc-es__mode:hover,.sc-es__mode:focus-visible{border-color:var(--es-green)}.sc-es__mode.is-active,.sc-es__calculator button{background:var(--es-green-dark);border-color:var(--es-green-dark);color:#fff}.sc-es__panel{min-height:240px}.sc-es__panel-heading{display:flex;flex-direction:column;gap:4px;margin:0 0 16px}.sc-es__panel-heading strong{font-family:Spartan,Montserrat,Arial,sans-serif;font-size:1.02rem}.sc-es__panel-heading span{color:var(--es-muted);font-size:.88rem;line-height:1.5}.sc-es__status{min-height:1.3em;color:var(--es-muted);font-size:.83rem;margin:10px 0}.sc-es__registry-warning{border:1px solid var(--es-line);border-radius:12px;background:var(--es-soft);padding:13px 15px;display:flex;gap:8px 16px;align-items:flex-start;flex-wrap:wrap}.sc-es__registry-warning strong{font-family:Spartan,Montserrat,Arial,sans-serif;font-size:.82rem;color:var(--es-green-dark)}.sc-es__registry-warning span{font-size:.8rem;line-height:1.5;color:var(--es-muted);flex:1 1 480px}.sc-es__metric-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0 18px}.sc-es__metric-row span{border:1px solid var(--es-line);border-radius:10px;padding:11px;background:#fff;font-size:.75rem;color:var(--es-muted)}.sc-es__metric-row b{display:block;font-family:Spartan,Montserrat,Arial,sans-serif;font-size:1.15rem;color:var(--es-ink);margin-bottom:2px}.sc-es__calc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 24px}.sc-es__calculator{border:1px solid var(--es-line);border-radius:13px;padding:15px;background:#fff;display:flex;flex-direction:column;gap:10px}.sc-es__calculator h3,.sc-es__registry-columns h3,.sc-es__methodology>h3{font-family:Spartan,Montserrat,Arial,sans-serif;font-size:.92rem;margin:0}.sc-es__calculator label{display:flex;flex-direction:column;gap:5px;font-size:.75rem;font-weight:700}.sc-es__calculator input,.sc-es__calculator select,.sc-es__search input,.sc-es__search select{width:100%;min-height:42px;border:1px solid #bec7c1;border-radius:8px;background:#fff;padding:8px 10px;font:400 .85rem Montserrat,Arial,sans-serif}.sc-es__calculator button{align-self:flex-start}.sc-es__result{min-height:54px;border-top:1px solid var(--es-line);padding-top:10px;font-size:.8rem;color:var(--es-muted);line-height:1.45}.sc-es__result strong{display:block;font-family:Spartan,Montserrat,Arial,sans-serif;color:var(--es-ink);font-size:1rem}.sc-es__result small{display:block;margin-top:3px}.sc-es__result.is-error{color:#8a1f11}.sc-es__registry-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:12px}.sc-es__registry-columns>div{min-width:0}.sc-es__registry-columns h3{margin-bottom:8px}.sc-es__cards--compact{grid-template-columns:1fr!important;max-height:500px;overflow:auto;padding-right:3px}.sc-es__methodology{margin-top:22px}.sc-es__methodology>h3{margin-bottom:10px}.sc-es__search{display:grid;grid-template-columns:minmax(240px,1fr) minmax(220px,.55fr);gap:12px;align-items:end;margin:0 0 16px}.sc-es__search label{display:flex;flex-direction:column;gap:6px;font-size:.78rem;font-weight:700}.sc-es__actions{display:flex;gap:8px;grid-column:1/-1}.sc-es__actions button{background:var(--es-green-dark);border-color:var(--es-green-dark);color:#fff}.sc-es__actions .sc-es__secondary{background:#fff;color:var(--es-ink);border-color:var(--es-line)}.sc-es__map,.sc-es__cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.sc-es__card{border:1px solid var(--es-line);border-radius:12px;padding:15px;background:#fff;min-width:0}.sc-es__card h3{font-family:Spartan,Montserrat,Arial,sans-serif;font-size:.9rem;line-height:1.35;margin:0 0 7px;overflow-wrap:anywhere}.sc-es__card p{font-size:.81rem;line-height:1.55;color:var(--es-muted);margin:6px 0;overflow-wrap:anywhere}.sc-es__meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.sc-es__meta span{font-size:.68rem;border-radius:999px;padding:5px 8px;background:var(--es-soft);color:#34413a}.sc-es__domain-card{border-top:3px solid var(--es-green)}.sc-es__domain-card ul{margin:10px 0 0;padding-left:18px}.sc-es__domain-card li{font-size:.78rem;line-height:1.45;margin:3px 0}.sc-es__sdgs{grid-column:1/-1;border:1px solid var(--es-line);border-radius:12px;padding:15px;background:var(--es-soft)}.sc-es__sdgs strong{font-family:Spartan,Montserrat,Arial,sans-serif;font-size:.88rem}.sc-es__sdg-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}.sc-es__sdg{background:#fff;border:1px solid var(--es-line);border-radius:8px;padding:7px 9px;font-size:.74rem}.sc-es__status-pill{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border-radius:999px;padding:5px 8px;background:var(--es-soft);color:#37443d}.sc-es__status-pill.is-available{background:#e8f4ed;color:#0d5a34}.sc-es footer{border-top:1px solid var(--es-line);margin-top:24px;padding-top:17px;color:var(--es-muted);font-size:.82rem;line-height:1.55}@media(max-width:900px){.sc-es__calc-grid,.sc-es__registry-columns{grid-template-columns:1fr}.sc-es__metric-row{grid-template-columns:repeat(2,minmax(0,1fr))}.sc-es__map,.sc-es__cards{grid-template-columns:repeat(2,minmax(0,1fr))}.sc-es__search{grid-template-columns:1fr}.sc-es__cards--compact{max-height:360px}}@media(max-width:560px){.sc-es{border-radius:12px;padding:18px}.sc-es__map,.sc-es__cards{grid-template-columns:1fr}.sc-es__metric-row{grid-template-columns:1fr 1fr}.sc-es__mode{flex:1 1 calc(50% - 8px)}.sc-es__actions{flex-direction:column}.sc-es__actions button{width:100%}.sc-es__calculator button{width:100%}}
+
+.sc-es__framework{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0 22px}.sc-es__framework-dimension{border:1px solid var(--es-line);border-top:4px solid var(--es-green);border-radius:13px;padding:15px;background:#fff}.sc-es__framework-dimension h3{font-family:Spartan,Montserrat,Arial,sans-serif;font-size:1rem;margin:0 0 12px}.sc-es__framework-theme{border-top:1px solid var(--es-line);padding-top:10px;margin-top:10px}.sc-es__framework-theme h4,.sc-es__indicator-detail h4{font-family:Spartan,Montserrat,Arial,sans-serif;font-size:.78rem;margin:0 0 7px;text-transform:uppercase;letter-spacing:.04em}.sc-es__framework-theme ul,.sc-es__indicator-detail ul{margin:0;padding-left:18px}.sc-es__framework-theme li{font-size:.75rem;line-height:1.5;margin:4px 0}.sc-es__framework-theme li strong{display:block;font-size:.74rem}.sc-es__framework-theme li span{color:var(--es-muted);font-size:.7rem}.sc-es__indicator-search{display:grid;grid-template-columns:minmax(260px,1fr) minmax(180px,.35fr);gap:12px;align-items:end;margin:0 0 16px}.sc-es__indicator-search label{display:flex;flex-direction:column;gap:6px;font-size:.78rem;font-weight:700}.sc-es__indicator-search input,.sc-es__indicator-search select{width:100%;min-height:42px;border:1px solid #bec7c1;border-radius:8px;background:#fff;padding:8px 10px;font:400 .85rem Montserrat,Arial,sans-serif}.sc-es__indicator-card{position:relative;padding-top:42px}.sc-es__indicator-code{position:absolute;top:14px;left:15px;font-family:Spartan,Montserrat,Arial,sans-serif;font-size:.68rem;font-weight:800;letter-spacing:.08em;color:var(--es-green-dark);background:var(--es-soft);border-radius:999px;padding:5px 8px}.sc-es__contract-button{appearance:none;border:0;background:transparent;color:var(--es-green-dark);padding:8px 0 0;font:700 .74rem Montserrat,Arial,sans-serif;cursor:pointer;text-align:left}.sc-es__contract-button:hover,.sc-es__contract-button:focus-visible{text-decoration:underline}.sc-es__indicator-detail{margin-top:18px;border:1px solid var(--es-line);border-radius:13px;background:var(--es-soft);padding:16px}.sc-es__contract-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.sc-es__contract-grid li{font-size:.76rem;line-height:1.45;margin:3px 0}.sc-es__contract-guardrail{margin:14px 0 0;border-top:1px solid var(--es-line);padding-top:12px;color:var(--es-muted);font-size:.78rem;line-height:1.5}.sc-es__metric-row--indicators{margin-bottom:14px}@media(max-width:900px){.sc-es__framework{grid-template-columns:1fr}.sc-es__indicator-search{grid-template-columns:1fr}.sc-es__contract-grid{grid-template-columns:1fr}}
+
+/* Energy Systems Intelligence v0.4.0 — renewable technology/resource model */
+.sc-es__technology-search{display:grid;grid-template-columns:minmax(260px,1fr) minmax(180px,.35fr);gap:12px;align-items:end;margin:0 0 16px}.sc-es__technology-search label{display:flex;flex-direction:column;gap:6px;font-size:.78rem;font-weight:700}.sc-es__technology-search input,.sc-es__technology-search select{width:100%;min-height:42px;border:1px solid #bec7c1;border-radius:8px;background:#fff;padding:8px 10px;font:400 .85rem Montserrat,Arial,sans-serif}.sc-es__technology-card{position:relative;padding-top:42px}.sc-es__technology-family{position:absolute;top:14px;left:15px;font-family:Spartan,Montserrat,Arial,sans-serif;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--es-green-dark);background:var(--es-soft);border-radius:999px;padding:5px 8px}.sc-es__technology-flow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:7px;margin:10px 0;padding:9px 10px;border-radius:9px;background:var(--es-soft);font-size:.72rem;text-align:center;color:#34413a}.sc-es__technology-flow b{color:var(--es-green-dark)}.sc-es__technology-detail{margin-top:18px;border:1px solid var(--es-line);border-radius:13px;background:var(--es-soft);padding:16px}.sc-es__resource-section{border-top:1px solid var(--es-line);margin-top:24px;padding-top:20px}.sc-es__resource-card{border-top:3px solid var(--es-green)}@media(max-width:900px){.sc-es__technology-search{grid-template-columns:1fr}}@media(max-width:560px){.sc-es__technology-flow{grid-template-columns:1fr}.sc-es__technology-flow b{transform:rotate(90deg)}}
+
+/* Energy Systems Intelligence v0.5.0 — Energy Balance & Systems Modeling */
+.sc-es__calc-grid--balance{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.sc-es__calculator--wide{grid-column:span 2}
+.sc-es__field-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.sc-es__result-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.sc-es__result-metrics>span{display:flex;min-width:0;flex-direction:column;gap:2px;padding:10px;border:1px solid #d7ddd7;background:#f7f9f7;font-size:12px}
+.sc-es__result-metrics b{font-size:19px;line-height:1.05;color:#111;overflow-wrap:anywhere}
+.sc-es__result-metrics small{color:#5d665d;font-size:10px;letter-spacing:.05em;text-transform:uppercase}
+.sc-es__stage-list{display:grid;gap:6px;margin:12px 0 0;padding:0;list-style:none}
+.sc-es__stage-list li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid #e1e5e1;font-size:12px}
+.sc-es__stage-list span{color:#545b54;text-align:right}
+.sc-es__boundary-note{margin:10px 0 0;color:#626962;font-size:11px;line-height:1.5}
+.sc-es__balance-state{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:8px;padding:10px 12px;border-left:4px solid #111;background:#f5f7f5}
+.sc-es__balance-state.is-residual{border-left-color:#a51f27}
+.sc-es__balance-state strong{font-size:13px}
+.sc-es__balance-state span{font-size:12px;color:#555d55}
+.sc-es__scenario-contract{margin-top:22px}
+@media(max-width:900px){.sc-es__field-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.sc-es__calc-grid--balance{grid-template-columns:1fr}.sc-es__calculator--wide{grid-column:auto}.sc-es__field-grid,.sc-es__result-metrics{grid-template-columns:1fr}.sc-es__stage-list li{display:block}.sc-es__stage-list span{display:block;margin-top:3px;text-align:left}}
+
+/* Energy Systems Intelligence v0.6.0 — Energy Scenario Economics */
+.sc-es__calc-grid--economics{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.sc-es__field-grid--economics{grid-template-columns:repeat(2,minmax(0,1fr))}
+.sc-es__inline-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sc-es__economic-contract{margin-top:22px;border-top:1px solid var(--es-line);padding-top:18px}
+@media(max-width:760px){.sc-es__calc-grid--economics,.sc-es__field-grid--economics{grid-template-columns:1fr}.sc-es__inline-fields{grid-template-columns:1fr 1fr}}
+
+/* Energy Systems Intelligence v0.7.0 — Biological Carbon & Bioenergy Integration */
+.sc-es__calc-grid--bioenergy{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.sc-es__bioenergy-section{border-top:1px solid var(--es-line);margin-top:24px;padding-top:20px}
+.sc-es__bioenergy-card{border-top:3px solid var(--es-green)}
+.sc-es__bridge-card{border-left:4px solid var(--es-green);background:#fbfcfb}
+.sc-es__bioenergy-contract{margin-top:24px;border-top:1px solid var(--es-line);padding-top:18px}
+@media(max-width:760px){.sc-es__calc-grid--bioenergy{grid-template-columns:1fr}}
+
+/* v0.8.0 — Global Energy Intelligence */
+.sc-es__global-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:18px 0 22px}
+.sc-es__global-section{margin-top:28px}
+.sc-es__global-profile,.sc-es__global-comparison{margin-top:22px}
+.sc-es__global-profile-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sc-es__global-value{font-size:1.7rem;font-weight:700;line-height:1.1;margin:.35rem 0 .5rem}
+.sc-es__global-value small{font-size:.72rem;font-weight:600;opacity:.72}
+.sc-es__sparkline{display:block;width:100%;height:42px;margin:.35rem 0 .7rem;opacity:.9}
+.sc-es__global-source-card .sc-es__meta span:first-child{font-weight:700}
+.sc-es__table-wrap{overflow-x:auto;border:1px solid rgba(17,17,17,.14);border-radius:12px;background:#fff}
+.sc-es__global-table{width:100%;border-collapse:collapse;min-width:620px}
+.sc-es__global-table th,.sc-es__global-table td{padding:11px 12px;text-align:left;border-bottom:1px solid rgba(17,17,17,.09)}
+.sc-es__global-table th{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;background:rgba(17,17,17,.035)}
+.sc-es__global-table tbody tr:last-child td{border-bottom:0}
+@media (max-width:900px){.sc-es__global-grid,.sc-es__global-profile-cards{grid-template-columns:1fr}}
+
+/* v0.9.0 — Energy Decision Intelligence */
+.sc-es__decision-layout{display:grid;grid-template-columns:minmax(0,.9fr) minmax(320px,1.1fr);gap:18px;margin-top:18px;align-items:start}
+.sc-es__decision-layout h3,.sc-es__decision-results h3{font-family:Spartan,Montserrat,Arial,sans-serif;font-size:.92rem;margin:0 0 10px}
+.sc-es__decision-criteria{grid-template-columns:1fr}
+.sc-es__decision-criterion-card{border-left:4px solid var(--es-green)}
+.sc-es__microcopy{font-size:.78rem;line-height:1.55;color:var(--es-muted);margin:0 0 10px}
+.sc-es__decision-packet{width:100%;min-height:420px;border:1px solid #bec7c1;border-radius:10px;padding:12px;background:#fbfcfb;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;resize:vertical}
+.sc-es__decision-actions{margin-top:10px}
+.sc-es__decision-results{display:grid;grid-template-columns:minmax(260px,.55fr) minmax(0,1.45fr);gap:18px;margin-top:24px;padding-top:20px;border-top:1px solid var(--es-line)}
+.sc-es__decision-results .sc-es__result{border:1px solid var(--es-line);border-radius:10px;padding:12px;min-height:120px;background:#fff}
+.sc-es__decision-results ul{margin:10px 0 0;padding-left:18px}
+.sc-es__decision-results li{font-size:.76rem;line-height:1.45;margin:4px 0;color:var(--es-muted)}
+.sc-es__decision-table{width:100%;border-collapse:collapse;min-width:840px}
+.sc-es__decision-table th,.sc-es__decision-table td{padding:10px 11px;text-align:left;vertical-align:top;border-bottom:1px solid rgba(17,17,17,.09);font-size:.76rem}
+.sc-es__decision-table thead th{background:rgba(17,17,17,.035);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em}
+.sc-es__decision-table tbody th{min-width:190px;font-family:Spartan,Montserrat,Arial,sans-serif;font-size:.76rem}
+.sc-es__decision-table th small,.sc-es__decision-table td small{display:block;margin-top:4px;color:var(--es-muted);font:400 .68rem/1.35 Montserrat,Arial,sans-serif;text-transform:none;letter-spacing:0}
+.sc-es__decision-flag,.sc-es__decision-ok{display:inline-block;border-radius:999px;padding:4px 7px;font-size:.64rem;font-weight:700}
+.sc-es__decision-flag{background:#fff2e8;color:#87420b}
+.sc-es__decision-ok{background:#e8f4ed;color:#0d5a34}
+@media(max-width:900px){.sc-es__decision-layout,.sc-es__decision-results{grid-template-columns:1fr}.sc-es__decision-packet{min-height:340px}}
+
+/* v1.0.0 Integrated Sustainable Energy Systems Platform */
+.sc-es__platform-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start}
+.sc-es__platform-grid>div{min-width:0}
+.sc-es__platform-layer-card h3,.sc-es__platform-contract-card h3{font-size:1rem}
+.sc-es__platform-certification{margin-top:1.25rem}
+.sc-es__platform-study-wrap{margin-top:1.25rem;padding:1rem;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:rgba(255,255,255,.65)}
+.sc-es__platform-study{width:100%;min-height:22rem;margin-top:.75rem;padding:.85rem;border:1px solid rgba(0,0,0,.18);border-radius:8px;background:#0e1116;color:#d6f5dc;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;resize:vertical}
+@media(max-width:900px){.sc-es__platform-grid{grid-template-columns:1fr}.sc-es__platform-study{min-height:18rem}}
+
+
+/* v1.1.0 Cross-Product Runtime Activation Gateway */
+.sc-es__runtime-targets{grid-template-columns:repeat(5,minmax(0,1fr));margin-top:1rem}
+.sc-es__runtime-target-card{border-top:3px solid var(--es-green)}
+.sc-es__runtime-builder{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(300px,.6fr);gap:1.25rem;align-items:start;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--es-line)}
+.sc-es__runtime-controls{display:grid;gap:.9rem;padding:1rem;border:1px solid var(--es-line);border-radius:10px;background:var(--es-soft)}
+.sc-es__runtime-controls label{display:flex;flex-direction:column;gap:6px;font-size:.78rem;font-weight:700}
+.sc-es__runtime-controls select{min-height:42px;border:1px solid #bec7c1;border-radius:8px;background:#fff;padding:8px 10px;font:400 .85rem Montserrat,Arial,sans-serif}
+.sc-es__runtime-output{margin-top:1.25rem}
+@media(max-width:1100px){.sc-es__runtime-targets{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){.sc-es__runtime-builder,.sc-es__runtime-targets{grid-template-columns:1fr}}

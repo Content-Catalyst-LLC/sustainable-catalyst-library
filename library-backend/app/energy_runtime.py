@@ -5,8 +5,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-MODEL_VERSION = "1.5.0"
-SCHEMA_VERSION = "sc-energy-cross-product-runtime-activation/1.4"
+MODEL_VERSION = "1.6.0"
+SCHEMA_VERSION = "sc-energy-cross-product-runtime-activation/1.5"
 
 
 @dataclass(frozen=True)
@@ -32,11 +32,11 @@ class EnergyRuntimeTarget:
 
 
 class EnergyCrossProductRuntimeActivation:
-    """Stateless cross-product handoff gateway for Energy Systems Intelligence v1.5.0.
+    """Stateless cross-product handoff gateway for Energy Systems Intelligence v1.6.0.
 
     The Library now does more than publish static cross-product contracts: it can build
     deterministic, target-shaped handoff packets from the v1.0.0 integrated study
-    contract. The Library remains a pull-oriented gateway. v1.5.0 retains Lab v0.102.0 seeded uncertainty planning and statistical analysis around explicitly executed Workbench v6.2.0 results; the Library itself does not perform outbound delivery, persistence, sampling, or execution.
+    contract. The Library remains a pull-oriented gateway. v1.6.0 extends Lab v0.103.0 seeded adequacy uncertainty analysis around explicitly executed Workbench v6.3.0 grid/storage results; the Library itself does not perform outbound delivery, persistence, sampling, or execution.
     """
 
     def __init__(self) -> None:
@@ -60,21 +60,21 @@ class EnergyCrossProductRuntimeActivation:
                 "lab", "Lab",
                 "Transfer explicit energy scenarios, resource observations, uncertainty, economics and biological-carbon context into a modeling-ready packet.",
                 ("energy-balance-scenario-contract", "energy-economic-scenario-contract", "bioenergy-carbon-scenario-contract", "renewable-resource-observation-contract"),
-                ("identity", "technologies_and_resources", "energy_balance", "economics", "bioenergy_and_carbon", "uncertainty", "provenance", "review"),
-                "sc-energy-runtime-lab-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "0.102.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
-                "Lab v0.102.0 can explicitly plan and analyze seeded Energy Systems uncertainty studies around Workbench outputs. It does not execute Workbench automatically, infer distributions, rank technologies, recommend a winner, or persist the study automatically.",
+                ("identity", "technologies_and_resources", "energy_balance", "economics", "bioenergy_and_carbon", "grid_storage_reliability", "uncertainty", "provenance", "review"),
+                "sc-energy-runtime-lab-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "0.103.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
+                "Lab v0.103.0 can explicitly plan and analyze seeded Energy Systems uncertainty and adequacy studies around Workbench outputs. It does not execute Workbench automatically, infer distributions, rank technologies, recommend a winner, or persist the study automatically.",
                 "certified-energy-modeling-and-uncertainty",
-                "/v1/energy-modeling/framework",
-                "/v1/energy-modeling/plan",
-                "/v1/energy-modeling/analyze",
-                "/v1/energy-modeling/validate-result",
+                "/v1/energy-reliability/framework",
+                "/v1/energy-reliability/plan",
+                "/v1/energy-reliability/analyze",
+                "/v1/energy-reliability/validate-result",
             ),
             T(
                 "workbench", "Workbench",
                 "Transfer source-bound numerical references and explicit-input calculation scenarios for interactive calculation.",
                 ("energy-conversion-contract", "conversion-chain-model", "capacity-factor-generation-estimate", "energy-npv-result", "energy-cost-efficiency-result"),
-                ("identity", "numeric_registry", "energy_balance", "economics", "bioenergy_and_carbon", "provenance", "review"),
-                "sc-energy-runtime-workbench-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "6.2.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
+                ("identity", "numeric_registry", "energy_balance", "economics", "bioenergy_and_carbon", "grid_storage_reliability", "provenance", "review"),
+                "sc-energy-runtime-workbench-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "6.3.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
                 "The packet carries explicit inputs and provenance. Execution requires an explicit Workbench /execute request and does not authorize hidden defaults, ranking, recommendations, persistence, or source-boundary changes.",
                 "certified-explicit-input-calculation-execution",
                 "/v1/energy-runtime/execution-framework",
@@ -107,14 +107,14 @@ class EnergyCrossProductRuntimeActivation:
 
     def _validate_registry(self) -> None:
         if len(self._targets) != 5:
-            raise ValueError("Energy Systems v1.5.0 requires five external runtime targets")
+            raise ValueError("Energy Systems v1.6.0 requires five external runtime targets")
         if len({x.key for x in self._targets}) != len(self._targets):
             raise ValueError("Runtime target keys must be unique")
         for target in self._targets:
             if target.gateway_state != "library-gateway-active":
-                raise ValueError("Every v1.5.0 target must expose an active Library gateway")
+                raise ValueError("Every v1.6.0 target must expose an active Library gateway")
             if target.target_runtime_state != "certified-contract-intake":
-                raise ValueError("Every v1.5.0 target must expose certified contract intake")
+                raise ValueError("Every v1.6.0 target must expose certified contract intake")
 
     def guardrails(self) -> dict[str, Any]:
         return {
@@ -140,10 +140,12 @@ class EnergyCrossProductRuntimeActivation:
             "site_intelligence_minimum_runtime_version": "4.41.0",
             "automatic_site_intelligence_external_fetch": False,
             "site_suitability_scoring": False,
-            "lab_minimum_runtime_version": "0.102.0",
+            "lab_minimum_runtime_version": "0.103.0",
+            "lab_grid_reliability_uncertainty_certified": True,
             "automatic_lab_to_workbench_execution": False,
             "workbench_explicit_calculation_execution_certified": True,
-            "workbench_minimum_runtime_version": "6.2.0",
+            "workbench_minimum_runtime_version": "6.3.0",
+            "workbench_grid_storage_reliability_execution_certified": True,
             "automatic_workbench_execution": False,
         }
 
@@ -199,6 +201,7 @@ class EnergyCrossProductRuntimeActivation:
             "energy_balance": {"scenario_refs": [], "results": [], "calculation_requests": []},
             "economics": {"scenario_refs": [], "results": [], "assumptions": [], "calculation_requests": []},
             "bioenergy_and_carbon": {"pathway_refs": [], "carbon_nature_refs": [], "results": [], "calculation_requests": []},
+            "grid_storage_reliability": {"topology_refs": [], "storage_scenario_refs": [], "reliability_scenario_refs": [], "calculation_requests": [], "results": []},
             "global_context": {"country_profile_refs": [], "observation_years": [], "missing_value_notes": []},
             "decision": {"decision_packet_ref": "", "comparison_matrix_ref": "", "readiness_ref": ""},
             "uncertainty": [],
@@ -295,6 +298,7 @@ class EnergyCrossProductRuntimeActivation:
                 self._is_populated(ec.get("scenario_refs")), self._is_populated(ec.get("results")),
                 self._is_populated(nr.get("calculation_requests")), self._is_populated(eb.get("calculation_requests")),
                 self._is_populated(ec.get("calculation_requests")), self._is_populated(study.get("bioenergy_and_carbon", {}).get("calculation_requests")),
+                self._is_populated(study.get("grid_storage_reliability", {}).get("calculation_requests")),
             ))
             if not has_calculation_context:
                 issues.append({"key": "missing-calculation-context", "severity": "warning", "message": "No numeric registry, energy-balance, economic, bioenergy, or explicit calculation-request context is present"})
@@ -316,9 +320,9 @@ class EnergyCrossProductRuntimeActivation:
             "target": {"key": target_obj.key, "product": target_obj.target},
             **result,
             "interpretation": (
-                "Runtime readiness reports packet completeness. Workbench v6.2.0 is certified for explicit-input Energy Systems arithmetic when execution is explicitly requested. No automatic execution, persistence, ranking, recommendation, scientific validity, or decision quality is certified."
+                "Runtime readiness reports packet completeness. Workbench v6.3.0 is certified for explicit-input Energy Systems arithmetic including grid/storage/reliability calculations when execution is explicitly requested. No automatic execution, persistence, ranking, recommendation, scientific validity, or decision quality is certified."
                 if target_obj.key == "workbench" else
-                "Runtime readiness reports packet completeness. Lab v0.102.0 is certified for explicit seeded uncertainty planning and statistical analysis of returned Workbench results. Lab does not call Workbench automatically, infer missing distributions, rank technologies, recommend a winner, or persist automatically."
+                "Runtime readiness reports packet completeness. Lab v0.103.0 is certified for explicit seeded uncertainty and adequacy planning and statistical analysis of returned Workbench results. Lab does not call Workbench automatically, infer missing distributions, rank technologies, recommend a winner, or persist automatically."
                 if target_obj.key == "lab" else
                 "Runtime readiness reports packet completeness. Target-side contract intake is certified at the listed minimum version; execution, persistence, scientific validity, ranking, recommendation, and decision quality are not certified."
             ),
