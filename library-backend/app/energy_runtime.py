@@ -5,8 +5,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-MODEL_VERSION = "1.4.0"
-SCHEMA_VERSION = "sc-energy-cross-product-runtime-activation/1.3"
+MODEL_VERSION = "1.5.0"
+SCHEMA_VERSION = "sc-energy-cross-product-runtime-activation/1.4"
 
 
 @dataclass(frozen=True)
@@ -32,11 +32,11 @@ class EnergyRuntimeTarget:
 
 
 class EnergyCrossProductRuntimeActivation:
-    """Stateless cross-product handoff gateway for Energy Systems Intelligence v1.4.0.
+    """Stateless cross-product handoff gateway for Energy Systems Intelligence v1.5.0.
 
     The Library now does more than publish static cross-product contracts: it can build
     deterministic, target-shaped handoff packets from the v1.0.0 integrated study
-    contract. The Library remains a pull-oriented gateway. v1.4.0 additionally certifies Lab v0.102.0 seeded uncertainty planning and statistical analysis around explicitly executed Workbench v6.2.0 results; the Library itself does not perform outbound delivery, persistence, sampling, or execution.
+    contract. The Library remains a pull-oriented gateway. v1.5.0 retains Lab v0.102.0 seeded uncertainty planning and statistical analysis around explicitly executed Workbench v6.2.0 results; the Library itself does not perform outbound delivery, persistence, sampling, or execution.
     """
 
     def __init__(self) -> None:
@@ -84,11 +84,16 @@ class EnergyCrossProductRuntimeActivation:
             ),
             T(
                 "site-intelligence", "Site Intelligence",
-                "Transfer dated country-energy context and renewable-resource observations for spatial presentation and geospatial joining.",
+                "Transfer dated country-energy context, renewable-resource observations, infrastructure evidence, and provenance for explicit spatial/global energy profiling and geospatial joining.",
                 ("global-energy-country-profile-contract", "global-energy-comparison-contract", "renewable-resource-observation-contract"),
                 ("identity", "technologies_and_resources", "global_context", "provenance", "review"),
-                "sc-energy-runtime-site-intelligence-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "4.40.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
-                "Spatial display does not establish site suitability, technical potential, causal attribution or current-year status when observations are older.",
+                "sc-energy-runtime-site-intelligence-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "4.41.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
+                "Site Intelligence v4.41.0 can explicitly build provenance-bound spatial/global energy profiles and neutral comparisons. Spatial evidence does not establish site suitability, technical potential, grid reliability, outage status, causal attribution, or current-year status.",
+                "certified-spatial-global-energy-intelligence",
+                "/v1/energy-spatial/framework",
+                "/v1/energy-spatial/source-registry",
+                "/v1/energy-spatial/profile",
+                "/v1/energy-spatial/validate-result",
             ),
             T(
                 "decision-studio", "Decision Studio",
@@ -102,14 +107,14 @@ class EnergyCrossProductRuntimeActivation:
 
     def _validate_registry(self) -> None:
         if len(self._targets) != 5:
-            raise ValueError("Energy Systems v1.4.0 requires five external runtime targets")
+            raise ValueError("Energy Systems v1.5.0 requires five external runtime targets")
         if len({x.key for x in self._targets}) != len(self._targets):
             raise ValueError("Runtime target keys must be unique")
         for target in self._targets:
             if target.gateway_state != "library-gateway-active":
-                raise ValueError("Every v1.4.0 target must expose an active Library gateway")
+                raise ValueError("Every v1.5.0 target must expose an active Library gateway")
             if target.target_runtime_state != "certified-contract-intake":
-                raise ValueError("Every v1.4.0 target must expose certified contract intake")
+                raise ValueError("Every v1.5.0 target must expose certified contract intake")
 
     def guardrails(self) -> dict[str, Any]:
         return {
@@ -131,6 +136,10 @@ class EnergyCrossProductRuntimeActivation:
             "target_contract_intake_certified": True,
             "target_model_execution_certified": True,
             "lab_energy_modeling_uncertainty_certified": True,
+            "site_intelligence_spatial_global_energy_certified": True,
+            "site_intelligence_minimum_runtime_version": "4.41.0",
+            "automatic_site_intelligence_external_fetch": False,
+            "site_suitability_scoring": False,
             "lab_minimum_runtime_version": "0.102.0",
             "automatic_lab_to_workbench_execution": False,
             "workbench_explicit_calculation_execution_certified": True,
@@ -147,7 +156,7 @@ class EnergyCrossProductRuntimeActivation:
             "ok": True,
             "schema": SCHEMA_VERSION,
             "version": MODEL_VERSION,
-            "release": "Energy Modeling & Uncertainty",
+            "release": "Spatial & Global Energy Intelligence",
             "counts": {
                 "external_runtime_targets": len(self._targets),
                 "target_packet_builders": len(self._targets),
@@ -155,6 +164,7 @@ class EnergyCrossProductRuntimeActivation:
                 "target_runtimes_certified_active": len(self._targets),
                 "explicit_execution_targets": 1,
                 "modeling_analysis_targets": 1,
+                "spatial_analysis_targets": 1,
             },
             "targets": [x.target for x in self._targets],
             "transport": "stateless-pull-oriented-json-with-target-intake-explicit-workbench-execution-and-lab-uncertainty-analysis",

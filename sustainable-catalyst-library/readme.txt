@@ -1,3 +1,5 @@
+Energy Systems Intelligence v1.5.0 adds Spatial & Global Energy Intelligence through Site Intelligence v4.41.0. Provenance-bound spatial profiles and neutral cross-geography comparisons retain source, year, geometry, indicator and unit boundaries and do not infer site suitability, technical potential, grid reliability, outage status, rankings, or recommendations.
+
 Energy Systems Intelligence v1.4.0 adds Energy Modeling & Uncertainty. Lab v0.102.0 designs reproducible seeded uncertainty studies around explicit Workbench v6.2.0 calculations and analyzes returned results without automatic cross-product execution, persistence, technology ranking, or recommendations.
 
 === Sustainable Catalyst Library ===

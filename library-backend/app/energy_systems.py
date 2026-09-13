@@ -15,10 +15,11 @@ from .energy_decision import EnergyDecisionIntelligence
 from .energy_platform import IntegratedSustainableEnergyPlatform
 from .energy_runtime import EnergyCrossProductRuntimeActivation
 from .energy_uncertainty import EnergyModelingUncertaintyRegistry
+from .energy_spatial import EnergySpatialGlobalRegistry
 
 
-DOMAIN_VERSION = "1.4.0"
-SCHEMA_VERSION = "sc-energy-systems-modeling-uncertainty/1.0"
+DOMAIN_VERSION = "1.5.0"
+SCHEMA_VERSION = "sc-energy-systems-spatial-global/1.0"
 
 
 @dataclass(frozen=True)
@@ -159,6 +160,7 @@ class EnergySystemsKnowledgeFoundation:
         self._integrated_platform = IntegratedSustainableEnergyPlatform()
         self._runtime_activation = EnergyCrossProductRuntimeActivation()
         self._modeling_uncertainty = EnergyModelingUncertaintyRegistry()
+        self._spatial_global = EnergySpatialGlobalRegistry()
         self._methodology_rules = self._build_methodology_rules()
         self._handoffs = self._build_handoffs()
         self._guardrails = self._build_guardrails()
@@ -767,6 +769,9 @@ class EnergySystemsKnowledgeFoundation:
         uncertainty_framework = self._modeling_uncertainty.framework()
         if len(uncertainty_framework["sampling_designs"]) != 2 or len(uncertainty_framework["distributions"]) != 4:
             raise ValueError("Energy modeling & uncertainty registry is incomplete")
+        spatial_framework = self._spatial_global.framework()
+        if spatial_framework["execution_authority"]["minimum_version"] != "4.41.0" or len(spatial_framework["source_crosswalk"]) != 4:
+            raise ValueError("Spatial & Global Energy Intelligence registry is incomplete")
 
     def _content_fingerprint(self) -> str:
         content = {
@@ -790,6 +795,7 @@ class EnergySystemsKnowledgeFoundation:
             "integrated_sustainable_energy_platform": self._integrated_platform.export(),
             "cross_product_runtime_activation": self._runtime_activation.export(),
             "energy_modeling_uncertainty": self._modeling_uncertainty.framework(),
+            "spatial_global_energy_intelligence": self._spatial_global.framework(),
             "methodology_rules": self._methodology_rules,
             "handoffs": self._handoffs,
             "guardrails": self._guardrails,
@@ -803,11 +809,11 @@ class EnergySystemsKnowledgeFoundation:
             "subsystem": {
                 "name": "Energy Systems Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Energy Modeling & Uncertainty",
+                "release": "Spatial & Global Energy Intelligence",
                 "library_version": "5.11.0",
-                "backend_version": "2.20.0",
+                "backend_version": "2.21.0",
                 "read_only": True,
-                "calculation_mode": "integrated-provenance-bound-energy-platform-with-explicit-workbench-execution-and-lab-uncertainty-analysis",
+                "calculation_mode": "integrated-provenance-bound-energy-platform-with-workbench-execution-lab-uncertainty-and-site-intelligence-spatial-analysis",
             },
             "counts": {
                 "concepts": len(self._concepts),
@@ -861,6 +867,7 @@ class EnergySystemsKnowledgeFoundation:
                 "runtime_target_runtimes_certified_active": self._runtime_activation.framework()["counts"]["target_runtimes_certified_active"],
                 "energy_uncertainty_sampling_designs": len(self._modeling_uncertainty.framework()["sampling_designs"]),
                 "energy_uncertainty_distributions": len(self._modeling_uncertainty.framework()["distributions"]),
+                "energy_spatial_source_crosswalks": len(self._spatial_global.framework()["source_crosswalk"]),
                 "methodology_rules": len(self._methodology_rules),
             },
             "knowledge_domains": self._knowledge_domains,
@@ -875,12 +882,14 @@ class EnergySystemsKnowledgeFoundation:
             "integrated_sustainable_energy_platform": self._integrated_platform.framework(),
             "cross_product_runtime_activation": self._runtime_activation.framework(),
             "energy_modeling_uncertainty": self._modeling_uncertainty.framework(),
+            "spatial_global_energy_intelligence": self._spatial_global.framework(),
             "roadmap": [
                 {"version": "1.0.0", "name": "Integrated Sustainable Energy Systems Platform", "status": "certified-baseline"},
                 {"version": "1.1.0", "name": "Cross-Product Runtime Activation Gateway", "status": "complete"},
                 {"version": "1.2.0", "name": "Target-Side Runtime Consumers", "status": "complete"},
                 {"version": "1.3.0", "name": "Energy Workbench Runtime", "status": "complete"},
-                {"version": "1.4.0", "name": "Energy Modeling & Uncertainty", "status": "current"},
+                {"version": "1.4.0", "name": "Energy Modeling & Uncertainty", "status": "complete"},
+                {"version": "1.5.0", "name": "Spatial & Global Energy Intelligence", "status": "current"},
             ],
             "content_fingerprint": self._fingerprint,
         }
@@ -1356,6 +1365,12 @@ class EnergySystemsKnowledgeFoundation:
 
     def uncertainty_study_template(self) -> dict[str, Any]:
         return self._modeling_uncertainty.study_template()
+
+    def spatial_global_framework(self) -> dict[str, Any]:
+        return self._spatial_global.framework()
+
+    def spatial_profile_template(self) -> dict[str, Any]:
+        return self._spatial_global.profile_template()
 
     def runtime_consumers(self) -> dict[str, Any]:
         return self._runtime_activation.consumers()

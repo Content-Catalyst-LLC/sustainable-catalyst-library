@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v1.4.0 — Energy Modeling & Uncertainty. */
+/** Energy Systems Intelligence v1.5.0 — Spatial & Global Energy Intelligence. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '1.4.0';
+    public const VERSION = '1.5.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v140', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v140.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v140', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v140.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v150', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v150.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v150', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v150.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -28,6 +28,8 @@ final class SC_Library_Energy_Systems_Intelligence {
         register_rest_route('sc-library/v1', '/energy-systems/runtime-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_framework']]);
         register_rest_route('sc-library/v1', '/energy-systems/modeling-uncertainty-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'modeling_uncertainty_framework']]);
         register_rest_route('sc-library/v1', '/energy-systems/uncertainty-study-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'uncertainty_study_template']]);
+        register_rest_route('sc-library/v1', '/energy-systems/spatial-global-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'spatial_global_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/spatial-profile-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'spatial_profile_template']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-targets', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_targets']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-consumers', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_consumers']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-target/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_target']]);
@@ -330,6 +332,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function runtime_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-framework'); }
     public function modeling_uncertainty_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/modeling-uncertainty-framework'); }
     public function uncertainty_study_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/uncertainty-study-template'); }
+    public function spatial_global_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/spatial-global-framework'); }
+    public function spatial_profile_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/spatial-profile-template'); }
     public function runtime_targets(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-targets'); }
     public function runtime_consumers(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-consumers'); }
     public function runtime_target(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/runtime-targets/' . rawurlencode(sanitize_key((string)$request['key']))); }
@@ -383,8 +387,8 @@ final class SC_Library_Energy_Systems_Intelligence {
             'intro' => 'Use one governed energy platform with an active Library-side runtime gateway for target-shaped handoffs into Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v140');
-        wp_enqueue_script('sc-library-energy-systems-v140');
+        wp_enqueue_style('sc-library-energy-systems-v150');
+        wp_enqueue_script('sc-library-energy-systems-v150');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -457,7 +461,7 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-biomass-to-oil-energy-endpoint="<?php echo esc_url($ep('/biomass-to-oil-energy-estimate')); ?>"
             data-bioenergy-scenario-endpoint="<?php echo esc_url($ep('/bioenergy-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Energy Modeling & Uncertainty · v1.4.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Spatial & Global Energy Intelligence · v1.5.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
@@ -468,7 +472,7 @@ final class SC_Library_Energy_Systems_Intelligence {
 
             <div class="sc-es__guardrail">
                 <strong><?php esc_html_e('Gateway activation ≠ target execution.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v1.4.0 activates seeded Energy Systems uncertainty planning and analysis in Lab v0.102.0 around explicit Workbench v6.2.0 calculations. Lab does not execute Workbench automatically, infer missing probability distributions, persist studies, rank technologies, or issue recommendations.', 'sustainable-catalyst-library'); ?>
+                <?php esc_html_e('v1.5.0 activates provenance-bound spatial and global energy intelligence in Site Intelligence v4.41.0 while retaining Workbench v6.2.0 calculation execution and Lab v0.102.0 uncertainty analysis. Spatial evidence does not establish site suitability, technical potential, grid reliability, outage status, technology rankings, or recommendations.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
@@ -500,7 +504,7 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="runtime" hidden>
-                <div class="sc-es__panel-heading"><strong>Cross-product runtime activation</strong><span>v1.4.0 preserves deterministic packet intake across all five targets, Workbench explicit arithmetic execution, and Lab uncertainty-analysis contracts. Cross-product execution remains explicit and non-automatic.</span></div>
+                <div class="sc-es__panel-heading"><strong>Cross-product runtime activation</strong><span>v1.5.0 preserves deterministic packet intake across all five targets and adds certified Site Intelligence spatial/global profiling. Workbench execution, Lab uncertainty analysis, and spatial profiling remain explicit and non-automatic.</span></div>
                 <p class="sc-es__status" data-es-runtime-status aria-live="polite">Loading runtime activation gateway…</p>
                 <div class="sc-es__runtime-summary" data-es-runtime-summary></div>
                 <div class="sc-es__cards sc-es__runtime-targets" data-es-runtime-targets></div>

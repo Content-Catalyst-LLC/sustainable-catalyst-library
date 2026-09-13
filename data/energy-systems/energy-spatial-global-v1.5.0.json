@@ -1,0 +1,37 @@
+{
+  "schema": "sc-energy-spatial-global-registry/1.0",
+  "version": "1.5.0",
+  "release": "Spatial & Global Energy Intelligence",
+  "site_intelligence": {
+    "minimum_version": "4.41.0",
+    "framework_route": "/v1/energy-spatial/framework",
+    "source_registry_route": "/v1/energy-spatial/source-registry",
+    "profile_route": "/v1/energy-spatial/profile",
+    "compare_route": "/v1/energy-spatial/compare",
+    "validation_route": "/v1/energy-spatial/validate-result"
+  },
+  "sources": [
+    "openstreetmap-power",
+    "eia-open-data",
+    "ember-electricity-data",
+    "entsoe-transparency"
+  ],
+  "spatial_outputs": [
+    "geographic-extent",
+    "focus-point-distances",
+    "feature-class-counts",
+    "technology-label-counts",
+    "year-range",
+    "source-coverage",
+    "indicator-unit-summary"
+  ],
+  "guardrails": {
+    "automatic_external_fetch": false,
+    "site_suitability_scoring": false,
+    "technical_potential_inference": false,
+    "grid_reliability_determination": false,
+    "outage_declaration": false,
+    "technology_ranking": false,
+    "automatic_recommendation": false
+  }
+}

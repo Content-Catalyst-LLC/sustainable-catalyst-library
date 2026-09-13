@@ -265,7 +265,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "1.4.0",
+            "energy_systems_domain_version": "1.5.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -285,6 +285,10 @@ def health() -> dict[str, Any]:
             "energy_modeling_uncertainty_lab_minimum_version": "0.102.0",
             "energy_modeling_uncertainty_seeded_designs": True,
             "energy_modeling_uncertainty_automatic_workbench_execution": False,
+            "energy_spatial_global_intelligence": True,
+            "energy_spatial_global_site_intelligence_minimum_version": "4.41.0",
+            "energy_spatial_global_site_suitability_scoring": False,
+            "energy_spatial_global_automatic_external_fetch": False,
             "energy_indicator_framework": True,
             "energy_indicator_definition_registry": True,
             "energy_indicator_observation_contracts": True,
@@ -856,6 +860,16 @@ def energy_systems_modeling_uncertainty_framework() -> dict[str, Any]:
 @app.get("/v1/energy-systems/uncertainty-study-template")
 def energy_systems_uncertainty_study_template() -> dict[str, Any]:
     return energy_systems.uncertainty_study_template()
+
+
+@app.get("/v1/energy-systems/spatial-global-framework")
+def energy_systems_spatial_global_framework() -> dict[str, Any]:
+    return energy_systems.spatial_global_framework()
+
+
+@app.get("/v1/energy-systems/spatial-profile-template")
+def energy_systems_spatial_profile_template() -> dict[str, Any]:
+    return energy_systems.spatial_profile_template()
 
 
 
