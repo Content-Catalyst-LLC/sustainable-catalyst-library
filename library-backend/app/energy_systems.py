@@ -14,10 +14,11 @@ from .energy_global import GlobalEnergyIntelligence
 from .energy_decision import EnergyDecisionIntelligence
 from .energy_platform import IntegratedSustainableEnergyPlatform
 from .energy_runtime import EnergyCrossProductRuntimeActivation
+from .energy_uncertainty import EnergyModelingUncertaintyRegistry
 
 
-DOMAIN_VERSION = "1.3.0"
-SCHEMA_VERSION = "sc-energy-systems-energy-workbench-runtime/1.0"
+DOMAIN_VERSION = "1.4.0"
+SCHEMA_VERSION = "sc-energy-systems-modeling-uncertainty/1.0"
 
 
 @dataclass(frozen=True)
@@ -157,6 +158,7 @@ class EnergySystemsKnowledgeFoundation:
         self._decision_intelligence = EnergyDecisionIntelligence()
         self._integrated_platform = IntegratedSustainableEnergyPlatform()
         self._runtime_activation = EnergyCrossProductRuntimeActivation()
+        self._modeling_uncertainty = EnergyModelingUncertaintyRegistry()
         self._methodology_rules = self._build_methodology_rules()
         self._handoffs = self._build_handoffs()
         self._guardrails = self._build_guardrails()
@@ -560,6 +562,7 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "integrated-platform-certification-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "v1.0.0 integrates the previously implemented Energy Systems layers into a single governed platform contract and repository-coherence certification. The certification validates expected release identities, counts, contracts, and guardrails; it is Sustainable Catalyst implementation governance, not scientific validation, live deployment certification, site suitability, or financial advice.", "current_default": False},
             {"key": "cross-product-runtime-activation-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "v1.2.0 activates target-side contract-intake consumers in Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio. Certification covers validation and deterministic receipt only; it does not certify model execution, persistence, scientific validity, ranking, or recommendation.", "current_default": False},
             {"key": "energy-workbench-runtime-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "v1.3.0 certifies explicit-input arithmetic execution in Workbench v6.2.0 for unit conversion, energy balances, generation, scenario economics, and bioenergy/carbon calculations. The runtime does not infer missing inputs, fetch market data, persist studies, rank alternatives, recommend a winner, or convert stoichiometric carbon equivalence into a carbon-credit claim.", "current_default": False},
+            {"key": "energy-modeling-uncertainty-boundary", "source_key": "ucd-module-sustainable-energy", "source_year": 2026, "rule": "v1.4.0 certifies seeded uncertainty design and statistical analysis in Lab v0.102.0 around explicit Workbench v6.2.0 results. Probability distributions, seeds, result paths, and calculation inputs must be explicit. Sensitivity ranks input influence only and is not technology ranking.", "current_default": False},
         ]
 
     @staticmethod
@@ -570,7 +573,7 @@ class EnergySystemsKnowledgeFoundation:
             {"key": "bioenergy-carbon-nature-extension", "source_concepts": ["anaerobic-digestion", "digestate", "biochar", "biomass-to-oil", "co2-to-energy", "bioenergy", "biomass"], "target": "Carbon & Nature Intelligence", "target_refs": ["soil-organic-carbon", "forest-woodland", "aboveground-biomass", "belowground-biomass", "carbon-dioxide", "methane", "nitrous-oxide", "whole-system-ghg-accounting"], "status": "cross-domain-contract-available", "boundary": "v0.8.0 preserves the validated v0.7.0 semantic/accounting bridges without fabricating quantitative carbon benefits, lifecycle results, avoided emissions, or crediting claims."},
             {"key": "energy-to-research-librarian", "source_concepts": ["energy-system", "sustainable-energy", "energy-access", "renewable-energy-share", "energy-security", "energy-indicator"], "target": "Research Librarian", "target_refs": ["energy-runtime-research-librarian-handoff", "energy-source-provenance-registry", "energy-indicator-observation-contract", "global-energy-country-profile-contract", "energy-decision-packet-contract"], "status": "runtime-gateway-active-target-consumer-certified", "boundary": "v1.2.0 certifies Research Librarian v8.1.0 contract intake. The consumer treats the packet as research context, not verified evidence, truth, or publication approval."},
             {"key": "energy-to-workbench", "source_concepts": ["energy-balance", "energy-efficiency", "cost-benefit-analysis", "cost-efficiency-analysis", "co2e", "bioenergy", "anaerobic-digestion", "biochar", "biomass-to-oil"], "target": "Workbench", "target_refs": ["energy-runtime-workbench-handoff", "energy-workbench-runtime/1.0", "energy-unit-conversion-registry", "historical-carbon-factor-registry", "energy-balance-calculation-contract", "energy-scenario-economics-calculation-contract", "bioenergy-explicit-input-calculation-contract", "global-energy-country-profile-contract"], "status": "runtime-gateway-active-explicit-execution-certified", "boundary": "v1.3.0 certifies Workbench v6.2.0 explicit-input ephemeral arithmetic execution. /consume remains non-executing; /execute must be called explicitly. Hidden defaults, automatic persistence, ranking, recommendations, market-data substitution, avoided-emissions inference, and carbon-credit claims remain prohibited."},
-            {"key": "energy-to-lab", "source_concepts": ["energy-system", "energy-balance", "energy-intensity", "renewable-resource-potential", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "soil-carbon", "forest-carbon"], "target": "Lab", "target_refs": ["renewable-technology-assessment-contract", "renewable-resource-observation-contract", "energy-balance-scenario-contract", "conversion-chain-model", "energy-economic-scenario-contract", "discounted-cash-flow-results", "bioenergy-carbon-scenario-contract", "carbon-nature-bridge-registry", "global-energy-country-profile-contract"], "status": "runtime-gateway-active-target-consumer-certified", "boundary": "v1.2.0 certifies Lab v0.101.0 contract intake for scenarios, evidence, economics and uncertainty. Intake does not execute models or establish scientific validity."},
+            {"key": "energy-to-lab", "source_concepts": ["energy-system", "renewable-energy", "energy-balance", "energy-efficiency", "bioenergy", "biological-carbon-capture-storage", "energy-security"], "target": "Lab", "target_refs": ["energy-runtime-lab-handoff", "energy-modeling-uncertainty/1.0", "energy-balance-scenario-contract", "energy-economic-scenario-contract", "bioenergy-carbon-scenario-contract", "renewable-resource-observation-contract", "global-energy-country-profile-contract"], "status": "runtime-gateway-active-modeling-uncertainty-certified", "boundary": "v1.4.0 certifies Lab v0.102.0 seeded uncertainty planning and statistical analysis around explicit Workbench v6.2.0 results. Lab does not infer missing distributions, call Workbench automatically, rank technologies, recommend a winner, or persist studies automatically."},
             {"key": "energy-to-site-intelligence", "source_concepts": ["energy-access", "energy-mix", "renewable-energy-share", "energy-security", "renewable-resource-potential", "bioenergy", "forest-carbon"], "target": "Site Intelligence", "target_refs": ["global-energy-country-profile-contract", "global-energy-metric-observation", "world-bank-wdi-live-connector", "renewable-resource-observation-contract", "biomass-feedstock-observation-contract", "bioenergy-geography-contract"], "status": "runtime-gateway-active-target-consumer-certified", "boundary": "v1.2.0 certifies Site Intelligence v4.40.0 contract intake for dated country-energy and resource observations. Intake does not infer project suitability or hide observation-year lag."},
             {"key": "energy-to-decision-studio", "source_concepts": ["energy-prosperity-environment-dilemma", "cost-benefit-analysis", "cost-efficiency-analysis", "bioenergy", "biological-carbon-capture-storage", "energy-security", "energy-access"], "target": "Decision Studio", "target_refs": ["energy-decision-packet-contract", "energy-decision-comparison-matrix", "energy-decision-readiness-contract", "energy-economic-scenario-contract", "energy-cost-benefit-result", "energy-cost-efficiency-result", "energy-npv-result", "bioenergy-carbon-scenario-contract", "carbon-nature-accounting-handoff", "global-energy-country-profile-contract", "global-energy-comparison-contract"], "status": "runtime-gateway-active-target-consumer-certified", "boundary": "v1.2.0 certifies Decision Studio v2.3.0 contract intake around the governed Energy Decision Intelligence packet. Intake does not normalize unlike evidence, assign hidden weights, rank alternatives, select a winner, recommend investments, or make policy choices."},
         ]
@@ -761,6 +764,9 @@ class EnergySystemsKnowledgeFoundation:
         runtime_framework = self._runtime_activation.framework()
         if runtime_framework["counts"]["external_runtime_targets"] != 5 or runtime_framework["counts"]["target_packet_builders"] != 5:
             raise ValueError("Cross-product runtime activation gateway is incomplete")
+        uncertainty_framework = self._modeling_uncertainty.framework()
+        if len(uncertainty_framework["sampling_designs"]) != 2 or len(uncertainty_framework["distributions"]) != 4:
+            raise ValueError("Energy modeling & uncertainty registry is incomplete")
 
     def _content_fingerprint(self) -> str:
         content = {
@@ -783,6 +789,7 @@ class EnergySystemsKnowledgeFoundation:
             "energy_decision_intelligence": self._decision_intelligence.export(),
             "integrated_sustainable_energy_platform": self._integrated_platform.export(),
             "cross_product_runtime_activation": self._runtime_activation.export(),
+            "energy_modeling_uncertainty": self._modeling_uncertainty.framework(),
             "methodology_rules": self._methodology_rules,
             "handoffs": self._handoffs,
             "guardrails": self._guardrails,
@@ -796,11 +803,11 @@ class EnergySystemsKnowledgeFoundation:
             "subsystem": {
                 "name": "Energy Systems Intelligence",
                 "version": DOMAIN_VERSION,
-                "release": "Energy Workbench Runtime",
+                "release": "Energy Modeling & Uncertainty",
                 "library_version": "5.11.0",
-                "backend_version": "2.19.0",
+                "backend_version": "2.20.0",
                 "read_only": True,
-                "calculation_mode": "integrated-provenance-bound-energy-platform-with-explicit-workbench-execution",
+                "calculation_mode": "integrated-provenance-bound-energy-platform-with-explicit-workbench-execution-and-lab-uncertainty-analysis",
             },
             "counts": {
                 "concepts": len(self._concepts),
@@ -852,6 +859,8 @@ class EnergySystemsKnowledgeFoundation:
                 "runtime_handoff_packet_builders": self._runtime_activation.framework()["counts"]["target_packet_builders"],
                 "runtime_pull_handoff_contracts": self._runtime_activation.framework()["counts"]["pull_handoff_contracts"],
                 "runtime_target_runtimes_certified_active": self._runtime_activation.framework()["counts"]["target_runtimes_certified_active"],
+                "energy_uncertainty_sampling_designs": len(self._modeling_uncertainty.framework()["sampling_designs"]),
+                "energy_uncertainty_distributions": len(self._modeling_uncertainty.framework()["distributions"]),
                 "methodology_rules": len(self._methodology_rules),
             },
             "knowledge_domains": self._knowledge_domains,
@@ -865,11 +874,13 @@ class EnergySystemsKnowledgeFoundation:
             "energy_decision_intelligence": self._decision_intelligence.framework(),
             "integrated_sustainable_energy_platform": self._integrated_platform.framework(),
             "cross_product_runtime_activation": self._runtime_activation.framework(),
+            "energy_modeling_uncertainty": self._modeling_uncertainty.framework(),
             "roadmap": [
                 {"version": "1.0.0", "name": "Integrated Sustainable Energy Systems Platform", "status": "certified-baseline"},
                 {"version": "1.1.0", "name": "Cross-Product Runtime Activation Gateway", "status": "complete"},
                 {"version": "1.2.0", "name": "Target-Side Runtime Consumers", "status": "complete"},
-                {"version": "1.3.0", "name": "Energy Workbench Runtime", "status": "current"},
+                {"version": "1.3.0", "name": "Energy Workbench Runtime", "status": "complete"},
+                {"version": "1.4.0", "name": "Energy Modeling & Uncertainty", "status": "current"},
             ],
             "content_fingerprint": self._fingerprint,
         }
@@ -1339,6 +1350,12 @@ class EnergySystemsKnowledgeFoundation:
 
     def runtime_framework(self) -> dict[str, Any]:
         return self._runtime_activation.framework()
+
+    def modeling_uncertainty_framework(self) -> dict[str, Any]:
+        return self._modeling_uncertainty.framework()
+
+    def uncertainty_study_template(self) -> dict[str, Any]:
+        return self._modeling_uncertainty.study_template()
 
     def runtime_consumers(self) -> dict[str, Any]:
         return self._runtime_activation.consumers()

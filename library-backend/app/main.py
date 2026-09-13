@@ -265,7 +265,7 @@ def health() -> dict[str, Any]:
             "afolu_policy_market_freshness_flags": True,
             "automatic_afolu_research_conclusion_generation": False,
             "energy_systems_intelligence": True,
-            "energy_systems_domain_version": "1.3.0",
+            "energy_systems_domain_version": "1.4.0",
             "sustainable_energy_knowledge_foundation": True,
             "energy_concept_registry": True,
             "energy_relationship_registry": True,
@@ -281,6 +281,10 @@ def health() -> dict[str, Any]:
             "energy_source_bound_heat_content_calculator": True,
             "energy_current_factor_defaults": False,
             "energy_workbench_execution": True,
+            "energy_modeling_uncertainty": True,
+            "energy_modeling_uncertainty_lab_minimum_version": "0.102.0",
+            "energy_modeling_uncertainty_seeded_designs": True,
+            "energy_modeling_uncertainty_automatic_workbench_execution": False,
             "energy_indicator_framework": True,
             "energy_indicator_definition_registry": True,
             "energy_indicator_observation_contracts": True,
@@ -842,6 +846,16 @@ def energy_systems_platform_certification() -> dict[str, Any]:
 @app.get("/v1/energy-systems/runtime-framework")
 def energy_systems_runtime_framework() -> dict[str, Any]:
     return energy_systems.runtime_framework()
+
+
+@app.get("/v1/energy-systems/modeling-uncertainty-framework")
+def energy_systems_modeling_uncertainty_framework() -> dict[str, Any]:
+    return energy_systems.modeling_uncertainty_framework()
+
+
+@app.get("/v1/energy-systems/uncertainty-study-template")
+def energy_systems_uncertainty_study_template() -> dict[str, Any]:
+    return energy_systems.uncertainty_study_template()
 
 
 

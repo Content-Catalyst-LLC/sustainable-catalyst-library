@@ -5,8 +5,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-MODEL_VERSION = "1.3.0"
-SCHEMA_VERSION = "sc-energy-cross-product-runtime-activation/1.2"
+MODEL_VERSION = "1.4.0"
+SCHEMA_VERSION = "sc-energy-cross-product-runtime-activation/1.3"
 
 
 @dataclass(frozen=True)
@@ -32,11 +32,11 @@ class EnergyRuntimeTarget:
 
 
 class EnergyCrossProductRuntimeActivation:
-    """Stateless cross-product handoff gateway for Energy Systems Intelligence v1.3.0.
+    """Stateless cross-product handoff gateway for Energy Systems Intelligence v1.4.0.
 
     The Library now does more than publish static cross-product contracts: it can build
     deterministic, target-shaped handoff packets from the v1.0.0 integrated study
-    contract. The Library remains a pull-oriented gateway. v1.3.0 additionally certifies explicit-input arithmetic execution in Workbench v6.2.0; the Library itself does not perform outbound delivery, persistence, or execution.
+    contract. The Library remains a pull-oriented gateway. v1.4.0 additionally certifies Lab v0.102.0 seeded uncertainty planning and statistical analysis around explicitly executed Workbench v6.2.0 results; the Library itself does not perform outbound delivery, persistence, sampling, or execution.
     """
 
     def __init__(self) -> None:
@@ -61,8 +61,13 @@ class EnergyCrossProductRuntimeActivation:
                 "Transfer explicit energy scenarios, resource observations, uncertainty, economics and biological-carbon context into a modeling-ready packet.",
                 ("energy-balance-scenario-contract", "energy-economic-scenario-contract", "bioenergy-carbon-scenario-contract", "renewable-resource-observation-contract"),
                 ("identity", "technologies_and_resources", "energy_balance", "economics", "bioenergy_and_carbon", "uncertainty", "provenance", "review"),
-                "sc-energy-runtime-lab-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "0.101.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
-                "The packet is modeling-ready evidence transport, not simulation execution. Lab remains responsible for model assumptions, diagnostics and outputs.",
+                "sc-energy-runtime-lab-handoff/1.0", "pull-get-json", "library-gateway-active", "certified-contract-intake", "0.102.0", "/v1/energy-runtime/consumer", "/v1/energy-runtime/consume",
+                "Lab v0.102.0 can explicitly plan and analyze seeded Energy Systems uncertainty studies around Workbench outputs. It does not execute Workbench automatically, infer distributions, rank technologies, recommend a winner, or persist the study automatically.",
+                "certified-energy-modeling-and-uncertainty",
+                "/v1/energy-modeling/framework",
+                "/v1/energy-modeling/plan",
+                "/v1/energy-modeling/analyze",
+                "/v1/energy-modeling/validate-result",
             ),
             T(
                 "workbench", "Workbench",
@@ -97,14 +102,14 @@ class EnergyCrossProductRuntimeActivation:
 
     def _validate_registry(self) -> None:
         if len(self._targets) != 5:
-            raise ValueError("Energy Systems v1.3.0 requires five external runtime targets")
+            raise ValueError("Energy Systems v1.4.0 requires five external runtime targets")
         if len({x.key for x in self._targets}) != len(self._targets):
             raise ValueError("Runtime target keys must be unique")
         for target in self._targets:
             if target.gateway_state != "library-gateway-active":
-                raise ValueError("Every v1.3.0 target must expose an active Library gateway")
+                raise ValueError("Every v1.4.0 target must expose an active Library gateway")
             if target.target_runtime_state != "certified-contract-intake":
-                raise ValueError("Every v1.3.0 target must expose certified contract intake")
+                raise ValueError("Every v1.4.0 target must expose certified contract intake")
 
     def guardrails(self) -> dict[str, Any]:
         return {
@@ -124,7 +129,10 @@ class EnergyCrossProductRuntimeActivation:
             "study_payload_mutated": False,
             "target_product_runtimes_modified_by_this_release": True,
             "target_contract_intake_certified": True,
-            "target_model_execution_certified": False,
+            "target_model_execution_certified": True,
+            "lab_energy_modeling_uncertainty_certified": True,
+            "lab_minimum_runtime_version": "0.102.0",
+            "automatic_lab_to_workbench_execution": False,
             "workbench_explicit_calculation_execution_certified": True,
             "workbench_minimum_runtime_version": "6.2.0",
             "automatic_workbench_execution": False,
@@ -139,16 +147,17 @@ class EnergyCrossProductRuntimeActivation:
             "ok": True,
             "schema": SCHEMA_VERSION,
             "version": MODEL_VERSION,
-            "release": "Energy Workbench Runtime",
+            "release": "Energy Modeling & Uncertainty",
             "counts": {
                 "external_runtime_targets": len(self._targets),
                 "target_packet_builders": len(self._targets),
                 "pull_handoff_contracts": len(self._targets),
                 "target_runtimes_certified_active": len(self._targets),
                 "explicit_execution_targets": 1,
+                "modeling_analysis_targets": 1,
             },
             "targets": [x.target for x in self._targets],
-            "transport": "stateless-pull-oriented-json-with-target-intake-and-explicit-workbench-execution",
+            "transport": "stateless-pull-oriented-json-with-target-intake-explicit-workbench-execution-and-lab-uncertainty-analysis",
             "guardrails": self.guardrails(),
             "content_fingerprint": self._fingerprint,
         }
@@ -297,8 +306,10 @@ class EnergyCrossProductRuntimeActivation:
             "target": {"key": target_obj.key, "product": target_obj.target},
             **result,
             "interpretation": (
-                "Runtime readiness reports packet completeness. Workbench v6.2.0 is certified for explicit-input Energy Systems arithmetic when execution is explicitly requested; other targets remain intake-only. No automatic execution, persistence, ranking, recommendation, scientific validity, or decision quality is certified."
+                "Runtime readiness reports packet completeness. Workbench v6.2.0 is certified for explicit-input Energy Systems arithmetic when execution is explicitly requested. No automatic execution, persistence, ranking, recommendation, scientific validity, or decision quality is certified."
                 if target_obj.key == "workbench" else
+                "Runtime readiness reports packet completeness. Lab v0.102.0 is certified for explicit seeded uncertainty planning and statistical analysis of returned Workbench results. Lab does not call Workbench automatically, infer missing distributions, rank technologies, recommend a winner, or persist automatically."
+                if target_obj.key == "lab" else
                 "Runtime readiness reports packet completeness. Target-side contract intake is certified at the listed minimum version; execution, persistence, scientific validity, ranking, recommendation, and decision quality are not certified."
             ),
         }
@@ -327,7 +338,7 @@ class EnergyCrossProductRuntimeActivation:
             "schema": "sc-energy-runtime-handoff/1.0",
             "version": MODEL_VERSION,
             "packet": packet,
-            "delivery": {"mode": "pull-only", "outbound_delivery_performed": False, "persistence_performed": False, "target_execution_claimed": key == "workbench", "execution_is_automatic": False},
+            "delivery": {"mode": "pull-only", "outbound_delivery_performed": False, "persistence_performed": False, "target_execution_claimed": key in {"workbench", "lab"}, "execution_is_automatic": False},
             "guardrail": target_obj.boundary,
         }
 
@@ -355,7 +366,7 @@ class EnergyCrossProductRuntimeActivation:
                     },
                 } for x in self._targets
             ],
-            "certification_scope": "All five targets: schema/target/payload intake, deterministic receipt, and provenance preservation. Workbench v6.2.0 additionally certifies explicit-input ephemeral calculation execution through its execution routes; automatic execution, persistence, ranking, recommendation, and scientific assurance remain excluded.",
+            "certification_scope": "All five targets: schema/target/payload intake, deterministic receipt, and provenance preservation. Workbench v6.2.0 certifies explicit-input ephemeral calculation execution. Lab v0.102.0 additionally certifies seeded uncertainty planning and statistical analysis around returned Workbench result packets; cross-service execution remains explicit and non-automatic, and persistence, technology ranking, recommendations, and scientific assurance remain excluded.",
         }
 
     def export(self) -> dict[str, Any]:

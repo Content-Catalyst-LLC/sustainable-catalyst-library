@@ -1,4 +1,4 @@
-Energy Systems Intelligence v1.3.0 adds the Energy Workbench Runtime. Workbench v6.2.0 can explicitly execute fourteen source-bound calculation operations for unit conversion, energy balances, generation, economics, and bioenergy/carbon arithmetic. Handoff intake remains non-executing; execution must be explicitly requested. Hidden defaults, automatic persistence, ranking, winner selection, recommendations, market-price fetching, avoided-emissions inference, and carbon-credit claims remain disabled.
+Energy Systems Intelligence v1.4.0 adds Energy Modeling & Uncertainty. Lab v0.102.0 designs reproducible seeded uncertainty studies around explicit Workbench v6.2.0 calculations and analyzes returned results without automatic cross-product execution, persistence, technology ranking, or recommendations.
 
 === Sustainable Catalyst Library ===
 Contributors: contentcatalyst

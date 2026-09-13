@@ -1,9 +1,9 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Energy Systems Intelligence v1.3.0 — Energy Workbench Runtime. */
+/** Energy Systems Intelligence v1.4.0 — Energy Modeling & Uncertainty. */
 final class SC_Library_Energy_Systems_Intelligence {
-    public const VERSION = '1.3.0';
+    public const VERSION = '1.4.0';
     public const SHORTCODE = 'sc_energy_systems_intelligence';
 
     public function register_hooks(): void {
@@ -13,8 +13,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     }
 
     public function register_assets(): void {
-        wp_register_style('sc-library-energy-systems-v130', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v130.css', [], self::VERSION);
-        wp_register_script('sc-library-energy-systems-v130', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v130.js', [], self::VERSION, true);
+        wp_register_style('sc-library-energy-systems-v140', SC_LIBRARY_URL . 'assets/css/sc-library-energy-systems-v140.css', [], self::VERSION);
+        wp_register_script('sc-library-energy-systems-v140', SC_LIBRARY_URL . 'assets/js/sc-library-energy-systems-v140.js', [], self::VERSION, true);
     }
 
     public function register_routes(): void {
@@ -26,6 +26,8 @@ final class SC_Library_Energy_Systems_Intelligence {
         register_rest_route('sc-library/v1', '/energy-systems/platform-study-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'platform_study_template']]);
         register_rest_route('sc-library/v1', '/energy-systems/platform-certification', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'platform_certification']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/modeling-uncertainty-framework', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'modeling_uncertainty_framework']]);
+        register_rest_route('sc-library/v1', '/energy-systems/uncertainty-study-template', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'uncertainty_study_template']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-targets', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_targets']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-consumers', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_consumers']]);
         register_rest_route('sc-library/v1', '/energy-systems/runtime-target/(?P<key>[a-z0-9-]+)', ['methods' => $readable, 'permission_callback' => $open, 'callback' => [$this, 'runtime_target']]);
@@ -326,6 +328,8 @@ final class SC_Library_Energy_Systems_Intelligence {
     public function platform_study_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/platform-study-template'); }
     public function platform_certification(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/platform-certification'); }
     public function runtime_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-framework'); }
+    public function modeling_uncertainty_framework(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/modeling-uncertainty-framework'); }
+    public function uncertainty_study_template(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/uncertainty-study-template'); }
     public function runtime_targets(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-targets'); }
     public function runtime_consumers(WP_REST_Request $request) { unset($request); return $this->proxy('/v1/energy-systems/runtime-consumers'); }
     public function runtime_target(WP_REST_Request $request) { return $this->proxy('/v1/energy-systems/runtime-targets/' . rawurlencode(sanitize_key((string)$request['key']))); }
@@ -379,8 +383,8 @@ final class SC_Library_Energy_Systems_Intelligence {
             'intro' => 'Use one governed energy platform with an active Library-side runtime gateway for target-shaped handoffs into Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio.',
         ], $atts, self::SHORTCODE);
 
-        wp_enqueue_style('sc-library-energy-systems-v130');
-        wp_enqueue_script('sc-library-energy-systems-v130');
+        wp_enqueue_style('sc-library-energy-systems-v140');
+        wp_enqueue_script('sc-library-energy-systems-v140');
 
         $ep = static fn(string $path): string => rest_url('sc-library/v1/energy-systems' . $path);
         ob_start(); ?>
@@ -453,7 +457,7 @@ final class SC_Library_Energy_Systems_Intelligence {
             data-biomass-to-oil-energy-endpoint="<?php echo esc_url($ep('/biomass-to-oil-energy-estimate')); ?>"
             data-bioenergy-scenario-endpoint="<?php echo esc_url($ep('/bioenergy-scenario-template')); ?>">
             <header class="sc-es__header">
-                <p class="sc-es__kicker"><?php esc_html_e('Energy Workbench Runtime · v1.3.0', 'sustainable-catalyst-library'); ?></p>
+                <p class="sc-es__kicker"><?php esc_html_e('Energy Modeling & Uncertainty · v1.4.0', 'sustainable-catalyst-library'); ?></p>
                 <h2><?php echo esc_html((string)$atts['title']); ?></h2>
                 <p><?php echo esc_html((string)$atts['intro']); ?></p>
             </header>
@@ -464,11 +468,12 @@ final class SC_Library_Energy_Systems_Intelligence {
 
             <div class="sc-es__guardrail">
                 <strong><?php esc_html_e('Gateway activation ≠ target execution.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v1.3.0 adds explicit-input, ephemeral energy calculation execution in Workbench v6.2.0 while preserving the five-target runtime gateway. Workbench execution is never automatic and does not persist studies, infer hidden defaults, rank alternatives, or issue recommendations.', 'sustainable-catalyst-library'); ?>
+                <?php esc_html_e('v1.4.0 activates seeded Energy Systems uncertainty planning and analysis in Lab v0.102.0 around explicit Workbench v6.2.0 calculations. Lab does not execute Workbench automatically, infer missing probability distributions, persist studies, rank technologies, or issue recommendations.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
-                <button type="button" class="sc-es__mode is-active" data-es-mode="runtime" role="tab" aria-selected="true">Runtime Activation</button>
+                <button type="button" class="sc-es__mode is-active" data-es-mode="uncertainty" role="tab" aria-selected="true">Modeling &amp; Uncertainty</button>
+                <button type="button" class="sc-es__mode" data-es-mode="runtime" role="tab" aria-selected="false">Runtime Activation</button>
                 <button type="button" class="sc-es__mode" data-es-mode="platform" role="tab" aria-selected="false">Integrated Platform</button>
                 <button type="button" class="sc-es__mode" data-es-mode="decision" role="tab" aria-selected="false">Decision Intelligence</button>
                 <button type="button" class="sc-es__mode" data-es-mode="global" role="tab" aria-selected="false">Global Intelligence</button>
@@ -484,8 +489,18 @@ final class SC_Library_Energy_Systems_Intelligence {
                 <button type="button" class="sc-es__mode" data-es-mode="handoffs" role="tab" aria-selected="false">Platform Handoffs</button>
             </div>
 
-            <div class="sc-es__panel" data-es-panel="runtime">
-                <div class="sc-es__panel-heading"><strong>Energy Workbench Runtime</strong><span>v1.3.0 preserves deterministic packet intake across all five targets and certifies explicit-input arithmetic execution in Workbench v6.2.0. Execution requires an explicit Workbench call and remains ephemeral, non-ranking, and non-recommending.</span></div>
+            <div class="sc-es__panel is-active" data-es-panel="uncertainty">
+                <div class="sc-es__panel-heading"><strong>Energy Modeling &amp; Uncertainty</strong><span>Design reproducible uncertainty studies in Lab v0.102.0 around explicit Workbench v6.2.0 calculations. Distributions, sampling seed, calculation inputs, and output path remain explicit.</span></div>
+                <div class="sc-es__cards">
+                    <article><h3>Seeded sampling</h3><p>Monte Carlo and Latin hypercube designs using uniform, normal, lognormal, or triangular input distributions.</p></article>
+                    <article><h3>Uncertainty analysis</h3><p>Empirical distributions, central intervals, threshold probabilities, and reproducible result identities.</p></article>
+                    <article><h3>Input influence</h3><p>Pearson, Spearman, and standardized-regression sensitivity describe input influence only—not technology ranking.</p></article>
+                </div>
+                <p class="sc-es__microcopy">Library structures the study; Lab plans and analyzes uncertainty; Workbench executes source-bound arithmetic only when explicitly called. No automatic cross-product execution or recommendation occurs.</p>
+            </div>
+
+            <div class="sc-es__panel" data-es-panel="runtime" hidden>
+                <div class="sc-es__panel-heading"><strong>Cross-product runtime activation</strong><span>v1.4.0 preserves deterministic packet intake across all five targets, Workbench explicit arithmetic execution, and Lab uncertainty-analysis contracts. Cross-product execution remains explicit and non-automatic.</span></div>
                 <p class="sc-es__status" data-es-runtime-status aria-live="polite">Loading runtime activation gateway…</p>
                 <div class="sc-es__runtime-summary" data-es-runtime-summary></div>
                 <div class="sc-es__cards sc-es__runtime-targets" data-es-runtime-targets></div>

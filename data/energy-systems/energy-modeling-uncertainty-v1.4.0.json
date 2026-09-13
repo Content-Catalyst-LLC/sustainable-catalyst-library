@@ -1,0 +1,60 @@
+{
+  "analysis_outputs": [
+    "empirical-summary-statistics",
+    "central-uncertainty-interval",
+    "explicit-threshold-probabilities",
+    "pearson-input-sensitivity",
+    "spearman-input-sensitivity",
+    "standardized-regression-input-sensitivity"
+  ],
+  "content_fingerprint": "f9207fc2a2cc257a433bdad515adcdda88280534f6602055cfba7c5fbd80f8c5",
+  "distributions": [
+    "uniform",
+    "normal",
+    "lognormal",
+    "triangular"
+  ],
+  "execution_authorities": {
+    "lab": {
+      "analysis_route": "/v1/energy-modeling/analyze",
+      "framework_route": "/v1/energy-modeling/framework",
+      "minimum_version": "0.102.0",
+      "plan_route": "/v1/energy-modeling/plan",
+      "role": "seeded uncertainty design and statistical analysis of explicit Workbench results",
+      "validation_route": "/v1/energy-modeling/validate-result"
+    },
+    "workbench": {
+      "execute_route": "/v1/energy-runtime/execute",
+      "minimum_version": "6.2.0",
+      "role": "source-bound explicit-input energy arithmetic"
+    }
+  },
+  "guardrails": {
+    "automatic_persistence": false,
+    "automatic_recommendation": false,
+    "automatic_workbench_execution": false,
+    "avoided_emissions_inference": false,
+    "carbon_credit_claiming": false,
+    "explicit_distributions_required": true,
+    "explicit_result_path_required": true,
+    "explicit_seed_required": true,
+    "hidden_defaults_allowed": false,
+    "market_data_fetch": false,
+    "technology_ranking": false
+  },
+  "ok": true,
+  "release": "Energy Modeling & Uncertainty",
+  "sampling_designs": [
+    "monte-carlo",
+    "latin-hypercube"
+  ],
+  "schema": "sc-energy-modeling-uncertainty-registry/1.0",
+  "version": "1.4.0",
+  "workflow": [
+    "Library structures evidence, provenance, and explicit uncertainty study intent.",
+    "Lab creates a deterministic seeded evaluation plan; it does not execute Workbench automatically.",
+    "Workbench explicitly evaluates each sampled input set using the v1.3.0 calculation runtime.",
+    "Lab analyzes the returned Workbench result packet and preserves provenance and review context.",
+    "Human review remains required before interpretation, publication, or decision use."
+  ]
+}
