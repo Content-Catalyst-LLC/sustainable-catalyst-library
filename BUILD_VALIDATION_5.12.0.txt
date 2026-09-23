@@ -1,0 +1,42 @@
+Sustainable Catalyst Library v5.12.0 — Platform Core Research Bridge
+Backend v2.23.0
+Validation result: PASS
+
+Versioning:
+- Requested roadmap label: v5.10.0
+- Supplied repository already contains v5.10.0 Institutional Research Network II
+- Supplied repository current WordPress line: v5.11.0
+- Release emitted monotonically as v5.12.0
+
+New release validation:
+- 6 repository/static integration tests passed
+- 7 backend Platform Core bridge unit tests passed
+
+Retained regression validation:
+- v5.11.0 Private Organizational Knowledge: 7 passed, 2 historical identity/readme assertions deselected
+- v5.10.0 Institutional Research Network II: 7 passed, 1 historical identity assertion deselected
+- v5.9.1 Biomedical Evidence Graph Reliability: 5 passed, 1 historical identity assertion deselected
+
+Static gates:
+- Python compileall: PASS
+- WordPress main plugin PHP lint: PASS
+- Python Backend bridge PHP lint: PASS
+- Supplied Platform Core v3.3.0 route cross-check: PASS (8/8 capability probes match router contracts)
+
+Key v5.12.0 contracts verified:
+- WordPress identity 5.12.0
+- backend identity 2.23.0
+- Core public base URL defaults to https://core.sustainablecatalyst.com
+- eight Core research/reasoning readiness probes
+- reviewed Core write-operation allowlist
+- X-SC-API-Key server-only Core write authentication
+- arbitrary Core path proxying disabled
+- durable library_core_bindings registry
+- idempotent library_core_sync_outbox
+- deterministic SHA-256 payload/idempotency fingerprints
+- FOR UPDATE SKIP LOCKED queue claim pattern
+- raw chunks remain Library-local
+- automatic truth promotion disabled
+- automatic claim promotion disabled
+- explicit governed promotion required
+- WordPress receives readiness only; Core write secret remains backend-only

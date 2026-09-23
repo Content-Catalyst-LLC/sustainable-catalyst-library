@@ -95,6 +95,7 @@ final class SC_Library_Python_Backend {
     public function render_admin_page(): void {
         if (!current_user_can('manage_options')) { return; }
         $health = self::health();
+        $core = self::platform_core_readiness();
         $last = get_option('sc_library_backend_last_sync', []);
         $checkpoint = get_option('sc_library_backend_sync_checkpoint', []);
         $has_failures = is_array($checkpoint) && !empty($checkpoint['failed_record_ids']);
@@ -118,6 +119,9 @@ final class SC_Library_Python_Backend {
             <hr>
             <h2><?php esc_html_e('Service state', 'sustainable-catalyst-library'); ?></h2>
             <pre style="max-width:1100px;overflow:auto;background:#fff;border:1px solid #ccd0d4;padding:12px;"><?php echo esc_html(wp_json_encode($health, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
+            <h2><?php esc_html_e('Platform Core Research Bridge', 'sustainable-catalyst-library'); ?></h2>
+            <p><?php esc_html_e('Library retains source ingestion, parsing, indexing, and retrieval. Platform Core owns governed research objects, evidence/provenance, reasoning, synthesis, and cross-product exchange.', 'sustainable-catalyst-library'); ?></p>
+            <pre style="max-width:1100px;overflow:auto;background:#fff;border:1px solid #ccd0d4;padding:12px;"><?php echo esc_html(wp_json_encode($core, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
             <?php if (self::configured()) : ?>
                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline-block;margin-right:8px;">
                     <input type="hidden" name="action" value="sc_library_backend_sync_all">
@@ -147,6 +151,11 @@ final class SC_Library_Python_Backend {
                 unset($health['database_detail']);
                 return rest_ensure_response($health);
             },
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/platform-core/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => static function () { return rest_ensure_response(self::platform_core_readiness()); },
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/search', [
             'methods' => WP_REST_Server::READABLE,
@@ -191,6 +200,26 @@ final class SC_Library_Python_Backend {
             'ingest_limits' => $body['ingest_limits'] ?? [],
             'database_detail' => $body['database_detail'] ?? null,
         ];
+    }
+
+    public static function platform_core_readiness(): array {
+        if (!self::configured()) {
+            return ['ok' => false, 'configured' => false, 'state' => 'library_backend_not_configured'];
+        }
+        $response = wp_remote_get(self::base_url() . '/v1/platform-core/readiness', [
+            'timeout' => self::timeout(),
+            'redirection' => 0,
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        if (is_wp_error($response)) {
+            return ['ok' => false, 'configured' => true, 'state' => 'unavailable', 'error' => $response->get_error_message()];
+        }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($body)) { $body = []; }
+        $body['ok'] = 200 === $code && !empty($body['reachable']);
+        $body['state'] = $body['ok'] ? 'ready' : (!empty($body['configured']) ? 'degraded' : 'not_configured');
+        return $body;
     }
 
     public function proxy_search(WP_REST_Request $request) {

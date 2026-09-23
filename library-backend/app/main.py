@@ -30,6 +30,18 @@ from .institutional_research_network import InstitutionalResearchNetwork
 from .carbon_nature import CarbonNatureKnowledgeFoundation
 from .energy_systems import EnergySystemsKnowledgeFoundation
 from .energy_global import GlobalEnergyDataError
+from .platform_core import (
+    CoreBindingRequest,
+    CoreOutboxRequest,
+    bridge_readiness,
+    default_client as platform_core_client,
+    enqueue_operation as enqueue_core_operation,
+    list_bindings as list_core_bindings,
+    outbox_status as core_outbox_status,
+    process_outbox_once as process_core_outbox_once,
+    reconcile_binding as reconcile_core_binding,
+    upsert_binding as upsert_core_binding,
+)
 from .private_knowledge import (
     PrivateHandoffRequest,
     PrivateKnowledgeIngestRequest,
@@ -167,6 +179,11 @@ def health() -> dict[str, Any]:
             "record_chunks": True,
             "provenance": True,
             "knowledge_graph": True,
+            "platform_core_research_bridge": True,
+            "platform_core_governed_promotion": True,
+            "platform_core_idempotent_outbox": True,
+            "platform_core_durable_bindings": True,
+            "platform_core_automatic_truth_promotion": False,
             "record_timeline": True,
             "facets": True,
             "signed_ingestion": True,
@@ -389,6 +406,95 @@ def health() -> dict[str, Any]:
         },
         "time": datetime.now(timezone.utc).isoformat(),
     }
+
+
+@app.get("/v1/platform-core/readiness")
+def platform_core_readiness() -> dict[str, Any]:
+    return bridge_readiness()
+
+
+@app.get("/v1/platform-core/capabilities")
+def platform_core_capabilities() -> dict[str, Any]:
+    return platform_core_client().capabilities()
+
+
+@app.post("/v1/platform-core/bindings")
+async def platform_core_binding_upsert(
+    payload: CoreBindingRequest,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    return upsert_core_binding(payload)
+
+
+@app.get("/v1/platform-core/bindings/{library_record_id:path}")
+async def platform_core_binding_list(
+    library_record_id: str,
+    request: Request,
+    limit: int = Query(default=100, ge=1, le=500),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    return list_core_bindings(library_record_id, limit=limit)
+
+
+@app.post("/v1/platform-core/outbox")
+async def platform_core_outbox_enqueue(
+    payload: CoreOutboxRequest,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    return enqueue_core_operation(payload)
+
+
+@app.get("/v1/platform-core/outbox")
+async def platform_core_outbox_read(
+    request: Request,
+    limit: int = Query(default=100, ge=1, le=500),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    return core_outbox_status(limit=limit)
+
+
+@app.post("/v1/platform-core/outbox/run-once")
+async def platform_core_outbox_run_once(
+    request: Request,
+    limit: int = Query(default=25, ge=1, le=100),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return process_core_outbox_once(limit=limit)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.post("/v1/platform-core/reconcile/{library_record_id:path}")
+async def platform_core_reconcile(
+    library_record_id: str,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return reconcile_core_binding(library_record_id)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @app.get("/ready")

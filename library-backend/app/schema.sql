@@ -201,3 +201,47 @@ CREATE TABLE IF NOT EXISTS library_private_access_events (
 );
 CREATE INDEX IF NOT EXISTS library_private_access_events_idx ON library_private_access_events(org_key, created_at DESC);
 CREATE INDEX IF NOT EXISTS library_private_access_record_idx ON library_private_access_events(private_record_key, created_at DESC);
+
+-- v2.23.0 — Platform Core Research Bridge.
+-- Library retains raw source/chunk/index state. Only governed, explicit promotion
+-- operations enter this bridge; Core remains authoritative for Core object IDs.
+CREATE TABLE IF NOT EXISTS library_core_bindings (
+    binding_id bigserial PRIMARY KEY,
+    library_record_id text NOT NULL,
+    library_object_type text NOT NULL DEFAULT 'document',
+    core_object_id text NOT NULL,
+    core_object_type text NOT NULL,
+    core_canonical_uri text NOT NULL DEFAULT '',
+    content_hash char(64),
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    sync_status text NOT NULL DEFAULT 'synced' CHECK (sync_status IN ('pending','synced','stale','error')),
+    last_synced_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE(library_record_id, core_object_id)
+);
+CREATE INDEX IF NOT EXISTS library_core_bindings_record_idx ON library_core_bindings(library_record_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS library_core_bindings_core_idx ON library_core_bindings(core_object_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS library_core_bindings_status_idx ON library_core_bindings(sync_status, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_core_sync_outbox (
+    event_id bigserial PRIMARY KEY,
+    library_record_id text,
+    operation text NOT NULL,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    payload_hash char(64) NOT NULL,
+    idempotency_key varchar(128) NOT NULL UNIQUE,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','processing','retry','complete','failed','cancelled')),
+    attempt_count integer NOT NULL DEFAULT 0 CHECK (attempt_count >= 0),
+    next_attempt_at timestamptz NOT NULL DEFAULT now(),
+    last_http_status integer,
+    last_error text,
+    core_object_id text,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    processed_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS library_core_sync_outbox_queue_idx ON library_core_sync_outbox(status, next_attempt_at, created_at);
+CREATE INDEX IF NOT EXISTS library_core_sync_outbox_record_idx ON library_core_sync_outbox(library_record_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS library_core_sync_outbox_core_idx ON library_core_sync_outbox(core_object_id, created_at DESC);

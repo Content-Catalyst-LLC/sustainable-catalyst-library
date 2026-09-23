@@ -1,3 +1,11 @@
+# Sustainable Catalyst Library v5.12.0 — Platform Core Research Bridge
+
+Knowledge Library v5.12.0 makes Platform Core a first-class governed dependency. The Library backend remains responsible for source ingestion, parsing, chunks, indexing, retrieval, connectors, and document intelligence; Platform Core remains responsible for governed research/evidence objects, provenance/lineage, findings and claims, synthesis, reproducibility, visual reasoning, statistical reasoning, and cross-product exchange.
+
+The shared Python backend advances to **v2.23.0** and adds Core capability discovery, durable Library↔Core bindings, an idempotent synchronization outbox, reconciliation, and an explicit promotion policy that keeps raw chunks local and disables automatic truth/claim promotion.
+
+See `PLATFORM_CORE_RESEARCH_BRIDGE_v5.12.0.md`, `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.12.0.md`, and `DEPLOY_CONTABO_LIBRARY_BACKEND_v2.23.0.md`.
+
 ## Energy Systems Intelligence v1.1.0
 
 v1.1.0 is the **Cross-Product Runtime Activation Gateway** release. It preserves the v1.0.0 Integrated Sustainable Energy Systems Platform certification baseline and adds five deterministic, stateless Library-side packet builders for Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio. The gateway can build target-shaped handoff packets and inspect packet readiness without persisting data, performing outbound delivery, forwarding credentials, or claiming target-side execution. Library remains v5.11.0, Carbon & Nature remains v0.5.0, and the shared Python backend advances to v2.17.0.
