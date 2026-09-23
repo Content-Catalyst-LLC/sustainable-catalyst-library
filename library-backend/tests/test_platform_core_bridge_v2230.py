@@ -107,6 +107,7 @@ def test_core_write_operation_is_allowlisted_and_authenticated():
         "research-object.create",
         "exchange-package.create",
         "scholarly-package.create",
+        "scholarly-citation.create",
         "runtime-contract.create",
     }
 
@@ -140,14 +141,9 @@ def test_stable_hash_is_deterministic_for_idempotency():
     assert len(left) == 64
 
 
-def test_release_identity_and_schema_tables_exist():
+def test_v2230_bridge_schema_tables_remain_preserved():
     repo = Path(__file__).resolve().parents[2]
-    plugin = (repo / "sustainable-catalyst-library" / "sustainable-catalyst-library.php").read_text()
-    backend_version = (repo / "library-backend" / "app" / "__init__.py").read_text()
     schema = (repo / "library-backend" / "app" / "schema.sql").read_text()
-    assert "Version: 5.12.0" in plugin
-    assert "SC_LIBRARY_VERSION', '5.12.0'" in plugin
-    assert '__version__ = "2.23.0"' in backend_version
     assert "CREATE TABLE IF NOT EXISTS library_core_bindings" in schema
     assert "CREATE TABLE IF NOT EXISTS library_core_sync_outbox" in schema
     assert "UNIQUE(library_record_id, core_object_id)" in schema

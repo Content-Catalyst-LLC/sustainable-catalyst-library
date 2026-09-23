@@ -18,6 +18,10 @@ from .models import EdgeBatch, IntegrityAuditRequest, PruneRequest, RecordBatch
 from .query import explorer_bootstrap, facets, get_record, graph_neighborhood, related_records, stats, timeline
 from .hybrid_retrieval import hybrid_search_records
 from .semantic import embedding_jobs_status, process_embedding_jobs_once, semantic_readiness, default_embedding_client
+from .citation_graph import (
+    CitationCreateRequest, CoreScholarlyCitationHandoffRequest, citation_graph, citation_readiness,
+    enqueue_core_scholarly_citation, import_record_metadata_citations, list_citations, upsert_citation,
+)
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -227,6 +231,12 @@ def health() -> dict[str, Any]:
             "semantic_embedding_provider": settings.embedding_provider,
             "semantic_embedding_worker": settings.embedding_worker_enabled,
             "core_aware_search_results": True,
+            "citation_graph": True,
+            "citation_exact_identifier_resolution": True,
+            "citation_unresolved_reference_preservation": True,
+            "scholarly_lineage": True,
+            "platform_core_scholarly_citation_handoff": True,
+            "automatic_citation_inference": False,
             "institutional_sources": True,
             "johns_hopkins_dataverse": True,
             "license_reuse_normalization": True,
@@ -1903,6 +1913,78 @@ def search(
         q, object_type, source_key, topic, year_from, year_to, sort, limit, offset,
         mode=mode, include_core=include_core,
     )
+
+
+@app.get("/v1/citations/readiness")
+def citations_readiness() -> dict[str, Any]:
+    return citation_readiness()
+
+
+@app.post("/v1/citations")
+async def citation_create(
+    payload: CitationCreateRequest,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return upsert_citation(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/citations/{record_id:path}")
+def citation_list(
+    record_id: str,
+    direction: str = Query(default="both", pattern="^(outgoing|incoming|both)$"),
+    limit: int = Query(default=100, ge=1, le=500),
+) -> dict[str, Any]:
+    return list_citations(record_id, direction=direction, limit=limit)
+
+
+@app.get("/v1/citations/{record_id:path}/graph")
+def citation_graph_read(
+    record_id: str,
+    depth: int = Query(default=2, ge=1, le=4),
+    limit: int = Query(default=250, ge=1, le=1000),
+    include_core: bool = Query(default=True),
+) -> dict[str, Any]:
+    try:
+        return citation_graph(record_id, depth=depth, limit=limit, include_core=include_core)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/v1/citations/{record_id:path}/import-metadata")
+async def citation_metadata_import(
+    record_id: str,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return import_record_metadata_citations(record_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/v1/citations/core-handoff")
+async def citation_core_handoff(
+    payload: CoreScholarlyCitationHandoffRequest,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return enqueue_core_scholarly_citation(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.get("/v1/search/readiness")

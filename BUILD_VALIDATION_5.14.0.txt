@@ -1,0 +1,18 @@
+Sustainable Catalyst Knowledge Library v5.14.0 — Citation Graph & Scholarly Lineage
+Python backend: v2.25.0
+
+Validation summary
+- 36/36 selected current + retained regression tests passed.
+- Python backend application compiled successfully.
+- WordPress main plugin and Python-backend bridge PHP syntax passed where PHP CLI was available.
+- Shell syntax passed for Git push and Contabo deployment scripts.
+- Platform Core v3.3 research-lineage and scholarly-interoperability readiness contracts remain first-class dependencies.
+- Core operation allowlist adds only scholarly-citation.create at /v1/research/scholarly-packages/citations.
+- Existing v5.13 hybrid retrieval, semantic fallback, Core-aware search enrichment and v5.13.0.1 defaultdict runtime repair are preserved.
+
+Safety / governance boundaries
+- Citation edges are declared/imported; no LLM-inferred citation relationships.
+- Identifier resolution is exact; no title-similarity guessing.
+- Unresolved references are preserved.
+- No automatic claim or truth promotion.
+- Library owns citation extraction/indexing/retrieval; Platform Core owns governed lineage and scholarly reasoning.

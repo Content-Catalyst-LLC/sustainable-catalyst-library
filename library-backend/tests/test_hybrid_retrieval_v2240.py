@@ -168,9 +168,10 @@ def test_public_semantic_queue_does_not_index_non_public_records():
     assert 'DELETE FROM library_record_embeddings WHERE record_id=%s' in repository
 
 
-def test_release_identity_is_backend_v2241():
+def test_v2241_runtime_repair_remains_preserved():
     repo = Path(__file__).resolve().parents[2]
-    assert '__version__ = "2.24.1"' in (repo / "library-backend/app/__init__.py").read_text()
+    source = (repo / "library-backend/app/hybrid_retrieval.py").read_text()
+    assert "from collections import defaultdict" in source
 
 
 def test_platform_core_v330_bridge_contracts_remain_intact():

@@ -1,3 +1,11 @@
+# Sustainable Catalyst Library v5.14.0 — Citation Graph & Scholarly Lineage
+
+Knowledge Library v5.14.0 advances the shared Python backend to **v2.25.0** and adds a declared citation graph, exact persistent-identifier resolution, unresolved-reference preservation, bounded citation neighborhoods, and Core-aware scholarly lineage. Library owns citation ingestion, extraction, normalization, resolution, graph indexing, and retrieval. Platform Core v3.3+ remains authoritative for governed lineage, evidence/provenance, scholarly packages, cross-study synthesis, and reasoning.
+
+The release adds an explicit allowlisted `scholarly-citation.create` handoff to Platform Core Scholarly Interoperability. It does not infer citations from title similarity or LLM output, and it does not automatically promote claims or truth status.
+
+See `CITATION_GRAPH_SCHOLARLY_LINEAGE_v5.14.0.md`, `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.14.0.md`, and `DEPLOY_CONTABO_LIBRARY_BACKEND_v2.25.0.md`.
+
 # Sustainable Catalyst Library v5.12.0 — Platform Core Research Bridge
 
 Knowledge Library v5.12.0 makes Platform Core a first-class governed dependency. The Library backend remains responsible for source ingestion, parsing, chunks, indexing, retrieval, connectors, and document intelligence; Platform Core remains responsible for governed research/evidence objects, provenance/lineage, findings and claims, synthesis, reproducibility, visual reasoning, statistical reasoning, and cross-product exchange.

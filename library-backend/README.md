@@ -1,5 +1,9 @@
-# Sustainable Catalyst Library Backend v2.24.1
+# Sustainable Catalyst Library Backend v2.25.0
 
+
+## v2.25.0 — Citation Graph & Scholarly Lineage
+
+v2.25.0 adds a Library-owned declared citation graph, exact DOI/PMID/PMCID/ISBN/ISSN resolution, unresolved-reference preservation, bounded citation-neighborhood traversal, Platform Core binding enrichment, and an explicit governed handoff into Platform Core Scholarly Interoperability. Library continues to own citation extraction/indexing; Platform Core remains authoritative for governed lineage, evidence, scholarly packages, synthesis, and reasoning. No LLM-inferred citation edges or automatic truth promotion are introduced.
 
 ## v2.24.1 — Core-Aware Search Runtime Repair
 

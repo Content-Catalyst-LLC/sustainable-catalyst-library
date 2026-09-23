@@ -312,3 +312,29 @@ SELECT r.record_id,r.content_hash,'pending'
     ON e.record_id=r.record_id AND e.content_hash=r.content_hash
  WHERE r.visibility='public' AND r.publication_status='published' AND e.record_id IS NULL
 ON CONFLICT (record_id) DO NOTHING;
+
+-- v2.25.0 — Citation Graph & Scholarly Lineage.
+-- Library stores declared/imported citation relationships and exact persistent-
+-- identifier resolution. Governed scholarly lineage remains a Platform Core concern.
+CREATE TABLE IF NOT EXISTS library_citations (
+    citation_id bigserial PRIMARY KEY,
+    citation_key char(64) NOT NULL UNIQUE,
+    citing_record_id text NOT NULL REFERENCES library_records(record_id) ON DELETE CASCADE,
+    cited_record_id text REFERENCES library_records(record_id) ON DELETE SET NULL,
+    identifier_type text NOT NULL DEFAULT 'other',
+    identifier_value text NOT NULL DEFAULT '',
+    raw_citation text NOT NULL DEFAULT '',
+    relation_type text NOT NULL DEFAULT 'cites',
+    extraction_method text NOT NULL DEFAULT 'manual',
+    confidence double precision NOT NULL DEFAULT 1.0 CHECK (confidence >= 0 AND confidence <= 1),
+    locator text NOT NULL DEFAULT '',
+    source_chunk_ordinal integer CHECK (source_chunk_ordinal IS NULL OR source_chunk_ordinal >= 0),
+    resolution_status text NOT NULL DEFAULT 'unresolved' CHECK (resolution_status IN ('resolved','unresolved','rejected')),
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_citations_citing_idx ON library_citations(citing_record_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS library_citations_cited_idx ON library_citations(cited_record_id, updated_at DESC) WHERE cited_record_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS library_citations_identifier_idx ON library_citations(identifier_type, lower(identifier_value)) WHERE identifier_value <> '';
+CREATE INDEX IF NOT EXISTS library_citations_resolution_idx ON library_citations(resolution_status, updated_at DESC);

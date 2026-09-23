@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) { exit; }
  * The Python service receives bounded server-to-server index packets only.
  * v5.5.1 hardens bulk ingestion with payload-aware adaptive batching.
  * v5.5.2 exposes signed operations/recovery helpers used by the operations console.
- * v5.13.0 exposes hybrid lexical/semantic retrieval with Platform Core binding context.
+ * v5.14.0 adds citation graph and scholarly-lineage readiness while preserving hybrid retrieval and Platform Core binding context.
  */
 final class SC_Library_Python_Backend {
     public const VERSION = '5.6.0.32';
@@ -167,6 +167,11 @@ final class SC_Library_Python_Backend {
             'permission_callback' => static function () { return current_user_can('manage_options'); },
             'callback' => static function () { return rest_ensure_response(self::search_readiness()); },
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/citations/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => static function () { return rest_ensure_response(self::citation_readiness()); },
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/search', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
@@ -236,6 +241,26 @@ final class SC_Library_Python_Backend {
         if (!is_array($body)) { $body = []; }
         $body['ok'] = 200 === $code && !empty($body['reachable']);
         $body['state'] = $body['ok'] ? 'ready' : (!empty($body['configured']) ? 'degraded' : 'not_configured');
+        return $body;
+    }
+
+    public static function citation_readiness(): array {
+        if (!self::configured()) {
+            return ['ok' => false, 'configured' => false, 'state' => 'library_backend_not_configured'];
+        }
+        $response = wp_remote_get(self::base_url() . '/v1/citations/readiness', [
+            'timeout' => self::timeout(),
+            'redirection' => 0,
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        if (is_wp_error($response)) {
+            return ['ok' => false, 'configured' => true, 'state' => 'unavailable', 'error' => $response->get_error_message()];
+        }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($body)) { $body = []; }
+        $body['ok'] = 200 === $code && !empty($body['citation_graph']);
+        $body['state'] = $body['ok'] ? 'citation-lineage-ready' : 'degraded';
         return $body;
     }
 
