@@ -7,10 +7,10 @@ def test_release_identity_and_backend_version():
     plugin = (ROOT / "sustainable-catalyst-library/sustainable-catalyst-library.php").read_text()
     readme = (ROOT / "sustainable-catalyst-library/readme.txt").read_text()
     backend = (ROOT / "library-backend/app/__init__.py").read_text()
-    assert "Version: 5.16.0" in plugin
-    assert "SC_LIBRARY_VERSION', '5.16.0" in plugin
-    assert "Stable tag: 5.16.0" in readme
-    assert '__version__ = "2.27.0"' in backend
+    assert "Version: 5.17.0" in plugin
+    assert "SC_LIBRARY_VERSION', '5.17.0" in plugin
+    assert "Stable tag: 5.17.0" in readme
+    assert '__version__ = "2.28.0"' in backend
 
 
 def test_visualization_storage_and_routes_exist():

@@ -1,0 +1,21 @@
+Sustainable Catalyst Knowledge Library v5.17.0
+Backend v2.28.0
+Feature: Scientific Knowledge Mapping & Interactive Semantic Analysis
+
+Validation target:
+- v5.17 scientific knowledge map backend contracts
+- HTTP route contract with colon-delimited Library record IDs
+- interactive WordPress Research Library renderer
+- real-vector-only semantic similarity
+- source-span co-occurrence integrity boundaries
+- v5.16 publication visualization regression
+- v5.15 research extraction regression
+- v5.14 citation graph / route repair regression
+- v5.13 hybrid retrieval regression
+- v5.12 Platform Core bridge regression
+
+Integrated pytest suite: 72 passed
+Python compileall: PASS
+PHP syntax: PASS
+JavaScript syntax: PASS
+Platform Core visual-runtime contract paths inspected against supplied Core v3.3.0 repository.
