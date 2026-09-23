@@ -17,3 +17,7 @@ See `PUBLICATION_CORPUS_SCOPE_REPAIR_v5.17.1.1.md`, `RELEASE_NOTES_KNOWLEDGE_LIB
 The Library owns publication/source intelligence. Platform Core remains the governed visual reasoning, provenance, linked-view, visual-query and reproducibility substrate.
 
 See `SCIENTIFIC_KNOWLEDGE_MAPPING_v5.17.0.md`, `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.17.0.md`, and `DEPLOY_CONTABO_LIBRARY_BACKEND_v2.28.0.md`.
+
+## v5.19.0 — 4D Knowledge Terrain & Temporal Dynamics
+
+Adds a source-grounded four-dimensional publication knowledge terrain to the Research Library. The model exposes deterministic X/Y topic topology, selectable analytical Z elevation, and publication-time T, with terrain orbit/zoom, year scrubbing, temporal playback, topic anchors, publication anchors, and explicit interpretation boundaries. Backend v2.30.0.

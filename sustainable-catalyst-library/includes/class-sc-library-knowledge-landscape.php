@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.18.0 — Multi-Publication Knowledge Landscape with topic regions, temporal dynamics, and linked scientific views.
+ * v5.19.0 — 4D Knowledge Terrain & Temporal Dynamics with scientific terrain rendering and linked views.
  *
  * Renders an interactive analytical graph from the Library Python backend.
  * Relationships remain typed by their actual basis: citation, reviewed concept
  * association, source-span co-occurrence, or real stored-embedding similarity.
  */
 final class SC_Library_Knowledge_Landscape {
-    public const VERSION = '5.18.0';
+    public const VERSION = '5.19.0';
     public const SHORTCODE = 'sc_library_knowledge_landscape';
 
     public function register_hooks(): void {
@@ -18,14 +18,14 @@ final class SC_Library_Knowledge_Landscape {
 
     private function enqueue_assets(): void {
         wp_enqueue_style(
-            'sc-library-knowledge-landscape-v5180',
-            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5180.css',
+            'sc-library-knowledge-landscape-v5190',
+            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5190.css',
             [],
             self::VERSION
         );
         wp_enqueue_script(
-            'sc-library-knowledge-landscape-v5180',
-            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5180.js',
+            'sc-library-knowledge-landscape-v5190',
+            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5190.js',
             [],
             self::VERSION,
             true
@@ -119,6 +119,7 @@ final class SC_Library_Knowledge_Landscape {
 
             <nav class="sc-kl__viewbar" aria-label="<?php esc_attr_e('Knowledge map views', 'sustainable-catalyst-library'); ?>">
                 <button type="button" class="is-active" data-sc-kl-view="knowledge-landscape"><?php esc_html_e('Knowledge Landscape', 'sustainable-catalyst-library'); ?></button>
+                <button type="button" data-sc-kl-view="knowledge-terrain-4d"><?php esc_html_e('4D Knowledge Terrain', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="topic-graph"><?php esc_html_e('Topic Graph', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="citation-overlay"><?php esc_html_e('Citation Overlay', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="topic-regions"><?php esc_html_e('Topic Regions', 'sustainable-catalyst-library'); ?></button>
@@ -144,6 +145,21 @@ final class SC_Library_Knowledge_Landscape {
                         <label><input type="checkbox" checked data-sc-kl-edge-basis="publication-topic-cooccurrence"> <?php esc_html_e('Corpus topic co-occurrence', 'sustainable-catalyst-library'); ?></label>
                         <label><input type="checkbox" checked data-sc-kl-edge-basis="embedding-cosine-similarity" <?php disabled(empty($semantic['available'])); ?>> <?php esc_html_e('Semantic similarity', 'sustainable-catalyst-library'); ?></label>
                     </fieldset>
+                    <div class="sc-kl__terrain-controls" data-sc-kl-terrain-controls hidden>
+                        <div class="sc-kl__control">
+                            <label for="<?php echo esc_attr($id); ?>-elevation"><?php esc_html_e('Terrain elevation', 'sustainable-catalyst-library'); ?></label>
+                            <select id="<?php echo esc_attr($id); ?>-elevation" data-sc-kl-elevation>
+                                <option value="relationship_density"><?php esc_html_e('Relationship density', 'sustainable-catalyst-library'); ?></option>
+                                <option value="publication_density"><?php esc_html_e('Publication density', 'sustainable-catalyst-library'); ?></option>
+                                <option value="temporal_activity"><?php esc_html_e('Temporal activity', 'sustainable-catalyst-library'); ?></option>
+                            </select>
+                        </div>
+                        <div class="sc-kl__control">
+                            <label for="<?php echo esc_attr($id); ?>-time"><?php esc_html_e('Publication time', 'sustainable-catalyst-library'); ?></label>
+                            <input id="<?php echo esc_attr($id); ?>-time" type="range" min="0" max="0" step="1" value="0" data-sc-kl-time>
+                            <div class="sc-kl__time-row"><button type="button" data-sc-kl-play aria-label="Play time">▶</button><output data-sc-kl-time-output>—</output></div>
+                        </div>
+                    </div>
                     <div class="sc-kl__control">
                         <label for="<?php echo esc_attr($id); ?>-strength"><?php esc_html_e('Relationship strength', 'sustainable-catalyst-library'); ?></label>
                         <input id="<?php echo esc_attr($id); ?>-strength" type="range" min="0" max="1" step="0.05" value="0" data-sc-kl-strength>
@@ -173,6 +189,8 @@ final class SC_Library_Knowledge_Landscape {
                     </div>
                     <div class="sc-kl__stage" tabindex="0" role="application" aria-label="<?php esc_attr_e('Interactive publication knowledge map', 'sustainable-catalyst-library'); ?>">
                         <svg class="sc-kl__svg" viewBox="0 0 1200 760" aria-hidden="true"></svg>
+                        <canvas class="sc-kl__terrain" data-sc-kl-terrain hidden aria-label="Interactive 4D publication knowledge terrain"></canvas>
+                        <div class="sc-kl__terrain-hud" data-sc-kl-terrain-hud hidden><span data-sc-kl-terrain-year>—</span><span data-sc-kl-terrain-metric>Relationship density</span><span><?php esc_html_e('Drag to orbit · Wheel to zoom', 'sustainable-catalyst-library'); ?></span></div>
                         <div class="sc-kl__matrix" data-sc-kl-matrix hidden></div>
                         <div class="sc-kl__axis" data-sc-kl-axis><span>X — structural / topic-region separation</span><span>Y — relational density</span></div>
                     </div>
@@ -184,6 +202,7 @@ final class SC_Library_Knowledge_Landscape {
                         <div><strong><?php echo esc_html((string) ($metrics['edge_count'] ?? 0)); ?></strong><span><?php esc_html_e('relationships', 'sustainable-catalyst-library'); ?></span></div>
                         <div><strong><?php echo esc_html((string) ($semantic['vector_count'] ?? 0)); ?></strong><span><?php esc_html_e('semantic vectors', 'sustainable-catalyst-library'); ?></span></div>
                         <div><strong><?php echo $years ? esc_html((string) (max($years) - min($years) + 1)) : '0'; ?></strong><span><?php esc_html_e('year span', 'sustainable-catalyst-library'); ?></span></div>
+                        <div><strong><?php echo esc_html((string) count($payload['knowledge_terrain_4d']['topic_anchors'] ?? [])); ?></strong><span><?php esc_html_e('terrain anchors', 'sustainable-catalyst-library'); ?></span></div>
                     </div>
                 </div>
 
@@ -200,6 +219,7 @@ final class SC_Library_Knowledge_Landscape {
                         <div><dt><?php esc_html_e('Semantic links', 'sustainable-catalyst-library'); ?></dt><dd><?php echo !empty($semantic['available']) ? esc_html__('Cosine similarity', 'sustainable-catalyst-library') : esc_html__('Unavailable', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Topic regions', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Repeated measured co-occurrence', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Time dimension', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Publication dates', 'sustainable-catalyst-library'); ?></dd></div>
+                        <div><dt><?php esc_html_e('4D terrain', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Measured topology + selectable Z + time', 'sustainable-catalyst-library'); ?></dd></div>
                     </dl>
                     <div class="sc-kl__integrity">
                         <strong><?php esc_html_e('Interpretation boundary', 'sustainable-catalyst-library'); ?></strong>

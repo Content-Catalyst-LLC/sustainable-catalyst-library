@@ -8,14 +8,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.18.0
+Stable tag: 5.19.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.18.0 adds a multi-publication scientific knowledge landscape with topic regions, cross-publication relationship analysis, temporal dynamics, bridge-node diagnostics, and linked analytical views while preserving canonical Publication Library scoping. v5.17.1.1 scopes `[sc_library_knowledge_landscape]` to the canonical Publications interface manifest rather than every public WordPress record. Corpus mode analyzes the publications actually surfaced by the Publication Library; unrelated pages, support content, Foundation documents, and other indexed WordPress object types are excluded. Direct backend corpus calls without a manifest safely fall back to public `post` records only.
+Sustainable Catalyst Library v5.19.0 adds a scientific 4D knowledge terrain with selectable analytical elevation, temporal playback, evolving topic regions, publication anchors, and cross-publication linked views while preserving canonical Publication Library scoping. v5.17.1.1 scopes `[sc_library_knowledge_landscape]` to the canonical Publications interface manifest rather than every public WordPress record. Corpus mode analyzes the publications actually surfaced by the Publication Library; unrelated pages, support content, Foundation documents, and other indexed WordPress object types are excluded. Direct backend corpus calls without a manifest safely fall back to public `post` records only.
 
 Sustainable Catalyst Library v5.15.0 adds Entity, Finding & Claim Extraction candidates with source-span provenance and human-review gates on top of Citation Graph & Scholarly Lineage and Hybrid Research Retrieval & Core-Aware Results. The Python backend combines weighted full-text/trigram retrieval with optional real semantic embeddings using weighted reciprocal-rank fusion, keeps vectors and retrieval artifacts in the Library, and enriches returned records with durable Platform Core object bindings. If no embedding provider is configured, search degrades explicitly to lexical retrieval rather than fabricating semantic scores. Platform Core remains authoritative for governed research/evidence objects, provenance/lineage, reasoning, synthesis, reproducibility, visual reasoning, statistical reasoning, and cross-product exchange.
 

@@ -64,6 +64,140 @@ def _year(value: Any) -> int | None:
     return None
 
 
+
+
+def _knowledge_terrain_analysis(
+    nodes: dict[str, dict[str, Any]],
+    records: dict[str, dict[str, Any]],
+    multi: dict[str, Any],
+) -> dict[str, Any]:
+    """Build a deterministic renderer-neutral 4D terrain contract.
+
+    X/Y are topological coordinates derived from measured topic regions and
+    deterministic within-region placement. Z is a selectable normalized
+    analytical metric. T is publication year. No terrain feature is an
+    inferred factual or causal claim.
+    """
+    import hashlib
+    import math
+
+    regions = list(multi.get("topic_regions") or [])
+    trajectories = {str(x.get("topic_id")): x for x in (multi.get("temporal_dynamics", {}).get("topic_trajectories") or [])}
+    years = [int(y) for y in (multi.get("temporal_dynamics", {}).get("years") or [])]
+
+    def norm_map(values: dict[str, float]) -> dict[str, float]:
+        if not values:
+            return {}
+        lo, hi = min(values.values()), max(values.values())
+        if hi <= lo:
+            return {k: (1.0 if hi > 0 else 0.0) for k in values}
+        return {k: round((v-lo)/(hi-lo), 6) for k,v in values.items()}
+
+    topic_nodes = {str(nid): node for nid,node in nodes.items() if node.get("kind") == "topic"}
+    weighted = {tid: float((n.get("metrics") or {}).get("weighted_degree") or 0.0) for tid,n in topic_nodes.items()}
+    pubdens = {tid: float((n.get("metrics") or {}).get("publication_count") or 0.0) for tid,n in topic_nodes.items()}
+    weighted_n, pubdens_n = norm_map(weighted), norm_map(pubdens)
+
+    region_centers: dict[str, tuple[float,float]] = {}
+    region_anchors = []
+    count=max(1,len(regions))
+    golden=math.pi*(3-math.sqrt(5))
+    for i,r in enumerate(regions):
+        radius=0.18+0.68*math.sqrt((i+0.5)/count)
+        angle=i*golden
+        x=round(math.cos(angle)*radius,6); y=round(math.sin(angle)*radius,6)
+        rid=str(r.get("id")); region_centers[rid]=(x,y)
+        region_anchors.append({
+            "region_id":rid, "label":r.get("representative_label") or rid,
+            "x":x, "y":y, "topic_count":int(r.get("topic_count") or 0),
+            "publication_count":int(r.get("publication_count") or 0),
+        })
+
+    topic_anchors=[]
+    for tid,n in topic_nodes.items():
+        rid=str(n.get("region_id") or "")
+        cx,cy=region_centers.get(rid,(0.0,0.0))
+        h=int(hashlib.sha256(tid.encode('utf-8')).hexdigest()[:16],16)
+        angle=(h%100000)/100000*2*math.pi
+        local_r=0.025+((h>>17)%1000)/1000*0.105
+        x=max(-1,min(1,cx+math.cos(angle)*local_r)); y=max(-1,min(1,cy+math.sin(angle)*local_r))
+        tr=trajectories.get(tid,{})
+        topic_anchors.append({
+            "topic_id":tid, "label":n.get("label") or tid, "region_id":rid or None,
+            "x":round(x,6), "y":round(y,6),
+            "relationship_density":weighted_n.get(tid,0.0),
+            "publication_density":pubdens_n.get(tid,0.0),
+            "weighted_degree":round(weighted.get(tid,0.0),6),
+            "publication_count":int(pubdens.get(tid,0.0)),
+            "first_year":tr.get("first_year"), "last_year":tr.get("last_year"),
+            "trajectory_slope":tr.get("trajectory_slope"),
+        })
+    topic_anchors.sort(key=lambda x:(x["publication_density"],x["relationship_density"]),reverse=True)
+    topic_anchors=topic_anchors[:250]
+
+    # Publication anchors are placed at the centroid of their attached topics.
+    pub_topic_edges={}
+    # Recover topic memberships from analysis relationships where possible.
+    for rel in multi.get("publication_relationships") or []:
+        for pid in (str(rel.get("source")),str(rel.get("target"))):
+            pub_topic_edges.setdefault(pid,set()).update(str(t) for t in (rel.get("shared_topics") or []))
+    by_topic={x["topic_id"]:x for x in topic_anchors}
+    publication_anchors=[]
+    for pid,rec in records.items():
+        tids=[t for t in pub_topic_edges.get(pid,set()) if t in by_topic]
+        if tids:
+            x=sum(by_topic[t]["x"] for t in tids)/len(tids); y=sum(by_topic[t]["y"] for t in tids)/len(tids)
+        else:
+            h=int(hashlib.sha256(pid.encode()).hexdigest()[:16],16); a=(h%100000)/100000*2*math.pi; rr=.72+((h>>11)%1000)/1000*.18; x=math.cos(a)*rr; y=math.sin(a)*rr
+        publication_anchors.append({
+            "record_id":pid,"title":rec.get("title") or pid,"x":round(x,6),"y":round(y,6),
+            "year":_year(rec.get("published_at")),"canonical_url":rec.get("canonical_url"),
+        })
+
+    # Compact temporal keyframes. Heights are publication frequencies for topic/year,
+    # normalized within the full corpus so playback is comparable across years.
+    max_count=max([int(p.get("publication_count") or 0) for p in topic_anchors] or [1])
+    keyframes=[]
+    for y in years:
+        heights={}
+        for t in topic_anchors:
+            tr=trajectories.get(t["topic_id"],{})
+            series={int(x.get("year")):int(x.get("publication_count") or 0) for x in (tr.get("series") or [])}
+            c=series.get(y,0)
+            if c:
+                heights[t["topic_id"]]=round(c/max_count,6)
+        keyframes.append({"year":y,"topic_heights":heights})
+
+    return {
+        "schema":"sc-library-4d-knowledge-terrain/1.0",
+        "coordinate_system":{
+            "x":"deterministic topological region separation",
+            "y":"deterministic within-region semantic/topic placement",
+            "z":"selectable normalized analytical elevation",
+            "t":"publication year",
+            "unit_domain":"normalized analytical coordinates",
+        },
+        "topic_anchors":topic_anchors,
+        "region_anchors":region_anchors,
+        "publication_anchors":publication_anchors[:500],
+        "temporal_keyframes":keyframes,
+        "elevation_metrics":[
+            {"key":"relationship_density","label":"Relationship density","basis":"normalized weighted graph degree"},
+            {"key":"publication_density","label":"Publication density","basis":"normalized publication membership count"},
+            {"key":"temporal_activity","label":"Temporal activity","basis":"normalized topic publication frequency at selected year"},
+        ],
+        "default_elevation_metric":"relationship_density",
+        "surface_model":{"kernel":"gaussian-radial","sigma":0.14,"grid_columns":44,"grid_rows":30,"interpolation":"weighted analytical surface"},
+        "camera":{"azimuth_degrees":-38,"elevation_degrees":42,"perspective":0.82},
+        "time_playback":{"available":len(years)>=2,"years":years,"interpolation":"step-year","default_year":years[-1] if years else None},
+        "interpretation":{
+            "terrain_height_is_evidence_of_truth":False,
+            "spatial_proximity_is_causality":False,
+            "time_is_publication_time":True,
+            "all_surface_peaks_trace_to_topic_anchors":True,
+        },
+    }
+
 def _multi_publication_analysis(
     nodes: dict[str, dict[str, Any]],
     edge_items: list[dict[str, Any]],
@@ -497,6 +631,7 @@ def build_publication_corpus_knowledge_map(
         relationship_counts[str(edge.get("relationship_basis") or "unknown")] += 1
 
     multi = _multi_publication_analysis(nodes, edge_items, records)
+    terrain = _knowledge_terrain_analysis(nodes, records, multi)
 
     return {
         "schema": CORPUS_KNOWLEDGE_MAP_CONTRACT,
@@ -530,8 +665,10 @@ def build_publication_corpus_knowledge_map(
         "bridge_nodes": multi["bridge_nodes"],
         "linked_views": multi["linked_views"],
         "analytical_dimensions": multi["analytical_dimensions"],
+        "knowledge_terrain_4d": terrain,
         "views": [
             {"key": "knowledge-landscape", "label": "Knowledge Landscape", "purpose": "Cross-publication topic and publication relationship field"},
+            {"key": "knowledge-terrain-4d", "label": "4D Knowledge Terrain", "purpose": "Spatial-temporal analytical terrain with selectable elevation metrics and time playback"},
             {"key": "topic-graph", "label": "Topic Graph", "purpose": "Measured topic co-occurrence across the publication corpus"},
             {"key": "citation-overlay", "label": "Citation Overlay", "purpose": "Explicit citation structure within the selected corpus"},
             {"key": "semantic-overlay", "label": "Semantic Overlay", "purpose": "Publication similarity from current stored embeddings only"},
@@ -542,11 +679,11 @@ def build_publication_corpus_knowledge_map(
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
             "renderer_neutral": True,
-            "preferred_runtime": "interactive-svg-webgl-capable",
+            "preferred_runtime": "interactive-svg-canvas-webgl-capable",
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -568,6 +705,7 @@ def build_publication_corpus_knowledge_map(
                 "cross-publication-topic-jaccard",
                 "deterministic-topic-regions",
                 "publication-time-binning",
+                "deterministic-4d-knowledge-terrain",
             ],
             "governed_visual_reasoning_authority": "platform-core",
         },
