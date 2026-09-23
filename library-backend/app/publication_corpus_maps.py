@@ -55,6 +55,190 @@ def _eligible_records(
     return records, total, selection_mode
 
 
+def _year(value: Any) -> int | None:
+    text = str(value or "").strip()
+    if len(text) >= 4 and text[:4].isdigit():
+        year = int(text[:4])
+        if 1000 <= year <= 3000:
+            return year
+    return None
+
+
+def _multi_publication_analysis(
+    nodes: dict[str, dict[str, Any]],
+    edge_items: list[dict[str, Any]],
+    records: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Compute deterministic cross-publication structures for linked scientific views.
+
+    This layer deliberately uses only relationships already present in the corpus
+    graph: metadata/reviewed concept membership, explicit citations and real
+    stored-embedding similarity. It does not infer facts, causality or truth.
+    """
+    publication_ids = set(records)
+    topic_ids = {nid for nid, node in nodes.items() if node.get("kind") == "topic"}
+    pub_topics: dict[str, set[str]] = defaultdict(set)
+    topic_pubs: dict[str, set[str]] = defaultdict(set)
+    citation_pairs: set[tuple[str, str]] = set()
+    semantic_pairs: dict[tuple[str, str], float] = {}
+
+    for edge in edge_items:
+        source, target = str(edge.get("source")), str(edge.get("target"))
+        basis = str(edge.get("relationship_basis") or "")
+        if basis in {"metadata-association", "reviewed-concept-association"}:
+            if source in publication_ids and target in topic_ids:
+                pub_topics[source].add(target); topic_pubs[target].add(source)
+            elif target in publication_ids and source in topic_ids:
+                pub_topics[target].add(source); topic_pubs[source].add(target)
+        elif basis == "explicit-citation" and source in publication_ids and target in publication_ids:
+            citation_pairs.add((source, target))
+        elif basis == "embedding-cosine-similarity" and source in publication_ids and target in publication_ids:
+            semantic_pairs[tuple(sorted((source, target)))] = float(edge.get("similarity") or edge.get("weight") or 0.0)
+
+    # Pairwise publication overlap from shared observed/reviewed topic membership.
+    publication_relationships: list[dict[str, Any]] = []
+    ids = sorted(publication_ids)
+    for i, a in enumerate(ids):
+        ta = pub_topics.get(a, set())
+        if not ta:
+            continue
+        for b in ids[i + 1:]:
+            tb = pub_topics.get(b, set())
+            if not tb:
+                continue
+            shared = ta & tb
+            if not shared:
+                continue
+            union = ta | tb
+            jaccard = len(shared) / max(1, len(union))
+            semantic = semantic_pairs.get((a, b))
+            cited = (a, b) in citation_pairs or (b, a) in citation_pairs
+            publication_relationships.append({
+                "source": a, "target": b,
+                "shared_topic_count": len(shared),
+                "topic_jaccard": round(jaccard, 6),
+                "semantic_similarity": round(semantic, 6) if semantic is not None else None,
+                "explicit_citation": cited,
+                "shared_topics": sorted(shared)[:16],
+            })
+    publication_relationships.sort(key=lambda x: (x["topic_jaccard"], x["shared_topic_count"], bool(x["explicit_citation"])), reverse=True)
+    publication_relationships = publication_relationships[:750]
+
+    # Topic regions are deterministic connected components over repeated corpus
+    # co-occurrence. A single co-occurrence is not enough to merge regions.
+    parent = {tid: tid for tid in topic_ids}
+    def find(x: str) -> str:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    def union(a: str, b: str) -> None:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[max(ra, rb)] = min(ra, rb)
+    for edge in edge_items:
+        if edge.get("relationship_basis") not in {"publication-topic-cooccurrence", "source-span-cooccurrence"}:
+            continue
+        a, b = str(edge.get("source")), str(edge.get("target"))
+        evidence = int(edge.get("evidence_count") or round(float(edge.get("weight") or 0.0)))
+        if a in topic_ids and b in topic_ids and evidence >= 2:
+            union(a, b)
+    components: dict[str, list[str]] = defaultdict(list)
+    for tid in topic_ids:
+        components[find(tid)].append(tid)
+    region_sets = sorted(components.values(), key=lambda group: (-sum(len(topic_pubs.get(t, set())) for t in group), min(group)))
+    topic_regions: list[dict[str, Any]] = []
+    topic_region_lookup: dict[str, str] = {}
+    for idx, group in enumerate(region_sets, 1):
+        pubs = set().union(*(topic_pubs.get(t, set()) for t in group)) if group else set()
+        labels = sorted((nodes[t].get("label", t) for t in group), key=str.casefold)
+        rid = f"region:{idx}"
+        for t in group:
+            topic_region_lookup[t] = rid
+            nodes[t]["region_id"] = rid
+        topic_regions.append({
+            "id": rid, "topic_count": len(group), "publication_count": len(pubs),
+            "topic_ids": sorted(group), "labels": labels[:20],
+            "representative_label": labels[0] if labels else rid,
+        })
+
+    # Temporal dynamics by publication year and topic-year frequency.
+    year_publications: dict[int, set[str]] = defaultdict(set)
+    topic_year_counts: dict[str, dict[int, int]] = defaultdict(lambda: defaultdict(int))
+    for rid, rec in records.items():
+        y = _year(rec.get("published_at"))
+        if y is None:
+            continue
+        year_publications[y].add(rid)
+        nodes[rid]["time_year"] = y
+        for tid in pub_topics.get(rid, set()):
+            topic_year_counts[tid][y] += 1
+    years = sorted(year_publications)
+    temporal_bins = [{"year": y, "publication_count": len(year_publications[y])} for y in years]
+    topic_trajectories = []
+    for tid, counts in topic_year_counts.items():
+        series = [{"year": y, "publication_count": counts[y]} for y in sorted(counts)]
+        if not series:
+            continue
+        first, last = series[0], series[-1]
+        span = max(1, int(last["year"]) - int(first["year"]))
+        slope = (int(last["publication_count"]) - int(first["publication_count"])) / span
+        topic_trajectories.append({
+            "topic_id": tid, "label": nodes.get(tid, {}).get("label", tid),
+            "series": series, "first_year": first["year"], "last_year": last["year"],
+            "trajectory_slope": round(slope, 6),
+            "publication_count": len(topic_pubs.get(tid, set())),
+        })
+    topic_trajectories.sort(key=lambda x: (x["publication_count"], abs(x["trajectory_slope"])), reverse=True)
+
+    # Cross-publication bridge candidates: high weighted degree connecting many
+    # topics or publications. This is a graph structural measure only.
+    bridges = []
+    for nid, node in nodes.items():
+        m = node.get("metrics") or {}
+        bridges.append({
+            "node_id": nid, "kind": node.get("kind"), "label": node.get("label"),
+            "weighted_degree": float(m.get("weighted_degree") or 0.0),
+            "publication_count": int(m.get("publication_count") or 0),
+            "region_id": node.get("region_id"),
+        })
+    bridges.sort(key=lambda x: (x["weighted_degree"], x["publication_count"]), reverse=True)
+
+    # Sparse relationship matrix for linked-view rendering.
+    matrix_entries = []
+    for rel in publication_relationships[:500]:
+        matrix_entries.append({
+            "row": rel["source"], "column": rel["target"],
+            "topic_overlap": rel["topic_jaccard"],
+            "shared_topic_count": rel["shared_topic_count"],
+            "semantic_similarity": rel["semantic_similarity"],
+            "explicit_citation": rel["explicit_citation"],
+        })
+
+    return {
+        "topic_regions": topic_regions,
+        "publication_relationships": publication_relationships,
+        "temporal_dynamics": {
+            "years": years, "bins": temporal_bins,
+            "topic_trajectories": topic_trajectories[:250],
+            "time_dimension_available": len(years) >= 2,
+        },
+        "bridge_nodes": bridges[:40],
+        "linked_views": {
+            "relationship_matrix": {"sparse": True, "entries": matrix_entries},
+            "temporal": {"bins": temporal_bins},
+            "regions": {"items": topic_regions},
+        },
+        "analytical_dimensions": {
+            "x": "topic-region / structural separation",
+            "y": "relationship density",
+            "z": "selectable prominence or publication density",
+            "t": "publication time",
+            "four_dimensional_ready": len(years) >= 2 and bool(topic_regions),
+        },
+    }
+
+
 def build_publication_corpus_knowledge_map(
     *,
     source_key: str = "wordpress-main",
@@ -312,6 +496,8 @@ def build_publication_corpus_knowledge_map(
     for edge in edge_items:
         relationship_counts[str(edge.get("relationship_basis") or "unknown")] += 1
 
+    multi = _multi_publication_analysis(nodes, edge_items, records)
+
     return {
         "schema": CORPUS_KNOWLEDGE_MAP_CONTRACT,
         "scope": "corpus",
@@ -337,21 +523,30 @@ def build_publication_corpus_knowledge_map(
             "max_publications": max_publications,
         },
         "semantic_analysis": semantic_status,
+        "multi_publication_analysis": multi,
+        "topic_regions": multi["topic_regions"],
+        "publication_relationships": multi["publication_relationships"],
+        "temporal_dynamics": multi["temporal_dynamics"],
+        "bridge_nodes": multi["bridge_nodes"],
+        "linked_views": multi["linked_views"],
+        "analytical_dimensions": multi["analytical_dimensions"],
         "views": [
             {"key": "knowledge-landscape", "label": "Knowledge Landscape", "purpose": "Cross-publication topic and publication relationship field"},
             {"key": "topic-graph", "label": "Topic Graph", "purpose": "Measured topic co-occurrence across the publication corpus"},
             {"key": "citation-overlay", "label": "Citation Overlay", "purpose": "Explicit citation structure within the selected corpus"},
             {"key": "semantic-overlay", "label": "Semantic Overlay", "purpose": "Publication similarity from current stored embeddings only"},
             {"key": "relationship-matrix", "label": "Relationship Matrix", "purpose": "Pairwise analytical relationship inspection"},
+            {"key": "topic-regions", "label": "Topic Regions", "purpose": "Corpus-scale topic regions from repeated measured co-occurrence"},
+            {"key": "temporal-dynamics", "label": "Temporal Dynamics", "purpose": "Publication and topic evolution through time"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
             "renderer_neutral": True,
             "preferred_runtime": "interactive-svg-webgl-capable",
-            "layout": "force-directed-multilayer",
+            "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -370,6 +565,9 @@ def build_publication_corpus_knowledge_map(
                 "publication-topic-cooccurrence",
                 "source-span-cooccurrence",
                 "stored-embedding-cosine-similarity-if-available",
+                "cross-publication-topic-jaccard",
+                "deterministic-topic-regions",
+                "publication-time-binning",
             ],
             "governed_visual_reasoning_authority": "platform-core",
         },

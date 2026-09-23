@@ -1,3 +1,7 @@
+# Sustainable Catalyst Library Backend v2.29.0
+
+Adds multi-publication knowledge-landscape analysis while preserving the existing ingestion, retrieval, citation, extraction, and Platform Core bridge contracts.
+
 # Sustainable Catalyst Library Backend v2.26.0
 
 ## v2.26.0 — Entity, Finding & Claim Extraction

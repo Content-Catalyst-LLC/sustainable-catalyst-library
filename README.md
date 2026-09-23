@@ -1,3 +1,7 @@
+## Knowledge Library v5.18.0 — Multi-Publication Knowledge Landscape
+
+Adds deterministic topic regions, cross-publication topic overlap, temporal topic dynamics, bridge-node diagnostics, relationship-matrix linked views, and four-dimensional renderer readiness over the canonical Publication Library corpus. Platform Core remains the governed visual-reasoning authority.
+
 # Sustainable Catalyst Library
 
 **Current release:** v5.17.1.2 / backend v2.28.3 — Corpus Validator Argument-Length Repair. Large corpus deployment validation is streamed through temporary JSON files instead of command-line arguments; canonical Publication Library manifest scoping from v5.17.1.1 is preserved. v5.17.1.1 — Publication Corpus Scope & Deployment Repair

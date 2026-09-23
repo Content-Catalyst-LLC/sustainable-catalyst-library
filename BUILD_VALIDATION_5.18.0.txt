@@ -1,0 +1,3 @@
+Knowledge Library v5.18.0 / backend v2.29.0
+Validation suite: 82 retained + new tests expected.
+Checks: Python compile, JS syntax, PHP syntax when available, shell syntax, release identity, package integrity.

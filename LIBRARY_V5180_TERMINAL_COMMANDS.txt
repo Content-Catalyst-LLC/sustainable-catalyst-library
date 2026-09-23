@@ -1,0 +1,6 @@
+Git:
+cd ~/Downloads
+unzip the v5.18.0 release bundle, then run install_and_push_sustainable_catalyst_library_v5_18_0_macos.sh against ~/Downloads/sustainable-catalyst-library.
+
+Backend:
+scp sustainable-catalyst-library-backend-v2.29.0.zip and upgrade_library_backend_v2_29_0_contabo.sh to catalystadmin@94.72.113.77:/tmp/ then run the installer on the VPS.
