@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) { exit; }
  * v5.14.0 adds citation graph and scholarly-lineage readiness while preserving hybrid retrieval and Platform Core binding context.
  * v5.15.0 adds entity/finding/claim candidate extraction readiness with source-span and human-review guardrails.
  * v5.16.0 adds publication visualization readiness and public Research Library delivery for reviewed renderer-neutral specs.
- * v5.17.1.1 scopes corpus analysis to the canonical Publications manifest and excludes unrelated WordPress content.
+ * v5.17.1.2 preserves v5.17.1.1 corpus scoping and hardens deployment validation; v5.17.1.1 scopes corpus analysis to the canonical Publications manifest and excludes unrelated WordPress content.
  */
 final class SC_Library_Python_Backend {
     public const VERSION = '5.6.0.33';

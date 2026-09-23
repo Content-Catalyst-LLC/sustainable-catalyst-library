@@ -1,4 +1,6 @@
-# Sustainable Catalyst Library v5.17.1.1 — Publication Corpus Scope & Deployment Repair
+# Sustainable Catalyst Library
+
+**Current release:** v5.17.1.2 / backend v2.28.3 — Corpus Validator Argument-Length Repair. Large corpus deployment validation is streamed through temporary JSON files instead of command-line arguments; canonical Publication Library manifest scoping from v5.17.1.1 is preserved. v5.17.1.1 — Publication Corpus Scope & Deployment Repair
 
 Knowledge Library v5.17.1.1 advances the shared Python backend to **v2.28.2** and narrows the scientific knowledge landscape to the canonical publications surfaced by the Sustainable Catalyst Publications interface. Plain `[sc_library_knowledge_landscape]` now sends that exact Publication Library manifest to Python; unrelated pages, support content, Foundation documents, and other indexed WordPress records are excluded.
 

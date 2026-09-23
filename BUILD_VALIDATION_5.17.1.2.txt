@@ -1,0 +1,19 @@
+Knowledge Library v5.17.1.2 / backend v2.28.3
+Corpus Validator Argument-Length Repair
+
+Validation summary
+- Integrated retained regression suite: 91 passed
+- Python compileall: PASS
+- PHP syntax validation: PASS where CLI available
+- JavaScript syntax validation: PASS where Node available
+- Shell syntax validation: PASS
+- Canonical Publication Library manifest contract: preserved
+- Safe wordpress-post-fallback contract: preserved
+- Large-corpus JSON command-line argument usage: removed
+- Temporary JSON response files + Python stdin parsing: required and validated
+- Synthetic 1.87 MB corpus JSON stdin parse: PASS (3000 publication nodes)
+- No python3 -m json.tool | head deployment pipeline
+- Platform Core visual bridge contract preserved
+
+Expected production final line:
+PASS: Library backend v2.28.3 Corpus Validator Argument-Length Repair deployed.

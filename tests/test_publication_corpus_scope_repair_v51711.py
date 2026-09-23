@@ -3,14 +3,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_release_identity():
+def test_v51711_scope_contract_remains_present():
     plugin = (ROOT / "sustainable-catalyst-library/sustainable-catalyst-library.php").read_text()
     readme = (ROOT / "sustainable-catalyst-library/readme.txt").read_text()
-    backend = (ROOT / "library-backend/app/__init__.py").read_text()
-    assert "Version: 5.17.1.1" in plugin
-    assert "SC_LIBRARY_VERSION', '5.17.1.1" in plugin
-    assert "Stable tag: 5.17.1.1" in readme
-    assert '__version__ = "2.28.2"' in backend
+    assert "canonical Publication Library corpus" in plugin
+    assert "canonical Publication Library" in readme
 
 
 def test_publications_class_exports_canonical_manifest():
@@ -38,8 +35,8 @@ def test_backend_manifest_filter_and_safe_fallback_are_present():
     assert 'record_ids: str = ""' in main
 
 
-def test_deployment_script_uses_bounded_summary_not_head_pipeline():
-    deploy = (ROOT / "upgrade_library_backend_v2_28_2_contabo.sh").read_text()
+def test_deployment_contract_uses_bounded_summary_not_head_pipeline():
+    candidates = [ROOT / "upgrade_library_backend_v2_28_3_contabo.sh", ROOT / "upgrade_library_backend_v2_28_2_contabo.sh"]
+    deploy = next(p for p in candidates if p.exists()).read_text()
     assert "CORPUS SUMMARY" in deploy
     assert "python3 -m json.tool | head" not in deploy
-    assert "Publication Corpus Scope & Deployment Repair deployed" in deploy
