@@ -1,4 +1,36 @@
-# Sustainable Catalyst Library Backend v1.1.0
+# Sustainable Catalyst Library Backend v2.24.0
+
+
+## v2.24.0 — Hybrid Research Retrieval & Core-Aware Results
+
+v2.24.0 is the backend companion to Knowledge Library v5.13.0. It preserves the v2.23.0 Platform Core Research Bridge and adds a Library-owned semantic retrieval plane without moving raw documents, chunks, embeddings, or search indexes into Platform Core.
+
+### Retrieval architecture
+
+- `GET /v1/search` now supports `mode=hybrid|lexical|semantic` and `include_core=true|false`.
+- Lexical retrieval retains PostgreSQL weighted full-text ranking and trigram title recovery.
+- Semantic retrieval uses real provider-generated vectors stored in `library_record_embeddings`; there are no fake/hash embeddings.
+- Hybrid relevance uses weighted Reciprocal Rank Fusion (RRF), avoiding invalid arithmetic across lexical and embedding score scales.
+- Search results can include durable Platform Core bindings from `library_core_bindings`; search does not make a live Core network call per result.
+- If an embedding provider is unavailable, hybrid/semantic requests explicitly degrade to lexical retrieval and report the effective mode.
+
+### Semantic indexing
+
+Changed public/published Library records are queued in `library_embedding_jobs`. A bounded background worker processes the queue when a real embedding provider is configured. Existing public records without a current vector are queued idempotently by the additive schema migration.
+
+Supported provider adapters:
+
+- `gemini` — Gemini Embedding API, default model `gemini-embedding-2`.
+- `openai_compatible` — configurable embeddings endpoint implementing the common `data[0].embedding` response shape.
+- `disabled` — safe default; lexical retrieval remains fully operational.
+
+Public readiness: `GET /v1/search/readiness`. Signed operations: `GET /v1/admin/embeddings/status` and `POST /v1/admin/embeddings/run-once`.
+
+### Platform Core boundary
+
+Knowledge Library owns acquisition, parsing, chunks, indexes, embeddings, retrieval, connectors, and document intelligence. Platform Core owns governed research/evidence objects, provenance/lineage, claims/findings/arguments, synthesis, reproducibility, visual reasoning, statistical reasoning, and cross-product exchange. v2.24.0 consumes the durable Core bindings introduced in v2.23.0; it does not duplicate Core reasoning.
+
+---
 
 This backend is the dedicated Python/PostgreSQL research-intelligence data plane for Sustainable Catalyst Library. WordPress remains authoritative for editorial state, public URLs, users, permissions, and the set of records that should exist.
 
@@ -17,12 +49,13 @@ v1.1.0 is the public-discovery companion to Library v5.6.0. It retains the v1.0 
 - adaptive ingestion, payload splitting, and deterministic chunk fallback
 - operations status, integrity audit, targeted repair, and verified pruning
 - public-only read boundary by default
-- adapter-ready schema for later semantic embeddings/reranking
+- hybrid lexical/semantic retrieval with Library-owned embeddings and explicit lexical fallback
 
 ## Public Explorer API
 
 - `GET /v1/explorer/bootstrap` — bounded stats, facets, four featured records, and four recently updated records
-- `GET /v1/search` — supports `q`, `object_type`, `source_key`, `topic`, `year_from`, `year_to`, `sort`, `limit`, and `offset`
+- `GET /v1/search` — supports `q`, filters, `sort`, `mode=hybrid|lexical|semantic`, `include_core`, `limit`, and `offset`
+- `GET /v1/search/readiness` — semantic-provider/index state plus Core-aware retrieval boundary
 - `GET /v1/records/{record_id}?include_body=false` — bounded progressive record detail
 - `GET /v1/records/{record_id}/related`
 - `GET /v1/records/{record_id}/timeline`
@@ -41,9 +74,11 @@ The existing signed endpoints remain unchanged:
 - `GET /v1/admin/status`
 - `POST /v1/admin/integrity`
 - `POST /v1/admin/prune`
+- `GET /v1/admin/embeddings/status`
+- `POST /v1/admin/embeddings/run-once`
 
 ## Deployment boundary
 
 The compose file remains bound to `127.0.0.1:8087` and the external `sc-internal` Docker network. Continue using `https://library-api.sustainablecatalyst.com` through Caddy. Preserve the existing `.env` on upgrade.
 
-No PostgreSQL schema migration is required for v1.1.0.
+v2.24.0 applies an additive, idempotent PostgreSQL migration for semantic embeddings and embedding jobs. Existing tables and v2.23.0 Core bridge state are preserved.

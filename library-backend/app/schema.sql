@@ -245,3 +245,70 @@ CREATE TABLE IF NOT EXISTS library_core_sync_outbox (
 CREATE INDEX IF NOT EXISTS library_core_sync_outbox_queue_idx ON library_core_sync_outbox(status, next_attempt_at, created_at);
 CREATE INDEX IF NOT EXISTS library_core_sync_outbox_record_idx ON library_core_sync_outbox(library_record_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS library_core_sync_outbox_core_idx ON library_core_sync_outbox(core_object_id, created_at DESC);
+
+-- v2.24.0 — Hybrid Research Retrieval & Core-Aware Results.
+-- Semantic vectors remain a Library-owned retrieval artifact. Platform Core is
+-- referenced through durable bindings and remains authoritative for governed
+-- research/evidence objects, provenance, reasoning, synthesis, and exchange.
+CREATE OR REPLACE FUNCTION sc_cosine_similarity(a double precision[], b double precision[])
+RETURNS double precision
+LANGUAGE SQL
+IMMUTABLE
+STRICT
+PARALLEL SAFE
+AS $$
+    SELECT CASE
+        WHEN cardinality(a)=0 OR cardinality(a)<>cardinality(b) THEN NULL
+        ELSE (
+            SELECT sum(a[i]*b[i]) /
+                   NULLIF(sqrt(sum(a[i]*a[i])) * sqrt(sum(b[i]*b[i])), 0)
+              FROM generate_subscripts(a,1) AS g(i)
+        )
+    END
+$$;
+
+CREATE TABLE IF NOT EXISTS library_record_embeddings (
+    record_id text PRIMARY KEY REFERENCES library_records(record_id) ON DELETE CASCADE,
+    content_hash char(64) NOT NULL,
+    input_hash char(64) NOT NULL,
+    provider text NOT NULL,
+    model text NOT NULL,
+    dimensions integer NOT NULL CHECK (dimensions BETWEEN 1 AND 4096),
+    embedding double precision[] NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (cardinality(embedding)=dimensions)
+);
+CREATE INDEX IF NOT EXISTS library_record_embeddings_model_idx
+    ON library_record_embeddings(provider,model,dimensions,updated_at DESC);
+CREATE INDEX IF NOT EXISTS library_record_embeddings_content_idx
+    ON library_record_embeddings(content_hash,updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_embedding_jobs (
+    job_id bigserial PRIMARY KEY,
+    record_id text NOT NULL UNIQUE REFERENCES library_records(record_id) ON DELETE CASCADE,
+    content_hash char(64) NOT NULL,
+    input_hash char(64),
+    status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','processing','retry','complete','failed','cancelled')),
+    attempt_count integer NOT NULL DEFAULT 0 CHECK (attempt_count >= 0),
+    next_attempt_at timestamptz NOT NULL DEFAULT now(),
+    provider text,
+    model text,
+    dimensions integer,
+    last_error text,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    completed_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS library_embedding_jobs_queue_idx
+    ON library_embedding_jobs(status,next_attempt_at,created_at);
+
+-- Queue legacy/public records that do not yet have a semantic vector. Existing
+-- job rows are preserved, so service restarts do not reset completed work.
+INSERT INTO library_embedding_jobs(record_id,content_hash,status)
+SELECT r.record_id,r.content_hash,'pending'
+  FROM library_records r
+  LEFT JOIN library_record_embeddings e
+    ON e.record_id=r.record_id AND e.content_hash=r.content_hash
+ WHERE r.visibility='public' AND r.publication_status='published' AND e.record_id IS NULL
+ON CONFLICT (record_id) DO NOTHING;

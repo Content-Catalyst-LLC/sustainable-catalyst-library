@@ -8,6 +8,7 @@ if (!defined('ABSPATH')) { exit; }
  * The Python service receives bounded server-to-server index packets only.
  * v5.5.1 hardens bulk ingestion with payload-aware adaptive batching.
  * v5.5.2 exposes signed operations/recovery helpers used by the operations console.
+ * v5.13.0 exposes hybrid lexical/semantic retrieval with Platform Core binding context.
  */
 final class SC_Library_Python_Backend {
     public const VERSION = '5.6.0.32';
@@ -96,6 +97,7 @@ final class SC_Library_Python_Backend {
         if (!current_user_can('manage_options')) { return; }
         $health = self::health();
         $core = self::platform_core_readiness();
+        $retrieval = self::search_readiness();
         $last = get_option('sc_library_backend_last_sync', []);
         $checkpoint = get_option('sc_library_backend_sync_checkpoint', []);
         $has_failures = is_array($checkpoint) && !empty($checkpoint['failed_record_ids']);
@@ -122,6 +124,9 @@ final class SC_Library_Python_Backend {
             <h2><?php esc_html_e('Platform Core Research Bridge', 'sustainable-catalyst-library'); ?></h2>
             <p><?php esc_html_e('Library retains source ingestion, parsing, indexing, and retrieval. Platform Core owns governed research objects, evidence/provenance, reasoning, synthesis, and cross-product exchange.', 'sustainable-catalyst-library'); ?></p>
             <pre style="max-width:1100px;overflow:auto;background:#fff;border:1px solid #ccd0d4;padding:12px;"><?php echo esc_html(wp_json_encode($core, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
+            <h2><?php esc_html_e('Hybrid Research Retrieval', 'sustainable-catalyst-library'); ?></h2>
+            <p><?php esc_html_e('Lexical retrieval always remains available. Semantic retrieval activates only when a real embedding provider is configured; Core-aware result enrichment uses durable Library/Core bindings without a live Core call on every search.', 'sustainable-catalyst-library'); ?></p>
+            <pre style="max-width:1100px;overflow:auto;background:#fff;border:1px solid #ccd0d4;padding:12px;"><?php echo esc_html(wp_json_encode($retrieval, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
             <?php if (self::configured()) : ?>
                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline-block;margin-right:8px;">
                     <input type="hidden" name="action" value="sc_library_backend_sync_all">
@@ -157,6 +162,11 @@ final class SC_Library_Python_Backend {
             'permission_callback' => static function () { return current_user_can('manage_options'); },
             'callback' => static function () { return rest_ensure_response(self::platform_core_readiness()); },
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/search/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => static function () { return rest_ensure_response(self::search_readiness()); },
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/search', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
@@ -164,6 +174,13 @@ final class SC_Library_Python_Backend {
             'args' => [
                 'q' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
                 'object_type' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'source_key' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+                'topic' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+                'year_from' => ['sanitize_callback' => 'absint', 'default' => 0],
+                'year_to' => ['sanitize_callback' => 'absint', 'default' => 0],
+                'sort' => ['sanitize_callback' => 'sanitize_key', 'default' => 'relevance'],
+                'mode' => ['sanitize_callback' => 'sanitize_key', 'default' => 'hybrid'],
+                'include_core' => ['sanitize_callback' => 'rest_sanitize_boolean', 'default' => true],
                 'limit' => ['sanitize_callback' => 'absint', 'default' => 20],
                 'offset' => ['sanitize_callback' => 'absint', 'default' => 0],
             ],
@@ -222,17 +239,48 @@ final class SC_Library_Python_Backend {
         return $body;
     }
 
+    public static function search_readiness(): array {
+        if (!self::configured()) {
+            return ['ok' => false, 'configured' => false, 'state' => 'library_backend_not_configured'];
+        }
+        $response = wp_remote_get(self::base_url() . '/v1/search/readiness', [
+            'timeout' => self::timeout(),
+            'redirection' => 0,
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        if (is_wp_error($response)) {
+            return ['ok' => false, 'configured' => true, 'state' => 'unavailable', 'error' => $response->get_error_message()];
+        }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($body)) { $body = []; }
+        $body['ok'] = 200 === $code && !empty($body['hybrid_retrieval']);
+        $body['state'] = $body['ok'] ? (!empty($body['semantic_retrieval']) ? 'hybrid-ready' : 'lexical-ready-semantic-not-configured') : 'degraded';
+        return $body;
+    }
+
     public function proxy_search(WP_REST_Request $request) {
         if (!self::configured()) {
             return new WP_Error('sc_library_backend_not_configured', __('Library backend is not configured.', 'sustainable-catalyst-library'), ['status' => 503]);
         }
         $params = [
             'q' => (string) $request->get_param('q'),
+            'sort' => sanitize_key((string) $request->get_param('sort')) ?: 'relevance',
+            'mode' => in_array(sanitize_key((string) $request->get_param('mode')), ['hybrid', 'lexical', 'semantic'], true) ? sanitize_key((string) $request->get_param('mode')) : 'hybrid',
+            'include_core' => rest_sanitize_boolean($request->get_param('include_core')) ? 'true' : 'false',
             'limit' => min(100, max(1, (int) $request->get_param('limit'))),
             'offset' => min(100000, max(0, (int) $request->get_param('offset'))),
         ];
         $object_type = sanitize_key((string) $request->get_param('object_type'));
+        $source_key = sanitize_text_field((string) $request->get_param('source_key'));
+        $topic = sanitize_text_field((string) $request->get_param('topic'));
+        $year_from = absint($request->get_param('year_from'));
+        $year_to = absint($request->get_param('year_to'));
         if ($object_type) { $params['object_type'] = $object_type; }
+        if ($source_key) { $params['source_key'] = $source_key; }
+        if ($topic) { $params['topic'] = $topic; }
+        if ($year_from >= 1000 && $year_from <= 3000) { $params['year_from'] = $year_from; }
+        if ($year_to >= 1000 && $year_to <= 3000) { $params['year_to'] = $year_to; }
         $url = add_query_arg($params, self::base_url() . '/v1/search');
         $response = wp_remote_get($url, ['timeout' => self::timeout(), 'redirection' => 2, 'headers' => ['Accept' => 'application/json']]);
         if (is_wp_error($response)) {

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
+import asyncio
 from datetime import datetime, timezone
 import json
 from time import perf_counter
@@ -14,7 +15,9 @@ from pydantic import ValidationError
 from . import __version__
 from .db import close_pool, get_pool, initialize_database
 from .models import EdgeBatch, IntegrityAuditRequest, PruneRequest, RecordBatch
-from .query import explorer_bootstrap, facets, get_record, graph_neighborhood, related_records, search_records, stats, timeline
+from .query import explorer_bootstrap, facets, get_record, graph_neighborhood, related_records, stats, timeline
+from .hybrid_retrieval import hybrid_search_records
+from .semantic import embedding_jobs_status, process_embedding_jobs_once, semantic_readiness, default_embedding_client
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -51,12 +54,33 @@ from .private_knowledge import (
 )
 
 
+async def _embedding_worker_loop() -> None:
+    while True:
+        try:
+            if settings.database_url and settings.embedding_worker_enabled and default_embedding_client().configured:
+                await asyncio.to_thread(process_embedding_jobs_once, settings.embedding_worker_batch_size)
+        except Exception:
+            # Individual job failures are persisted by the semantic queue. A worker-level
+            # failure must not take down public Library search.
+            pass
+        await asyncio.sleep(settings.embedding_worker_interval_seconds)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     if settings.database_url:
         initialize_database()
-    yield
-    close_pool()
+    worker: asyncio.Task[Any] | None = None
+    if settings.embedding_worker_enabled:
+        worker = asyncio.create_task(_embedding_worker_loop())
+    try:
+        yield
+    finally:
+        if worker is not None:
+            worker.cancel()
+            with suppress(asyncio.CancelledError):
+                await worker
+        close_pool()
 
 
 institutional_sources = build_registry(settings.institutional_source_timeout_seconds)
@@ -196,7 +220,13 @@ def health() -> dict[str, Any]:
             "progressive_record_detail": True,
             "integrity_audit": True,
             "targeted_pruning": True,
-            "semantic_embeddings": "adapter-ready",
+            "hybrid_retrieval": True,
+            "hybrid_rank_fusion": "weighted-reciprocal-rank-fusion",
+            "semantic_vector_store": True,
+            "semantic_embeddings": "configured" if default_embedding_client().configured else "not-configured",
+            "semantic_embedding_provider": settings.embedding_provider,
+            "semantic_embedding_worker": settings.embedding_worker_enabled,
+            "core_aware_search_results": True,
             "institutional_sources": True,
             "johns_hopkins_dataverse": True,
             "license_reuse_normalization": True,
@@ -1864,10 +1894,59 @@ def search(
     year_from: int | None = Query(default=None, ge=1000, le=3000),
     year_to: int | None = Query(default=None, ge=1000, le=3000),
     sort: str = Query(default="relevance", max_length=20),
+    mode: str = Query(default="hybrid", pattern="^(hybrid|lexical|semantic)$"),
+    include_core: bool = Query(default=True),
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0, le=100000),
 ) -> dict[str, Any]:
-    return search_records(q, object_type, source_key, topic, year_from, year_to, sort, limit, offset)
+    return hybrid_search_records(
+        q, object_type, source_key, topic, year_from, year_to, sort, limit, offset,
+        mode=mode, include_core=include_core,
+    )
+
+
+@app.get("/v1/search/readiness")
+def search_readiness() -> dict[str, Any]:
+    semantic = semantic_readiness()
+    return {
+        "schema": "sc-library-hybrid-retrieval-readiness/1.0",
+        "hybrid_retrieval": True,
+        "lexical_retrieval": True,
+        "semantic_retrieval": bool(semantic.get("configured")),
+        "semantic": semantic,
+        "fusion": "weighted-reciprocal-rank-fusion",
+        "core_aware_results": True,
+        "core_binding_source": "library_core_bindings",
+        "platform_core_role": "governed-research-reasoning-and-provenance",
+        "library_role": "source-intelligence-indexing-and-retrieval",
+    }
+
+
+@app.get("/v1/admin/embeddings/status")
+async def admin_embedding_status(
+    request: Request,
+    limit: int = Query(default=100, ge=1, le=500),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    return embedding_jobs_status(limit=limit)
+
+
+@app.post("/v1/admin/embeddings/run-once")
+async def admin_embedding_run_once(
+    request: Request,
+    limit: int = Query(default=25, ge=1, le=100),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return process_embedding_jobs_once(limit=limit)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @app.get("/v1/explorer/bootstrap")

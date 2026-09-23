@@ -1,0 +1,34 @@
+Sustainable Catalyst Knowledge Library v5.13.0
+Hybrid Research Retrieval & Core-Aware Results
+Python backend v2.24.0
+Platform Core dependency: v3.3.0+ contracts through the v5.12.0 Research Bridge
+
+VALIDATION STATUS: PASS
+
+Current-release tests:
+- Root release/integration tests: 8 passed
+- Backend retrieval/Core integration tests: 13 passed
+- Total current-release tests: 21 passed
+
+Retained functional regression checks:
+- v5.12 Platform Core bridge functional tests: 5 passed (historical release-identity assertion deselected)
+- backend v2.23 Core bridge functional tests: 6 passed (historical release-identity assertion deselected)
+- v5.11 private organizational knowledge functional tests: 7 passed (historical release/readme identity assertions deselected)
+
+Static/runtime validation:
+- Python backend compileall: PASS
+- WordPress main plugin PHP lint: PASS
+- WordPress Python-backend integration PHP lint: PASS
+- macOS installer shell syntax: PASS
+- Contabo backend deployment shell syntax: PASS
+- Platform Core v3.3 capability probe contract: 8/8 routes present
+- No generic Platform Core proxy path: PASS
+- No fake/hash semantic embeddings: PASS
+- Library raw chunks/vectors remain Library-owned: PASS
+- Core-aware results use durable local Core bindings: PASS
+- Content-hash changes mark mismatched synchronized Core bindings stale: PASS
+- Public semantic index excludes non-public/unpublished records: PASS
+
+Release identity:
+- WordPress plugin: 5.13.0
+- Python backend: 2.24.0

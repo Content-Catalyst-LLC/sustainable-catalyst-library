@@ -14,6 +14,12 @@ See `ENERGY_SYSTEMS_INTELLIGENCE_v1.1.0.md`, `RELEASE_NOTES_ENERGY_SYSTEMS_1.1.0
 
 # Sustainable Catalyst Library
 
+## v5.13.0 — Hybrid Research Retrieval & Core-Aware Results
+
+v5.13.0 advances the Library Python backend to v2.24.0 and turns the canonical public search into a three-mode retrieval engine: lexical, semantic, or hybrid. Hybrid relevance uses weighted Reciprocal Rank Fusion across PostgreSQL full-text/trigram retrieval and real provider-generated embeddings stored in a Library-owned vector table. An idempotent embedding queue and bounded background worker keep public vectors current; when no provider is configured, requests degrade explicitly to lexical retrieval rather than inventing semantic scores. Search results can include durable Platform Core object bindings from v5.12.0 without making a live Core call for every result.
+
+See `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.13.0.md` and `HYBRID_RESEARCH_RETRIEVAL_v5.13.0.md`.
+
 ## Energy Systems Intelligence v1.0.0
 
 v1.0.0 is the **Integrated Sustainable Energy Systems Platform** certification release. It preserves the complete v0.1.0-v0.9.0 Energy Systems stack and adds a governed platform registry, six cross-product contracts, a portable integrated-study contract, and a repository/domain-contract structural certification report. Library remains v5.11.0, Carbon & Nature remains v0.5.0, and the shared Python backend advances to v2.16.0.

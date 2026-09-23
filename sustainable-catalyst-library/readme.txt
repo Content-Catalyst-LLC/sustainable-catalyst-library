@@ -8,14 +8,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.12.0
+Stable tag: 5.13.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.12.0 adds the Platform Core Research Bridge. The Library retains source ingestion, parsing, chunking, indexing, retrieval, connectors, and document intelligence while Platform Core owns governed research/evidence objects, provenance/lineage, reasoning, synthesis, reproducibility, visual reasoning, statistical reasoning, and cross-product exchange. Raw chunks are not mirrored into Core and automatic truth/claim promotion remains disabled.
+Sustainable Catalyst Library v5.13.0 adds Hybrid Research Retrieval & Core-Aware Results. The Python backend combines weighted full-text/trigram retrieval with optional real semantic embeddings using weighted reciprocal-rank fusion, keeps vectors and retrieval artifacts in the Library, and enriches returned records with durable Platform Core object bindings. If no embedding provider is configured, search degrades explicitly to lexical retrieval rather than fabricating semantic scores. Platform Core remains authoritative for governed research/evidence objects, provenance/lineage, reasoning, synthesis, reproducibility, visual reasoning, statistical reasoning, and cross-product exchange.
 
 Energy Systems Intelligence v1.1.0 adds a Cross-Product Runtime Activation Gateway while preserving the v1.0.0 integration/certification baseline. Five stateless Library-side packet builders now shape the integrated energy study for Research Librarian, Lab, Workbench, Site Intelligence, and Decision Studio. Gateway activation does not claim target-runtime consumption or execution; outbound push delivery, cross-product persistence, credential forwarding, automatic ranking, winner selection, and recommendation remain disabled.
 
@@ -402,6 +402,15 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= 5.13.0 =
+* Adds Hybrid Research Retrieval with lexical, semantic, and hybrid modes.
+* Adds Library-owned semantic vector storage and an idempotent embedding job queue.
+* Adds Gemini and OpenAI-compatible embedding adapters; no fake/hash embeddings are used.
+* Adds weighted reciprocal-rank fusion so lexical and semantic raw scores are not incorrectly treated as commensurate.
+* Enriches search results with durable Platform Core object bindings without a live Core call per search.
+* Adds /v1/search/readiness plus signed embedding queue status/run-once operations in backend v2.24.0.
+* Preserves explicit lexical fallback when semantic embeddings are unavailable.
 
 = 5.12.0 =
 * Adds the Platform Core Research Bridge and backend v2.23.0.

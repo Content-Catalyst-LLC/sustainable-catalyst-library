@@ -114,6 +114,45 @@ def ingest_records(batch: RecordBatch, request_hash: str) -> dict[str, Any]:
                     """,
                     (record.record_id, revision, digest, Jsonb(_snapshot(record, digest, revision))),
                 )
+                # A Core binding is only current for the Library content hash that
+                # was promoted. Content changes invalidate that assertion until the
+                # governed object is re-synchronized through the v5.12 bridge.
+                cur.execute(
+                    """
+                    UPDATE library_core_bindings
+                    SET sync_status='stale', updated_at=now()
+                    WHERE library_record_id=%s
+                      AND sync_status='synced'
+                      AND content_hash IS NOT NULL
+                      AND content_hash<>%s
+                    """,
+                    (record.record_id, digest),
+                )
+                if record.visibility == "public" and record.publication_status == "published":
+                    cur.execute(
+                        """
+                        INSERT INTO library_embedding_jobs(record_id,content_hash,status,attempt_count,next_attempt_at,updated_at)
+                        VALUES (%s,%s,'pending',0,now(),now())
+                        ON CONFLICT (record_id) DO UPDATE SET
+                            content_hash=EXCLUDED.content_hash,
+                            input_hash=NULL,
+                            status='pending',
+                            attempt_count=0,
+                            next_attempt_at=now(),
+                            provider=NULL,
+                            model=NULL,
+                            dimensions=NULL,
+                            last_error=NULL,
+                            updated_at=now(),
+                            completed_at=NULL
+                        """,
+                        (record.record_id, digest),
+                    )
+                else:
+                    # The public semantic index never retains vectors for records
+                    # that are no longer publicly published.
+                    cur.execute("DELETE FROM library_embedding_jobs WHERE record_id=%s", (record.record_id,))
+                    cur.execute("DELETE FROM library_record_embeddings WHERE record_id=%s", (record.record_id,))
                 changed += 1
 
             duration_ms = int((time.perf_counter() - started) * 1000)

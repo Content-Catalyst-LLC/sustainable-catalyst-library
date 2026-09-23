@@ -1,0 +1,45 @@
+KNOWLEDGE LIBRARY v5.13.0 — HYBRID RESEARCH RETRIEVAL & CORE-AWARE RESULTS
+Backend v2.24.0
+
+1) GIT COMMIT / PUSH / TAG FROM macOS
+
+cd ~/Downloads
+rm -rf sc-library-v5.13.0-release
+unzip -q sustainable-catalyst-library-v5.13.0-release-bundle.zip -d sc-library-v5.13.0-release
+cd sc-library-v5.13.0-release
+chmod +x install_and_push_sustainable_catalyst_library_v5_13_0_macos.sh
+./install_and_push_sustainable_catalyst_library_v5_13_0_macos.sh "$HOME/Downloads/sustainable-catalyst-library"
+
+2) WORDPRESS
+
+Upload and activate/upgrade:
+sustainable-catalyst-library-v5.13.0.zip
+
+3) COPY BACKEND TO CONTABO
+
+cd ~/Downloads/sc-library-v5.13.0-release
+scp -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes sustainable-catalyst-library-backend-v2.24.0.zip upgrade_library_backend_v2_24_0_contabo.sh catalystadmin@94.72.113.77:/tmp/
+
+4) DEPLOY BACKEND
+
+ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes catalystadmin@94.72.113.77
+cd /tmp
+chmod +x upgrade_library_backend_v2_24_0_contabo.sh
+./upgrade_library_backend_v2_24_0_contabo.sh /tmp/sustainable-catalyst-library-backend-v2.24.0.zip
+
+5) OPTIONAL — ACTIVATE GEMINI SEMANTIC EMBEDDINGS
+
+Edit:
+/opt/sustainable-catalyst/library-backend/.env
+
+Set:
+SC_LIBRARY_EMBEDDING_PROVIDER=gemini
+SC_LIBRARY_EMBEDDING_API_KEY=<server-side key>
+SC_LIBRARY_EMBEDDING_MODEL=gemini-embedding-2
+SC_LIBRARY_EMBEDDING_DIMENSIONS=768
+
+Then:
+cd /opt/sustainable-catalyst/library-backend
+docker compose up -d --force-recreate
+
+Without a configured embedding provider, v5.13.0 remains healthy and explicitly uses lexical-fallback mode.

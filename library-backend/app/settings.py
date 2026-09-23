@@ -12,6 +12,22 @@ def _as_int(name: str, default: int, minimum: int, maximum: int) -> int:
     return max(minimum, min(maximum, value))
 
 
+
+def _as_float(name: str, default: float, minimum: float, maximum: float) -> float:
+    try:
+        value = float(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        value = default
+    return max(minimum, min(maximum, value))
+
+
+def _default_embedding_provider() -> str:
+    explicit = os.getenv("SC_LIBRARY_EMBEDDING_PROVIDER", "").strip().lower()
+    if explicit:
+        return explicit
+    key = os.getenv("SC_LIBRARY_EMBEDDING_API_KEY", "").strip() or os.getenv("GEMINI_API_KEY", "").strip()
+    return "gemini" if key else "disabled"
+
 def _as_bool(name: str, default: bool = False) -> bool:
     raw = os.getenv(name)
     if raw is None:
@@ -37,6 +53,20 @@ class Settings:
     platform_core_write_api_key: str = os.getenv("SC_LIBRARY_PLATFORM_CORE_WRITE_API_KEY", "").strip()
     platform_core_timeout_seconds: int = _as_int("SC_LIBRARY_PLATFORM_CORE_TIMEOUT_SECONDS", 8, 2, 30)
     platform_core_max_attempts: int = _as_int("SC_LIBRARY_PLATFORM_CORE_MAX_ATTEMPTS", 5, 1, 20)
+    embedding_provider: str = _default_embedding_provider()
+    embedding_api_key: str = (os.getenv("SC_LIBRARY_EMBEDDING_API_KEY", "").strip() or os.getenv("GEMINI_API_KEY", "").strip())
+    embedding_model: str = os.getenv("SC_LIBRARY_EMBEDDING_MODEL", "gemini-embedding-2").strip()
+    embedding_api_url: str = os.getenv("SC_LIBRARY_EMBEDDING_API_URL", "").strip()
+    embedding_dimensions: int = _as_int("SC_LIBRARY_EMBEDDING_DIMENSIONS", 768, 64, 3072)
+    embedding_timeout_seconds: int = _as_int("SC_LIBRARY_EMBEDDING_TIMEOUT_SECONDS", 12, 2, 60)
+    embedding_max_attempts: int = _as_int("SC_LIBRARY_EMBEDDING_MAX_ATTEMPTS", 5, 1, 20)
+    embedding_worker_enabled: bool = _as_bool("SC_LIBRARY_EMBEDDING_WORKER_ENABLED", True)
+    embedding_worker_interval_seconds: int = _as_int("SC_LIBRARY_EMBEDDING_WORKER_INTERVAL_SECONDS", 30, 5, 3600)
+    embedding_worker_batch_size: int = _as_int("SC_LIBRARY_EMBEDDING_WORKER_BATCH_SIZE", 10, 1, 100)
+    hybrid_candidate_multiplier: int = _as_int("SC_LIBRARY_HYBRID_CANDIDATE_MULTIPLIER", 4, 2, 10)
+    hybrid_rrf_k: int = _as_int("SC_LIBRARY_HYBRID_RRF_K", 60, 1, 500)
+    hybrid_lexical_weight: float = _as_float("SC_LIBRARY_HYBRID_LEXICAL_WEIGHT", 1.0, 0.0, 10.0)
+    hybrid_semantic_weight: float = _as_float("SC_LIBRARY_HYBRID_SEMANTIC_WEIGHT", 1.0, 0.0, 10.0)
     institutional_source_timeout_seconds: int = _as_int("SC_LIBRARY_INSTITUTIONAL_TIMEOUT_SECONDS", 8, 2, 30)
     biomedical_source_timeout_seconds: int = _as_int("SC_LIBRARY_BIOMEDICAL_TIMEOUT_SECONDS", 8, 2, 30)
     ncbi_tool: str = os.getenv("SC_LIBRARY_NCBI_TOOL", "sustainable_catalyst_library").strip()
