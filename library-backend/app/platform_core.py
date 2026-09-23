@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import hashlib
 import json
+import re
+from urllib.parse import quote
 from typing import Any, Callable
 
 import httpx
@@ -24,6 +26,8 @@ CORE_OPERATIONS: dict[str, tuple[str, str]] = {
     "exchange-package.create": ("POST", "/v1/exchange/packages"),
     "scholarly-package.create": ("POST", "/v1/research/scholarly-packages/packages"),
     "scholarly-citation.create": ("POST", "/v1/research/scholarly-packages/citations"),
+    "research-finding.create": ("POST", "/v1/research/intelligence/projects/{project_id}/findings"),
+    "research-claim.create": ("POST", "/v1/research/intelligence/projects/{project_id}/claims"),
     "runtime-contract.create": ("POST", "/v1/research/runtime-contract/contracts"),
 }
 
@@ -125,7 +129,17 @@ class PlatformCoreClient:
 
     def execute(self, operation: str, payload: dict[str, Any]) -> CoreResponse:
         method, path = CORE_OPERATIONS[operation]
-        return self._request(method, path, payload)
+        body = dict(payload or {})
+        if "{project_id}" in path:
+            project_id = str(body.pop("project_id", "")).strip()
+            if not project_id or len(project_id) > 500 or not re.fullmatch(r"[A-Za-z0-9._~:@/-]+", project_id):
+                raise RuntimeError("invalid or missing Core project_id for allowlisted research-intelligence operation")
+            data = body.pop("data", None)
+            if not isinstance(data, dict) or body:
+                raise RuntimeError("research-intelligence operation payload must contain only project_id and data")
+            path = path.format(project_id=quote(project_id, safe=":"))
+            body = {"data": data}
+        return self._request(method, path, body)
 
     def capabilities(self) -> dict[str, Any]:
         if not self.configured:

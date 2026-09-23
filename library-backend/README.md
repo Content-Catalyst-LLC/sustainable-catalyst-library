@@ -1,4 +1,12 @@
-# Sustainable Catalyst Library Backend v2.25.1
+# Sustainable Catalyst Library Backend v2.26.0
+
+## v2.26.0 — Entity, Finding & Claim Extraction
+
+v2.26.0 adds Library-owned extraction candidates for entities, findings, and claims. Candidates are anchored to exact source locators, chunk ordinals, character spans, source content hashes, extraction methods, and confidence values. They remain non-governed until human review. Accepted finding/claim candidates can be queued through the durable Platform Core outbox into Core Finding, Claim & Evidence Intelligence using allowlisted project-scoped operations. Entity candidates remain Library-owned in this release.
+
+Public readiness: `GET /v1/research-extraction/readiness`. Signed operations: `POST /v1/research-extraction/extract`, `GET /v1/research-extraction/candidates`, `POST /v1/research-extraction/candidates/{candidate_id}/review`, and `POST /v1/research-extraction/core-handoff`.
+
+The extraction layer does not determine truth, scientific validity, causal validity, consensus, evidence strength, or recommendations. Source changes supersede pending/accepted candidates tied to an older content hash.
 
 
 ## v2.25.1 — Citation Graph Route Precedence Repair

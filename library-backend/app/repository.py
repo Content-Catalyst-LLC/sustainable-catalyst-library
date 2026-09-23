@@ -128,6 +128,20 @@ def ingest_records(batch: RecordBatch, request_hash: str) -> dict[str, Any]:
                     """,
                     (record.record_id, digest),
                 )
+                # Extracted research candidates are source-bound proposals. If the
+                # publication changes, unresolved/accepted candidates from the old
+                # hash are superseded and must be extracted/reviewed again.
+                cur.execute(
+                    """
+                    UPDATE library_research_candidates
+                       SET review_state='superseded', updated_at=now()
+                     WHERE record_id=%s
+                       AND review_state IN ('pending','accepted')
+                       AND source_content_hash IS NOT NULL
+                       AND source_content_hash<>%s
+                    """,
+                    (record.record_id, digest),
+                )
                 if record.visibility == "public" and record.publication_status == "published":
                     cur.execute(
                         """

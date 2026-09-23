@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) { exit; }
  * v5.5.1 hardens bulk ingestion with payload-aware adaptive batching.
  * v5.5.2 exposes signed operations/recovery helpers used by the operations console.
  * v5.14.0 adds citation graph and scholarly-lineage readiness while preserving hybrid retrieval and Platform Core binding context.
+ * v5.15.0 adds entity/finding/claim candidate extraction readiness with source-span and human-review guardrails.
  */
 final class SC_Library_Python_Backend {
     public const VERSION = '5.6.0.32';
@@ -98,6 +99,7 @@ final class SC_Library_Python_Backend {
         $health = self::health();
         $core = self::platform_core_readiness();
         $retrieval = self::search_readiness();
+        $extraction = self::extraction_readiness();
         $last = get_option('sc_library_backend_last_sync', []);
         $checkpoint = get_option('sc_library_backend_sync_checkpoint', []);
         $has_failures = is_array($checkpoint) && !empty($checkpoint['failed_record_ids']);
@@ -127,6 +129,9 @@ final class SC_Library_Python_Backend {
             <h2><?php esc_html_e('Hybrid Research Retrieval', 'sustainable-catalyst-library'); ?></h2>
             <p><?php esc_html_e('Lexical retrieval always remains available. Semantic retrieval activates only when a real embedding provider is configured; Core-aware result enrichment uses durable Library/Core bindings without a live Core call on every search.', 'sustainable-catalyst-library'); ?></p>
             <pre style="max-width:1100px;overflow:auto;background:#fff;border:1px solid #ccd0d4;padding:12px;"><?php echo esc_html(wp_json_encode($retrieval, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
+            <h2><?php esc_html_e('Research Extraction Candidates', 'sustainable-catalyst-library'); ?></h2>
+            <p><?php esc_html_e('Entity, finding, and claim extraction produces source-anchored candidates only. Human review is required before findings or claims can enter the Platform Core governed promotion queue.', 'sustainable-catalyst-library'); ?></p>
+            <pre style="max-width:1100px;overflow:auto;background:#fff;border:1px solid #ccd0d4;padding:12px;"><?php echo esc_html(wp_json_encode($extraction, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
             <?php if (self::configured()) : ?>
                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline-block;margin-right:8px;">
                     <input type="hidden" name="action" value="sc_library_backend_sync_all">
@@ -171,6 +176,11 @@ final class SC_Library_Python_Backend {
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => static function () { return current_user_can('manage_options'); },
             'callback' => static function () { return rest_ensure_response(self::citation_readiness()); },
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/extraction/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => static function () { return rest_ensure_response(self::extraction_readiness()); },
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/search', [
             'methods' => WP_REST_Server::READABLE,
@@ -261,6 +271,26 @@ final class SC_Library_Python_Backend {
         if (!is_array($body)) { $body = []; }
         $body['ok'] = 200 === $code && !empty($body['citation_graph']);
         $body['state'] = $body['ok'] ? 'citation-lineage-ready' : 'degraded';
+        return $body;
+    }
+
+    public static function extraction_readiness(): array {
+        if (!self::configured()) {
+            return ['ok' => false, 'configured' => false, 'state' => 'library_backend_not_configured'];
+        }
+        $response = wp_remote_get(self::base_url() . '/v1/research-extraction/readiness', [
+            'timeout' => self::timeout(),
+            'redirection' => 0,
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        if (is_wp_error($response)) {
+            return ['ok' => false, 'configured' => true, 'state' => 'unavailable', 'error' => $response->get_error_message()];
+        }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($body)) { $body = []; }
+        $body['ok'] = 200 === $code && !empty($body['storage_ready']) && !empty($body['entity_candidates']) && !empty($body['finding_candidates']) && !empty($body['claim_candidates']);
+        $body['state'] = $body['ok'] ? 'candidate-extraction-ready' : 'degraded';
         return $body;
     }
 

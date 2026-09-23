@@ -338,3 +338,39 @@ CREATE INDEX IF NOT EXISTS library_citations_citing_idx ON library_citations(cit
 CREATE INDEX IF NOT EXISTS library_citations_cited_idx ON library_citations(cited_record_id, updated_at DESC) WHERE cited_record_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS library_citations_identifier_idx ON library_citations(identifier_type, lower(identifier_value)) WHERE identifier_value <> '';
 CREATE INDEX IF NOT EXISTS library_citations_resolution_idx ON library_citations(resolution_status, updated_at DESC);
+
+
+-- v2.26.0 — Entity, Finding & Claim Extraction.
+-- These rows are Library-owned extraction candidates anchored to source spans.
+-- They are not governed Platform Core findings/claims until a human accepts a
+-- candidate and explicitly queues it through the allowlisted Core bridge.
+CREATE TABLE IF NOT EXISTS library_research_candidates (
+    candidate_id bigserial PRIMARY KEY,
+    candidate_key char(64) NOT NULL UNIQUE,
+    record_id text NOT NULL REFERENCES library_records(record_id) ON DELETE CASCADE,
+    candidate_type text NOT NULL CHECK (candidate_type IN ('entity','finding','claim')),
+    candidate_text text NOT NULL,
+    entity_type text,
+    extraction_method text NOT NULL DEFAULT 'rule-based',
+    confidence double precision NOT NULL DEFAULT 0.5 CHECK (confidence >= 0 AND confidence <= 1),
+    source_locator text NOT NULL,
+    source_chunk_ordinal integer CHECK (source_chunk_ordinal IS NULL OR source_chunk_ordinal >= 0),
+    char_start integer NOT NULL DEFAULT 0 CHECK (char_start >= 0),
+    char_end integer NOT NULL DEFAULT 0 CHECK (char_end >= char_start),
+    source_content_hash char(64),
+    review_state text NOT NULL DEFAULT 'pending' CHECK (review_state IN ('pending','accepted','rejected','superseded')),
+    reviewer text,
+    review_note text NOT NULL DEFAULT '',
+    reviewed_at timestamptz,
+    core_operation text,
+    core_outbox_event_id bigint REFERENCES library_core_sync_outbox(event_id) ON DELETE SET NULL,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_research_candidates_record_idx
+    ON library_research_candidates(record_id,candidate_type,review_state,confidence DESC);
+CREATE INDEX IF NOT EXISTS library_research_candidates_review_idx
+    ON library_research_candidates(review_state,updated_at DESC);
+CREATE INDEX IF NOT EXISTS library_research_candidates_core_idx
+    ON library_research_candidates(core_outbox_event_id) WHERE core_outbox_event_id IS NOT NULL;

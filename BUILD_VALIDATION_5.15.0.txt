@@ -1,0 +1,29 @@
+Sustainable Catalyst Knowledge Library v5.15.0
+Python backend v2.26.0
+Release: Entity, Finding & Claim Extraction
+
+Validation summary
+------------------
+PASS - WordPress release identity 5.15.0
+PASS - Backend identity 2.26.0
+PASS - Python compileall
+PASS - PHP syntax: main plugin and Python backend bridge
+PASS - Shell syntax: release validator, Git installer, Contabo installer
+PASS - 51/51 integrated tests
+PASS - Platform Core v3.3 research-intelligence endpoint contract verified against uploaded Core repository
+PASS - Candidate schema includes source locator, character spans, content hash, review state, and outbox reference
+PASS - Human review gate required before Core finding/claim promotion
+PASS - Entity candidates remain Library-owned in v5.15.0
+PASS - Source content changes supersede stale pending/accepted candidates
+PASS - v5.14 citation graph route precedence repair retained
+PASS - v5.13 hybrid retrieval runtime repair retained
+PASS - v5.12 durable Platform Core bridge retained
+
+Governance boundaries
+---------------------
+No automatic truth promotion.
+No automatic finding promotion.
+No automatic claim promotion.
+No Core-generated findings or claims.
+No arbitrary Core URL proxy.
+No entity candidate misrepresentation as a finding or claim.

@@ -22,6 +22,10 @@ from .citation_graph import (
     CitationCreateRequest, CoreScholarlyCitationHandoffRequest, citation_graph, citation_readiness,
     enqueue_core_scholarly_citation, import_record_metadata_citations, list_citations, upsert_citation,
 )
+from .research_extraction import (
+    CandidatePromotionRequest, CandidateReviewRequest, ExtractionRequest,
+    enqueue_core_candidate, extract_record_candidates, extraction_readiness, list_candidates, review_candidate,
+)
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -237,6 +241,16 @@ def health() -> dict[str, Any]:
             "scholarly_lineage": True,
             "platform_core_scholarly_citation_handoff": True,
             "automatic_citation_inference": False,
+            "research_candidate_extraction": True,
+            "entity_candidate_extraction": True,
+            "finding_candidate_extraction": True,
+            "claim_candidate_extraction": True,
+            "candidate_source_spans": True,
+            "candidate_human_review_gate": True,
+            "platform_core_finding_claim_promotion": True,
+            "automatic_finding_promotion": False,
+            "automatic_claim_promotion": False,
+            "automatic_truth_promotion_from_extraction": False,
             "institutional_sources": True,
             "johns_hopkins_dataverse": True,
             "license_reuse_normalization": True,
@@ -1986,6 +2000,75 @@ async def citation_core_handoff(
     await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
     try:
         return enqueue_core_scholarly_citation(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/research-extraction/readiness")
+def research_extraction_readiness() -> dict[str, Any]:
+    return extraction_readiness()
+
+
+@app.post("/v1/research-extraction/extract")
+async def research_extraction_run(
+    payload: ExtractionRequest,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return extract_record_candidates(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/research-extraction/candidates")
+async def research_extraction_candidates(
+    request: Request,
+    record_id: str = Query(min_length=1, max_length=500),
+    candidate_type: str | None = Query(default=None, pattern="^(entity|finding|claim)$"),
+    review_state: str | None = Query(default=None, pattern="^(pending|accepted|rejected|superseded)$"),
+    limit: int = Query(default=200, ge=1, le=1000),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return list_candidates(record_id, candidate_type=candidate_type, review_state=review_state, limit=limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/v1/research-extraction/candidates/{candidate_id}/review")
+async def research_extraction_review(
+    candidate_id: int,
+    payload: CandidateReviewRequest,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return review_candidate(candidate_id, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/v1/research-extraction/core-handoff")
+async def research_extraction_core_handoff(
+    payload: CandidatePromotionRequest,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return enqueue_core_candidate(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

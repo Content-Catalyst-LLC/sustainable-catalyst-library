@@ -108,6 +108,8 @@ def test_core_write_operation_is_allowlisted_and_authenticated():
         "exchange-package.create",
         "scholarly-package.create",
         "scholarly-citation.create",
+        "research-finding.create",
+        "research-claim.create",
         "runtime-contract.create",
     }
 

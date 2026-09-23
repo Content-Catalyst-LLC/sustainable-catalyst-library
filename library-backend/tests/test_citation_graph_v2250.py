@@ -59,9 +59,9 @@ def test_release_identity_and_schema():
     plugin = (repo / "sustainable-catalyst-library/sustainable-catalyst-library.php").read_text()
     schema = (repo / "library-backend/app/schema.sql").read_text()
     main = (repo / "library-backend/app/main.py").read_text()
-    assert "Version: 5.14.0" in plugin
-    assert "SC_LIBRARY_VERSION', '5.14.0'" in plugin
-    assert '__version__ = "2.25.1"' in (repo / "library-backend/app/__init__.py").read_text()
+    assert "Version: 5.15.0" in plugin
+    assert "SC_LIBRARY_VERSION', '5.15.0'" in plugin
+    assert '__version__ = "2.26.0"' in (repo / "library-backend/app/__init__.py").read_text()
     assert "CREATE TABLE IF NOT EXISTS library_citations" in schema
     assert '@app.get("/v1/citations/readiness")' in main
     assert '@app.post("/v1/citations/core-handoff")' in main
