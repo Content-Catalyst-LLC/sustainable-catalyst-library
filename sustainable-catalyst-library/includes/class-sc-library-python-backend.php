@@ -206,6 +206,18 @@ final class SC_Library_Python_Backend {
                 'limit' => ['sanitize_callback' => 'absint', 'default' => 20],
             ],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-corpus-knowledge-map', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_corpus_knowledge_map'],
+            'args' => [
+                'source_key' => ['sanitize_callback' => 'sanitize_text_field', 'default' => 'wordpress-main'],
+                'object_type' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'semantic_threshold' => ['sanitize_callback' => static function ($value) { return max(0.0, min(1.0, (float) $value)); }, 'default' => 0.72],
+                'max_publications' => ['sanitize_callback' => 'absint', 'default' => 250],
+                'max_topics_per_publication' => ['sanitize_callback' => 'absint', 'default' => 36],
+            ],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-knowledge-map', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
@@ -367,6 +379,40 @@ final class SC_Library_Python_Backend {
         $body['ok'] = 200 === $code && !empty($body['publication_knowledge_mapping']) && !empty($body['storage_ready']);
         $body['state'] = $body['ok'] ? 'scientific-knowledge-mapping-ready' : 'degraded';
         return $body;
+    }
+
+    public static function publication_corpus_knowledge_map(string $source_key = 'wordpress-main', string $object_type = '', float $semantic_threshold = 0.72, int $max_publications = 250, int $max_topics_per_publication = 36): array {
+        if (!self::configured()) {
+            return ['schema' => 'sc-library-publication-corpus-knowledge-map/1.0', 'scope' => 'corpus', 'nodes' => [], 'edges' => []];
+        }
+        $url = add_query_arg([
+            'source_key' => sanitize_text_field($source_key),
+            'object_type' => sanitize_key($object_type),
+            'include_citations' => 'true',
+            'include_semantic_similarity' => 'true',
+            'semantic_threshold' => max(0.0, min(1.0, $semantic_threshold)),
+            'max_publications' => min(1000, max(1, $max_publications)),
+            'max_topics_per_publication' => min(100, max(1, $max_topics_per_publication)),
+        ], self::base_url() . '/v1/publication-knowledge-maps/corpus');
+        $response = wp_remote_get($url, [
+            'timeout' => max(self::timeout(), 20),
+            'redirection' => 2,
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        if (is_wp_error($response) || 200 !== (int) wp_remote_retrieve_response_code($response)) {
+            return ['schema' => 'sc-library-publication-corpus-knowledge-map/1.0', 'scope' => 'corpus', 'nodes' => [], 'edges' => []];
+        }
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        return is_array($body) ? $body : ['schema' => 'sc-library-publication-corpus-knowledge-map/1.0', 'scope' => 'corpus', 'nodes' => [], 'edges' => []];
+    }
+
+    public function proxy_publication_corpus_knowledge_map(WP_REST_Request $request) {
+        $source_key = sanitize_text_field((string) $request->get_param('source_key')) ?: 'wordpress-main';
+        $object_type = sanitize_key((string) $request->get_param('object_type'));
+        $semantic_threshold = max(0.0, min(1.0, (float) $request->get_param('semantic_threshold')));
+        $max_publications = min(1000, max(1, (int) $request->get_param('max_publications')));
+        $max_topics = min(100, max(1, (int) $request->get_param('max_topics_per_publication')));
+        return rest_ensure_response(self::publication_corpus_knowledge_map($source_key, $object_type, $semantic_threshold, $max_publications, $max_topics));
     }
 
     public static function publication_knowledge_map(string $record_id, float $semantic_threshold = 0.72, int $max_neighbors = 40, int $max_topics_per_publication = 36): array {

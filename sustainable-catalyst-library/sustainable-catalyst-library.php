@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.17.0 with scientific publication knowledge mapping, interactive topic/citation/semantic graph analysis, publication visualization foundations, Entity/Finding/Claim extraction, scholarly lineage, hybrid retrieval, and Platform Core-governed visual reasoning handoff while preserving existing research domains.
- * Version: 5.17.0
+ * Description: Sustainable Catalyst Library v5.17.1 with live publication-corpus knowledge mapping, interactive topic/citation/semantic graph analysis, publication visualization foundations, Entity/Finding/Claim extraction, scholarly lineage, hybrid retrieval, and Platform Core-governed visual reasoning handoff while preserving existing research domains.
+ * Version: 5.17.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.17.0');
+define('SC_LIBRARY_VERSION', '5.17.1');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);

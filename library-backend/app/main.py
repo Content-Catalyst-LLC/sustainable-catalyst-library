@@ -32,6 +32,7 @@ from .publication_visualizations import (
     list_publication_visualizations, review_publication_visualization, visualization_readiness,
 )
 from .publication_knowledge_maps import build_publication_knowledge_map, knowledge_map_readiness
+from .publication_corpus_maps import build_publication_corpus_knowledge_map
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -268,6 +269,9 @@ def health() -> dict[str, Any]:
             "publication_topic_relationship_mapping": True,
             "publication_semantic_similarity": "stored-embeddings-only",
             "publication_knowledge_map_workspace_portable": True,
+            "publication_corpus_integration": True,
+            "publication_corpus_default_source": "wordpress-main",
+            "publication_corpus_live_library_records": True,
             "institutional_sources": True,
             "johns_hopkins_dataverse": True,
             "license_reuse_normalization": True,
@@ -2098,6 +2102,27 @@ def publication_visualizations_readiness() -> dict[str, Any]:
 @app.get("/v1/publication-knowledge-maps/readiness")
 def publication_knowledge_maps_readiness() -> dict[str, Any]:
     return knowledge_map_readiness()
+
+
+@app.get("/v1/publication-knowledge-maps/corpus")
+def publication_corpus_knowledge_maps_read(
+    source_key: str = "wordpress-main",
+    object_type: str = "",
+    include_citations: bool = True,
+    include_semantic_similarity: bool = True,
+    semantic_threshold: float = 0.72,
+    max_publications: int = 250,
+    max_topics_per_publication: int = 36,
+) -> dict[str, Any]:
+    return build_publication_corpus_knowledge_map(
+        source_key=source_key,
+        object_type=object_type,
+        include_citations=include_citations,
+        include_semantic_similarity=include_semantic_similarity,
+        semantic_threshold=semantic_threshold,
+        max_publications=max_publications,
+        max_topics_per_publication=max_topics_per_publication,
+    )
 
 
 @app.get("/v1/publication-knowledge-maps")

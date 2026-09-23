@@ -1,107 +1,64 @@
 from __future__ import annotations
 
 from collections import defaultdict
-import hashlib
-import math
 from typing import Any
 
 from .db import get_pool
+from .publication_knowledge_maps import _add_edge, _add_node, _as_list, _cosine, _topic_id
 
-KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-knowledge-map/1.0"
-KNOWLEDGE_MAP_READINESS_CONTRACT = "sc-library-publication-knowledge-map-readiness/1.0"
-
-
-def _topic_id(label: str) -> str:
-    normalized = " ".join(str(label or "").strip().lower().split())
-    return "topic:" + hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:20]
+CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
 
 
-def _cosine(a: list[float], b: list[float]) -> float:
-    if not a or len(a) != len(b):
-        return 0.0
-    dot = sum(x * y for x, y in zip(a, b))
-    na = math.sqrt(sum(x * x for x in a))
-    nb = math.sqrt(sum(y * y for y in b))
-    if na <= 0.0 or nb <= 0.0:
-        return 0.0
-    return max(-1.0, min(1.0, dot / (na * nb)))
-
-
-def _record(cur: Any, record_id: str) -> dict[str, Any]:
+def _eligible_records(cur: Any, *, source_key: str = "wordpress-main", object_type: str = "", max_publications: int = 250) -> tuple[dict[str, dict[str, Any]], int]:
+    source_key = str(source_key or "").strip()
+    object_type = str(object_type or "").strip()
+    max_publications = max(1, min(1000, int(max_publications)))
+    where = ["visibility='public'", "publication_status='published'"]
+    params: list[Any] = []
+    if source_key:
+        where.append("source_key=%s")
+        params.append(source_key)
+    if object_type:
+        where.append("object_type=%s")
+        params.append(object_type)
+    clause = " AND ".join(where)
+    cur.execute(f"SELECT count(*) AS n FROM library_records WHERE {clause}", tuple(params))
+    total = int(cur.fetchone()["n"])
     cur.execute(
-        """
-        SELECT record_id,title,canonical_url,object_type,content_hash,authors,topics,tags,identifiers,
+        f"""
+        SELECT record_id,source_key,title,canonical_url,object_type,content_hash,authors,topics,tags,identifiers,
                visibility,publication_status,published_at,indexed_at,metadata
           FROM library_records
-         WHERE record_id=%s
+         WHERE {clause}
+         ORDER BY published_at DESC NULLS LAST,indexed_at DESC,record_id ASC
+         LIMIT %s
         """,
-        (record_id,),
+        tuple(params + [max_publications]),
     )
-    row = cur.fetchone()
-    if not row:
-        raise ValueError("record_id does not exist")
-    record = dict(row)
-    if record.get("visibility") != "public" or record.get("publication_status") != "published":
-        raise ValueError("knowledge maps require a public, published Library record")
-    return record
+    records: dict[str, dict[str, Any]] = {}
+    for row in cur.fetchall():
+        item = dict(row)
+        records[str(item["record_id"])] = item
+    return records, total
 
 
-def _as_list(value: Any) -> list[Any]:
-    return list(value) if isinstance(value, (list, tuple)) else []
-
-
-def _add_node(nodes: dict[str, dict[str, Any]], node_id: str, kind: str, label: str, **extra: Any) -> None:
-    if node_id in nodes:
-        # Preserve the first canonical label but merge useful source metadata.
-        nodes[node_id].update({k: v for k, v in extra.items() if v not in (None, "", [], {})})
-        return
-    nodes[node_id] = {"id": node_id, "kind": kind, "label": label, **{k: v for k, v in extra.items() if v is not None}}
-
-
-def _edge_key(source: str, target: str, basis: str, directed: bool) -> tuple[str, str, str, bool]:
-    if directed or source <= target:
-        return source, target, basis, directed
-    return target, source, basis, directed
-
-
-def _add_edge(edges: dict[tuple[str, str, str, bool], dict[str, Any]], source: str, target: str, basis: str, *, directed: bool, weight: float = 1.0, **extra: Any) -> None:
-    if source == target:
-        return
-    key = _edge_key(source, target, basis, directed)
-    if key in edges:
-        edges[key]["weight"] = round(float(edges[key].get("weight", 1.0)) + float(weight), 6)
-        if extra.get("evidence_count"):
-            edges[key]["evidence_count"] = int(edges[key].get("evidence_count", 1)) + int(extra["evidence_count"])
-        return
-    edges[key] = {
-        "id": f"edge:{hashlib.sha256('|'.join(map(str, key)).encode('utf-8')).hexdigest()[:20]}",
-        "source": key[0],
-        "target": key[1],
-        "relationship_basis": basis,
-        "directed": directed,
-        "weight": round(float(weight), 6),
-        **extra,
-    }
-
-
-def build_publication_knowledge_map(
-    record_id: str,
+def build_publication_corpus_knowledge_map(
     *,
+    source_key: str = "wordpress-main",
+    object_type: str = "",
     include_citations: bool = True,
     include_semantic_similarity: bool = True,
     semantic_threshold: float = 0.72,
-    max_neighbors: int = 40,
+    max_publications: int = 250,
     max_topics_per_publication: int = 36,
 ) -> dict[str, Any]:
     semantic_threshold = max(0.0, min(1.0, float(semantic_threshold)))
-    max_neighbors = max(0, min(100, int(max_neighbors)))
+    max_publications = max(1, min(1000, int(max_publications)))
     max_topics_per_publication = max(1, min(100, int(max_topics_per_publication)))
 
     pool = get_pool()
     nodes: dict[str, dict[str, Any]] = {}
     edges: dict[tuple[str, str, str, bool], dict[str, Any]] = {}
-    citation_neighbor_ids: list[str] = []
-    records: dict[str, dict[str, Any]] = {}
     semantic_status = {
         "requested": bool(include_semantic_similarity),
         "available": False,
@@ -113,10 +70,45 @@ def build_publication_knowledge_map(
     }
 
     with pool.connection() as conn, conn.cursor() as cur:
-        root = _record(cur, record_id)
-        records[record_id] = root
+        records, total_eligible = _eligible_records(
+            cur, source_key=source_key, object_type=object_type, max_publications=max_publications
+        )
+        if not records:
+            return {
+                "schema": CORPUS_KNOWLEDGE_MAP_CONTRACT,
+                "scope": "corpus",
+                "title": "Publication Corpus Knowledge Landscape",
+                "analysis_kind": "publication-corpus-knowledge-landscape",
+                "nodes": [],
+                "edges": [],
+                "metrics": {"node_count": 0, "edge_count": 0, "publication_count": 0, "topic_count": 0, "relationship_counts": {}},
+                "corpus": {
+                    "source_key": source_key or None,
+                    "object_type": object_type or None,
+                    "eligible_publication_count": 0,
+                    "analyzed_publication_count": 0,
+                    "truncated": False,
+                },
+                "semantic_analysis": semantic_status,
+                "boundaries": {
+                    "llm_inferred_edges": False,
+                    "automatic_truth_promotion": False,
+                    "semantic_edges_are_truth_claims": False,
+                    "unresolved_citations_guessed": False,
+                },
+            }
 
-        if include_citations and max_neighbors:
+        record_ids = list(records)
+        for rid, rec in records.items():
+            _add_node(
+                nodes, rid, "publication", str(rec.get("title") or rid),
+                root=False, corpus_member=True, canonical_url=rec.get("canonical_url"),
+                published_at=str(rec.get("published_at") or ""), object_type=rec.get("object_type"),
+                source_key=rec.get("source_key"), source_content_hash=rec.get("content_hash"),
+                authors=_as_list(rec.get("authors")),
+            )
+
+        if include_citations and len(record_ids) >= 2:
             cur.execute(
                 """
                 SELECT citation_id,citing_record_id,cited_record_id,relation_type,resolution_status,
@@ -124,54 +116,23 @@ def build_publication_knowledge_map(
                   FROM library_citations
                  WHERE resolution_status='resolved'
                    AND cited_record_id IS NOT NULL
-                   AND (citing_record_id=%s OR cited_record_id=%s)
+                   AND citing_record_id=ANY(%s)
+                   AND cited_record_id=ANY(%s)
                  ORDER BY citation_id DESC
-                 LIMIT %s
                 """,
-                (record_id, record_id, max_neighbors),
+                (record_ids, record_ids),
             )
-            citation_rows = [dict(row) for row in cur.fetchall()]
-            for item in citation_rows:
-                other = str(item["cited_record_id"] if item["citing_record_id"] == record_id else item["citing_record_id"])
-                if other and other != record_id and other not in citation_neighbor_ids:
-                    citation_neighbor_ids.append(other)
-            if citation_neighbor_ids:
-                cur.execute(
-                    """
-                    SELECT record_id,title,canonical_url,object_type,content_hash,authors,topics,tags,identifiers,
-                           visibility,publication_status,published_at,indexed_at,metadata
-                      FROM library_records
-                     WHERE record_id=ANY(%s)
-                       AND visibility='public' AND publication_status='published'
-                    """,
-                    (citation_neighbor_ids,),
+            for row in cur.fetchall():
+                item = dict(row)
+                _add_edge(
+                    edges, str(item["citing_record_id"]), str(item["cited_record_id"]),
+                    "explicit-citation", directed=True,
+                    weight=max(0.05, float(item.get("confidence") or 1.0)),
+                    relation_type=str(item.get("relation_type") or "cites"),
+                    citation_id=item.get("citation_id"), locator=item.get("locator"),
+                    analytical=False, truth_assertion=False,
                 )
-                for row in cur.fetchall():
-                    item = dict(row)
-                    records[str(item["record_id"])] = item
-            for item in citation_rows:
-                source = str(item["citing_record_id"])
-                target = str(item["cited_record_id"])
-                if source in records and target in records:
-                    _add_edge(
-                        edges, source, target, "explicit-citation", directed=True,
-                        weight=max(0.05, float(item.get("confidence") or 1.0)),
-                        relation_type=str(item.get("relation_type") or "cites"),
-                        citation_id=item.get("citation_id"),
-                        locator=item.get("locator"),
-                        analytical=False,
-                        truth_assertion=False,
-                    )
 
-        for rid, rec in records.items():
-            _add_node(
-                nodes, rid, "publication", str(rec.get("title") or rid),
-                root=(rid == record_id), canonical_url=rec.get("canonical_url"),
-                published_at=str(rec.get("published_at") or ""),
-                object_type=rec.get("object_type"), source_content_hash=rec.get("content_hash"),
-            )
-
-        record_ids = list(records)
         cur.execute(
             """
             SELECT candidate_id,record_id,candidate_text,entity_type,confidence,source_locator,
@@ -187,7 +148,7 @@ def build_publication_knowledge_map(
         )
         accepted_concepts = [dict(row) for row in cur.fetchall()]
 
-        topic_sources: dict[tuple[str, str], dict[str, Any]] = {}
+        per_record_topics: dict[str, list[str]] = defaultdict(list)
         for rid, rec in records.items():
             labels: list[tuple[str, str, float]] = []
             labels.extend((str(x), "record-topic", 1.0) for x in _as_list(rec.get("topics")))
@@ -195,16 +156,16 @@ def build_publication_knowledge_map(
             seen_labels: set[str] = set()
             for label, source_type, confidence in labels:
                 norm = " ".join(label.strip().split())
-                if not norm or norm.lower() in seen_labels:
+                if not norm or norm.casefold() in seen_labels:
                     continue
-                seen_labels.add(norm.lower())
+                seen_labels.add(norm.casefold())
                 tid = _topic_id(norm)
                 _add_node(nodes, tid, "topic", norm, source_type=source_type, reviewed=True)
                 _add_edge(
                     edges, rid, tid, "metadata-association", directed=False, weight=confidence,
                     evidence_count=1, source_type=source_type, analytical=False, truth_assertion=False,
                 )
-                topic_sources[(rid, tid)] = {"source_type": source_type, "confidence": confidence}
+                per_record_topics[rid].append(tid)
                 if len(seen_labels) >= max_topics_per_publication:
                     break
 
@@ -230,12 +191,25 @@ def build_publication_knowledge_map(
                 weight=max(0.05, confidence), evidence_count=1,
                 source_locator=item.get("source_locator"), analytical=False, truth_assertion=False,
             )
+            per_record_topics[rid].append(tid)
             ordinal = item.get("source_chunk_ordinal")
             if ordinal is not None:
                 chunk_topics[(rid, int(ordinal))].append(tid)
             per_record_concepts[rid] += 1
 
-        # Topic-topic relationships are only created from observed source-span co-occurrence.
+        # Measured topic proximity within a publication. The cap prevents quadratic
+        # explosion on heavily tagged records while preserving the strongest local structure.
+        for rid, tids in per_record_topics.items():
+            unique = list(dict.fromkeys(tids))[:14]
+            for i in range(len(unique)):
+                for j in range(i + 1, len(unique)):
+                    _add_edge(
+                        edges, unique[i], unique[j], "publication-topic-cooccurrence", directed=False,
+                        weight=1.0, evidence_count=1, publication_record_id=rid,
+                        analytical=True, truth_assertion=False,
+                    )
+
+        # More specific concept proximity when two reviewed concepts occur in the same source chunk.
         for (rid, ordinal), tids in chunk_topics.items():
             unique = list(dict.fromkeys(tids))[:30]
             for i in range(len(unique)):
@@ -246,7 +220,6 @@ def build_publication_knowledge_map(
                         source_chunk_ordinal=ordinal, analytical=True, truth_assertion=False,
                     )
 
-        # Real semantic similarity is computed only from current stored embeddings.
         if include_semantic_similarity and len(records) >= 2:
             cur.execute(
                 """
@@ -290,6 +263,7 @@ def build_publication_knowledge_map(
     degree: dict[str, float] = defaultdict(float)
     citations: dict[str, int] = defaultdict(int)
     semantic_links: dict[str, int] = defaultdict(int)
+    topic_publications: dict[str, set[str]] = defaultdict(set)
     for edge in edge_items:
         source, target = str(edge["source"]), str(edge["target"])
         weight = float(edge.get("weight") or 1.0)
@@ -301,12 +275,18 @@ def build_publication_knowledge_map(
         if edge.get("relationship_basis") == "embedding-cosine-similarity":
             semantic_links[source] += 1
             semantic_links[target] += 1
+        if edge.get("relationship_basis") in {"metadata-association", "reviewed-concept-association"}:
+            if source.startswith("topic:") and target in records:
+                topic_publications[source].add(target)
+            elif target.startswith("topic:") and source in records:
+                topic_publications[target].add(source)
 
     for node_id, node in nodes.items():
         node["metrics"] = {
             "weighted_degree": round(degree.get(node_id, 0.0), 6),
             "citation_links": citations.get(node_id, 0),
             "semantic_links": semantic_links.get(node_id, 0),
+            "publication_count": len(topic_publications.get(node_id, set())) if node.get("kind") == "topic" else 0,
         }
 
     node_items = list(nodes.values())
@@ -317,10 +297,10 @@ def build_publication_knowledge_map(
         relationship_counts[str(edge.get("relationship_basis") or "unknown")] += 1
 
     return {
-        "schema": KNOWLEDGE_MAP_CONTRACT,
-        "record_id": record_id,
-        "title": f"Knowledge Landscape — {records[record_id].get('title')}",
-        "analysis_kind": "publication-knowledge-landscape",
+        "schema": CORPUS_KNOWLEDGE_MAP_CONTRACT,
+        "scope": "corpus",
+        "title": "Publication Corpus Knowledge Landscape",
+        "analysis_kind": "publication-corpus-knowledge-landscape",
         "nodes": node_items,
         "edges": edge_items,
         "metrics": {
@@ -330,22 +310,31 @@ def build_publication_knowledge_map(
             "topic_count": topic_count,
             "relationship_counts": dict(sorted(relationship_counts.items())),
         },
+        "corpus": {
+            "source_key": source_key or None,
+            "object_type": object_type or None,
+            "eligible_publication_count": total_eligible,
+            "analyzed_publication_count": publication_count,
+            "truncated": total_eligible > publication_count,
+            "max_publications": max_publications,
+            "selection": "public-published-most-recent-first",
+        },
         "semantic_analysis": semantic_status,
         "views": [
-            {"key": "knowledge-landscape", "label": "Knowledge Landscape", "purpose": "Combined publication/topic relationship field"},
-            {"key": "topic-graph", "label": "Topic Graph", "purpose": "Topics and measured co-occurrence"},
-            {"key": "citation-overlay", "label": "Citation Overlay", "purpose": "Explicit scholarly citation structure"},
-            {"key": "semantic-overlay", "label": "Semantic Overlay", "purpose": "Embedding similarity when real current vectors exist"},
+            {"key": "knowledge-landscape", "label": "Knowledge Landscape", "purpose": "Cross-publication topic and publication relationship field"},
+            {"key": "topic-graph", "label": "Topic Graph", "purpose": "Measured topic co-occurrence across the publication corpus"},
+            {"key": "citation-overlay", "label": "Citation Overlay", "purpose": "Explicit citation structure within the selected corpus"},
+            {"key": "semantic-overlay", "label": "Semantic Overlay", "purpose": "Publication similarity from current stored embeddings only"},
             {"key": "relationship-matrix", "label": "Relationship Matrix", "purpose": "Pairwise analytical relationship inspection"},
         ],
         "renderer_profile": {
-            "family": "scientific-knowledge-landscape",
+            "family": "scientific-publication-corpus-landscape",
             "renderer_neutral": True,
             "preferred_runtime": "interactive-svg-webgl-capable",
             "layout": "force-directed-multilayer",
-            "node_channels": ["kind", "weighted_degree", "source_type"],
-            "edge_channels": ["relationship_basis", "weight", "directed"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer"],
+            "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
+            "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -356,10 +345,12 @@ def build_publication_knowledge_map(
         },
         "provenance": {
             "source_product": "knowledge-library",
+            "corpus_source": source_key or "all-public-library-sources",
             "relationship_methods": [
                 "explicit-citation",
                 "record-metadata-association",
                 "human-reviewed-concept-association",
+                "publication-topic-cooccurrence",
                 "source-span-cooccurrence",
                 "stored-embedding-cosine-similarity-if-available",
             ],
@@ -371,49 +362,6 @@ def build_publication_knowledge_map(
             "semantic_edges_are_truth_claims": False,
             "unresolved_citations_guessed": False,
             "human_review_required_for_extracted_concepts": True,
-        },
-    }
-
-
-def knowledge_map_readiness() -> dict[str, Any]:
-    pool = get_pool()
-    storage_ready = False
-    storage_error: str | None = None
-    counts = {"records": 0, "wordpress_publications": 0, "accepted_concepts": 0, "resolved_citations": 0, "current_embeddings": 0}
-    try:
-        with pool.connection() as conn, conn.cursor() as cur:
-            cur.execute("SELECT count(*) AS n FROM library_records WHERE visibility='public' AND publication_status='published'")
-            counts["records"] = int(cur.fetchone()["n"])
-            cur.execute("SELECT count(*) AS n FROM library_records WHERE visibility='public' AND publication_status='published' AND source_key='wordpress-main'")
-            counts["wordpress_publications"] = int(cur.fetchone()["n"])
-            cur.execute("SELECT count(*) AS n FROM library_research_candidates WHERE candidate_type='entity' AND entity_type='concept' AND review_state='accepted'")
-            counts["accepted_concepts"] = int(cur.fetchone()["n"])
-            cur.execute("SELECT count(*) AS n FROM library_citations WHERE resolution_status='resolved' AND cited_record_id IS NOT NULL")
-            counts["resolved_citations"] = int(cur.fetchone()["n"])
-            cur.execute("SELECT count(*) AS n FROM library_record_embeddings e JOIN library_records r ON r.record_id=e.record_id AND r.content_hash=e.content_hash")
-            counts["current_embeddings"] = int(cur.fetchone()["n"])
-        storage_ready = True
-    except Exception as exc:
-        storage_error = exc.__class__.__name__
-    return {
-        "schema": KNOWLEDGE_MAP_READINESS_CONTRACT,
-        "publication_knowledge_mapping": True,
-        "publication_corpus_integration": True,
-        "default_corpus_source": "wordpress-main",
-        "live_library_records": True,
-        "scientific_graphical_analysis": True,
-        "source_anchored_topic_relationships": True,
-        "citation_overlay": True,
-        "semantic_similarity_from_real_embeddings_only": True,
-        "interactive_research_library_renderer": True,
-        "workspace_portable_contract": True,
-        "platform_core_visual_runtime_alignment": True,
-        "storage_ready": storage_ready,
-        "storage_error": storage_error,
-        "counts": counts,
-        "boundaries": {
-            "llm_inferred_edges": False,
-            "automatic_truth_promotion": False,
-            "semantic_edges_are_truth_claims": False,
+            "corpus_is_live_library_records": True,
         },
     }

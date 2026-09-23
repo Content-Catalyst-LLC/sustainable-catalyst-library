@@ -1,0 +1,18 @@
+Sustainable Catalyst Knowledge Library v5.17.1
+Publication Corpus Integration
+Backend v2.28.1
+
+Validation target:
+- default shortcode uses live publication corpus
+- WordPress source defaults to wordpress-main
+- single-publication drill-down retained
+- corpus endpoint is public read-only
+- explicit citations retained
+- reviewed concepts retained
+- measured publication-topic co-occurrence added
+- source-span co-occurrence retained
+- semantic similarity uses real current embeddings only
+- no inferred graph edges or automatic truth promotion
+- Platform Core visual-runtime alignment retained
+
+Integrated regression target: 80 passing tests.
