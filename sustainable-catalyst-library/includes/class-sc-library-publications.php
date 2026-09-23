@@ -55,6 +55,52 @@ final class SC_Library_Publications {
         return apply_filters( 'sc_library_publications_registry', $maps );
     }
 
+    /**
+     * Return the canonical public WordPress posts currently surfaced by the
+     * Publications interface. This is the authoritative corpus manifest for
+     * publication knowledge analysis; it intentionally excludes unrelated
+     * public pages, Foundation documents, support content, and other indexed
+     * WordPress records that do not appear in Publications.
+     *
+     * @return int[]
+     */
+    public function publication_post_ids(int $limit = 1000): array {
+        $limit = max(1, min(1000, $limit));
+        $ids = array();
+        $seen = array();
+        foreach ($this->topics() as $topic) {
+            foreach ((array) ($topic['articles'] ?? array()) as $article) {
+                if (!is_array($article)) { continue; }
+                $url = esc_url_raw((string) ($article['url'] ?? ''));
+                if (!$url) { continue; }
+                $post_id = url_to_postid($url);
+                if (!$post_id) {
+                    $path = trim((string) wp_parse_url($url, PHP_URL_PATH), '/');
+                    $linked = $path ? get_page_by_path($path, OBJECT, $this->eligible_source_post_types()) : null;
+                    $post_id = $linked instanceof WP_Post ? absint($linked->ID) : 0;
+                }
+                if (!$post_id || isset($seen[$post_id])) { continue; }
+                $post = get_post($post_id);
+                if (!$this->is_public_source($post)) { continue; }
+                $seen[$post_id] = true;
+                $ids[] = $post_id;
+                if (count($ids) >= $limit) { return $ids; }
+            }
+        }
+        return $ids;
+    }
+
+    /** @return string[] */
+    public function publication_record_ids(int $limit = 1000): array {
+        $record_ids = array();
+        foreach ($this->publication_post_ids($limit) as $post_id) {
+            $post = get_post($post_id);
+            if (!$post instanceof WP_Post) { continue; }
+            $record_ids[] = 'wordpress:' . (int) get_current_blog_id() . ':' . sanitize_key($post->post_type) . ':' . (int) $post_id;
+        }
+        return array_values(array_unique($record_ids));
+    }
+
     /** @return array<string,mixed> */
     private function default_settings(): array {
         return array(

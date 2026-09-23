@@ -272,6 +272,8 @@ def health() -> dict[str, Any]:
             "publication_corpus_integration": True,
             "publication_corpus_default_source": "wordpress-main",
             "publication_corpus_live_library_records": True,
+            "publication_corpus_canonical_manifest": True,
+            "publication_corpus_nonpublication_types_excluded": True,
             "institutional_sources": True,
             "johns_hopkins_dataverse": True,
             "license_reuse_normalization": True,
@@ -2108,6 +2110,7 @@ def publication_knowledge_maps_readiness() -> dict[str, Any]:
 def publication_corpus_knowledge_maps_read(
     source_key: str = "wordpress-main",
     object_type: str = "",
+    record_ids: str = "",
     include_citations: bool = True,
     include_semantic_similarity: bool = True,
     semantic_threshold: float = 0.72,
@@ -2117,6 +2120,7 @@ def publication_corpus_knowledge_maps_read(
     return build_publication_corpus_knowledge_map(
         source_key=source_key,
         object_type=object_type,
+        record_ids=[x.strip() for x in record_ids.split(",") if x.strip()],
         include_citations=include_citations,
         include_semantic_similarity=include_semantic_similarity,
         semantic_threshold=semantic_threshold,

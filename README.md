@@ -1,10 +1,12 @@
-# Sustainable Catalyst Library v5.17.1 — Publication Corpus Integration
+# Sustainable Catalyst Library v5.17.1.1 — Publication Corpus Scope & Deployment Repair
 
-Knowledge Library v5.17.1 advances the shared Python backend to **v2.28.1** and connects the scientific knowledge landscape directly to the public, published WordPress publication corpus already indexed as `wordpress-main`. Plain `[sc_library_knowledge_landscape]` now analyzes that live corpus; explicit `scope="publication"` retains single-publication drill-down.
+Knowledge Library v5.17.1.1 advances the shared Python backend to **v2.28.2** and narrows the scientific knowledge landscape to the canonical publications surfaced by the Sustainable Catalyst Publications interface. Plain `[sc_library_knowledge_landscape]` now sends that exact Publication Library manifest to Python; unrelated pages, support content, Foundation documents, and other indexed WordPress records are excluded.
+
+Direct backend corpus calls without a manifest use a conservative public `post` fallback. The Contabo installer also replaces the former large-JSON/head pipeline with bounded summaries so production validation reaches its final PASS reliably.
 
 The Library owns corpus/source intelligence and analytical graph assembly. Platform Core remains the governed visual reasoning, provenance, linked-view, visual-query and reproducibility substrate.
 
-See `PUBLICATION_CORPUS_INTEGRATION_v5.17.1.md`, `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.17.1.md`, and `DEPLOY_CONTABO_LIBRARY_BACKEND_v2.28.1.md`.
+See `PUBLICATION_CORPUS_SCOPE_REPAIR_v5.17.1.1.md`, `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.17.1.1.md`, and `DEPLOY_CONTABO_LIBRARY_BACKEND_v2.28.2.md`.
 
 The Library owns publication/source intelligence. Platform Core remains the governed visual reasoning, provenance, linked-view, visual-query and reproducibility substrate.
 

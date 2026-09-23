@@ -11,6 +11,7 @@ if (!defined('ABSPATH')) { exit; }
  * v5.14.0 adds citation graph and scholarly-lineage readiness while preserving hybrid retrieval and Platform Core binding context.
  * v5.15.0 adds entity/finding/claim candidate extraction readiness with source-span and human-review guardrails.
  * v5.16.0 adds publication visualization readiness and public Research Library delivery for reviewed renderer-neutral specs.
+ * v5.17.1.1 scopes corpus analysis to the canonical Publications manifest and excludes unrelated WordPress content.
  */
 final class SC_Library_Python_Backend {
     public const VERSION = '5.6.0.33';
@@ -213,6 +214,7 @@ final class SC_Library_Python_Backend {
             'args' => [
                 'source_key' => ['sanitize_callback' => 'sanitize_text_field', 'default' => 'wordpress-main'],
                 'object_type' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'record_ids' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
                 'semantic_threshold' => ['sanitize_callback' => static function ($value) { return max(0.0, min(1.0, (float) $value)); }, 'default' => 0.72],
                 'max_publications' => ['sanitize_callback' => 'absint', 'default' => 250],
                 'max_topics_per_publication' => ['sanitize_callback' => 'absint', 'default' => 36],
@@ -381,13 +383,16 @@ final class SC_Library_Python_Backend {
         return $body;
     }
 
-    public static function publication_corpus_knowledge_map(string $source_key = 'wordpress-main', string $object_type = '', float $semantic_threshold = 0.72, int $max_publications = 250, int $max_topics_per_publication = 36): array {
+    public static function publication_corpus_knowledge_map(string $source_key = 'wordpress-main', string $object_type = '', float $semantic_threshold = 0.72, int $max_publications = 250, int $max_topics_per_publication = 36, array $record_ids = []): array {
         if (!self::configured()) {
             return ['schema' => 'sc-library-publication-corpus-knowledge-map/1.0', 'scope' => 'corpus', 'nodes' => [], 'edges' => []];
         }
+        $record_ids = array_values(array_unique(array_filter(array_map(static fn($value) => sanitize_text_field((string) $value), $record_ids))));
+        $record_ids = array_slice($record_ids, 0, 1000);
         $url = add_query_arg([
             'source_key' => sanitize_text_field($source_key),
             'object_type' => sanitize_key($object_type),
+            'record_ids' => implode(',', $record_ids),
             'include_citations' => 'true',
             'include_semantic_similarity' => 'true',
             'semantic_threshold' => max(0.0, min(1.0, $semantic_threshold)),
@@ -412,7 +417,9 @@ final class SC_Library_Python_Backend {
         $semantic_threshold = max(0.0, min(1.0, (float) $request->get_param('semantic_threshold')));
         $max_publications = min(1000, max(1, (int) $request->get_param('max_publications')));
         $max_topics = min(100, max(1, (int) $request->get_param('max_topics_per_publication')));
-        return rest_ensure_response(self::publication_corpus_knowledge_map($source_key, $object_type, $semantic_threshold, $max_publications, $max_topics));
+        $record_ids_raw = sanitize_text_field((string) $request->get_param('record_ids'));
+        $record_ids = array_values(array_filter(array_map('trim', explode(',', $record_ids_raw))));
+        return rest_ensure_response(self::publication_corpus_knowledge_map($source_key, $object_type, $semantic_threshold, $max_publications, $max_topics, $record_ids));
     }
 
     public static function publication_knowledge_map(string $record_id, float $semantic_threshold = 0.72, int $max_neighbors = 40, int $max_topics_per_publication = 36): array {

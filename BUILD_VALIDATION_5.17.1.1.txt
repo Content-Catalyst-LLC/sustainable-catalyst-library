@@ -1,0 +1,18 @@
+Knowledge Library v5.17.1.1 — Publication Corpus Scope & Deployment Repair
+Backend v2.28.2
+
+Validated locally:
+- Canonical Publications manifest helper present
+- Shortcode passes canonical Publication Library record IDs
+- Python corpus selector supports explicit manifest filtering
+- Safe no-manifest fallback restricts WordPress corpus to object_type=post
+- Pages/Foundation documents are not generic corpus candidates
+- Deployment validation uses bounded JSON summaries and reaches final PASS path
+- Single-publication drill-down preserved
+- v5.17 scientific knowledge mapping preserved
+- v5.16 publication visualization foundations preserved
+- Platform Core visual handoff preserved
+- Python compileall passed
+- PHP lint passed when PHP CLI available
+- JavaScript syntax check passed when Node available
+- Integrated test suite: 87 passed

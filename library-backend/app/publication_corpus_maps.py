@@ -9,18 +9,31 @@ from .publication_knowledge_maps import _add_edge, _add_node, _as_list, _cosine,
 CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
 
 
-def _eligible_records(cur: Any, *, source_key: str = "wordpress-main", object_type: str = "", max_publications: int = 250) -> tuple[dict[str, dict[str, Any]], int]:
+def _eligible_records(
+    cur: Any, *, source_key: str = "wordpress-main", object_type: str = "",
+    record_ids: list[str] | tuple[str, ...] | None = None, max_publications: int = 250,
+) -> tuple[dict[str, dict[str, Any]], int, str]:
     source_key = str(source_key or "").strip()
     object_type = str(object_type or "").strip()
     max_publications = max(1, min(1000, int(max_publications)))
+    manifest_ids = list(dict.fromkeys(str(x).strip() for x in (record_ids or []) if str(x).strip()))[:1000]
     where = ["visibility='public'", "publication_status='published'"]
     params: list[Any] = []
     if source_key:
         where.append("source_key=%s")
         params.append(source_key)
-    if object_type:
+    if manifest_ids:
+        where.append("record_id=ANY(%s)")
+        params.append(manifest_ids)
+        selection_mode = "publication-library-manifest"
+    else:
+        # Safe backend fallback: generic wordpress-main calls analyze editorial
+        # posts only. Pages, Foundation documents, support content, and other
+        # indexed object types are not silently treated as publications.
+        object_type = object_type or "post"
         where.append("object_type=%s")
         params.append(object_type)
+        selection_mode = "wordpress-post-fallback"
     clause = " AND ".join(where)
     cur.execute(f"SELECT count(*) AS n FROM library_records WHERE {clause}", tuple(params))
     total = int(cur.fetchone()["n"])
@@ -39,13 +52,14 @@ def _eligible_records(cur: Any, *, source_key: str = "wordpress-main", object_ty
     for row in cur.fetchall():
         item = dict(row)
         records[str(item["record_id"])] = item
-    return records, total
+    return records, total, selection_mode
 
 
 def build_publication_corpus_knowledge_map(
     *,
     source_key: str = "wordpress-main",
     object_type: str = "",
+    record_ids: list[str] | tuple[str, ...] | None = None,
     include_citations: bool = True,
     include_semantic_similarity: bool = True,
     semantic_threshold: float = 0.72,
@@ -70,8 +84,8 @@ def build_publication_corpus_knowledge_map(
     }
 
     with pool.connection() as conn, conn.cursor() as cur:
-        records, total_eligible = _eligible_records(
-            cur, source_key=source_key, object_type=object_type, max_publications=max_publications
+        records, total_eligible, selection_mode = _eligible_records(
+            cur, source_key=source_key, object_type=object_type, record_ids=record_ids, max_publications=max_publications
         )
         if not records:
             return {
@@ -84,7 +98,9 @@ def build_publication_corpus_knowledge_map(
                 "metrics": {"node_count": 0, "edge_count": 0, "publication_count": 0, "topic_count": 0, "relationship_counts": {}},
                 "corpus": {
                     "source_key": source_key or None,
-                    "object_type": object_type or None,
+                    "object_type": object_type or (None if selection_mode == "publication-library-manifest" else "post"),
+                    "selection": selection_mode,
+                    "requested_manifest_count": len(record_ids or []),
                     "eligible_publication_count": 0,
                     "analyzed_publication_count": 0,
                     "truncated": False,
@@ -312,12 +328,13 @@ def build_publication_corpus_knowledge_map(
         },
         "corpus": {
             "source_key": source_key or None,
-            "object_type": object_type or None,
+            "object_type": object_type or (None if selection_mode == "publication-library-manifest" else "post"),
+            "selection": selection_mode,
+            "requested_manifest_count": len(record_ids or []),
             "eligible_publication_count": total_eligible,
             "analyzed_publication_count": publication_count,
             "truncated": total_eligible > publication_count,
             "max_publications": max_publications,
-            "selection": "public-published-most-recent-first",
         },
         "semantic_analysis": semantic_status,
         "views": [
@@ -363,5 +380,7 @@ def build_publication_corpus_knowledge_map(
             "unresolved_citations_guessed": False,
             "human_review_required_for_extracted_concepts": True,
             "corpus_is_live_library_records": True,
+            "publication_library_manifest_applied": selection_mode == "publication-library-manifest",
+            "non_publication_wordpress_types_excluded": True,
         },
     }

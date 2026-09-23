@@ -22,36 +22,40 @@ if "psycopg" not in sys.modules:
         "psycopg_pool": pool_pkg,
     })
 
-from app.publication_corpus_maps import CORPUS_KNOWLEDGE_MAP_CONTRACT, _eligible_records
+from app.publication_corpus_maps import _eligible_records
 
 
 class FakeCursor:
     def __init__(self):
         self.calls = []
-        self._mode = "count"
     def execute(self, sql, params=()):
         self.calls.append((sql, params))
-        self._mode = "records" if "SELECT record_id,source_key" in sql else "count"
     def fetchone(self):
-        return {"n": 3}
+        return {"n": 2}
     def fetchall(self):
         return [
-            {"record_id": "wordpress:1:post:3", "source_key": "wordpress-main", "title": "C"},
-            {"record_id": "wordpress:1:post:2", "source_key": "wordpress-main", "title": "B"},
+            {"record_id": "wordpress:1:post:10", "source_key": "wordpress-main", "title": "A"},
+            {"record_id": "wordpress:1:post:20", "source_key": "wordpress-main", "title": "B"},
         ]
 
 
-def test_corpus_contract_is_explicit():
-    assert CORPUS_KNOWLEDGE_MAP_CONTRACT == "sc-library-publication-corpus-knowledge-map/1.0"
-
-
-def test_corpus_selector_is_bounded_to_wordpress_main_by_default():
+def test_manifest_selection_uses_record_ids_not_generic_post_type():
     cur = FakeCursor()
-    records, total, selection = _eligible_records(cur)
-    assert total == 3
-    assert list(records) == ["wordpress:1:post:3", "wordpress:1:post:2"]
-    sql_text = "\n".join(call[0] for call in cur.calls)
-    assert "source_key=%s" in sql_text
-    assert cur.calls[0][1] == ("wordpress-main", "post")
+    manifest = ["wordpress:1:post:10", "wordpress:1:post:20"]
+    records, total, selection = _eligible_records(cur, record_ids=manifest)
+    assert total == 2
+    assert selection == "publication-library-manifest"
+    sql = "\n".join(x[0] for x in cur.calls)
+    assert "record_id=ANY(%s)" in sql
+    assert "object_type=%s" not in sql
+    assert cur.calls[0][1] == ("wordpress-main", manifest)
+    assert set(records) == set(manifest)
+
+
+def test_backend_fallback_excludes_pages_and_custom_document_types():
+    cur = FakeCursor()
+    _records, _total, selection = _eligible_records(cur)
+    sql = "\n".join(x[0] for x in cur.calls)
     assert selection == "wordpress-post-fallback"
-    assert cur.calls[1][1][-1] == 250
+    assert "object_type=%s" in sql
+    assert cur.calls[0][1] == ("wordpress-main", "post")

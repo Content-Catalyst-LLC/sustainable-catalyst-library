@@ -1,0 +1,28 @@
+Knowledge Library v5.17.1.1 — Publication Corpus Scope & Deployment Repair
+Backend v2.28.2
+
+GIT PUSH / TAG
+
+cd ~/Downloads
+rm -rf "$HOME/Downloads/sc-library-v5.17.1.1-release"
+BUNDLE="$(find "$HOME/Downloads" -maxdepth 1 -type f -name 'sustainable-catalyst-library-v5.17.1.1-release-bundle*.zip' -print | head -n 1)"
+echo "Using: $BUNDLE"
+unzip -q "$BUNDLE" -d "$HOME/Downloads/sc-library-v5.17.1.1-release"
+cd "$HOME/Downloads/sc-library-v5.17.1.1-release"
+chmod +x install_and_push_sustainable_catalyst_library_v5_17_1_1_macos.sh
+./install_and_push_sustainable_catalyst_library_v5_17_1_1_macos.sh "$HOME/Downloads/sustainable-catalyst-library"
+
+BACKEND TRANSFER
+
+cd ~/Downloads/sc-library-v5.17.1.1-release
+scp -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes sustainable-catalyst-library-backend-v2.28.2.zip upgrade_library_backend_v2_28_2_contabo.sh catalystadmin@94.72.113.77:/tmp/
+
+SSH
+
+ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes catalystadmin@94.72.113.77
+
+BACKEND DEPLOY
+
+cd /tmp
+chmod +x upgrade_library_backend_v2_28_2_contabo.sh
+./upgrade_library_backend_v2_28_2_contabo.sh /tmp/sustainable-catalyst-library-backend-v2.28.2.zip

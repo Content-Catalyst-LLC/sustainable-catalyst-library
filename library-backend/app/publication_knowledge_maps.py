@@ -379,13 +379,14 @@ def knowledge_map_readiness() -> dict[str, Any]:
     pool = get_pool()
     storage_ready = False
     storage_error: str | None = None
-    counts = {"records": 0, "wordpress_publications": 0, "accepted_concepts": 0, "resolved_citations": 0, "current_embeddings": 0}
+    counts = {"records": 0, "wordpress_publications": 0, "wordpress_publication_posts": 0, "accepted_concepts": 0, "resolved_citations": 0, "current_embeddings": 0}
     try:
         with pool.connection() as conn, conn.cursor() as cur:
             cur.execute("SELECT count(*) AS n FROM library_records WHERE visibility='public' AND publication_status='published'")
             counts["records"] = int(cur.fetchone()["n"])
-            cur.execute("SELECT count(*) AS n FROM library_records WHERE visibility='public' AND publication_status='published' AND source_key='wordpress-main'")
+            cur.execute("SELECT count(*) AS n FROM library_records WHERE visibility='public' AND publication_status='published' AND source_key='wordpress-main' AND object_type='post'")
             counts["wordpress_publications"] = int(cur.fetchone()["n"])
+            counts["wordpress_publication_posts"] = counts["wordpress_publications"]
             cur.execute("SELECT count(*) AS n FROM library_research_candidates WHERE candidate_type='entity' AND entity_type='concept' AND review_state='accepted'")
             counts["accepted_concepts"] = int(cur.fetchone()["n"])
             cur.execute("SELECT count(*) AS n FROM library_citations WHERE resolution_status='resolved' AND cited_record_id IS NOT NULL")
@@ -401,6 +402,8 @@ def knowledge_map_readiness() -> dict[str, Any]:
         "publication_corpus_integration": True,
         "default_corpus_source": "wordpress-main",
         "live_library_records": True,
+        "canonical_publication_manifest_supported": True,
+        "safe_backend_fallback_object_type": "post",
         "scientific_graphical_analysis": True,
         "source_anchored_topic_relationships": True,
         "citation_overlay": True,
@@ -415,5 +418,6 @@ def knowledge_map_readiness() -> dict[str, Any]:
             "llm_inferred_edges": False,
             "automatic_truth_promotion": False,
             "semantic_edges_are_truth_claims": False,
+            "non_publication_wordpress_types_excluded": True,
         },
     }

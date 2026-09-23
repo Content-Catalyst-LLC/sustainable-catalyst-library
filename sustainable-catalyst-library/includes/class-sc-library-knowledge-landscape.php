@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.17.1 — Live publication corpus scientific knowledge landscape.
+ * v5.17.1.1 — Canonical Publication Library corpus scope repair.
  *
  * Renders an interactive analytical graph from the Library Python backend.
  * Relationships remain typed by their actual basis: citation, reviewed concept
  * association, source-span co-occurrence, or real stored-embedding similarity.
  */
 final class SC_Library_Knowledge_Landscape {
-    public const VERSION = '5.17.1';
+    public const VERSION = '5.17.1.1';
     public const SHORTCODE = 'sc_library_knowledge_landscape';
 
     public function register_hooks(): void {
@@ -73,7 +73,19 @@ final class SC_Library_Knowledge_Landscape {
             $source_key = sanitize_text_field((string) $atts['source_key']);
             $object_type = sanitize_key((string) $atts['object_type']);
             $max_publications = min(1000, max(1, (int) $atts['max_publications']));
-            $payload = SC_Library_Python_Backend::publication_corpus_knowledge_map($source_key ?: 'wordpress-main', $object_type, $threshold, $max_publications, $topics);
+            $publication_record_ids = [];
+            if (class_exists('SC_Library_Publications')) {
+                $publication_manifest = new SC_Library_Publications();
+                $publication_record_ids = $publication_manifest->publication_record_ids($max_publications);
+            }
+            $payload = SC_Library_Python_Backend::publication_corpus_knowledge_map(
+                $source_key ?: 'wordpress-main',
+                $object_type,
+                $threshold,
+                $max_publications,
+                $topics,
+                $publication_record_ids
+            );
         }
 
         $nodes = isset($payload['nodes']) && is_array($payload['nodes']) ? $payload['nodes'] : [];
@@ -97,7 +109,7 @@ final class SC_Library_Knowledge_Landscape {
                     <p><?php esc_html_e('Interactive semantic and graphical representation of the publications actually indexed in the Research Library, including source-grounded topics, citations, concepts, and measured relationships.', 'sustainable-catalyst-library'); ?></p>
                 </div>
                 <div class="sc-kl__status-row">
-                    <?php if ('corpus' === $scope) : ?><span class="sc-kl__status is-good"><?php esc_html_e('Live Library corpus', 'sustainable-catalyst-library'); ?></span><?php endif; ?>
+                    <?php if ('corpus' === $scope) : ?><span class="sc-kl__status is-good"><?php esc_html_e('Publication Library manifest', 'sustainable-catalyst-library'); ?></span><?php endif; ?>
                     <span class="sc-kl__status is-good"><?php esc_html_e('Source-grounded', 'sustainable-catalyst-library'); ?></span>
                     <span class="sc-kl__status <?php echo !empty($semantic['available']) ? 'is-good' : 'is-neutral'; ?>">
                         <?php echo !empty($semantic['available']) ? esc_html__('Semantic vectors online', 'sustainable-catalyst-library') : esc_html__('Structural mode', 'sustainable-catalyst-library'); ?>

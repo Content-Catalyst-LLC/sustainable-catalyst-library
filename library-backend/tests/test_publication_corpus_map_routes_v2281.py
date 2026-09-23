@@ -45,6 +45,7 @@ def test_publication_corpus_route_defaults_to_wordpress_publications(monkeypatch
     assert response.status_code == 200
     assert response.json()["scope"] == "corpus"
     assert seen["source_key"] == "wordpress-main"
+    assert seen["record_ids"] == []
     assert seen["max_publications"] == 250
     assert seen["include_citations"] is True
 
@@ -59,12 +60,14 @@ def test_publication_corpus_route_passes_analysis_controls(monkeypatch):
         response = client.get("/v1/publication-knowledge-maps/corpus", params={
             "source_key": "wordpress-main",
             "object_type": "post",
+            "record_ids": "wordpress:1:post:10,wordpress:1:post:20",
             "semantic_threshold": 0.81,
             "max_publications": 125,
             "max_topics_per_publication": 24,
         })
     assert response.status_code == 200
     assert seen["object_type"] == "post"
+    assert seen["record_ids"] == ["wordpress:1:post:10", "wordpress:1:post:20"]
     assert seen["semantic_threshold"] == 0.81
     assert seen["max_publications"] == 125
     assert seen["max_topics_per_publication"] == 24
