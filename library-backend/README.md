@@ -1,9 +1,9 @@
-# Sustainable Catalyst Library Backend v2.24.0
+# Sustainable Catalyst Library Backend v2.24.1
 
 
-## v2.24.0 — Hybrid Research Retrieval & Core-Aware Results
+## v2.24.1 — Core-Aware Search Runtime Repair
 
-v2.24.0 is the backend companion to Knowledge Library v5.13.0. It preserves the v2.23.0 Platform Core Research Bridge and adds a Library-owned semantic retrieval plane without moving raw documents, chunks, embeddings, or search indexes into Platform Core.
+v2.24.1 is the runtime-repair backend companion to Knowledge Library v5.13.0.1. It preserves the v2.24.0 retrieval architecture and fixes Core-aware search enrichment by importing the required collections.defaultdict runtime dependency. It preserves the v2.23.0 Platform Core Research Bridge and adds a Library-owned semantic retrieval plane without moving raw documents, chunks, embeddings, or search indexes into Platform Core.
 
 ### Retrieval architecture
 

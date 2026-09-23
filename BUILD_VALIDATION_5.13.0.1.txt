@@ -1,0 +1,11 @@
+Sustainable Catalyst Knowledge Library v5.13.0.1 / backend v2.24.1
+Core-Aware Search Runtime Repair
+
+Validation targets:
+- Python compilation
+- executable regression for Core-aware enrichment runtime
+- retained v2.24 retrieval tests
+- Platform Core v3.3 contract preservation
+- no WordPress changes
+- backend archive integrity
+- deploy-script shell syntax
