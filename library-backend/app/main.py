@@ -1935,15 +1935,9 @@ async def citation_create(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@app.get("/v1/citations/{record_id:path}")
-def citation_list(
-    record_id: str,
-    direction: str = Query(default="both", pattern="^(outgoing|incoming|both)$"),
-    limit: int = Query(default=100, ge=1, le=500),
-) -> dict[str, Any]:
-    return list_citations(record_id, direction=direction, limit=limit)
-
-
+# IMPORTANT: register suffix-specific citation routes before the catch-all path
+# route below. Starlette resolves routes in declaration order, and {record_id:path}
+# otherwise consumes suffixes such as /graph as part of the record identifier.
 @app.get("/v1/citations/{record_id:path}/graph")
 def citation_graph_read(
     record_id: str,
@@ -1970,6 +1964,15 @@ async def citation_metadata_import(
         return import_record_metadata_citations(record_id)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.get("/v1/citations/{record_id:path}")
+def citation_list(
+    record_id: str,
+    direction: str = Query(default="both", pattern="^(outgoing|incoming|both)$"),
+    limit: int = Query(default=100, ge=1, le=500),
+) -> dict[str, Any]:
+    return list_citations(record_id, direction=direction, limit=limit)
 
 
 @app.post("/v1/citations/core-handoff")

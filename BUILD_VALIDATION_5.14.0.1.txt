@@ -1,0 +1,7 @@
+Knowledge Library v5.14.0.1 / backend v2.25.1
+Scope: Citation Graph Route Precedence Repair
+- specific citation graph route registered before catch-all path route
+- HTTP regression test covers colon-containing WordPress record IDs
+- generic citation list route preserved
+- no schema migration
+- no WordPress redeploy

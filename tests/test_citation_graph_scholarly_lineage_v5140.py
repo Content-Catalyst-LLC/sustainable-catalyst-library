@@ -12,7 +12,7 @@ def t(path): return path.read_text(encoding='utf-8')
 def test_identity():
     assert 'Version: 5.14.0' in t(PLUGIN/'sustainable-catalyst-library.php')
     assert "SC_LIBRARY_VERSION', '5.14.0'" in t(PLUGIN/'sustainable-catalyst-library.php')
-    assert '__version__ = "2.25.0"' in t(BACKEND/'app/__init__.py')
+    assert '__version__ = "2.25.1"' in t(BACKEND/'app/__init__.py')
     assert 'Stable tag: 5.14.0' in t(PLUGIN/'readme.txt')
 
 

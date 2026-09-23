@@ -1,5 +1,9 @@
-# Sustainable Catalyst Library Backend v2.25.0
+# Sustainable Catalyst Library Backend v2.25.1
 
+
+## v2.25.1 — Citation Graph Route Precedence Repair
+
+v2.25.1 repairs FastAPI/Starlette route precedence so `/v1/citations/{record_id}/graph` reaches the graph handler instead of the generic citation-list route. It is a runtime-only patch; schemas and WordPress v5.14.0 remain unchanged.
 
 ## v2.25.0 — Citation Graph & Scholarly Lineage
 
