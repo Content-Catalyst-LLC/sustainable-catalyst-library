@@ -10,9 +10,10 @@ if (!defined('ABSPATH')) { exit; }
  * v5.5.2 exposes signed operations/recovery helpers used by the operations console.
  * v5.14.0 adds citation graph and scholarly-lineage readiness while preserving hybrid retrieval and Platform Core binding context.
  * v5.15.0 adds entity/finding/claim candidate extraction readiness with source-span and human-review guardrails.
+ * v5.16.0 adds publication visualization readiness and public Research Library delivery for reviewed renderer-neutral specs.
  */
 final class SC_Library_Python_Backend {
-    public const VERSION = '5.6.0.32';
+    public const VERSION = '5.6.0.33';
     public const BACKEND_SCHEMA = 'sc-library-backend-ingest/1.0';
     public const REST_NAMESPACE = 'sc-library/v1';
     public const CRON_HOOK = 'sc_library_python_backend_sync_post';
@@ -100,6 +101,7 @@ final class SC_Library_Python_Backend {
         $core = self::platform_core_readiness();
         $retrieval = self::search_readiness();
         $extraction = self::extraction_readiness();
+        $visualizations = self::visualization_readiness();
         $last = get_option('sc_library_backend_last_sync', []);
         $checkpoint = get_option('sc_library_backend_sync_checkpoint', []);
         $has_failures = is_array($checkpoint) && !empty($checkpoint['failed_record_ids']);
@@ -132,6 +134,9 @@ final class SC_Library_Python_Backend {
             <h2><?php esc_html_e('Research Extraction Candidates', 'sustainable-catalyst-library'); ?></h2>
             <p><?php esc_html_e('Entity, finding, and claim extraction produces source-anchored candidates only. Human review is required before findings or claims can enter the Platform Core governed promotion queue.', 'sustainable-catalyst-library'); ?></p>
             <pre style="max-width:1100px;overflow:auto;background:#fff;border:1px solid #ccd0d4;padding:12px;"><?php echo esc_html(wp_json_encode($extraction, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
+            <h2><?php esc_html_e('Publication Visualization Foundations', 'sustainable-catalyst-library'); ?></h2>
+            <p><?php esc_html_e('Reviewed renderer-neutral publication visualizations are delivered through the Research Library. Platform Core remains the governed visual reasoning and provenance authority.', 'sustainable-catalyst-library'); ?></p>
+            <pre style="max-width:1100px;overflow:auto;background:#fff;border:1px solid #ccd0d4;padding:12px;"><?php echo esc_html(wp_json_encode($visualizations, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
             <?php if (self::configured()) : ?>
                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline-block;margin-right:8px;">
                     <input type="hidden" name="action" value="sc_library_backend_sync_all">
@@ -181,6 +186,20 @@ final class SC_Library_Python_Backend {
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => static function () { return current_user_can('manage_options'); },
             'callback' => static function () { return rest_ensure_response(self::extraction_readiness()); },
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/visualizations/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => static function () { return rest_ensure_response(self::visualization_readiness()); },
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-visualizations', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_visualizations'],
+            'args' => [
+                'record_id' => ['sanitize_callback' => 'sanitize_text_field', 'required' => true],
+                'limit' => ['sanitize_callback' => 'absint', 'default' => 20],
+            ],
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/search', [
             'methods' => WP_REST_Server::READABLE,
@@ -292,6 +311,52 @@ final class SC_Library_Python_Backend {
         $body['ok'] = 200 === $code && !empty($body['storage_ready']) && !empty($body['entity_candidates']) && !empty($body['finding_candidates']) && !empty($body['claim_candidates']);
         $body['state'] = $body['ok'] ? 'candidate-extraction-ready' : 'degraded';
         return $body;
+    }
+
+    public static function visualization_readiness(): array {
+        if (!self::configured()) {
+            return ['ok' => false, 'configured' => false, 'state' => 'library_backend_not_configured'];
+        }
+        $response = wp_remote_get(self::base_url() . '/v1/publication-visualizations/readiness', [
+            'timeout' => self::timeout(),
+            'redirection' => 0,
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        if (is_wp_error($response)) {
+            return ['ok' => false, 'configured' => true, 'state' => 'unavailable', 'error' => $response->get_error_message()];
+        }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($body)) { $body = []; }
+        $body['ok'] = 200 === $code && !empty($body['publication_visualizations']) && !empty($body['storage_ready']);
+        $body['state'] = $body['ok'] ? 'publication-visualization-ready' : 'degraded';
+        return $body;
+    }
+
+    public static function publication_visualizations(string $record_id, int $limit = 20): array {
+        if (!self::configured() || '' === trim($record_id)) {
+            return ['schema' => 'sc-library-publication-visualization/1.0', 'record_id' => $record_id, 'items' => [], 'count' => 0];
+        }
+        $url = add_query_arg([
+            'record_id' => $record_id,
+            'limit' => min(100, max(1, $limit)),
+        ], self::base_url() . '/v1/publication-visualizations');
+        $response = wp_remote_get($url, [
+            'timeout' => self::timeout(),
+            'redirection' => 2,
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        if (is_wp_error($response) || 200 !== (int) wp_remote_retrieve_response_code($response)) {
+            return ['schema' => 'sc-library-publication-visualization/1.0', 'record_id' => $record_id, 'items' => [], 'count' => 0];
+        }
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        return is_array($body) ? $body : ['schema' => 'sc-library-publication-visualization/1.0', 'record_id' => $record_id, 'items' => [], 'count' => 0];
+    }
+
+    public function proxy_publication_visualizations(WP_REST_Request $request) {
+        $record_id = sanitize_text_field((string) $request->get_param('record_id'));
+        $limit = min(100, max(1, (int) $request->get_param('limit')));
+        return rest_ensure_response(self::publication_visualizations($record_id, $limit));
     }
 
     public static function search_readiness(): array {

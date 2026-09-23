@@ -374,3 +374,36 @@ CREATE INDEX IF NOT EXISTS library_research_candidates_review_idx
     ON library_research_candidates(review_state,updated_at DESC);
 CREATE INDEX IF NOT EXISTS library_research_candidates_core_idx
     ON library_research_candidates(core_outbox_event_id) WHERE core_outbox_event_id IS NOT NULL;
+
+
+-- v2.27.0 — Publication Visualization Foundations.
+-- Library stores renderer-neutral publication visualization specifications and
+-- their review state. Platform Core remains authoritative for governed visual
+-- research objects, visual reasoning, provenance, reproducibility, and exchange.
+CREATE TABLE IF NOT EXISTS library_publication_visualizations (
+    visualization_id bigserial PRIMARY KEY,
+    visualization_key char(64) NOT NULL UNIQUE,
+    record_id text NOT NULL REFERENCES library_records(record_id) ON DELETE CASCADE,
+    visualization_kind text NOT NULL CHECK (visualization_kind IN ('citation-network','concept-map','finding-map','claim-map')),
+    title text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    source_content_hash char(64) NOT NULL,
+    specification jsonb NOT NULL DEFAULT '{}'::jsonb,
+    spec_hash char(64) NOT NULL,
+    review_state text NOT NULL DEFAULT 'draft' CHECK (review_state IN ('draft','published','rejected','superseded')),
+    reviewer text,
+    review_note text NOT NULL DEFAULT '',
+    reviewed_at timestamptz,
+    created_by text NOT NULL DEFAULT 'library-visualization-builder',
+    core_operation text,
+    core_outbox_event_id bigint REFERENCES library_core_sync_outbox(event_id) ON DELETE SET NULL,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_publication_visualizations_record_idx
+    ON library_publication_visualizations(record_id,review_state,visualization_kind,updated_at DESC);
+CREATE INDEX IF NOT EXISTS library_publication_visualizations_review_idx
+    ON library_publication_visualizations(review_state,updated_at DESC);
+CREATE INDEX IF NOT EXISTS library_publication_visualizations_core_idx
+    ON library_publication_visualizations(core_outbox_event_id) WHERE core_outbox_event_id IS NOT NULL;

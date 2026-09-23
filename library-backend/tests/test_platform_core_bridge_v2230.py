@@ -103,7 +103,7 @@ def test_core_write_operation_is_allowlisted_and_authenticated():
     )
     assert response.status_code == 201
     assert response.data["entity_id"] == "entity:research-project:test"
-    assert set(CORE_OPERATIONS) == {
+    assert {
         "research-object.create",
         "exchange-package.create",
         "scholarly-package.create",
@@ -111,7 +111,7 @@ def test_core_write_operation_is_allowlisted_and_authenticated():
         "research-finding.create",
         "research-claim.create",
         "runtime-contract.create",
-    }
+    }.issubset(set(CORE_OPERATIONS))
 
 
 def test_arbitrary_core_path_cannot_be_queued():

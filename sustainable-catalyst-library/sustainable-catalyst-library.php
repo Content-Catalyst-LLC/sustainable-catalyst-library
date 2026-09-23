@@ -3,7 +3,7 @@
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
  * Description: Sustainable Catalyst Library v5.15.0 with Entity, Finding & Claim Extraction candidates, source-span provenance, human review gates, Citation Graph & Scholarly Lineage, hybrid research retrieval, and explicit Platform Core-governed promotion while preserving existing public, institutional, biomedical, private-organizational, Carbon & Nature, and Energy Systems capabilities.
- * Version: 5.15.0
+ * Version: 5.16.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.15.0');
+define('SC_LIBRARY_VERSION', '5.16.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
@@ -58,6 +58,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-shortcodes.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-publications.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-field-spotlights.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-backend.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-publication-visualizations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-operations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-dynamic-explorer.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-capability-hub.php';
@@ -129,6 +130,7 @@ final class SC_Library_Plugin {
         $publications = new SC_Library_Publications();
         $field_spotlights = new SC_Library_Field_Spotlights();
         $python_backend = new SC_Library_Python_Backend();
+        $publication_visualizations = new SC_Library_Publication_Visualizations();
         $python_operations = new SC_Library_Python_Operations();
         $dynamic_explorer = new SC_Library_Dynamic_Explorer();
         $capability_hub = new SC_Library_Capability_Hub();
@@ -206,6 +208,7 @@ final class SC_Library_Plugin {
         $publications->register_hooks();
         $field_spotlights->register_hooks();
         $python_backend->register_hooks();
+        $publication_visualizations->register_hooks();
         $python_operations->register_hooks();
         $dynamic_explorer->register_hooks();
         $capability_hub->register_hooks();

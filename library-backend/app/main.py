@@ -26,6 +26,11 @@ from .research_extraction import (
     CandidatePromotionRequest, CandidateReviewRequest, ExtractionRequest,
     enqueue_core_candidate, extract_record_candidates, extraction_readiness, list_candidates, review_candidate,
 )
+from .publication_visualizations import (
+    VisualizationBuildRequest, VisualizationCoreHandoffRequest, VisualizationReviewRequest,
+    build_publication_visualizations, enqueue_core_visualization, get_publication_visualization,
+    list_publication_visualizations, review_publication_visualization, visualization_readiness,
+)
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -251,6 +256,12 @@ def health() -> dict[str, Any]:
             "automatic_finding_promotion": False,
             "automatic_claim_promotion": False,
             "automatic_truth_promotion_from_extraction": False,
+            "publication_visualizations": True,
+            "publication_visualization_renderer_neutral_specs": True,
+            "publication_visualization_human_review_gate": True,
+            "publication_visualization_research_library_delivery": True,
+            "platform_core_visual_research_handoff": True,
+            "automatic_visual_truth_promotion": False,
             "institutional_sources": True,
             "johns_hopkins_dataverse": True,
             "license_reuse_normalization": True,
@@ -2069,6 +2080,73 @@ async def research_extraction_core_handoff(
     await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
     try:
         return enqueue_core_candidate(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/publication-visualizations/readiness")
+def publication_visualizations_readiness() -> dict[str, Any]:
+    return visualization_readiness()
+
+
+@app.post("/v1/publication-visualizations/build")
+async def publication_visualizations_build(
+    payload: VisualizationBuildRequest,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return build_publication_visualizations(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/publication-visualizations")
+def publication_visualizations_list(
+    record_id: str = Query(min_length=1, max_length=500),
+    limit: int = Query(default=50, ge=1, le=200),
+) -> dict[str, Any]:
+    return list_publication_visualizations(record_id, published_only=True, limit=limit)
+
+
+@app.get("/v1/publication-visualizations/{visualization_id}")
+def publication_visualization_read(visualization_id: int) -> dict[str, Any]:
+    try:
+        return get_publication_visualization(visualization_id, published_only=True)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/v1/publication-visualizations/{visualization_id}/review")
+async def publication_visualization_review(
+    visualization_id: int,
+    payload: VisualizationReviewRequest,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return review_publication_visualization(visualization_id, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/v1/publication-visualizations/core-handoff")
+async def publication_visualization_core_handoff(
+    payload: VisualizationCoreHandoffRequest,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return enqueue_core_visualization(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

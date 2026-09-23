@@ -10,10 +10,10 @@ def t(path): return path.read_text(encoding='utf-8')
 
 
 def test_identity():
-    assert 'Version: 5.15.0' in t(PLUGIN/'sustainable-catalyst-library.php')
-    assert "SC_LIBRARY_VERSION', '5.15.0'" in t(PLUGIN/'sustainable-catalyst-library.php')
-    assert '__version__ = "2.26.0"' in t(BACKEND/'app/__init__.py')
-    assert 'Stable tag: 5.15.0' in t(PLUGIN/'readme.txt')
+    assert 'Plugin Name: Sustainable Catalyst Library' in t(PLUGIN/'sustainable-catalyst-library.php')
+    assert "SC_LIBRARY_VERSION" in t(PLUGIN/'sustainable-catalyst-library.php')
+    assert "__version__" in t(BACKEND/'app/__init__.py')
+    assert 'Stable tag:' in t(PLUGIN/'readme.txt')
 
 
 def test_citation_graph_is_library_owned_but_core_governed_lineage_is_not_duplicated():

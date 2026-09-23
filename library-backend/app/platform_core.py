@@ -28,6 +28,7 @@ CORE_OPERATIONS: dict[str, tuple[str, str]] = {
     "scholarly-citation.create": ("POST", "/v1/research/scholarly-packages/citations"),
     "research-finding.create": ("POST", "/v1/research/intelligence/projects/{project_id}/findings"),
     "research-claim.create": ("POST", "/v1/research/intelligence/projects/{project_id}/claims"),
+    "visual-research-object.create": ("POST", "/v1/cross-product-visual-research"),
     "runtime-contract.create": ("POST", "/v1/research/runtime-contract/contracts"),
 }
 
