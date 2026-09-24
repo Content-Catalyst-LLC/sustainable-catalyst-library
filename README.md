@@ -1,3 +1,7 @@
+# Sustainable Catalyst Knowledge Library v5.20.0
+
+Current release: **Linked Scientific Views & Visual Query** with backend **v2.31.0**. The release coordinates the 4D knowledge terrain, graph, topic-region, temporal, citation, semantic, and relationship-matrix views through a portable deterministic visual-query state.
+
 ## Knowledge Library v5.18.0 — Multi-Publication Knowledge Landscape
 
 Adds deterministic topic regions, cross-publication topic overlap, temporal topic dynamics, bridge-node diagnostics, relationship-matrix linked views, and four-dimensional renderer readiness over the canonical Publication Library corpus. Platform Core remains the governed visual-reasoning authority.

@@ -373,6 +373,100 @@ def _multi_publication_analysis(
     }
 
 
+
+def _linked_visual_query_analysis(
+    nodes: dict[str, dict[str, Any]],
+    edge_items: list[dict[str, Any]],
+    records: dict[str, dict[str, Any]],
+    multi: dict[str, Any],
+) -> dict[str, Any]:
+    """Build a portable, renderer-neutral linked-view query contract.
+
+    The contract indexes only relationships already present in the corpus model.
+    It supports deterministic cross-filtering/highlighting without inferring new
+    scholarly claims, causality, or truth.
+    """
+    publication_ids=set(records)
+    topic_ids={str(nid) for nid,node in nodes.items() if node.get("kind")=="topic"}
+    pub_topics: dict[str,set[str]]=defaultdict(set)
+    topic_pubs: dict[str,set[str]]=defaultdict(set)
+    adjacency: dict[str,list[dict[str,Any]]]=defaultdict(list)
+    relationship_bases=set()
+    for edge in edge_items:
+        a,b=str(edge.get("source")),str(edge.get("target"))
+        basis=str(edge.get("relationship_basis") or "unknown")
+        relationship_bases.add(basis)
+        weight=float(edge.get("similarity") if edge.get("relationship_basis")=="embedding-cosine-similarity" and edge.get("similarity") is not None else edge.get("weight") or 1.0)
+        adjacency[a].append({"node_id":b,"relationship_basis":basis,"weight":round(weight,6),"directed":bool(edge.get("directed"))})
+        adjacency[b].append({"node_id":a,"relationship_basis":basis,"weight":round(weight,6),"directed":bool(edge.get("directed"))})
+        if basis in {"metadata-association","reviewed-concept-association"}:
+            if a in publication_ids and b in topic_ids:
+                pub_topics[a].add(b); topic_pubs[b].add(a)
+            elif b in publication_ids and a in topic_ids:
+                pub_topics[b].add(a); topic_pubs[a].add(b)
+    adjacency_compact={k:sorted(v,key=lambda x:(x["weight"],x["node_id"]),reverse=True)[:80] for k,v in adjacency.items()}
+    region_topics={str(r.get("id")):sorted(str(x) for x in (r.get("topic_ids") or [])) for r in (multi.get("topic_regions") or [])}
+    region_publications={}
+    for rid,tids in region_topics.items():
+        pubs=set()
+        for tid in tids: pubs.update(topic_pubs.get(tid,set()))
+        region_publications[rid]=sorted(pubs)
+    year_publications: dict[str,list[str]]=defaultdict(list)
+    for rid,rec in records.items():
+        y=_year(rec.get("published_at"))
+        if y is not None: year_publications[str(y)].append(rid)
+    year_topics: dict[str,set[str]]=defaultdict(set)
+    for y,pubs in year_publications.items():
+        for rid in pubs: year_topics[y].update(pub_topics.get(rid,set()))
+    return {
+        "schema":"sc-library-linked-visual-query/1.0",
+        "runtime":"deterministic-client-crossfilter-over-loaded-corpus",
+        "default_state":{
+            "selected_node_ids":[],"selected_region_id":None,"selected_year":None,
+            "text":"","mode":"highlight","relationship_bases":sorted(relationship_bases),
+            "minimum_relationship_strength":0.0,
+        },
+        "fields":[
+            {"key":"node_id","operators":["equals","in"]},
+            {"key":"node_kind","operators":["equals","in"]},
+            {"key":"label","operators":["contains"]},
+            {"key":"region_id","operators":["equals","in"]},
+            {"key":"publication_year","operators":["equals","in","gte","lte"]},
+            {"key":"relationship_basis","operators":["equals","in"]},
+            {"key":"relationship_strength","operators":["gte"]},
+        ],
+        "modes":["highlight","isolate"],
+        "selection_semantics":{
+            "node_selection":"selected node plus directly observed graph neighbors",
+            "region_selection":"topics in measured region plus publications attached to those topics",
+            "year_selection":"publications dated to selected year plus their observed topics",
+            "text_selection":"case-insensitive label match within loaded corpus",
+            "combined_filters":"intersection of active query dimensions",
+        },
+        "indexes":{
+            "publication_to_topics":{k:sorted(v) for k,v in pub_topics.items()},
+            "topic_to_publications":{k:sorted(v) for k,v in topic_pubs.items()},
+            "region_to_topics":region_topics,
+            "region_to_publications":region_publications,
+            "year_to_publications":{k:sorted(v) for k,v in year_publications.items()},
+            "year_to_topics":{k:sorted(v) for k,v in year_topics.items()},
+            "adjacency":adjacency_compact,
+        },
+        "linked_view_targets":[
+            "knowledge-landscape","knowledge-terrain-4d","topic-graph","citation-overlay",
+            "topic-regions","temporal-dynamics","relationship-matrix","semantic-overlay",
+        ],
+        "capabilities":{
+            "cross_view_selection":True,"cross_view_highlighting":True,"cross_view_isolation":True,
+            "terrain_peak_selection":True,"matrix_cell_selection":True,"region_selection":True,
+            "time_crossfilter":True,"text_visual_query":True,"portable_query_state":True,
+        },
+        "boundaries":{
+            "query_creates_new_research_claims":False,"selection_is_research_conclusion":False,
+            "neighbor_highlight_implies_causality":False,"filters_mutate_source_records":False,
+        },
+    }
+
 def build_publication_corpus_knowledge_map(
     *,
     source_key: str = "wordpress-main",
@@ -632,6 +726,7 @@ def build_publication_corpus_knowledge_map(
 
     multi = _multi_publication_analysis(nodes, edge_items, records)
     terrain = _knowledge_terrain_analysis(nodes, records, multi)
+    visual_query = _linked_visual_query_analysis(nodes, edge_items, records, multi)
 
     return {
         "schema": CORPUS_KNOWLEDGE_MAP_CONTRACT,
@@ -666,6 +761,7 @@ def build_publication_corpus_knowledge_map(
         "linked_views": multi["linked_views"],
         "analytical_dimensions": multi["analytical_dimensions"],
         "knowledge_terrain_4d": terrain,
+        "visual_query": visual_query,
         "views": [
             {"key": "knowledge-landscape", "label": "Knowledge Landscape", "purpose": "Cross-publication topic and publication relationship field"},
             {"key": "knowledge-terrain-4d", "label": "4D Knowledge Terrain", "purpose": "Spatial-temporal analytical terrain with selectable elevation metrics and time playback"},
@@ -683,7 +779,7 @@ def build_publication_corpus_knowledge_map(
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -706,6 +802,7 @@ def build_publication_corpus_knowledge_map(
                 "deterministic-topic-regions",
                 "publication-time-binning",
                 "deterministic-4d-knowledge-terrain",
+                "linked-view-deterministic-crossfilter",
             ],
             "governed_visual_reasoning_authority": "platform-core",
         },
@@ -718,5 +815,6 @@ def build_publication_corpus_knowledge_map(
             "corpus_is_live_library_records": True,
             "publication_library_manifest_applied": selection_mode == "publication-library-manifest",
             "non_publication_wordpress_types_excluded": True,
+            "visual_query_selection_is_research_conclusion": False,
         },
     }

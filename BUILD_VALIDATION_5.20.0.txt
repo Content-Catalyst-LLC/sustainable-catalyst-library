@@ -1,0 +1,6 @@
+Sustainable Catalyst Knowledge Library v5.20.0
+Backend v2.31.0
+Release: Linked Scientific Views & Visual Query
+Validation target: retained v5.12-v5.19 research/visualization line plus v5.20 visual-query tests
+Expected integrated pytest result: 88 passed
+Additional checks: Python compile, PHP lint, JavaScript syntax, shell syntax, package ZIP integrity, SHA-256 manifest, fresh-bundle validation
