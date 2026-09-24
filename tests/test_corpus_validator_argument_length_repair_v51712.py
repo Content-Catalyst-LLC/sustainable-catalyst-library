@@ -35,4 +35,6 @@ def test_canonical_scope_contract_is_unchanged():
     assert 'selection_mode = "publication-library-manifest"' in engine
     assert 'selection_mode = "wordpress-post-fallback"' in engine
     assert 'object_type = object_type or "post"' in engine
-    assert "publication_record_ids($max_publications)" in shortcode
+    bridge = (ROOT / "sustainable-catalyst-library/includes/class-sc-library-python-backend.php").read_text()
+    assert "publication_record_ids($max_publications)" in bridge
+    assert "data-sc-kl-async" in shortcode

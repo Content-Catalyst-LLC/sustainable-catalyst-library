@@ -20,8 +20,10 @@ def test_publications_class_exports_canonical_manifest():
 
 def test_shortcode_passes_publications_manifest_to_backend():
     code = (ROOT / "sustainable-catalyst-library/includes/class-sc-library-knowledge-landscape.php").read_text()
-    assert "publication_record_ids($max_publications)" in code
-    assert "$publication_record_ids" in code
+    bridge = (ROOT / "sustainable-catalyst-library/includes/class-sc-library-python-backend.php").read_text()
+    assert "publication_record_ids($max_publications)" in bridge
+    assert "data-sc-kl-async" in code
+    assert "publication-corpus-knowledge-map" in code
     assert "Publication Library manifest" in code
 
 

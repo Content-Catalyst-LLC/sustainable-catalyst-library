@@ -282,6 +282,8 @@ def health() -> dict[str, Any]:
             "publication_linked_scientific_views": True,
             "publication_visual_query_contract": True,
             "publication_cross_view_selection": True,
+            "publication_async_corpus_transport": True,
+            "publication_corpus_post_transport": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
             "publication_corpus_live_library_records": True,
@@ -2139,6 +2141,32 @@ def publication_corpus_knowledge_maps_read(
         semantic_threshold=semantic_threshold,
         max_publications=max_publications,
         max_topics_per_publication=max_topics_per_publication,
+    )
+
+
+@app.post("/v1/publication-knowledge-maps/corpus")
+def publication_corpus_knowledge_maps_post(payload: dict[str, Any]) -> dict[str, Any]:
+    """POST transport for research-sized corpus manifests.
+
+    This mirrors the GET contract but carries record IDs in the JSON body so large
+    canonical Publication Library manifests are not constrained by URL length.
+    """
+    record_ids_raw = payload.get("record_ids") or []
+    if isinstance(record_ids_raw, str):
+        record_ids = [x.strip() for x in record_ids_raw.split(",") if x.strip()]
+    elif isinstance(record_ids_raw, list):
+        record_ids = [str(x).strip() for x in record_ids_raw if str(x).strip()]
+    else:
+        record_ids = []
+    return build_publication_corpus_knowledge_map(
+        source_key=str(payload.get("source_key") or "wordpress-main"),
+        object_type=str(payload.get("object_type") or ""),
+        record_ids=record_ids[:1000],
+        include_citations=bool(payload.get("include_citations", True)),
+        include_semantic_similarity=bool(payload.get("include_semantic_similarity", True)),
+        semantic_threshold=float(payload.get("semantic_threshold", 0.72)),
+        max_publications=int(payload.get("max_publications", 250)),
+        max_topics_per_publication=int(payload.get("max_topics_per_publication", 36)),
     )
 
 

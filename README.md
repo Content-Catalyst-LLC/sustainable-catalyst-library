@@ -1,6 +1,8 @@
-# Sustainable Catalyst Knowledge Library v5.20.0
+# Sustainable Catalyst Knowledge Library v5.20.0.1
 
-Current release: **Linked Scientific Views & Visual Query** with backend **v2.31.0**. The release coordinates the 4D knowledge terrain, graph, topic-region, temporal, citation, semantic, and relationship-matrix views through a portable deterministic visual-query state.
+Current release: **Asynchronous Publication Corpus Loading & Transport Repair** with backend **v2.31.1**. Corpus mode now renders immediately, loads the canonical Publication Library asynchronously through the WordPress REST proxy, and transports research-sized manifests to Python in a JSON POST body rather than a GET query string. v5.20.0 linked scientific views, visual query, and the v5.19 4D terrain remain intact.
+
+See `ASYNC_PUBLICATION_CORPUS_LOADING_v5.20.0.1.md`, `RELEASE_NOTES_KNOWLEDGE_LIBRARY_5.20.0.1.md`, and `DEPLOY_CONTABO_LIBRARY_BACKEND_v2.31.1.md`.
 
 ## Knowledge Library v5.18.0 — Multi-Publication Knowledge Landscape
 

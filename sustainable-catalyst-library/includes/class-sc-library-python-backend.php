@@ -208,16 +208,23 @@ final class SC_Library_Python_Backend {
             ],
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-corpus-knowledge-map', [
-            'methods' => WP_REST_Server::READABLE,
-            'permission_callback' => '__return_true',
-            'callback' => [$this, 'proxy_publication_corpus_knowledge_map'],
-            'args' => [
-                'source_key' => ['sanitize_callback' => 'sanitize_text_field', 'default' => 'wordpress-main'],
-                'object_type' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
-                'record_ids' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
-                'semantic_threshold' => ['sanitize_callback' => static function ($value) { return max(0.0, min(1.0, (float) $value)); }, 'default' => 0.72],
-                'max_publications' => ['sanitize_callback' => 'absint', 'default' => 250],
-                'max_topics_per_publication' => ['sanitize_callback' => 'absint', 'default' => 36],
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'permission_callback' => '__return_true',
+                'callback' => [$this, 'proxy_publication_corpus_knowledge_map'],
+                'args' => [
+                    'source_key' => ['sanitize_callback' => 'sanitize_text_field', 'default' => 'wordpress-main'],
+                    'object_type' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                    'record_ids' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+                    'semantic_threshold' => ['sanitize_callback' => static function ($value) { return max(0.0, min(1.0, (float) $value)); }, 'default' => 0.72],
+                    'max_publications' => ['sanitize_callback' => 'absint', 'default' => 250],
+                    'max_topics_per_publication' => ['sanitize_callback' => 'absint', 'default' => 36],
+                ],
+            ],
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'permission_callback' => '__return_true',
+                'callback' => [$this, 'proxy_publication_corpus_knowledge_map'],
             ],
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-knowledge-map', [
@@ -384,42 +391,96 @@ final class SC_Library_Python_Backend {
     }
 
     public static function publication_corpus_knowledge_map(string $source_key = 'wordpress-main', string $object_type = '', float $semantic_threshold = 0.72, int $max_publications = 250, int $max_topics_per_publication = 36, array $record_ids = []): array {
+        $failure = static function (string $state, string $message = '', int $http_status = 0): array {
+            return [
+                'schema' => 'sc-library-publication-corpus-knowledge-map/1.0',
+                'scope' => 'corpus',
+                'nodes' => [],
+                'edges' => [],
+                'transport' => [
+                    'ok' => false,
+                    'state' => $state,
+                    'http_status' => $http_status,
+                    'error' => $message,
+                ],
+            ];
+        };
         if (!self::configured()) {
-            return ['schema' => 'sc-library-publication-corpus-knowledge-map/1.0', 'scope' => 'corpus', 'nodes' => [], 'edges' => []];
+            return $failure('library_backend_not_configured', __('The Library analysis backend is not configured.', 'sustainable-catalyst-library'));
         }
         $record_ids = array_values(array_unique(array_filter(array_map(static fn($value) => sanitize_text_field((string) $value), $record_ids))));
         $record_ids = array_slice($record_ids, 0, 1000);
-        $url = add_query_arg([
-            'source_key' => sanitize_text_field($source_key),
+        $request_body = [
+            'source_key' => sanitize_text_field($source_key) ?: 'wordpress-main',
             'object_type' => sanitize_key($object_type),
-            'record_ids' => implode(',', $record_ids),
-            'include_citations' => 'true',
-            'include_semantic_similarity' => 'true',
+            'record_ids' => $record_ids,
+            'include_citations' => true,
+            'include_semantic_similarity' => true,
             'semantic_threshold' => max(0.0, min(1.0, $semantic_threshold)),
             'max_publications' => min(1000, max(1, $max_publications)),
             'max_topics_per_publication' => min(100, max(1, $max_topics_per_publication)),
-        ], self::base_url() . '/v1/publication-knowledge-maps/corpus');
-        $response = wp_remote_get($url, [
-            'timeout' => max(self::timeout(), 20),
+        ];
+        $response = wp_remote_post(self::base_url() . '/v1/publication-knowledge-maps/corpus', [
+            'timeout' => max(self::timeout(), 45),
             'redirection' => 2,
-            'headers' => ['Accept' => 'application/json'],
+            'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ],
+            'body' => wp_json_encode($request_body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            'data_format' => 'body',
         ]);
-        if (is_wp_error($response) || 200 !== (int) wp_remote_retrieve_response_code($response)) {
-            return ['schema' => 'sc-library-publication-corpus-knowledge-map/1.0', 'scope' => 'corpus', 'nodes' => [], 'edges' => []];
+        if (is_wp_error($response)) {
+            return $failure('backend_request_failed', $response->get_error_message());
         }
-        $body = json_decode((string) wp_remote_retrieve_body($response), true);
-        return is_array($body) ? $body : ['schema' => 'sc-library-publication-corpus-knowledge-map/1.0', 'scope' => 'corpus', 'nodes' => [], 'edges' => []];
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $raw = (string) wp_remote_retrieve_body($response);
+        $body = json_decode($raw, true);
+        if (200 !== $code) {
+            $message = is_array($body) ? (string) ($body['detail'] ?? $body['error'] ?? '') : '';
+            if ($message === '') { $message = wp_strip_all_tags(substr($raw, 0, 500)); }
+            return $failure('backend_http_error', $message ?: ('Backend HTTP ' . $code), $code);
+        }
+        if (!is_array($body)) {
+            return $failure('backend_invalid_json', __('The Library analysis backend returned invalid JSON.', 'sustainable-catalyst-library'), $code);
+        }
+        $body['transport'] = [
+            'ok' => true,
+            'state' => 'ready',
+            'http_status' => $code,
+            'method' => 'POST',
+            'manifest_record_count' => count($record_ids),
+        ];
+        return $body;
     }
 
     public function proxy_publication_corpus_knowledge_map(WP_REST_Request $request) {
-        $source_key = sanitize_text_field((string) $request->get_param('source_key')) ?: 'wordpress-main';
-        $object_type = sanitize_key((string) $request->get_param('object_type'));
-        $semantic_threshold = max(0.0, min(1.0, (float) $request->get_param('semantic_threshold')));
-        $max_publications = min(1000, max(1, (int) $request->get_param('max_publications')));
-        $max_topics = min(100, max(1, (int) $request->get_param('max_topics_per_publication')));
-        $record_ids_raw = sanitize_text_field((string) $request->get_param('record_ids'));
-        $record_ids = array_values(array_filter(array_map('trim', explode(',', $record_ids_raw))));
-        return rest_ensure_response(self::publication_corpus_knowledge_map($source_key, $object_type, $semantic_threshold, $max_publications, $max_topics, $record_ids));
+        $json = $request->get_json_params();
+        $json = is_array($json) ? $json : [];
+        $source_key = sanitize_text_field((string) ($json['source_key'] ?? $request->get_param('source_key'))) ?: 'wordpress-main';
+        $object_type = sanitize_key((string) ($json['object_type'] ?? $request->get_param('object_type')));
+        $semantic_threshold = max(0.0, min(1.0, (float) ($json['semantic_threshold'] ?? $request->get_param('semantic_threshold') ?? 0.72)));
+        $max_publications = min(1000, max(1, (int) ($json['max_publications'] ?? $request->get_param('max_publications') ?? 250)));
+        $max_topics = min(100, max(1, (int) ($json['max_topics_per_publication'] ?? $request->get_param('max_topics_per_publication') ?? 36)));
+        $record_ids_value = $json['record_ids'] ?? $request->get_param('record_ids') ?? [];
+        if (is_array($record_ids_value)) {
+            $record_ids = array_values(array_filter(array_map(static fn($value) => sanitize_text_field((string) $value), $record_ids_value)));
+        } else {
+            $record_ids_raw = sanitize_text_field((string) $record_ids_value);
+            $record_ids = array_values(array_filter(array_map('trim', explode(',', $record_ids_raw))));
+        }
+        // Browser corpus requests intentionally omit the manifest. Resolve it at request
+        // time from the canonical Publications interface so page rendering stays fast and
+        // the payload remains the same source-of-truth used by the Publication Library.
+        if (!$record_ids && class_exists('SC_Library_Publications')) {
+            $publication_manifest = new SC_Library_Publications();
+            $record_ids = $publication_manifest->publication_record_ids($max_publications);
+        }
+        $result = self::publication_corpus_knowledge_map($source_key, $object_type, $semantic_threshold, $max_publications, $max_topics, $record_ids);
+        $ok = !empty($result['transport']['ok']);
+        $status = $ok ? 200 : (int) ($result['transport']['http_status'] ?? 0);
+        if ($status < 400) { $status = 502; }
+        return new WP_REST_Response($result, $ok ? 200 : $status);
     }
 
     public static function publication_knowledge_map(string $record_id, float $semantic_threshold = 0.72, int $max_neighbors = 40, int $max_topics_per_publication = 36): array {

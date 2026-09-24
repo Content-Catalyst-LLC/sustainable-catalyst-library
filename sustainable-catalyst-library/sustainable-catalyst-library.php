@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.20.0 with linked scientific views, deterministic visual query, 4D knowledge terrain, temporal cross-filtering, multi-publication knowledge landscapes, and Platform Core-aligned visual reasoning with canonical Publication Library corpus scoping while preserving existing research domains.
- * Version: 5.20.0
+ * Description: Sustainable Catalyst Library v5.20.0.1 with asynchronous Publication Library corpus loading, POST-based manifest transport, explicit loading/error states, linked scientific views, deterministic visual query, 4D knowledge terrain, temporal cross-filtering, and canonical Publication Library corpus scoping.
+ * Version: 5.20.0.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.20.0');
+define('SC_LIBRARY_VERSION', '5.20.0.1');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);

@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.20.0 — Linked Scientific Views & Visual Query with cross-view analytical selection.
+ * v5.20.0.1 — Asynchronous Publication Corpus Loading & Transport Repair.
  *
  * Renders an interactive analytical graph from the Library Python backend.
  * Relationships remain typed by their actual basis: citation, reviewed concept
  * association, source-span co-occurrence, or real stored-embedding similarity.
  */
 final class SC_Library_Knowledge_Landscape {
-    public const VERSION = '5.20.0';
+    public const VERSION = '5.20.0.1';
     public const SHORTCODE = 'sc_library_knowledge_landscape';
 
     public function register_hooks(): void {
@@ -56,12 +56,14 @@ final class SC_Library_Knowledge_Landscape {
         $topics = min(100, max(1, (int) $atts['max_topics']));
         $height = min(960, max(480, (int) $atts['height']));
 
+        $async_corpus = false;
+        $async_config = [];
         if ('publication' === $scope) {
             $record_id = sanitize_text_field((string) $atts['record_id']);
             if ($record_id === '' && function_exists('get_the_ID')) {
                 $post_id = (int) get_the_ID();
-                if ($post_id > 0) {
-                    $record_id = 'wordpress:' . (int) get_current_blog_id() . ':post:' . $post_id;
+                if ($post_id > 0 && class_exists('SC_Library_Python_Backend')) {
+                    $record_id = SC_Library_Python_Backend::record_id($post_id, get_post_type($post_id));
                 }
             }
             if ($record_id === '') {
@@ -69,28 +71,41 @@ final class SC_Library_Knowledge_Landscape {
             }
             $neighbors = min(100, max(0, (int) $atts['max_neighbors']));
             $payload = SC_Library_Python_Backend::publication_knowledge_map($record_id, $threshold, $neighbors, $topics);
+            $nodes = isset($payload['nodes']) && is_array($payload['nodes']) ? $payload['nodes'] : [];
+            if (!$nodes) {
+                return 'hide' === sanitize_key((string) $atts['empty']) ? '' : $this->empty_state($scope);
+            }
         } else {
-            $source_key = sanitize_text_field((string) $atts['source_key']);
+            // v5.20.0.1: corpus mode renders immediately and loads research-sized analytical
+            // payloads asynchronously through the WordPress REST proxy. The proxy resolves
+            // the canonical Publication Library manifest and sends it to Python via POST JSON.
+            $async_corpus = true;
+            $source_key = sanitize_text_field((string) $atts['source_key']) ?: 'wordpress-main';
             $object_type = sanitize_key((string) $atts['object_type']);
             $max_publications = min(1000, max(1, (int) $atts['max_publications']));
-            $publication_record_ids = [];
-            if (class_exists('SC_Library_Publications')) {
-                $publication_manifest = new SC_Library_Publications();
-                $publication_record_ids = $publication_manifest->publication_record_ids($max_publications);
-            }
-            $payload = SC_Library_Python_Backend::publication_corpus_knowledge_map(
-                $source_key ?: 'wordpress-main',
-                $object_type,
-                $threshold,
-                $max_publications,
-                $topics,
-                $publication_record_ids
-            );
-        }
-
-        $nodes = isset($payload['nodes']) && is_array($payload['nodes']) ? $payload['nodes'] : [];
-        if (!$nodes) {
-            return 'hide' === sanitize_key((string) $atts['empty']) ? '' : $this->empty_state($scope);
+            $payload = [
+                'schema' => 'sc-library-publication-corpus-knowledge-map/1.0',
+                'scope' => 'corpus',
+                'title' => __('Scientific Knowledge Landscape', 'sustainable-catalyst-library'),
+                'nodes' => [],
+                'edges' => [],
+                'metrics' => [],
+                'semantic_analysis' => ['available' => false, 'vector_count' => 0],
+                'topic_regions' => [],
+                'temporal_dynamics' => ['years' => []],
+                'knowledge_terrain_4d' => ['topic_anchors' => []],
+            ];
+            $async_config = [
+                'endpoint' => esc_url_raw(rest_url(SC_Library_Python_Backend::REST_NAMESPACE . '/backend/publication-corpus-knowledge-map')),
+                'scope' => 'corpus',
+                'source_key' => $source_key,
+                'object_type' => $object_type,
+                'semantic_threshold' => $threshold,
+                'max_publications' => $max_publications,
+                'max_topics_per_publication' => $topics,
+                'timeout_ms' => 90000,
+            ];
+            $nodes = [];
         }
 
         $this->enqueue_assets();
@@ -101,17 +116,17 @@ final class SC_Library_Knowledge_Landscape {
 
         ob_start();
         ?>
-        <section id="<?php echo esc_attr($id); ?>" class="sc-kl" style="--sc-kl-height:<?php echo esc_attr((string) $height); ?>px" data-sc-kl-root>
+        <section id="<?php echo esc_attr($id); ?>" class="sc-kl" data-sc-kl-async="<?php echo $async_corpus ? '1' : '0'; ?>" style="--sc-kl-height:<?php echo esc_attr((string) $height); ?>px" data-sc-kl-root>
             <header class="sc-kl__header">
                 <div>
                     <p class="sc-kl__eyebrow"><?php echo 'corpus' === $scope ? esc_html__('Publication Corpus Analysis', 'sustainable-catalyst-library') : esc_html__('Publication Knowledge Analysis', 'sustainable-catalyst-library'); ?></p>
-                    <h2><?php echo esc_html((string) ($payload['title'] ?? __('Scientific Knowledge Landscape', 'sustainable-catalyst-library'))); ?></h2>
+                    <h2 data-sc-kl-title><?php echo esc_html((string) ($payload['title'] ?? __('Scientific Knowledge Landscape', 'sustainable-catalyst-library'))); ?></h2>
                     <p><?php esc_html_e('Linked scientific knowledge environment connecting 4D terrain, topic regions, publication relationships, citation flows, temporal dynamics, and visual queries across the Research Library corpus.', 'sustainable-catalyst-library'); ?></p>
                 </div>
                 <div class="sc-kl__status-row">
                     <?php if ('corpus' === $scope) : ?><span class="sc-kl__status is-good"><?php esc_html_e('Publication Library manifest', 'sustainable-catalyst-library'); ?></span><?php endif; ?>
                     <span class="sc-kl__status is-good"><?php esc_html_e('Source-grounded', 'sustainable-catalyst-library'); ?></span>
-                    <span class="sc-kl__status <?php echo !empty($semantic['available']) ? 'is-good' : 'is-neutral'; ?>">
+                    <span class="sc-kl__status <?php echo !empty($semantic['available']) ? 'is-good' : 'is-neutral'; ?>" data-sc-kl-semantic-status>
                         <?php echo !empty($semantic['available']) ? esc_html__('Semantic vectors online', 'sustainable-catalyst-library') : esc_html__('Structural mode', 'sustainable-catalyst-library'); ?>
                     </span>
                 </div>
@@ -200,6 +215,13 @@ final class SC_Library_Knowledge_Landscape {
                         </div>
                     </div>
                     <div class="sc-kl__stage" tabindex="0" role="application" aria-label="<?php esc_attr_e('Interactive publication knowledge map', 'sustainable-catalyst-library'); ?>">
+                        <?php if ($async_corpus) : ?>
+                        <div class="sc-kl__load-state is-loading" data-sc-kl-load-state role="status" aria-live="polite">
+                            <strong data-sc-kl-load-title><?php esc_html_e('Connecting to Publication Library…', 'sustainable-catalyst-library'); ?></strong>
+                            <span data-sc-kl-load-detail><?php esc_html_e('Preparing the canonical publication corpus for scientific analysis.', 'sustainable-catalyst-library'); ?></span>
+                            <button type="button" data-sc-kl-retry hidden><?php esc_html_e('Retry corpus load', 'sustainable-catalyst-library'); ?></button>
+                        </div>
+                        <?php endif; ?>
                         <svg class="sc-kl__svg" viewBox="0 0 1200 760" aria-hidden="true"></svg>
                         <canvas class="sc-kl__terrain" data-sc-kl-terrain hidden aria-label="Interactive 4D publication knowledge terrain"></canvas>
                         <div class="sc-kl__terrain-hud" data-sc-kl-terrain-hud hidden><span data-sc-kl-terrain-year>—</span><span data-sc-kl-terrain-metric>Relationship density</span><span><?php esc_html_e('Drag to orbit · Wheel to zoom', 'sustainable-catalyst-library'); ?></span></div>
@@ -208,13 +230,13 @@ final class SC_Library_Knowledge_Landscape {
                     </div>
                     <?php $regions = isset($payload['topic_regions']) && is_array($payload['topic_regions']) ? $payload['topic_regions'] : []; $temporal = isset($payload['temporal_dynamics']) && is_array($payload['temporal_dynamics']) ? $payload['temporal_dynamics'] : []; $years = isset($temporal['years']) && is_array($temporal['years']) ? $temporal['years'] : []; ?>
                     <div class="sc-kl__metrics-strip">
-                        <div><strong><?php echo esc_html((string) ($metrics['publication_count'] ?? 0)); ?></strong><span><?php esc_html_e('publications', 'sustainable-catalyst-library'); ?></span></div>
-                        <div><strong><?php echo esc_html((string) ($metrics['topic_count'] ?? 0)); ?></strong><span><?php esc_html_e('topics', 'sustainable-catalyst-library'); ?></span></div>
-                        <div><strong><?php echo esc_html((string) count($regions)); ?></strong><span><?php esc_html_e('topic regions', 'sustainable-catalyst-library'); ?></span></div>
-                        <div><strong><?php echo esc_html((string) ($metrics['edge_count'] ?? 0)); ?></strong><span><?php esc_html_e('relationships', 'sustainable-catalyst-library'); ?></span></div>
-                        <div><strong><?php echo esc_html((string) ($semantic['vector_count'] ?? 0)); ?></strong><span><?php esc_html_e('semantic vectors', 'sustainable-catalyst-library'); ?></span></div>
-                        <div><strong><?php echo $years ? esc_html((string) (max($years) - min($years) + 1)) : '0'; ?></strong><span><?php esc_html_e('year span', 'sustainable-catalyst-library'); ?></span></div>
-                        <div><strong><?php echo esc_html((string) count($payload['knowledge_terrain_4d']['topic_anchors'] ?? [])); ?></strong><span><?php esc_html_e('terrain anchors', 'sustainable-catalyst-library'); ?></span></div>
+                        <div><strong data-sc-kl-metric="publication_count"><?php echo esc_html((string) ($metrics['publication_count'] ?? 0)); ?></strong><span><?php esc_html_e('publications', 'sustainable-catalyst-library'); ?></span></div>
+                        <div><strong data-sc-kl-metric="topic_count"><?php echo esc_html((string) ($metrics['topic_count'] ?? 0)); ?></strong><span><?php esc_html_e('topics', 'sustainable-catalyst-library'); ?></span></div>
+                        <div><strong data-sc-kl-metric="topic_regions"><?php echo esc_html((string) count($regions)); ?></strong><span><?php esc_html_e('topic regions', 'sustainable-catalyst-library'); ?></span></div>
+                        <div><strong data-sc-kl-metric="edge_count"><?php echo esc_html((string) ($metrics['edge_count'] ?? 0)); ?></strong><span><?php esc_html_e('relationships', 'sustainable-catalyst-library'); ?></span></div>
+                        <div><strong data-sc-kl-metric="semantic_vectors"><?php echo esc_html((string) ($semantic['vector_count'] ?? 0)); ?></strong><span><?php esc_html_e('semantic vectors', 'sustainable-catalyst-library'); ?></span></div>
+                        <div><strong data-sc-kl-metric="year_span"><?php echo $years ? esc_html((string) (max($years) - min($years) + 1)) : '0'; ?></strong><span><?php esc_html_e('year span', 'sustainable-catalyst-library'); ?></span></div>
+                        <div><strong data-sc-kl-metric="terrain_anchors"><?php echo esc_html((string) count($payload['knowledge_terrain_4d']['topic_anchors'] ?? [])); ?></strong><span><?php esc_html_e('terrain anchors', 'sustainable-catalyst-library'); ?></span></div>
                     </div>
                 </div>
 
@@ -233,7 +255,7 @@ final class SC_Library_Knowledge_Landscape {
                         <div><dt><?php esc_html_e('Citations', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Explicit', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Concepts', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Human reviewed', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Co-occurrence', 'sustainable-catalyst-library'); ?></dt><dd><?php echo 'corpus' === $scope ? esc_html__('Corpus + source-span measured', 'sustainable-catalyst-library') : esc_html__('Source-span measured', 'sustainable-catalyst-library'); ?></dd></div>
-                        <div><dt><?php esc_html_e('Semantic links', 'sustainable-catalyst-library'); ?></dt><dd><?php echo !empty($semantic['available']) ? esc_html__('Cosine similarity', 'sustainable-catalyst-library') : esc_html__('Unavailable', 'sustainable-catalyst-library'); ?></dd></div>
+                        <div><dt><?php esc_html_e('Semantic links', 'sustainable-catalyst-library'); ?></dt><dd data-sc-kl-semantic-method><?php echo !empty($semantic['available']) ? esc_html__('Cosine similarity', 'sustainable-catalyst-library') : esc_html__('Unavailable', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Topic regions', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Repeated measured co-occurrence', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Time dimension', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Publication dates', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('4D terrain', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Measured topology + selectable Z + time', 'sustainable-catalyst-library'); ?></dd></div>
@@ -248,13 +270,16 @@ final class SC_Library_Knowledge_Landscape {
             </div>
             <details class="sc-kl__accessible">
                 <summary><?php esc_html_e('Accessible graph data', 'sustainable-catalyst-library'); ?></summary>
-                <p><?php echo esc_html(sprintf(__('This view contains %1$d nodes and %2$d typed relationships.', 'sustainable-catalyst-library'), (int) ($metrics['node_count'] ?? 0), (int) ($metrics['edge_count'] ?? 0))); ?></p>
-                <ul>
+                <p data-sc-kl-accessible-summary><?php echo esc_html(sprintf(__('This view contains %1$d nodes and %2$d typed relationships.', 'sustainable-catalyst-library'), (int) ($metrics['node_count'] ?? 0), (int) ($metrics['edge_count'] ?? 0))); ?></p>
+                <ul data-sc-kl-accessible-list>
                     <?php foreach (array_slice($nodes, 0, 100) as $node) : if (!is_array($node)) { continue; } ?>
                         <li><strong><?php echo esc_html((string) ($node['kind'] ?? 'node')); ?>:</strong> <?php echo esc_html((string) ($node['label'] ?? $node['id'] ?? '')); ?></li>
                     <?php endforeach; ?>
                 </ul>
             </details>
+            <?php if ($async_corpus) : ?>
+            <script type="application/json" class="sc-kl__config"><?php echo wp_json_encode($async_config, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
+            <?php endif; ?>
             <script type="application/json" class="sc-kl__data"><?php echo $safe_json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
         </section>
         <?php

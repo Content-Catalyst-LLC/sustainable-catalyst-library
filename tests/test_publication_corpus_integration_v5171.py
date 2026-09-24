@@ -15,7 +15,9 @@ def test_shortcode_defaults_to_live_corpus_not_current_page():
     code = (ROOT / "sustainable-catalyst-library/includes/class-sc-library-knowledge-landscape.php").read_text()
     assert "'scope' => 'corpus'" in code
     assert "'source_key' => 'wordpress-main'" in code
-    assert "publication_corpus_knowledge_map" in code
+    bridge = (ROOT / "sustainable-catalyst-library/includes/class-sc-library-python-backend.php").read_text()
+    assert "publication_corpus_knowledge_map" in bridge
+    assert "publication-corpus-knowledge-map" in code
     assert "if ('publication' === $scope)" in code
     assert "No eligible published publications are currently indexed for this Research Library corpus." in code
 

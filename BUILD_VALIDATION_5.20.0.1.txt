@@ -1,0 +1,13 @@
+Sustainable Catalyst Knowledge Library v5.20.0.1
+Backend v2.31.1
+Release: Asynchronous Publication Corpus Loading & Transport Repair
+Validation: 92/92 retained + patch tests passed
+Python compileall: PASS
+PHP lint: PASS
+JavaScript syntax: PASS
+Shell syntax: PASS
+Canonical Publication Library scoping: PRESERVED
+Async browser corpus loading: PASS
+WordPress REST POST proxy: PASS
+Python corpus POST JSON transport: PASS
+Linked scientific views / 4D terrain: PRESERVED

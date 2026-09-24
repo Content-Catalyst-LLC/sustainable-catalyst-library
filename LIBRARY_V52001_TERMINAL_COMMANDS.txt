@@ -1,0 +1,19 @@
+# Git install / push / tag
+cd ~/Downloads
+rm -rf "$HOME/Downloads/sc-library-v5.20.0.1-release"
+BUNDLE="$(find "$HOME/Downloads" -maxdepth 1 -type f -name 'sustainable-catalyst-library-v5.20.0.1-release-bundle*.zip' -print | head -n 1)"
+echo "Using: $BUNDLE"
+unzip -q "$BUNDLE" -d "$HOME/Downloads/sc-library-v5.20.0.1-release"
+cd "$HOME/Downloads/sc-library-v5.20.0.1-release"
+chmod +x install_and_push_sustainable_catalyst_library_v5_20_0_1_macos.sh
+./install_and_push_sustainable_catalyst_library_v5_20_0_1_macos.sh "$HOME/Downloads/sustainable-catalyst-library"
+
+# Backend transfer
+cd ~/Downloads/sc-library-v5.20.0.1-release
+scp -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes sustainable-catalyst-library-backend-v2.31.1.zip upgrade_library_backend_v2_31_1_contabo.sh catalystadmin@94.72.113.77:/tmp/
+ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes catalystadmin@94.72.113.77
+
+# VPS
+cd /tmp
+chmod +x upgrade_library_backend_v2_31_1_contabo.sh
+./upgrade_library_backend_v2_31_1_contabo.sh /tmp/sustainable-catalyst-library-backend-v2.31.1.zip
