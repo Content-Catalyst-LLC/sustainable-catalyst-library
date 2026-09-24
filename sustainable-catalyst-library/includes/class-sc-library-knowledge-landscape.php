@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.20.0.1 — Asynchronous Publication Corpus Loading & Transport Repair.
+ * v5.20.0.2 — Scientific Renderer Visibility & 4D Terrain Recovery.
  *
  * Renders an interactive analytical graph from the Library Python backend.
  * Relationships remain typed by their actual basis: citation, reviewed concept
  * association, source-span co-occurrence, or real stored-embedding similarity.
  */
 final class SC_Library_Knowledge_Landscape {
-    public const VERSION = '5.20.0.1';
+    public const VERSION = '5.20.0.2';
     public const SHORTCODE = 'sc_library_knowledge_landscape';
 
     public function register_hooks(): void {
@@ -18,14 +18,14 @@ final class SC_Library_Knowledge_Landscape {
 
     private function enqueue_assets(): void {
         wp_enqueue_style(
-            'sc-library-knowledge-landscape-v5200',
-            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5200.css',
+            'sc-library-knowledge-landscape-v52002',
+            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v52002.css',
             [],
             self::VERSION
         );
         wp_enqueue_script(
-            'sc-library-knowledge-landscape-v5200',
-            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5200.js',
+            'sc-library-knowledge-landscape-v52002',
+            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v52002.js',
             [],
             self::VERSION,
             true

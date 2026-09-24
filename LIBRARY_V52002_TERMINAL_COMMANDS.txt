@@ -1,0 +1,23 @@
+Knowledge Library v5.20.0.2 — Scientific Renderer Visibility & 4D Terrain Recovery
+
+GIT INSTALL / COMMIT / PUSH / TAG
+cd ~/Downloads
+rm -rf "$HOME/Downloads/sc-library-v5.20.0.2-release"
+BUNDLE="$(find "$HOME/Downloads" -maxdepth 1 -type f -name 'sustainable-catalyst-library-v5.20.0.2-release-bundle*.zip' -print | head -n 1)"
+echo "Using: $BUNDLE"
+unzip -q "$BUNDLE" -d "$HOME/Downloads/sc-library-v5.20.0.2-release"
+cd "$HOME/Downloads/sc-library-v5.20.0.2-release"
+chmod +x install_and_push_sustainable_catalyst_library_v5_20_0_2_macos.sh
+./install_and_push_sustainable_catalyst_library_v5_20_0_2_macos.sh "$HOME/Downloads/sustainable-catalyst-library"
+
+BACKEND COPY
+cd ~/Downloads/sc-library-v5.20.0.2-release
+scp -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes sustainable-catalyst-library-backend-v2.31.2.zip upgrade_library_backend_v2_31_2_contabo.sh catalystadmin@94.72.113.77:/tmp/
+
+SSH
+ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes catalystadmin@94.72.113.77
+
+BACKEND DEPLOY
+cd /tmp
+chmod +x upgrade_library_backend_v2_31_2_contabo.sh
+./upgrade_library_backend_v2_31_2_contabo.sh /tmp/sustainable-catalyst-library-backend-v2.31.2.zip

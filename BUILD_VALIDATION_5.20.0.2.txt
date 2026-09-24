@@ -1,0 +1,4 @@
+Sustainable Catalyst Knowledge Library v5.20.0.2
+Backend v2.31.2
+Validation target: scientific renderer visibility lifecycle + peak-preserving 4D terrain recovery
+Checks: retained regression suite; v5.20.0.2 renderer tests; Python compileall; Node syntax; PHP lint; shell syntax; ZIP integrity; SHA-256 manifest
