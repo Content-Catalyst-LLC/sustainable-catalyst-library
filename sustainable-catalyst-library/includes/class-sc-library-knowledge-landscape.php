@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.20.0.2 — Scientific Renderer Visibility & 4D Terrain Recovery.
+ * v5.21.0 — Reproducible Visual Research Sessions & Workspace Handoff.
  *
  * Renders an interactive analytical graph from the Library Python backend.
  * Relationships remain typed by their actual basis: citation, reviewed concept
  * association, source-span co-occurrence, or real stored-embedding similarity.
  */
 final class SC_Library_Knowledge_Landscape {
-    public const VERSION = '5.20.0.2';
+    public const VERSION = '5.21.0';
     public const SHORTCODE = 'sc_library_knowledge_landscape';
 
     public function register_hooks(): void {
@@ -18,14 +18,14 @@ final class SC_Library_Knowledge_Landscape {
 
     private function enqueue_assets(): void {
         wp_enqueue_style(
-            'sc-library-knowledge-landscape-v52002',
-            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v52002.css',
+            'sc-library-knowledge-landscape-v5210',
+            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5210.css',
             [],
             self::VERSION
         );
         wp_enqueue_script(
-            'sc-library-knowledge-landscape-v52002',
-            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v52002.js',
+            'sc-library-knowledge-landscape-v5210',
+            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5210.js',
             [],
             self::VERSION,
             true
@@ -104,6 +104,7 @@ final class SC_Library_Knowledge_Landscape {
                 'max_publications' => $max_publications,
                 'max_topics_per_publication' => $topics,
                 'timeout_ms' => 90000,
+                'session_endpoint' => esc_url_raw(rest_url(SC_Library_Python_Backend::REST_NAMESPACE . '/backend/publication-visual-session-package')),
             ];
             $nodes = [];
         }
@@ -250,6 +251,17 @@ final class SC_Library_Knowledge_Landscape {
                         <p class="sc-kl__muted"><?php esc_html_e('Selections made in any scientific view will appear here and propagate to the others.', 'sustainable-catalyst-library'); ?></p>
                     </div>
                     <button type="button" class="sc-kl__copy-query" data-sc-kl-copy-query><?php esc_html_e('Copy query state', 'sustainable-catalyst-library'); ?></button>
+                    <div class="sc-kl__session-tools" data-sc-kl-session-tools>
+                        <div class="sc-kl__panel-title sc-kl__panel-title--secondary"><?php esc_html_e('Reproducible Session', 'sustainable-catalyst-library'); ?></div>
+                        <p class="sc-kl__muted"><?php esc_html_e('Save and reopen the current view, query, terrain camera, filters, and publication-time context.', 'sustainable-catalyst-library'); ?></p>
+                        <div class="sc-kl__session-actions">
+                            <button type="button" data-sc-kl-session-save><?php esc_html_e('Save session', 'sustainable-catalyst-library'); ?></button>
+                            <button type="button" data-sc-kl-session-restore><?php esc_html_e('Restore last', 'sustainable-catalyst-library'); ?></button>
+                            <button type="button" data-sc-kl-session-download><?php esc_html_e('Download session', 'sustainable-catalyst-library'); ?></button>
+                            <button type="button" data-sc-kl-session-workspace><?php esc_html_e('Workspace package', 'sustainable-catalyst-library'); ?></button>
+                        </div>
+                        <span class="sc-kl__session-status" data-sc-kl-session-status aria-live="polite"></span>
+                    </div>
                     <div class="sc-kl__panel-title sc-kl__panel-title--secondary"><?php esc_html_e('Analysis Method', 'sustainable-catalyst-library'); ?></div>
                     <dl class="sc-kl__method">
                         <div><dt><?php esc_html_e('Citations', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Explicit', 'sustainable-catalyst-library'); ?></dd></div>

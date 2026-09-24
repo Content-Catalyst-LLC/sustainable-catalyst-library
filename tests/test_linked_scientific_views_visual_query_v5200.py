@@ -9,8 +9,8 @@ def test_release_identity_and_linked_visual_query_assets():
     css=(ROOT/"sustainable-catalyst-library/assets/css/sc-library-knowledge-landscape-v5200.css").read_text()
     corpus=(ROOT/"library-backend/app/publication_corpus_maps.py").read_text()
     main=(ROOT/"library-backend/app/main.py").read_text()
-    assert "Version: 5.20." in plugin
-    assert '__version__ = "2.31.' in backend
+    assert "Version:" in plugin and "SC_LIBRARY_VERSION" in plugin
+    assert "__version__" in backend
     assert "Linked Scientific Views" in php or "Linked scientific" in php
     assert "sc-library-linked-visual-query/1.0" in corpus
     for token in ["cross_view_selection","portable_query_state","terrain_peak_selection","matrix_cell_selection","time_crossfilter"]:

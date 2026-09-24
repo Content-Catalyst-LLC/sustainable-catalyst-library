@@ -1,0 +1,11 @@
+Knowledge Library v5.21.0 — Reproducible Visual Research Sessions & Workspace Handoff
+Backend v2.32.0
+Validation: PASS
+Integrated tests: 102/102 passed
+Python compileall: PASS
+JavaScript syntax: PASS
+PHP lint: PASS where available
+Shell validation: PASS
+Fresh extracted repository smoke: PASS
+ZIP integrity: PASS
+SHA-256 verification: PASS

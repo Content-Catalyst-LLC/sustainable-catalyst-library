@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from collections import defaultdict
 from typing import Any
+import hashlib
+import json
 
 from .db import get_pool
 from .publication_knowledge_maps import _add_edge, _add_node, _as_list, _cosine, _topic_id
@@ -727,6 +729,8 @@ def build_publication_corpus_knowledge_map(
     multi = _multi_publication_analysis(nodes, edge_items, records)
     terrain = _knowledge_terrain_analysis(nodes, records, multi)
     visual_query = _linked_visual_query_analysis(nodes, edge_items, records, multi)
+    _refs = sorted([{"record_id": str(n.get("id") or ""), "content_hash": str(n.get("source_content_hash") or "")} for n in node_items if n.get("kind") == "publication"], key=lambda x: x["record_id"])
+    _corpus_fingerprint = hashlib.sha256(json.dumps(_refs, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
     return {
         "schema": CORPUS_KNOWLEDGE_MAP_CONTRACT,
@@ -762,6 +766,14 @@ def build_publication_corpus_knowledge_map(
         "analytical_dimensions": multi["analytical_dimensions"],
         "knowledge_terrain_4d": terrain,
         "visual_query": visual_query,
+        "reproducibility": {
+            "schema": "sc-library-visual-corpus-reproducibility/1.0",
+            "corpus_fingerprint_sha256": _corpus_fingerprint,
+            "publication_source_hashes": _refs,
+            "deterministic_layout": True,
+            "portable_visual_session_ready": True,
+            "workspace_handoff_package_ready": True,
+        },
         "views": [
             {"key": "knowledge-landscape", "label": "Knowledge Landscape", "purpose": "Cross-publication topic and publication relationship field"},
             {"key": "knowledge-terrain-4d", "label": "4D Knowledge Terrain", "purpose": "Spatial-temporal analytical terrain with selectable elevation metrics and time playback"},

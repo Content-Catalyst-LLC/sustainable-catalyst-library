@@ -1,0 +1,17 @@
+Knowledge Library v5.21.0 — Reproducible Visual Research Sessions & Workspace Handoff
+
+GIT
+cd ~/Downloads
+rm -rf "$HOME/Downloads/sc-library-v5.21.0-release"
+BUNDLE="$(find "$HOME/Downloads" -maxdepth 1 -type f -name 'sustainable-catalyst-library-v5.21.0-release-bundle*.zip' -print | head -n 1)"
+unzip -q "$BUNDLE" -d "$HOME/Downloads/sc-library-v5.21.0-release"
+cd "$HOME/Downloads/sc-library-v5.21.0-release"
+chmod +x install_and_push_sustainable_catalyst_library_v5_21_0_macos.sh
+./install_and_push_sustainable_catalyst_library_v5_21_0_macos.sh "$HOME/Downloads/sustainable-catalyst-library"
+
+BACKEND
+scp -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes sustainable-catalyst-library-backend-v2.32.0.zip upgrade_library_backend_v2_32_0_contabo.sh catalystadmin@94.72.113.77:/tmp/
+ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes catalystadmin@94.72.113.77
+cd /tmp
+chmod +x upgrade_library_backend_v2_32_0_contabo.sh
+./upgrade_library_backend_v2_32_0_contabo.sh /tmp/sustainable-catalyst-library-backend-v2.32.0.zip

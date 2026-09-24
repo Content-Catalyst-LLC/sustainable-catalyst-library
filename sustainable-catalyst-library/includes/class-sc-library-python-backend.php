@@ -227,6 +227,11 @@ final class SC_Library_Python_Backend {
                 'callback' => [$this, 'proxy_publication_corpus_knowledge_map'],
             ],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-visual-session-package', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_visual_session_package'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-knowledge-map', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
@@ -481,6 +486,51 @@ final class SC_Library_Python_Backend {
         $status = $ok ? 200 : (int) ($result['transport']['http_status'] ?? 0);
         if ($status < 400) { $status = 502; }
         return new WP_REST_Response($result, $ok ? 200 : $status);
+    }
+
+    public function proxy_publication_visual_session_package(WP_REST_Request $request) {
+        $json = $request->get_json_params();
+        $json = is_array($json) ? $json : [];
+        $corpus = isset($json['corpus_request']) && is_array($json['corpus_request']) ? $json['corpus_request'] : [];
+        $max_publications = min(1000, max(1, (int) ($corpus['max_publications'] ?? 250)));
+        $record_ids = isset($corpus['record_ids']) && is_array($corpus['record_ids']) ? array_values(array_filter(array_map(static fn($v) => sanitize_text_field((string) $v), $corpus['record_ids']))) : [];
+        if (!$record_ids && class_exists('SC_Library_Publications')) {
+            $publication_manifest = new SC_Library_Publications();
+            $record_ids = $publication_manifest->publication_record_ids($max_publications);
+        }
+        $body = [
+            'corpus_request' => [
+                'source_key' => sanitize_text_field((string) ($corpus['source_key'] ?? 'wordpress-main')) ?: 'wordpress-main',
+                'object_type' => sanitize_key((string) ($corpus['object_type'] ?? '')),
+                'record_ids' => array_slice($record_ids, 0, 1000),
+                'include_citations' => true,
+                'include_semantic_similarity' => true,
+                'semantic_threshold' => max(0.0, min(1.0, (float) ($corpus['semantic_threshold'] ?? 0.72))),
+                'max_publications' => $max_publications,
+                'max_topics_per_publication' => min(100, max(1, (int) ($corpus['max_topics_per_publication'] ?? 36))),
+            ],
+            'visual_state' => isset($json['visual_state']) && is_array($json['visual_state']) ? $json['visual_state'] : [],
+            'session_name' => sanitize_text_field((string) ($json['session_name'] ?? '')),
+            'note' => sanitize_textarea_field((string) ($json['note'] ?? '')),
+            'target_workspace' => !empty($json['target_workspace']),
+        ];
+        if (!self::configured()) {
+            return new WP_REST_Response(['schema'=>'sc-library-visual-research-session/1.0','error'=>'Library backend not configured'], 503);
+        }
+        $response = wp_remote_post(self::base_url() . '/v1/publication-knowledge-maps/session-package', [
+            'timeout' => max(self::timeout(), 45),
+            'redirection' => 2,
+            'headers' => ['Accept'=>'application/json','Content-Type'=>'application/json'],
+            'body' => wp_json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            'data_format' => 'body',
+        ]);
+        if (is_wp_error($response)) {
+            return new WP_REST_Response(['schema'=>'sc-library-visual-research-session/1.0','error'=>$response->get_error_message()], 502);
+        }
+        $code=(int) wp_remote_retrieve_response_code($response);
+        $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>'sc-library-visual-research-session/1.0','error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
     }
 
     public static function publication_knowledge_map(string $record_id, float $semantic_threshold = 0.72, int $max_neighbors = 40, int $max_topics_per_publication = 36): array {

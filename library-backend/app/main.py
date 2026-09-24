@@ -33,6 +33,7 @@ from .publication_visualizations import (
 )
 from .publication_knowledge_maps import build_publication_knowledge_map, knowledge_map_readiness
 from .publication_corpus_maps import build_publication_corpus_knowledge_map
+from .visual_research_sessions import build_visual_research_session_package
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -287,6 +288,9 @@ def health() -> dict[str, Any]:
             "publication_renderer_visibility_repair": True,
             "publication_4d_terrain_recovery": True,
             "publication_peak_preserving_terrain_surface": True,
+            "publication_reproducible_visual_sessions": True,
+            "publication_visual_session_export": True,
+            "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
             "publication_corpus_live_library_records": True,
@@ -2170,6 +2174,35 @@ def publication_corpus_knowledge_maps_post(payload: dict[str, Any]) -> dict[str,
         semantic_threshold=float(payload.get("semantic_threshold", 0.72)),
         max_publications=int(payload.get("max_publications", 250)),
         max_topics_per_publication=int(payload.get("max_topics_per_publication", 36)),
+    )
+
+
+@app.post("/v1/publication-knowledge-maps/session-package")
+def publication_visual_session_package(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus_request = payload.get("corpus_request") if isinstance(payload.get("corpus_request"), dict) else {}
+    record_ids_raw = corpus_request.get("record_ids") or []
+    if isinstance(record_ids_raw, str):
+        record_ids = [x.strip() for x in record_ids_raw.split(",") if x.strip()]
+    elif isinstance(record_ids_raw, list):
+        record_ids = [str(x).strip() for x in record_ids_raw if str(x).strip()]
+    else:
+        record_ids = []
+    corpus = build_publication_corpus_knowledge_map(
+        source_key=str(corpus_request.get("source_key") or "wordpress-main"),
+        object_type=str(corpus_request.get("object_type") or ""),
+        record_ids=record_ids[:1000],
+        include_citations=bool(corpus_request.get("include_citations", True)),
+        include_semantic_similarity=bool(corpus_request.get("include_semantic_similarity", True)),
+        semantic_threshold=float(corpus_request.get("semantic_threshold", 0.72)),
+        max_publications=int(corpus_request.get("max_publications", 250)),
+        max_topics_per_publication=int(corpus_request.get("max_topics_per_publication", 36)),
+    )
+    return build_visual_research_session_package(
+        corpus,
+        payload.get("visual_state") if isinstance(payload.get("visual_state"), dict) else {},
+        session_name=str(payload.get("session_name") or ""),
+        note=str(payload.get("note") or ""),
+        target_workspace=bool(payload.get("target_workspace", False)),
     )
 
 
