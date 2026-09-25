@@ -1,0 +1,8 @@
+Knowledge Library v5.22.0 — Visual Evidence Traceability & Source Drilldown
+Backend v2.33.0
+Validation: PASS
+Integrated tests: 107/107 passed
+Python compileall: PASS
+JavaScript syntax: PASS
+PHP lint: PASS where available
+Shell validation: PASS

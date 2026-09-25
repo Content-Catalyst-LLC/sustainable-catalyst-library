@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.21.0 — Reproducible Visual Research Sessions & Workspace Handoff.
+ * v5.22.0 — Visual Evidence Traceability & Source Drilldown.
  *
  * Renders an interactive analytical graph from the Library Python backend.
  * Relationships remain typed by their actual basis: citation, reviewed concept
  * association, source-span co-occurrence, or real stored-embedding similarity.
  */
 final class SC_Library_Knowledge_Landscape {
-    public const VERSION = '5.21.0';
+    public const VERSION = '5.22.0';
     public const SHORTCODE = 'sc_library_knowledge_landscape';
 
     public function register_hooks(): void {
@@ -18,14 +18,14 @@ final class SC_Library_Knowledge_Landscape {
 
     private function enqueue_assets(): void {
         wp_enqueue_style(
-            'sc-library-knowledge-landscape-v5210',
-            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5210.css',
+            'sc-library-knowledge-landscape-v5220',
+            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5220.css',
             [],
             self::VERSION
         );
         wp_enqueue_script(
-            'sc-library-knowledge-landscape-v5210',
-            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5210.js',
+            'sc-library-knowledge-landscape-v5220',
+            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5220.js',
             [],
             self::VERSION,
             true
@@ -105,6 +105,7 @@ final class SC_Library_Knowledge_Landscape {
                 'max_topics_per_publication' => $topics,
                 'timeout_ms' => 90000,
                 'session_endpoint' => esc_url_raw(rest_url(SC_Library_Python_Backend::REST_NAMESPACE . '/backend/publication-visual-session-package')),
+                'evidence_trace_endpoint' => esc_url_raw(rest_url(SC_Library_Python_Backend::REST_NAMESPACE . '/backend/publication-visual-evidence-trace')),
             ];
             $nodes = [];
         }
@@ -246,6 +247,12 @@ final class SC_Library_Knowledge_Landscape {
                     <div class="sc-kl__inspector" data-sc-kl-inspector>
                         <p class="sc-kl__muted"><?php esc_html_e('Select a node to inspect its research context, provenance, and relationship metrics.', 'sustainable-catalyst-library'); ?></p>
                     </div>
+                    <div class="sc-kl__evidence-trace" data-sc-kl-evidence-trace>
+                        <div class="sc-kl__panel-title sc-kl__panel-title--secondary"><?php esc_html_e('Evidence Trace', 'sustainable-catalyst-library'); ?></div>
+                        <p class="sc-kl__muted"><?php esc_html_e('Select a topic, publication, region, or relationship, then trace why it appears in the visual model back to source records, passages, citations, and reviewed research candidates.', 'sustainable-catalyst-library'); ?></p>
+                        <button type="button" data-sc-kl-trace><?php esc_html_e('Trace selection to sources', 'sustainable-catalyst-library'); ?></button>
+                        <div class="sc-kl__trace-results" data-sc-kl-trace-results aria-live="polite"><span class="sc-kl__muted"><?php esc_html_e('No visual selection traced yet.', 'sustainable-catalyst-library'); ?></span></div>
+                    </div>
                     <div class="sc-kl__panel-title sc-kl__panel-title--secondary"><?php esc_html_e('Linked Query State', 'sustainable-catalyst-library'); ?></div>
                     <div class="sc-kl__query-state" data-sc-kl-query-summary>
                         <p class="sc-kl__muted"><?php esc_html_e('Selections made in any scientific view will appear here and propagate to the others.', 'sustainable-catalyst-library'); ?></p>
@@ -273,6 +280,7 @@ final class SC_Library_Knowledge_Landscape {
                         <div><dt><?php esc_html_e('4D terrain', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Measured topology + selectable Z + time', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Linked views', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Shared deterministic query state', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Visual query', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Highlight or isolate; no source mutation', 'sustainable-catalyst-library'); ?></dd></div>
+                        <div><dt><?php esc_html_e('Evidence trace', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Source records + passages + explicit citations + reviewed candidates', 'sustainable-catalyst-library'); ?></dd></div>
                     </dl>
                     <div class="sc-kl__integrity">
                         <strong><?php esc_html_e('Interpretation boundary', 'sustainable-catalyst-library'); ?></strong>

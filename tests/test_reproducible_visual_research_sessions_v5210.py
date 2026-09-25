@@ -4,13 +4,13 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_release_identity_and_assets():
     plugin=(ROOT/'sustainable-catalyst-library/sustainable-catalyst-library.php').read_text()
     cls=(ROOT/'sustainable-catalyst-library/includes/class-sc-library-knowledge-landscape.php').read_text()
-    assert 'Version: 5.21.0' in plugin
-    assert "public const VERSION = '5.21.0'" in cls
-    assert 'sc-library-knowledge-landscape-v5210' in cls
+    assert 'reproducible visual research sessions' in plugin.lower()
+    assert 'data-sc-kl-session-save' in cls
+    assert 'data-sc-kl-session-workspace' in cls
 
 def test_session_ui_and_workspace_package_are_present():
     php=(ROOT/'sustainable-catalyst-library/includes/class-sc-library-knowledge-landscape.php').read_text()
-    js=(ROOT/'sustainable-catalyst-library/assets/js/sc-library-knowledge-landscape-v5210.js').read_text()
+    js=(ROOT/'sustainable-catalyst-library/assets/js/sc-library-knowledge-landscape-v5220.js').read_text()
     assert 'data-sc-kl-session-save' in php
     assert 'data-sc-kl-session-restore' in php
     assert 'data-sc-kl-session-download' in php

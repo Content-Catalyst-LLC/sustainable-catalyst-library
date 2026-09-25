@@ -1,0 +1,8 @@
+Knowledge Library v5.22.0 — Visual Evidence Traceability & Source Drilldown
+Backend v2.33.0
+
+Git installer:
+./install_and_push_sustainable_catalyst_library_v5_22_0_macos.sh "$HOME/Downloads/sustainable-catalyst-library"
+
+Backend installer:
+./upgrade_library_backend_v2_33_0_contabo.sh /tmp/sustainable-catalyst-library-backend-v2.33.0.zip
