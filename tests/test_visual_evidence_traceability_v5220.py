@@ -6,9 +6,9 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_release_identity_and_assets():
     plugin=(ROOT/'sustainable-catalyst-library/sustainable-catalyst-library.php').read_text()
     landscape=(ROOT/'sustainable-catalyst-library/includes/class-sc-library-knowledge-landscape.php').read_text()
-    assert 'Version: 5.22.0' in plugin
-    assert "public const VERSION = '5.22.0'" in landscape
-    assert 'sc-library-knowledge-landscape-v5220' in landscape
+    assert 'Visual Evidence Traceability' in (ROOT/'VISUAL_EVIDENCE_TRACEABILITY_v5.22.0.md').read_text()
+    assert 'data-sc-kl-evidence-trace' in landscape
+    assert 'sc-library-knowledge-landscape-v5230' in landscape
 
 
 def test_wordpress_evidence_trace_proxy_and_ui():

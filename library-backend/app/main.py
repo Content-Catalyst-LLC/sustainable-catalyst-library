@@ -293,6 +293,8 @@ def health() -> dict[str, Any]:
             "publication_visual_session_export": True,
             "publication_visual_evidence_trace": True,
             "publication_source_drilldown": True,
+            "publication_evidence_weighted_findings_claims": True,
+            "publication_explicit_reviewed_contradiction_overlays": True,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",

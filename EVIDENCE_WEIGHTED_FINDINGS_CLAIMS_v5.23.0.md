@@ -1,0 +1,3 @@
+# Knowledge Library v5.23.0 — Evidence-Weighted Findings, Claims & Contradiction Overlays
+
+Adds accepted, source-bound finding and claim candidates to the publication knowledge landscape. Visual prominence uses an evidence **traceability** weight (candidate confidence + source locator + current source hash + named reviewer); it is not a truth score. Support/contradiction edges are emitted only when reviewed candidate metadata explicitly identifies a target and relation. Absence of a contradiction edge does not imply agreement. Platform Core remains the authority for governed claims/findings and cross-product research objects.

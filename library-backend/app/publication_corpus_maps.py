@@ -7,6 +7,7 @@ import json
 
 from .db import get_pool
 from .publication_knowledge_maps import _add_edge, _add_node, _as_list, _cosine, _topic_id
+from .evidence_weighted_overlays import build_evidence_weighted_overlays
 
 CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
 
@@ -689,6 +690,32 @@ def build_publication_corpus_knowledge_map(
                                 truth_assertion=False, provider=a.get("provider"), model=a.get("model"),
                             )
 
+    # v5.23.0: reviewed findings/claims become source-bound analytical overlay nodes.
+    # Relationship bases: reviewed-finding-evidence, reviewed-claim-evidence,
+    # reviewed-explicit-support, reviewed-explicit-contradiction.
+    # Visual weight is traceability, never truth confidence. Contradiction/support
+    # edges appear only when an accepted candidate explicitly encodes a reviewed target.
+    research_overlays = build_evidence_weighted_overlays(records)
+    for item in research_overlays.get("items") or []:
+        nid=str(item.get("id") or "")
+        rid=str(item.get("record_id") or "")
+        if not nid or rid not in records:
+            continue
+        _add_node(nodes,nid,str(item.get("kind") or "research-object"),str(item.get("label") or nid),
+                  record_id=rid, reviewed=True, candidate_id=item.get("candidate_id"),
+                  candidate_confidence=item.get("candidate_confidence"),
+                  evidence_traceability_weight=item.get("evidence_traceability_weight"),
+                  source_locator=item.get("source_locator"), source_hash_current=item.get("source_hash_current"),
+                  core_operation=item.get("core_operation"), core_outbox_event_id=item.get("core_outbox_event_id"),
+                  truth_determined=False)
+        _add_edge(edges,rid,nid,f"reviewed-{item.get('kind')}-evidence",directed=False,
+                  weight=max(.05,float(item.get("evidence_traceability_weight") or 0.0)),
+                  evidence_count=1, analytical=False, truth_assertion=False, source_locator=item.get("source_locator"))
+    for rel in research_overlays.get("relations") or []:
+        _add_edge(edges,str(rel.get("source")),str(rel.get("target")),str(rel.get("relationship_basis")),directed=False,
+                  weight=max(.05,float(rel.get("weight") or 0.0)), evidence_count=1, analytical=True,
+                  truth_assertion=False, explicit_reviewed_relation=True)
+
     edge_items = list(edges.values())
     degree: dict[str, float] = defaultdict(float)
     citations: dict[str, int] = defaultdict(int)
@@ -766,6 +793,7 @@ def build_publication_corpus_knowledge_map(
         "analytical_dimensions": multi["analytical_dimensions"],
         "knowledge_terrain_4d": terrain,
         "visual_query": visual_query,
+        "research_overlays": research_overlays,
         "reproducibility": {
             "schema": "sc-library-visual-corpus-reproducibility/1.0",
             "corpus_fingerprint_sha256": _corpus_fingerprint,
@@ -783,6 +811,8 @@ def build_publication_corpus_knowledge_map(
             {"key": "relationship-matrix", "label": "Relationship Matrix", "purpose": "Pairwise analytical relationship inspection"},
             {"key": "topic-regions", "label": "Topic Regions", "purpose": "Corpus-scale topic regions from repeated measured co-occurrence"},
             {"key": "temporal-dynamics", "label": "Temporal Dynamics", "purpose": "Publication and topic evolution through time"},
+            {"key": "findings-claims", "label": "Findings & Claims", "purpose": "Accepted source-bound findings and claims over the publication corpus"},
+            {"key": "contradiction-overlay", "label": "Contradiction Overlay", "purpose": "Only explicitly reviewed contradiction/support relations between accepted research objects"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
@@ -815,6 +845,8 @@ def build_publication_corpus_knowledge_map(
                 "publication-time-binning",
                 "deterministic-4d-knowledge-terrain",
                 "linked-view-deterministic-crossfilter",
+                "accepted-finding-claim-overlay",
+                "explicit-reviewed-support-contradiction-overlay",
             ],
             "governed_visual_reasoning_authority": "platform-core",
         },
@@ -828,5 +860,8 @@ def build_publication_corpus_knowledge_map(
             "publication_library_manifest_applied": selection_mode == "publication-library-manifest",
             "non_publication_wordpress_types_excluded": True,
             "visual_query_selection_is_research_conclusion": False,
+            "finding_claim_overlays_are_accepted_candidates_only": True,
+            "overlay_weight_is_truth_score": False,
+            "contradiction_requires_explicit_reviewed_relation": True,
         },
     }

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.22.0 with visual evidence traceability and source drilldown, reproducible visual research sessions, portable analytical state, explicit Workspace handoff packages, linked scientific views, 4D terrain, asynchronous Publication Library corpus loading, and canonical Publication Library corpus scoping.
- * Version: 5.22.0
+ * Description: Sustainable Catalyst Library v5.23.0.1 with local validation environment repair preserving evidence-weighted reviewed finding/claim overlays, explicit contradiction/support relations, visual evidence traceability, reproducible visual research sessions, linked scientific views, 4D terrain, asynchronous Publication Library corpus loading, and canonical Publication Library corpus scoping.
+ * Version: 5.23.0.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.22.0');
+define('SC_LIBRARY_VERSION', '5.23.0.1');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
