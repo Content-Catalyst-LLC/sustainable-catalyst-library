@@ -221,6 +221,7 @@ def health() -> dict[str, Any]:
             "provenance": True,
             "knowledge_graph": True,
             "platform_core_research_bridge": True,
+            "release_certification_alignment": True,
             "platform_core_governed_promotion": True,
             "platform_core_idempotent_outbox": True,
             "platform_core_durable_bindings": True,

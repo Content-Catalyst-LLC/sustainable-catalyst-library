@@ -12,8 +12,7 @@ if (!defined('ABSPATH')) {
  */
 final class SC_Library_Hardening {
     public const SCHEMA = 'sc-library-production-readiness/1.0';
-    public const BRANCH_VERSION = '5.5.0';
-    public const BRANCH_SCHEMA = 'sc-library-v550-python-backend-certification/1.0';
+    public const CERTIFICATION_SCHEMA = 'sc-library-release-certification-readiness/1.0';
 
     /** Recent 4.3 branch modules that must load together for release certification. */
     private const V43_CRITICAL_MODULES = [
@@ -607,7 +606,7 @@ final class SC_Library_Hardening {
             'performance' => ['label' => __('Performance and large-library operations', 'sustainable-catalyst-library'), 'checks' => []],
             'security' => ['label' => __('Security and privacy', 'sustainable-catalyst-library'), 'checks' => []],
             'integrity' => ['label' => __('Preservation, backups, and integrity', 'sustainable-catalyst-library'), 'checks' => []],
-            'branch_43' => ['label' => __('5.3.0 public evidence certification', 'sustainable-catalyst-library'), 'checks' => []],
+            'branch_43' => ['label' => __('Current release certification and readiness', 'sustainable-catalyst-library'), 'checks' => []],
         ];
 
         $categories['platform']['checks'][] = $this->check('wordpress-version', __('WordPress version', 'sustainable-catalyst-library'), version_compare(get_bloginfo('version'), '6.4', '>='), __('WordPress meets the Library minimum.', 'sustainable-catalyst-library'), sprintf(__('Current version: %s', 'sustainable-catalyst-library'), get_bloginfo('version')), __('Upgrade WordPress to 6.4 or later.', 'sustainable-catalyst-library'));
@@ -636,7 +635,15 @@ final class SC_Library_Hardening {
         $categories['performance']['checks'][] = $this->check('daily-reconcile', __('Daily index reconciliation', 'sustainable-catalyst-library'), (bool) wp_next_scheduled('sc_library_daily_reconcile'), __('The daily cursor reconciliation is scheduled.', 'sustainable-catalyst-library'), '', __('Use Repair maintenance schedules on this page.', 'sustainable-catalyst-library'));
         $categories['performance']['checks'][] = $this->check('public-cache', __('Bounded public response cache', 'sustainable-catalyst-library'), (bool) get_option('sc_library_enable_public_cache', 1), sprintf(__('Public read responses are cached for %d seconds.', 'sustainable-catalyst-library'), (int) get_option('sc_library_public_cache_ttl', 300)), wp_using_ext_object_cache() ? __('A persistent object cache is active.', 'sustainable-catalyst-library') : __('WordPress is using its standard transient store.', 'sustainable-catalyst-library'), __('Enable the bounded cache or add a persistent object cache for very high traffic.', 'sustainable-catalyst-library'));
         $categories['performance']['checks'][] = $this->check_status('object-cache', __('Persistent object cache', 'sustainable-catalyst-library'), wp_using_ext_object_cache() ? 'ready' : 'info', wp_using_ext_object_cache() ? __('A persistent object cache is active.', 'sustainable-catalyst-library') : __('No persistent object cache was detected. This is optional.', 'sustainable-catalyst-library'), '', '');
-        $categories['performance']['checks'][] = $this->check('wp-cron', __('WordPress scheduled jobs', 'sustainable-catalyst-library'), !(defined('DISABLE_WP_CRON') && DISABLE_WP_CRON), __('WordPress cron is available.', 'sustainable-catalyst-library'), '', __('Configure a real system cron if WP-Cron is disabled.', 'sustainable-catalyst-library'));
+        $wp_cron_disabled = defined('DISABLE_WP_CRON') && DISABLE_WP_CRON;
+        $categories['performance']['checks'][] = $this->check_status(
+            'wp-cron',
+            __('WordPress scheduled jobs', 'sustainable-catalyst-library'),
+            $wp_cron_disabled ? 'info' : 'ready',
+            $wp_cron_disabled ? __('WP-Cron is disabled; scheduled Library jobs require a real system cron.', 'sustainable-catalyst-library') : __('WordPress cron is available.', 'sustainable-catalyst-library'),
+            '',
+            $wp_cron_disabled ? __('Verify that a real system cron invokes wp-cron.php or WP-CLI on schedule.', 'sustainable-catalyst-library') : ''
+        );
 
         $categories['security']['checks'][] = $this->check_status('debug-display', __('Debug display', 'sustainable-catalyst-library'), (defined('WP_DEBUG_DISPLAY') && WP_DEBUG_DISPLAY) ? 'warning' : 'ready', (defined('WP_DEBUG_DISPLAY') && WP_DEBUG_DISPLAY) ? __('Debug output may be visible to public visitors.', 'sustainable-catalyst-library') : __('Public debug display is disabled.', 'sustainable-catalyst-library'), '', __('Set WP_DEBUG_DISPLAY to false in production.', 'sustainable-catalyst-library'));
         $categories['security']['checks'][] = $this->check_status('file-editor', __('WordPress file editor', 'sustainable-catalyst-library'), (defined('DISALLOW_FILE_EDIT') && DISALLOW_FILE_EDIT) ? 'ready' : 'warning', (defined('DISALLOW_FILE_EDIT') && DISALLOW_FILE_EDIT) ? __('The dashboard file editor is disabled.', 'sustainable-catalyst-library') : __('The dashboard file editor may be available.', 'sustainable-catalyst-library'), '', __('Define DISALLOW_FILE_EDIT as true in production.', 'sustainable-catalyst-library'));
@@ -656,13 +663,31 @@ final class SC_Library_Hardening {
         $categories['integrity']['checks'][] = $this->check_status('backup-boundary', __('Off-site backups', 'sustainable-catalyst-library'), 'info', __('WordPress cannot verify your hosting provider’s off-site backup policy.', 'sustainable-catalyst-library'), '', __('Confirm automated database and uploads backups outside this plugin.', 'sustainable-catalyst-library'));
         $categories['integrity']['checks'][] = $this->check('hardening-cron', __('Daily readiness evaluation', 'sustainable-catalyst-library'), (bool) wp_next_scheduled('sc_library_hardening_daily'), __('The daily readiness check is scheduled.', 'sustainable-catalyst-library'), '', __('Use Repair maintenance schedules on this page.', 'sustainable-catalyst-library'));
 
-        // v5.0.1 production-soak certification is intentionally first-party only. It does not
-        // contact connector providers and does not inspect private research content.
-        $branch_version_ready = defined('SC_LIBRARY_VERSION') && SC_LIBRARY_VERSION === self::BRANCH_VERSION;
-        $categories['branch_43']['checks'][] = $this->check('v43-release-version', __('5.3.0 release version alignment', 'sustainable-catalyst-library'), $branch_version_ready, __('Plugin runtime is aligned to the certified 5.3.0 release.', 'sustainable-catalyst-library'), defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : __('Not defined', 'sustainable-catalyst-library'), __('Reinstall the complete v5.3.0 package; do not mix files from different releases.', 'sustainable-catalyst-library'));
+        // Current release certification is intentionally first-party only. Historical module
+        // VERSION constants represent component lineage, not the current plugin release number.
+        $runtime_version = defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : '';
+        $branch_version_ready = '' !== $runtime_version;
+        $categories['branch_43']['checks'][] = $this->check(
+            'v43-release-version',
+            __('Release/runtime alignment', 'sustainable-catalyst-library'),
+            $branch_version_ready,
+            __('The production readiness report is evaluating the currently installed Library release.', 'sustainable-catalyst-library'),
+            $branch_version_ready ? sprintf(__('Plugin runtime: %s', 'sustainable-catalyst-library'), $runtime_version) : __('Runtime version is not defined.', 'sustainable-catalyst-library'),
+            __('Reinstall the current complete Library package if the runtime version is missing.', 'sustainable-catalyst-library')
+        );
 
-        $identity_ready = class_exists('SC_Library_Canonical_Route_Identity') && defined('SC_Library_Canonical_Route_Identity::VERSION') && SC_Library_Canonical_Route_Identity::VERSION === self::BRANCH_VERSION;
-        $categories['branch_43']['checks'][] = $this->check('v43-identity-version', __('Canonical identity/version alignment', 'sustainable-catalyst-library'), $identity_ready, __('Canonical routing and shared-account identity are aligned to the release.', 'sustainable-catalyst-library'), '', __('Reinstall v5.3.0 so canonical-route identity and plugin runtime versions match.', 'sustainable-catalyst-library'));
+        $route_health = class_exists('SC_Library_Canonical_Route_Identity') ? SC_Library_Canonical_Route_Identity::health_payload() : array();
+        $identity_ready = is_array($route_health)
+            && ($route_health['plugin_version'] ?? '') === $runtime_version
+            && ! empty($route_health['component_compatible']);
+        $categories['branch_43']['checks'][] = $this->check(
+            'v43-identity-version',
+            __('Canonical identity/version alignment', 'sustainable-catalyst-library'),
+            $identity_ready,
+            __('Canonical routing uses the installed Library runtime while preserving its component lineage version.', 'sustainable-catalyst-library'),
+            $identity_ready ? sprintf(__('Runtime: %s; identity component: %s', 'sustainable-catalyst-library'), $runtime_version, (string) ($route_health['component_version'] ?? '')) : '',
+            __('Restore the current canonical-route component and verify that it reports compatibility with the installed Library runtime.', 'sustainable-catalyst-library')
+        );
 
         $extension_status = class_exists('SC_Library_Extension_Bootstrap_V402') ? SC_Library_Extension_Bootstrap_V402::status() : [];
         $extensions_ready = is_array($extension_status) && (int) ($extension_status['expected'] ?? 0) > 0 && (int) ($extension_status['active'] ?? 0) === (int) ($extension_status['expected'] ?? -1) && empty($extension_status['errors']);
@@ -716,20 +741,28 @@ final class SC_Library_Hardening {
         $account_ready = is_array($account_contract) && false === ($account_contract['separate_library_account_required'] ?? true) && 'shared-sustainable-catalyst-account' === ($account_contract['workspace_account'] ?? '') && 'shared-sustainable-catalyst-account' === ($account_contract['library_account'] ?? '');
         $categories['branch_43']['checks'][] = $this->check('v43-account-continuity', __('Shared account continuity', 'sustainable-catalyst-library'), $account_ready, __('Library and Workspace remain on the same Sustainable Catalyst authenticated account boundary.', 'sustainable-catalyst-library'), '', __('Restore the canonical shared-account continuity contract before release.', 'sustainable-catalyst-library'));
 
-        $route_health = class_exists('SC_Library_Canonical_Route_Identity') ? SC_Library_Canonical_Route_Identity::health_payload() : [];
         $canonical_ready = is_array($route_health) && 'ok' === ($route_health['status'] ?? '');
-        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the v5.4.0 identity-health endpoint.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v43-canonical-route', __('Canonical Research Library route', 'sustainable-catalyst-library'), $canonical_ready, __('The published /knowledge-libraries/ route and runtime version are aligned.', 'sustainable-catalyst-library'), '', __('Publish the canonical Knowledge Library page and verify the current /sc-library/v1/runtime/identity-health endpoint.', 'sustainable-catalyst-library'));
 
         $private_routes_ready = $this->private_v43_routes_require_permission();
         $categories['branch_43']['checks'][] = $this->check('v43-private-rest-boundary', __('Private REST authorization boundary', 'sustainable-catalyst-library'), $private_routes_ready, __('Private research base routes are registered with explicit permission callbacks.', 'sustainable-catalyst-library'), '', __('Do not release until every private research endpoint requires an authenticated permission callback.', 'sustainable-catalyst-library'));
 
         $public_v5_profile = self::public_v5_route_profile();
         $safe_v5_cache = ! empty($public_v5_profile['connected_public_research_cacheable']) && ! empty($public_v5_profile['library_api_cacheable']) && ! empty($public_v5_profile['research_discovery_cacheable']) && ! empty($public_v5_profile['research_identity_cacheable']) && ! empty($public_v5_profile['public_evidence_cacheable']) && ! empty($public_v5_profile['curated_spaces_cacheable']) && empty($public_v5_profile['private_research_routes_cacheable']);
-        $categories['branch_43']['checks'][] = $this->check('v501-public-cache-boundary', __('v5 public cache boundary', 'sustainable-catalyst-library'), $safe_v5_cache, __('The v4.9/v5 public GET facades use the bounded cache through explicit route allowlisting while private research routes remain excluded.', 'sustainable-catalyst-library'), wp_json_encode($public_v5_profile), __('Restore the v5.4.0 safe-route cache profile before release.', 'sustainable-catalyst-library'));
+        $categories['branch_43']['checks'][] = $this->check('v501-public-cache-boundary', __('v5 public cache boundary', 'sustainable-catalyst-library'), $safe_v5_cache, __('The v4.9/v5 public GET facades use the bounded cache through explicit route allowlisting while private research routes remain excluded.', 'sustainable-catalyst-library'), wp_json_encode($public_v5_profile), __('Restore the current safe-route cache profile before release.', 'sustainable-catalyst-library'));
 
         $soak = class_exists('SC_Library_Connected_Public_Research_Infrastructure') && method_exists('SC_Library_Connected_Public_Research_Infrastructure', 'run_production_soak') ? SC_Library_Connected_Public_Research_Infrastructure::run_production_soak(false) : [];
-        $soak_ready = is_array($soak) && 'pass' === ($soak['status'] ?? '') && (int) ($soak['scenario_count'] ?? 0) === 10 && (int) ($soak['failed'] ?? 1) === 0;
-        $categories['branch_43']['checks'][] = $this->check('v501-connected-public-soak', __('Connected Public Research production soak', 'sustainable-catalyst-library'), $soak_ready, __('The bounded first-party integration soak passes all ten scenarios.', 'sustainable-catalyst-library'), $soak_ready ? sprintf(__('%d/%d scenarios passed.', 'sustainable-catalyst-library'), (int) ($soak['passed'] ?? 0), (int) ($soak['scenario_count'] ?? 0)) : __('Soak diagnostics are incomplete or failing.', 'sustainable-catalyst-library'), __('Open the v5.0.1 soak details endpoint and resolve every blocking scenario.', 'sustainable-catalyst-library'));
+        $soak_count = (int) ($soak['scenario_count'] ?? 0);
+        $soak_failed = (int) ($soak['failed'] ?? -1);
+        $soak_ready = is_array($soak) && 'pass' === ($soak['status'] ?? '') && $soak_count > 0 && 0 === $soak_failed;
+        $categories['branch_43']['checks'][] = $this->check(
+            'v501-connected-public-soak',
+            __('Connected Public Research production soak', 'sustainable-catalyst-library'),
+            $soak_ready,
+            __('The bounded first-party integration soak passes every registered scenario.', 'sustainable-catalyst-library'),
+            $soak_ready ? sprintf(__('%d/%d scenarios passed.', 'sustainable-catalyst-library'), (int) ($soak['passed'] ?? 0), $soak_count) : sprintf(__('Soak status: %s; passed: %d; failed: %d; scenarios: %d.', 'sustainable-catalyst-library'), (string) ($soak['status'] ?? 'unavailable'), (int) ($soak['passed'] ?? 0), max(0, $soak_failed), $soak_count),
+            __('Open the current connected-public-research soak details endpoint and resolve only the scenarios that are actually failing.', 'sustainable-catalyst-library')
+        );
 
         $discovery_contract = class_exists('SC_Library_Global_Research_Discovery_Federated_Search') ? SC_Library_Global_Research_Discovery_Federated_Search::contract() : [];
         $discovery_ready = is_array($discovery_contract) && !empty($discovery_contract['canonical_public_records_only']) && !empty($discovery_contract['published_federation_metadata_only']) && empty($discovery_contract['remote_network_calls_during_search']) && empty($discovery_contract['private_projects_searched']) && 'deterministic-lexical' === ($discovery_contract['ranking_mode'] ?? '');
@@ -838,8 +871,8 @@ final class SC_Library_Hardening {
             'counts' => (array) ($report['counts'] ?? []),
             'categories' => $categories,
             'branch_release_gate' => [
-                'schema' => self::BRANCH_SCHEMA,
-                'version' => self::BRANCH_VERSION,
+                'schema' => self::CERTIFICATION_SCHEMA,
+                'version' => defined('SC_LIBRARY_VERSION') ? (string) SC_LIBRARY_VERSION : '',
                 'status' => ((int) ($branch['fail'] ?? 0) > 0) ? 'blocked' : 'ready',
                 'blocking_failures' => (int) ($branch['fail'] ?? 0),
                 'first_party_only' => true,

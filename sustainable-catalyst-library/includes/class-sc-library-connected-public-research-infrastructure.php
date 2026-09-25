@@ -144,7 +144,7 @@ final class SC_Library_Connected_Public_Research_Infrastructure {
     public static function run_production_soak( $include_details = false ) {
         $checks = array();
         $contract = self::contract();
-        $checks[] = self::soak_check( 'release-alignment', 'Release and schema alignment', defined( 'SC_LIBRARY_VERSION' ) && self::VERSION === SC_LIBRARY_VERSION && 0 === strpos( self::SCHEMA, 'sc-library-connected-public-research/' ), self::VERSION );
+        $checks[] = self::soak_check( 'release-alignment', 'Release and schema alignment', defined( 'SC_LIBRARY_VERSION' ) && version_compare( SC_LIBRARY_VERSION, self::VERSION, '>=' ) && 0 === strpos( self::SCHEMA, 'sc-library-connected-public-research/' ), self::VERSION );
         $profiles = self::api_profiles();
         $checks[] = self::soak_check( 'public-api-dependency', 'Public API dependency', class_exists( 'SC_Library_API_Embeds_Interoperability' ) && count( $profiles ) >= 6, sprintf( '%d public object profiles', count( $profiles ) ) );
         $bad_type = self::index_payload( '__invalid_public_type__', '', 1 );

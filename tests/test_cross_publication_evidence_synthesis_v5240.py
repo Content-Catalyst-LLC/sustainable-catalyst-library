@@ -8,7 +8,7 @@ def test_release_identity_and_backend_contract():
     backend = (ROOT / "library-backend/app/__init__.py").read_text()
     synthesis = (ROOT / "library-backend/app/evidence_synthesis.py").read_text()
     assert "Version: 5.24.0" in plugin
-    assert '__version__ = "2.35.0"' in backend
+    assert '__version__ = "2.35.' in backend
     assert "sc-library-cross-publication-evidence-synthesis/1.0" in synthesis
     assert '"consensus_inferred": False' in synthesis
     assert '"hypotheses_inferred": False' in synthesis

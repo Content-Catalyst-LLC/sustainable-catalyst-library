@@ -192,13 +192,15 @@ final class SC_Library_Canonical_Route_Identity {
         $legacy_page = get_page_by_path( self::LEGACY_SLUG, OBJECT, 'page' );
         $version = defined( 'SC_LIBRARY_VERSION' ) ? SC_LIBRARY_VERSION : '';
         $canonical_ready = $canonical_page instanceof WP_Post && 'publish' === $canonical_page->post_status;
-        $version_ready = self::VERSION === $version;
+        $component_compatible = '' !== $version && version_compare($version, '4.3.27', '>=');
 
         return array(
             'schema'              => self::SCHEMA,
             'version'             => self::VERSION,
+            'component_version'   => self::VERSION,
             'plugin_version'      => $version,
-            'status'              => ( $canonical_ready && $version_ready ) ? 'ok' : 'attention',
+            'component_compatible'=> $component_compatible,
+            'status'              => ( $canonical_ready && $component_compatible ) ? 'ok' : 'attention',
             'canonical'           => array(
                 'slug'           => self::CANONICAL_SLUG,
                 'url'            => self::canonical_url(),
