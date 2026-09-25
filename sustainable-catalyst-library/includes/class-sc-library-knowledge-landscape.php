@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.23.0.1 — Local Validation Environment Repair; v5.23.0 analytical behavior preserved.
+ * v5.24.0 — Cross-Publication Evidence Synthesis & Competing Hypotheses.
  *
  * Renders an interactive analytical graph from the Library Python backend.
  * Relationships remain typed by their actual basis: citation, reviewed concept
  * association, source-span co-occurrence, or real stored-embedding similarity.
  */
 final class SC_Library_Knowledge_Landscape {
-    public const VERSION = '5.23.0.1';
+    public const VERSION = '5.24.0';
     public const SHORTCODE = 'sc_library_knowledge_landscape';
 
     public function register_hooks(): void {
@@ -18,14 +18,14 @@ final class SC_Library_Knowledge_Landscape {
 
     private function enqueue_assets(): void {
         wp_enqueue_style(
-            'sc-library-knowledge-landscape-v5230',
-            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5230.css',
+            'sc-library-knowledge-landscape-v5240',
+            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5240.css',
             [],
             self::VERSION
         );
         wp_enqueue_script(
-            'sc-library-knowledge-landscape-v5230',
-            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5230.js',
+            'sc-library-knowledge-landscape-v5240',
+            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5240.js',
             [],
             self::VERSION,
             true
@@ -145,6 +145,8 @@ final class SC_Library_Knowledge_Landscape {
                 <button type="button" data-sc-kl-view="semantic-overlay" <?php disabled(empty($semantic['available'])); ?>><?php esc_html_e('Semantic Overlay', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="findings-claims"><?php esc_html_e('Findings & Claims', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="contradiction-overlay"><?php esc_html_e('Contradictions', 'sustainable-catalyst-library'); ?></button>
+                <button type="button" data-sc-kl-view="evidence-synthesis"><?php esc_html_e('Evidence Synthesis', 'sustainable-catalyst-library'); ?></button>
+                <button type="button" data-sc-kl-view="competing-hypotheses"><?php esc_html_e('Competing Hypotheses', 'sustainable-catalyst-library'); ?></button>
             </nav>
 
             <div class="sc-kl__workspace">
@@ -156,6 +158,7 @@ final class SC_Library_Knowledge_Landscape {
                         <label><input type="checkbox" checked data-sc-kl-node-kind="topic"> <span class="sc-kl__dot is-topic"></span><?php esc_html_e('Topics & concepts', 'sustainable-catalyst-library'); ?></label>
                         <label><input type="checkbox" checked data-sc-kl-node-kind="finding"> <span class="sc-kl__dot is-finding"></span><?php esc_html_e('Reviewed findings', 'sustainable-catalyst-library'); ?></label>
                         <label><input type="checkbox" checked data-sc-kl-node-kind="claim"> <span class="sc-kl__dot is-claim"></span><?php esc_html_e('Accepted claims', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-node-kind="hypothesis"> <span class="sc-kl__dot is-hypothesis"></span><?php esc_html_e('Explicit hypotheses', 'sustainable-catalyst-library'); ?></label>
                     </fieldset>
                     <fieldset class="sc-kl__fieldset">
                         <legend><?php esc_html_e('Relationships', 'sustainable-catalyst-library'); ?></legend>
@@ -169,6 +172,7 @@ final class SC_Library_Knowledge_Landscape {
                         <label><input type="checkbox" checked data-sc-kl-edge-basis="reviewed-claim-evidence"> <?php esc_html_e('Claim evidence', 'sustainable-catalyst-library'); ?></label>
                         <label><input type="checkbox" checked data-sc-kl-edge-basis="reviewed-explicit-support"> <?php esc_html_e('Reviewed support', 'sustainable-catalyst-library'); ?></label>
                         <label><input type="checkbox" checked data-sc-kl-edge-basis="reviewed-explicit-contradiction"> <?php esc_html_e('Reviewed contradiction', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-edge-basis="explicit-hypothesis-membership"> <?php esc_html_e('Explicit hypothesis membership', 'sustainable-catalyst-library'); ?></label>
                     </fieldset>
                     <div class="sc-kl__terrain-controls" data-sc-kl-terrain-controls hidden>
                         <div class="sc-kl__control">
@@ -261,6 +265,16 @@ final class SC_Library_Knowledge_Landscape {
                         <button type="button" data-sc-kl-trace><?php esc_html_e('Trace selection to sources', 'sustainable-catalyst-library'); ?></button>
                         <div class="sc-kl__trace-results" data-sc-kl-trace-results aria-live="polite"><span class="sc-kl__muted"><?php esc_html_e('No visual selection traced yet.', 'sustainable-catalyst-library'); ?></span></div>
                     </div>
+                    <div class="sc-kl__synthesis-summary" data-sc-kl-synthesis-summary>
+                        <div class="sc-kl__panel-title sc-kl__panel-title--secondary"><?php esc_html_e('Cross-Publication Synthesis', 'sustainable-catalyst-library'); ?></div>
+                        <p class="sc-kl__muted"><?php esc_html_e('Reviewed support/contradiction structures are descriptive. Hypotheses appear only when explicitly encoded in reviewed metadata; Platform Core remains the durable synthesis authority.', 'sustainable-catalyst-library'); ?></p>
+                        <div class="sc-kl__synthesis-metrics">
+                            <span><strong data-sc-kl-synthesis-metric="support_structure_count">0</strong> support structures</span>
+                            <span><strong data-sc-kl-synthesis-metric="explicit_contradiction_relation_count">0</strong> contradictions</span>
+                            <span><strong data-sc-kl-synthesis-metric="explicit_hypothesis_count">0</strong> explicit hypotheses</span>
+                            <span><strong data-sc-kl-synthesis-metric="explicit_competing_hypothesis_set_count">0</strong> competing sets</span>
+                        </div>
+                    </div>
                     <div class="sc-kl__panel-title sc-kl__panel-title--secondary"><?php esc_html_e('Linked Query State', 'sustainable-catalyst-library'); ?></div>
                     <div class="sc-kl__query-state" data-sc-kl-query-summary>
                         <p class="sc-kl__muted"><?php esc_html_e('Selections made in any scientific view will appear here and propagate to the others.', 'sustainable-catalyst-library'); ?></p>
@@ -289,6 +303,7 @@ final class SC_Library_Knowledge_Landscape {
                         <div><dt><?php esc_html_e('Linked views', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Shared deterministic query state', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Visual query', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Highlight or isolate; no source mutation', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Evidence trace', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Source records + passages + explicit citations + reviewed candidates', 'sustainable-catalyst-library'); ?></dd></div>
+                        <div><dt><?php esc_html_e('Evidence synthesis', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Accepted reviewed relations; no inferred consensus or hypotheses', 'sustainable-catalyst-library'); ?></dd></div>
                     </dl>
                     <div class="sc-kl__integrity">
                         <strong><?php esc_html_e('Interpretation boundary', 'sustainable-catalyst-library'); ?></strong>

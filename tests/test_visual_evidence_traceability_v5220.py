@@ -8,7 +8,8 @@ def test_release_identity_and_assets():
     landscape=(ROOT/'sustainable-catalyst-library/includes/class-sc-library-knowledge-landscape.php').read_text()
     assert 'Visual Evidence Traceability' in (ROOT/'VISUAL_EVIDENCE_TRACEABILITY_v5.22.0.md').read_text()
     assert 'data-sc-kl-evidence-trace' in landscape
-    assert 'sc-library-knowledge-landscape-v5230' in landscape
+    assert 'data-sc-kl-evidence-trace' in landscape
+    assert 'sc-library-knowledge-landscape-v5240' in landscape
 
 
 def test_wordpress_evidence_trace_proxy_and_ui():

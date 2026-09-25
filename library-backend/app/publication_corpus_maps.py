@@ -8,6 +8,7 @@ import json
 from .db import get_pool
 from .publication_knowledge_maps import _add_edge, _add_node, _as_list, _cosine, _topic_id
 from .evidence_weighted_overlays import build_evidence_weighted_overlays
+from .evidence_synthesis import build_cross_publication_synthesis
 
 CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
 
@@ -716,6 +717,31 @@ def build_publication_corpus_knowledge_map(
                   weight=max(.05,float(rel.get("weight") or 0.0)), evidence_count=1, analytical=True,
                   truth_assertion=False, explicit_reviewed_relation=True)
 
+    # v5.24.0: cross-publication synthesis stays descriptive in the Library.
+    # Hypotheses are visualized only when accepted reviewed candidates carry
+    # explicit hypothesis metadata; competition is never inferred from topology.
+    evidence_synthesis = build_cross_publication_synthesis(research_overlays, records)
+    for hypothesis in evidence_synthesis.get("hypotheses") or []:
+        hid = str(hypothesis.get("id") or "")
+        if not hid:
+            continue
+        _add_node(
+            nodes, hid, "hypothesis", str(hypothesis.get("label") or hid),
+            hypothesis_key=hypothesis.get("hypothesis_key"),
+            competing_set=hypothesis.get("competing_set"),
+            member_count=len(hypothesis.get("member_ids") or []),
+            publication_count=len(hypothesis.get("publication_record_ids") or []),
+            explicit_metadata_only=True, truth_determined=False,
+        )
+    for rel in evidence_synthesis.get("hypothesis_membership_edges") or []:
+        _add_edge(
+            edges, str(rel.get("source")), str(rel.get("target")),
+            "explicit-hypothesis-membership", directed=False,
+            weight=max(.05, float(rel.get("weight") or 0.0)), evidence_count=1,
+            analytical=True, truth_assertion=False, causal_assertion=False,
+            explicitly_encoded=True, stance=rel.get("stance"),
+        )
+
     edge_items = list(edges.values())
     degree: dict[str, float] = defaultdict(float)
     citations: dict[str, int] = defaultdict(int)
@@ -794,6 +820,7 @@ def build_publication_corpus_knowledge_map(
         "knowledge_terrain_4d": terrain,
         "visual_query": visual_query,
         "research_overlays": research_overlays,
+        "evidence_synthesis": evidence_synthesis,
         "reproducibility": {
             "schema": "sc-library-visual-corpus-reproducibility/1.0",
             "corpus_fingerprint_sha256": _corpus_fingerprint,
@@ -813,6 +840,8 @@ def build_publication_corpus_knowledge_map(
             {"key": "temporal-dynamics", "label": "Temporal Dynamics", "purpose": "Publication and topic evolution through time"},
             {"key": "findings-claims", "label": "Findings & Claims", "purpose": "Accepted source-bound findings and claims over the publication corpus"},
             {"key": "contradiction-overlay", "label": "Contradiction Overlay", "purpose": "Only explicitly reviewed contradiction/support relations between accepted research objects"},
+            {"key": "evidence-synthesis", "label": "Evidence Synthesis", "purpose": "Cross-publication support/contradiction structures and argument paths from accepted reviewed objects"},
+            {"key": "competing-hypotheses", "label": "Competing Hypotheses", "purpose": "Explicitly authored hypothesis sets only; no hypothesis or competition inference"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
@@ -847,6 +876,8 @@ def build_publication_corpus_knowledge_map(
                 "linked-view-deterministic-crossfilter",
                 "accepted-finding-claim-overlay",
                 "explicit-reviewed-support-contradiction-overlay",
+                "cross-publication-reviewed-evidence-synthesis",
+                "explicit-hypothesis-membership-only",
             ],
             "governed_visual_reasoning_authority": "platform-core",
         },
@@ -863,5 +894,10 @@ def build_publication_corpus_knowledge_map(
             "finding_claim_overlays_are_accepted_candidates_only": True,
             "overlay_weight_is_truth_score": False,
             "contradiction_requires_explicit_reviewed_relation": True,
+            "consensus_inferred": False,
+            "hypotheses_inferred": False,
+            "competing_hypotheses_require_explicit_metadata": True,
+            "evidence_balance_is_truth_score": False,
+            "durable_cross_study_synthesis_authority": "platform-core",
         },
     }

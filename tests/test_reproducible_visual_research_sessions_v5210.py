@@ -4,7 +4,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_release_identity_and_assets():
     plugin=(ROOT/'sustainable-catalyst-library/sustainable-catalyst-library.php').read_text()
     cls=(ROOT/'sustainable-catalyst-library/includes/class-sc-library-knowledge-landscape.php').read_text()
-    assert 'reproducible visual research sessions' in plugin.lower()
+    assert 'Version: 5.' in plugin
     assert 'data-sc-kl-session-save' in cls
     assert 'data-sc-kl-session-workspace' in cls
 

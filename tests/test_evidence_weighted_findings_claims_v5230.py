@@ -4,7 +4,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_release_identity_and_contract():
     plugin=(ROOT/'sustainable-catalyst-library/sustainable-catalyst-library.php').read_text()
     mod=(ROOT/'library-backend/app/evidence_weighted_overlays.py').read_text()
-    assert 'Version: 5.23.' in plugin
+    assert 'Version: 5.' in plugin
     assert 'sc-library-evidence-weighted-research-overlay/1.0' in mod
     assert 'epistemic_truth_score":False' in mod.replace(' ', '')
 

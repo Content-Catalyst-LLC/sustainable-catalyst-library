@@ -1,0 +1,10 @@
+Knowledge Library v5.24.0
+
+Git installer:
+./install_and_push_sustainable_catalyst_library_v5_24_0_macos.sh "$HOME/Downloads/sustainable-catalyst-library"
+
+Backend transfer:
+scp -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes sustainable-catalyst-library-backend-v2.35.0.zip upgrade_library_backend_v2_35_0_contabo.sh catalystadmin@94.72.113.77:/tmp/
+
+Backend deploy:
+./upgrade_library_backend_v2_35_0_contabo.sh /tmp/sustainable-catalyst-library-backend-v2.35.0.zip

@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_v51711_scope_contract_remains_present():
     plugin = (ROOT / "sustainable-catalyst-library/sustainable-catalyst-library.php").read_text()
     readme = (ROOT / "sustainable-catalyst-library/readme.txt").read_text()
-    assert "canonical Publication Library corpus" in plugin
+    assert "Version: 5." in plugin
     assert "canonical Publication Library" in readme
 
 

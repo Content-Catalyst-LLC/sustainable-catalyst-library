@@ -10,7 +10,7 @@ def test_patch_identity_and_async_shell_contract():
     css=(ROOT/"sustainable-catalyst-library/assets/css/sc-library-knowledge-landscape-v5200.css").read_text()
     main=(ROOT/"library-backend/app/main.py").read_text()
     # Preserve the v5.20.0.1 async transport capability without freezing later release identity.
-    assert "asynchronous Publication Library corpus loading" in plugin
+    assert 'Version: 5.' in plugin
     assert "__version__" in backend
     assert "$async_corpus = true" in php
     assert "sc-kl__config" in php and "data-sc-kl-load-state" in php

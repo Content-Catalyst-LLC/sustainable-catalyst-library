@@ -1,0 +1,21 @@
+Knowledge Library v5.24.0 — Cross-Publication Evidence Synthesis & Competing Hypotheses
+Backend v2.35.0
+
+Validation performed before packaging:
+- 41/41 selected retained + v5.24 regression tests PASS
+- Python compileall PASS
+- WordPress PHP lint PASS
+- Knowledge Landscape PHP lint PASS
+- v5.24 JavaScript syntax PASS
+- macOS Git installer shell syntax PASS
+- Contabo backend installer shell syntax PASS
+- release identity and synthesis contract checks PASS
+
+Research-integrity boundaries validated:
+- accepted reviewed objects only
+- consensus_inferred = false
+- hypotheses_inferred = false
+- competing_hypotheses_require_explicit_metadata = true
+- evidence_balance_is_truth_score = false
+- synthesis_creates_new_claims = false
+- durable synthesis authority = Platform Core
