@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.36.0 adds the Go Research Ingestion & Job Fabric for concurrent connector, OCR, parsing, extraction, indexing, retry, cancellation, and worker orchestration.
- * Version: 5.36.0
+ * Description: Sustainable Catalyst Library v5.36.0.1 adds the Go Research Ingestion & Job Fabric for concurrent connector, OCR, parsing, extraction, indexing, retry, cancellation, and worker orchestration.
+ * Version: 5.36.0.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.36.0');
+define('SC_LIBRARY_VERSION', '5.36.0.1');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);

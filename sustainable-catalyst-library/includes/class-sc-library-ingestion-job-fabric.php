@@ -1,16 +1,16 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** v5.36.0 — Go Research Ingestion & Job Fabric console. */
+/** v5.36.0.1 — Go Research Ingestion & Job Fabric console. */
 final class SC_Library_Ingestion_Job_Fabric {
-    public const VERSION = '5.36.0';
+    public const VERSION = '5.36.0.1';
     public const SHORTCODE = 'sc_library_ingestion_job_fabric';
 
     public function register_hooks(): void { add_shortcode(self::SHORTCODE, [$this, 'render_shortcode']); }
 
     private function enqueue_assets(): void {
-        wp_enqueue_style('sc-library-ingestion-fabric-v5360', SC_LIBRARY_URL . 'assets/css/sc-library-ingestion-fabric-v5360.css', [], self::VERSION);
-        wp_enqueue_script('sc-library-ingestion-fabric-v5360', SC_LIBRARY_URL . 'assets/js/sc-library-ingestion-fabric-v5360.js', [], self::VERSION, true);
+        wp_enqueue_style('sc-library-ingestion-fabric-v53601', SC_LIBRARY_URL . 'assets/css/sc-library-ingestion-fabric-v53601.css', [], self::VERSION);
+        wp_enqueue_script('sc-library-ingestion-fabric-v53601', SC_LIBRARY_URL . 'assets/js/sc-library-ingestion-fabric-v53601.js', [], self::VERSION, true);
     }
 
     public function render_shortcode($atts=[]): string {

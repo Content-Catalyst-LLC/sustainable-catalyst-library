@@ -1,11 +1,11 @@
-# Knowledge Library v5.36.0 — Go Research Ingestion & Job Fabric
+# Knowledge Library v5.36.0.1 — Go Research Ingestion & Job Fabric
 
 ## Purpose
-v5.36.0 adds a dedicated Go execution fabric beneath the Python research backend. The fabric coordinates concurrent ingestion work without taking ownership of research meaning, evidence quality, claim truth, or Platform Core governance.
+v5.36.0.1 adds a dedicated Go execution fabric beneath the Python research backend. The fabric coordinates concurrent ingestion work without taking ownership of research meaning, evidence quality, claim truth, or Platform Core governance.
 
 ## Runtime architecture
 
-WordPress → Python backend v2.47.0 → Go ingestion runtime v0.1.0 → connector/OCR/parser/extraction/index workers
+WordPress → Python backend v2.47.1 → Go ingestion runtime v0.1.0 → connector/OCR/parser/extraction/index workers
 
 Rust graph runtime v0.2.0 remains a separate structural graph-compute layer.
 
@@ -48,4 +48,4 @@ The Go service is internal-only on the `sc-internal` Docker network. Public job 
 - Platform Core remains the durable authority for governed research objects
 
 ## Production verification
-The v2.47.0 installer performs a no-cache Docker build of both the Rust and Go runtimes, waits for both services to become healthy, validates the Go contract/version, executes a submit/claim/fail/retry/claim/complete lifecycle, confirms durable state is enabled, verifies Rust v0.2.0 continuity, and checks Platform Core readiness.
+The v2.47.1 installer performs a no-cache Docker build of both the Rust and Go runtimes, waits for both services to become healthy, validates the Go contract/version, executes a submit/claim/fail/retry/claim/complete lifecycle, confirms durable state is enabled, verifies Rust v0.2.0 continuity, and checks Platform Core readiness.

@@ -180,7 +180,7 @@ func (s *Store) health(w http.ResponseWriter, r *http.Request) {
 		"ok": true, "schema": contract, "version": version, "engine": "go",
 		"queue": counts, "max_queue": s.maxQueue, "max_in_flight": s.maxInFlight,
 		"capabilities": []string{"submit", "idempotency", "priority-queue", "claim", "complete", "retry", "cancel", "backpressure", "worker-health"},
-		"durability":   "process-memory-foundation", "research_semantics_authority": "python-library-backend",
+		"durability":   "state-file", "research_semantics_authority": "python-library-backend",
 		"platform_core_durable_authority": true, "job_state_implies_research_validity": false,
 	})
 }
