@@ -1,0 +1,21 @@
+Knowledge Library v5.29.0 / backend v2.40.0
+Temporal Knowledge & Research Evolution
+
+Release validation:
+- 42/42 selected temporal + regression tests passed
+- Python compileall passed
+- WordPress plugin PHP lint passed
+- Python-backend proxy PHP lint passed
+- Temporal console PHP lint passed
+- Temporal JavaScript syntax check passed
+- Git installer shell syntax passed
+- Contabo backend installer shell syntax passed
+- Temporal evolution/snapshot/change-set schemas parsed successfully
+
+Guardrails validated:
+- later events are not projected backward by default
+- historical availability is distinct from retrospective status
+- absence of later evidence does not imply earlier consensus
+- temporal coincidence does not imply causality
+- record availability does not prove researcher awareness
+- Platform Core governance is unchanged

@@ -41,6 +41,7 @@ from .source_identity_resolution import build_source_identity_analysis
 from .retrieval_evaluation import (
     adaptive_rerank, build_adaptive_ranking_profile, evaluate_retrieval, rerank_results,
 )
+from .temporal_knowledge import temporal_request, knowledge_snapshot, compare_snapshots
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -339,6 +340,13 @@ def health() -> dict[str, Any]:
             "adaptive_ranking_bounded_rerank": True,
             "adaptive_ranking_automatic_filtering": False,
             "adaptive_ranking_truth_promotion": False,
+            "temporal_knowledge_evolution": True,
+            "temporal_historical_availability_snapshots": True,
+            "temporal_retrospective_status_lens": True,
+            "temporal_correction_retraction_tracking": True,
+            "temporal_research_change_sets": True,
+            "temporal_later_events_projected_backward_by_default": False,
+            "temporal_coincidence_implies_causality": False,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2353,6 +2361,30 @@ def search_adaptive(payload: dict[str, Any]) -> dict[str, Any]:
     return base
 
 
+@app.post("/v1/temporal-knowledge/analyze")
+def temporal_knowledge_analyze(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return temporal_request(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/v1/publication-knowledge-maps/temporal-evolution")
+def publication_temporal_evolution(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus = _publication_corpus_from_payload(payload)
+    result = dict(corpus.get("temporal_knowledge_evolution") or {})
+    try:
+        if payload.get("as_of"):
+            result["snapshot"] = knowledge_snapshot(result, payload.get("as_of"), lens=str(payload.get("lens") or "historical-availability"))
+        if payload.get("from_date") and payload.get("to_date"):
+            result["change_set"] = compare_snapshots(result, payload.get("from_date"), payload.get("to_date"), lens=str(payload.get("lens") or "historical-availability"))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    result["corpus"] = corpus.get("corpus") or {}
+    result["reproducibility"] = corpus.get("reproducibility") or {}
+    return result
+
+
 @app.post("/v1/scientific-document-intelligence/analyze")
 def scientific_document_intelligence_analyze(payload: dict[str, Any]) -> dict[str, Any]:
     document = payload.get("document") if isinstance(payload.get("document"), dict) else payload
@@ -2502,6 +2534,8 @@ def search_readiness() -> dict[str, Any]:
         "retrieval_evaluation": True,
         "adaptive_ranking_profiles": True,
         "adaptive_ranking_guardrail": "rerank-only-no-filter-no-truth-promotion",
+        "temporal_knowledge_evolution": True,
+        "temporal_snapshot_guardrail": "historical-availability-is-distinct-from-retrospective-status",
     }
 
 

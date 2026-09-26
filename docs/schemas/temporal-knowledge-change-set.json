@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/temporal-knowledge-change-set/1.0",
+  "title": "Sustainable Catalyst Temporal Knowledge Change Set",
+  "type": "object",
+  "required": [
+    "schema",
+    "from",
+    "to",
+    "lens",
+    "added_record_ids",
+    "removed_record_ids",
+    "status_changes",
+    "metrics",
+    "interpretation"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-temporal-knowledge-change-set/1.0"
+    },
+    "from": {
+      "type": "string"
+    },
+    "to": {
+      "type": "string"
+    },
+    "lens": {
+      "enum": [
+        "historical-availability",
+        "retrospective-status"
+      ]
+    },
+    "added_record_ids": {
+      "type": "array"
+    },
+    "removed_record_ids": {
+      "type": "array"
+    },
+    "status_changes": {
+      "type": "array"
+    },
+    "metrics": {
+      "type": "object"
+    },
+    "interpretation": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

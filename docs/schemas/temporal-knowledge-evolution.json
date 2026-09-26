@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/temporal-knowledge-evolution/1.0",
+  "title": "Sustainable Catalyst Temporal Knowledge & Research Evolution",
+  "type": "object",
+  "required": [
+    "schema",
+    "records",
+    "events",
+    "timeline_bins",
+    "metrics",
+    "lenses",
+    "guardrails",
+    "fingerprint_sha256"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-temporal-knowledge-evolution/1.0"
+    },
+    "records": {
+      "type": "array"
+    },
+    "events": {
+      "type": "array"
+    },
+    "research_object_events": {
+      "type": "array"
+    },
+    "timeline_bins": {
+      "type": "array"
+    },
+    "metrics": {
+      "type": "object"
+    },
+    "lenses": {
+      "type": "array"
+    },
+    "guardrails": {
+      "type": "object"
+    },
+    "fingerprint_sha256": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

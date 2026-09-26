@@ -12,6 +12,7 @@ from .evidence_synthesis import build_cross_publication_synthesis
 from .research_graph_pathfinding import build_research_graph_manifest
 from .scientific_document_intelligence import build_scientific_corpus_overlay
 from .source_identity_resolution import build_source_identity_resolution
+from .temporal_knowledge import build_temporal_knowledge_evolution
 
 CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
 
@@ -847,6 +848,7 @@ def build_publication_corpus_knowledge_map(
         }
 
     node_items = list(nodes.values())
+    temporal_knowledge_evolution = build_temporal_knowledge_evolution(records.values(), nodes=node_items, edges=edge_items)
     publication_count = sum(1 for x in node_items if x.get("kind") == "publication")
     topic_count = sum(1 for x in node_items if x.get("kind") == "topic")
     relationship_counts: dict[str, int] = defaultdict(int)
@@ -898,6 +900,7 @@ def build_publication_corpus_knowledge_map(
         "evidence_synthesis": evidence_synthesis,
         "scientific_document_intelligence": scientific_document_intelligence,
         "source_identity_resolution": source_identity_resolution,
+        "temporal_knowledge_evolution": temporal_knowledge_evolution,
         "research_graph": research_graph,
         "reproducibility": {
             "schema": "sc-library-visual-corpus-reproducibility/1.0",
@@ -923,6 +926,7 @@ def build_publication_corpus_knowledge_map(
             {"key": "evidence-paths", "label": "Evidence Paths", "purpose": "Deterministic source-grounded graph paths between selected research objects; analytical relationships are opt-in"},
             {"key": "scientific-objects", "label": "Scientific Objects", "purpose": "Source-grounded figures, charts, tables, equations, captions, appendices, supplements and datasets with exact document references"},
             {"key": "source-identity", "label": "Source Identity", "purpose": "Canonical source clusters, duplicate/version-family diagnostics, and strong-identifier author/institution/dataset resolution without destructive merges"},
+            {"key": "temporal-evolution", "label": "Temporal Evolution", "purpose": "Explicit publication/version/status-event chronology with historical-availability and retrospective-status snapshots"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
@@ -931,7 +935,7 @@ def build_publication_corpus_knowledge_map(
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",

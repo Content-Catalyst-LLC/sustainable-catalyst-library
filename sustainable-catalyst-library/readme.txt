@@ -404,6 +404,13 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+= 5.29.0 =
+* Adds Temporal Knowledge & Research Evolution with explicit publication/version/status-event chronology.
+* Adds historical-availability snapshots that do not project later corrections backward.
+* Adds a distinct retrospective-status lens for later corrections, retractions, withdrawals, and supersession.
+* Adds reproducible temporal change sets and the [sc_library_temporal_evolution] research console.
+* Preserves v5.28 retrieval evaluation/adaptive ranking, v5.27 source identity, v5.26 scientific objects, v5.25 pathfinding, and Platform Core governance boundaries.
+
 
 = 5.27.0 =
 * Added Source Identity, Deduplication & Entity Resolution with backend 2.38.0.
