@@ -14,6 +14,7 @@ from .scientific_document_intelligence import build_scientific_corpus_overlay
 from .source_identity_resolution import build_source_identity_resolution
 from .temporal_knowledge import build_temporal_knowledge_evolution
 from .methodology_intelligence import build_methodology_intelligence
+from .research_gap_novelty import build_research_gap_novelty
 
 CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
 
@@ -529,6 +530,7 @@ def build_publication_corpus_knowledge_map(
                 },
                 "semantic_analysis": semantic_status,
                 "methodology_intelligence": build_methodology_intelligence([]),
+                "research_gap_novelty": build_research_gap_novelty([]),
                 "boundaries": {
                     "llm_inferred_edges": False,
                     "automatic_truth_promotion": False,
@@ -844,6 +846,34 @@ def build_publication_corpus_knowledge_map(
             provenance=rel.get("provenance") or {}, default_evidence_path=False,
         )
 
+    # v5.31.0: candidate research gaps and novelty-discovery signals are
+    # corpus-scoped analytical leads only. They never establish global absence
+    # or scholarly novelty, and they are excluded from default evidence paths.
+    research_gap_novelty = build_research_gap_novelty(
+        records.values(), nodes=list(nodes.values()), edges=list(edges.values()),
+        methodology_intelligence=methodology_intelligence,
+    )
+    gap_overlay = research_gap_novelty.get("graph_overlay") or {}
+    for node in gap_overlay.get("nodes") or []:
+        if not isinstance(node, dict) or not node.get("id"):
+            continue
+        nid = str(node.get("id"))
+        kind = str(node.get("kind") or "research-gap-candidate")
+        label = str(node.get("label") or nid)
+        extras = {k: v for k, v in node.items() if k not in {"id", "kind", "label"}}
+        _add_node(nodes, nid, kind, label, **extras)
+    for rel in gap_overlay.get("edges") or []:
+        if not isinstance(rel, dict) or not rel.get("source") or not rel.get("target"):
+            continue
+        _add_edge(
+            edges, str(rel.get("source")), str(rel.get("target")),
+            str(rel.get("relationship_basis") or "research-gap-signal"),
+            directed=bool(rel.get("directed", True)),
+            weight=max(.05, float(rel.get("weight") or 1.0)), evidence_count=0,
+            analytical=True, truth_assertion=False, causal_assertion=False,
+            default_evidence_path=False, requires_review=True,
+        )
+
     edge_items = list(edges.values())
     degree: dict[str, float] = defaultdict(float)
     citations: dict[str, int] = defaultdict(int)
@@ -929,6 +959,7 @@ def build_publication_corpus_knowledge_map(
         "source_identity_resolution": source_identity_resolution,
         "temporal_knowledge_evolution": temporal_knowledge_evolution,
         "methodology_intelligence": methodology_intelligence,
+        "research_gap_novelty": research_gap_novelty,
         "research_graph": research_graph,
         "reproducibility": {
             "schema": "sc-library-visual-corpus-reproducibility/1.0",
@@ -956,6 +987,7 @@ def build_publication_corpus_knowledge_map(
             {"key": "source-identity", "label": "Source Identity", "purpose": "Canonical source clusters, duplicate/version-family diagnostics, and strong-identifier author/institution/dataset resolution without destructive merges"},
             {"key": "temporal-evolution", "label": "Temporal Evolution", "purpose": "Explicit publication/version/status-event chronology with historical-availability and retrospective-status snapshots"},
             {"key": "methodology-intelligence", "label": "Methodology Intelligence", "purpose": "Source-grounded study design, population, sample, methods, uncertainty, limitations and reproducibility reporting without automatic quality scoring"},
+            {"key": "research-gap-novelty", "label": "Research Gaps & Novelty", "purpose": "Corpus-scoped candidate gaps and novelty-discovery leads with explicit caveats and external-verification requirements"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
@@ -964,7 +996,7 @@ def build_publication_corpus_knowledge_map(
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens", "inspect-methodology-profile", "compare-methodologies", "filter-study-design"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens", "inspect-methodology-profile", "compare-methodologies", "filter-study-design", "inspect-gap-candidate", "inspect-novelty-candidate", "filter-gap-kind"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -1031,6 +1063,8 @@ def build_publication_corpus_knowledge_map(
             "method_reporting_coverage_is_quality_score": False,
             "methodology_profile_determines_truth": False,
             "methodology_profile_proves_causality": False,
+            "gap_signal_proves_global_absence": False,
+            "novelty_candidate_is_novelty_claim": False,
             "automatic_risk_of_bias_judgment": False,
             "missing_method_metadata_means_method_not_used": False,
         },

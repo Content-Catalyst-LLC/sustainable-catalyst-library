@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"sc-library-novelty-candidate/1.0","type":"object","required":["id","kind","label","candidate_only","requires_external_search","novelty_claim","basis"],"properties":{"candidate_only":{"const":true},"requires_external_search":{"const":true},"novelty_claim":{"const":false},"basis":{"type":"object"}}}

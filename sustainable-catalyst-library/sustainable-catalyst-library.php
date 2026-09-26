@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.30.0 adds Evidence Quality & Methodology Intelligence with source-grounded study design, methods, uncertainty, limitations, transparency, and reproducibility profiling without automatic quality scores.
- * Version: 5.30.0
+ * Description: Sustainable Catalyst Library v5.31.0 adds Research Gap & Novelty Discovery with corpus-scoped gap signals, rare-combination discovery leads, and explicit external-verification guardrails.
+ * Version: 5.31.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.30.0');
+define('SC_LIBRARY_VERSION', '5.31.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
@@ -63,6 +63,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-knowledge-landscape.php
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-retrieval-evaluation.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-temporal-evolution.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-methodology-intelligence.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-research-gap-novelty.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-operations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-dynamic-explorer.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-capability-hub.php';
@@ -139,6 +140,7 @@ final class SC_Library_Plugin {
         $retrieval_evaluation = new SC_Library_Retrieval_Evaluation();
         $temporal_evolution = new SC_Library_Temporal_Evolution();
         $methodology_intelligence = new SC_Library_Methodology_Intelligence();
+        $research_gap_novelty = new SC_Library_Research_Gap_Novelty();
         $python_operations = new SC_Library_Python_Operations();
         $dynamic_explorer = new SC_Library_Dynamic_Explorer();
         $capability_hub = new SC_Library_Capability_Hub();
@@ -221,6 +223,7 @@ final class SC_Library_Plugin {
         $retrieval_evaluation->register_hooks();
         $temporal_evolution->register_hooks();
         $methodology_intelligence->register_hooks();
+        $research_gap_novelty->register_hooks();
         $python_operations->register_hooks();
         $dynamic_explorer->register_hooks();
         $capability_hub->register_hooks();

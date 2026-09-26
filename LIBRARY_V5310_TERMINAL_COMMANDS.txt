@@ -1,0 +1,35 @@
+Knowledge Library v5.31.0 — Research Gap & Novelty Discovery
+Backend v2.42.0
+
+GIT / MACOS
+===========
+cd ~/Downloads
+rm -rf "$HOME/Downloads/sc-library-v5.31.0-release"
+BUNDLE="$(find "$HOME/Downloads" -maxdepth 1 -type f -name 'sustainable-catalyst-library-v5.31.0-release-bundle*.zip' -print | head -n 1)"
+echo "Using: $BUNDLE"
+unzip -q "$BUNDLE" -d "$HOME/Downloads/sc-library-v5.31.0-release"
+cd "$HOME/Downloads/sc-library-v5.31.0-release"
+chmod +x install_and_push_sustainable_catalyst_library_v5_31_0_macos.sh
+./install_and_push_sustainable_catalyst_library_v5_31_0_macos.sh "$HOME/Downloads/sustainable-catalyst-library"
+
+BACKEND COPY
+============
+cd ~/Downloads/sc-library-v5.31.0-release
+scp -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+  sustainable-catalyst-library-backend-v2.42.0.zip \
+  upgrade_library_backend_v2_42_0_contabo.sh \
+  catalystadmin@94.72.113.77:/tmp/
+
+SSH
+===
+ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes catalystadmin@94.72.113.77
+
+CONTABO
+=======
+cd /tmp
+chmod +x upgrade_library_backend_v2_42_0_contabo.sh
+sudo ./upgrade_library_backend_v2_42_0_contabo.sh /tmp/sustainable-catalyst-library-backend-v2.42.0.zip
+
+WORDPRESS
+=========
+Upload sustainable-catalyst-library-v5.31.0.zip and replace the installed plugin.

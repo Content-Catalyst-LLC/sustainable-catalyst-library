@@ -43,6 +43,7 @@ from .retrieval_evaluation import (
 )
 from .temporal_knowledge import temporal_request, knowledge_snapshot, compare_snapshots
 from .methodology_intelligence import methodology_request
+from .research_gap_novelty import research_gap_novelty_request
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -356,6 +357,12 @@ def health() -> dict[str, Any]:
             "methodology_automatic_quality_score": False,
             "methodology_automatic_risk_of_bias_judgment": False,
             "methodology_profile_truth_promotion": False,
+            "research_gap_novelty_discovery": True,
+            "research_gap_candidate_objects": True,
+            "research_gap_external_verification_required": True,
+            "research_novelty_candidate_objects": True,
+            "research_novelty_automatic_claim": False,
+            "research_gap_global_absence_claim": False,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2411,6 +2418,23 @@ def publication_methodology_intelligence(payload: dict[str, Any]) -> dict[str, A
     return result
 
 
+@app.post("/v1/research-gap-novelty/analyze")
+def research_gap_novelty_analyze(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return research_gap_novelty_request(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/v1/publication-knowledge-maps/research-gap-novelty")
+def publication_research_gap_novelty(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus = _publication_corpus_from_payload(payload)
+    result = dict(corpus.get("research_gap_novelty") or {})
+    result["corpus"] = corpus.get("corpus") or {}
+    result["reproducibility"] = corpus.get("reproducibility") or {}
+    return result
+
+
 @app.post("/v1/scientific-document-intelligence/analyze")
 def scientific_document_intelligence_analyze(payload: dict[str, Any]) -> dict[str, Any]:
     document = payload.get("document") if isinstance(payload.get("document"), dict) else payload
@@ -2564,6 +2588,8 @@ def search_readiness() -> dict[str, Any]:
         "temporal_snapshot_guardrail": "historical-availability-is-distinct-from-retrospective-status",
         "methodology_intelligence": True,
         "methodology_guardrail": "structured-reporting-is-not-quality-or-truth",
+        "research_gap_novelty_discovery": True,
+        "research_gap_novelty_guardrail": "corpus-gap-is-not-global-absence-and-novelty-candidate-is-not-novelty-claim",
     }
 
 
