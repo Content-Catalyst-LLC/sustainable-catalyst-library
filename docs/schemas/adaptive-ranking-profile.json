@@ -1,0 +1,16 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://sustainablecatalyst.com/schemas/adaptive-ranking-profile.json",
+  "title":"Sustainable Catalyst Adaptive Ranking Profile",
+  "type":"object",
+  "required":["schema","profile_id","active","weights","guardrails"],
+  "properties":{
+    "schema":{"const":"sc-library-adaptive-ranking-profile/1.0"},
+    "profile_id":{"type":"string"},
+    "active":{"type":"boolean"},
+    "weights":{"type":"object"},
+    "source_boosts":{"type":"object"},
+    "object_type_boosts":{"type":"object"},
+    "guardrails":{"type":"object"}
+  }
+}

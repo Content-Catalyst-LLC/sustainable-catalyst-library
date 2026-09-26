@@ -38,6 +38,9 @@ from .visual_evidence_trace import build_visual_evidence_trace
 from .research_graph_pathfinding import find_research_paths, query_research_graph
 from .scientific_document_intelligence import build_scientific_document_intelligence, load_scientific_document_intelligence
 from .source_identity_resolution import build_source_identity_analysis
+from .retrieval_evaluation import (
+    adaptive_rerank, build_adaptive_ranking_profile, evaluate_retrieval, rerank_results,
+)
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -328,6 +331,14 @@ def health() -> dict[str, Any]:
             "dataset_doi_url_resolution": True,
             "source_identity_automatic_merge": False,
             "source_identity_title_only_merge": False,
+            "retrieval_evaluation": True,
+            "retrieval_precision_recall_ndcg_mrr_map": True,
+            "retrieval_evidence_coverage_diagnostics": True,
+            "retrieval_judged_feedback": True,
+            "adaptive_ranking_profiles": True,
+            "adaptive_ranking_bounded_rerank": True,
+            "adaptive_ranking_automatic_filtering": False,
+            "adaptive_ranking_truth_promotion": False,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2291,6 +2302,57 @@ def _publication_corpus_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+@app.post("/v1/retrieval-evaluation/evaluate")
+def retrieval_evaluation_evaluate(payload: dict[str, Any]) -> dict[str, Any]:
+    return evaluate_retrieval(payload)
+
+
+@app.post("/v1/retrieval-evaluation/profile")
+def retrieval_evaluation_profile(payload: dict[str, Any]) -> dict[str, Any]:
+    return build_adaptive_ranking_profile(payload)
+
+
+@app.post("/v1/retrieval-evaluation/rerank")
+def retrieval_evaluation_rerank(payload: dict[str, Any]) -> dict[str, Any]:
+    return adaptive_rerank(payload)
+
+
+@app.post("/v1/search/adaptive")
+def search_adaptive(payload: dict[str, Any]) -> dict[str, Any]:
+    search_payload = payload.get("search") if isinstance(payload.get("search"), dict) else {}
+    profile = payload.get("profile") if isinstance(payload.get("profile"), dict) else {}
+    requested_limit = max(1, min(100, int(search_payload.get("limit", 20))))
+    requested_offset = max(0, min(100000, int(search_payload.get("offset", 0))))
+    candidate_limit = max(requested_limit + requested_offset, min(100, int(search_payload.get("candidate_limit", 80))))
+    base = hybrid_search_records(
+        str(search_payload.get("q") or ""),
+        str(search_payload.get("object_type") or "") or None,
+        str(search_payload.get("source_key") or "") or None,
+        str(search_payload.get("topic") or "") or None,
+        int(search_payload["year_from"]) if search_payload.get("year_from") else None,
+        int(search_payload["year_to"]) if search_payload.get("year_to") else None,
+        str(search_payload.get("sort") or "relevance"),
+        candidate_limit,
+        0,
+        mode=str(search_payload.get("mode") or "hybrid"),
+        include_core=bool(search_payload.get("include_core", True)),
+    )
+    ranked = rerank_results([dict(x) for x in base.get("results", [])], profile)
+    base["results"] = ranked[requested_offset:requested_offset + requested_limit]
+    base["limit"] = requested_limit
+    base["offset"] = requested_offset
+    base["adaptive_ranking"] = {
+        "schema": "sc-library-adaptive-reranking/1.0",
+        "profile_id": profile.get("profile_id"),
+        "active": bool(profile.get("active")),
+        "candidate_count": len(ranked),
+        "result_set_filtered": False,
+        "truth_status_changed": False,
+        "evidence_relations_changed": False,
+    }
+    return base
+
+
 @app.post("/v1/scientific-document-intelligence/analyze")
 def scientific_document_intelligence_analyze(payload: dict[str, Any]) -> dict[str, Any]:
     document = payload.get("document") if isinstance(payload.get("document"), dict) else payload
@@ -2437,6 +2499,9 @@ def search_readiness() -> dict[str, Any]:
         "core_binding_source": "library_core_bindings",
         "platform_core_role": "governed-research-reasoning-and-provenance",
         "library_role": "source-intelligence-indexing-and-retrieval",
+        "retrieval_evaluation": True,
+        "adaptive_ranking_profiles": True,
+        "adaptive_ranking_guardrail": "rerank-only-no-filter-no-truth-promotion",
     }
 
 

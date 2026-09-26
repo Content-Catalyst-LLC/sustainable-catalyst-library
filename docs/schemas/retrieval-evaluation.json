@@ -1,0 +1,13 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://sustainablecatalyst.com/schemas/retrieval-evaluation.json",
+  "title":"Sustainable Catalyst Retrieval Evaluation",
+  "type":"object",
+  "required":["schema","cases","aggregate","reproducibility"],
+  "properties":{
+    "schema":{"enum":["sc-library-retrieval-evaluation/1.0","sc-library-retrieval-benchmark/1.0"]},
+    "cases":{"type":"array"},
+    "aggregate":{"type":"object"},
+    "reproducibility":{"type":"object"}
+  }
+}

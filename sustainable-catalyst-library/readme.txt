@@ -8,7 +8,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.27.0
+Stable tag: 5.28.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -1500,3 +1500,11 @@ Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature
 
 = Energy Systems Intelligence 1.2.0 =
 Adds target-side runtime consumer compatibility metadata and certified contract-intake baselines for five Sustainable Catalyst applications.
+
+
+== 5.28.0 ==
+* Adds reproducible retrieval evaluation with precision/recall-style metrics, nDCG, MRR, MAP, evidence coverage, and source diversity.
+* Adds bounded adaptive ranking profiles derived from explicit researcher judgments.
+* Adaptive ranking never deletes or filters source records and does not promote evidence truth.
+* Adds [sc_library_retrieval_evaluation] research evaluation console.
+* Preserves v5.27 source identity, v5.26 scientific objects, v5.25 research graph/pathfinding, and v5.24 synthesis.

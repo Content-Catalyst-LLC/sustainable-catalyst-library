@@ -12,6 +12,7 @@ if (!defined('ABSPATH')) { exit; }
  * v5.15.0 adds entity/finding/claim candidate extraction readiness with source-span and human-review guardrails.
  * v5.16.0 adds publication visualization readiness and public Research Library delivery for reviewed renderer-neutral specs.
  * v5.18.0 adds multi-publication analytical structures while preserving canonical Publications manifest scoping and the hardened corpus deployment validator.
+ * v5.28.0 adds stateless retrieval evaluation, bounded adaptive-ranking profiles, and transparent reranking/search proxies.
  */
 final class SC_Library_Python_Backend {
     public const VERSION = '5.6.0.33';
@@ -285,6 +286,26 @@ final class SC_Library_Python_Backend {
                 'limit' => ['sanitize_callback' => 'absint', 'default' => 20],
                 'offset' => ['sanitize_callback' => 'absint', 'default' => 0],
             ],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/retrieval-evaluation', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_retrieval_evaluation'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/retrieval-adaptive-profile', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_retrieval_adaptive_profile'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/retrieval-rerank', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_retrieval_rerank'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/search/adaptive', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_adaptive_search'],
         ]);
     }
 
@@ -794,6 +815,44 @@ final class SC_Library_Python_Backend {
         $record_id = sanitize_text_field((string) $request->get_param('record_id'));
         $limit = min(100, max(1, (int) $request->get_param('limit')));
         return rest_ensure_response(self::publication_visualizations($record_id, $limit));
+    }
+
+    private function proxy_retrieval_post(WP_REST_Request $request, string $backend_path, string $fallback_schema): WP_REST_Response {
+        if (!self::configured()) {
+            return new WP_REST_Response(['schema'=>$fallback_schema,'error'=>'Library backend not configured'], 503);
+        }
+        $payload = $request->get_json_params();
+        if (!is_array($payload)) { $payload = []; }
+        $response = wp_remote_post(self::base_url() . $backend_path, [
+            'timeout' => max(self::timeout(), 12),
+            'redirection' => 2,
+            'headers' => ['Accept'=>'application/json','Content-Type'=>'application/json'],
+            'body' => wp_json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            'data_format' => 'body',
+        ]);
+        if (is_wp_error($response)) {
+            return new WP_REST_Response(['schema'=>$fallback_schema,'error'=>$response->get_error_message()], 502);
+        }
+        $code=(int) wp_remote_retrieve_response_code($response);
+        $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>$fallback_schema,'error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
+    }
+
+    public function proxy_retrieval_evaluation(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/retrieval-evaluation/evaluate', 'sc-library-retrieval-evaluation/1.0');
+    }
+
+    public function proxy_retrieval_adaptive_profile(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/retrieval-evaluation/profile', 'sc-library-adaptive-ranking-profile/1.0');
+    }
+
+    public function proxy_retrieval_rerank(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/retrieval-evaluation/rerank', 'sc-library-adaptive-reranking/1.0');
+    }
+
+    public function proxy_adaptive_search(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/search/adaptive', 'sc-library-hybrid-retrieval/1.0');
     }
 
     public static function search_readiness(): array {

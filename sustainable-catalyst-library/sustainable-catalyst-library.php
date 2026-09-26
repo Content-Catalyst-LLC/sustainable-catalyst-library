@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.27.0 adds Source Identity, Deduplication & Entity Resolution with deterministic DOI/URL/content/version clustering and identifier-grounded author, institution, and dataset identity while preserving every source record and provenance chain.
- * Version: 5.27.0
+ * Description: Sustainable Catalyst Library v5.28.0 adds Research Retrieval Evaluation & Adaptive Ranking with reproducible ranking benchmarks, evidence-coverage diagnostics, judged-result feedback, and bounded provenance-preserving reranking.
+ * Version: 5.28.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.27.0');
+define('SC_LIBRARY_VERSION', '5.28.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
@@ -60,6 +60,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-field-spotlights.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-backend.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-publication-visualizations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-knowledge-landscape.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-retrieval-evaluation.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-operations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-dynamic-explorer.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-capability-hub.php';
@@ -133,6 +134,7 @@ final class SC_Library_Plugin {
         $python_backend = new SC_Library_Python_Backend();
         $publication_visualizations = new SC_Library_Publication_Visualizations();
         $knowledge_landscape = new SC_Library_Knowledge_Landscape();
+        $retrieval_evaluation = new SC_Library_Retrieval_Evaluation();
         $python_operations = new SC_Library_Python_Operations();
         $dynamic_explorer = new SC_Library_Dynamic_Explorer();
         $capability_hub = new SC_Library_Capability_Hub();
@@ -212,6 +214,7 @@ final class SC_Library_Plugin {
         $python_backend->register_hooks();
         $publication_visualizations->register_hooks();
         $knowledge_landscape->register_hooks();
+        $retrieval_evaluation->register_hooks();
         $python_operations->register_hooks();
         $dynamic_explorer->register_hooks();
         $capability_hub->register_hooks();
