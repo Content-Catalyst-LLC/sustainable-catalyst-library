@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.34.0 adds Living Evidence & Research Evolution with reproducible review snapshot comparison, explicit source-change tracking, update candidates, and immutable prior-review lineage.
- * Version: 5.34.0
+ * Description: Sustainable Catalyst Library v5.35.0 adds Rust Evidence Graph Acceleration & Native Query Engine with policy-filtered neighborhoods, reachability, components, induced subgraphs, and structural graph statistics.
+ * Version: 5.35.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.34.0');
+define('SC_LIBRARY_VERSION', '5.35.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);

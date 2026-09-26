@@ -990,6 +990,7 @@ def build_publication_corpus_knowledge_map(
             {"key": "research-gap-novelty", "label": "Research Gaps & Novelty", "purpose": "Corpus-scoped candidate gaps and novelty-discovery leads with explicit caveats and external-verification requirements"},
             {"key": "literature-review", "label": "Literature Review", "purpose": "Reproducible protocol, human screening decisions, extraction lineage, review flow and deterministic review-state snapshots"},
             {"key": "living-evidence", "label": "Living Evidence", "purpose": "Compare immutable literature-review snapshots, inspect explicit source/review changes, and surface human-reviewed update candidates over time"},
+            {"key": "native-graph-query", "label": "Native Graph Query", "purpose": "High-performance structural graph exploration using Rust for neighborhoods, reachability, components, induced subgraphs and descriptive graph statistics"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
@@ -998,7 +999,7 @@ def build_publication_corpus_knowledge_map(
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens", "inspect-methodology-profile", "compare-methodologies", "filter-study-design", "inspect-gap-candidate", "inspect-novelty-candidate", "filter-gap-kind", "inspect-review-protocol", "inspect-screening-decision", "compare-review-snapshots", "inspect-living-update-candidate", "compare-living-review-snapshots", "inspect-explicit-change-event"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens", "inspect-methodology-profile", "compare-methodologies", "filter-study-design", "inspect-gap-candidate", "inspect-novelty-candidate", "filter-gap-kind", "inspect-review-protocol", "inspect-screening-decision", "compare-review-snapshots", "inspect-living-update-candidate", "compare-living-review-snapshots", "inspect-explicit-change-event", "native-neighborhood-query", "native-reachability-query", "native-component-analysis", "native-subgraph-extraction", "native-structural-stats"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -1069,6 +1070,11 @@ def build_publication_corpus_knowledge_map(
             "methodology_profile_determines_truth": False,
             "methodology_profile_proves_causality": False,
             "gap_signal_proves_global_absence": False,
+            "native_graph_connectivity_implies_evidence_support": False,
+            "native_graph_connectivity_implies_causality": False,
+            "native_graph_component_implies_consensus": False,
+            "native_graph_degree_is_quality_score": False,
+            "native_graph_analytical_relationships_are_opt_in": True,
             "novelty_candidate_is_novelty_claim": False,
             "automatic_risk_of_bias_judgment": False,
             "missing_method_metadata_means_method_not_used": False,

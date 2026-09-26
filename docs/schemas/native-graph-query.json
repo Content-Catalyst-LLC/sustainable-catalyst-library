@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/native-graph-query.json",
+  "title": "Sustainable Catalyst Native Graph Query",
+  "type": "object",
+  "required": ["schema", "operation", "runtime", "interpretation"],
+  "properties": {
+    "schema": {"const": "sc-library-native-graph-query/1.0"},
+    "runtime_contract": {"const": "sc-library-native-graph-runtime/1.0"},
+    "operation": {"enum": ["neighborhood", "reachability", "connected-components", "subgraph", "structural-stats"]},
+    "query": {"type": "object"},
+    "runtime": {"type": "object"},
+    "nodes": {"type": "array"},
+    "edges": {"type": "array"},
+    "reachability": {"type": "array"},
+    "components": {"type": "array"},
+    "stats": {"type": "object"},
+    "metrics": {"type": "object"},
+    "interpretation": {"type": "object"}
+  },
+  "additionalProperties": true
+}

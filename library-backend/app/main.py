@@ -36,7 +36,8 @@ from .publication_corpus_maps import build_publication_corpus_knowledge_map
 from .visual_research_sessions import build_visual_research_session_package
 from .visual_evidence_trace import build_visual_evidence_trace
 from .research_graph_pathfinding import find_research_paths, query_research_graph
-from .native_graph_runtime import NATIVE_GRAPH_CONTRACT, native_graph_runtime_status
+from .native_graph_runtime import NATIVE_GRAPH_CONTRACT, NATIVE_QUERY_CONTRACT, native_graph_runtime_status
+from .native_graph_query import query_native_graph
 from .scientific_document_intelligence import build_scientific_document_intelligence, load_scientific_document_intelligence
 from .source_identity_resolution import build_source_identity_analysis
 from .retrieval_evaluation import (
@@ -319,6 +320,15 @@ def health() -> dict[str, Any]:
             "native_rust_graph_runtime_foundation": True,
             "native_graph_runtime_contract": NATIVE_GRAPH_CONTRACT,
             "native_graph_runtime_python_fallback": True,
+            "native_rust_evidence_graph_acceleration": True,
+            "native_graph_query_engine": True,
+            "native_graph_query_contract": NATIVE_QUERY_CONTRACT,
+            "native_graph_filtered_neighborhoods": True,
+            "native_graph_reachability": True,
+            "native_graph_connected_components": True,
+            "native_graph_induced_subgraphs": True,
+            "native_graph_structural_statistics": True,
+            "native_graph_analytical_relationships_opt_in": True,
             "scientific_document_intelligence": True,
             "scientific_document_figures_charts": True,
             "scientific_document_tables": True,
@@ -2555,6 +2565,22 @@ def native_graph_pathfind(payload: dict[str, Any]) -> dict[str, Any]:
     query["runtime"] = "rust"
     return find_research_paths(corpus, query)
 
+@app.post("/v1/runtime/native-graph/query")
+def native_graph_query(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus = payload.get("corpus") if isinstance(payload.get("corpus"), dict) else payload
+    query = payload.get("query") if isinstance(payload.get("query"), dict) else {}
+    return query_native_graph(corpus, query)
+
+
+@app.post("/v1/publication-knowledge-maps/native-graph-query")
+def publication_native_graph_query(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus = _publication_corpus_from_payload(payload)
+    query = payload.get("query") if isinstance(payload.get("query"), dict) else {}
+    result = query_native_graph(corpus, query)
+    result["corpus"] = corpus.get("corpus") or {}
+    result["reproducibility"] = corpus.get("reproducibility") or {}
+    return result
+
 @app.post("/v1/publication-knowledge-maps/research-graph-query")
 def publication_research_graph_query(payload: dict[str, Any]) -> dict[str, Any]:
     corpus = _publication_corpus_from_payload(payload)
@@ -2686,6 +2712,8 @@ def search_readiness() -> dict[str, Any]:
         "literature_review_guardrail": "human-screening-and-explicit-protocol-no-automatic-inclusion-or-meta-analysis",
         "living_evidence_research_evolution": True,
         "living_evidence_guardrail": "snapshot-comparison-and-update-candidates-no-automatic-search-state-change-or-truth-promotion",
+        "rust_evidence_graph_acceleration_native_query_engine": True,
+        "native_graph_query_guardrail": "native-structural-results-do-not-imply-evidence-truth-causality-consensus-or-quality",
     }
 
 

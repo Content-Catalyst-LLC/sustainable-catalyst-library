@@ -1,0 +1,14 @@
+Knowledge Library v5.35.0 — Rust Evidence Graph Acceleration & Native Query Engine
+Backend v2.46.0 / Rust runtime v0.2.0
+
+Validation status: PASS
+- 81/81 selected functional and regression tests pass in the build environment.
+- Python compilation: PASS
+- PHP lint: PASS
+- JavaScript syntax: PASS
+- JSON schema parse: PASS
+- Shell syntax: PASS
+- ZIP integrity: PASS
+- Rust target/ build artifacts excluded from packaged repository/backend.
+- Validator correction: Cargo uses an isolated temporary CARGO_TARGET_DIR, preventing local Rust compilation from creating target/ inside the release tree and invalidating the packaging assertion.
+- Production no-cache Docker build remains the hard Rust compile/runtime gate.
