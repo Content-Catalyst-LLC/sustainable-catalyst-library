@@ -1,0 +1,17 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://sustainablecatalyst.com/schemas/review-protocol.json",
+  "title":"Sustainable Catalyst Literature Review Protocol",
+  "type":"object",
+  "required":["schema","protocol_id","title","protocol_fingerprint_sha256"],
+  "properties":{
+    "schema":{"const":"sc-library-review-protocol/1.0"},
+    "protocol_id":{"type":"string"},
+    "title":{"type":"string"},
+    "research_question":{"type":["string","null"]},
+    "inclusion_criteria":{"type":"array","items":{"type":"string"}},
+    "exclusion_criteria":{"type":"array","items":{"type":"string"}},
+    "search_strategies":{"type":"array"},
+    "protocol_fingerprint_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"}
+  }
+}

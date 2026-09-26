@@ -1,0 +1,8 @@
+Knowledge Library v5.33.0 / backend v2.44.0
+Local selected release/regression suite: 61/61 PASS
+Python compileall: PASS
+PHP lint: PASS
+JavaScript syntax: PASS
+JSON schemas: PASS
+Rust source: corrected v0.1.0 retained; target/ excluded
+Production hard gate: Docker cargo build --release --locked + native runtime forced path query

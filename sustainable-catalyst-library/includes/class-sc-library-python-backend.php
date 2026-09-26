@@ -288,6 +288,21 @@ final class SC_Library_Python_Backend {
             'permission_callback' => '__return_true',
             'callback' => [$this, 'proxy_publication_research_gap_novelty'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/literature-review-build', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_literature_review_build'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/literature-review-compare', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_literature_review_compare'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-literature-review', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_literature_review'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/scientific-document-intelligence', [
             'methods' => WP_REST_Server::CREATABLE,
             'permission_callback' => '__return_true',
@@ -735,6 +750,18 @@ final class SC_Library_Python_Backend {
         $result=json_decode((string) wp_remote_retrieve_body($response), true);
         if (!is_array($result)) { $result=['schema'=>'sc-library-research-gap-novelty/1.0','error'=>'Invalid backend JSON']; }
         return new WP_REST_Response($result, $code ?: 502);
+    }
+
+    public function proxy_literature_review_build(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/literature-reviews/build', 'sc-library-literature-review/1.0');
+    }
+
+    public function proxy_literature_review_compare(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/literature-reviews/compare', 'sc-library-review-change-set/1.0');
+    }
+
+    public function proxy_publication_literature_review(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/publication-knowledge-maps/literature-review', 'sc-library-literature-review/1.0');
     }
 
     public function proxy_publication_methodology_intelligence(WP_REST_Request $request): WP_REST_Response {

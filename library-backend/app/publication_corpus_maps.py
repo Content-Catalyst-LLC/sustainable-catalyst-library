@@ -988,6 +988,7 @@ def build_publication_corpus_knowledge_map(
             {"key": "temporal-evolution", "label": "Temporal Evolution", "purpose": "Explicit publication/version/status-event chronology with historical-availability and retrospective-status snapshots"},
             {"key": "methodology-intelligence", "label": "Methodology Intelligence", "purpose": "Source-grounded study design, population, sample, methods, uncertainty, limitations and reproducibility reporting without automatic quality scoring"},
             {"key": "research-gap-novelty", "label": "Research Gaps & Novelty", "purpose": "Corpus-scoped candidate gaps and novelty-discovery leads with explicit caveats and external-verification requirements"},
+            {"key": "literature-review", "label": "Literature Review", "purpose": "Reproducible protocol, human screening decisions, extraction lineage, review flow and deterministic review-state snapshots"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
@@ -996,7 +997,7 @@ def build_publication_corpus_knowledge_map(
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens", "inspect-methodology-profile", "compare-methodologies", "filter-study-design", "inspect-gap-candidate", "inspect-novelty-candidate", "filter-gap-kind"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens", "inspect-methodology-profile", "compare-methodologies", "filter-study-design", "inspect-gap-candidate", "inspect-novelty-candidate", "filter-gap-kind", "inspect-review-protocol", "inspect-screening-decision", "compare-review-snapshots"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -1031,6 +1032,7 @@ def build_publication_corpus_knowledge_map(
                 "non-destructive-duplicate-candidate-detection",
                 "explicit-structured-methodology-extraction",
                 "descriptive-methodology-comparison",
+                "reproducible-review-protocol-and-screening-lineage",
             ],
             "governed_visual_reasoning_authority": "platform-core",
         },
@@ -1067,5 +1069,9 @@ def build_publication_corpus_knowledge_map(
             "novelty_candidate_is_novelty_claim": False,
             "automatic_risk_of_bias_judgment": False,
             "missing_method_metadata_means_method_not_used": False,
+            "review_membership_determines_truth": False,
+            "review_flow_implies_prisma_compliance": False,
+            "automatic_review_screening": False,
+            "automatic_review_meta_analysis": False,
         },
     }

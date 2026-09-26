@@ -1,0 +1,20 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://sustainablecatalyst.com/schemas/literature-review.json",
+  "title":"Sustainable Catalyst Reproducible Literature Review",
+  "type":"object",
+  "required":["schema","review_id","protocol","flow","sets","snapshot","guardrails"],
+  "properties":{
+    "schema":{"const":"sc-library-literature-review/1.0"},
+    "review_id":{"type":"string"},
+    "protocol":{"type":"object"},
+    "records":{"type":"array"},
+    "decisions":{"type":"array"},
+    "extractions":{"type":"array"},
+    "flow":{"type":"object"},
+    "sets":{"type":"object"},
+    "snapshot":{"type":"object"},
+    "graph_overlay":{"type":"object"},
+    "guardrails":{"type":"object"}
+  }
+}

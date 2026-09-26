@@ -1,0 +1,16 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://sustainablecatalyst.com/schemas/review-change-set.json",
+  "title":"Sustainable Catalyst Literature Review Change Set",
+  "type":"object",
+  "required":["schema","from_review_id","to_review_id","protocol_changed","guardrails"],
+  "properties":{
+    "schema":{"const":"sc-library-review-change-set/1.0"},
+    "from_review_id":{"type":"string"},
+    "to_review_id":{"type":"string"},
+    "protocol_changed":{"type":"boolean"},
+    "added_included_record_ids":{"type":"array","items":{"type":"string"}},
+    "removed_included_record_ids":{"type":"array","items":{"type":"string"}},
+    "guardrails":{"type":"object"}
+  }
+}

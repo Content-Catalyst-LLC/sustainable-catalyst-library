@@ -45,6 +45,7 @@ from .retrieval_evaluation import (
 from .temporal_knowledge import temporal_request, knowledge_snapshot, compare_snapshots
 from .methodology_intelligence import methodology_request
 from .research_gap_novelty import research_gap_novelty_request
+from .literature_review import literature_review_request, build_literature_review
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -367,6 +368,15 @@ def health() -> dict[str, Any]:
             "research_novelty_candidate_objects": True,
             "research_novelty_automatic_claim": False,
             "research_gap_global_absence_claim": False,
+            "reproducible_literature_review_engine": True,
+            "literature_review_protocol_fingerprints": True,
+            "literature_review_human_screening_decisions": True,
+            "literature_review_extraction_lineage": True,
+            "literature_review_reproducible_snapshots": True,
+            "literature_review_review_state_comparison": True,
+            "literature_review_automatic_screening": False,
+            "literature_review_automatic_inclusion_exclusion": False,
+            "literature_review_automatic_meta_analysis": False,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2439,6 +2449,38 @@ def publication_research_gap_novelty(payload: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+@app.post("/v1/literature-reviews/build")
+def literature_review_build(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return build_literature_review(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/v1/literature-reviews/compare")
+def literature_review_compare(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        request_payload = dict(payload)
+        request_payload["mode"] = "compare"
+        return literature_review_request(request_payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/v1/publication-knowledge-maps/literature-review")
+def publication_literature_review(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        result = build_literature_review(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    result["publication_map_context"] = {
+        "renderer_neutral": True,
+        "graph_overlay_default_evidence_path": False,
+        "platform_core_governance_changed": False,
+    }
+    return result
+
+
 @app.post("/v1/scientific-document-intelligence/analyze")
 def scientific_document_intelligence_analyze(payload: dict[str, Any]) -> dict[str, Any]:
     document = payload.get("document") if isinstance(payload.get("document"), dict) else payload
@@ -2608,6 +2650,8 @@ def search_readiness() -> dict[str, Any]:
         "methodology_guardrail": "structured-reporting-is-not-quality-or-truth",
         "research_gap_novelty_discovery": True,
         "research_gap_novelty_guardrail": "corpus-gap-is-not-global-absence-and-novelty-candidate-is-not-novelty-claim",
+        "reproducible_literature_review_engine": True,
+        "literature_review_guardrail": "human-screening-and-explicit-protocol-no-automatic-inclusion-or-meta-analysis",
     }
 
 
