@@ -48,6 +48,7 @@ from .methodology_intelligence import methodology_request
 from .research_gap_novelty import research_gap_novelty_request
 from .literature_review import literature_review_request, build_literature_review
 from .living_evidence import living_evidence_request, build_living_evidence
+from .ingestion_job_fabric import ingestion_fabric_status, submit_ingestion_job, list_ingestion_jobs, get_ingestion_job, cancel_ingestion_job
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -321,6 +322,15 @@ def health() -> dict[str, Any]:
             "native_graph_runtime_contract": NATIVE_GRAPH_CONTRACT,
             "native_graph_runtime_python_fallback": True,
             "native_rust_evidence_graph_acceleration": True,
+            "go_research_ingestion_job_fabric": True,
+            "go_ingestion_concurrency": True,
+            "go_ingestion_retries": True,
+            "go_ingestion_cancellation": True,
+            "go_ingestion_backpressure": True,
+            "go_ingestion_worker_health": True,
+            "go_ingestion_job_state_implies_source_validity": False,
+            "go_ingestion_job_state_implies_evidence_truth": False,
+            "go_ingestion_automatic_core_promotion": False,
             "native_graph_query_engine": True,
             "native_graph_query_contract": NATIVE_QUERY_CONTRACT,
             "native_graph_filtered_neighborhoods": True,
@@ -2551,6 +2561,69 @@ def publication_source_identity(payload: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+
+
+@app.get("/v1/runtime/ingestion-fabric/status")
+def ingestion_job_fabric_status() -> dict[str, Any]:
+    return ingestion_fabric_status()
+
+
+@app.post("/v1/ingestion-jobs")
+async def ingestion_job_submit(
+    payload: dict[str, Any], request: Request, authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None), x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return submit_ingestion_job(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/v1/ingestion-jobs")
+async def ingestion_job_list(
+    request: Request, authorization: str | None = Header(default=None), x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None), state: str = "", job_type: str = "",
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return list_ingestion_jobs(state=state, job_type=job_type)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/v1/ingestion-jobs/{job_id}")
+async def ingestion_job_read(
+    job_id: str, request: Request, authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None), x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return get_ingestion_job(job_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.post("/v1/ingestion-jobs/{job_id}/cancel")
+async def ingestion_job_cancel(
+    job_id: str, request: Request, authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None), x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return cancel_ingestion_job(job_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 @app.get("/v1/runtime/native-graph/status")
 def native_graph_status() -> dict[str, Any]:

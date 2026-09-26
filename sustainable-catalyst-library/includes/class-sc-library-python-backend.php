@@ -243,6 +243,33 @@ final class SC_Library_Python_Backend {
             'permission_callback' => '__return_true',
             'callback' => [$this, 'proxy_publication_source_identity'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/ingestion-fabric-status', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_ingestion_fabric_status'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/ingestion-jobs', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'permission_callback' => static fn() => current_user_can('edit_posts'),
+                'callback' => [$this, 'proxy_ingestion_job_submit'],
+            ],
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'permission_callback' => static fn() => current_user_can('edit_posts'),
+                'callback' => [$this, 'proxy_ingestion_jobs_list'],
+            ],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/ingestion-jobs/(?P<job_id>[A-Za-z0-9._-]+)', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => static fn() => current_user_can('edit_posts'),
+            'callback' => [$this, 'proxy_ingestion_job_read'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/ingestion-jobs/(?P<job_id>[A-Za-z0-9._-]+)/cancel', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static fn() => current_user_can('edit_posts'),
+            'callback' => [$this, 'proxy_ingestion_job_cancel'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/native-graph-runtime-status', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
@@ -834,6 +861,48 @@ final class SC_Library_Python_Backend {
         return new WP_REST_Response($result, $code ?: 502);
     }
 
+
+
+    public function proxy_ingestion_fabric_status(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) { return new WP_REST_Response(['schema'=>'sc-library-go-ingestion-runtime/1.0','available'=>false,'error'=>'Library backend not configured'], 503); }
+        $response = wp_remote_get(self::base_url() . '/v1/runtime/ingestion-fabric/status', ['timeout'=>max(self::timeout(),10),'redirection'=>2,'headers'=>['Accept'=>'application/json']]);
+        if (is_wp_error($response)) { return new WP_REST_Response(['schema'=>'sc-library-go-ingestion-runtime/1.0','available'=>false,'error'=>$response->get_error_message()],502); }
+        $code=(int) wp_remote_retrieve_response_code($response); $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>'sc-library-go-ingestion-runtime/1.0','available'=>false,'error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
+    }
+
+    public function proxy_ingestion_job_submit(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) { return new WP_REST_Response(['schema'=>'sc-library-go-ingestion-runtime/1.0','error'=>'Library backend not configured'],503); }
+        $payload=$request->get_json_params(); if (!is_array($payload)) {$payload=[];}
+        $body=wp_json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $response=self::signed_request('POST','/v1/ingestion-jobs',(string)$body);
+        if (is_wp_error($response)) { return new WP_REST_Response(['schema'=>'sc-library-go-ingestion-runtime/1.0','error'=>$response->get_error_message()], self::error_status($response) ?: 502); }
+        return new WP_REST_Response($response, 200);
+    }
+
+    public function proxy_ingestion_jobs_list(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) { return new WP_REST_Response(['schema'=>'sc-library-go-ingestion-runtime/1.0','error'=>'Library backend not configured'],503); }
+        $response=self::signed_request('GET','/v1/ingestion-jobs','');
+        if (is_wp_error($response)) { return new WP_REST_Response(['schema'=>'sc-library-go-ingestion-runtime/1.0','error'=>$response->get_error_message()], self::error_status($response) ?: 502); }
+        return new WP_REST_Response($response, 200);
+    }
+
+    public function proxy_ingestion_job_read(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) { return new WP_REST_Response(['schema'=>'sc-library-go-ingestion-runtime/1.0','error'=>'Library backend not configured'],503); }
+        $job_id=sanitize_text_field((string)$request['job_id']); $path='/v1/ingestion-jobs/'.rawurlencode($job_id);
+        $response=self::signed_request('GET',$path,'');
+        if (is_wp_error($response)) { return new WP_REST_Response(['schema'=>'sc-library-go-ingestion-runtime/1.0','error'=>$response->get_error_message()], self::error_status($response) ?: 502); }
+        return new WP_REST_Response($response, 200);
+    }
+
+    public function proxy_ingestion_job_cancel(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) { return new WP_REST_Response(['schema'=>'sc-library-go-ingestion-runtime/1.0','error'=>'Library backend not configured'],503); }
+        $job_id=sanitize_text_field((string)$request['job_id']); $path='/v1/ingestion-jobs/'.rawurlencode($job_id).'/cancel';
+        $response=self::signed_request('POST',$path,'{}');
+        if (is_wp_error($response)) { return new WP_REST_Response(['schema'=>'sc-library-go-ingestion-runtime/1.0','error'=>$response->get_error_message()], self::error_status($response) ?: 502); }
+        return new WP_REST_Response($response, 200);
+    }
 
     public function proxy_publication_native_graph_query(WP_REST_Request $request) {
         $json = $request->get_json_params();

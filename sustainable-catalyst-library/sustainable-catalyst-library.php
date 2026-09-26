@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.35.0 adds Rust Evidence Graph Acceleration & Native Query Engine with policy-filtered neighborhoods, reachability, components, induced subgraphs, and structural graph statistics.
- * Version: 5.35.0
+ * Description: Sustainable Catalyst Library v5.36.0 adds the Go Research Ingestion & Job Fabric for concurrent connector, OCR, parsing, extraction, indexing, retry, cancellation, and worker orchestration.
+ * Version: 5.36.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.35.0');
+define('SC_LIBRARY_VERSION', '5.36.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
@@ -67,6 +67,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-research-gap-novelty.ph
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-native-graph-runtime.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-literature-review.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-living-evidence.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-ingestion-job-fabric.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-operations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-dynamic-explorer.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-capability-hub.php';
@@ -147,6 +148,7 @@ final class SC_Library_Plugin {
         $native_graph_runtime = new SC_Library_Native_Graph_Runtime();
         $literature_review = new SC_Library_Literature_Review();
         $living_evidence = new SC_Library_Living_Evidence();
+        $ingestion_job_fabric = new SC_Library_Ingestion_Job_Fabric();
         $python_operations = new SC_Library_Python_Operations();
         $dynamic_explorer = new SC_Library_Dynamic_Explorer();
         $capability_hub = new SC_Library_Capability_Hub();
@@ -233,6 +235,7 @@ final class SC_Library_Plugin {
         $native_graph_runtime->register_hooks();
         $literature_review->register_hooks();
         $living_evidence->register_hooks();
+        $ingestion_job_fabric->register_hooks();
         $python_operations->register_hooks();
         $dynamic_explorer->register_hooks();
         $capability_hub->register_hooks();

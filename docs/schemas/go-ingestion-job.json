@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/go-ingestion-job.json",
+  "title": "Sustainable Catalyst Go Ingestion Job",
+  "type": "object",
+  "required": ["id", "type", "state", "attempt", "max_attempts", "created_at", "updated_at"],
+  "properties": {
+    "id": {"type": "string"},
+    "type": {"type": "string"},
+    "source_key": {"type": "string"},
+    "payload": {"type": "object"},
+    "priority": {"type": "integer"},
+    "state": {"enum": ["queued", "running", "retry_wait", "completed", "failed", "cancelled"]},
+    "attempt": {"type": "integer", "minimum": 0},
+    "max_attempts": {"type": "integer", "minimum": 1},
+    "idempotency_key": {"type": "string"},
+    "worker_id": {"type": "string"},
+    "created_at": {"type": "string"},
+    "updated_at": {"type": "string"},
+    "available_at": {"type": "string"},
+    "result": {"type": "object"},
+    "error": {"type": "string"}
+  },
+  "additionalProperties": true
+}

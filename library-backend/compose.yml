@@ -7,6 +7,11 @@ services:
       - .env
     ports:
       - "127.0.0.1:8087:8080"
+    depends_on:
+      sc-library-ingestion:
+        condition: service_healthy
+    environment:
+      SC_LIBRARY_GO_INGESTION_URL: http://sc-library-ingestion:8090
     networks:
       - sc-internal
     healthcheck:
@@ -15,6 +20,30 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  sc-library-ingestion:
+    build:
+      context: ./go-ingestion-runtime
+    container_name: sc-library-ingestion
+    restart: unless-stopped
+    environment:
+      SC_LIBRARY_GO_PORT: "8090"
+      SC_LIBRARY_GO_MAX_QUEUE: "${SC_LIBRARY_GO_MAX_QUEUE:-5000}"
+      SC_LIBRARY_GO_MAX_IN_FLIGHT: "${SC_LIBRARY_GO_MAX_IN_FLIGHT:-32}"
+      SC_LIBRARY_GO_STATE_FILE: /data/jobs.json
+    volumes:
+      - sc-library-ingestion-data:/data
+    networks:
+      - sc-internal
+    healthcheck:
+      test: ["CMD", "/sc-library-ingestion-runtime", "status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  sc-library-ingestion-data:
 
 networks:
   sc-internal:
