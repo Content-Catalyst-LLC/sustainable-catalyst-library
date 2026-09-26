@@ -1,0 +1,26 @@
+Sustainable Catalyst Knowledge Library v5.30.0
+Evidence Quality & Methodology Intelligence
+Backend v2.41.0
+
+Release validation:
+- 49/49 selected release/regression tests passed
+- Python compilation passed
+- PHP lint passed
+- JavaScript syntax passed
+- shell syntax passed
+- methodology JSON schemas parsed successfully
+- preserves v5.29 temporal research evolution
+- preserves v5.28 retrieval evaluation/adaptive ranking
+- preserves v5.27 source identity resolution
+- preserves v5.26 scientific document intelligence
+- preserves v5.25 research graph/evidence pathfinding
+- preserves v5.24 cross-publication evidence synthesis
+
+Integrity boundaries:
+- no automatic universal methodology/evidence quality score
+- no automatic formal risk-of-bias judgment
+- no automatic causal-validity judgment
+- reporting coverage is not scientific quality
+- missing structured metadata does not prove method absence
+- methodology graph relations are not default evidence paths
+- Platform Core remains durable governed research/synthesis authority

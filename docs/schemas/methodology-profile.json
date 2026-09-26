@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/methodology-profile.json",
+  "title": "Sustainable Catalyst Methodology Profile",
+  "type": "object",
+  "required": ["schema", "record_id", "study_design", "study_context", "research_structure", "methods", "transparency", "method_reporting_coverage", "appraisal_readiness", "provenance", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-methodology-profile/1.0"},
+    "record_id": {"type": "string", "minLength": 1},
+    "title": {"type": "string"},
+    "study_design": {"type": "object"},
+    "study_context": {"type": "object"},
+    "research_structure": {"type": "object"},
+    "methods": {"type": "object"},
+    "transparency": {"type": "object"},
+    "method_reporting_coverage": {
+      "type": "object",
+      "required": ["reported_dimension_count", "dimension_count", "coverage_ratio", "coverage_is_quality_score"],
+      "properties": {
+        "reported_dimension_count": {"type": "integer", "minimum": 0},
+        "dimension_count": {"type": "integer", "minimum": 1},
+        "coverage_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "coverage_is_quality_score": {"const": false}
+      }
+    },
+    "appraisal_readiness": {"type": "object"},
+    "provenance": {"type": "object"},
+    "guardrails": {"type": "object"}
+  }
+}

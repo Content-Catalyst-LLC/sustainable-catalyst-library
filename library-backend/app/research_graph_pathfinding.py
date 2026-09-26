@@ -30,6 +30,7 @@ RELATIONSHIP_CLASSES: dict[str, str] = {
     "affiliated-institution-identity": "explicit-entity-identity",
     "references-dataset-identity": "explicit-entity-identity",
     "duplicate-candidate": "review-required-identity-candidate",
+    "describes-methodology": "explicit-methodology-description",
     "publication-topic-cooccurrence": "measured-analytical",
     "source-span-cooccurrence": "measured-analytical",
     "embedding-cosine-similarity": "measured-analytical",
@@ -133,6 +134,7 @@ def build_research_graph_manifest(corpus: dict[str, Any]) -> dict[str, Any]:
             "duplicate_candidate_requires_review": True,
             "identity_candidate_edges_are_opt_in": True,
             "author_institution_identity_edges_are_default_evidence_paths": False,
+            "methodology_description_edges_are_default_evidence_paths": False,
         },
     }
 

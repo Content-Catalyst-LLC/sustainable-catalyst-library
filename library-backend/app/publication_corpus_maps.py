@@ -13,6 +13,7 @@ from .research_graph_pathfinding import build_research_graph_manifest
 from .scientific_document_intelligence import build_scientific_corpus_overlay
 from .source_identity_resolution import build_source_identity_resolution
 from .temporal_knowledge import build_temporal_knowledge_evolution
+from .methodology_intelligence import build_methodology_intelligence
 
 CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
 
@@ -527,6 +528,7 @@ def build_publication_corpus_knowledge_map(
                     "truncated": False,
                 },
                 "semantic_analysis": semantic_status,
+                "methodology_intelligence": build_methodology_intelligence([]),
                 "boundaries": {
                     "llm_inferred_edges": False,
                     "automatic_truth_promotion": False,
@@ -817,6 +819,31 @@ def build_publication_corpus_knowledge_map(
             requires_review=bool(rel.get("requires_review", False)),
         )
 
+    # v5.30.0: methodology intelligence structures only explicitly reported
+    # study-method fields. Reporting coverage is documentary completeness, never
+    # a quality score, and methodology nodes are not default evidence-path edges.
+    methodology_intelligence = build_methodology_intelligence(records.values())
+    methodology_overlay = methodology_intelligence.get("graph_overlay") or {}
+    for node in methodology_overlay.get("nodes") or []:
+        if not isinstance(node, dict) or not node.get("id"):
+            continue
+        nid = str(node.get("id"))
+        kind = str(node.get("kind") or "methodology-profile")
+        label = str(node.get("label") or nid)
+        extras = {k: v for k, v in node.items() if k not in {"id", "kind", "label"}}
+        _add_node(nodes, nid, kind, label, **extras)
+    for rel in methodology_overlay.get("edges") or []:
+        if not isinstance(rel, dict) or not rel.get("source") or not rel.get("target"):
+            continue
+        _add_edge(
+            edges, str(rel.get("source")), str(rel.get("target")),
+            str(rel.get("relationship_basis") or "describes-methodology"),
+            directed=bool(rel.get("directed", True)),
+            weight=max(.05, float(rel.get("weight") or 1.0)), evidence_count=1,
+            analytical=False, truth_assertion=False, causal_assertion=False,
+            provenance=rel.get("provenance") or {}, default_evidence_path=False,
+        )
+
     edge_items = list(edges.values())
     degree: dict[str, float] = defaultdict(float)
     citations: dict[str, int] = defaultdict(int)
@@ -901,6 +928,7 @@ def build_publication_corpus_knowledge_map(
         "scientific_document_intelligence": scientific_document_intelligence,
         "source_identity_resolution": source_identity_resolution,
         "temporal_knowledge_evolution": temporal_knowledge_evolution,
+        "methodology_intelligence": methodology_intelligence,
         "research_graph": research_graph,
         "reproducibility": {
             "schema": "sc-library-visual-corpus-reproducibility/1.0",
@@ -927,6 +955,7 @@ def build_publication_corpus_knowledge_map(
             {"key": "scientific-objects", "label": "Scientific Objects", "purpose": "Source-grounded figures, charts, tables, equations, captions, appendices, supplements and datasets with exact document references"},
             {"key": "source-identity", "label": "Source Identity", "purpose": "Canonical source clusters, duplicate/version-family diagnostics, and strong-identifier author/institution/dataset resolution without destructive merges"},
             {"key": "temporal-evolution", "label": "Temporal Evolution", "purpose": "Explicit publication/version/status-event chronology with historical-availability and retrospective-status snapshots"},
+            {"key": "methodology-intelligence", "label": "Methodology Intelligence", "purpose": "Source-grounded study design, population, sample, methods, uncertainty, limitations and reproducibility reporting without automatic quality scoring"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
@@ -935,7 +964,7 @@ def build_publication_corpus_knowledge_map(
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens", "inspect-methodology-profile", "compare-methodologies", "filter-study-design"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -968,6 +997,8 @@ def build_publication_corpus_knowledge_map(
                 "deterministic-source-identity-normalization",
                 "exact-identifier-entity-resolution",
                 "non-destructive-duplicate-candidate-detection",
+                "explicit-structured-methodology-extraction",
+                "descriptive-methodology-comparison",
             ],
             "governed_visual_reasoning_authority": "platform-core",
         },
@@ -997,5 +1028,10 @@ def build_publication_corpus_knowledge_map(
             "title_only_source_identity_merge": False,
             "author_name_only_cross_source_merge": False,
             "source_identity_is_evidence_truth": False,
+            "method_reporting_coverage_is_quality_score": False,
+            "methodology_profile_determines_truth": False,
+            "methodology_profile_proves_causality": False,
+            "automatic_risk_of_bias_judgment": False,
+            "missing_method_metadata_means_method_not_used": False,
         },
     }

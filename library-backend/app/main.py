@@ -42,6 +42,7 @@ from .retrieval_evaluation import (
     adaptive_rerank, build_adaptive_ranking_profile, evaluate_retrieval, rerank_results,
 )
 from .temporal_knowledge import temporal_request, knowledge_snapshot, compare_snapshots
+from .methodology_intelligence import methodology_request
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -347,6 +348,14 @@ def health() -> dict[str, Any]:
             "temporal_research_change_sets": True,
             "temporal_later_events_projected_backward_by_default": False,
             "temporal_coincidence_implies_causality": False,
+            "methodology_intelligence": True,
+            "methodology_study_design_structuring": True,
+            "methodology_population_sample_methods_uncertainty": True,
+            "methodology_transparency_reproducibility_signals": True,
+            "methodology_reporting_coverage": True,
+            "methodology_automatic_quality_score": False,
+            "methodology_automatic_risk_of_bias_judgment": False,
+            "methodology_profile_truth_promotion": False,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2385,6 +2394,23 @@ def publication_temporal_evolution(payload: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+@app.post("/v1/methodology-intelligence/analyze")
+def methodology_intelligence_analyze(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return methodology_request(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/v1/publication-knowledge-maps/methodology-intelligence")
+def publication_methodology_intelligence(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus = _publication_corpus_from_payload(payload)
+    result = dict(corpus.get("methodology_intelligence") or {})
+    result["corpus"] = corpus.get("corpus") or {}
+    result["reproducibility"] = corpus.get("reproducibility") or {}
+    return result
+
+
 @app.post("/v1/scientific-document-intelligence/analyze")
 def scientific_document_intelligence_analyze(payload: dict[str, Any]) -> dict[str, Any]:
     document = payload.get("document") if isinstance(payload.get("document"), dict) else payload
@@ -2536,6 +2562,8 @@ def search_readiness() -> dict[str, Any]:
         "adaptive_ranking_guardrail": "rerank-only-no-filter-no-truth-promotion",
         "temporal_knowledge_evolution": True,
         "temporal_snapshot_guardrail": "historical-availability-is-distinct-from-retrospective-status",
+        "methodology_intelligence": True,
+        "methodology_guardrail": "structured-reporting-is-not-quality-or-truth",
     }
 
 

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/methodology-intelligence.json",
+  "title": "Sustainable Catalyst Methodology Intelligence",
+  "type": "object",
+  "required": ["schema", "profiles", "metrics", "graph_overlay", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-methodology-intelligence/1.0"},
+    "profiles": {"type": "array", "items": {"$ref": "methodology-profile.json"}},
+    "comparison": {"$ref": "methodology-comparison.json"},
+    "metrics": {"type": "object"},
+    "graph_overlay": {
+      "type": "object",
+      "required": ["nodes", "edges"],
+      "properties": {
+        "nodes": {"type": "array"},
+        "edges": {"type": "array"}
+      }
+    },
+    "guardrails": {"type": "object"},
+    "fingerprint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
