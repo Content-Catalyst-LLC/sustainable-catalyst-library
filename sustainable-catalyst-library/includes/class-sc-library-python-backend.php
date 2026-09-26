@@ -303,6 +303,16 @@ final class SC_Library_Python_Backend {
             'permission_callback' => '__return_true',
             'callback' => [$this, 'proxy_publication_literature_review'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/living-evidence', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_living_evidence'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-living-evidence', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_living_evidence'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/scientific-document-intelligence', [
             'methods' => WP_REST_Server::CREATABLE,
             'permission_callback' => '__return_true',
@@ -762,6 +772,14 @@ final class SC_Library_Python_Backend {
 
     public function proxy_publication_literature_review(WP_REST_Request $request): WP_REST_Response {
         return $this->proxy_retrieval_post($request, '/v1/publication-knowledge-maps/literature-review', 'sc-library-literature-review/1.0');
+    }
+
+    public function proxy_living_evidence(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/living-evidence/analyze', 'sc-library-living-evidence/1.0');
+    }
+
+    public function proxy_publication_living_evidence(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/publication-knowledge-maps/living-evidence', 'sc-library-living-evidence/1.0');
     }
 
     public function proxy_publication_methodology_intelligence(WP_REST_Request $request): WP_REST_Response {

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.31.0 adds Research Gap & Novelty Discovery with corpus-scoped gap signals, rare-combination discovery leads, and explicit external-verification guardrails.
- * Version: 5.33.0
+ * Description: Sustainable Catalyst Library v5.34.0 adds Living Evidence & Research Evolution with reproducible review snapshot comparison, explicit source-change tracking, update candidates, and immutable prior-review lineage.
+ * Version: 5.34.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.33.0');
+define('SC_LIBRARY_VERSION', '5.34.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
@@ -66,6 +66,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-methodology-intelligenc
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-research-gap-novelty.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-native-graph-runtime.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-literature-review.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-living-evidence.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-operations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-dynamic-explorer.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-capability-hub.php';
@@ -145,6 +146,7 @@ final class SC_Library_Plugin {
         $research_gap_novelty = new SC_Library_Research_Gap_Novelty();
         $native_graph_runtime = new SC_Library_Native_Graph_Runtime();
         $literature_review = new SC_Library_Literature_Review();
+        $living_evidence = new SC_Library_Living_Evidence();
         $python_operations = new SC_Library_Python_Operations();
         $dynamic_explorer = new SC_Library_Dynamic_Explorer();
         $capability_hub = new SC_Library_Capability_Hub();
@@ -230,6 +232,7 @@ final class SC_Library_Plugin {
         $research_gap_novelty->register_hooks();
         $native_graph_runtime->register_hooks();
         $literature_review->register_hooks();
+        $living_evidence->register_hooks();
         $python_operations->register_hooks();
         $dynamic_explorer->register_hooks();
         $capability_hub->register_hooks();

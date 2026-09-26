@@ -989,6 +989,7 @@ def build_publication_corpus_knowledge_map(
             {"key": "methodology-intelligence", "label": "Methodology Intelligence", "purpose": "Source-grounded study design, population, sample, methods, uncertainty, limitations and reproducibility reporting without automatic quality scoring"},
             {"key": "research-gap-novelty", "label": "Research Gaps & Novelty", "purpose": "Corpus-scoped candidate gaps and novelty-discovery leads with explicit caveats and external-verification requirements"},
             {"key": "literature-review", "label": "Literature Review", "purpose": "Reproducible protocol, human screening decisions, extraction lineage, review flow and deterministic review-state snapshots"},
+            {"key": "living-evidence", "label": "Living Evidence", "purpose": "Compare immutable literature-review snapshots, inspect explicit source/review changes, and surface human-reviewed update candidates over time"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
@@ -997,7 +998,7 @@ def build_publication_corpus_knowledge_map(
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens", "inspect-methodology-profile", "compare-methodologies", "filter-study-design", "inspect-gap-candidate", "inspect-novelty-candidate", "filter-gap-kind", "inspect-review-protocol", "inspect-screening-decision", "compare-review-snapshots"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens", "inspect-methodology-profile", "compare-methodologies", "filter-study-design", "inspect-gap-candidate", "inspect-novelty-candidate", "filter-gap-kind", "inspect-review-protocol", "inspect-screening-decision", "compare-review-snapshots", "inspect-living-update-candidate", "compare-living-review-snapshots", "inspect-explicit-change-event"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -1018,6 +1019,8 @@ def build_publication_corpus_knowledge_map(
                 "stored-embedding-cosine-similarity-if-available",
                 "cross-publication-topic-jaccard",
                 "deterministic-topic-regions",
+                "living-review-snapshot-comparison",
+                "explicit-source-change-event-lineage",
                 "publication-time-binning",
                 "deterministic-4d-knowledge-terrain",
                 "linked-view-deterministic-crossfilter",

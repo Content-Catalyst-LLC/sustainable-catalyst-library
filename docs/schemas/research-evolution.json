@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/research-evolution.json",
+  "title": "Research Evolution",
+  "type": "object",
+  "required": ["schema", "yearly_counts", "explicit_event_type_counts", "interpretation"],
+  "properties": {
+    "schema": {"const": "sc-library-research-evolution/1.0"},
+    "yearly_counts": {"type": "array"},
+    "explicit_event_type_counts": {"type": "object"},
+    "interpretation": {"type": "string"}
+  }
+}

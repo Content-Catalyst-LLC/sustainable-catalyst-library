@@ -46,6 +46,7 @@ from .temporal_knowledge import temporal_request, knowledge_snapshot, compare_sn
 from .methodology_intelligence import methodology_request
 from .research_gap_novelty import research_gap_novelty_request
 from .literature_review import literature_review_request, build_literature_review
+from .living_evidence import living_evidence_request, build_living_evidence
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -377,6 +378,14 @@ def health() -> dict[str, Any]:
             "literature_review_automatic_screening": False,
             "literature_review_automatic_inclusion_exclusion": False,
             "literature_review_automatic_meta_analysis": False,
+            "living_evidence_research_evolution": True,
+            "living_evidence_review_update_candidates": True,
+            "living_evidence_snapshot_comparison": True,
+            "living_evidence_explicit_change_events": True,
+            "living_evidence_surveillance_plan": True,
+            "living_evidence_automatic_search": False,
+            "living_evidence_automatic_review_state_change": False,
+            "living_evidence_newer_evidence_truth_promotion": False,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2481,6 +2490,29 @@ def publication_literature_review(payload: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+@app.post("/v1/living-evidence/analyze")
+def living_evidence_analyze(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return living_evidence_request(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/v1/publication-knowledge-maps/living-evidence")
+def publication_living_evidence(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        result = build_living_evidence(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    result["publication_map_context"] = {
+        "renderer_neutral": True,
+        "graph_overlay_default_evidence_path": False,
+        "prior_review_snapshots_immutable": True,
+        "platform_core_governance_changed": False,
+    }
+    return result
+
+
 @app.post("/v1/scientific-document-intelligence/analyze")
 def scientific_document_intelligence_analyze(payload: dict[str, Any]) -> dict[str, Any]:
     document = payload.get("document") if isinstance(payload.get("document"), dict) else payload
@@ -2652,6 +2684,8 @@ def search_readiness() -> dict[str, Any]:
         "research_gap_novelty_guardrail": "corpus-gap-is-not-global-absence-and-novelty-candidate-is-not-novelty-claim",
         "reproducible_literature_review_engine": True,
         "literature_review_guardrail": "human-screening-and-explicit-protocol-no-automatic-inclusion-or-meta-analysis",
+        "living_evidence_research_evolution": True,
+        "living_evidence_guardrail": "snapshot-comparison-and-update-candidates-no-automatic-search-state-change-or-truth-promotion",
     }
 
 

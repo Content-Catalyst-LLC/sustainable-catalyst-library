@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/living-evidence.json",
+  "title": "Sustainable Catalyst Living Evidence",
+  "type": "object",
+  "required": ["schema", "living_evidence_id", "baseline_snapshot", "current_snapshot", "update_candidates", "research_evolution", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-living-evidence/1.0"},
+    "living_evidence_id": {"type": "string"},
+    "baseline_review_id": {"type": ["string", "null"]},
+    "current_review_id": {"type": ["string", "null"]},
+    "baseline_snapshot": {"type": ["object", "null"]},
+    "current_snapshot": {"type": ["object", "null"]},
+    "review_change_set": {"type": "object"},
+    "update_candidates": {"type": "array"},
+    "research_evolution": {"type": "object"},
+    "surveillance": {"type": "object"},
+    "graph_overlay": {"type": "object"},
+    "guardrails": {"type": "object"}
+  }
+}

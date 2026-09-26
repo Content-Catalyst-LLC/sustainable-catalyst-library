@@ -8,3 +8,5 @@ __pycache__/
 
 # Rust native graph build artifacts
 library-backend/native-graph-runtime/target/
+
+library-backend/native-graph-runtime/target/

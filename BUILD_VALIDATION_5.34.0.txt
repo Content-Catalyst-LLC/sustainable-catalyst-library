@@ -1,0 +1,10 @@
+Knowledge Library v5.34.0 — Living Evidence & Research Evolution
+Release validation result: PASS
+- 71/71 selected functional + regression tests passed
+- Python compileall passed
+- PHP lint passed
+- JavaScript syntax passed
+- JSON schema parsing passed
+- Rust source continuity verified; cargo unavailable in packaging environment, so production Docker remains the mandatory native compile gate
+- native-graph-runtime/target excluded from release packages
+- ZIP integrity and clean-unzip revalidation required below and completed during packaging

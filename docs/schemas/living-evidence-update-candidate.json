@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/living-evidence-update-candidate.json",
+  "title": "Living Evidence Update Candidate",
+  "type": "object",
+  "required": ["schema", "candidate_id", "kind", "suggested_review_action", "automatic_state_change", "human_review_required"],
+  "properties": {
+    "schema": {"const": "sc-library-living-evidence-update-candidate/1.0"},
+    "candidate_id": {"type": "string"},
+    "kind": {"type": "string"},
+    "record_id": {"type": ["string", "null"]},
+    "attention_class": {"type": "string"},
+    "basis": {"type": "object"},
+    "suggested_review_action": {"type": "string"},
+    "automatic_state_change": {"const": false},
+    "human_review_required": {"const": true}
+  }
+}
