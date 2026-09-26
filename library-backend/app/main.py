@@ -36,6 +36,7 @@ from .publication_corpus_maps import build_publication_corpus_knowledge_map
 from .visual_research_sessions import build_visual_research_session_package
 from .visual_evidence_trace import build_visual_evidence_trace
 from .research_graph_pathfinding import find_research_paths, query_research_graph
+from .scientific_document_intelligence import build_scientific_document_intelligence, load_scientific_document_intelligence
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -305,6 +306,16 @@ def health() -> dict[str, Any]:
             "publication_evidence_pathfinding": True,
             "publication_direction_aware_graph_traversal": True,
             "publication_analytical_path_edges_opt_in": True,
+            "scientific_document_intelligence": True,
+            "scientific_document_figures_charts": True,
+            "scientific_document_tables": True,
+            "scientific_document_equations": True,
+            "scientific_document_captions": True,
+            "scientific_document_appendices_supplements": True,
+            "scientific_document_datasets": True,
+            "scientific_object_source_provenance": True,
+            "scientific_object_graph_overlay": True,
+            "scientific_visual_values_inferred_from_pixels": False,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2266,6 +2277,20 @@ def _publication_corpus_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
         max_publications=int(corpus_request.get("max_publications", 250)),
         max_topics_per_publication=int(corpus_request.get("max_topics_per_publication", 36)),
     )
+
+
+@app.post("/v1/scientific-document-intelligence/analyze")
+def scientific_document_intelligence_analyze(payload: dict[str, Any]) -> dict[str, Any]:
+    document = payload.get("document") if isinstance(payload.get("document"), dict) else payload
+    return build_scientific_document_intelligence(document)
+
+
+@app.get("/v1/scientific-document-intelligence/record/{record_id}")
+def scientific_document_intelligence_record(record_id: str) -> dict[str, Any]:
+    try:
+        return load_scientific_document_intelligence(record_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @app.post("/v1/publication-knowledge-maps/research-graph-query")

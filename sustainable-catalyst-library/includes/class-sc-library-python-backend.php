@@ -247,6 +247,11 @@ final class SC_Library_Python_Backend {
             'permission_callback' => '__return_true',
             'callback' => [$this, 'proxy_publication_evidence_pathfind'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/scientific-document-intelligence', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_scientific_document_intelligence'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-knowledge-map', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
@@ -669,6 +674,39 @@ final class SC_Library_Python_Backend {
         $code=(int) wp_remote_retrieve_response_code($response);
         $result=json_decode((string) wp_remote_retrieve_body($response), true);
         if (!is_array($result)) { $result=['schema'=>'sc-library-evidence-pathfinding/1.0','error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
+    }
+
+    public function proxy_scientific_document_intelligence(WP_REST_Request $request) {
+        $json = $request->get_json_params();
+        $json = is_array($json) ? $json : [];
+        if (!self::configured()) {
+            return new WP_REST_Response(['schema'=>'sc-library-scientific-document-intelligence/1.0','error'=>'Library backend not configured'], 503);
+        }
+        $record_id = sanitize_text_field((string) ($json['record_id'] ?? ''));
+        if ($record_id !== '' && empty($json['document'])) {
+            $url = self::base_url() . '/v1/scientific-document-intelligence/record/' . rawurlencode($record_id);
+            $response = wp_remote_get($url, [
+                'timeout' => max(self::timeout(), 30),
+                'redirection' => 2,
+                'headers' => ['Accept'=>'application/json'],
+            ]);
+        } else {
+            $document = isset($json['document']) && is_array($json['document']) ? $json['document'] : [];
+            $response = wp_remote_post(self::base_url() . '/v1/scientific-document-intelligence/analyze', [
+                'timeout' => max(self::timeout(), 45),
+                'redirection' => 2,
+                'headers' => ['Accept'=>'application/json','Content-Type'=>'application/json'],
+                'body' => wp_json_encode(['document'=>$document], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+                'data_format' => 'body',
+            ]);
+        }
+        if (is_wp_error($response)) {
+            return new WP_REST_Response(['schema'=>'sc-library-scientific-document-intelligence/1.0','error'=>$response->get_error_message()], 502);
+        }
+        $code=(int) wp_remote_retrieve_response_code($response);
+        $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>'sc-library-scientific-document-intelligence/1.0','error'=>'Invalid backend JSON']; }
         return new WP_REST_Response($result, $code ?: 502);
     }
 

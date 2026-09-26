@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/scientific-object/1.0",
+  "title": "Sustainable Catalyst Scientific Object",
+  "type": "object",
+  "required": ["schema", "id", "record_id", "kind", "label", "interpretation"],
+  "properties": {
+    "schema": {"const": "sc-library-scientific-object/1.0"},
+    "id": {"type": "string", "minLength": 1},
+    "record_id": {"type": "string", "minLength": 1},
+    "kind": {"enum": ["figure", "chart", "table", "equation", "caption", "appendix", "supplement", "dataset"]},
+    "label": {"type": "string", "minLength": 1},
+    "caption": {"type": ["string", "null"]},
+    "source_locator": {"type": ["string", "null"]},
+    "page": {"type": ["integer", "null"], "minimum": 0},
+    "bbox": {
+      "type": ["array", "null"],
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"type": "number"}
+    },
+    "source_content_hash": {"type": ["string", "null"]},
+    "asset_url": {"type": ["string", "null"]},
+    "table": {"type": ["object", "null"]},
+    "equation": {"type": ["object", "null"]},
+    "data_series": {"type": "array"},
+    "verification": {"type": "object"},
+    "interpretation": {
+      "type": "object",
+      "required": ["values_inferred_from_pixels", "claims_inferred_from_object", "causality_inferred", "equation_solved"]
+    }
+  },
+  "additionalProperties": true
+}

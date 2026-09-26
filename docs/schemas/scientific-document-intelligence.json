@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/scientific-document-intelligence/1.0",
+  "title": "Sustainable Catalyst Scientific Document Intelligence",
+  "type": "object",
+  "required": ["schema", "record_id", "objects", "references", "metrics", "graph_overlay", "boundaries"],
+  "properties": {
+    "schema": {"const": "sc-library-scientific-document-intelligence/1.0"},
+    "record_id": {"type": "string", "minLength": 1},
+    "title": {"type": "string"},
+    "objects": {"type": "array", "items": {"$ref": "scientific-object.json"}},
+    "references": {"type": "array"},
+    "metrics": {"type": "object"},
+    "coverage": {"type": "object"},
+    "graph_overlay": {"type": "object"},
+    "reproducibility": {"type": "object"},
+    "platform_core": {"type": "object"},
+    "boundaries": {"type": "object"}
+  },
+  "additionalProperties": true
+}

@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.25.0 — Research Graph Query & Evidence Pathfinding.
+ * v5.26.0 — Multimodal Scientific Document Intelligence.
  *
  * Renders an interactive analytical graph from the Library Python backend.
  * Relationships remain typed by their actual basis: citation, reviewed concept
  * association, source-span co-occurrence, or real stored-embedding similarity.
  */
 final class SC_Library_Knowledge_Landscape {
-    public const VERSION = '5.25.0';
+    public const VERSION = '5.26.0';
     public const SHORTCODE = 'sc_library_knowledge_landscape';
 
     public function register_hooks(): void {
@@ -18,14 +18,14 @@ final class SC_Library_Knowledge_Landscape {
 
     private function enqueue_assets(): void {
         wp_enqueue_style(
-            'sc-library-knowledge-landscape-v5250',
-            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5250.css',
+            'sc-library-knowledge-landscape-v5260',
+            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5260.css',
             [],
             self::VERSION
         );
         wp_enqueue_script(
-            'sc-library-knowledge-landscape-v5250',
-            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5250.js',
+            'sc-library-knowledge-landscape-v5260',
+            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5260.js',
             [],
             self::VERSION,
             true
@@ -125,7 +125,7 @@ final class SC_Library_Knowledge_Landscape {
                 <div>
                     <p class="sc-kl__eyebrow"><?php echo 'corpus' === $scope ? esc_html__('Publication Corpus Analysis', 'sustainable-catalyst-library') : esc_html__('Publication Knowledge Analysis', 'sustainable-catalyst-library'); ?></p>
                     <h2 data-sc-kl-title><?php echo esc_html((string) ($payload['title'] ?? __('Scientific Knowledge Landscape', 'sustainable-catalyst-library'))); ?></h2>
-                    <p><?php esc_html_e('Linked scientific knowledge environment connecting 4D terrain, publication relationships, reviewed evidence, research-graph queries, and deterministic evidence paths across the Research Library corpus.', 'sustainable-catalyst-library'); ?></p>
+                    <p><?php esc_html_e('Linked scientific knowledge environment connecting publications, reviewed evidence, research-graph paths, and source-grounded figures, charts, tables, equations, appendices, supplements, and datasets across the Research Library corpus.', 'sustainable-catalyst-library'); ?></p>
                 </div>
                 <div class="sc-kl__status-row">
                     <?php if ('corpus' === $scope) : ?><span class="sc-kl__status is-good"><?php esc_html_e('Publication Library manifest', 'sustainable-catalyst-library'); ?></span><?php endif; ?>
@@ -150,6 +150,7 @@ final class SC_Library_Knowledge_Landscape {
                 <button type="button" data-sc-kl-view="evidence-synthesis"><?php esc_html_e('Evidence Synthesis', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="competing-hypotheses"><?php esc_html_e('Competing Hypotheses', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="evidence-paths"><?php esc_html_e('Evidence Paths', 'sustainable-catalyst-library'); ?></button>
+                <button type="button" data-sc-kl-view="scientific-objects"><?php esc_html_e('Scientific Objects', 'sustainable-catalyst-library'); ?></button>
             </nav>
 
             <div class="sc-kl__workspace">
@@ -162,6 +163,15 @@ final class SC_Library_Knowledge_Landscape {
                         <label><input type="checkbox" checked data-sc-kl-node-kind="finding"> <span class="sc-kl__dot is-finding"></span><?php esc_html_e('Reviewed findings', 'sustainable-catalyst-library'); ?></label>
                         <label><input type="checkbox" checked data-sc-kl-node-kind="claim"> <span class="sc-kl__dot is-claim"></span><?php esc_html_e('Accepted claims', 'sustainable-catalyst-library'); ?></label>
                         <label><input type="checkbox" checked data-sc-kl-node-kind="hypothesis"> <span class="sc-kl__dot is-hypothesis"></span><?php esc_html_e('Explicit hypotheses', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-node-kind="figure"> <span class="sc-kl__dot is-figure"></span><?php esc_html_e('Figures', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-node-kind="chart"> <span class="sc-kl__dot is-chart"></span><?php esc_html_e('Charts & plots', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-node-kind="table"> <span class="sc-kl__dot is-table"></span><?php esc_html_e('Tables', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-node-kind="equation"> <span class="sc-kl__dot is-equation"></span><?php esc_html_e('Equations', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-node-kind="caption"> <span class="sc-kl__dot is-caption"></span><?php esc_html_e('Captions', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-node-kind="appendix"> <span class="sc-kl__dot is-appendix"></span><?php esc_html_e('Appendices', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-node-kind="supplement"> <span class="sc-kl__dot is-supplement"></span><?php esc_html_e('Supplements', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-node-kind="dataset"> <span class="sc-kl__dot is-dataset"></span><?php esc_html_e('Datasets', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-node-kind="source-span"> <span class="sc-kl__dot is-source-span"></span><?php esc_html_e('Document reference spans', 'sustainable-catalyst-library'); ?></label>
                     </fieldset>
                     <fieldset class="sc-kl__fieldset">
                         <legend><?php esc_html_e('Relationships', 'sustainable-catalyst-library'); ?></legend>
@@ -176,6 +186,12 @@ final class SC_Library_Knowledge_Landscape {
                         <label><input type="checkbox" checked data-sc-kl-edge-basis="reviewed-explicit-support"> <?php esc_html_e('Reviewed support', 'sustainable-catalyst-library'); ?></label>
                         <label><input type="checkbox" checked data-sc-kl-edge-basis="reviewed-explicit-contradiction"> <?php esc_html_e('Reviewed contradiction', 'sustainable-catalyst-library'); ?></label>
                         <label><input type="checkbox" checked data-sc-kl-edge-basis="explicit-hypothesis-membership"> <?php esc_html_e('Explicit hypothesis membership', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-edge-basis="contains-scientific-object"> <?php esc_html_e('Publication scientific objects', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-edge-basis="contains-source-span"> <?php esc_html_e('Publication source spans', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-edge-basis="explicit-scientific-cross-reference"> <?php esc_html_e('Explicit document references', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-edge-basis="caption-describes"> <?php esc_html_e('Caption describes object', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-edge-basis="dataset-link"> <?php esc_html_e('Dataset links', 'sustainable-catalyst-library'); ?></label>
+                        <label><input type="checkbox" checked data-sc-kl-edge-basis="supplementary-material-link"> <?php esc_html_e('Supplement links', 'sustainable-catalyst-library'); ?></label>
                     </fieldset>
                     <div class="sc-kl__terrain-controls" data-sc-kl-terrain-controls hidden>
                         <div class="sc-kl__control">
@@ -253,6 +269,7 @@ final class SC_Library_Knowledge_Landscape {
                         <div><strong data-sc-kl-metric="edge_count"><?php echo esc_html((string) ($metrics['edge_count'] ?? 0)); ?></strong><span><?php esc_html_e('relationships', 'sustainable-catalyst-library'); ?></span></div>
                         <div><strong data-sc-kl-metric="semantic_vectors"><?php echo esc_html((string) ($semantic['vector_count'] ?? 0)); ?></strong><span><?php esc_html_e('semantic vectors', 'sustainable-catalyst-library'); ?></span></div>
                         <div><strong data-sc-kl-metric="year_span"><?php echo $years ? esc_html((string) (max($years) - min($years) + 1)) : '0'; ?></strong><span><?php esc_html_e('year span', 'sustainable-catalyst-library'); ?></span></div>
+                        <div><strong data-sc-kl-metric="scientific_objects"><?php echo esc_html((string) ($payload['scientific_document_intelligence']['metrics']['scientific_object_count'] ?? 0)); ?></strong><span><?php esc_html_e('scientific objects', 'sustainable-catalyst-library'); ?></span></div>
                         <div><strong data-sc-kl-metric="terrain_anchors"><?php echo esc_html((string) count($payload['knowledge_terrain_4d']['topic_anchors'] ?? [])); ?></strong><span><?php esc_html_e('terrain anchors', 'sustainable-catalyst-library'); ?></span></div>
                     </div>
                 </div>
@@ -292,6 +309,13 @@ final class SC_Library_Knowledge_Landscape {
                                 <option value="finding"><?php esc_html_e('Finding', 'sustainable-catalyst-library'); ?></option>
                                 <option value="claim"><?php esc_html_e('Claim', 'sustainable-catalyst-library'); ?></option>
                                 <option value="hypothesis"><?php esc_html_e('Hypothesis', 'sustainable-catalyst-library'); ?></option>
+                                <option value="figure"><?php esc_html_e('Figure', 'sustainable-catalyst-library'); ?></option>
+                                <option value="chart"><?php esc_html_e('Chart', 'sustainable-catalyst-library'); ?></option>
+                                <option value="table"><?php esc_html_e('Table', 'sustainable-catalyst-library'); ?></option>
+                                <option value="equation"><?php esc_html_e('Equation', 'sustainable-catalyst-library'); ?></option>
+                                <option value="appendix"><?php esc_html_e('Appendix', 'sustainable-catalyst-library'); ?></option>
+                                <option value="supplement"><?php esc_html_e('Supplement', 'sustainable-catalyst-library'); ?></option>
+                                <option value="dataset"><?php esc_html_e('Dataset', 'sustainable-catalyst-library'); ?></option>
                             </select>
                         </label>
                         <button type="button" data-sc-kl-graph-query-run><?php esc_html_e('Query research graph', 'sustainable-catalyst-library'); ?></button>

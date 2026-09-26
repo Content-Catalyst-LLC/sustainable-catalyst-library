@@ -1,0 +1,23 @@
+Sustainable Catalyst Knowledge Library v5.26.0
+Multimodal Scientific Document Intelligence
+Backend v2.37.0
+
+Local release validation:
+- 26/26 dependency-free selected release/regression tests passed.
+- Python compile checks passed.
+- WordPress/PHP lint checks passed.
+- Knowledge Landscape JavaScript syntax check passed.
+- Release/deployment shell syntax checks passed.
+- JSON schema parsing passed.
+
+Scientific integrity checks:
+- Structured scientific objects remain source-grounded.
+- No chart/figure values are inferred from pixels.
+- OCR text is not automatically treated as verified.
+- Scientific object presence does not imply claim truth.
+- Explicit scientific cross-references require identifiable source references.
+- Platform Core remains the durable authority for governed research objects and synthesis.
+- v5.25 research graph/pathfinding and v5.24 cross-publication synthesis contracts are preserved.
+
+Environment note:
+Some broader database-backed historical tests import psycopg and cannot run in this local packaging environment because that dependency is not installed. The production deployment script rebuilds the full backend Docker image and performs live backend v2.37.0, scientific-object, corpus, graph/pathfinding, synthesis, Platform Core readiness, and hybrid-retrieval checks on the VPS.

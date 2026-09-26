@@ -10,6 +10,7 @@ from .publication_knowledge_maps import _add_edge, _add_node, _as_list, _cosine,
 from .evidence_weighted_overlays import build_evidence_weighted_overlays
 from .evidence_synthesis import build_cross_publication_synthesis
 from .research_graph_pathfinding import build_research_graph_manifest
+from .scientific_document_intelligence import build_scientific_corpus_overlay
 
 CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
 
@@ -490,6 +491,7 @@ def build_publication_corpus_knowledge_map(
     pool = get_pool()
     nodes: dict[str, dict[str, Any]] = {}
     edges: dict[tuple[str, str, str, bool], dict[str, Any]] = {}
+    scientific_chunks_by_record: dict[str, list[dict[str, Any]]] = defaultdict(list)
     semantic_status = {
         "requested": bool(include_semantic_similarity),
         "available": False,
@@ -580,6 +582,23 @@ def build_publication_corpus_knowledge_map(
             (record_ids,),
         )
         accepted_concepts = [dict(row) for row in cur.fetchall()]
+
+        # v5.26.0: scientific-object intelligence consumes only source-grounded
+        # structured metadata already stored by ingestion/parsing/OCR connectors.
+        # Chunk text is used only to resolve explicit references such as Figure 2
+        # or Table 1; pixel values and missing labels are never inferred here.
+        cur.execute(
+            """
+            SELECT record_id,ordinal,heading,text,metadata
+              FROM library_record_chunks
+             WHERE record_id=ANY(%s)
+             ORDER BY record_id,ordinal ASC
+            """,
+            (record_ids,),
+        )
+        for row in cur.fetchall():
+            chunk = dict(row)
+            scientific_chunks_by_record[str(chunk.get("record_id"))].append(chunk)
 
         per_record_topics: dict[str, list[str]] = defaultdict(list)
         for rid, rec in records.items():
@@ -743,6 +762,31 @@ def build_publication_corpus_knowledge_map(
             explicitly_encoded=True, stance=rel.get("stance"),
         )
 
+    # v5.26.0: add source-grounded figures/charts/tables/equations/captions,
+    # appendices, supplements, datasets and exact in-text cross-references.
+    # These are documentary objects, not claims, and never promote truth.
+    scientific_document_intelligence = build_scientific_corpus_overlay(records, scientific_chunks_by_record)
+    scientific_overlay = scientific_document_intelligence.get("graph_overlay") or {}
+    for node in scientific_overlay.get("nodes") or []:
+        if not isinstance(node, dict) or not node.get("id"):
+            continue
+        nid = str(node.get("id"))
+        kind = str(node.get("kind") or "scientific-object")
+        label = str(node.get("label") or nid)
+        extras = {k: v for k, v in node.items() if k not in {"id", "kind", "label"}}
+        _add_node(nodes, nid, kind, label, **extras)
+    for rel in scientific_overlay.get("edges") or []:
+        if not isinstance(rel, dict) or not rel.get("source") or not rel.get("target"):
+            continue
+        _add_edge(
+            edges, str(rel.get("source")), str(rel.get("target")),
+            str(rel.get("relationship_basis") or "contains-scientific-object"),
+            directed=bool(rel.get("directed", True)),
+            weight=max(.05, float(rel.get("weight") or 1.0)),
+            evidence_count=1, analytical=False, truth_assertion=False,
+            provenance=rel.get("provenance") or {},
+        )
+
     edge_items = list(edges.values())
     degree: dict[str, float] = defaultdict(float)
     citations: dict[str, int] = defaultdict(int)
@@ -823,6 +867,7 @@ def build_publication_corpus_knowledge_map(
         "visual_query": visual_query,
         "research_overlays": research_overlays,
         "evidence_synthesis": evidence_synthesis,
+        "scientific_document_intelligence": scientific_document_intelligence,
         "research_graph": research_graph,
         "reproducibility": {
             "schema": "sc-library-visual-corpus-reproducibility/1.0",
@@ -846,6 +891,7 @@ def build_publication_corpus_knowledge_map(
             {"key": "evidence-synthesis", "label": "Evidence Synthesis", "purpose": "Cross-publication support/contradiction structures and argument paths from accepted reviewed objects"},
             {"key": "competing-hypotheses", "label": "Competing Hypotheses", "purpose": "Explicitly authored hypothesis sets only; no hypothesis or competition inference"},
             {"key": "evidence-paths", "label": "Evidence Paths", "purpose": "Deterministic source-grounded graph paths between selected research objects; analytical relationships are opt-in"},
+            {"key": "scientific-objects", "label": "Scientific Objects", "purpose": "Source-grounded figures, charts, tables, equations, captions, appendices, supplements and datasets with exact document references"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
@@ -854,7 +900,7 @@ def build_publication_corpus_knowledge_map(
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -882,6 +928,8 @@ def build_publication_corpus_knowledge_map(
                 "explicit-reviewed-support-contradiction-overlay",
                 "cross-publication-reviewed-evidence-synthesis",
                 "explicit-hypothesis-membership-only",
+                "structured-scientific-object-extraction",
+                "explicit-scientific-cross-reference",
             ],
             "governed_visual_reasoning_authority": "platform-core",
         },
@@ -903,5 +951,8 @@ def build_publication_corpus_knowledge_map(
             "competing_hypotheses_require_explicit_metadata": True,
             "evidence_balance_is_truth_score": False,
             "durable_cross_study_synthesis_authority": "platform-core",
+            "scientific_values_inferred_from_pixels": False,
+            "scientific_object_presence_is_claim_truth": False,
+            "ocr_text_automatically_verified": False,
         },
     }
