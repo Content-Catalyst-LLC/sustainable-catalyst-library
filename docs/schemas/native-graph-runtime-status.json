@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Native Graph Runtime Status",
+  "type": "object",
+  "required": [
+    "schema",
+    "runtime_version",
+    "engine",
+    "available",
+    "research_semantics_authority"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-native-graph-runtime/1.0"
+    },
+    "runtime_version": {
+      "type": "string"
+    },
+    "engine": {
+      "const": "rust"
+    },
+    "available": {
+      "type": "boolean"
+    },
+    "research_semantics_authority": {
+      "const": "python-library-backend"
+    },
+    "native_runtime_changes_research_semantics": {
+      "const": false
+    }
+  }
+}

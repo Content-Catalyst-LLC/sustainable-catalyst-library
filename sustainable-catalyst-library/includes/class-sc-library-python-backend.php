@@ -243,6 +243,11 @@ final class SC_Library_Python_Backend {
             'permission_callback' => '__return_true',
             'callback' => [$this, 'proxy_publication_source_identity'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/native-graph-runtime-status', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_native_graph_runtime_status'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-research-graph-query', [
             'methods' => WP_REST_Server::CREATABLE,
             'permission_callback' => '__return_true',
@@ -779,6 +784,23 @@ final class SC_Library_Python_Backend {
         return new WP_REST_Response($result, $code ?: 502);
     }
 
+
+    public function proxy_native_graph_runtime_status(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) {
+            return new WP_REST_Response(['schema'=>'sc-library-native-graph-runtime/1.0','available'=>false,'error'=>'Library backend not configured'], 503);
+        }
+        $response = wp_remote_get(self::base_url() . '/v1/runtime/native-graph/status', [
+            'timeout' => max(self::timeout(), 10), 'redirection' => 2, 'headers' => ['Accept'=>'application/json'],
+        ]);
+        if (is_wp_error($response)) {
+            return new WP_REST_Response(['schema'=>'sc-library-native-graph-runtime/1.0','available'=>false,'error'=>$response->get_error_message()], 502);
+        }
+        $code=(int) wp_remote_retrieve_response_code($response);
+        $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>'sc-library-native-graph-runtime/1.0','available'=>false,'error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
+    }
+
     public function proxy_publication_research_graph_query(WP_REST_Request $request) {
         $json = $request->get_json_params();
         $json = is_array($json) ? $json : [];
@@ -816,6 +838,8 @@ final class SC_Library_Python_Backend {
         $query['max_paths'] = min(50, max(1, (int) ($query['max_paths'] ?? 12)));
         $direction = sanitize_key((string) ($query['direction'] ?? 'both'));
         $query['direction'] = in_array($direction, ['both','forward','reverse'], true) ? $direction : 'both';
+        $runtime = sanitize_key((string) ($query['runtime'] ?? 'auto'));
+        $query['runtime'] = in_array($runtime, ['auto','rust','python'], true) ? $runtime : 'auto';
         $body['query'] = $query;
         if (!self::configured()) {
             return new WP_REST_Response(['schema'=>'sc-library-evidence-pathfinding/1.0','error'=>'Library backend not configured'], 503);

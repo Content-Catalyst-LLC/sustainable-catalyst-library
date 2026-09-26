@@ -4,6 +4,8 @@ from collections import Counter, defaultdict, deque
 from dataclasses import dataclass
 from typing import Any, Iterable
 
+from .native_graph_runtime import native_graph_runtime_status, native_path_steps
+
 GRAPH_CONTRACT = "sc-library-research-graph-query/1.0"
 PATH_CONTRACT = "sc-library-evidence-pathfinding/1.0"
 
@@ -121,6 +123,8 @@ def build_research_graph_manifest(corpus: dict[str, Any]) -> dict[str, Any]:
             "deterministic_pathfinding": True,
             "direction_aware_traversal": True,
             "analytical_relationships_opt_in": True,
+            "native_rust_pathfinding_foundation": True,
+            "python_fallback": True,
         },
         "interpretation": {
             "graph_path_implies_truth": False,
@@ -135,6 +139,7 @@ def build_research_graph_manifest(corpus: dict[str, Any]) -> dict[str, Any]:
             "identity_candidate_edges_are_opt_in": True,
             "author_institution_identity_edges_are_default_evidence_paths": False,
             "methodology_description_edges_are_default_evidence_paths": False,
+            "native_runtime_changes_research_semantics": False,
         },
     }
 
@@ -288,6 +293,9 @@ def find_research_paths(corpus: dict[str, Any], query: dict[str, Any] | None = N
     direction = str(q.get("direction") or "both").strip().lower()
     if direction not in {"both", "forward", "reverse"}:
         direction = "both"
+    runtime_requested = str(q.get("runtime") or "auto").strip().lower()
+    if runtime_requested not in {"auto", "rust", "python"}:
+        runtime_requested = "auto"
 
     requested_bases = set(_clean_strings(q.get("relationship_bases")))
     if not requested_bases:
@@ -298,6 +306,30 @@ def find_research_paths(corpus: dict[str, Any], query: dict[str, Any] | None = N
         allowed_bases = set(requested_bases)
         if not include_analytical:
             allowed_bases -= ANALYTICAL_RELATIONSHIPS
+
+    allowed_edge_indexes = []
+    for idx, edge in enumerate(edges):
+        basis = _edge_basis(edge)
+        if basis not in allowed_bases:
+            continue
+        if not include_analytical and _is_analytical(basis, edge):
+            continue
+        if _node_id(edge.get("source")) not in by_id or _node_id(edge.get("target")) not in by_id:
+            continue
+        allowed_edge_indexes.append(idx)
+
+    native_rows = None
+    runtime_used = "python"
+    native_status = native_graph_runtime_status()
+    if runtime_requested in {"auto", "rust"}:
+        native_rows = native_path_steps(
+            nodes, edges, start_ids=start_ids, target_ids=target_ids, target_kinds=target_kinds,
+            allowed_edge_indexes=allowed_edge_indexes, max_hops=max_hops, max_paths=max_paths, direction=direction,
+        )
+        if native_rows is not None:
+            runtime_used = "rust"
+        elif runtime_requested == "rust":
+            runtime_used = "python-fallback"
 
     adjacency: dict[str, list[Step]] = defaultdict(list)
     for idx, edge in enumerate(edges):
@@ -334,55 +366,80 @@ def find_research_paths(corpus: dict[str, Any], query: dict[str, Any] | None = N
         return False
 
     path_results: list[dict[str, Any]] = []
-    seen_signatures: set[tuple[str, ...]] = set()
-    for source in start_ids:
-        queue: deque[tuple[str, list[str], list[Step]]] = deque([(source, [source], [])])
-        # Track shallowest visit per (node, path basis signature prefix) loosely enough
-        # to preserve alternate auditable routes without unbounded graph explosion.
-        best_depth: dict[str, int] = {source: 0}
-        while queue and len(path_results) < max_paths:
-            current, node_path, step_path = queue.popleft()
-            depth = len(step_path)
-            if depth >= max_hops:
-                continue
-            for step in adjacency.get(current, []):
-                nxt = step.to_id
-                if nxt in node_path:
+    if native_rows is not None:
+        for raw in native_rows[:max_paths]:
+            new_nodes = [nid for nid in raw.get("node_ids", []) if nid in by_id]
+            new_steps = [Step(
+                str(row.get("from_id") or ""), str(row.get("to_id") or ""), int(row.get("edge_index") or 0),
+                str(row.get("basis") or "relationship"), str(row.get("traversed_direction") or "undirected"),
+            ) for row in raw.get("steps", [])]
+            edge_snaps = [_edge_snapshot(edges[step.edge_index], step) for step in new_steps]
+            analytical_count = sum(1 for x in edge_snaps if x["analytical"])
+            reviewed_count = sum(1 for step in new_steps if _is_reviewed(step.basis, edges[step.edge_index]))
+            path_results.append({
+                "path_id": f"path:{len(path_results)+1}",
+                "source_node_id": str(raw.get("source_node_id") or ""),
+                "target_node_id": str(raw.get("target_node_id") or ""),
+                "hop_count": len(new_steps),
+                "node_ids": new_nodes,
+                "nodes": [by_id[nid] for nid in new_nodes],
+                "edges": edge_snaps,
+                "relationship_bases": [x["relationship_basis"] for x in edge_snaps],
+                "analytical_edge_count": analytical_count,
+                "reviewed_edge_count": reviewed_count,
+                "all_edges_source_grounded": analytical_count == 0,
+                "path_semantics": "descriptive-connectivity",
+            })
+    else:
+        seen_signatures: set[tuple[str, ...]] = set()
+        for source in start_ids:
+            queue: deque[tuple[str, list[str], list[Step]]] = deque([(source, [source], [])])
+            # Track shallowest visit per (node, path basis signature prefix) loosely enough
+            # to preserve alternate auditable routes without unbounded graph explosion.
+            best_depth: dict[str, int] = {source: 0}
+            while queue and len(path_results) < max_paths:
+                current, node_path, step_path = queue.popleft()
+                depth = len(step_path)
+                if depth >= max_hops:
                     continue
-                new_nodes = node_path + [nxt]
-                new_steps = step_path + [step]
-                if is_target(nxt, source):
-                    signature = tuple(new_nodes + ["|" + x.basis for x in new_steps])
-                    if signature not in seen_signatures:
-                        seen_signatures.add(signature)
-                        edge_snaps = [_edge_snapshot(edges[s.edge_index], s) for s in new_steps]
-                        analytical_count = sum(1 for x in edge_snaps if x["analytical"])
-                        reviewed_count = sum(1 for s in new_steps if _is_reviewed(s.basis, edges[s.edge_index]))
-                        path_results.append({
-                            "path_id": f"path:{len(path_results)+1}",
-                            "source_node_id": source,
-                            "target_node_id": nxt,
-                            "hop_count": len(new_steps),
-                            "node_ids": new_nodes,
-                            "nodes": [by_id[nid] for nid in new_nodes],
-                            "edges": edge_snaps,
-                            "relationship_bases": [x["relationship_basis"] for x in edge_snaps],
-                            "analytical_edge_count": analytical_count,
-                            "reviewed_edge_count": reviewed_count,
-                            "all_edges_source_grounded": analytical_count == 0,
-                            "path_semantics": "descriptive-connectivity",
-                        })
-                        if len(path_results) >= max_paths:
-                            break
-                nd = len(new_steps)
-                prior = best_depth.get(nxt)
-                if prior is None or nd <= prior + 1:
-                    best_depth[nxt] = min(nd, prior if prior is not None else nd)
-                    queue.append((nxt, new_nodes, new_steps))
+                for step in adjacency.get(current, []):
+                    nxt = step.to_id
+                    if nxt in node_path:
+                        continue
+                    new_nodes = node_path + [nxt]
+                    new_steps = step_path + [step]
+                    if is_target(nxt, source):
+                        signature = tuple(new_nodes + ["|" + x.basis for x in new_steps])
+                        if signature not in seen_signatures:
+                            seen_signatures.add(signature)
+                            edge_snaps = [_edge_snapshot(edges[s.edge_index], s) for s in new_steps]
+                            analytical_count = sum(1 for x in edge_snaps if x["analytical"])
+                            reviewed_count = sum(1 for s in new_steps if _is_reviewed(s.basis, edges[s.edge_index]))
+                            path_results.append({
+                                "path_id": f"path:{len(path_results)+1}",
+                                "source_node_id": source,
+                                "target_node_id": nxt,
+                                "hop_count": len(new_steps),
+                                "node_ids": new_nodes,
+                                "nodes": [by_id[nid] for nid in new_nodes],
+                                "edges": edge_snaps,
+                                "relationship_bases": [x["relationship_basis"] for x in edge_snaps],
+                                "analytical_edge_count": analytical_count,
+                                "reviewed_edge_count": reviewed_count,
+                                "all_edges_source_grounded": analytical_count == 0,
+                                "path_semantics": "descriptive-connectivity",
+                            })
+                            if len(path_results) >= max_paths:
+                                break
+                    nd = len(new_steps)
+                    prior = best_depth.get(nxt)
+                    if prior is None or nd <= prior + 1:
+                        best_depth[nxt] = min(nd, prior if prior is not None else nd)
+                        queue.append((nxt, new_nodes, new_steps))
+                if len(path_results) >= max_paths:
+                    break
             if len(path_results) >= max_paths:
                 break
-        if len(path_results) >= max_paths:
-            break
 
     path_results.sort(key=lambda p: (p["hop_count"], p["target_node_id"], p["path_id"]))
     basis_counts = Counter(b for p in path_results for b in p["relationship_bases"])
@@ -397,7 +454,9 @@ def find_research_paths(corpus: dict[str, Any], query: dict[str, Any] | None = N
             "max_hops": max_hops,
             "max_paths": max_paths,
             "direction": direction,
+            "runtime": runtime_requested,
         },
+        "runtime": {"requested": runtime_requested, "used": runtime_used, "native": native_status},
         "paths": path_results,
         "metrics": {
             "path_count": len(path_results),
@@ -405,6 +464,7 @@ def find_research_paths(corpus: dict[str, Any], query: dict[str, Any] | None = N
             "relationship_basis_counts": dict(sorted(basis_counts.items())),
             "paths_with_analytical_edges": sum(1 for p in path_results if p["analytical_edge_count"] > 0),
             "fully_source_grounded_path_count": sum(1 for p in path_results if p["all_edges_source_grounded"]),
+            "runtime_used": runtime_used,
         },
         "manifest": build_research_graph_manifest(corpus),
         "platform_core": {
@@ -421,6 +481,10 @@ def find_research_paths(corpus: dict[str, Any], query: dict[str, Any] | None = N
             "support_requires_explicit_reviewed_relation": True,
             "contradiction_requires_explicit_reviewed_relation": True,
             "analytical_relationships_opt_in": True,
+            "native_rust_pathfinding_foundation": True,
+            "python_fallback": True,
             "absence_of_path_means_no_relationship_exists": False,
+            "native_runtime_changes_research_semantics": False,
+            "python_fallback_preserves_contract": True,
         },
     }
