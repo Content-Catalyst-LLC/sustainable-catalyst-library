@@ -1,0 +1,25 @@
+Sustainable Catalyst Knowledge Library v5.27.0
+Source Identity, Deduplication & Entity Resolution
+Backend v2.38.0
+
+Release validation summary
+- New identity-resolution functional and integration tests: PASS
+- Selected release/regression suite: 34/34 PASS
+- Source identity DOI/version-family clustering: PASS
+- Exact content-hash duplicate clustering: PASS
+- Normalized canonical URL clustering: PASS
+- Review-required title/author/year duplicate candidates: PASS
+- ORCID author identity resolution: PASS
+- ROR institution identity resolution: PASS
+- Dataset DOI/URL identity resolution: PASS
+- Non-destructive merge/delete boundaries: PASS
+- v5.26 scientific document intelligence regression: PASS
+- v5.25 research graph/pathfinding regression: PASS
+- v5.24 cross-publication evidence synthesis regression: PASS
+- Python compileall: PASS
+- PHP lint for touched plugin files: PASS
+- JavaScript syntax check: PASS
+- Shell syntax checks: PASS
+- JSON schema parse checks: PASS
+
+Release state: built and locally release-validated. Git push, WordPress upgrade, and VPS deployment are not assumed complete until confirmed by the operator.

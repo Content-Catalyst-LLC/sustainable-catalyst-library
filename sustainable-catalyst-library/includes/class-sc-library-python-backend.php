@@ -237,6 +237,11 @@ final class SC_Library_Python_Backend {
             'permission_callback' => '__return_true',
             'callback' => [$this, 'proxy_publication_visual_evidence_trace'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-source-identity', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_source_identity'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-research-graph-query', [
             'methods' => WP_REST_Server::CREATABLE,
             'permission_callback' => '__return_true',
@@ -618,6 +623,29 @@ final class SC_Library_Python_Backend {
             ],
             'query' => isset($json['query']) && is_array($json['query']) ? $json['query'] : [],
         ];
+    }
+
+    public function proxy_publication_source_identity(WP_REST_Request $request) {
+        $json = $request->get_json_params();
+        $json = is_array($json) ? $json : [];
+        $body = $this->publication_graph_proxy_body($json);
+        if (!self::configured()) {
+            return new WP_REST_Response(['schema'=>'sc-library-source-identity-corpus/1.0','error'=>'Library backend not configured'], 503);
+        }
+        $response = wp_remote_post(self::base_url() . '/v1/publication-knowledge-maps/source-identity', [
+            'timeout' => max(self::timeout(), 45),
+            'redirection' => 2,
+            'headers' => ['Accept'=>'application/json','Content-Type'=>'application/json'],
+            'body' => wp_json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            'data_format' => 'body',
+        ]);
+        if (is_wp_error($response)) {
+            return new WP_REST_Response(['schema'=>'sc-library-source-identity-corpus/1.0','error'=>$response->get_error_message()], 502);
+        }
+        $code=(int) wp_remote_retrieve_response_code($response);
+        $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>'sc-library-source-identity-corpus/1.0','error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
     }
 
     public function proxy_publication_research_graph_query(WP_REST_Request $request) {

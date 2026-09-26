@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/source-identity-cluster/1.0",
+  "title": "Sustainable Catalyst Source Identity Cluster",
+  "type": "object",
+  "required": ["schema", "id", "classification", "preferred_display_record_id", "member_record_ids", "member_count", "automatic_merge", "records_deleted"],
+  "properties": {
+    "schema": {"const": "sc-library-source-identity-cluster/1.0"},
+    "id": {"type": "string", "minLength": 1},
+    "classification": {"type": "string", "minLength": 1},
+    "preferred_display_record_id": {"type": "string", "minLength": 1},
+    "member_record_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "uniqueItems": true},
+    "member_count": {"type": "integer", "minimum": 1},
+    "shared_strong_identity_keys": {"type": "array", "items": {"type": "string"}},
+    "identity_basis": {"type": "array", "items": {"type": "string"}},
+    "content_hash_count": {"type": "integer", "minimum": 0},
+    "version_family": {"type": "boolean"},
+    "automatic_merge": {"const": false},
+    "records_deleted": {"const": false}
+  },
+  "additionalProperties": true
+}

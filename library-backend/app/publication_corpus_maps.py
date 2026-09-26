@@ -11,6 +11,7 @@ from .evidence_weighted_overlays import build_evidence_weighted_overlays
 from .evidence_synthesis import build_cross_publication_synthesis
 from .research_graph_pathfinding import build_research_graph_manifest
 from .scientific_document_intelligence import build_scientific_corpus_overlay
+from .source_identity_resolution import build_source_identity_resolution
 
 CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
 
@@ -787,6 +788,34 @@ def build_publication_corpus_knowledge_map(
             provenance=rel.get("provenance") or {},
         )
 
+    # v5.27.0: canonical source identity, duplicate/version-family detection and
+    # strong-identifier entity resolution remain non-destructive. Exact DOI/content/URL
+    # or source-scoped persistent identifiers may cluster records; bibliographic
+    # title/author/year matches remain review candidates only.
+    source_identity_resolution = build_source_identity_resolution(records.values())
+    source_identity_overlay = source_identity_resolution.get("graph_overlay") or {}
+    for node in source_identity_overlay.get("nodes") or []:
+        if not isinstance(node, dict) or not node.get("id"):
+            continue
+        nid = str(node.get("id"))
+        kind = str(node.get("kind") or "source-identity")
+        label = str(node.get("label") or nid)
+        extras = {k: v for k, v in node.items() if k not in {"id", "kind", "label"}}
+        _add_node(nodes, nid, kind, label, **extras)
+    for rel in source_identity_overlay.get("edges") or []:
+        if not isinstance(rel, dict) or not rel.get("source") or not rel.get("target"):
+            continue
+        basis = str(rel.get("relationship_basis") or "member-of-source-identity")
+        _add_edge(
+            edges, str(rel.get("source")), str(rel.get("target")), basis,
+            directed=bool(rel.get("directed", True)),
+            weight=max(.05, float(rel.get("weight") or 1.0)), evidence_count=1,
+            analytical=bool(rel.get("analytical", False)), truth_assertion=False,
+            provenance=rel.get("provenance") or {},
+            identity_assertion=rel.get("identity_assertion"),
+            requires_review=bool(rel.get("requires_review", False)),
+        )
+
     edge_items = list(edges.values())
     degree: dict[str, float] = defaultdict(float)
     citations: dict[str, int] = defaultdict(int)
@@ -868,6 +897,7 @@ def build_publication_corpus_knowledge_map(
         "research_overlays": research_overlays,
         "evidence_synthesis": evidence_synthesis,
         "scientific_document_intelligence": scientific_document_intelligence,
+        "source_identity_resolution": source_identity_resolution,
         "research_graph": research_graph,
         "reproducibility": {
             "schema": "sc-library-visual-corpus-reproducibility/1.0",
@@ -892,6 +922,7 @@ def build_publication_corpus_knowledge_map(
             {"key": "competing-hypotheses", "label": "Competing Hypotheses", "purpose": "Explicitly authored hypothesis sets only; no hypothesis or competition inference"},
             {"key": "evidence-paths", "label": "Evidence Paths", "purpose": "Deterministic source-grounded graph paths between selected research objects; analytical relationships are opt-in"},
             {"key": "scientific-objects", "label": "Scientific Objects", "purpose": "Source-grounded figures, charts, tables, equations, captions, appendices, supplements and datasets with exact document references"},
+            {"key": "source-identity", "label": "Source Identity", "purpose": "Canonical source clusters, duplicate/version-family diagnostics, and strong-identifier author/institution/dataset resolution without destructive merges"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
@@ -900,7 +931,7 @@ def build_publication_corpus_knowledge_map(
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -930,6 +961,9 @@ def build_publication_corpus_knowledge_map(
                 "explicit-hypothesis-membership-only",
                 "structured-scientific-object-extraction",
                 "explicit-scientific-cross-reference",
+                "deterministic-source-identity-normalization",
+                "exact-identifier-entity-resolution",
+                "non-destructive-duplicate-candidate-detection",
             ],
             "governed_visual_reasoning_authority": "platform-core",
         },
@@ -954,5 +988,10 @@ def build_publication_corpus_knowledge_map(
             "scientific_values_inferred_from_pixels": False,
             "scientific_object_presence_is_claim_truth": False,
             "ocr_text_automatically_verified": False,
+            "automatic_source_record_merge": False,
+            "automatic_duplicate_record_deletion": False,
+            "title_only_source_identity_merge": False,
+            "author_name_only_cross_source_merge": False,
+            "source_identity_is_evidence_truth": False,
         },
     }

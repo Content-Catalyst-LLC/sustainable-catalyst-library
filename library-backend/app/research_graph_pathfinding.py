@@ -25,6 +25,11 @@ RELATIONSHIP_CLASSES: dict[str, str] = {
     "caption-describes": "explicit-structural",
     "dataset-link": "explicit-structural",
     "supplementary-material-link": "explicit-structural",
+    "member-of-source-identity": "deterministic-source-identity",
+    "authored-by-identity": "explicit-entity-identity",
+    "affiliated-institution-identity": "explicit-entity-identity",
+    "references-dataset-identity": "explicit-entity-identity",
+    "duplicate-candidate": "review-required-identity-candidate",
     "publication-topic-cooccurrence": "measured-analytical",
     "source-span-cooccurrence": "measured-analytical",
     "embedding-cosine-similarity": "measured-analytical",
@@ -45,11 +50,13 @@ DEFAULT_TRACE_RELATIONSHIPS = {
     "caption-describes",
     "dataset-link",
     "supplementary-material-link",
+    "member-of-source-identity",
 }
 ANALYTICAL_RELATIONSHIPS = {
     "publication-topic-cooccurrence",
     "source-span-cooccurrence",
     "embedding-cosine-similarity",
+    "duplicate-candidate",
 }
 
 
@@ -122,6 +129,10 @@ def build_research_graph_manifest(corpus: dict[str, Any]) -> dict[str, Any]:
             "contradiction_requires_explicit_reviewed_relation": True,
             "analytical_edges_are_evidence_relations": False,
             "platform_core_durable_authority": True,
+            "source_identity_cluster_is_truth_authority": False,
+            "duplicate_candidate_requires_review": True,
+            "identity_candidate_edges_are_opt_in": True,
+            "author_institution_identity_edges_are_default_evidence_paths": False,
         },
     }
 
@@ -150,7 +161,7 @@ def query_research_graph(corpus: dict[str, Any], query: dict[str, Any] | None = 
             continue
         if text:
             hay = " ".join(
-                str(node.get(k) or "") for k in ("id", "label", "candidate_text", "hypothesis_key", "source_type")
+                str(node.get(k) or "") for k in ("id", "label", "candidate_text", "hypothesis_key", "source_type", "identifier_type", "identifier_value", "classification", "shared_strong_identity_keys")
             ).casefold()
             if text not in hay:
                 continue

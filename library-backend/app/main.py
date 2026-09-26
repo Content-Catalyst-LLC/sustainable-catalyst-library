@@ -37,6 +37,7 @@ from .visual_research_sessions import build_visual_research_session_package
 from .visual_evidence_trace import build_visual_evidence_trace
 from .research_graph_pathfinding import find_research_paths, query_research_graph
 from .scientific_document_intelligence import build_scientific_document_intelligence, load_scientific_document_intelligence
+from .source_identity_resolution import build_source_identity_analysis
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -316,6 +317,17 @@ def health() -> dict[str, Any]:
             "scientific_object_source_provenance": True,
             "scientific_object_graph_overlay": True,
             "scientific_visual_values_inferred_from_pixels": False,
+            "source_identity_resolution": True,
+            "source_identity_exact_doi_resolution": True,
+            "source_identity_exact_content_hash_resolution": True,
+            "source_identity_normalized_url_resolution": True,
+            "source_identity_version_family_detection": True,
+            "source_identity_duplicate_candidate_review": True,
+            "author_orcid_resolution": True,
+            "institution_ror_resolution": True,
+            "dataset_doi_url_resolution": True,
+            "source_identity_automatic_merge": False,
+            "source_identity_title_only_merge": False,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2285,12 +2297,26 @@ def scientific_document_intelligence_analyze(payload: dict[str, Any]) -> dict[st
     return build_scientific_document_intelligence(document)
 
 
+@app.post("/v1/source-identity/analyze")
+def source_identity_analyze(payload: dict[str, Any]) -> dict[str, Any]:
+    return build_source_identity_analysis(payload)
+
+
 @app.get("/v1/scientific-document-intelligence/record/{record_id}")
 def scientific_document_intelligence_record(record_id: str) -> dict[str, Any]:
     try:
         return load_scientific_document_intelligence(record_id)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/v1/publication-knowledge-maps/source-identity")
+def publication_source_identity(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus = _publication_corpus_from_payload(payload)
+    result = dict(corpus.get("source_identity_resolution") or {})
+    result["corpus"] = corpus.get("corpus") or {}
+    result["reproducibility"] = corpus.get("reproducibility") or {}
+    return result
 
 
 @app.post("/v1/publication-knowledge-maps/research-graph-query")

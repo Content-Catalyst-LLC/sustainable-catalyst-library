@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/source-identity-resolution/1.0",
+  "title": "Sustainable Catalyst Source Identity, Deduplication & Entity Resolution",
+  "type": "object",
+  "required": ["schema", "records", "source_identity_clusters", "duplicate_candidates", "entity_resolution", "metrics", "identity_policy", "boundaries", "platform_core"],
+  "properties": {
+    "schema": {"enum": ["sc-library-source-identity-resolution/1.0", "sc-library-source-identity-corpus/1.0"]},
+    "records": {"type": "array"},
+    "source_identity_clusters": {"type": "array", "items": {"$ref": "source-identity-cluster.json"}},
+    "duplicate_candidates": {"type": "array"},
+    "entity_resolution": {"type": "object"},
+    "graph_overlay": {"type": "object"},
+    "metrics": {"type": "object"},
+    "identity_policy": {"type": "object"},
+    "boundaries": {"type": "object"},
+    "platform_core": {"type": "object"}
+  },
+  "additionalProperties": true
+}
