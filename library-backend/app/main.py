@@ -35,6 +35,7 @@ from .publication_knowledge_maps import build_publication_knowledge_map, knowled
 from .publication_corpus_maps import build_publication_corpus_knowledge_map
 from .visual_research_sessions import build_visual_research_session_package
 from .visual_evidence_trace import build_visual_evidence_trace
+from .research_graph_pathfinding import find_research_paths, query_research_graph
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -300,6 +301,10 @@ def health() -> dict[str, Any]:
             "publication_support_connected_structures": True,
             "publication_explicit_competing_hypotheses": True,
             "publication_argument_path_visualization": True,
+            "publication_research_graph_query": True,
+            "publication_evidence_pathfinding": True,
+            "publication_direction_aware_graph_traversal": True,
+            "publication_analytical_path_edges_opt_in": True,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2240,6 +2245,47 @@ def publication_visual_evidence_trace(payload: dict[str, Any]) -> dict[str, Any]
         corpus,
         payload.get("visual_state") if isinstance(payload.get("visual_state"), dict) else {},
     )
+
+
+def _publication_corpus_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus_request = payload.get("corpus_request") if isinstance(payload.get("corpus_request"), dict) else {}
+    record_ids_raw = corpus_request.get("record_ids") or []
+    if isinstance(record_ids_raw, str):
+        record_ids = [x.strip() for x in record_ids_raw.split(",") if x.strip()]
+    elif isinstance(record_ids_raw, list):
+        record_ids = [str(x).strip() for x in record_ids_raw if str(x).strip()]
+    else:
+        record_ids = []
+    return build_publication_corpus_knowledge_map(
+        source_key=str(corpus_request.get("source_key") or "wordpress-main"),
+        object_type=str(corpus_request.get("object_type") or ""),
+        record_ids=record_ids[:1000],
+        include_citations=bool(corpus_request.get("include_citations", True)),
+        include_semantic_similarity=bool(corpus_request.get("include_semantic_similarity", True)),
+        semantic_threshold=float(corpus_request.get("semantic_threshold", 0.72)),
+        max_publications=int(corpus_request.get("max_publications", 250)),
+        max_topics_per_publication=int(corpus_request.get("max_topics_per_publication", 36)),
+    )
+
+
+@app.post("/v1/publication-knowledge-maps/research-graph-query")
+def publication_research_graph_query(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus = _publication_corpus_from_payload(payload)
+    query = payload.get("query") if isinstance(payload.get("query"), dict) else {}
+    result = query_research_graph(corpus, query)
+    result["corpus"] = corpus.get("corpus") or {}
+    result["reproducibility"] = corpus.get("reproducibility") or {}
+    return result
+
+
+@app.post("/v1/publication-knowledge-maps/evidence-pathfind")
+def publication_evidence_pathfind(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus = _publication_corpus_from_payload(payload)
+    query = payload.get("query") if isinstance(payload.get("query"), dict) else {}
+    result = find_research_paths(corpus, query)
+    result["corpus"] = corpus.get("corpus") or {}
+    result["reproducibility"] = corpus.get("reproducibility") or {}
+    return result
 
 
 @app.get("/v1/publication-knowledge-maps")

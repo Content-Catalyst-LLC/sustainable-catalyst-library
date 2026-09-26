@@ -1,0 +1,55 @@
+Knowledge Library v5.25.0 — Research Graph Query & Evidence Pathfinding
+Backend v2.36.0
+
+========================================
+1. MAC: INSTALL / VALIDATE / GIT PUSH / TAG
+========================================
+
+cd ~/Downloads/sc-library-v5.25.0-release
+chmod +x install_and_push_sustainable_catalyst_library_v5_25_0_macos.sh
+./install_and_push_sustainable_catalyst_library_v5_25_0_macos.sh \
+  "$HOME/Downloads/sustainable-catalyst-library"
+
+Expected tag:
+v5.25.0
+
+Expected commit message:
+Library v5.25.0 Research Graph Query & Evidence Pathfinding
+
+========================================
+2. MAC: TRANSFER BACKEND TO CONTABO
+========================================
+
+cd ~/Downloads/sc-library-v5.25.0-release
+
+scp -i ~/.ssh/id_ed25519 \
+  -o IdentitiesOnly=yes \
+  sustainable-catalyst-library-backend-v2.36.0.zip \
+  upgrade_library_backend_v2_36_0_contabo.sh \
+  catalystadmin@94.72.113.77:/tmp/
+
+========================================
+3. MAC: SSH TO CONTABO
+========================================
+
+ssh -i ~/.ssh/id_ed25519 \
+  -o IdentitiesOnly=yes \
+  catalystadmin@94.72.113.77
+
+========================================
+4. VPS: DEPLOY / VERIFY BACKEND
+========================================
+
+chmod +x /tmp/upgrade_library_backend_v2_36_0_contabo.sh
+sudo /tmp/upgrade_library_backend_v2_36_0_contabo.sh \
+  /tmp/sustainable-catalyst-library-backend-v2.36.0.zip
+
+========================================
+5. WORDPRESS
+========================================
+
+Upload and replace the existing plugin with:
+sustainable-catalyst-library-v5.25.0.zip
+
+The WordPress plugin version should report:
+5.25.0

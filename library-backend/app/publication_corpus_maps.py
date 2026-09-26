@@ -9,6 +9,7 @@ from .db import get_pool
 from .publication_knowledge_maps import _add_edge, _add_node, _as_list, _cosine, _topic_id
 from .evidence_weighted_overlays import build_evidence_weighted_overlays
 from .evidence_synthesis import build_cross_publication_synthesis
+from .research_graph_pathfinding import build_research_graph_manifest
 
 CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
 
@@ -784,6 +785,7 @@ def build_publication_corpus_knowledge_map(
     visual_query = _linked_visual_query_analysis(nodes, edge_items, records, multi)
     _refs = sorted([{"record_id": str(n.get("id") or ""), "content_hash": str(n.get("source_content_hash") or "")} for n in node_items if n.get("kind") == "publication"], key=lambda x: x["record_id"])
     _corpus_fingerprint = hashlib.sha256(json.dumps(_refs, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    research_graph = build_research_graph_manifest({"nodes": node_items, "edges": edge_items})
 
     return {
         "schema": CORPUS_KNOWLEDGE_MAP_CONTRACT,
@@ -821,6 +823,7 @@ def build_publication_corpus_knowledge_map(
         "visual_query": visual_query,
         "research_overlays": research_overlays,
         "evidence_synthesis": evidence_synthesis,
+        "research_graph": research_graph,
         "reproducibility": {
             "schema": "sc-library-visual-corpus-reproducibility/1.0",
             "corpus_fingerprint_sha256": _corpus_fingerprint,
@@ -842,6 +845,7 @@ def build_publication_corpus_knowledge_map(
             {"key": "contradiction-overlay", "label": "Contradiction Overlay", "purpose": "Only explicitly reviewed contradiction/support relations between accepted research objects"},
             {"key": "evidence-synthesis", "label": "Evidence Synthesis", "purpose": "Cross-publication support/contradiction structures and argument paths from accepted reviewed objects"},
             {"key": "competing-hypotheses", "label": "Competing Hypotheses", "purpose": "Explicitly authored hypothesis sets only; no hypothesis or competition inference"},
+            {"key": "evidence-paths", "label": "Evidence Paths", "purpose": "Deterministic source-grounded graph paths between selected research objects; analytical relationships are opt-in"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",
@@ -850,7 +854,7 @@ def build_publication_corpus_knowledge_map(
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",

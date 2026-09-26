@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.24.0 — Cross-Publication Evidence Synthesis & Competing Hypotheses.
+ * v5.25.0 — Research Graph Query & Evidence Pathfinding.
  *
  * Renders an interactive analytical graph from the Library Python backend.
  * Relationships remain typed by their actual basis: citation, reviewed concept
  * association, source-span co-occurrence, or real stored-embedding similarity.
  */
 final class SC_Library_Knowledge_Landscape {
-    public const VERSION = '5.24.0';
+    public const VERSION = '5.25.0';
     public const SHORTCODE = 'sc_library_knowledge_landscape';
 
     public function register_hooks(): void {
@@ -18,14 +18,14 @@ final class SC_Library_Knowledge_Landscape {
 
     private function enqueue_assets(): void {
         wp_enqueue_style(
-            'sc-library-knowledge-landscape-v5240',
-            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5240.css',
+            'sc-library-knowledge-landscape-v5250',
+            SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5250.css',
             [],
             self::VERSION
         );
         wp_enqueue_script(
-            'sc-library-knowledge-landscape-v5240',
-            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5240.js',
+            'sc-library-knowledge-landscape-v5250',
+            SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5250.js',
             [],
             self::VERSION,
             true
@@ -106,6 +106,8 @@ final class SC_Library_Knowledge_Landscape {
                 'timeout_ms' => 90000,
                 'session_endpoint' => esc_url_raw(rest_url(SC_Library_Python_Backend::REST_NAMESPACE . '/backend/publication-visual-session-package')),
                 'evidence_trace_endpoint' => esc_url_raw(rest_url(SC_Library_Python_Backend::REST_NAMESPACE . '/backend/publication-visual-evidence-trace')),
+                'research_graph_query_endpoint' => esc_url_raw(rest_url(SC_Library_Python_Backend::REST_NAMESPACE . '/backend/publication-research-graph-query')),
+                'evidence_pathfind_endpoint' => esc_url_raw(rest_url(SC_Library_Python_Backend::REST_NAMESPACE . '/backend/publication-evidence-pathfind')),
             ];
             $nodes = [];
         }
@@ -123,7 +125,7 @@ final class SC_Library_Knowledge_Landscape {
                 <div>
                     <p class="sc-kl__eyebrow"><?php echo 'corpus' === $scope ? esc_html__('Publication Corpus Analysis', 'sustainable-catalyst-library') : esc_html__('Publication Knowledge Analysis', 'sustainable-catalyst-library'); ?></p>
                     <h2 data-sc-kl-title><?php echo esc_html((string) ($payload['title'] ?? __('Scientific Knowledge Landscape', 'sustainable-catalyst-library'))); ?></h2>
-                    <p><?php esc_html_e('Linked scientific knowledge environment connecting 4D terrain, topic regions, publication relationships, citation flows, temporal dynamics, and visual queries across the Research Library corpus.', 'sustainable-catalyst-library'); ?></p>
+                    <p><?php esc_html_e('Linked scientific knowledge environment connecting 4D terrain, publication relationships, reviewed evidence, research-graph queries, and deterministic evidence paths across the Research Library corpus.', 'sustainable-catalyst-library'); ?></p>
                 </div>
                 <div class="sc-kl__status-row">
                     <?php if ('corpus' === $scope) : ?><span class="sc-kl__status is-good"><?php esc_html_e('Publication Library manifest', 'sustainable-catalyst-library'); ?></span><?php endif; ?>
@@ -147,6 +149,7 @@ final class SC_Library_Knowledge_Landscape {
                 <button type="button" data-sc-kl-view="contradiction-overlay"><?php esc_html_e('Contradictions', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="evidence-synthesis"><?php esc_html_e('Evidence Synthesis', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="competing-hypotheses"><?php esc_html_e('Competing Hypotheses', 'sustainable-catalyst-library'); ?></button>
+                <button type="button" data-sc-kl-view="evidence-paths"><?php esc_html_e('Evidence Paths', 'sustainable-catalyst-library'); ?></button>
             </nav>
 
             <div class="sc-kl__workspace">
@@ -275,6 +278,37 @@ final class SC_Library_Knowledge_Landscape {
                             <span><strong data-sc-kl-synthesis-metric="explicit_competing_hypothesis_set_count">0</strong> competing sets</span>
                         </div>
                     </div>
+                    <div class="sc-kl__graph-query" data-sc-kl-graph-query>
+                        <div class="sc-kl__panel-title sc-kl__panel-title--secondary"><?php esc_html_e('Research Graph Query', 'sustainable-catalyst-library'); ?></div>
+                        <p class="sc-kl__muted"><?php esc_html_e('Search the loaded research graph deterministically by node label or ID. Graph queries do not create research claims.', 'sustainable-catalyst-library'); ?></p>
+                        <label class="sc-kl__path-label"><?php esc_html_e('Graph text query', 'sustainable-catalyst-library'); ?>
+                            <input type="search" data-sc-kl-graph-query-text placeholder="claim, topic, publication…">
+                        </label>
+                        <label class="sc-kl__path-label"><?php esc_html_e('Node kind', 'sustainable-catalyst-library'); ?>
+                            <select data-sc-kl-graph-query-kind>
+                                <option value=""><?php esc_html_e('Any', 'sustainable-catalyst-library'); ?></option>
+                                <option value="publication"><?php esc_html_e('Publication', 'sustainable-catalyst-library'); ?></option>
+                                <option value="topic"><?php esc_html_e('Topic', 'sustainable-catalyst-library'); ?></option>
+                                <option value="finding"><?php esc_html_e('Finding', 'sustainable-catalyst-library'); ?></option>
+                                <option value="claim"><?php esc_html_e('Claim', 'sustainable-catalyst-library'); ?></option>
+                                <option value="hypothesis"><?php esc_html_e('Hypothesis', 'sustainable-catalyst-library'); ?></option>
+                            </select>
+                        </label>
+                        <button type="button" data-sc-kl-graph-query-run><?php esc_html_e('Query research graph', 'sustainable-catalyst-library'); ?></button>
+                        <div class="sc-kl__path-results" data-sc-kl-graph-query-results aria-live="polite"><span class="sc-kl__muted"><?php esc_html_e('No graph query run yet.', 'sustainable-catalyst-library'); ?></span></div>
+                    </div>
+                    <div class="sc-kl__evidence-pathfinder" data-sc-kl-evidence-pathfinder>
+                        <div class="sc-kl__panel-title sc-kl__panel-title--secondary"><?php esc_html_e('Evidence Pathfinder', 'sustainable-catalyst-library'); ?></div>
+                        <p class="sc-kl__muted"><?php esc_html_e('Select one or more research objects. With one selection, paths trace toward publications; with multiple selections, the first is traced to the others.', 'sustainable-catalyst-library'); ?></p>
+                        <div class="sc-kl__path-options">
+                            <label class="sc-kl__path-label"><?php esc_html_e('Maximum hops', 'sustainable-catalyst-library'); ?>
+                                <select data-sc-kl-path-max-hops><option>2</option><option selected>4</option><option>6</option><option>8</option></select>
+                            </label>
+                            <label class="sc-kl__path-check"><input type="checkbox" data-sc-kl-path-analytical> <?php esc_html_e('Include analytical similarity/co-occurrence', 'sustainable-catalyst-library'); ?></label>
+                        </div>
+                        <button type="button" data-sc-kl-pathfind><?php esc_html_e('Find evidence paths', 'sustainable-catalyst-library'); ?></button>
+                        <div class="sc-kl__path-results" data-sc-kl-path-results aria-live="polite"><span class="sc-kl__muted"><?php esc_html_e('No evidence path query run yet.', 'sustainable-catalyst-library'); ?></span></div>
+                    </div>
                     <div class="sc-kl__panel-title sc-kl__panel-title--secondary"><?php esc_html_e('Linked Query State', 'sustainable-catalyst-library'); ?></div>
                     <div class="sc-kl__query-state" data-sc-kl-query-summary>
                         <p class="sc-kl__muted"><?php esc_html_e('Selections made in any scientific view will appear here and propagate to the others.', 'sustainable-catalyst-library'); ?></p>
@@ -304,6 +338,7 @@ final class SC_Library_Knowledge_Landscape {
                         <div><dt><?php esc_html_e('Visual query', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Highlight or isolate; no source mutation', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Evidence trace', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Source records + passages + explicit citations + reviewed candidates', 'sustainable-catalyst-library'); ?></dd></div>
                         <div><dt><?php esc_html_e('Evidence synthesis', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Accepted reviewed relations; no inferred consensus or hypotheses', 'sustainable-catalyst-library'); ?></dd></div>
+                        <div><dt><?php esc_html_e('Evidence paths', 'sustainable-catalyst-library'); ?></dt><dd><?php esc_html_e('Deterministic typed graph traversal; analytical edges opt-in', 'sustainable-catalyst-library'); ?></dd></div>
                     </dl>
                     <div class="sc-kl__integrity">
                         <strong><?php esc_html_e('Interpretation boundary', 'sustainable-catalyst-library'); ?></strong>

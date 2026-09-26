@@ -1,0 +1,35 @@
+Sustainable Catalyst Knowledge Library v5.25.0
+Research Graph Query & Evidence Pathfinding
+Backend v2.36.0
+
+VALIDATION TARGETS
+- plugin release identity 5.25.0
+- backend release identity 2.36.0
+- research graph query contract
+- evidence pathfinding contract
+- canonical publication corpus graph manifest
+- source-grounded traversal by default
+- analytical similarity/co-occurrence opt-in
+- reviewed support/contradiction compatibility
+- direction-aware citation traversal
+- WordPress REST proxies
+- Evidence Paths interface controls
+- v5.24 synthesis regression protection
+- v5.24.0.1 release-readiness behavior preserved
+
+LOCAL RESULT
+55 selected release/regression tests passed.
+Python compileall passed.
+PHP lint passed for release-critical plugin files.
+JavaScript syntax check passed for v5.25.0 Knowledge Landscape asset.
+Installer/deployment shell syntax validated.
+
+INTEGRITY GUARANTEES
+- path creates no new claims
+- path does not imply truth
+- path does not imply causality
+- path does not imply consensus
+- support/contradiction require explicit reviewed relation
+- analytical graph relations are opt-in
+- absence of a path is not evidence that no relationship exists
+- Platform Core remains durable research-object authority

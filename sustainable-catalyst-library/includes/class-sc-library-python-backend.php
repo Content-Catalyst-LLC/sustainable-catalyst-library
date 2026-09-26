@@ -237,6 +237,16 @@ final class SC_Library_Python_Backend {
             'permission_callback' => '__return_true',
             'callback' => [$this, 'proxy_publication_visual_evidence_trace'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-research-graph-query', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_research_graph_query'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-evidence-pathfind', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_evidence_pathfind'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-knowledge-map', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
@@ -577,6 +587,88 @@ final class SC_Library_Python_Backend {
         $code=(int) wp_remote_retrieve_response_code($response);
         $result=json_decode((string) wp_remote_retrieve_body($response), true);
         if (!is_array($result)) { $result=['schema'=>'sc-library-visual-evidence-trace/1.0','error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
+    }
+
+    private function publication_graph_proxy_body(array $json): array {
+        $corpus = isset($json['corpus_request']) && is_array($json['corpus_request']) ? $json['corpus_request'] : [];
+        $max_publications = min(1000, max(1, (int) ($corpus['max_publications'] ?? 250)));
+        $record_ids = isset($corpus['record_ids']) && is_array($corpus['record_ids'])
+            ? array_values(array_filter(array_map(static fn($v) => sanitize_text_field((string) $v), $corpus['record_ids'])))
+            : [];
+        if (!$record_ids && class_exists('SC_Library_Publications')) {
+            $publication_manifest = new SC_Library_Publications();
+            $record_ids = $publication_manifest->publication_record_ids($max_publications);
+        }
+        return [
+            'corpus_request' => [
+                'source_key' => sanitize_text_field((string) ($corpus['source_key'] ?? 'wordpress-main')) ?: 'wordpress-main',
+                'object_type' => sanitize_key((string) ($corpus['object_type'] ?? '')),
+                'record_ids' => array_slice($record_ids, 0, 1000),
+                'include_citations' => true,
+                'include_semantic_similarity' => true,
+                'semantic_threshold' => max(0.0, min(1.0, (float) ($corpus['semantic_threshold'] ?? 0.72))),
+                'max_publications' => $max_publications,
+                'max_topics_per_publication' => min(100, max(1, (int) ($corpus['max_topics_per_publication'] ?? 36))),
+            ],
+            'query' => isset($json['query']) && is_array($json['query']) ? $json['query'] : [],
+        ];
+    }
+
+    public function proxy_publication_research_graph_query(WP_REST_Request $request) {
+        $json = $request->get_json_params();
+        $json = is_array($json) ? $json : [];
+        $body = $this->publication_graph_proxy_body($json);
+        if (!self::configured()) {
+            return new WP_REST_Response(['schema'=>'sc-library-research-graph-query/1.0','error'=>'Library backend not configured'], 503);
+        }
+        $response = wp_remote_post(self::base_url() . '/v1/publication-knowledge-maps/research-graph-query', [
+            'timeout' => max(self::timeout(), 45),
+            'redirection' => 2,
+            'headers' => ['Accept'=>'application/json','Content-Type'=>'application/json'],
+            'body' => wp_json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            'data_format' => 'body',
+        ]);
+        if (is_wp_error($response)) {
+            return new WP_REST_Response(['schema'=>'sc-library-research-graph-query/1.0','error'=>$response->get_error_message()], 502);
+        }
+        $code=(int) wp_remote_retrieve_response_code($response);
+        $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>'sc-library-research-graph-query/1.0','error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
+    }
+
+    public function proxy_publication_evidence_pathfind(WP_REST_Request $request) {
+        $json = $request->get_json_params();
+        $json = is_array($json) ? $json : [];
+        $body = $this->publication_graph_proxy_body($json);
+        $query = isset($body['query']) && is_array($body['query']) ? $body['query'] : [];
+        $query['start_node_ids'] = array_slice(array_values(array_filter(array_map(static fn($v) => sanitize_text_field((string) $v), is_array($query['start_node_ids'] ?? null) ? $query['start_node_ids'] : []))), 0, 25);
+        $query['target_node_ids'] = array_slice(array_values(array_filter(array_map(static fn($v) => sanitize_text_field((string) $v), is_array($query['target_node_ids'] ?? null) ? $query['target_node_ids'] : []))), 0, 100);
+        $query['target_kinds'] = array_slice(array_values(array_filter(array_map('sanitize_key', is_array($query['target_kinds'] ?? null) ? $query['target_kinds'] : []))), 0, 20);
+        $query['relationship_bases'] = array_slice(array_values(array_filter(array_map('sanitize_key', is_array($query['relationship_bases'] ?? null) ? $query['relationship_bases'] : []))), 0, 30);
+        $query['include_analytical'] = !empty($query['include_analytical']);
+        $query['max_hops'] = min(8, max(1, (int) ($query['max_hops'] ?? 4)));
+        $query['max_paths'] = min(50, max(1, (int) ($query['max_paths'] ?? 12)));
+        $direction = sanitize_key((string) ($query['direction'] ?? 'both'));
+        $query['direction'] = in_array($direction, ['both','forward','reverse'], true) ? $direction : 'both';
+        $body['query'] = $query;
+        if (!self::configured()) {
+            return new WP_REST_Response(['schema'=>'sc-library-evidence-pathfinding/1.0','error'=>'Library backend not configured'], 503);
+        }
+        $response = wp_remote_post(self::base_url() . '/v1/publication-knowledge-maps/evidence-pathfind', [
+            'timeout' => max(self::timeout(), 45),
+            'redirection' => 2,
+            'headers' => ['Accept'=>'application/json','Content-Type'=>'application/json'],
+            'body' => wp_json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            'data_format' => 'body',
+        ]);
+        if (is_wp_error($response)) {
+            return new WP_REST_Response(['schema'=>'sc-library-evidence-pathfinding/1.0','error'=>$response->get_error_message()], 502);
+        }
+        $code=(int) wp_remote_retrieve_response_code($response);
+        $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>'sc-library-evidence-pathfinding/1.0','error'=>'Invalid backend JSON']; }
         return new WP_REST_Response($result, $code ?: 502);
     }
 

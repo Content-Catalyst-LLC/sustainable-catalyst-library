@@ -9,7 +9,7 @@ def test_release_identity_and_assets():
     assert 'Visual Evidence Traceability' in (ROOT/'VISUAL_EVIDENCE_TRACEABILITY_v5.22.0.md').read_text()
     assert 'data-sc-kl-evidence-trace' in landscape
     assert 'data-sc-kl-evidence-trace' in landscape
-    assert 'sc-library-knowledge-landscape-v5240' in landscape
+    assert 'sc-library-knowledge-landscape-v5250' in landscape
 
 
 def test_wordpress_evidence_trace_proxy_and_ui():
