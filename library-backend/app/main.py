@@ -50,6 +50,14 @@ from .literature_review import literature_review_request, build_literature_revie
 from .living_evidence import living_evidence_request, build_living_evidence
 from .ingestion_job_fabric import ingestion_fabric_status, submit_ingestion_job, list_ingestion_jobs, get_ingestion_job, cancel_ingestion_job
 from .research_corpus_builder import build_research_corpus, export_research_corpus
+from .unified_runtime_contract import (
+    EXECUTION_ENVELOPE_SCHEMA,
+    ROUTING_DECISION_SCHEMA,
+    RUNTIME_CONTRACT,
+    execute_runtime,
+    resolve_runtime,
+    runtime_contract_status,
+)
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -416,6 +424,14 @@ def health() -> dict[str, Any]:
             "research_corpus_automatic_quality_judgment": False,
             "research_corpus_automatic_truth_promotion": False,
             "research_corpus_automatic_core_promotion": False,
+            "unified_research_runtime_contract": True,
+            "unified_runtime_discovery": True,
+            "unified_runtime_routing": True,
+            "unified_runtime_execution_envelopes": True,
+            "unified_runtime_explicit_fallback_policy": True,
+            "unified_runtime_python_semantics_authority": True,
+            "unified_runtime_cross_runtime_equivalence_claim": False,
+            "unified_runtime_automatic_core_promotion": False,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2557,6 +2573,33 @@ def research_corpus_export(payload: dict[str, Any]) -> dict[str, Any]:
         return export_research_corpus(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/runtime/research/status")
+def unified_research_runtime_status() -> dict[str, Any]:
+    return runtime_contract_status()
+
+
+@app.post("/v1/runtime/research/resolve")
+def unified_research_runtime_resolve(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return resolve_runtime(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/v1/runtime/research/execute")
+async def unified_research_runtime_execute(
+    payload: dict[str, Any], request: Request, authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None), x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return execute_runtime(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @app.post("/v1/publication-knowledge-maps/research-corpus")

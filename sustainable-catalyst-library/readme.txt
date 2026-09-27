@@ -8,7 +8,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.37.0
+Stable tag: 5.38.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -404,6 +404,11 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= 5.38.0 =
+* Added the Unified Research Runtime Contract across Python, Go, and Rust.
+* Added governed runtime discovery, route resolution, execution envelopes, and explicit fallback policy.
+* Preserved Python research-semantics authority, Go durable ingestion jobs, Rust structural graph acceleration, and Platform Core durable governance.
 = 5.37.0 =
 * Adds the Research Corpus Builder & Dataset Export.
 * Builds deterministic, versioned corpus manifests from explicit record selections and source snapshots.

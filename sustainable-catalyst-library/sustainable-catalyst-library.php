@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.37.0 adds the Research Corpus Builder & Dataset Export for reproducible corpus selection, manifests, row-level provenance, and JSON/JSONL/CSV research datasets.
- * Version: 5.37.0
+ * Description: Sustainable Catalyst Library v5.38.0 adds the Unified Research Runtime Contract for governed Python, Go, and Rust runtime discovery, routing, execution envelopes, and explicit fallback policy.
+ * Version: 5.38.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.37.0');
+define('SC_LIBRARY_VERSION', '5.38.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
@@ -69,6 +69,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-literature-review.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-living-evidence.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-ingestion-job-fabric.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-research-corpus-builder.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-unified-runtime.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-python-operations.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-dynamic-explorer.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-capability-hub.php';
@@ -151,6 +152,7 @@ final class SC_Library_Plugin {
         $living_evidence = new SC_Library_Living_Evidence();
         $ingestion_job_fabric = new SC_Library_Ingestion_Job_Fabric();
         $research_corpus_builder = new SC_Library_Research_Corpus_Builder();
+        $unified_runtime = new SC_Library_Unified_Runtime();
         $python_operations = new SC_Library_Python_Operations();
         $dynamic_explorer = new SC_Library_Dynamic_Explorer();
         $capability_hub = new SC_Library_Capability_Hub();
@@ -239,6 +241,7 @@ final class SC_Library_Plugin {
         $living_evidence->register_hooks();
         $ingestion_job_fabric->register_hooks();
         $research_corpus_builder->register_hooks();
+        $unified_runtime->register_hooks();
         $python_operations->register_hooks();
         $dynamic_explorer->register_hooks();
         $capability_hub->register_hooks();

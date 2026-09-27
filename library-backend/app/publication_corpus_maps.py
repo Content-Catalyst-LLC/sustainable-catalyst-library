@@ -992,6 +992,7 @@ def build_publication_corpus_knowledge_map(
             {"key": "living-evidence", "label": "Living Evidence", "purpose": "Compare immutable literature-review snapshots, inspect explicit source/review changes, and surface human-reviewed update candidates over time"},
             {"key": "native-graph-query", "label": "Native Graph Query", "purpose": "High-performance structural graph exploration using Rust for neighborhoods, reachability, components, induced subgraphs and descriptive graph statistics"},
             {"key": "research-corpus-builder", "label": "Research Corpus Builder", "purpose": "Create deterministic publication corpora and exportable research datasets with explicit selection criteria, manifests and row-level provenance"},
+            {"key": "unified-runtime-contract", "label": "Unified Research Runtime", "purpose": "Discover, route and execute governed Python, Go and Rust research workloads through one explicit runtime contract"},
         ],
         "renderer_profile": {
             "family": "scientific-publication-corpus-landscape",

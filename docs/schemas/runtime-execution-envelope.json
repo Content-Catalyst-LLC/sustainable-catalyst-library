@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/runtime-execution-envelope.json",
+  "title": "Sustainable Catalyst Library Runtime Execution Envelope",
+  "type": "object",
+  "required": ["schema", "execution_id", "request_fingerprint_sha256", "state", "workload", "routing", "result", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-runtime-execution-envelope/1.0"},
+    "execution_id": {"type": "string"},
+    "request_fingerprint_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "result_fingerprint_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "state": {"enum": ["completed", "accepted"]},
+    "workload": {"type": "string"},
+    "routing": {"type": "object"},
+    "result": {"type": "object"},
+    "authority": {"type": "object"},
+    "guardrails": {"type": "object"}
+  }
+}

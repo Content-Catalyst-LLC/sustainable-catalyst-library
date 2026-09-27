@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/research-runtime-contract.json",
+  "title": "Sustainable Catalyst Library Unified Research Runtime Contract",
+  "type": "object",
+  "required": ["schema", "backend_version", "runtimes", "workloads", "authority", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-research-runtime-contract/1.0"},
+    "backend_version": {"type": "string"},
+    "runtimes": {"type": "array", "minItems": 3, "items": {"type": "object"}},
+    "workloads": {"type": "array", "items": {"type": "object"}},
+    "contract_fingerprint_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "authority": {"type": "object"},
+    "guardrails": {"type": "object"}
+  }
+}
