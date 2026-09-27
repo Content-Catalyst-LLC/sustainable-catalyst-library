@@ -360,6 +360,21 @@ final class SC_Library_Python_Backend {
             'permission_callback' => static fn() => current_user_can('edit_posts'),
             'callback' => [$this, 'proxy_unified_runtime_execute'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/runtime-reproducibility-status', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_runtime_reproducibility_status'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/runtime-reproducibility-record', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static fn() => current_user_can('edit_posts'),
+            'callback' => [$this, 'proxy_runtime_reproducibility_record'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/runtime-reproducibility-verify', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static fn() => current_user_can('edit_posts'),
+            'callback' => [$this, 'proxy_runtime_reproducibility_verify'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/research-corpus-build', [
             'methods' => WP_REST_Server::CREATABLE,
             'permission_callback' => '__return_true',
@@ -864,6 +879,32 @@ final class SC_Library_Python_Backend {
         $response=self::signed_request('POST','/v1/runtime/research/execute',(string)$body);
         if (is_wp_error($response)) { return new WP_REST_Response(['schema'=>'sc-library-runtime-execution-envelope/1.0','error'=>$response->get_error_message()], self::error_status($response) ?: 502); }
         return new WP_REST_Response($response, 200);
+    }
+
+    public function proxy_runtime_reproducibility_status(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) { return new WP_REST_Response(['schema'=>'sc-library-cross-runtime-reproducibility/1.0','error'=>'Library backend not configured'], 503); }
+        $response = wp_remote_get(self::base_url() . '/v1/runtime/reproducibility/status', ['timeout'=>max(self::timeout(),10),'redirection'=>2,'headers'=>['Accept'=>'application/json']]);
+        if (is_wp_error($response)) { return new WP_REST_Response(['schema'=>'sc-library-cross-runtime-reproducibility/1.0','error'=>$response->get_error_message()],502); }
+        $code=(int) wp_remote_retrieve_response_code($response); $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>'sc-library-cross-runtime-reproducibility/1.0','error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
+    }
+
+    private function proxy_runtime_reproducibility_write(WP_REST_Request $request, string $path, string $schema): WP_REST_Response {
+        if (!self::configured()) { return new WP_REST_Response(['schema'=>$schema,'error'=>'Library backend not configured'],503); }
+        $payload=$request->get_json_params(); if (!is_array($payload)) {$payload=[];}
+        $body=wp_json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $response=self::signed_request('POST',$path,(string)$body);
+        if (is_wp_error($response)) { return new WP_REST_Response(['schema'=>$schema,'error'=>$response->get_error_message()], self::error_status($response) ?: 502); }
+        return new WP_REST_Response($response, 200);
+    }
+
+    public function proxy_runtime_reproducibility_record(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_runtime_reproducibility_write($request, '/v1/runtime/reproducibility/record', 'sc-library-reproducibility-record/1.0');
+    }
+
+    public function proxy_runtime_reproducibility_verify(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_runtime_reproducibility_write($request, '/v1/runtime/reproducibility/verify', 'sc-library-runtime-verification/1.0');
     }
 
     public function proxy_research_corpus_build(WP_REST_Request $request): WP_REST_Response {

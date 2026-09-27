@@ -58,6 +58,14 @@ from .unified_runtime_contract import (
     resolve_runtime,
     runtime_contract_status,
 )
+from .execution_lineage import (
+    REPRODUCIBILITY_RECORD_SCHEMA,
+    RUNTIME_VERIFICATION_SCHEMA,
+    create_reproducibility_record,
+    execution_environment_snapshot,
+    reproducibility_status,
+    verify_reproducibility,
+)
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -432,6 +440,14 @@ def health() -> dict[str, Any]:
             "unified_runtime_python_semantics_authority": True,
             "unified_runtime_cross_runtime_equivalence_claim": False,
             "unified_runtime_automatic_core_promotion": False,
+            "cross_runtime_reproducibility_execution_lineage": True,
+            "execution_environment_capture": True,
+            "execution_input_output_fingerprints": True,
+            "execution_parent_child_lineage": True,
+            "execution_replay_verification": True,
+            "cross_runtime_observed_output_comparison": True,
+            "cross_runtime_equivalence_claim": False,
+            "execution_lineage_automatic_core_promotion": False,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2596,6 +2612,44 @@ async def unified_research_runtime_execute(
     await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
     try:
         return execute_runtime(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/v1/runtime/reproducibility/status")
+def runtime_reproducibility_status() -> dict[str, Any]:
+    return reproducibility_status()
+
+
+@app.get("/v1/runtime/reproducibility/environment")
+def runtime_reproducibility_environment() -> dict[str, Any]:
+    return execution_environment_snapshot()
+
+
+@app.post("/v1/runtime/reproducibility/record")
+async def runtime_reproducibility_record(
+    payload: dict[str, Any], request: Request, authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None), x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return create_reproducibility_record(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.post("/v1/runtime/reproducibility/verify")
+async def runtime_reproducibility_verify(
+    payload: dict[str, Any], request: Request, authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None), x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return verify_reproducibility(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except RuntimeError as exc:

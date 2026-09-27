@@ -1,0 +1,15 @@
+Knowledge Library v5.39.0 — Cross-Runtime Reproducibility & Execution Lineage
+Backend v2.50.0
+Go runtime v0.1.0
+Rust graph runtime v0.2.0
+
+Validation:
+- Go unit tests: PASS
+- Rust compile: required on Mac/production Docker; Cargo unavailable in packaging environment
+- Selected functional/regression suite: 124 passed
+- Python compileall: PASS
+- PHP lint: PASS
+- JavaScript syntax: PASS
+- JSON schemas: PASS
+- Rust target artifacts excluded
+- Compiled Go binary excluded

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sustainable Catalyst Execution Lineage",
+  "type": "object",
+  "required": [
+    "schema",
+    "execution_id",
+    "root_execution_id",
+    "lineage_fingerprint_sha256",
+    "selected_runtime"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-execution-lineage/1.0"
+    },
+    "execution_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "root_execution_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parent_execution_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "lineage_fingerprint_sha256": {
+      "type": "string"
+    },
+    "selected_runtime": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

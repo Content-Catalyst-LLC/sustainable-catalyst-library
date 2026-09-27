@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sustainable Catalyst Runtime Verification",
+  "type": "object",
+  "required": [
+    "schema",
+    "status",
+    "workload",
+    "cross_runtime",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-runtime-verification/1.0"
+    },
+    "status": {
+      "enum": [
+        "verified",
+        "differs",
+        "not-applicable"
+      ]
+    },
+    "workload": {
+      "type": "string"
+    },
+    "cross_runtime": {
+      "type": "boolean"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

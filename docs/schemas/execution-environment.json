@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sustainable Catalyst Execution Environment",
+  "type": "object",
+  "required": [
+    "schema",
+    "backend_version",
+    "runtime_contract_fingerprint_sha256",
+    "environment_fingerprint_sha256",
+    "runtimes"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-execution-environment/1.0"
+    },
+    "backend_version": {
+      "type": "string"
+    },
+    "runtime_contract_fingerprint_sha256": {
+      "type": "string"
+    },
+    "environment_fingerprint_sha256": {
+      "type": "string"
+    },
+    "runtimes": {
+      "type": "array"
+    }
+  }
+}
