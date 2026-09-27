@@ -15,6 +15,8 @@ from .source_identity_resolution import build_source_identity_resolution
 from .temporal_knowledge import build_temporal_knowledge_evolution
 from .methodology_intelligence import build_methodology_intelligence
 from .research_gap_novelty import build_research_gap_novelty
+from .semantic import default_embedding_client
+from .settings import settings
 
 CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
 
@@ -496,14 +498,22 @@ def build_publication_corpus_knowledge_map(
     nodes: dict[str, dict[str, Any]] = {}
     edges: dict[tuple[str, str, str, bool], dict[str, Any]] = {}
     scientific_chunks_by_record: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    embedding_client = default_embedding_client()
     semantic_status = {
         "requested": bool(include_semantic_similarity),
         "available": False,
         "reason": "not-requested" if not include_semantic_similarity else "insufficient-current-embeddings",
+        "message": "Semantic analysis was not requested." if not include_semantic_similarity else "Semantic similarity requires at least two current publication embeddings.",
         "threshold": semantic_threshold,
         "vector_count": 0,
-        "model": None,
-        "provider": None,
+        "current_embedding_count": 0,
+        "missing_current_embedding_count": 0,
+        "stale_embedding_count": 0,
+        "embedding_job_counts": {},
+        "provider_configured": bool(embedding_client.configured),
+        "worker_enabled": bool(settings.embedding_worker_enabled),
+        "model": embedding_client.model or None,
+        "provider": embedding_client.provider or None,
     }
 
     with pool.connection() as conn, conn.cursor() as cur:
@@ -540,6 +550,12 @@ def build_publication_corpus_knowledge_map(
             }
 
         record_ids = list(records)
+        semantic_status["missing_current_embedding_count"] = len(records)
+        if include_semantic_similarity and len(records) < 2:
+            semantic_status.update({
+                "reason": "insufficient-publications",
+                "message": f"Semantic Overlay requires at least two publications; this view contains {len(records)}.",
+            })
         for rid, rec in records.items():
             _add_node(
                 nodes, rid, "publication", str(rec.get("title") or rid),
@@ -695,14 +711,53 @@ def build_publication_corpus_knowledge_map(
                 rid = str(item["record_id"])
                 if rid not in vectors:
                     vectors[rid] = item
-            semantic_status["vector_count"] = len(vectors)
-            if len(vectors) >= 2:
+            current_count = len(vectors)
+            semantic_status["vector_count"] = current_count
+            semantic_status["current_embedding_count"] = current_count
+            semantic_status["missing_current_embedding_count"] = max(0, len(records) - current_count)
+            cur.execute(
+                "SELECT count(*) AS n FROM library_record_embeddings WHERE record_id=ANY(%s)",
+                (record_ids,),
+            )
+            total_embedding_rows = int(cur.fetchone()["n"])
+            semantic_status["stale_embedding_count"] = max(0, total_embedding_rows - current_count)
+            cur.execute(
+                "SELECT status,count(*) AS n FROM library_embedding_jobs WHERE record_id=ANY(%s) GROUP BY status ORDER BY status",
+                (record_ids,),
+            )
+            semantic_status["embedding_job_counts"] = {str(row["status"]): int(row["n"]) for row in cur.fetchall()}
+            if current_count >= 2:
                 semantic_status.update({
                     "available": True,
                     "reason": "current-record-embeddings",
+                    "message": f"Semantic Overlay is ready with {current_count} current publication embeddings.",
                     "provider": next(iter(vectors.values())).get("provider"),
                     "model": next(iter(vectors.values())).get("model"),
                 })
+            else:
+                jobs = semantic_status["embedding_job_counts"]
+                active_jobs = sum(int(jobs.get(key, 0)) for key in ("pending", "running", "retry_wait"))
+                if not embedding_client.configured:
+                    semantic_status.update({
+                        "reason": "embedding-provider-not-configured",
+                        "message": f"Semantic Overlay is unavailable: {current_count} current publication embeddings are available and the embedding provider is not configured.",
+                    })
+                elif active_jobs > 0:
+                    semantic_status.update({
+                        "reason": "embedding-jobs-pending",
+                        "message": f"Semantic Overlay is waiting for embedding work: {current_count} current embeddings are available and {active_jobs} embedding jobs are pending or retrying.",
+                    })
+                elif semantic_status["stale_embedding_count"] > 0:
+                    semantic_status.update({
+                        "reason": "stale-embeddings-require-refresh",
+                        "message": f"Semantic Overlay is unavailable: {current_count} current embeddings are available and {semantic_status['stale_embedding_count']} stored embeddings are stale for the current publication content hashes.",
+                    })
+                else:
+                    semantic_status.update({
+                        "reason": "insufficient-current-embeddings",
+                        "message": f"Semantic Overlay is unavailable: {current_count} current publication embeddings are available; at least 2 are required.",
+                    })
+            if len(vectors) >= 2:
                 ids = list(vectors)
                 for i in range(len(ids)):
                     for j in range(i + 1, len(ids)):

@@ -197,8 +197,14 @@ def semantic_readiness(client: EmbeddingClient | None = None) -> dict[str, Any]:
         with pool.connection() as conn, conn.cursor() as cur:
             cur.execute("SELECT count(*) AS count FROM library_record_embeddings")
             result["indexed_records"] = int(cur.fetchone()["count"])
+            cur.execute(
+                "SELECT count(*) AS count FROM library_record_embeddings e JOIN library_records r ON r.record_id=e.record_id AND r.content_hash=e.content_hash"
+            )
+            result["current_indexed_records"] = int(cur.fetchone()["count"])
+            result["stale_indexed_records"] = max(0, result["indexed_records"] - result["current_indexed_records"])
             cur.execute("SELECT status,count(*) AS count FROM library_embedding_jobs GROUP BY status ORDER BY status")
             result["job_counts"] = {row["status"]: int(row["count"]) for row in cur.fetchall()}
+            result["worker_enabled"] = bool(settings.embedding_worker_enabled)
     except Exception as exc:
         result["index_state"] = "unavailable"
         result["index_error"] = exc.__class__.__name__

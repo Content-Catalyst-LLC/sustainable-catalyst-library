@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.27.0 — Source Identity, Deduplication & Entity Resolution.
+ * v5.39.0.1 — Knowledge Landscape Desktop Layout & Semantic Availability Repair.
  *
  * Renders an interactive analytical graph from the Library Python backend.
  * Relationships remain typed by their actual basis: citation, reviewed concept
  * association, source-span co-occurrence, or real stored-embedding similarity.
  */
 final class SC_Library_Knowledge_Landscape {
-    public const VERSION = '5.27.0';
+    public const VERSION = '5.39.0.1';
     public const SHORTCODE = 'sc_library_knowledge_landscape';
 
     public function register_hooks(): void {
@@ -145,7 +145,7 @@ final class SC_Library_Knowledge_Landscape {
                 <button type="button" data-sc-kl-view="topic-regions"><?php esc_html_e('Topic Regions', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="temporal-dynamics"><?php esc_html_e('Temporal Dynamics', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="relationship-matrix"><?php esc_html_e('Relationship Matrix', 'sustainable-catalyst-library'); ?></button>
-                <button type="button" data-sc-kl-view="semantic-overlay" <?php disabled(empty($semantic['available'])); ?>><?php esc_html_e('Semantic Overlay', 'sustainable-catalyst-library'); ?></button>
+                <button type="button" data-sc-kl-view="semantic-overlay" aria-describedby="<?php echo esc_attr($id); ?>-semantic-notice"><?php esc_html_e('Semantic Overlay', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="findings-claims"><?php esc_html_e('Findings & Claims', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="contradiction-overlay"><?php esc_html_e('Contradictions', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="evidence-synthesis"><?php esc_html_e('Evidence Synthesis', 'sustainable-catalyst-library'); ?></button>
@@ -154,6 +154,9 @@ final class SC_Library_Knowledge_Landscape {
                 <button type="button" data-sc-kl-view="scientific-objects"><?php esc_html_e('Scientific Objects', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="source-identity"><?php esc_html_e('Source Identity', 'sustainable-catalyst-library'); ?></button>
             </nav>
+            <div id="<?php echo esc_attr($id); ?>-semantic-notice" class="sc-kl__semantic-notice" data-sc-kl-semantic-notice aria-live="polite" <?php echo !empty($semantic['available']) ? 'hidden' : ''; ?>>
+                <?php esc_html_e('Semantic Overlay is available for inspection, but similarity links require at least two current publication embeddings. Structural views remain available.', 'sustainable-catalyst-library'); ?>
+            </div>
 
             <div class="sc-kl__workspace">
                 <aside class="sc-kl__panel sc-kl__panel--left">
