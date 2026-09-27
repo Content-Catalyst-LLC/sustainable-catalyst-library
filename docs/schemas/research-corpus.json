@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/research-corpus.json",
+  "title": "Sustainable Catalyst Research Corpus",
+  "type": "object",
+  "required": ["schema", "corpus_id", "manifest", "rows", "row_provenance", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-research-corpus/1.0"},
+    "corpus_id": {"type": "string"},
+    "manifest": {"type": "object"},
+    "rows": {"type": "array", "items": {"type": "object"}},
+    "row_provenance": {"type": "array", "items": {"type": "object"}},
+    "guardrails": {"type": "object"}
+  },
+  "additionalProperties": true
+}

@@ -49,6 +49,7 @@ from .research_gap_novelty import research_gap_novelty_request
 from .literature_review import literature_review_request, build_literature_review
 from .living_evidence import living_evidence_request, build_living_evidence
 from .ingestion_job_fabric import ingestion_fabric_status, submit_ingestion_job, list_ingestion_jobs, get_ingestion_job, cancel_ingestion_job
+from .research_corpus_builder import build_research_corpus, export_research_corpus
 from .repository import delete_record, ingest_edges, ingest_records
 from .security import constant_time_equal, sha256_hex, sign_request, valid_timestamp
 from .settings import settings
@@ -406,6 +407,15 @@ def health() -> dict[str, Any]:
             "living_evidence_automatic_search": False,
             "living_evidence_automatic_review_state_change": False,
             "living_evidence_newer_evidence_truth_promotion": False,
+            "research_corpus_builder": True,
+            "research_corpus_deterministic_manifests": True,
+            "research_corpus_row_level_provenance": True,
+            "research_corpus_json_export": True,
+            "research_corpus_jsonl_export": True,
+            "research_corpus_csv_export": True,
+            "research_corpus_automatic_quality_judgment": False,
+            "research_corpus_automatic_truth_promotion": False,
+            "research_corpus_automatic_core_promotion": False,
             "publication_workspace_visual_handoff_package": True,
             "publication_visual_query_portable_state": True,
             "publication_corpus_default_source": "wordpress-main",
@@ -2528,6 +2538,59 @@ def publication_living_evidence(payload: dict[str, Any]) -> dict[str, Any]:
         "renderer_neutral": True,
         "graph_overlay_default_evidence_path": False,
         "prior_review_snapshots_immutable": True,
+        "platform_core_governance_changed": False,
+    }
+    return result
+
+
+@app.post("/v1/research-corpora/build")
+def research_corpus_build(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return build_research_corpus(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/v1/research-corpora/export")
+def research_corpus_export(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return export_research_corpus(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/v1/publication-knowledge-maps/research-corpus")
+def publication_research_corpus(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus_map = _publication_corpus_from_payload(payload)
+    publication_records = []
+    for node in corpus_map.get("nodes") or []:
+        if isinstance(node, dict) and node.get("kind") == "publication":
+            publication_records.append({
+                "record_id": node.get("id"),
+                "title": node.get("label"),
+                "url": node.get("canonical_url"),
+                "published_at": node.get("published_at"),
+                "source_type": node.get("object_type"),
+                "source_key": node.get("source_key"),
+                "source_hash": node.get("source_content_hash"),
+                "authors": node.get("authors") or [],
+            })
+    request_payload = dict(payload)
+    request_payload["records"] = publication_records
+    source_context = dict(request_payload.get("source_context") or {})
+    source_context.update({
+        "publication_corpus_fingerprint_sha256": (corpus_map.get("reproducibility") or {}).get("corpus_fingerprint_sha256"),
+        "publication_source_hashes": (corpus_map.get("reproducibility") or {}).get("publication_source_hashes") or {},
+        "publication_corpus": corpus_map.get("corpus") or {},
+    })
+    request_payload["source_context"] = source_context
+    try:
+        result = build_research_corpus(request_payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    result["publication_map_context"] = {
+        "publication_record_count": len(publication_records),
+        "renderer_neutral": True,
         "platform_core_governance_changed": False,
     }
     return result

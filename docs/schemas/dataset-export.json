@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/dataset-export.json",
+  "title": "Sustainable Catalyst Dataset Export",
+  "type": "object",
+  "required": ["schema", "corpus_id", "manifest"],
+  "properties": {
+    "schema": {"enum": ["sc-library-dataset-export/1.0", "sc-library-dataset-export-package/1.0"]},
+    "corpus_id": {"type": "string"},
+    "manifest": {"type": "object"},
+    "format": {"type": "string"},
+    "exports": {"type": "object"},
+    "row_provenance": {"type": "array", "items": {"type": "object"}}
+  },
+  "additionalProperties": true
+}

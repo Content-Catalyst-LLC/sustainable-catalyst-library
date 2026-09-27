@@ -345,6 +345,21 @@ final class SC_Library_Python_Backend {
             'permission_callback' => '__return_true',
             'callback' => [$this, 'proxy_publication_living_evidence'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/research-corpus-build', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_research_corpus_build'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/research-corpus-export', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_research_corpus_export'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-research-corpus', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_research_corpus'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/scientific-document-intelligence', [
             'methods' => WP_REST_Server::CREATABLE,
             'permission_callback' => '__return_true',
@@ -812,6 +827,18 @@ final class SC_Library_Python_Backend {
 
     public function proxy_publication_living_evidence(WP_REST_Request $request): WP_REST_Response {
         return $this->proxy_retrieval_post($request, '/v1/publication-knowledge-maps/living-evidence', 'sc-library-living-evidence/1.0');
+    }
+
+    public function proxy_research_corpus_build(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/research-corpora/build', 'sc-library-research-corpus/1.0');
+    }
+
+    public function proxy_research_corpus_export(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/research-corpora/export', 'sc-library-dataset-export-package/1.0');
+    }
+
+    public function proxy_publication_research_corpus(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/publication-knowledge-maps/research-corpus', 'sc-library-research-corpus/1.0');
     }
 
     public function proxy_publication_methodology_intelligence(WP_REST_Request $request): WP_REST_Response {
