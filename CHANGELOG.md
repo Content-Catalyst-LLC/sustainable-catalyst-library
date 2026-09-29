@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.51.0 — Research Artifact & Object Storage Fabric
+- Immutable SHA-256 content-addressed research artifact identities and storage keys.
+- PostgreSQL-authoritative artifact metadata, provenance, lifecycle, derivation links, and integrity events.
+- Shared filesystem object-store volume as the safe production baseline.
+- S3-compatible adapter contract for MinIO, R2, AWS S3, and compatible providers without changing artifact identity.
+- Signed persistence, lifecycle, and integrity-verification endpoints; raw artifact access remains admin/backend-only.
+- Python worker integration for artifact persistence and verification.
+
 ## v5.50.0 — Specialized Worker Runtime & Failure Isolation
 - Durable worker profiles/registrations with heartbeats and concurrency limits.
 - Active Python research, Go ingestion-handoff, and Rust graph worker pools.

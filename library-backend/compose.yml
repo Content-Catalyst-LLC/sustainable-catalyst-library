@@ -15,6 +15,9 @@ services:
     environment:
       SC_LIBRARY_GO_INGESTION_URL: http://sc-library-ingestion:8090
       SC_LIBRARY_JOB_REDIS_URL: redis://sc-library-redis:6379/0
+      SC_LIBRARY_ARTIFACT_FILESYSTEM_ROOT: /data/artifacts
+    volumes:
+      - sc-library-artifact-data:/data/artifacts
     networks:
       - sc-internal
     healthcheck:
@@ -72,6 +75,8 @@ services:
     environment:
       SC_LIBRARY_WORKER_PROFILE: python.research
     command: ["python", "-m", "app.worker_agent", "--profile", "python.research"]
+    volumes:
+      - sc-library-artifact-data:/data/artifacts
     networks: [sc-internal]
 
   sc-library-worker-go:
@@ -86,6 +91,8 @@ services:
       SC_LIBRARY_WORKER_PROFILE: go.ingestion
       SC_LIBRARY_GO_INGESTION_URL: http://sc-library-ingestion:8090
     command: ["python", "-m", "app.worker_agent", "--profile", "go.ingestion"]
+    volumes:
+      - sc-library-artifact-data:/data/artifacts
     networks: [sc-internal]
 
   sc-library-worker-rust:
@@ -98,11 +105,14 @@ services:
     environment:
       SC_LIBRARY_WORKER_PROFILE: rust.graph
     command: ["python", "-m", "app.worker_agent", "--profile", "rust.graph"]
+    volumes:
+      - sc-library-artifact-data:/data/artifacts
     networks: [sc-internal]
 
 volumes:
   sc-library-ingestion-data:
   sc-library-redis-data:
+  sc-library-artifact-data:
 
 networks:
   sc-internal:

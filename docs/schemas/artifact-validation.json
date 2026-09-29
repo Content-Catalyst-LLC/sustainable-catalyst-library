@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Artifact Validation",
+  "type": "object",
+  "required": ["schema","valid","errors","normalized","guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-artifact-validation/1.0"},
+    "valid": {"type": "boolean"},
+    "errors": {"type": "array", "items": {"type": "string"}},
+    "normalized": {"type": "object"},
+    "guardrails": {"type": "object"}
+  }
+}

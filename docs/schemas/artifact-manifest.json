@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Artifact Manifest",
+  "type": "object",
+  "required": ["schema","version","backend_version","artifact","storage","guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-artifact-manifest/1.0"},
+    "version": {"const": "5.51.0"},
+    "backend_version": {"const": "2.62.0"}
+  }
+}

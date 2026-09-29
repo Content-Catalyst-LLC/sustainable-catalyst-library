@@ -16,9 +16,10 @@ if (!defined('ABSPATH')) { exit; }
  * v5.45.0 exposes Original-Language Corpus preservation surfaces while retaining the v5.44 Global Source Federation Registry from backend v2.56.0.
  * v5.47.0 exposes linguistic corpus validation/package/KWIC/frequency surfaces while keeping signed persistence backend-authoritative.
  * v5.50.0 adds specialized worker-runtime readiness and failure-isolation status; worker mutation remains signed backend-authoritative.
+ * v5.51.0 adds read-only Research Artifact & Object Storage readiness; raw artifact content and mutation remain backend-authoritative.
  */
 final class SC_Library_Python_Backend {
-    public const VERSION = '5.6.0.37';
+    public const VERSION = '5.6.0.38';
     public const BACKEND_SCHEMA = 'sc-library-backend-ingest/1.0';
     public const REST_NAMESPACE = 'sc-library/v1';
     public const CRON_HOOK = 'sc_library_python_backend_sync_post';
@@ -589,6 +590,9 @@ final class SC_Library_Python_Backend {
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/worker-runtime/readiness', [
             'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_worker_runtime_readiness'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/artifact-storage/readiness', [
+            'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_artifact_storage_readiness'],
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/cross-language-resolution/readiness', [
             'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_cross_language_resolution_readiness'],
@@ -2072,6 +2076,13 @@ final class SC_Library_Python_Backend {
         $r=wp_remote_get(self::base_url().'/v1/worker-runtime/readiness',['timeout'=>self::timeout(),'redirection'=>2,'headers'=>['Accept'=>'application/json']]);
         if (is_wp_error($r)) return new WP_REST_Response(['schema'=>'sc-library-specialized-worker-readiness/1.0','state'=>'unavailable','error'=>$r->get_error_message()],502);
         $body=json_decode((string)wp_remote_retrieve_body($r),true); return new WP_REST_Response(is_array($body)?$body:['schema'=>'sc-library-specialized-worker-readiness/1.0','state'=>'unavailable'],(int)wp_remote_retrieve_response_code($r)?:502);
+    }
+
+    public function proxy_artifact_storage_readiness(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) return new WP_REST_Response(['schema'=>'sc-library-artifact-storage-readiness/1.0','state'=>'unavailable'],503);
+        $r=wp_remote_get(self::base_url().'/v1/artifact-storage/readiness',['timeout'=>self::timeout(),'redirection'=>2,'headers'=>['Accept'=>'application/json']]);
+        if (is_wp_error($r)) return new WP_REST_Response(['schema'=>'sc-library-artifact-storage-readiness/1.0','state'=>'unavailable','error'=>$r->get_error_message()],502);
+        $body=json_decode((string)wp_remote_retrieve_body($r),true); return new WP_REST_Response(is_array($body)?$body:['schema'=>'sc-library-artifact-storage-readiness/1.0','state'=>'unavailable'],(int)wp_remote_retrieve_response_code($r)?:502);
     }
 
     public function proxy_cross_language_resolution_readiness(WP_REST_Request $request): WP_REST_Response {

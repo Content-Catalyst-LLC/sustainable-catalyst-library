@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Artifact Storage Readiness",
+  "type": "object",
+  "required": ["schema","version","backend_version","state","postgresql","storage","capabilities","guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-artifact-storage-readiness/1.0"},
+    "version": {"const": "5.51.0"},
+    "backend_version": {"const": "2.62.0"},
+    "state": {"enum": ["ready","degraded","unavailable"]}
+  }
+}

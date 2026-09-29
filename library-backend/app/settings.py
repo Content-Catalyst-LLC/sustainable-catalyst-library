@@ -112,6 +112,17 @@ class Settings:
     worker_quarantine_threshold: int = _as_int("SC_LIBRARY_WORKER_QUARANTINE_THRESHOLD", 5, 1, 20)
     worker_stale_seconds: int = _as_int("SC_LIBRARY_WORKER_STALE_SECONDS", 180, 30, 3600)
 
+    # Research Artifact & Object Storage Fabric (Library v5.51.0 / backend v2.62.0)
+    artifact_store_backend: str = (os.getenv("SC_LIBRARY_ARTIFACT_STORE_BACKEND", "filesystem").strip().lower() if os.getenv("SC_LIBRARY_ARTIFACT_STORE_BACKEND", "filesystem").strip().lower() in {"filesystem","s3"} else "filesystem")
+    artifact_filesystem_root: str = os.getenv("SC_LIBRARY_ARTIFACT_FILESYSTEM_ROOT", "/data/artifacts").strip() or "/data/artifacts"
+    artifact_max_inline_bytes: int = _as_int("SC_LIBRARY_ARTIFACT_MAX_INLINE_MB", 32, 1, 256) * 1024 * 1024
+    artifact_s3_endpoint_url: str = os.getenv("SC_LIBRARY_ARTIFACT_S3_ENDPOINT_URL", "").strip().rstrip("/")
+    artifact_s3_region: str = os.getenv("SC_LIBRARY_ARTIFACT_S3_REGION", "us-east-1").strip()
+    artifact_s3_bucket: str = os.getenv("SC_LIBRARY_ARTIFACT_S3_BUCKET", "").strip()
+    artifact_s3_prefix: str = os.getenv("SC_LIBRARY_ARTIFACT_S3_PREFIX", "library-artifacts").strip().strip("/")
+    artifact_s3_access_key: str = os.getenv("SC_LIBRARY_ARTIFACT_S3_ACCESS_KEY", "").strip()
+    artifact_s3_secret_key: str = os.getenv("SC_LIBRARY_ARTIFACT_S3_SECRET_KEY", "").strip()
+
     @property
     def allowed_origins(self) -> list[str]:
         return [item.strip().rstrip("/") for item in self.allowed_origins_raw.split(",") if item.strip()]

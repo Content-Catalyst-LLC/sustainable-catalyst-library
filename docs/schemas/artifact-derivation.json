@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Artifact Derivation",
+  "type": "object",
+  "required": ["schema","relation_id","parent_artifact_id","child_artifact_id","operation","relation_fingerprint"],
+  "properties": {
+    "schema": {"const": "sc-library-artifact-derivation/1.0"},
+    "relation_id": {"type": "string"},
+    "parent_artifact_id": {"type": "string"},
+    "child_artifact_id": {"type": "string"},
+    "operation": {"type": "string"},
+    "relation_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

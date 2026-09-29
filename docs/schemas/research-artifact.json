@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Research Artifact",
+  "type": "object",
+  "required": ["schema","artifact_id","content_sha256","artifact_type","media_type","byte_length","storage_backend","storage_key","lifecycle_state","immutable"],
+  "properties": {
+    "schema": {"const": "sc-library-research-artifact/1.0"},
+    "artifact_id": {"type": "string", "pattern": "^artifact:sha256:[0-9a-f]{64}$"},
+    "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "artifact_type": {"type": "string"},
+    "media_type": {"type": "string"},
+    "byte_length": {"type": "integer", "minimum": 0},
+    "storage_backend": {"enum": ["filesystem","s3"]},
+    "storage_key": {"type": "string"},
+    "lifecycle_state": {"enum": ["active","retained","quarantined","tombstoned"]},
+    "immutable": {"const": true}
+  }
+}

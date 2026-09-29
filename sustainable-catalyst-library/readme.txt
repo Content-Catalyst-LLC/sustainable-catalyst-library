@@ -8,12 +8,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.49.0
+Stable tag: 5.51.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
+
+Sustainable Catalyst Library v5.51.0 adds Research Artifact & Object Storage Fabric. Heavyweight PDFs, scans, OCR/HTR intermediates, corpora, embedding exports, model outputs, visualization assets, investigation packages, and reproducibility outputs can be represented as immutable SHA-256 content-addressed artifacts. PostgreSQL remains authoritative for artifact identity, metadata, provenance, derivation lineage, integrity events, and lifecycle state while bytes live in a shared filesystem object store or an S3-compatible provider. Artifact presence and checksum integrity do not imply source validity, evidence truth, or automatic Platform Core promotion.
 
 Sustainable Catalyst Library v5.50.0 adds Specialized Worker Runtime & Failure Isolation. Durable Python research, Go ingestion-handoff, and Rust graph worker pools now register and heartbeat independently, lease only compatible work, obey per-worker concurrency limits, and isolate repeated failures through quarantine and dead-letter lineage. Provider-dependent OCR/HTR/speech, neural, and Workspace profiles remain explicit standby profiles until configured. PostgreSQL remains authoritative for job and worker state; Redis remains dispatch coordination only.
 

@@ -866,3 +866,52 @@ CREATE TABLE IF NOT EXISTS library_research_dead_letters (
  created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS library_research_dead_letters_state_idx ON library_research_dead_letters(state,created_at DESC);
+
+-- Research Artifact & Object Storage Fabric (Library v5.51.0 / backend v2.62.0)
+-- PostgreSQL stores authoritative identity/metadata/provenance; heavyweight bytes live in
+-- a content-addressed object store outside PostgreSQL.
+CREATE TABLE IF NOT EXISTS library_research_artifacts (
+    artifact_id text PRIMARY KEY,
+    content_sha256 char(64) NOT NULL UNIQUE,
+    artifact_type text NOT NULL,
+    media_type text NOT NULL,
+    byte_length bigint NOT NULL CHECK (byte_length >= 0),
+    storage_backend text NOT NULL CHECK (storage_backend IN ('filesystem','s3')),
+    storage_key text NOT NULL,
+    original_filename text,
+    source_uri text,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_by_job text,
+    lifecycle_state text NOT NULL DEFAULT 'active' CHECK (lifecycle_state IN ('active','retained','quarantined','tombstoned')),
+    immutable boolean NOT NULL DEFAULT true CHECK (immutable = true),
+    manifest_fingerprint char(64) NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    verified_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS library_research_artifacts_type_idx ON library_research_artifacts(artifact_type,lifecycle_state,created_at DESC);
+CREATE INDEX IF NOT EXISTS library_research_artifacts_job_idx ON library_research_artifacts(created_by_job,created_at DESC) WHERE created_by_job IS NOT NULL;
+CREATE INDEX IF NOT EXISTS library_research_artifacts_storage_idx ON library_research_artifacts(storage_backend,storage_key);
+
+CREATE TABLE IF NOT EXISTS library_artifact_derivations (
+    relation_id text PRIMARY KEY,
+    parent_artifact_id text NOT NULL REFERENCES library_research_artifacts(artifact_id) ON DELETE RESTRICT,
+    child_artifact_id text NOT NULL REFERENCES library_research_artifacts(artifact_id) ON DELETE RESTRICT,
+    operation text NOT NULL,
+    created_by_job text,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    relation_fingerprint char(64) NOT NULL UNIQUE,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (parent_artifact_id <> child_artifact_id)
+);
+CREATE INDEX IF NOT EXISTS library_artifact_derivations_parent_idx ON library_artifact_derivations(parent_artifact_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS library_artifact_derivations_child_idx ON library_artifact_derivations(child_artifact_id,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_artifact_events (
+    event_id bigserial PRIMARY KEY,
+    artifact_id text NOT NULL REFERENCES library_research_artifacts(artifact_id) ON DELETE RESTRICT,
+    event_type text NOT NULL,
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_artifact_events_artifact_idx ON library_artifact_events(artifact_id,event_id DESC);

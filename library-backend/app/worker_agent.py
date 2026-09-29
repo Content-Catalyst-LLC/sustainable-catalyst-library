@@ -5,7 +5,7 @@ from .durable_job_queue import start_job, complete_job
 
 def wid(profile): return os.getenv('SC_LIBRARY_WORKER_ID','').strip() or f'{profile}:{socket.gethostname()}'
 def run(profile):
-    worker=wid(profile); register_worker({'worker_id':worker,'worker_class':profile,'metadata':{'pid':os.getpid(),'agent':'v5.50.0'}})
+    worker=wid(profile); register_worker({'worker_id':worker,'worker_class':profile,'metadata':{'pid':os.getpid(),'agent':'v5.51.0'}})
     while True:
         heartbeat_worker(worker,{'agent_state':'polling'}); job=lease_for_worker(worker)
         if not job.get('leased'): time.sleep(2); continue

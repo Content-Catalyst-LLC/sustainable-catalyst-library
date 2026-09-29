@@ -9,7 +9,7 @@ from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import ValidationError
 
 from . import __version__
@@ -74,6 +74,11 @@ from .durable_job_queue import (
 from .specialized_worker_runtime import (
     worker_profiles, validate_worker_profile, register_worker, heartbeat_worker, get_worker, list_workers,
     quarantine_worker, release_worker, lease_for_worker, isolate_worker_failure, list_dead_letters, worker_readiness,
+)
+from .artifact_storage import (
+    ARTIFACT_CONTRACT as RESEARCH_ARTIFACT_CONTRACT, READINESS_CONTRACT as ARTIFACT_STORAGE_READINESS_CONTRACT,
+    artifact_storage_readiness, build_artifact_manifest, get_artifact, persist_artifact, read_artifact_bytes,
+    set_lifecycle as set_artifact_lifecycle, validate_artifact_payload, verify_artifact,
 )
 from .research_corpus_builder import build_research_corpus, export_research_corpus
 from .unified_runtime_contract import (
@@ -528,6 +533,14 @@ def health() -> dict[str, Any]:
             "specialized_worker_runtime": True,
             "worker_failure_isolation": True,
             "worker_dead_letters": True,
+            "research_artifact_object_storage_fabric": True,
+            "research_artifact_content_addressed": True,
+            "research_artifact_sha256_integrity": True,
+            "research_artifact_derivation_lineage": True,
+            "research_artifact_filesystem_backend": True,
+            "research_artifact_s3_compatible_backend": True,
+            "research_artifact_postgresql_bytes": False,
+            "research_artifact_presence_implies_evidence_truth": False,
             "research_job_completion_implies_evidence_truth": False,
             "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
@@ -2725,6 +2738,52 @@ async def worker_fail_job_endpoint(worker_id:str,job_id:str,request:Request,auth
 @app.get("/v1/admin/dead-letters")
 def dead_letters_endpoint(state:str=Query(default="open",max_length=20),limit:int=Query(default=100,ge=1,le=500),authorization:str|None=Header(default=None)) -> dict[str,Any]:
     require_admin_bearer(authorization); return list_dead_letters(state=state,limit=limit)
+
+@app.get("/v1/artifact-storage/readiness")
+def artifact_storage_readiness_endpoint() -> dict[str,Any]:
+    return artifact_storage_readiness()
+
+@app.post("/v1/artifact-storage/validate")
+def artifact_storage_validate_endpoint(payload:dict[str,Any]) -> dict[str,Any]:
+    return validate_artifact_payload(payload)
+
+@app.post("/v1/artifact-storage/manifest")
+def artifact_storage_manifest_endpoint(payload:dict[str,Any]) -> dict[str,Any]:
+    try: return build_artifact_manifest(payload)
+    except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.get("/v1/admin/artifacts/{artifact_id:path}")
+def artifact_get_endpoint(artifact_id:str,authorization:str|None=Header(default=None)) -> dict[str,Any]:
+    require_admin_bearer(authorization)
+    try: return get_artifact(artifact_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="artifact not found") from exc
+
+@app.get("/v1/admin/artifacts/{artifact_id:path}/content")
+def artifact_content_endpoint(artifact_id:str,authorization:str|None=Header(default=None)) -> Response:
+    require_admin_bearer(authorization)
+    try: artifact,data=read_artifact_bytes(artifact_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="artifact not found") from exc
+    except FileNotFoundError as exc: raise HTTPException(status_code=404,detail="artifact bytes not found") from exc
+    return Response(content=data,media_type=str(artifact.get("media_type") or "application/octet-stream"),headers={"X-Content-SHA256":str(artifact.get("content_sha256") or ""),"X-SC-Artifact-ID":artifact_id})
+
+@app.post("/v1/admin/artifacts")
+async def artifact_persist_endpoint(request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
+    try: return persist_artifact(payload)
+    except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.post("/v1/admin/artifacts/{artifact_id:path}/verify")
+async def artifact_verify_endpoint(artifact_id:str,request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return verify_artifact(artifact_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="artifact not found") from exc
+
+@app.post("/v1/admin/artifacts/{artifact_id:path}/lifecycle")
+async def artifact_lifecycle_endpoint(artifact_id:str,request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
+    try: return set_artifact_lifecycle(artifact_id,str(payload.get("state") or ""),str(payload.get("reason") or ""))
+    except KeyError as exc: raise HTTPException(status_code=404,detail="artifact not found") from exc
+    except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
 
 @app.get("/v1/institutional-research-network")
 def institutional_research_network_manifest() -> dict[str, Any]:

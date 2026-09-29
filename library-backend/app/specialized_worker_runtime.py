@@ -10,7 +10,7 @@ DEAD_LETTER_CONTRACT='sc-library-job-dead-letter/1.0'
 READINESS_CONTRACT='sc-library-specialized-worker-readiness/1.0'
 FAILURE_ISOLATION_CONTRACT='sc-library-worker-failure-isolation/1.0'
 PROFILES={
- 'python.research':{'runtimes':['python'],'capabilities':['entity.resolve','corpus.kwic','corpus.frequency'],'execution_mode':'local','active':True,'default_concurrency':2},
+ 'python.research':{'runtimes':['python'],'capabilities':['entity.resolve','corpus.kwic','corpus.frequency','artifact.persist','artifact.verify'],'execution_mode':'local','active':True,'default_concurrency':2},
  'go.ingestion':{'runtimes':['go'],'capabilities':['ingestion.submit'],'execution_mode':'handoff','active':True,'default_concurrency':2},
  'rust.graph':{'runtimes':['rust'],'capabilities':['graph.query'],'execution_mode':'local-native','active':True,'default_concurrency':2},
  'ocr.document':{'runtimes':['ocr'],'capabilities':['document.ocr'],'execution_mode':'provider','active':False,'default_concurrency':1},
@@ -22,7 +22,7 @@ PROFILES={
 def _clean(x): return str(x or '').strip()
 def _hash(x): return sha256(json.dumps(x,sort_keys=True,separators=(',',':'),default=str).encode()).hexdigest()
 def guardrails(): return {'postgresql_authoritative_worker_state':True,'redis_authoritative_worker_state':False,'worker_failure_isolated':True,'quarantined_worker_can_lease':False,'dead_letter_implies_evidence_truth':False,'job_completion_implies_evidence_truth':False,'automatic_platform_core_promotion':False,'standby_profiles_execute_without_adapter':False}
-def worker_profiles(): return {'schema':WORKER_PROFILE_CONTRACT,'version':'5.50.0','backend_version':'2.61.0','profiles':[{'worker_class':k,**v} for k,v in PROFILES.items()],'guardrails':guardrails()}
+def worker_profiles(): return {'schema':WORKER_PROFILE_CONTRACT,'version':'5.51.0','backend_version':'2.62.0','profiles':[{'worker_class':k,**v} for k,v in PROFILES.items()],'guardrails':guardrails()}
 def validate_worker_profile(payload:dict[str,Any]):
     wc=_clean(payload.get('worker_class')); errors=[]; p=PROFILES.get(wc,{})
     if wc not in PROFILES: errors.append('unknown-worker-class')
@@ -90,6 +90,12 @@ def execute_job(job,worker_class):
         from .linguistic_corpus import build_corpus_package, kwic_from_package, frequency_table_from_package
         pkg=build_corpus_package(manifest.get('corpus') or {})
         return {'kind':'kwic','result':kwic_from_package(pkg,_clean(manifest.get('query')),window_tokens=int(manifest.get('window_tokens') or 8),limit=int(manifest.get('limit') or 100))} if cap=='corpus.kwic' else {'kind':'frequency','result':frequency_table_from_package(pkg,limit=int(manifest.get('limit') or 100))}
+    if worker_class=='python.research' and cap=='artifact.persist':
+        from .artifact_storage import persist_artifact
+        return {'kind':'artifact-persist','artifact':persist_artifact(manifest.get('artifact') or manifest)}
+    if worker_class=='python.research' and cap=='artifact.verify':
+        from .artifact_storage import verify_artifact
+        return {'kind':'artifact-verify','verification':verify_artifact(_clean(manifest.get('artifact_id')))}
     if worker_class=='go.ingestion' and cap=='ingestion.submit':
         from .ingestion_job_fabric import submit_ingestion_job
         return {'kind':'go-ingestion-handoff','handoff':submit_ingestion_job(manifest.get('job') or manifest)}
@@ -126,6 +132,6 @@ def worker_readiness():
         from .db import get_pool
         with get_pool().connection(timeout=3) as conn, conn.cursor() as cur:
             cur.execute('SELECT state,count(*) AS n FROM library_research_workers GROUP BY state'); counts={str(x['state']):int(x['n']) for x in cur.fetchall()}; cur.execute("SELECT count(*) AS n FROM library_research_dead_letters WHERE state='open'"); dead=int(cur.fetchone()['n'])
-    except Exception as exc: return {'schema':READINESS_CONTRACT,'version':'5.50.0','backend_version':'2.61.0','state':'unavailable','error_class':exc.__class__.__name__,'guardrails':guardrails()}
+    except Exception as exc: return {'schema':READINESS_CONTRACT,'version':'5.51.0','backend_version':'2.62.0','state':'unavailable','error_class':exc.__class__.__name__,'guardrails':guardrails()}
     active=sum(1 for x in PROFILES.values() if x['active'])
-    return {'schema':READINESS_CONTRACT,'version':'5.50.0','backend_version':'2.61.0','state':'ready','postgresql':{'state':'ready','authoritative':True},'worker_counts':counts,'open_dead_letters':dead,'profiles':{'total':len(PROFILES),'active':active,'standby':len(PROFILES)-active},'capabilities':{'worker_registry':True,'capability_routing':True,'concurrency_limits':True,'worker_heartbeats':True,'worker_quarantine':True,'dead_letters':True,'python_research_worker':True,'go_ingestion_handoff_worker':True,'rust_graph_worker':True,'ocr_htr_speech_profiles':True,'neural_profile':True,'workspace_profile':True},'guardrails':guardrails()}
+    return {'schema':READINESS_CONTRACT,'version':'5.51.0','backend_version':'2.62.0','state':'ready','postgresql':{'state':'ready','authoritative':True},'worker_counts':counts,'open_dead_letters':dead,'profiles':{'total':len(PROFILES),'active':active,'standby':len(PROFILES)-active},'capabilities':{'worker_registry':True,'capability_routing':True,'concurrency_limits':True,'worker_heartbeats':True,'worker_quarantine':True,'dead_letters':True,'python_research_worker':True,'go_ingestion_handoff_worker':True,'rust_graph_worker':True,'ocr_htr_speech_profiles':True,'neural_profile':True,'workspace_profile':True},'guardrails':guardrails()}

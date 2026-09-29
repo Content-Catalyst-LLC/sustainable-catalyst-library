@@ -8,7 +8,7 @@ FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
     SC_LIBRARY_NATIVE_GRAPH_BIN=/usr/local/bin/sc-library-graph-runtime
 WORKDIR /app
-RUN useradd --create-home --uid 10001 catalyst
+RUN useradd --create-home --uid 10001 catalyst && mkdir -p /data/artifacts && chown -R catalyst:catalyst /data
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 COPY --from=rust-builder /native/target/release/sc-library-graph-runtime /usr/local/bin/sc-library-graph-runtime

@@ -1,12 +1,14 @@
 # Sustainable Catalyst Knowledge Library
 
-**Current release:** v5.50.0 — Specialized Worker Runtime & Failure Isolation  
-**Backend:** v2.61.0  
+**Current release:** v5.51.0 — Research Artifact & Object Storage Fabric  
+**Backend:** v2.62.0  
 **Go ingestion runtime:** v0.1.0  
 **Rust graph runtime:** v0.2.0
 
 The Knowledge Library is the research publishing, source-intelligence, corpus, retrieval, preservation, and connected-knowledge layer of Sustainable Catalyst.
 
-v5.50.0 activates isolated worker pools for Python research operations, Go ingestion handoff, and Rust graph queries. PostgreSQL remains authoritative for jobs, workers, attempts, provenance, and dead letters; Redis remains rebuildable dispatch coordination. OCR/HTR/speech, neural, and Workspace profiles are declared as explicit standby profiles until their adapters are configured.
+v5.51.0 adds immutable content-addressed research artifacts backed by SHA-256 identity, PostgreSQL-authoritative metadata/provenance, derivation lineage, lifecycle state, a shared filesystem object store, and an S3-compatible adapter. Heavyweight bytes no longer need to live in PostgreSQL or WordPress. Artifact presence or successful integrity verification does not establish source validity or evidence truth.
+
+The v5.49 durable job fabric and v5.50 specialized worker layer remain active; the Python research worker can persist and verify artifact objects through the same governed execution fabric.
 
 See `docs/README.md`, `docs/architecture/library-backend.md`, and `CHANGELOG.md`. Historical release artifacts remain available through Git tags rather than accumulating at the root of `main`.
