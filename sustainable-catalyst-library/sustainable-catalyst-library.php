@@ -3,7 +3,7 @@
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
  * Description: Sustainable Catalyst Library v5.47.0 adds Linguistic Corpus Objects, Concordance & KWIC: reproducible corpus/document/token objects, character offsets, source-representation lineage, deterministic concordance and KWIC windows, and frequency analysis without silently inferring morphology, syntax, meaning, or truth.
- * Version: 5.48.0
+ * Version: 5.49.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.48.0');
+define('SC_LIBRARY_VERSION', '5.49.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
@@ -68,6 +68,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-native-graph-runtime.ph
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-literature-review.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-living-evidence.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-ingestion-job-fabric.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-execution-fabric.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-research-corpus-builder.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-unified-runtime.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-execution-lineage.php';
@@ -157,6 +158,7 @@ final class SC_Library_Plugin {
         $literature_review = new SC_Library_Literature_Review();
         $living_evidence = new SC_Library_Living_Evidence();
         $ingestion_job_fabric = new SC_Library_Ingestion_Job_Fabric();
+        $execution_fabric = new SC_Library_Execution_Fabric();
         $research_corpus_builder = new SC_Library_Research_Corpus_Builder();
         $unified_runtime = new SC_Library_Unified_Runtime();
         $execution_lineage = new SC_Library_Execution_Lineage();
@@ -252,6 +254,7 @@ final class SC_Library_Plugin {
         $literature_review->register_hooks();
         $living_evidence->register_hooks();
         $ingestion_job_fabric->register_hooks();
+        $execution_fabric->register_hooks();
         $research_corpus_builder->register_hooks();
         $unified_runtime->register_hooks();
         $execution_lineage->register_hooks();

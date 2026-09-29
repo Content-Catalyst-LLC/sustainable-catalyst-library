@@ -10,8 +10,11 @@ services:
     depends_on:
       sc-library-ingestion:
         condition: service_healthy
+      sc-library-redis:
+        condition: service_healthy
     environment:
       SC_LIBRARY_GO_INGESTION_URL: http://sc-library-ingestion:8090
+      SC_LIBRARY_JOB_REDIS_URL: redis://sc-library-redis:6379/0
     networks:
       - sc-internal
     healthcheck:
@@ -20,6 +23,22 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  sc-library-redis:
+    image: redis:7.4-alpine
+    container_name: sc-library-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec"]
+    volumes:
+      - sc-library-redis-data:/data
+    networks:
+      - sc-internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 4s
+      retries: 5
+      start_period: 5s
 
   sc-library-ingestion:
     build:
@@ -44,6 +63,7 @@ services:
 
 volumes:
   sc-library-ingestion-data:
+  sc-library-redis-data:
 
 networks:
   sc-internal:

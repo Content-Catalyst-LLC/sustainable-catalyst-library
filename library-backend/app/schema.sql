@@ -774,3 +774,74 @@ CREATE TABLE IF NOT EXISTS library_entity_resolution_decisions (
     CHECK ((state = 'accepted' AND selected_candidate_id IS NOT NULL) OR (state <> 'accepted' AND selected_candidate_id IS NULL))
 );
 CREATE INDEX IF NOT EXISTS library_entity_resolution_decisions_case_idx ON library_entity_resolution_decisions(case_id, created_at DESC);
+
+
+-- v2.60.0 — Durable Research Job Queue & Execution State.
+-- PostgreSQL is the authoritative job/execution-state store. Redis is dispatch/wake-up
+-- coordination only and may be rebuilt without losing durable jobs or provenance.
+CREATE TABLE IF NOT EXISTS library_research_jobs (
+    job_id text PRIMARY KEY,
+    job_type text NOT NULL,
+    capability text NOT NULL,
+    requested_runtime text NOT NULL DEFAULT 'auto',
+    priority smallint NOT NULL DEFAULT 0 CHECK (priority BETWEEN -100 AND 100),
+    state text NOT NULL DEFAULT 'queued' CHECK (state IN ('queued','leased','running','retry','complete','failed','cancelled')),
+    progress double precision NOT NULL DEFAULT 0 CHECK (progress >= 0 AND progress <= 1),
+    idempotency_key varchar(128) NOT NULL UNIQUE,
+    input_manifest jsonb NOT NULL DEFAULT '{}'::jsonb,
+    output_manifest jsonb NOT NULL DEFAULT '{}'::jsonb,
+    provenance_context jsonb NOT NULL DEFAULT '{}'::jsonb,
+    resource_hints jsonb NOT NULL DEFAULT '{}'::jsonb,
+    attempt_count integer NOT NULL DEFAULT 0 CHECK (attempt_count >= 0),
+    max_attempts integer NOT NULL DEFAULT 5 CHECK (max_attempts BETWEEN 1 AND 20),
+    lease_owner text,
+    lease_expires_at timestamptz,
+    available_at timestamptz NOT NULL DEFAULT now(),
+    external_execution_id text,
+    dispatch_count integer NOT NULL DEFAULT 0 CHECK (dispatch_count >= 0),
+    last_dispatched_at timestamptz,
+    last_error_class text,
+    last_error_detail text,
+    job_fingerprint char(64) NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    started_at timestamptz,
+    completed_at timestamptz,
+    cancelled_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS library_research_jobs_queue_idx ON library_research_jobs(state,available_at,priority DESC,created_at ASC);
+CREATE INDEX IF NOT EXISTS library_research_jobs_capability_idx ON library_research_jobs(capability,state,priority DESC,created_at ASC);
+CREATE INDEX IF NOT EXISTS library_research_jobs_lease_idx ON library_research_jobs(state,lease_expires_at) WHERE lease_expires_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS library_research_jobs_runtime_idx ON library_research_jobs(requested_runtime,state,priority DESC);
+
+CREATE TABLE IF NOT EXISTS library_research_job_attempts (
+    attempt_id text PRIMARY KEY,
+    job_id text NOT NULL REFERENCES library_research_jobs(job_id) ON DELETE CASCADE,
+    attempt_no integer NOT NULL CHECK (attempt_no > 0),
+    runtime_id text,
+    worker_id text NOT NULL,
+    state text NOT NULL CHECK (state IN ('leased','running','retry','complete','failed','cancelled')),
+    lease_expires_at timestamptz,
+    execution_metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    failure_class text,
+    failure_detail text,
+    leased_at timestamptz NOT NULL DEFAULT now(),
+    started_at timestamptz,
+    heartbeat_at timestamptz,
+    finished_at timestamptz,
+    UNIQUE(job_id,attempt_no)
+);
+CREATE INDEX IF NOT EXISTS library_research_job_attempts_job_idx ON library_research_job_attempts(job_id,attempt_no DESC);
+CREATE INDEX IF NOT EXISTS library_research_job_attempts_worker_idx ON library_research_job_attempts(worker_id,state,lease_expires_at);
+
+CREATE TABLE IF NOT EXISTS library_research_job_events (
+    event_id bigserial PRIMARY KEY,
+    job_id text NOT NULL REFERENCES library_research_jobs(job_id) ON DELETE CASCADE,
+    event_type text NOT NULL,
+    state text NOT NULL,
+    progress double precision NOT NULL DEFAULT 0 CHECK (progress >= 0 AND progress <= 1),
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_research_job_events_job_idx ON library_research_job_events(job_id,event_id DESC);
+CREATE INDEX IF NOT EXISTS library_research_job_events_type_idx ON library_research_job_events(event_type,created_at DESC);

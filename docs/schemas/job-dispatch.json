@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Job Dispatch",
+  "type": "object",
+  "required": [
+    "schema",
+    "state",
+    "authoritative"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-job-dispatch/1.0"
+    },
+    "state": {
+      "type": "string"
+    },
+    "authoritative": {
+      "const": false
+    },
+    "dispatched": {
+      "type": "boolean"
+    }
+  }
+}

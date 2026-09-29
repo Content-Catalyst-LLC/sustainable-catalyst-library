@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Execution Fabric Readiness",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "backend_version",
+    "state",
+    "postgresql",
+    "redis",
+    "capabilities",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-execution-fabric-readiness/1.0"
+    },
+    "version": {
+      "const": "5.49.0"
+    },
+    "backend_version": {
+      "const": "2.60.0"
+    },
+    "state": {
+      "enum": [
+        "ready",
+        "degraded",
+        "unavailable"
+      ]
+    }
+  }
+}

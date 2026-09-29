@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"; cd "$ROOT"
+echo "=== Knowledge Library v5.49.0 / backend v2.60.0 / Durable Research Job Queue & Execution State validation ==="
+python3 - <<'PY'
+import runpy
+suite=[
+ ('tests/test_durable_research_job_queue_v5490.py',set()),
+ ('tests/test_cross_language_entity_toponym_resolution_v5480.py',{'test_release_identity_routes_and_health_capabilities'}),
+ ('tests/test_linguistic_corpus_concordance_kwic_v5470.py',{'test_release_identity_and_routes'}),
+ ('tests/test_ocr_htr_transcription_lineage_v5460.py',{'test_release_identity_and_routes'}),
+ ('tests/test_original_language_corpus_v5450.py',{'test_release_identity_and_surfaces'}),
+ ('tests/test_global_source_federation_v5440.py',{'test_release_identity'}),
+ ('tests/test_publication_embedding_maps_v5430.py',{'test_release_identity'}),
+ ('tests/test_neural_reranking_v5420.py',{'test_release_identity'}),
+ ('tests/test_semantic_similarity_representation_search_v5410.py',{'test_release_identity'}),
+ ('tests/test_scientific_embedding_governance_v5400.py',{'test_release_identity'}),
+ ('tests/test_embedding_backfill_timestamp_repair_v54001.py',{'test_release_identity'}),
+]
+total=0
+for path,skip in suite:
+ ns=runpy.run_path(path); count=0
+ for name,fn in sorted(ns.items()):
+  if name.startswith('test_') and callable(fn) and name not in skip: fn(); count+=1; total+=1
+ print(f'PASS: {path}: {count} assertions')
+print(f'PASS: {total} mandatory Python release assertions')
+PY
+PYTHONPATH=library-backend python3 - <<'PY'
+import runpy
+total=0
+for path in ['library-backend/tests/test_durable_job_queue_v2600.py','library-backend/tests/test_cross_language_resolution_v2590.py','library-backend/tests/test_linguistic_corpus_v2580.py','library-backend/tests/test_ocr_htr_transcription_lineage_v2570.py','library-backend/tests/test_original_language_corpus_v2560.py']:
+ ns=runpy.run_path(path); count=0
+ for name,fn in sorted(ns.items()):
+  if name.startswith('test_') and callable(fn): fn(); count+=1; total+=1
+ print(f'PASS: {path}: {count} assertions')
+print(f'PASS: {total} backend execution/language-lineage assertions')
+PY
+python3 -m py_compile library-backend/app/durable_job_queue.py library-backend/app/cross_language_resolution.py library-backend/app/ingestion_job_fabric.py library-backend/app/unified_runtime_contract.py library-backend/app/main.py library-backend/app/settings.py
+python3 - <<'PY'
+import json
+from pathlib import Path
+names=['research-job.json','job-attempt.json','job-event.json','job-dispatch.json','execution-fabric-readiness.json','cross-language-entity-authority.json','linguistic-corpus.json','text-derivation-run.json','original-language-capture.json']
+for n in names: json.loads((Path('docs/schemas')/n).read_text(encoding='utf-8'))
+print('PASS: v5.49.0 and preserved execution/language JSON schemas parse')
+PY
+if command -v php >/dev/null 2>&1; then while IFS= read -r -d '' f; do php -l "$f" >/dev/null; done < <(find sustainable-catalyst-library -type f -name '*.php' -print0); echo 'PASS: WordPress PHP lint'; else echo 'INFO: php unavailable'; fi
+if command -v node >/dev/null 2>&1; then while IFS= read -r -d '' f; do node --check "$f" >/dev/null; done < <(find sustainable-catalyst-library -type f -name '*.js' -print0); echo 'PASS: WordPress JavaScript syntax'; else echo 'INFO: node unavailable'; fi
+if command -v go >/dev/null 2>&1; then (cd library-backend/go-ingestion-runtime && go test ./...); else echo 'INFO: go unavailable; production Docker build remains required'; fi
+if command -v cargo >/dev/null 2>&1; then CARGO_TMP_DIR="$(mktemp -d /tmp/sc-library-v5490-cargo.XXXXXX)"; CARGO_TARGET_DIR="$CARGO_TMP_DIR" cargo test --manifest-path library-backend/native-graph-runtime/Cargo.toml --locked; rm -rf "$CARGO_TMP_DIR"; else echo 'INFO: cargo unavailable; production Docker build remains the Rust gate'; fi
+echo 'PASS: Knowledge Library v5.49.0 Durable Research Job Queue & Execution State validation complete'

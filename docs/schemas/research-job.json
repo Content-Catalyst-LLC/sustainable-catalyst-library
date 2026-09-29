@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Research Job",
+  "type": "object",
+  "required": [
+    "schema",
+    "job_id",
+    "job_type",
+    "capability",
+    "state",
+    "idempotency_key"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-research-job/1.0"
+    },
+    "job_id": {
+      "type": "string"
+    },
+    "job_type": {
+      "type": "string"
+    },
+    "capability": {
+      "type": "string"
+    },
+    "requested_runtime": {
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "cancelled",
+        "complete",
+        "failed",
+        "leased",
+        "queued",
+        "retry",
+        "running"
+      ]
+    },
+    "progress": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "maxLength": 128
+    }
+  }
+}

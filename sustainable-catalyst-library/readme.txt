@@ -8,14 +8,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.48.0
+Stable tag: 5.49.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.48.0 adds Cross-Language Entity, Name & Historical Toponym Resolution. It preserves multilingual names, aliases, declared transliterations, endonyms/exonyms, historical toponyms, language/script identity, validity windows, candidate-ranking signals, ambiguity, and explicit adjudication provenance. Candidate rank never silently becomes identity, evidence, or truth.
+Sustainable Catalyst Library v5.49.0 adds a Durable Research Job Queue & Execution State layer. PostgreSQL becomes authoritative for research-job state, attempts, leases, retries, progress, cancellation, and provenance while Redis provides rebuildable dispatch/wake-up coordination. Specialized worker pools remain a v5.50.0 concern.
 
 Sustainable Catalyst Library v5.46.0 adds OCR, HTR & Transcription Lineage on top of original-language preservation. It preserves source-media payload fingerprints, OCR/HTR/transcription engine and model identity, parameters, page geometry or timecodes, confidence measurements, explicit review state, and derived-text representation lineage. Recognition/transcription output never replaces the original source, and confidence is not treated as truth probability.
 
@@ -414,6 +414,14 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= 5.49.0 =
+* Added PostgreSQL-authoritative research jobs, attempts, and immutable execution event history.
+* Added deterministic idempotent submission, priority ordering, worker leases, heartbeat/progress, cancellation, retry state, and expired-lease recovery.
+* Added Redis Streams dispatch coordination with explicit degraded operation when Redis is unavailable; Redis is never authoritative job storage.
+* Extended the v5.36 Go job-fabric and v5.38 runtime-contract lineage instead of creating a parallel execution architecture.
+* Added read-only WordPress execution-fabric readiness surface; worker/job mutation remains signed backend-only.
+* Specialized Python/Go/Rust/OCR/neural worker activation is reserved for v5.50.0.
 
 = 5.48.0 =
 * Added cross-language entity authority objects and multilingual name-form objects.

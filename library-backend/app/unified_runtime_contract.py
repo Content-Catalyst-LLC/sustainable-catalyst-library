@@ -115,6 +115,9 @@ def _python_descriptor() -> dict[str, Any]:
             "provenance-policy",
             "runtime-routing",
             "native-graph-query-fallback",
+            "durable-job-orchestration",
+            "postgresql-job-state-authority",
+            "redis-dispatch-coordination",
         ],
         "authority": {
             "research_semantics": True,

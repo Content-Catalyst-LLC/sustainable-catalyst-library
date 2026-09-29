@@ -63,6 +63,14 @@ from .research_gap_novelty import research_gap_novelty_request
 from .literature_review import literature_review_request, build_literature_review
 from .living_evidence import living_evidence_request, build_living_evidence
 from .ingestion_job_fabric import ingestion_fabric_status, submit_ingestion_job, list_ingestion_jobs, get_ingestion_job, cancel_ingestion_job
+from .durable_job_queue import (
+    JOB_CONTRACT as RESEARCH_JOB_CONTRACT, READINESS_CONTRACT as EXECUTION_FABRIC_READINESS_CONTRACT,
+    build_job_package, cancel_job as cancel_research_job, complete_job as complete_research_job,
+    execution_fabric_readiness, fail_job as fail_research_job, get_job as get_research_job,
+    heartbeat_job as heartbeat_research_job, lease_next_job, list_jobs as list_research_jobs,
+    recover_expired_leases, start_job as start_research_job, submit_job as submit_research_job,
+    validate_job_payload,
+)
 from .research_corpus_builder import build_research_corpus, export_research_corpus
 from .unified_runtime_contract import (
     EXECUTION_ENVELOPE_SCHEMA,
@@ -501,6 +509,20 @@ def health() -> dict[str, Any]:
             "go_ingestion_job_state_implies_source_validity": False,
             "go_ingestion_job_state_implies_evidence_truth": False,
             "go_ingestion_automatic_core_promotion": False,
+            "durable_research_job_queue": True,
+            "durable_research_execution_state": True,
+            "research_job_postgresql_authority": True,
+            "research_job_redis_dispatch": True,
+            "research_job_redis_authoritative": False,
+            "research_job_idempotent_submission": True,
+            "research_job_worker_leases": True,
+            "research_job_lease_heartbeats": True,
+            "research_job_retry_state": True,
+            "research_job_progress_reporting": True,
+            "research_job_expired_lease_recovery": True,
+            "research_job_worker_fleet_active": False,
+            "research_job_completion_implies_evidence_truth": False,
+            "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
             "native_graph_query_contract": NATIVE_QUERY_CONTRACT,
             "native_graph_filtered_neighborhoods": True,
@@ -2558,6 +2580,97 @@ async def cross_language_resolution_decision_ingest(
     except KeyError as exc: raise HTTPException(status_code=404, detail="resolution case not found") from exc
     except (ValueError, json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+
+
+@app.get("/v1/execution-fabric/readiness")
+def execution_fabric_readiness_endpoint() -> dict[str, Any]:
+    return execution_fabric_readiness()
+
+
+@app.post("/v1/execution-fabric/validate-job")
+def execution_fabric_validate_job(payload: dict[str, Any]) -> dict[str, Any]:
+    return validate_job_payload(payload)
+
+
+@app.post("/v1/execution-fabric/package-job")
+def execution_fabric_package_job(payload: dict[str, Any]) -> dict[str, Any]:
+    try: return build_job_package(payload)
+    except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/research-jobs")
+async def research_job_submit_endpoint(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return submit_research_job(payload)
+    except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+
+@app.get("/v1/admin/research-jobs")
+async def research_job_list_endpoint(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None), state: str="", capability: str="", limit: int=100) -> dict[str,Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return list_research_jobs(state=state,capability=capability,limit=limit)
+    except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+
+@app.get("/v1/admin/research-jobs/{job_id:path}")
+async def research_job_get_endpoint(job_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str,Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return get_research_job(job_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="research job not found") from exc
+
+
+@app.post("/v1/admin/research-jobs/lease")
+async def research_job_lease_endpoint(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return lease_next_job(json.loads(body.decode("utf-8")) if body else {})
+    except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/research-jobs/{job_id:path}/start")
+async def research_job_start_endpoint(job_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
+    try: return start_research_job(job_id,str(payload.get("worker_id") or ""))
+    except KeyError as exc: raise HTTPException(status_code=404,detail="research job not found") from exc
+    except ValueError as exc: raise HTTPException(status_code=409,detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/research-jobs/{job_id:path}/heartbeat")
+async def research_job_heartbeat_endpoint(job_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
+    try: return heartbeat_research_job(job_id,str(payload.get("worker_id") or ""),payload.get("progress"))
+    except KeyError as exc: raise HTTPException(status_code=404,detail="research job not found") from exc
+    except ValueError as exc: raise HTTPException(status_code=409,detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/research-jobs/{job_id:path}/complete")
+async def research_job_complete_endpoint(job_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
+    try: return complete_research_job(job_id,str(payload.get("worker_id") or ""),payload.get("output_manifest") if isinstance(payload.get("output_manifest"),dict) else {})
+    except KeyError as exc: raise HTTPException(status_code=404,detail="research job not found") from exc
+    except ValueError as exc: raise HTTPException(status_code=409,detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/research-jobs/{job_id:path}/fail")
+async def research_job_fail_endpoint(job_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
+    try: return fail_research_job(job_id,str(payload.get("worker_id") or ""),error_class=str(payload.get("error_class") or ""),error_detail=str(payload.get("error_detail") or ""),retryable=bool(payload.get("retryable",True)),retry_delay_seconds=int(payload.get("retry_delay_seconds") or 30))
+    except KeyError as exc: raise HTTPException(status_code=404,detail="research job not found") from exc
+    except ValueError as exc: raise HTTPException(status_code=409,detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/research-jobs/{job_id:path}/cancel")
+async def research_job_cancel_endpoint(job_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
+    try: return cancel_research_job(job_id,reason=str(payload.get("reason") or ""))
+    except KeyError as exc: raise HTTPException(status_code=404,detail="research job not found") from exc
+
+
+@app.post("/v1/admin/research-jobs/recover-expired")
+async def research_job_recover_endpoint(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
+    return recover_expired_leases(limit=int(payload.get("limit") or 100))
 
 @app.get("/v1/institutional-research-network")
 def institutional_research_network_manifest() -> dict[str, Any]:

@@ -102,6 +102,13 @@ class Settings:
     who_icd_release_id: str = os.getenv("SC_LIBRARY_WHO_ICD_RELEASE_ID", "2026-01").strip()
     who_icd_language: str = os.getenv("SC_LIBRARY_WHO_ICD_LANGUAGE", "en").strip()
     who_icd_local_mode: bool = _as_bool("SC_LIBRARY_WHO_ICD_LOCAL_MODE", False)
+    # Durable Research Job Queue & Execution State (Library v5.49.0 / backend v2.60.0)
+    job_redis_url: str = os.getenv("SC_LIBRARY_JOB_REDIS_URL", "redis://sc-library-redis:6379/0").strip()
+    job_redis_stream: str = os.getenv("SC_LIBRARY_JOB_REDIS_STREAM", "sc:library:research-jobs").strip() or "sc:library:research-jobs"
+    job_redis_stream_maxlen: int = _as_int("SC_LIBRARY_JOB_REDIS_STREAM_MAXLEN", 10000, 100, 1000000)
+    job_dispatch_enabled: bool = _as_bool("SC_LIBRARY_JOB_DISPATCH_ENABLED", True)
+    job_lease_seconds: int = _as_int("SC_LIBRARY_JOB_LEASE_SECONDS", 120, 30, 3600)
+    job_default_max_attempts: int = _as_int("SC_LIBRARY_JOB_DEFAULT_MAX_ATTEMPTS", 5, 1, 20)
 
     @property
     def allowed_origins(self) -> list[str]:

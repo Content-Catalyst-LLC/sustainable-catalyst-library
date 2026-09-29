@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Job Event",
+  "type": "object",
+  "required": [
+    "schema",
+    "job_id",
+    "event_type",
+    "state"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-job-event/1.0"
+    },
+    "job_id": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+=== Knowledge Library v5.49.0 / backend v2.60.0 / Durable Research Job Queue & Execution State validation ===
+PASS: tests/test_durable_research_job_queue_v5490.py: 10 assertions
+PASS: tests/test_cross_language_entity_toponym_resolution_v5480.py: 9 assertions
+PASS: tests/test_linguistic_corpus_concordance_kwic_v5470.py: 8 assertions
+PASS: tests/test_ocr_htr_transcription_lineage_v5460.py: 7 assertions
+PASS: tests/test_original_language_corpus_v5450.py: 7 assertions
+PASS: tests/test_global_source_federation_v5440.py: 12 assertions
+PASS: tests/test_publication_embedding_maps_v5430.py: 9 assertions
+PASS: tests/test_neural_reranking_v5420.py: 9 assertions
+PASS: tests/test_semantic_similarity_representation_search_v5410.py: 8 assertions
+PASS: tests/test_scientific_embedding_governance_v5400.py: 6 assertions
+PASS: tests/test_embedding_backfill_timestamp_repair_v54001.py: 2 assertions
+PASS: 87 mandatory Python release assertions
+PASS: library-backend/tests/test_durable_job_queue_v2600.py: 5 assertions
+PASS: library-backend/tests/test_cross_language_resolution_v2590.py: 4 assertions
+PASS: library-backend/tests/test_linguistic_corpus_v2580.py: 2 assertions
+PASS: library-backend/tests/test_ocr_htr_transcription_lineage_v2570.py: 2 assertions
+PASS: library-backend/tests/test_original_language_corpus_v2560.py: 2 assertions
+PASS: 15 backend execution/language-lineage assertions
+PASS: v5.49.0 and preserved execution/language JSON schemas parse
+PASS: WordPress PHP lint
+PASS: WordPress JavaScript syntax
+ok  	sustainablecatalyst.com/library/go-ingestion-runtime	(cached)
+INFO: cargo unavailable; production Docker build remains the Rust gate
+PASS: Knowledge Library v5.49.0 Durable Research Job Queue & Execution State validation complete

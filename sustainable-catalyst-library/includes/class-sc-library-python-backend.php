@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) { exit; }
  * v5.28.0 adds stateless retrieval evaluation, bounded adaptive-ranking profiles, and transparent reranking/search proxies.
  * v5.45.0 exposes Original-Language Corpus preservation surfaces while retaining the v5.44 Global Source Federation Registry from backend v2.56.0.
  * v5.47.0 exposes linguistic corpus validation/package/KWIC/frequency surfaces while keeping signed persistence backend-authoritative.
- * v5.48.0 adds cross-language entity/name/toponym validation and candidate-resolution proxies; persistent authority, cases, and decisions remain signed backend-authoritative.
+ * v5.49.0 adds durable research execution-fabric readiness; job mutation and worker lease operations remain signed backend-authoritative.
  */
 final class SC_Library_Python_Backend {
     public const VERSION = '5.6.0.36';
@@ -583,6 +583,9 @@ final class SC_Library_Python_Backend {
             'methods' => WP_REST_Server::CREATABLE,
             'permission_callback' => static function () { return current_user_can('manage_options'); },
             'callback' => [$this, 'proxy_linguistic_corpus_frequencies'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/execution-fabric/readiness', [
+            'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_execution_fabric_readiness'],
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/cross-language-resolution/readiness', [
             'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_cross_language_resolution_readiness'],
@@ -2051,6 +2054,13 @@ final class SC_Library_Python_Backend {
             ]);
         }
         return is_array($decoded) ? $decoded : ['ok' => true];
+    }
+
+    public function proxy_execution_fabric_readiness(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) return new WP_REST_Response(['schema'=>'sc-library-execution-fabric-readiness/1.0','state'=>'unavailable'],503);
+        $r=wp_remote_get(self::base_url().'/v1/execution-fabric/readiness',['timeout'=>self::timeout(),'redirection'=>2,'headers'=>['Accept'=>'application/json']]);
+        if (is_wp_error($r)) return new WP_REST_Response(['schema'=>'sc-library-execution-fabric-readiness/1.0','state'=>'unavailable','error'=>$r->get_error_message()],502);
+        $body=json_decode((string)wp_remote_retrieve_body($r),true); return new WP_REST_Response(is_array($body)?$body:['schema'=>'sc-library-execution-fabric-readiness/1.0','state'=>'unavailable'],(int)wp_remote_retrieve_response_code($r)?:502);
     }
 
     public function proxy_cross_language_resolution_readiness(WP_REST_Request $request): WP_REST_Response {
