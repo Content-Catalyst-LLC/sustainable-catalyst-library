@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/tokenizer-specification.json",
+  "title": "Sustainable Catalyst Tokenizer Specification",
+  "type": "object",
+  "required": ["schema", "profile", "version", "algorithm", "fingerprint_sha256"],
+  "properties": {
+    "schema": {"const": "sc-library-tokenizer-specification/1.0"},
+    "profile": {"const": "unicode-word-v1"},
+    "version": {"const": "1.0"},
+    "algorithm": {"type": "string"},
+    "fingerprint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "language_specific_segmentation": {"const": false},
+    "morphology_inferred": {"const": false},
+    "lemma_inferred": {"const": false},
+    "part_of_speech_inferred": {"const": false},
+    "syntax_inferred": {"const": false}
+  },
+  "additionalProperties": true
+}

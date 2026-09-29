@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/linguistic-corpus.json",
+  "title": "Sustainable Catalyst Linguistic Corpus",
+  "type": "object",
+  "required": ["schema", "corpus_id", "corpus_fingerprint_sha256", "title", "tokenizer", "document_count", "token_count", "documents", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-linguistic-corpus/1.0"},
+    "corpus_id": {"type": "string", "pattern": "^lingcorpus:[0-9a-f]{32}$"},
+    "corpus_fingerprint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "title": {"type": "string"},
+    "description": {"type": ["string", "null"]},
+    "tokenizer": {"$ref": "tokenizer-specification.json"},
+    "document_count": {"type": "integer", "minimum": 0},
+    "token_count": {"type": "integer", "minimum": 0},
+    "documents": {"type": "array", "items": {"$ref": "linguistic-document.json"}},
+    "guardrails": {"type": "object"}
+  },
+  "additionalProperties": true
+}

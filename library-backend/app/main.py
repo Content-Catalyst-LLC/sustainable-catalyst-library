@@ -106,6 +106,20 @@ from .ocr_htr_transcription_lineage import (
     readiness as ocr_htr_transcription_readiness,
     validate_derivation_payload,
 )
+from .linguistic_corpus import (
+    CORPUS_CONTRACT as LINGUISTIC_CORPUS_CONTRACT,
+    CONCORDANCE_CONTRACT as CONCORDANCE_QUERY_CONTRACT,
+    KWIC_CONTRACT as KWIC_RESULT_CONTRACT,
+    READINESS_CONTRACT as LINGUISTIC_CORPUS_READINESS_CONTRACT,
+    build_corpus_package as build_linguistic_corpus_package,
+    frequency_table_from_package as linguistic_frequency_table,
+    get_corpus as get_linguistic_corpus,
+    ingest_corpus as ingest_linguistic_corpus,
+    kwic_from_package as linguistic_kwic_from_package,
+    kwic_persisted_corpus,
+    readiness as linguistic_corpus_readiness,
+    validate_corpus_payload as validate_linguistic_corpus_payload,
+)
 from .biomedical_sources import BiomedicalSourceError, build_biomedical_registry
 from .fda_regulatory import FDARegulatoryError, build_fda_regulatory_registry
 from .medical_terminology import MedicalTerminologyError, MedicalTerminologyResolver, WHOICD11Connector
@@ -367,6 +381,21 @@ def health() -> dict[str, Any]:
             "ocr_htr_transcription_automatic_evidence_promotion": False,
             "ocr_htr_transcription_automatic_truth_promotion": False,
             "ocr_htr_transcription_automatic_platform_core_promotion": False,
+            "linguistic_corpus_objects": True,
+            "linguistic_document_objects": True,
+            "linguistic_token_objects": True,
+            "linguistic_concordance": True,
+            "linguistic_kwic": True,
+            "linguistic_frequency_tables": True,
+            "linguistic_representation_lineage": True,
+            "linguistic_deterministic_tokenizer": True,
+            "linguistic_tokenizer_is_morphological_analysis": False,
+            "linguistic_kwic_context_establishes_meaning_or_intent": False,
+            "linguistic_frequency_implies_importance": False,
+            "linguistic_automatic_translation": False,
+            "linguistic_automatic_evidence_promotion": False,
+            "linguistic_automatic_truth_promotion": False,
+            "linguistic_automatic_platform_core_promotion": False,
             "core_aware_search_results": True,
             "citation_graph": True,
             "citation_exact_identifier_resolution": True,
@@ -2305,6 +2334,117 @@ async def ocr_htr_transcription_run(
         raise HTTPException(status_code=404, detail="text derivation run not found") from exc
 
 
+@app.get("/v1/linguistic-corpus/readiness")
+def linguistic_corpus_readiness_endpoint() -> dict[str, Any]:
+    return linguistic_corpus_readiness()
+
+
+@app.post("/v1/linguistic-corpus/validate")
+def linguistic_corpus_validate(payload: dict[str, Any]) -> dict[str, Any]:
+    return validate_linguistic_corpus_payload(payload)
+
+
+@app.post("/v1/linguistic-corpus/package")
+def linguistic_corpus_package(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        package = build_linguistic_corpus_package(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    # Package construction is non-persisting and may return token text, but never source-media bytes.
+    return package
+
+
+@app.post("/v1/linguistic-corpus/kwic")
+def linguistic_corpus_kwic(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus_payload = payload.get("corpus") if isinstance(payload.get("corpus"), dict) else payload
+    query = str(payload.get("query") or "")
+    try:
+        package = build_linguistic_corpus_package(corpus_payload)
+        return linguistic_kwic_from_package(
+            package, query,
+            window_tokens=int(payload.get("window_tokens", 5)),
+            case_sensitive=bool(payload.get("case_sensitive", False)),
+            limit=int(payload.get("limit", 100)),
+            offset=int(payload.get("offset", 0)),
+        )
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/linguistic-corpus/frequencies")
+def linguistic_corpus_frequencies(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus_payload = payload.get("corpus") if isinstance(payload.get("corpus"), dict) else payload
+    try:
+        package = build_linguistic_corpus_package(corpus_payload)
+        return linguistic_frequency_table(
+            package,
+            min_count=int(payload.get("min_count", 1)),
+            limit=int(payload.get("limit", 100)),
+            words_only=bool(payload.get("words_only", True)),
+        )
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/linguistic-corpora")
+async def linguistic_corpus_ingest(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8")) if body else {}
+        if not isinstance(payload, dict):
+            raise ValueError("linguistic corpus payload must be an object")
+        return ingest_linguistic_corpus(payload)
+    except (ValueError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/admin/linguistic-corpora/{corpus_id}")
+async def linguistic_corpus_get(
+    corpus_id: str,
+    request: Request,
+    include_tokens: bool = Query(default=False),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return get_linguistic_corpus(corpus_id, include_tokens=include_tokens)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="linguistic corpus not found") from exc
+
+
+@app.post("/v1/admin/linguistic-corpora/{corpus_id}/kwic")
+async def linguistic_corpus_persisted_kwic(
+    corpus_id: str,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8")) if body else {}
+        if not isinstance(payload, dict):
+            raise ValueError("KWIC query payload must be an object")
+        return kwic_persisted_corpus(
+            corpus_id, str(payload.get("query") or ""),
+            window_tokens=int(payload.get("window_tokens", 5)),
+            case_sensitive=bool(payload.get("case_sensitive", False)),
+            limit=int(payload.get("limit", 100)),
+            offset=int(payload.get("offset", 0)),
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="linguistic corpus not found") from exc
+    except (ValueError, TypeError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 @app.get("/v1/institutional-research-network")
 def institutional_research_network_manifest() -> dict[str, Any]:
     return institutional_research_network.manifest()
@@ -3373,6 +3513,11 @@ def search_readiness() -> dict[str, Any]:
         "ocr_htr_transcription_lineage_contract": OCR_HTR_TRANSCRIPTION_LINEAGE_CONTRACT,
         "text_derivation_run_contract": TEXT_DERIVATION_RUN_CONTRACT,
         "ocr_htr_transcription_guardrail": "recognition-and-transcription-output-is-derived-text-and-confidence-is-not-truth-probability",
+        "linguistic_corpus": linguistic_corpus_readiness(),
+        "linguistic_corpus_contract": LINGUISTIC_CORPUS_CONTRACT,
+        "concordance_query_contract": CONCORDANCE_QUERY_CONTRACT,
+        "kwic_result_contract": KWIC_RESULT_CONTRACT,
+        "linguistic_corpus_guardrail": "tokenization-concordance-and-frequency-are-reproducible-analytical-views-not-morphology-meaning-intent-evidence-or-truth",
         "temporal_knowledge_evolution": True,
         "temporal_snapshot_guardrail": "historical-availability-is-distinct-from-retrospective-status",
         "methodology_intelligence": True,

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/linguistic-corpus-readiness.json",
+  "title": "Sustainable Catalyst Linguistic Corpus Readiness",
+  "type": "object",
+  "required": ["schema", "contract", "version", "state", "counts", "tokenizer", "capabilities", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-linguistic-corpus-readiness/1.0"},
+    "contract": {"const": "sc-library-linguistic-corpus/1.0"},
+    "version": {"const": "5.47.0"},
+    "state": {"type": "string"},
+    "counts": {"type": "object"},
+    "tokenizer": {"$ref": "tokenizer-specification.json"},
+    "capabilities": {"type": "object"},
+    "guardrails": {"type": "object"}
+  },
+  "additionalProperties": true
+}

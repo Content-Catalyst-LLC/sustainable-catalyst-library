@@ -14,6 +14,7 @@ if (!defined('ABSPATH')) { exit; }
  * v5.18.0 adds multi-publication analytical structures while preserving canonical Publications manifest scoping and the hardened corpus deployment validator.
  * v5.28.0 adds stateless retrieval evaluation, bounded adaptive-ranking profiles, and transparent reranking/search proxies.
  * v5.45.0 exposes Original-Language Corpus preservation surfaces while retaining the v5.44 Global Source Federation Registry from backend v2.56.0.
+ * v5.47.0 exposes linguistic corpus validation/package/KWIC/frequency surfaces while keeping signed persistence backend-authoritative.
  */
 final class SC_Library_Python_Backend {
     public const VERSION = '5.6.0.35';
@@ -556,6 +557,31 @@ final class SC_Library_Python_Backend {
             'methods' => WP_REST_Server::CREATABLE,
             'permission_callback' => static function () { return current_user_can('manage_options'); },
             'callback' => [$this, 'proxy_ocr_htr_transcription_package'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/linguistic-corpus/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_linguistic_corpus_readiness'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/linguistic-corpus/validate', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => [$this, 'proxy_linguistic_corpus_validate'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/linguistic-corpus/package', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => [$this, 'proxy_linguistic_corpus_package'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/linguistic-corpus/kwic', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => [$this, 'proxy_linguistic_corpus_kwic'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/linguistic-corpus/frequencies', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => [$this, 'proxy_linguistic_corpus_frequencies'],
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-embedding-maps/readiness', [
             'methods' => WP_REST_Server::READABLE,

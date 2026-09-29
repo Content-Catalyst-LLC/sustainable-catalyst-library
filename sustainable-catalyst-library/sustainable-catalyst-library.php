@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.46.0 adds OCR, HTR & Transcription Lineage: preserved source-media assets, engine/model provenance, segment geometry and timecodes, confidence measurements, review state, and derived-text lineage on the original-language preservation foundation.
- * Version: 5.46.0
+ * Description: Sustainable Catalyst Library v5.47.0 adds Linguistic Corpus Objects, Concordance & KWIC: reproducible corpus/document/token objects, character offsets, source-representation lineage, deterministic concordance and KWIC windows, and frequency analysis without silently inferring morphology, syntax, meaning, or truth.
+ * Version: 5.47.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.46.0');
+define('SC_LIBRARY_VERSION', '5.47.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
@@ -81,6 +81,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-institutional-research-
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-global-source-federation-registry.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-original-language-corpus.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-ocr-htr-transcription-lineage.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-linguistic-corpus.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-fda-regulatory-intelligence.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-medical-terminology.php';
@@ -168,6 +169,7 @@ final class SC_Library_Plugin {
         $global_source_federation_registry = new SC_Library_Global_Source_Federation_Registry();
         $original_language_corpus = new SC_Library_Original_Language_Corpus();
         $ocr_htr_transcription_lineage = new SC_Library_OCR_HTR_Transcription_Lineage();
+        $linguistic_corpus = new SC_Library_Linguistic_Corpus();
         $biomedical_evidence = new SC_Library_Biomedical_Evidence();
         $fda_regulatory_intelligence = new SC_Library_FDA_Regulatory_Intelligence();
         $medical_terminology = new SC_Library_Medical_Terminology();
@@ -261,6 +263,7 @@ final class SC_Library_Plugin {
         $global_source_federation_registry->register_hooks();
         $original_language_corpus->register_hooks();
         $ocr_htr_transcription_lineage->register_hooks();
+        $linguistic_corpus->register_hooks();
         $biomedical_evidence->register_hooks();
         $fda_regulatory_intelligence->register_hooks();
         $medical_terminology->register_hooks();

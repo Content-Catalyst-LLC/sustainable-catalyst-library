@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/kwic-result.json",
+  "title": "Sustainable Catalyst KWIC Result",
+  "type": "object",
+  "required": ["schema", "query_fingerprint_sha256", "corpus_id", "query", "window_tokens", "total_matches", "returned_matches", "matches", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-kwic-result/1.0"},
+    "query_fingerprint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "corpus_id": {"type": "string"},
+    "query": {"type": "string"},
+    "window_tokens": {"type": "integer", "minimum": 0, "maximum": 50},
+    "total_matches": {"type": "integer", "minimum": 0},
+    "returned_matches": {"type": "integer", "minimum": 0},
+    "matches": {"type": "array", "items": {"type": "object"}},
+    "guardrails": {"type": "object"}
+  },
+  "additionalProperties": true
+}

@@ -103,6 +103,10 @@ def _normalize_record(record: dict[str, Any]) -> dict[str, Any]:
         "text_derivation_source_asset_id": _clean(record.get("text_derivation_source_asset_id") or record.get("source_asset_id")) or None,
         "text_derivation_engine_fingerprint": _clean(record.get("text_derivation_engine_fingerprint") or record.get("engine_spec_fingerprint")) or None,
         "text_derivation_review_state": _clean(record.get("text_derivation_review_state") or record.get("review_state")) or None,
+        "linguistic_corpus_id": _clean(record.get("linguistic_corpus_id")) or None,
+        "linguistic_document_id": _clean(record.get("linguistic_document_id")) or None,
+        "linguistic_tokenizer_fingerprint": _clean(record.get("linguistic_tokenizer_fingerprint") or record.get("tokenizer_spec_fingerprint")) or None,
+        "linguistic_token_count": record.get("linguistic_token_count") if record.get("linguistic_token_count") is not None else None,
         "metadata": _dict(record.get("metadata")) or None,
     }
     normalized["record_fingerprint_sha256"] = _stable_hash({k: v for k, v in normalized.items() if k != "record_fingerprint_sha256"})
@@ -202,6 +206,7 @@ def _resolve_fields(fields: Any) -> list[str]:
         "original_language_capture_id", "original_language_representation_id",
         "text_derivation_kind", "text_derivation_run_id", "text_derivation_source_asset_id",
         "text_derivation_engine_fingerprint", "text_derivation_review_state",
+        "linguistic_corpus_id", "linguistic_document_id", "linguistic_tokenizer_fingerprint", "linguistic_token_count",
     ])
     unknown = [f for f in requested if f not in allowed]
     if unknown:

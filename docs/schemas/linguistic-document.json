@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/linguistic-document.json",
+  "title": "Sustainable Catalyst Linguistic Document",
+  "type": "object",
+  "required": ["schema", "document_id", "corpus_id", "sequence", "representation_id", "source_kind", "language_bcp47", "text_sha256", "token_count", "tokens"],
+  "properties": {
+    "schema": {"const": "sc-library-linguistic-document/1.0"},
+    "document_id": {"type": "string", "pattern": "^lingdoc:[0-9a-f]{32}$"},
+    "corpus_id": {"type": "string", "pattern": "^lingcorpus:[0-9a-f]{32}$"},
+    "sequence": {"type": "integer", "minimum": 1},
+    "representation_id": {"type": "string"},
+    "source_kind": {"enum": ["original", "unicode-normalized", "ocr", "htr", "transcription", "other-derived"]},
+    "language_bcp47": {"type": "string"},
+    "script_iso15924": {"type": ["string", "null"]},
+    "text_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "token_count": {"type": "integer", "minimum": 0},
+    "tokens": {"type": "array", "items": {"$ref": "linguistic-token.json"}}
+  },
+  "additionalProperties": true
+}

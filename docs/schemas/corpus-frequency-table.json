@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/corpus-frequency-table.json",
+  "title": "Sustainable Catalyst Corpus Frequency Table",
+  "type": "object",
+  "required": ["schema", "corpus_id", "rows", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-corpus-frequency-table/1.0"},
+    "corpus_id": {"type": "string"},
+    "rows": {"type": "array", "items": {"type": "object", "required": ["normalized_text", "count"], "properties": {"normalized_text": {"type": "string"}, "count": {"type": "integer", "minimum": 1}}}},
+    "guardrails": {"type": "object"}
+  },
+  "additionalProperties": true
+}

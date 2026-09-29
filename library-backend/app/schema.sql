@@ -619,3 +619,71 @@ CREATE TABLE IF NOT EXISTS library_text_derivation_segments (
 );
 CREATE INDEX IF NOT EXISTS library_text_derivation_segments_run_idx ON library_text_derivation_segments(run_id, sequence ASC);
 CREATE INDEX IF NOT EXISTS library_text_derivation_segments_page_idx ON library_text_derivation_segments(run_id, page_number, sequence ASC);
+
+-- v2.58.0 — Linguistic Corpus Objects, Concordance & KWIC.
+-- Corpus/token objects preserve representation lineage and deterministic offsets.
+-- This foundation does not infer morphology, lemma, POS, syntax, meaning, or intent.
+CREATE TABLE IF NOT EXISTS library_linguistic_corpora (
+    corpus_id text PRIMARY KEY,
+    corpus_fingerprint char(64) NOT NULL UNIQUE,
+    title text NOT NULL,
+    description text,
+    tokenizer_spec jsonb NOT NULL,
+    tokenizer_spec_fingerprint char(64) NOT NULL,
+    language_distribution jsonb NOT NULL DEFAULT '{}'::jsonb,
+    script_distribution jsonb NOT NULL DEFAULT '{}'::jsonb,
+    source_kind_distribution jsonb NOT NULL DEFAULT '{}'::jsonb,
+    document_count integer NOT NULL DEFAULT 0 CHECK (document_count >= 0),
+    token_count bigint NOT NULL DEFAULT 0 CHECK (token_count >= 0),
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_linguistic_corpora_tokenizer_idx ON library_linguistic_corpora(tokenizer_spec_fingerprint, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_linguistic_documents (
+    document_id text PRIMARY KEY,
+    corpus_id text NOT NULL REFERENCES library_linguistic_corpora(corpus_id) ON DELETE RESTRICT,
+    sequence integer NOT NULL CHECK (sequence > 0),
+    representation_id text NOT NULL REFERENCES library_text_representations(representation_id) ON DELETE RESTRICT,
+    record_id text,
+    capture_id text REFERENCES library_original_language_captures(capture_id) ON DELETE RESTRICT,
+    source_asset_id text REFERENCES library_source_media_assets(source_asset_id) ON DELETE RESTRICT,
+    derivation_run_id text REFERENCES library_text_derivation_runs(run_id) ON DELETE RESTRICT,
+    source_kind text NOT NULL CHECK (source_kind IN ('original','unicode-normalized','ocr','htr','transcription','other-derived')),
+    language_bcp47 text NOT NULL,
+    script_iso15924 varchar(4),
+    language_variant text,
+    orthography_variant text,
+    review_state text,
+    text_sha256 char(64) NOT NULL,
+    character_count bigint NOT NULL CHECK (character_count >= 0),
+    token_count bigint NOT NULL CHECK (token_count >= 0),
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (corpus_id, sequence),
+    UNIQUE (corpus_id, representation_id)
+);
+CREATE INDEX IF NOT EXISTS library_linguistic_documents_corpus_idx ON library_linguistic_documents(corpus_id, sequence ASC);
+CREATE INDEX IF NOT EXISTS library_linguistic_documents_representation_idx ON library_linguistic_documents(representation_id, corpus_id);
+CREATE INDEX IF NOT EXISTS library_linguistic_documents_language_idx ON library_linguistic_documents(language_bcp47, script_iso15924, source_kind);
+CREATE INDEX IF NOT EXISTS library_linguistic_documents_derivation_idx ON library_linguistic_documents(derivation_run_id, corpus_id);
+
+CREATE TABLE IF NOT EXISTS library_linguistic_tokens (
+    token_id text PRIMARY KEY,
+    corpus_id text NOT NULL REFERENCES library_linguistic_corpora(corpus_id) ON DELETE RESTRICT,
+    document_id text NOT NULL REFERENCES library_linguistic_documents(document_id) ON DELETE RESTRICT,
+    representation_id text NOT NULL REFERENCES library_text_representations(representation_id) ON DELETE RESTRICT,
+    sequence integer NOT NULL CHECK (sequence > 0),
+    token_text text NOT NULL,
+    normalized_text text NOT NULL,
+    token_kind text NOT NULL CHECK (token_kind IN ('word','punctuation')),
+    start_char bigint NOT NULL CHECK (start_char >= 0),
+    end_char bigint NOT NULL CHECK (end_char >= start_char),
+    text_sha256 char(64) NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (document_id, sequence)
+);
+CREATE INDEX IF NOT EXISTS library_linguistic_tokens_corpus_normalized_idx ON library_linguistic_tokens(corpus_id, normalized_text, document_id, sequence);
+CREATE INDEX IF NOT EXISTS library_linguistic_tokens_document_idx ON library_linguistic_tokens(document_id, sequence ASC);
+CREATE INDEX IF NOT EXISTS library_linguistic_tokens_representation_idx ON library_linguistic_tokens(representation_id, sequence ASC);
