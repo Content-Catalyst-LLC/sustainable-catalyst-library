@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Job Dead Letter",
+  "type": "object",
+  "required": [
+    "dead_letter_id",
+    "job_id",
+    "attempt_no",
+    "failure_class",
+    "state"
+  ],
+  "properties": {
+    "dead_letter_id": {
+      "type": "string"
+    },
+    "job_id": {
+      "type": "string"
+    },
+    "attempt_no": {
+      "type": "integer"
+    },
+    "failure_class": {
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "open",
+        "reviewed",
+        "requeued",
+        "closed"
+      ]
+    }
+  }
+}

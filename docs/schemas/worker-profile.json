@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Worker Profile",
+  "type": "object",
+  "required": [
+    "worker_class",
+    "runtimes",
+    "capabilities",
+    "execution_mode"
+  ],
+  "properties": {
+    "worker_class": {
+      "type": "string"
+    },
+    "runtimes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "execution_mode": {
+      "type": "string"
+    }
+  }
+}

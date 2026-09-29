@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.47.0 adds Linguistic Corpus Objects, Concordance & KWIC: reproducible corpus/document/token objects, character offsets, source-representation lineage, deterministic concordance and KWIC windows, and frequency analysis without silently inferring morphology, syntax, meaning, or truth.
- * Version: 5.49.0
+ * Description: Sustainable Catalyst Library v5.50.0 adds Specialized Worker Runtime & Failure Isolation: capability-routed worker pools, heartbeats, concurrency limits, quarantine, and dead-letter lineage while PostgreSQL remains authoritative.
+ * Version: 5.50.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.49.0');
+define('SC_LIBRARY_VERSION', '5.50.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);

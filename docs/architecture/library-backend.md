@@ -1,52 +1,23 @@
 # Knowledge Library Backend Architecture
 
-## Responsibility boundary
-
-The Knowledge Library retrieves, preserves, structures, indexes, and processes knowledge. Platform Core remains the governed object/meaning layer for claims, findings, evidence relationships, reproducibility, model objects, and cross-product exchange.
-
-## Current runtime topology
-
 ```text
 WordPress Library UI
         |
         v
-Library FastAPI Backend
+Library FastAPI API
         |
-        +-- Research / Search APIs
-        +-- Source Federation APIs
-        +-- Corpus / Linguistic APIs
-        +-- Semantic / Graph APIs
-        +-- Preservation APIs
-        +-- Durable Job API
-                |
-                v
-        Execution Coordination
-        PostgreSQL + Redis
-                |
-        +-------+-------+
-        |       |       |
-      Python    Go     Rust
-        |       |       |
-        +-------+-------+
-                |
-                v
-      PostgreSQL / pgvector
-      research artifact stores
-                |
-                v
-          Platform Core
+        v
+PostgreSQL Job / Worker Authority <--> Redis dispatch wakeups
+        |
+        +--> Python Research Worker
+        +--> Go Ingestion Handoff Worker --> Go runtime
+        +--> Rust Graph Worker -----------> native Rust runtime
+        +--> OCR / HTR / Speech profiles (standby)
+        +--> Neural profile (standby)
+        +--> Workspace profile (standby)
+        |
+        v
+Platform Core governed research objects
 ```
 
-## Authority rules
-
-1. **FastAPI/Python** owns Library orchestration and research semantics.
-2. **PostgreSQL** is authoritative for durable metadata, provenance, and research-job state.
-3. **Redis** is dispatch/wake-up coordination only and may be rebuilt without losing authoritative job state.
-4. **Go** handles ingestion/network-oriented runtime work.
-5. **Rust** is used selectively for deterministic CPU-heavy graph/data operations.
-6. **Workspace** remains the destination for generic heavy/GPU computational execution rather than the Library becoming a general compute platform.
-7. **Platform Core** defines governed research objects and cross-product exchange semantics.
-
-## Release-artifact policy
-
-Generated validation logs, release manifests, checksums, installer scripts, deployment notes, release-specific README files, and historical page snapshots belong in release bundles and Git tags. They are not living source-tree documentation and should not accumulate at the repository root.
+Worker failures are isolated to the owning attempt and worker registration. Exhausted/permanent failures create durable dead-letter records. Quarantined workers cannot lease new work. PostgreSQL remains authoritative; Redis is never authoritative worker or job state.

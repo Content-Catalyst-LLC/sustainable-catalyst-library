@@ -5,16 +5,10 @@ __pycache__/
 .venv/
 .env
 *.log
-
-# Native/runtime build artifacts
 library-backend/native-graph-runtime/target/
 library-backend/go-ingestion-runtime/sc-library-ingestion-runtime
-
-# Local release staging
 /release-staging/
 /dist-v*/
-
-# Generated release artifacts belong in release bundles, not repository root.
 /BUILD_VALIDATION_*.txt
 /RELEASE_MANIFEST_*.json
 /SHA256SUMS_*.txt
@@ -32,7 +26,5 @@ library-backend/go-ingestion-runtime/sc-library-ingestion-runtime
 /install_and_push_sustainable_catalyst_library_*.sh
 /upgrade_library_backend_*.sh
 /*_v[0-9]*.md
-
-# Keep tracked operational scripts under a dedicated source directory, not root.
 /*.sh
 /*.py

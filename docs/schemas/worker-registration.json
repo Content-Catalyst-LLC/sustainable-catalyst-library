@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Worker Registration",
+  "type": "object",
+  "required": [
+    "worker_id",
+    "worker_class",
+    "state"
+  ],
+  "properties": {
+    "worker_id": {
+      "type": "string"
+    },
+    "worker_class": {
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "active",
+        "standby",
+        "quarantined",
+        "offline"
+      ]
+    }
+  }
+}

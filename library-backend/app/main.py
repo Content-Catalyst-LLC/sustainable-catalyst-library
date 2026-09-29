@@ -71,6 +71,10 @@ from .durable_job_queue import (
     recover_expired_leases, start_job as start_research_job, submit_job as submit_research_job,
     validate_job_payload,
 )
+from .specialized_worker_runtime import (
+    worker_profiles, validate_worker_profile, register_worker, heartbeat_worker, get_worker, list_workers,
+    quarantine_worker, release_worker, lease_for_worker, isolate_worker_failure, list_dead_letters, worker_readiness,
+)
 from .research_corpus_builder import build_research_corpus, export_research_corpus
 from .unified_runtime_contract import (
     EXECUTION_ENVELOPE_SCHEMA,
@@ -520,7 +524,10 @@ def health() -> dict[str, Any]:
             "research_job_retry_state": True,
             "research_job_progress_reporting": True,
             "research_job_expired_lease_recovery": True,
-            "research_job_worker_fleet_active": False,
+            "research_job_worker_fleet_active": True,
+            "specialized_worker_runtime": True,
+            "worker_failure_isolation": True,
+            "worker_dead_letters": True,
             "research_job_completion_implies_evidence_truth": False,
             "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
@@ -2671,6 +2678,53 @@ async def research_job_cancel_endpoint(job_id: str, request: Request, authorizat
 async def research_job_recover_endpoint(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str,Any]:
     body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
     return recover_expired_leases(limit=int(payload.get("limit") or 100))
+
+@app.get("/v1/worker-runtime/profiles")
+def worker_runtime_profiles_endpoint() -> dict[str,Any]: return worker_profiles()
+
+@app.get("/v1/worker-runtime/readiness")
+def worker_runtime_readiness_endpoint() -> dict[str,Any]: return worker_readiness()
+
+@app.post("/v1/worker-runtime/validate-profile")
+def worker_runtime_validate_profile_endpoint(payload:dict[str,Any]) -> dict[str,Any]: return validate_worker_profile(payload)
+
+@app.get("/v1/admin/workers")
+def workers_list_endpoint(authorization:str|None=Header(default=None)) -> dict[str,Any]:
+    require_admin_bearer(authorization); return list_workers()
+
+@app.get("/v1/admin/workers/{worker_id:path}")
+def worker_get_endpoint(worker_id:str,authorization:str|None=Header(default=None)) -> dict[str,Any]:
+    require_admin_bearer(authorization)
+    try: return get_worker(worker_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="worker not found") from exc
+
+@app.post("/v1/admin/workers/register")
+async def worker_register_endpoint(request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); return register_worker(json.loads(body.decode("utf-8")) if body else {})
+
+@app.post("/v1/admin/workers/{worker_id:path}/heartbeat")
+async def worker_heartbeat_endpoint(worker_id:str,request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}; return heartbeat_worker(worker_id,payload.get("metadata") if isinstance(payload,dict) else {})
+
+@app.post("/v1/admin/workers/{worker_id:path}/lease")
+async def worker_lease_endpoint(worker_id:str,request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); return lease_for_worker(worker_id)
+
+@app.post("/v1/admin/workers/{worker_id:path}/quarantine")
+async def worker_quarantine_endpoint(worker_id:str,request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}; return quarantine_worker(worker_id,str(payload.get("reason") or "manual-quarantine"))
+
+@app.post("/v1/admin/workers/{worker_id:path}/release")
+async def worker_release_endpoint(worker_id:str,request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); return release_worker(worker_id)
+
+@app.post("/v1/admin/workers/{worker_id:path}/fail-job/{job_id:path}")
+async def worker_fail_job_endpoint(worker_id:str,job_id:str,request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}; return isolate_worker_failure(worker_id,job_id,error_class=str(payload.get("error_class") or "WorkerFailure"),error_detail=str(payload.get("error_detail") or ""),retryable=bool(payload.get("retryable",True)),retry_delay_seconds=int(payload.get("retry_delay_seconds") or 30))
+
+@app.get("/v1/admin/dead-letters")
+def dead_letters_endpoint(state:str=Query(default="open",max_length=20),limit:int=Query(default=100,ge=1,le=500),authorization:str|None=Header(default=None)) -> dict[str,Any]:
+    require_admin_bearer(authorization); return list_dead_letters(state=state,limit=limit)
 
 @app.get("/v1/institutional-research-network")
 def institutional_research_network_manifest() -> dict[str, Any]:

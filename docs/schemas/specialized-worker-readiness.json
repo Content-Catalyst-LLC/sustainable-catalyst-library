@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Specialized Worker Readiness",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "backend_version",
+    "state"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-specialized-worker-readiness/1.0"
+    },
+    "version": {
+      "const": "5.50.0"
+    },
+    "backend_version": {
+      "const": "2.61.0"
+    },
+    "state": {
+      "enum": [
+        "ready",
+        "degraded",
+        "unavailable"
+      ]
+    }
+  }
+}

@@ -13,11 +13,11 @@ final class SC_Library_Execution_Fabric {
         $x=$this->status(); $state=(string)($x['state']??'unavailable'); $redis=(string)($x['redis']['state']??'unknown'); $counts=is_array($x['counts']??null)?$x['counts']:[];
         ob_start(); ?>
         <section class="sc-execution-fabric" data-schema="<?php echo esc_attr(self::SCHEMA); ?>">
-          <p class="sc-execution-fabric__kicker"><?php esc_html_e('Knowledge Library v5.49.0','sustainable-catalyst-library'); ?></p>
+          <p class="sc-execution-fabric__kicker"><?php esc_html_e('Knowledge Library v5.50.0','sustainable-catalyst-library'); ?></p>
           <h3><?php esc_html_e('Durable Research Execution Fabric','sustainable-catalyst-library'); ?></h3>
           <p><strong><?php esc_html_e('State:','sustainable-catalyst-library'); ?></strong> <?php echo esc_html($state); ?> · <strong><?php esc_html_e('Redis dispatch:','sustainable-catalyst-library'); ?></strong> <?php echo esc_html($redis); ?></p>
           <p><?php echo esc_html(sprintf(__('Queued %1$d · Running %2$d · Retry %3$d · Failed %4$d','sustainable-catalyst-library'),(int)($counts['queued']??0),(int)($counts['running']??0),(int)($counts['retry']??0),(int)($counts['failed']??0))); ?></p>
-          <p><?php esc_html_e('PostgreSQL is authoritative for job state. Redis is dispatch coordination only. Job completion does not establish evidence truth or source validity. Specialized worker pools arrive in v5.50.0.','sustainable-catalyst-library'); ?></p>
+          <p><?php esc_html_e('PostgreSQL is authoritative for job state. Redis is dispatch coordination only. Job completion does not establish evidence truth or source validity. Specialized Python, Go, and Rust worker pools are active; provider-dependent OCR/HTR/speech, neural, and Workspace profiles remain explicit standby profiles.','sustainable-catalyst-library'); ?></p>
         </section><?php return (string)ob_get_clean();
     }
 }

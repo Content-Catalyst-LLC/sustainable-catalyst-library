@@ -109,6 +109,8 @@ class Settings:
     job_dispatch_enabled: bool = _as_bool("SC_LIBRARY_JOB_DISPATCH_ENABLED", True)
     job_lease_seconds: int = _as_int("SC_LIBRARY_JOB_LEASE_SECONDS", 120, 30, 3600)
     job_default_max_attempts: int = _as_int("SC_LIBRARY_JOB_DEFAULT_MAX_ATTEMPTS", 5, 1, 20)
+    worker_quarantine_threshold: int = _as_int("SC_LIBRARY_WORKER_QUARANTINE_THRESHOLD", 5, 1, 20)
+    worker_stale_seconds: int = _as_int("SC_LIBRARY_WORKER_STALE_SECONDS", 180, 30, 3600)
 
     @property
     def allowed_origins(self) -> list[str]:

@@ -845,3 +845,24 @@ CREATE TABLE IF NOT EXISTS library_research_job_events (
 );
 CREATE INDEX IF NOT EXISTS library_research_job_events_job_idx ON library_research_job_events(job_id,event_id DESC);
 CREATE INDEX IF NOT EXISTS library_research_job_events_type_idx ON library_research_job_events(event_type,created_at DESC);
+
+-- Specialized Worker Runtime & Failure Isolation (Library v5.50.0 / backend v2.61.0)
+CREATE TABLE IF NOT EXISTS library_research_workers (
+ worker_id text PRIMARY KEY, worker_class text NOT NULL,
+ state text NOT NULL DEFAULT 'active' CHECK (state IN ('active','standby','quarantined','offline')),
+ runtimes text[] NOT NULL DEFAULT '{}'::text[], capabilities text[] NOT NULL DEFAULT '{}'::text[],
+ concurrency_limit integer NOT NULL DEFAULT 1 CHECK (concurrency_limit BETWEEN 1 AND 32),
+ profile_fingerprint char(64) NOT NULL, metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+ completed_jobs bigint NOT NULL DEFAULT 0, failed_jobs bigint NOT NULL DEFAULT 0, consecutive_failures integer NOT NULL DEFAULT 0,
+ quarantine_reason text, registered_at timestamptz NOT NULL DEFAULT now(), heartbeat_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(),
+ last_success_at timestamptz, last_failure_at timestamptz, quarantined_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS library_research_workers_state_idx ON library_research_workers(state,heartbeat_at DESC);
+CREATE TABLE IF NOT EXISTS library_research_dead_letters (
+ dead_letter_id text PRIMARY KEY, job_id text NOT NULL REFERENCES library_research_jobs(job_id) ON DELETE CASCADE,
+ attempt_no integer NOT NULL, worker_id text, worker_class text, failure_class text NOT NULL, failure_detail text,
+ input_manifest jsonb NOT NULL DEFAULT '{}'::jsonb, provenance_context jsonb NOT NULL DEFAULT '{}'::jsonb,
+ state text NOT NULL DEFAULT 'open' CHECK (state IN ('open','reviewed','requeued','closed')), resolution_note text,
+ created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_research_dead_letters_state_idx ON library_research_dead_letters(state,created_at DESC);

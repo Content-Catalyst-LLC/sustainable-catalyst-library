@@ -15,6 +15,8 @@ A unified WordPress Living Knowledge System for public discovery, research works
 
 == Description ==
 
+Sustainable Catalyst Library v5.50.0 adds Specialized Worker Runtime & Failure Isolation. Durable Python research, Go ingestion-handoff, and Rust graph worker pools now register and heartbeat independently, lease only compatible work, obey per-worker concurrency limits, and isolate repeated failures through quarantine and dead-letter lineage. Provider-dependent OCR/HTR/speech, neural, and Workspace profiles remain explicit standby profiles until configured. PostgreSQL remains authoritative for job and worker state; Redis remains dispatch coordination only.
+
 Sustainable Catalyst Library v5.49.0 adds a Durable Research Job Queue & Execution State layer. PostgreSQL becomes authoritative for research-job state, attempts, leases, retries, progress, cancellation, and provenance while Redis provides rebuildable dispatch/wake-up coordination. Specialized worker pools remain a v5.50.0 concern.
 
 Sustainable Catalyst Library v5.46.0 adds OCR, HTR & Transcription Lineage on top of original-language preservation. It preserves source-media payload fingerprints, OCR/HTR/transcription engine and model identity, parameters, page geometry or timecodes, confidence measurements, explicit review state, and derived-text representation lineage. Recognition/transcription output never replaces the original source, and confidence is not treated as truth probability.
@@ -414,6 +416,14 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= 5.50.0 =
+* Added durable specialized worker profiles and registrations with heartbeat and concurrency controls.
+* Activated Python research, Go ingestion-handoff, and Rust graph worker pools.
+* Added capability-aware leasing, automatic/manual quarantine, and explicit worker release.
+* Added durable dead-letter records for exhausted or permanent failures.
+* Kept OCR/HTR/speech, neural, and Workspace profiles in explicit standby until adapters are configured.
+* PostgreSQL remains authoritative for worker/job state; Redis remains dispatch coordination only.
 
 = 5.49.0 =
 * Added PostgreSQL-authoritative research jobs, attempts, and immutable execution event history.

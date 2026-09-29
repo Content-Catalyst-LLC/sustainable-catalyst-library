@@ -61,6 +61,45 @@ services:
       retries: 3
       start_period: 5s
 
+  sc-library-worker-python:
+    build: .
+    container_name: sc-library-worker-python
+    restart: unless-stopped
+    env_file: [.env]
+    depends_on:
+      library-backend: {condition: service_healthy}
+      sc-library-redis: {condition: service_healthy}
+    environment:
+      SC_LIBRARY_WORKER_PROFILE: python.research
+    command: ["python", "-m", "app.worker_agent", "--profile", "python.research"]
+    networks: [sc-internal]
+
+  sc-library-worker-go:
+    build: .
+    container_name: sc-library-worker-go
+    restart: unless-stopped
+    env_file: [.env]
+    depends_on:
+      library-backend: {condition: service_healthy}
+      sc-library-ingestion: {condition: service_healthy}
+    environment:
+      SC_LIBRARY_WORKER_PROFILE: go.ingestion
+      SC_LIBRARY_GO_INGESTION_URL: http://sc-library-ingestion:8090
+    command: ["python", "-m", "app.worker_agent", "--profile", "go.ingestion"]
+    networks: [sc-internal]
+
+  sc-library-worker-rust:
+    build: .
+    container_name: sc-library-worker-rust
+    restart: unless-stopped
+    env_file: [.env]
+    depends_on:
+      library-backend: {condition: service_healthy}
+    environment:
+      SC_LIBRARY_WORKER_PROFILE: rust.graph
+    command: ["python", "-m", "app.worker_agent", "--profile", "rust.graph"]
+    networks: [sc-internal]
+
 volumes:
   sc-library-ingestion-data:
   sc-library-redis-data:

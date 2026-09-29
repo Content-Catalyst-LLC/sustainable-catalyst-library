@@ -48,8 +48,8 @@ def guardrails() -> dict[str, Any]:
         "automatic_evidence_promotion": False,
         "automatic_truth_promotion": False,
         "automatic_platform_core_promotion": False,
-        "worker_fleet_activated_by_this_release": False,
-        "specialized_worker_activation_target": "5.50.0",
+        "worker_fleet_activated_by_this_release": True,
+        "specialized_worker_activation_release": "5.50.0",
     }
 
 
@@ -300,8 +300,8 @@ def execution_fabric_readiness() -> dict[str, Any]:
     else: db_error=None
     broker=broker_status(); state="ready" if db_state=="ready" and broker.get("available") else ("degraded" if db_state=="ready" else "unavailable")
     return {
-        "schema":READINESS_CONTRACT,"version":"5.49.0","backend_version":"2.60.0","state":state,
+        "schema":READINESS_CONTRACT,"version":"5.50.0","backend_version":"2.61.0","state":state,
         "postgresql":{"state":db_state,"authoritative":True,"error_class":db_error},"redis":broker,"counts":counts,
-        "capabilities":{"durable_job_state":True,"idempotent_submission":True,"priority_ordering":True,"worker_leases":True,"lease_heartbeats":True,"progress_reporting":True,"retry_state":True,"cancellation":True,"expired_lease_recovery":True,"redis_dispatch_wakeup":True,"postgresql_recovery_without_redis":True,"worker_fleet_active":False},
-        "guardrails":guardrails(),"lineage":{"go_ingestion_job_fabric":"v5.36.0 / Go 0.1.0","unified_runtime_contract":"v5.38.0","cross_language_resolution":"v5.48.0"},"next_lineage":{"specialized_worker_runtime_failure_isolation":"v5.50.0"},
+        "capabilities":{"durable_job_state":True,"idempotent_submission":True,"priority_ordering":True,"worker_leases":True,"lease_heartbeats":True,"progress_reporting":True,"retry_state":True,"cancellation":True,"expired_lease_recovery":True,"redis_dispatch_wakeup":True,"postgresql_recovery_without_redis":True,"worker_fleet_active":True},
+        "guardrails":guardrails(),"lineage":{"go_ingestion_job_fabric":"v5.36.0 / Go 0.1.0","unified_runtime_contract":"v5.38.0","cross_language_resolution":"v5.48.0"},"lineage_extension":{"specialized_worker_runtime_failure_isolation":"v5.50.0"},
     }
