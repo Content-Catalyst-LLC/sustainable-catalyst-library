@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library/semantic-similarity-result-v1.json",
+  "title": "Sustainable Catalyst Library Semantic Similarity Result",
+  "type": "object",
+  "required": ["schema", "seed", "specification", "results", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-semantic-similarity/1.0"},
+    "seed": {"type": "object"},
+    "specification": {
+      "type": "object",
+      "required": ["fingerprint_sha256", "provider", "model", "dimensions"],
+      "properties": {
+        "fingerprint_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "provider": {"type": "string"},
+        "model": {"type": "string"},
+        "dimensions": {"type": "integer", "minimum": 1}
+      }
+    },
+    "results": {"type": "array", "items": {"type": "object"}},
+    "guardrails": {
+      "type": "object",
+      "properties": {
+        "semantic_similarity_is_evidence": {"const": false},
+        "semantic_similarity_is_truth": {"const": false},
+        "semantic_similarity_is_causality": {"const": false},
+        "automatic_core_promotion": {"const": false}
+      }
+    }
+  }
+}

@@ -179,6 +179,11 @@ final class SC_Library_Python_Backend {
             'permission_callback' => static function () { return current_user_can('manage_options'); },
             'callback' => static function () { return rest_ensure_response(self::search_readiness()); },
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/semantic-similarity/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => static function () { return rest_ensure_response(self::semantic_similarity_readiness()); },
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/citations/readiness', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => static function () { return current_user_can('manage_options'); },
@@ -404,6 +409,46 @@ final class SC_Library_Python_Backend {
                 'semantic_threshold' => ['sanitize_callback' => static function ($value) { return max(0.0, min(1.0, (float) $value)); }, 'default' => 0.72],
                 'max_neighbors' => ['sanitize_callback' => 'absint', 'default' => 40],
                 'max_topics_per_publication' => ['sanitize_callback' => 'absint', 'default' => 36],
+            ],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/semantic-similarity/search', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_semantic_similarity_search'],
+            'args' => [
+                'q' => ['sanitize_callback' => 'sanitize_text_field', 'required' => true],
+                'object_type' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'source_key' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+                'topic' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+                'year_from' => ['sanitize_callback' => 'absint', 'default' => 0],
+                'year_to' => ['sanitize_callback' => 'absint', 'default' => 0],
+                'min_similarity' => ['sanitize_callback' => static function ($value) { return max(-1.0, min(1.0, (float) $value)); }, 'default' => 0.0],
+                'limit' => ['sanitize_callback' => 'absint', 'default' => 20],
+                'offset' => ['sanitize_callback' => 'absint', 'default' => 0],
+            ],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/semantic-similarity/record', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_semantic_similarity_record'],
+            'args' => [
+                'record_id' => ['sanitize_callback' => 'sanitize_text_field', 'required' => true],
+                'object_type' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'source_key' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+                'topic' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+                'year_from' => ['sanitize_callback' => 'absint', 'default' => 0],
+                'year_to' => ['sanitize_callback' => 'absint', 'default' => 0],
+                'min_similarity' => ['sanitize_callback' => static function ($value) { return max(-1.0, min(1.0, (float) $value)); }, 'default' => 0.0],
+                'limit' => ['sanitize_callback' => 'absint', 'default' => 20],
+                'offset' => ['sanitize_callback' => 'absint', 'default' => 0],
+            ],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/semantic-representation', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_semantic_representation'],
+            'args' => [
+                'record_id' => ['sanitize_callback' => 'sanitize_text_field', 'required' => true],
             ],
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/search', [
@@ -1254,6 +1299,87 @@ final class SC_Library_Python_Backend {
         $body['ok'] = 200 === $code && !empty($body['hybrid_retrieval']);
         $body['state'] = $body['ok'] ? (!empty($body['semantic_retrieval']) ? 'hybrid-ready' : 'lexical-ready-semantic-not-configured') : 'degraded';
         return $body;
+    }
+
+    public static function semantic_similarity_readiness(): array {
+        if (!self::configured()) {
+            return ['ok' => false, 'configured' => false, 'state' => 'library_backend_not_configured'];
+        }
+        $response = wp_remote_get(self::base_url() . '/v1/semantic-similarity/readiness', [
+            'timeout' => self::timeout(),
+            'redirection' => 0,
+            'headers' => ['Accept' => 'application/json'],
+        ]);
+        if (is_wp_error($response)) {
+            return ['ok' => false, 'configured' => true, 'state' => 'unavailable', 'error' => $response->get_error_message()];
+        }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($body)) { $body = []; }
+        $body['ok'] = 200 === $code && 'ready' === (string) ($body['state'] ?? '');
+        return $body;
+    }
+
+    private function semantic_similarity_params(WP_REST_Request $request): array {
+        $params = [
+            'min_similarity' => max(-1.0, min(1.0, (float) $request->get_param('min_similarity'))),
+            'limit' => min(100, max(1, (int) $request->get_param('limit'))),
+            'offset' => min(100000, max(0, (int) $request->get_param('offset'))),
+        ];
+        foreach (['object_type','source_key','topic'] as $key) {
+            $value = sanitize_text_field((string) $request->get_param($key));
+            if ($value) { $params[$key] = $value; }
+        }
+        foreach (['year_from','year_to'] as $key) {
+            $value = absint($request->get_param($key));
+            if ($value >= 1000 && $value <= 3000) { $params[$key] = $value; }
+        }
+        return $params;
+    }
+
+    public function proxy_semantic_similarity_search(WP_REST_Request $request) {
+        if (!self::configured()) {
+            return new WP_Error('sc_library_backend_not_configured', __('Library backend is not configured.', 'sustainable-catalyst-library'), ['status' => 503]);
+        }
+        $params = $this->semantic_similarity_params($request);
+        $params['q'] = sanitize_text_field((string) $request->get_param('q'));
+        $response = wp_remote_get(add_query_arg($params, self::base_url() . '/v1/semantic-similarity/search'), [
+            'timeout' => self::timeout(), 'redirection' => 2, 'headers' => ['Accept' => 'application/json'],
+        ]);
+        if (is_wp_error($response)) { return new WP_Error('sc_library_backend_unavailable', $response->get_error_message(), ['status' => 503]); }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        return new WP_REST_Response(is_array($body) ? $body : ['ok' => false], $code ?: 502);
+    }
+
+    public function proxy_semantic_similarity_record(WP_REST_Request $request) {
+        if (!self::configured()) {
+            return new WP_Error('sc_library_backend_not_configured', __('Library backend is not configured.', 'sustainable-catalyst-library'), ['status' => 503]);
+        }
+        $record_id = sanitize_text_field((string) $request->get_param('record_id'));
+        $params = $this->semantic_similarity_params($request);
+        $path = '/v1/semantic-similarity/records/' . rawurlencode($record_id);
+        $response = wp_remote_get(add_query_arg($params, self::base_url() . $path), [
+            'timeout' => self::timeout(), 'redirection' => 2, 'headers' => ['Accept' => 'application/json'],
+        ]);
+        if (is_wp_error($response)) { return new WP_Error('sc_library_backend_unavailable', $response->get_error_message(), ['status' => 503]); }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        return new WP_REST_Response(is_array($body) ? $body : ['ok' => false], $code ?: 502);
+    }
+
+    public function proxy_semantic_representation(WP_REST_Request $request) {
+        if (!self::configured()) {
+            return new WP_Error('sc_library_backend_not_configured', __('Library backend is not configured.', 'sustainable-catalyst-library'), ['status' => 503]);
+        }
+        $record_id = sanitize_text_field((string) $request->get_param('record_id'));
+        $response = wp_remote_get(self::base_url() . '/v1/semantic-representations/' . rawurlencode($record_id), [
+            'timeout' => self::timeout(), 'redirection' => 2, 'headers' => ['Accept' => 'application/json'],
+        ]);
+        if (is_wp_error($response)) { return new WP_Error('sc_library_backend_unavailable', $response->get_error_message(), ['status' => 503]); }
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = json_decode((string) wp_remote_retrieve_body($response), true);
+        return new WP_REST_Response(is_array($body) ? $body : ['ok' => false], $code ?: 502);
     }
 
     public function proxy_search(WP_REST_Request $request) {

@@ -72,6 +72,7 @@ class Settings:
     hybrid_rrf_k: int = _as_int("SC_LIBRARY_HYBRID_RRF_K", 60, 1, 500)
     hybrid_lexical_weight: float = _as_float("SC_LIBRARY_HYBRID_LEXICAL_WEIGHT", 1.0, 0.0, 10.0)
     hybrid_semantic_weight: float = _as_float("SC_LIBRARY_HYBRID_SEMANTIC_WEIGHT", 1.0, 0.0, 10.0)
+    semantic_min_similarity: float = _as_float("SC_LIBRARY_SEMANTIC_MIN_SIMILARITY", 0.0, -1.0, 1.0)
     institutional_source_timeout_seconds: int = _as_int("SC_LIBRARY_INSTITUTIONAL_TIMEOUT_SECONDS", 8, 2, 30)
     biomedical_source_timeout_seconds: int = _as_int("SC_LIBRARY_BIOMEDICAL_TIMEOUT_SECONDS", 8, 2, 30)
     ncbi_tool: str = os.getenv("SC_LIBRARY_NCBI_TOOL", "sustainable_catalyst_library").strip()

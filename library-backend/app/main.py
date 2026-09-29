@@ -17,6 +17,9 @@ from .db import close_pool, get_pool, initialize_database
 from .models import EdgeBatch, IntegrityAuditRequest, PruneRequest, RecordBatch
 from .query import explorer_bootstrap, facets, get_record, graph_neighborhood, related_records, stats, timeline
 from .hybrid_retrieval import hybrid_search_records
+from .representation_search import (
+    representation_descriptor, representation_search_readiness, semantic_text_search, similar_records,
+)
 from .semantic import embedding_jobs_status, process_embedding_jobs_once, semantic_readiness, default_embedding_client
 from .embedding_governance import (
     claim_workspace_handoff, complete_workspace_handoff, current_embedding_specification,
@@ -292,6 +295,13 @@ def health() -> dict[str, Any]:
             "embedding_automatic_evidence_promotion": False,
             "embedding_automatic_truth_promotion": False,
             "embedding_automatic_core_promotion": False,
+            "semantic_similarity_representation_search": True,
+            "semantic_similarity_current_specification_only": True,
+            "semantic_similarity_current_content_only": True,
+            "semantic_record_to_record_without_provider": True,
+            "semantic_similarity_automatic_evidence_promotion": False,
+            "semantic_similarity_automatic_truth_promotion": False,
+            "semantic_similarity_automatic_causality_inference": False,
             "core_aware_search_results": True,
             "citation_graph": True,
             "citation_exact_identifier_resolution": True,
@@ -2149,6 +2159,63 @@ def search(
     )
 
 
+@app.get("/v1/semantic-similarity/readiness")
+def semantic_similarity_readiness() -> dict[str, Any]:
+    return representation_search_readiness()
+
+
+@app.get("/v1/semantic-similarity/search")
+def semantic_similarity_search(
+    q: str = Query(min_length=1, max_length=500),
+    object_type: str | None = Query(default=None, max_length=80),
+    source_key: str | None = Query(default=None, max_length=191),
+    topic: str | None = Query(default=None, max_length=500),
+    year_from: int | None = Query(default=None, ge=1000, le=3000),
+    year_to: int | None = Query(default=None, ge=1000, le=3000),
+    min_similarity: float | None = Query(default=None, ge=-1.0, le=1.0),
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0, le=100000),
+) -> dict[str, Any]:
+    try:
+        return semantic_text_search(
+            q, object_type=object_type, source_key=source_key, topic=topic,
+            year_from=year_from, year_to=year_to, min_similarity=min_similarity,
+            limit=limit, offset=offset,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/v1/semantic-similarity/records/{record_id:path}")
+def semantic_similarity_for_record(
+    record_id: str,
+    object_type: str | None = Query(default=None, max_length=80),
+    source_key: str | None = Query(default=None, max_length=191),
+    topic: str | None = Query(default=None, max_length=500),
+    year_from: int | None = Query(default=None, ge=1000, le=3000),
+    year_to: int | None = Query(default=None, ge=1000, le=3000),
+    min_similarity: float | None = Query(default=None, ge=-1.0, le=1.0),
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0, le=100000),
+) -> dict[str, Any]:
+    try:
+        return similar_records(
+            record_id, object_type=object_type, source_key=source_key, topic=topic,
+            year_from=year_from, year_to=year_to, min_similarity=min_similarity,
+            limit=limit, offset=offset,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.get("/v1/semantic-representations/{record_id:path}")
+def semantic_representation_read(record_id: str) -> dict[str, Any]:
+    try:
+        return representation_descriptor(record_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
 @app.get("/v1/citations/readiness")
 def citations_readiness() -> dict[str, Any]:
     return citation_readiness()
@@ -2952,6 +3019,10 @@ def search_readiness() -> dict[str, Any]:
             "automatic_evidence_promotion": False,
             "automatic_truth_promotion": False,
         },
+        "representation_search": representation_search_readiness(),
+        "semantic_similarity_contract": "sc-library-semantic-similarity/1.0",
+        "representation_search_contract": "sc-library-representation-search/1.0",
+        "semantic_similarity_guardrail": "similarity-is-a-retrieval-signal-not-evidence-truth-or-causality",
         "fusion": "weighted-reciprocal-rank-fusion",
         "core_aware_results": True,
         "core_binding_source": "library_core_bindings",

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library/representation-search-response-v1.json",
+  "title": "Sustainable Catalyst Library Representation Search Response",
+  "type": "object",
+  "required": ["schema", "available", "results", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-representation-search/1.0"},
+    "available": {"type": "boolean"},
+    "query_hash_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "specification": {"type": "object"},
+    "results": {"type": "array", "items": {"type": "object"}},
+    "guardrails": {
+      "type": "object",
+      "properties": {
+        "semantic_similarity_is_evidence": {"const": false},
+        "semantic_similarity_is_truth": {"const": false},
+        "semantic_similarity_is_causality": {"const": false},
+        "automatic_core_promotion": {"const": false}
+      }
+    }
+  }
+}

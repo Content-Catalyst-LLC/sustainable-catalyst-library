@@ -6,6 +6,7 @@ from typing import Any
 from .db import get_pool
 from .query import search_records
 from .semantic import EmbeddingClient, EmbeddingError, default_embedding_client
+from .embedding_governance import current_embedding_specification
 from .settings import settings
 from .retrieval_fusion import as_float_or_none, reciprocal_rank_fusion
 
@@ -56,28 +57,38 @@ def semantic_candidates(
     year_from: int | None = None,
     year_to: int | None = None,
     limit: int = 80,
+    specification_fingerprint: str | None = None,
+    min_similarity: float | None = None,
 ) -> list[dict[str, Any]]:
     where, params = _filter_sql(object_type, source_key, topic, year_from, year_to)
+    specification_fingerprint = specification_fingerprint or current_embedding_specification()["fingerprint_sha256"]
+    threshold = settings.semantic_min_similarity if min_similarity is None else max(-1.0, min(1.0, float(min_similarity)))
     pool = get_pool()
     with pool.connection() as conn, conn.cursor() as cur:
         cur.execute(
             f"""
             SELECT r.record_id,r.object_type,r.title,r.canonical_url,r.abstract,r.source_key,
                    r.published_at,r.source_updated_at,r.indexed_at,r.authors,r.topics,r.tags,
-                   r.identifiers,r.metadata,
+                   r.identifiers,r.metadata,r.content_hash AS record_content_hash,
+                   e.content_hash AS embedding_content_hash,e.provider AS embedding_provider,
+                   e.model AS embedding_model,e.dimensions AS embedding_dimensions,
+                   e.specification_fingerprint,e.representation_id,
+                   e.execution_target AS embedding_execution_target,e.execution_id AS embedding_execution_id,
                    sc_cosine_similarity(e.embedding,%s::double precision[]) AS semantic_score,
                    left(coalesce(nullif(r.abstract,''),r.body_text),420) AS snippet
               FROM library_record_embeddings e
               JOIN library_records r ON r.record_id=e.record_id
              WHERE {where}
                AND e.content_hash=r.content_hash
+               AND e.specification_fingerprint=%s
                AND cardinality(e.embedding)=cardinality(%s::double precision[])
-             ORDER BY semantic_score DESC NULLS LAST,r.source_updated_at DESC NULLS LAST
+             ORDER BY semantic_score DESC NULLS LAST,r.record_id ASC
              LIMIT %s
             """,
-            [query_embedding, *params, query_embedding, max(1, min(500, int(limit)))],
+            [query_embedding, *params, specification_fingerprint, query_embedding, max(1, min(500, int(limit)))],
         )
-        return [dict(row) for row in cur.fetchall() if row.get("semantic_score") is not None]
+        rows = [dict(row) for row in cur.fetchall() if row.get("semantic_score") is not None]
+    return [row for row in rows if float(row["semantic_score"]) >= threshold]
 
 
 def _core_bindings(record_ids: list[str]) -> dict[str, list[dict[str, Any]]]:
@@ -163,6 +174,7 @@ def hybrid_search_records(
     semantic: list[dict[str, Any]] = []
     semantic_error: str | None = None
     client = embedding_client or default_embedding_client()
+    specification = current_embedding_specification(client)
 
     if mode in {"hybrid", "semantic"}:
         if client.configured:
@@ -176,6 +188,8 @@ def hybrid_search_records(
                     year_from=year_from,
                     year_to=year_to,
                     limit=candidate_limit,
+                    specification_fingerprint=specification["fingerprint_sha256"],
+                    min_similarity=settings.semantic_min_similarity,
                 )
             except Exception as exc:
                 semantic_error = exc.__class__.__name__
@@ -195,6 +209,8 @@ def hybrid_search_records(
                 "lexical_score": None,
                 "semantic_rank": rank,
                 "semantic_score": as_float_or_none(item.get("semantic_score")),
+                "representation_id": item.get("representation_id"),
+                "specification_fingerprint_sha256": item.get("specification_fingerprint"),
             }
             combined.append(item)
         effective_mode = "semantic"
@@ -258,5 +274,12 @@ def hybrid_search_records(
             "platform_core_enrichment": include_core,
             "semantic_candidate_count": len(semantic),
             "lexical_candidate_count": len(lexical),
+            "semantic_specification_fingerprint_sha256": specification["fingerprint_sha256"],
+            "semantic_current_specification_only": True,
+            "semantic_current_content_only": True,
+            "semantic_min_similarity": settings.semantic_min_similarity,
+            "semantic_similarity_is_evidence": False,
+            "semantic_similarity_is_truth": False,
+            "semantic_similarity_is_causality": False,
         },
     }

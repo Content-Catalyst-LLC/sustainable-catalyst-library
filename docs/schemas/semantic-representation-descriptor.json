@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library/semantic-representation-descriptor-v1.json",
+  "title": "Sustainable Catalyst Library Semantic Representation Descriptor",
+  "type": "object",
+  "required": ["schema", "record", "stored", "current_content", "current_specification", "search_eligible", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-semantic-representation/1.0"},
+    "record": {"type": "object"},
+    "stored": {"type": "boolean"},
+    "current_content": {"type": "boolean"},
+    "current_specification": {"type": "boolean"},
+    "search_eligible": {"type": "boolean"},
+    "representation": {"type": ["object", "null"]},
+    "guardrails": {
+      "type": "object",
+      "properties": {
+        "embedding_is_evidence": {"const": false},
+        "embedding_is_truth": {"const": false},
+        "semantic_similarity_is_truth": {"const": false},
+        "semantic_similarity_is_causality": {"const": false}
+      }
+    }
+  }
+}

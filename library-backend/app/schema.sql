@@ -293,6 +293,10 @@ CREATE INDEX IF NOT EXISTS library_record_embeddings_model_idx
     ON library_record_embeddings(provider,model,dimensions,updated_at DESC);
 CREATE INDEX IF NOT EXISTS library_record_embeddings_content_idx
     ON library_record_embeddings(content_hash,updated_at DESC);
+CREATE INDEX IF NOT EXISTS library_record_embeddings_specification_idx
+    ON library_record_embeddings(specification_fingerprint,dimensions,updated_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS library_record_embeddings_representation_uidx
+    ON library_record_embeddings(representation_id) WHERE representation_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS library_embedding_jobs (
     job_id bigserial PRIMARY KEY,
