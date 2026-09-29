@@ -275,10 +275,20 @@ CREATE TABLE IF NOT EXISTS library_record_embeddings (
     model text NOT NULL,
     dimensions integer NOT NULL CHECK (dimensions BETWEEN 1 AND 4096),
     embedding double precision[] NOT NULL,
+    specification_fingerprint char(64),
+    representation_id text,
+    execution_target text NOT NULL DEFAULT 'local',
+    execution_id text,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     CHECK (cardinality(embedding)=dimensions)
 );
+ALTER TABLE library_record_embeddings ADD COLUMN IF NOT EXISTS specification_fingerprint char(64);
+ALTER TABLE library_record_embeddings ADD COLUMN IF NOT EXISTS representation_id text;
+ALTER TABLE library_record_embeddings ADD COLUMN IF NOT EXISTS execution_target text NOT NULL DEFAULT 'local';
+ALTER TABLE library_record_embeddings ADD COLUMN IF NOT EXISTS execution_id text;
+ALTER TABLE library_record_embeddings ADD COLUMN IF NOT EXISTS provenance jsonb NOT NULL DEFAULT '{}'::jsonb;
 CREATE INDEX IF NOT EXISTS library_record_embeddings_model_idx
     ON library_record_embeddings(provider,model,dimensions,updated_at DESC);
 CREATE INDEX IF NOT EXISTS library_record_embeddings_content_idx
@@ -295,13 +305,54 @@ CREATE TABLE IF NOT EXISTS library_embedding_jobs (
     provider text,
     model text,
     dimensions integer,
+    specification_fingerprint char(64),
+    execution_target text NOT NULL DEFAULT 'local',
+    execution_id text,
+    handoff_id text,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
     last_error text,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     completed_at timestamptz
 );
+ALTER TABLE library_embedding_jobs ADD COLUMN IF NOT EXISTS specification_fingerprint char(64);
+ALTER TABLE library_embedding_jobs ADD COLUMN IF NOT EXISTS execution_target text NOT NULL DEFAULT 'local';
+ALTER TABLE library_embedding_jobs ADD COLUMN IF NOT EXISTS execution_id text;
+ALTER TABLE library_embedding_jobs ADD COLUMN IF NOT EXISTS handoff_id text;
+ALTER TABLE library_embedding_jobs ADD COLUMN IF NOT EXISTS provenance jsonb NOT NULL DEFAULT '{}'::jsonb;
 CREATE INDEX IF NOT EXISTS library_embedding_jobs_queue_idx
     ON library_embedding_jobs(status,next_attempt_at,created_at);
+CREATE INDEX IF NOT EXISTS library_embedding_jobs_execution_idx
+    ON library_embedding_jobs(execution_target,status,next_attempt_at,created_at);
+
+-- v2.51.0 — Scientific Embedding Governance & Workspace Compute Handoff.
+-- The Library keeps its operational vector index, Platform Core owns governed
+-- representation contracts, and Workspace may execute model compute. A handoff
+-- result is an analytical representation and never becomes evidence/truth by itself.
+CREATE TABLE IF NOT EXISTS library_embedding_compute_handoffs (
+    handoff_id text PRIMARY KEY,
+    job_id bigint NOT NULL REFERENCES library_embedding_jobs(job_id) ON DELETE CASCADE,
+    record_id text NOT NULL REFERENCES library_records(record_id) ON DELETE CASCADE,
+    content_hash char(64) NOT NULL,
+    input_hash char(64) NOT NULL,
+    specification_fingerprint char(64) NOT NULL,
+    status text NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','claimed','retry','complete','failed','cancelled')),
+    attempt_count integer NOT NULL DEFAULT 0 CHECK (attempt_count >= 0),
+    claimed_by text,
+    claimed_at timestamptz,
+    workspace_execution_id text,
+    payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+    last_error text,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    completed_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS library_embedding_handoffs_queue_idx
+    ON library_embedding_compute_handoffs(status,created_at);
+CREATE INDEX IF NOT EXISTS library_embedding_handoffs_record_idx
+    ON library_embedding_compute_handoffs(record_id,updated_at DESC);
+CREATE INDEX IF NOT EXISTS library_embedding_handoffs_spec_idx
+    ON library_embedding_compute_handoffs(specification_fingerprint,status);
 
 -- Queue legacy/public records that do not yet have a semantic vector. Existing
 -- job rows are preserved, so service restarts do not reset completed work.

@@ -18,6 +18,11 @@ from .models import EdgeBatch, IntegrityAuditRequest, PruneRequest, RecordBatch
 from .query import explorer_bootstrap, facets, get_record, graph_neighborhood, related_records, stats, timeline
 from .hybrid_retrieval import hybrid_search_records
 from .semantic import embedding_jobs_status, process_embedding_jobs_once, semantic_readiness, default_embedding_client
+from .embedding_governance import (
+    claim_workspace_handoff, complete_workspace_handoff, current_embedding_specification,
+    embedding_governance_readiness, fail_workspace_handoff, prepare_workspace_handoffs,
+    queue_embedding_backfill, workspace_handoff_status,
+)
 from .citation_graph import (
     CitationCreateRequest, CoreScholarlyCitationHandoffRequest, citation_graph, citation_readiness,
     enqueue_core_scholarly_citation, import_record_metadata_citations, list_citations, upsert_citation,
@@ -105,10 +110,13 @@ from .private_knowledge import (
 async def _embedding_worker_loop() -> None:
     while True:
         try:
-            if settings.database_url and settings.embedding_worker_enabled and default_embedding_client().configured:
-                await asyncio.to_thread(process_embedding_jobs_once, settings.embedding_worker_batch_size)
+            if settings.database_url:
+                if settings.embedding_compute_target in {"workspace_preferred", "workspace_only"}:
+                    await asyncio.to_thread(prepare_workspace_handoffs, settings.embedding_worker_batch_size)
+                if settings.embedding_worker_enabled and default_embedding_client().configured:
+                    await asyncio.to_thread(process_embedding_jobs_once, settings.embedding_worker_batch_size)
         except Exception:
-            # Individual job failures are persisted by the semantic queue. A worker-level
+            # Individual job/handoff failures are persisted by the semantic queue. A worker-level
             # failure must not take down public Library search.
             pass
         await asyncio.sleep(settings.embedding_worker_interval_seconds)
@@ -275,6 +283,15 @@ def health() -> dict[str, Any]:
             "semantic_embeddings": "configured" if default_embedding_client().configured else "not-configured",
             "semantic_embedding_provider": settings.embedding_provider,
             "semantic_embedding_worker": settings.embedding_worker_enabled,
+            "scientific_embedding_governance": True,
+            "embedding_specification_provenance": True,
+            "embedding_representation_lineage": True,
+            "embedding_deterministic_backfill": True,
+            "workspace_embedding_compute_handoff": True,
+            "workspace_embedding_result_ingestion": True,
+            "embedding_automatic_evidence_promotion": False,
+            "embedding_automatic_truth_promotion": False,
+            "embedding_automatic_core_promotion": False,
             "core_aware_search_results": True,
             "citation_graph": True,
             "citation_exact_identifier_resolution": True,
@@ -2927,6 +2944,14 @@ def search_readiness() -> dict[str, Any]:
         "lexical_retrieval": True,
         "semantic_retrieval": bool(semantic.get("configured")),
         "semantic": semantic,
+        "embedding_governance": {
+            "enabled": True,
+            "compute_target": settings.embedding_compute_target,
+            "specification_fingerprint_sha256": current_embedding_specification()["fingerprint_sha256"],
+            "workspace_handoff": True,
+            "automatic_evidence_promotion": False,
+            "automatic_truth_promotion": False,
+        },
         "fusion": "weighted-reciprocal-rank-fusion",
         "core_aware_results": True,
         "core_binding_source": "library_core_bindings",
@@ -2948,6 +2973,115 @@ def search_readiness() -> dict[str, Any]:
         "rust_evidence_graph_acceleration_native_query_engine": True,
         "native_graph_query_guardrail": "native-structural-results-do-not-imply-evidence-truth-causality-consensus-or-quality",
     }
+
+
+@app.get("/v1/embeddings/specification")
+def embedding_specification() -> dict[str, Any]:
+    return current_embedding_specification()
+
+
+@app.get("/v1/embeddings/governance/readiness")
+def embedding_governance_status() -> dict[str, Any]:
+    return embedding_governance_readiness()
+
+
+@app.post("/v1/admin/embeddings/backfill")
+async def admin_embedding_backfill(
+    request: Request,
+    dry_run: bool = Query(default=True),
+    limit: int = Query(default=1000, ge=1, le=10000),
+    execution_target: str | None = Query(default=None, pattern="^(local|workspace)$"),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return queue_embedding_backfill(dry_run=dry_run, limit=limit, execution_target=execution_target)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/admin/embeddings/handoffs")
+async def admin_embedding_handoffs_status(
+    request: Request,
+    limit: int = Query(default=100, ge=1, le=500),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    return workspace_handoff_status(limit=limit)
+
+
+@app.post("/v1/admin/embeddings/handoffs/prepare")
+async def admin_embedding_handoffs_prepare(
+    request: Request,
+    limit: int = Query(default=25, ge=1, le=100),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    return prepare_workspace_handoffs(limit=limit)
+
+
+@app.post("/v1/admin/embeddings/handoffs/claim")
+async def admin_embedding_handoff_claim(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8") or "{}")
+        return claim_workspace_handoff(str(payload.get("worker_id") or ""))
+    except (ValueError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/embeddings/handoffs/{handoff_id}/complete")
+async def admin_embedding_handoff_complete(
+    handoff_id: str,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8") or "{}")
+        values = payload.get("embedding") if isinstance(payload.get("embedding"), list) else payload.get("values")
+        if not isinstance(values, list):
+            raise ValueError("embedding values are required")
+        return complete_workspace_handoff(
+            handoff_id=handoff_id,
+            values=values,
+            workspace_execution_id=str(payload.get("workspace_execution_id") or payload.get("execution_id") or ""),
+        )
+    except (ValueError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/embeddings/handoffs/{handoff_id}/fail")
+async def admin_embedding_handoff_fail(
+    handoff_id: str,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8") or "{}")
+        return fail_workspace_handoff(
+            handoff_id=handoff_id,
+            error=str(payload.get("error") or "workspace embedding execution failed"),
+            retry_after_seconds=int(payload.get("retry_after_seconds") or 30),
+        )
+    except (ValueError, TypeError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.get("/v1/admin/embeddings/status")

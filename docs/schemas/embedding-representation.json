@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sustainable Catalyst Embedding Representation Provenance",
+  "type": "object",
+  "required": [
+    "schema",
+    "representation_id",
+    "source",
+    "specification",
+    "execution",
+    "authority",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-core-compatible-embedding-representation/1.0"
+    },
+    "representation_id": {
+      "type": "string"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "library_record_id",
+        "content_hash",
+        "input_hash",
+        "input_profile"
+      ]
+    },
+    "specification": {
+      "type": "object",
+      "required": [
+        "specification_id",
+        "fingerprint_sha256",
+        "provider",
+        "model",
+        "dimensions",
+        "normalization",
+        "similarity_metric"
+      ]
+    },
+    "execution": {
+      "type": "object",
+      "required": [
+        "target",
+        "executed_by_workspace"
+      ]
+    },
+    "authority": {
+      "type": "object"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

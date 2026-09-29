@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sustainable Catalyst Embedding Specification",
+  "type": "object",
+  "required": [
+    "schema",
+    "specification_id",
+    "fingerprint_sha256",
+    "provider",
+    "model",
+    "dimensions",
+    "input_profile",
+    "normalization",
+    "similarity_metric",
+    "governance"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-core-compatible-embedding-specification/1.0"
+    },
+    "specification_id": {
+      "type": "string"
+    },
+    "fingerprint_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "dimensions": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4096
+    },
+    "input_profile": {
+      "type": "string"
+    },
+    "input_max_characters": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "input_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "normalization": {
+      "const": "l2-unit"
+    },
+    "similarity_metric": {
+      "const": "cosine"
+    },
+    "configured": {
+      "type": "boolean"
+    },
+    "governance": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

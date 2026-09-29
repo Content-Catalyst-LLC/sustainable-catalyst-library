@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sustainable Catalyst Workspace Embedding Compute Handoff",
+  "type": "object",
+  "required": [
+    "schema",
+    "handoff_id",
+    "idempotency_key",
+    "workload",
+    "source",
+    "specification",
+    "input",
+    "requested_output",
+    "authority",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-workspace-embedding-handoff/1.0"
+    },
+    "handoff_id": {
+      "type": "string"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "workload": {
+      "const": "scientific-embedding-compute"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "library_job_id",
+        "library_record_id",
+        "content_hash",
+        "input_hash"
+      ]
+    },
+    "specification": {
+      "$ref": "embedding-specification.json"
+    },
+    "input": {
+      "type": "object",
+      "required": [
+        "text",
+        "profile"
+      ]
+    },
+    "requested_output": {
+      "type": "object"
+    },
+    "authority": {
+      "type": "object"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

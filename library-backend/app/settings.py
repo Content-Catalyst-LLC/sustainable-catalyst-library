@@ -28,6 +28,10 @@ def _default_embedding_provider() -> str:
     key = os.getenv("SC_LIBRARY_EMBEDDING_API_KEY", "").strip() or os.getenv("GEMINI_API_KEY", "").strip()
     return "gemini" if key else "disabled"
 
+def _embedding_compute_target() -> str:
+    value = os.getenv("SC_LIBRARY_EMBEDDING_COMPUTE_TARGET", "local").strip().lower()
+    return value if value in {"local", "workspace_preferred", "workspace_only"} else "local"
+
 def _as_bool(name: str, default: bool = False) -> bool:
     raw = os.getenv(name)
     if raw is None:
@@ -63,6 +67,7 @@ class Settings:
     embedding_worker_enabled: bool = _as_bool("SC_LIBRARY_EMBEDDING_WORKER_ENABLED", True)
     embedding_worker_interval_seconds: int = _as_int("SC_LIBRARY_EMBEDDING_WORKER_INTERVAL_SECONDS", 30, 5, 3600)
     embedding_worker_batch_size: int = _as_int("SC_LIBRARY_EMBEDDING_WORKER_BATCH_SIZE", 10, 1, 100)
+    embedding_compute_target: str = _embedding_compute_target()
     hybrid_candidate_multiplier: int = _as_int("SC_LIBRARY_HYBRID_CANDIDATE_MULTIPLIER", 4, 2, 10)
     hybrid_rrf_k: int = _as_int("SC_LIBRARY_HYBRID_RRF_K", 60, 1, 500)
     hybrid_lexical_weight: float = _as_float("SC_LIBRARY_HYBRID_LEXICAL_WEIGHT", 1.0, 0.0, 10.0)

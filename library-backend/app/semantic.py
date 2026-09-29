@@ -11,6 +11,9 @@ from psycopg.types.json import Jsonb
 
 from .db import get_pool
 from .settings import settings
+from .embedding_governance import (
+    configured_execution_target, current_embedding_specification, representation_metadata,
+)
 
 SEMANTIC_CONTRACT = "sc-library-semantic-index/1.0"
 EMBEDDING_JOB_CONTRACT = "sc-library-embedding-jobs/1.0"
@@ -191,6 +194,10 @@ def semantic_readiness(client: EmbeddingClient | None = None) -> dict[str, Any]:
         "library_local_vector_store": True,
         "platform_core_owns_vectors": False,
         "raw_chunks_promoted_to_core": False,
+        "embedding_governance": True,
+        "embedding_specification_fingerprint": current_embedding_specification(client)["fingerprint_sha256"],
+        "embedding_compute_target": settings.embedding_compute_target,
+        "workspace_compute_handoff": True,
     }
     try:
         pool = get_pool()
@@ -221,7 +228,8 @@ def embedding_jobs_status(limit: int = 100) -> dict[str, Any]:
         cur.execute(
             """
             SELECT job_id,record_id,content_hash,input_hash,status,attempt_count,next_attempt_at,
-                   provider,model,dimensions,last_error,created_at,updated_at,completed_at
+                   provider,model,dimensions,specification_fingerprint,execution_target,execution_id,handoff_id,
+                   provenance,last_error,created_at,updated_at,completed_at
               FROM library_embedding_jobs
              ORDER BY updated_at DESC
              LIMIT %s
@@ -233,12 +241,17 @@ def embedding_jobs_status(limit: int = 100) -> dict[str, Any]:
 
 
 def queue_record_embedding(record_id: str, content_hash: str) -> None:
+    specification = current_embedding_specification()
+    execution_target = configured_execution_target()
     pool = get_pool()
     with pool.connection() as conn, conn.cursor() as cur:
         cur.execute(
             """
-            INSERT INTO library_embedding_jobs(record_id,content_hash,status,attempt_count,next_attempt_at,updated_at)
-            VALUES (%s,%s,'pending',0,now(),now())
+            INSERT INTO library_embedding_jobs(
+                record_id,content_hash,status,attempt_count,next_attempt_at,
+                specification_fingerprint,execution_target,updated_at
+            )
+            VALUES (%s,%s,'pending',0,now(),%s,%s,now())
             ON CONFLICT (record_id) DO UPDATE SET
                 content_hash=EXCLUDED.content_hash,
                 input_hash=NULL,
@@ -248,11 +261,16 @@ def queue_record_embedding(record_id: str, content_hash: str) -> None:
                 provider=NULL,
                 model=NULL,
                 dimensions=NULL,
+                specification_fingerprint=EXCLUDED.specification_fingerprint,
+                execution_target=EXCLUDED.execution_target,
+                execution_id=NULL,
+                handoff_id=NULL,
+                provenance='{}'::jsonb,
                 last_error=NULL,
                 updated_at=now(),
                 completed_at=NULL
             """,
-            (record_id, content_hash),
+            (record_id, content_hash, specification["fingerprint_sha256"], execution_target),
         )
         conn.commit()
 
@@ -269,9 +287,10 @@ def process_embedding_jobs_once(limit: int = 25, client: EmbeddingClient | None 
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT job_id,record_id,content_hash,attempt_count
+                SELECT job_id,record_id,content_hash,attempt_count,specification_fingerprint,execution_target
                   FROM library_embedding_jobs
                  WHERE status IN ('pending','retry') AND next_attempt_at <= now()
+                   AND execution_target IN ('local','local-fallback')
                  ORDER BY created_at ASC
                  FOR UPDATE SKIP LOCKED
                  LIMIT %s
@@ -318,14 +337,25 @@ def process_embedding_jobs_once(limit: int = 25, client: EmbeddingClient | None 
 
                 input_text = embedding_input_from_record(dict(record))
                 input_hash = hashlib.sha256(input_text.encode("utf-8")).hexdigest()
+                specification = current_embedding_specification(client)
                 embedding = client.embed(input_text)
+                execution_target = str(job.get("execution_target") or "local")
+                provenance = representation_metadata(
+                    record_id=str(record_id),
+                    content_hash=str(record["content_hash"]),
+                    input_hash=input_hash,
+                    specification=specification,
+                    execution_target=execution_target,
+                    execution_id=f"library-local-embedding-job:{job_id}",
+                )
                 now = datetime.now(timezone.utc)
                 with conn.cursor() as cur:
                     cur.execute(
                         """
                         INSERT INTO library_record_embeddings(
-                            record_id,content_hash,input_hash,provider,model,dimensions,embedding,updated_at
-                        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                            record_id,content_hash,input_hash,provider,model,dimensions,embedding,
+                            specification_fingerprint,representation_id,execution_target,execution_id,provenance,updated_at
+                        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                         ON CONFLICT (record_id) DO UPDATE SET
                             content_hash=EXCLUDED.content_hash,
                             input_hash=EXCLUDED.input_hash,
@@ -333,18 +363,33 @@ def process_embedding_jobs_once(limit: int = 25, client: EmbeddingClient | None 
                             model=EXCLUDED.model,
                             dimensions=EXCLUDED.dimensions,
                             embedding=EXCLUDED.embedding,
+                            specification_fingerprint=EXCLUDED.specification_fingerprint,
+                            representation_id=EXCLUDED.representation_id,
+                            execution_target=EXCLUDED.execution_target,
+                            execution_id=EXCLUDED.execution_id,
+                            provenance=EXCLUDED.provenance,
                             updated_at=EXCLUDED.updated_at
                         """,
-                        (record_id, record["content_hash"], input_hash, embedding.provider, embedding.model, embedding.dimensions, embedding.values, now),
+                        (
+                            record_id, record["content_hash"], input_hash, embedding.provider, embedding.model,
+                            embedding.dimensions, embedding.values, specification["fingerprint_sha256"],
+                            provenance["representation_id"], execution_target, f"library-local-embedding-job:{job_id}",
+                            Jsonb(provenance), now,
+                        ),
                     )
                     cur.execute(
                         """
                         UPDATE library_embedding_jobs
                            SET input_hash=%s,status='complete',provider=%s,model=%s,dimensions=%s,
+                               specification_fingerprint=%s,execution_target=%s,execution_id=%s,provenance=%s,
                                last_error=NULL,updated_at=%s,completed_at=%s
                          WHERE job_id=%s
                         """,
-                        (input_hash, embedding.provider, embedding.model, embedding.dimensions, now, now, job_id),
+                        (
+                            input_hash, embedding.provider, embedding.model, embedding.dimensions,
+                            specification["fingerprint_sha256"], execution_target, f"library-local-embedding-job:{job_id}",
+                            Jsonb(provenance), now, now, job_id,
+                        ),
                     )
                 conn.commit()
                 processed.append({"record_id": record_id, "status": "complete", "dimensions": embedding.dimensions})
