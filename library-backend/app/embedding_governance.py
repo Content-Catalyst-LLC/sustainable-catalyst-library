@@ -284,7 +284,7 @@ def queue_embedding_backfill(
                     e.content_hash<>r.content_hash OR
                     COALESCE(e.specification_fingerprint,'')<>%s
                )
-             ORDER BY r.updated_at ASC,r.record_id ASC
+             ORDER BY COALESCE(r.source_updated_at,r.indexed_at,r.created_at) ASC,r.record_id ASC
              LIMIT %s
             """,
             (specification["fingerprint_sha256"], specification["fingerprint_sha256"], limit),

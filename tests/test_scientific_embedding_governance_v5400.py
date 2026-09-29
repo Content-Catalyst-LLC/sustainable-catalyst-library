@@ -10,9 +10,9 @@ def read(rel: str) -> str:
 
 def test_release_identity():
     plugin = read("sustainable-catalyst-library/sustainable-catalyst-library.php")
-    assert "Version: 5.40.0" in plugin
-    assert "define('SC_LIBRARY_VERSION', '5.40.0');" in plugin
-    assert '__version__ = "2.51.0"' in read("library-backend/app/__init__.py")
+    assert "Version: 5.40.0.1" in plugin
+    assert "define('SC_LIBRARY_VERSION', '5.40.0.1');" in plugin
+    assert '__version__ = "2.51.1"' in read("library-backend/app/__init__.py")
 
 
 def test_governance_contract_and_authority_boundary_present():
