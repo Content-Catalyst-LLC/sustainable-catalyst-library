@@ -51,6 +51,9 @@ from .source_identity_resolution import build_source_identity_analysis
 from .retrieval_evaluation import (
     adaptive_rerank, build_adaptive_ranking_profile, evaluate_retrieval, rerank_results,
 )
+from .neural_reranking import (
+    default_reranker_client, evaluate_reranking, rerank_candidates, reranking_readiness,
+)
 from .temporal_knowledge import temporal_request, knowledge_snapshot, compare_snapshots
 from .methodology_intelligence import methodology_request
 from .research_gap_novelty import research_gap_novelty_request
@@ -412,6 +415,16 @@ def health() -> dict[str, Any]:
             "adaptive_ranking_bounded_rerank": True,
             "adaptive_ranking_automatic_filtering": False,
             "adaptive_ranking_truth_promotion": False,
+            "neural_reranking": True,
+            "neural_reranking_provider": settings.rerank_provider,
+            "neural_reranking_configured": default_reranker_client().configured,
+            "neural_reranking_baseline_rank_preserved": True,
+            "neural_reranking_score_components_exposed": True,
+            "neural_reranking_retrieval_evaluation": True,
+            "neural_reranking_automatic_filtering": False,
+            "neural_reranking_evidence_promotion": False,
+            "neural_reranking_truth_promotion": False,
+            "neural_reranking_score_is_probability": False,
             "temporal_knowledge_evolution": True,
             "temporal_historical_availability_snapshots": True,
             "temporal_retrospective_status_lens": True,
@@ -2510,6 +2523,57 @@ def retrieval_evaluation_rerank(payload: dict[str, Any]) -> dict[str, Any]:
     return adaptive_rerank(payload)
 
 
+@app.get("/v1/neural-reranking/readiness")
+def neural_reranking_readiness() -> dict[str, Any]:
+    return reranking_readiness()
+
+
+@app.post("/v1/neural-reranking/rerank")
+def neural_reranking_rerank(payload: dict[str, Any]) -> dict[str, Any]:
+    results = [dict(x) for x in (payload.get("results") or []) if isinstance(x, dict)]
+    return rerank_candidates(str(payload.get("query") or ""), results)
+
+
+@app.post("/v1/neural-reranking/evaluate")
+def neural_reranking_evaluate(payload: dict[str, Any]) -> dict[str, Any]:
+    return evaluate_reranking(payload)
+
+
+@app.post("/v1/search/neural-reranked")
+def search_neural_reranked(payload: dict[str, Any]) -> dict[str, Any]:
+    search_payload = payload.get("search") if isinstance(payload.get("search"), dict) else payload
+    query = str(search_payload.get("q") or "")
+    requested_limit = max(1, min(100, int(search_payload.get("limit", 20))))
+    requested_offset = max(0, min(100000, int(search_payload.get("offset", 0))))
+    candidate_limit = max(
+        requested_limit + requested_offset,
+        min(settings.rerank_max_candidates, max(20, int(search_payload.get("candidate_limit", settings.rerank_max_candidates)))),
+    )
+    candidate_limit = min(100, settings.rerank_max_candidates, candidate_limit)
+    base = hybrid_search_records(
+        query,
+        str(search_payload.get("object_type") or "") or None,
+        str(search_payload.get("source_key") or "") or None,
+        str(search_payload.get("topic") or "") or None,
+        int(search_payload["year_from"]) if search_payload.get("year_from") else None,
+        int(search_payload["year_to"]) if search_payload.get("year_to") else None,
+        str(search_payload.get("sort") or "relevance"),
+        candidate_limit,
+        0,
+        mode=str(search_payload.get("mode") or "hybrid"),
+        include_core=bool(search_payload.get("include_core", True)),
+    )
+    reranked = rerank_candidates(query, [dict(x) for x in base.get("results", [])])
+    base["results"] = reranked["results"][requested_offset:requested_offset + requested_limit]
+    base["limit"] = requested_limit
+    base["offset"] = requested_offset
+    base["neural_reranking"] = {
+        key: reranked.get(key)
+        for key in ("schema", "run_id", "available", "reason", "specification", "candidate_count", "provider_scored_candidate_count", "max_provider_candidates", "guardrails")
+    }
+    return base
+
+
 @app.post("/v1/search/adaptive")
 def search_adaptive(payload: dict[str, Any]) -> dict[str, Any]:
     search_payload = payload.get("search") if isinstance(payload.get("search"), dict) else {}
@@ -3031,6 +3095,10 @@ def search_readiness() -> dict[str, Any]:
         "retrieval_evaluation": True,
         "adaptive_ranking_profiles": True,
         "adaptive_ranking_guardrail": "rerank-only-no-filter-no-truth-promotion",
+        "neural_reranking": reranking_readiness(),
+        "neural_reranking_contract": "sc-library-neural-reranking/1.0",
+        "neural_reranking_evaluation_contract": "sc-library-neural-reranking-evaluation/1.0",
+        "neural_reranking_guardrail": "provider-relevance-score-is-not-probability-evidence-or-truth-and-result-set-is-preserved",
         "temporal_knowledge_evolution": True,
         "temporal_snapshot_guardrail": "historical-availability-is-distinct-from-retrospective-status",
         "methodology_intelligence": True,

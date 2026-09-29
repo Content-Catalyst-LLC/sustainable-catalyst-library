@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/neural-reranker-specification.json",
+  "title": "Sustainable Catalyst Neural Reranker Specification",
+  "type": "object",
+  "required": ["schema", "provider", "api_contract", "fingerprint_sha256", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-neural-reranker-specification/1.0"},
+    "provider": {"type": "string"},
+    "model": {"type": ["string", "null"]},
+    "api_contract": {"type": "string"},
+    "candidate_text_contract": {"type": "string"},
+    "max_candidates": {"type": "integer", "minimum": 1},
+    "configured": {"type": "boolean"},
+    "fingerprint_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "specification_id": {"type": "string"},
+    "guardrails": {"type": "object"}
+  }
+}

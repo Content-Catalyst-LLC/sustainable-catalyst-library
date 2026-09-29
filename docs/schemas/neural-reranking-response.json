@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/neural-reranking-response.json",
+  "title": "Sustainable Catalyst Neural Reranking Response",
+  "type": "object",
+  "required": ["schema", "query", "run_id", "available", "results", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-neural-reranking/1.0"},
+    "query": {"type": "string"},
+    "run_id": {"type": "string"},
+    "available": {"type": "boolean"},
+    "reason": {"type": ["string", "null"]},
+    "candidate_count": {"type": "integer", "minimum": 0},
+    "provider_scored_candidate_count": {"type": "integer", "minimum": 0},
+    "results": {"type": "array", "items": {"type": "object"}},
+    "guardrails": {"type": "object"}
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/neural-reranking-evaluation.json",
+  "title": "Sustainable Catalyst Neural Reranking Evaluation",
+  "type": "object",
+  "required": ["schema", "baseline", "reranked", "metric_deltas_reranked_minus_baseline", "interpretation"],
+  "properties": {
+    "schema": {"const": "sc-library-neural-reranking-evaluation/1.0"},
+    "query": {"type": "string"},
+    "judgment_count": {"type": "integer", "minimum": 0},
+    "baseline": {"type": "object"},
+    "reranked": {"type": "object"},
+    "metric_deltas_reranked_minus_baseline": {"type": "object"},
+    "interpretation": {"type": "object"}
+  }
+}

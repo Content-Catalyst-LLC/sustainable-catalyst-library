@@ -32,6 +32,13 @@ def _embedding_compute_target() -> str:
     value = os.getenv("SC_LIBRARY_EMBEDDING_COMPUTE_TARGET", "local").strip().lower()
     return value if value in {"local", "workspace_preferred", "workspace_only"} else "local"
 
+
+
+def _rerank_provider() -> str:
+    value = os.getenv("SC_LIBRARY_RERANK_PROVIDER", "disabled").strip().lower()
+    return value if value in {"disabled", "rerank_compatible"} else "disabled"
+
+
 def _as_bool(name: str, default: bool = False) -> bool:
     raw = os.getenv(name)
     if raw is None:
@@ -73,6 +80,12 @@ class Settings:
     hybrid_lexical_weight: float = _as_float("SC_LIBRARY_HYBRID_LEXICAL_WEIGHT", 1.0, 0.0, 10.0)
     hybrid_semantic_weight: float = _as_float("SC_LIBRARY_HYBRID_SEMANTIC_WEIGHT", 1.0, 0.0, 10.0)
     semantic_min_similarity: float = _as_float("SC_LIBRARY_SEMANTIC_MIN_SIMILARITY", 0.0, -1.0, 1.0)
+    rerank_provider: str = _rerank_provider()
+    rerank_api_key: str = os.getenv("SC_LIBRARY_RERANK_API_KEY", "").strip()
+    rerank_model: str = os.getenv("SC_LIBRARY_RERANK_MODEL", "rerank-model").strip()
+    rerank_api_url: str = os.getenv("SC_LIBRARY_RERANK_API_URL", "").strip()
+    rerank_timeout_seconds: int = _as_int("SC_LIBRARY_RERANK_TIMEOUT_SECONDS", 12, 2, 60)
+    rerank_max_candidates: int = _as_int("SC_LIBRARY_RERANK_MAX_CANDIDATES", 40, 5, 100)
     institutional_source_timeout_seconds: int = _as_int("SC_LIBRARY_INSTITUTIONAL_TIMEOUT_SECONDS", 8, 2, 30)
     biomedical_source_timeout_seconds: int = _as_int("SC_LIBRARY_BIOMEDICAL_TIMEOUT_SECONDS", 8, 2, 30)
     ncbi_tool: str = os.getenv("SC_LIBRARY_NCBI_TOOL", "sustainable_catalyst_library").strip()

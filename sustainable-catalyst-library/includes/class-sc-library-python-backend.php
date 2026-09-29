@@ -489,6 +489,26 @@ final class SC_Library_Python_Backend {
             'permission_callback' => '__return_true',
             'callback' => [$this, 'proxy_adaptive_search'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/neural-reranking/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_neural_reranking_readiness'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/neural-reranking/rerank', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_neural_reranking'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/neural-reranking/evaluate', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_neural_reranking_evaluate'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/search/neural-reranked', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_neural_reranked_search'],
+        ]);
     }
 
     public static function health(): array {
@@ -1279,6 +1299,36 @@ final class SC_Library_Python_Backend {
 
     public function proxy_adaptive_search(WP_REST_Request $request): WP_REST_Response {
         return $this->proxy_retrieval_post($request, '/v1/search/adaptive', 'sc-library-hybrid-retrieval/1.0');
+    }
+
+    public function proxy_neural_reranking_readiness(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) {
+            return new WP_REST_Response(['schema'=>'sc-library-neural-reranking/1.0','state'=>'unavailable','configured'=>false], 503);
+        }
+        $response = wp_remote_get(self::base_url() . '/v1/neural-reranking/readiness', [
+            'timeout' => max(self::timeout(), 12),
+            'redirection' => 0,
+            'headers' => ['Accept'=>'application/json'],
+        ]);
+        if (is_wp_error($response)) {
+            return new WP_REST_Response(['schema'=>'sc-library-neural-reranking/1.0','state'=>'unavailable','error'=>$response->get_error_message()], 502);
+        }
+        $code=(int) wp_remote_retrieve_response_code($response);
+        $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>'sc-library-neural-reranking/1.0','state'=>'unavailable','error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
+    }
+
+    public function proxy_neural_reranking(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/neural-reranking/rerank', 'sc-library-neural-reranking/1.0');
+    }
+
+    public function proxy_neural_reranking_evaluate(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/neural-reranking/evaluate', 'sc-library-neural-reranking-evaluation/1.0');
+    }
+
+    public function proxy_neural_reranked_search(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/search/neural-reranked', 'sc-library-hybrid-retrieval/1.0');
     }
 
     public static function search_readiness(): array {
