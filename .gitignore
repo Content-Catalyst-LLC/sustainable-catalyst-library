@@ -6,7 +6,33 @@ __pycache__/
 .env
 *.log
 
-# Rust native graph build artifacts
+# Native/runtime build artifacts
 library-backend/native-graph-runtime/target/
+library-backend/go-ingestion-runtime/sc-library-ingestion-runtime
 
-library-backend/native-graph-runtime/target/
+# Local release staging
+/release-staging/
+/dist-v*/
+
+# Generated release artifacts belong in release bundles, not repository root.
+/BUILD_VALIDATION_*.txt
+/RELEASE_MANIFEST_*.json
+/SHA256SUMS_*.txt
+/RELEASE_NOTES_*.md
+/README_v*_RELEASE.md
+/DEPLOY_*.md
+/PRODUCTION_CHECKLIST*.md
+/CAPABILITY_PRESERVATION_REPORT*.md
+/NO_BACKEND_REDEPLOY_REQUIRED*.md
+/NO_WORDPRESS_REDEPLOY_REQUIRED*.md
+/RESEARCH_LIBRARY_PAGE_v*.html
+/RESEARCH_LIBRARY_PAGE_UPDATE_v*.md
+/LIBRARY_V*_TERMINAL_COMMANDS.txt
+/PACKAGE_LIBRARY_*.sh
+/install_and_push_sustainable_catalyst_library_*.sh
+/upgrade_library_backend_*.sh
+/*_v[0-9]*.md
+
+# Keep tracked operational scripts under a dedicated source directory, not root.
+/*.sh
+/*.py

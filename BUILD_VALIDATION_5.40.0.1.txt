@@ -1,5 +1,0 @@
-Knowledge Library v5.40.0.1
-Backend v2.51.1
-Repair: Embedding Backfill Timestamp Repair
-Expected production fix: signed /v1/admin/embeddings/backfill dry-run returns HTTP 200 instead of HTTP 500.
-Backfill remains dry-run during deployment verification.
