@@ -489,6 +489,26 @@ final class SC_Library_Python_Backend {
             'permission_callback' => '__return_true',
             'callback' => [$this, 'proxy_adaptive_search'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-embedding-maps/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_embedding_maps_readiness'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-embedding-maps/map', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_embedding_map'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/publication-embedding-maps/neighborhood', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_publication_embedding_neighborhood'],
+            'args' => [
+                'record_id' => ['sanitize_callback' => 'sanitize_text_field', 'required' => true],
+                'limit' => ['sanitize_callback' => 'absint', 'default' => 12],
+                'min_similarity' => ['sanitize_callback' => static fn($v) => (float) $v, 'default' => 0.0],
+            ],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/neural-reranking/readiness', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
@@ -1299,6 +1319,47 @@ final class SC_Library_Python_Backend {
 
     public function proxy_adaptive_search(WP_REST_Request $request): WP_REST_Response {
         return $this->proxy_retrieval_post($request, '/v1/search/adaptive', 'sc-library-hybrid-retrieval/1.0');
+    }
+
+    public function proxy_publication_embedding_maps_readiness(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) {
+            return new WP_REST_Response(['schema'=>'sc-library-semantic-knowledge-landscape/1.0','state'=>'unavailable'], 503);
+        }
+        $response = wp_remote_get(self::base_url() . '/v1/publication-embedding-maps/readiness', [
+            'timeout' => max(self::timeout(), 12),
+            'redirection' => 0,
+            'headers' => ['Accept'=>'application/json'],
+        ]);
+        if (is_wp_error($response)) {
+            return new WP_REST_Response(['schema'=>'sc-library-semantic-knowledge-landscape/1.0','state'=>'unavailable','error'=>$response->get_error_message()], 502);
+        }
+        $code=(int) wp_remote_retrieve_response_code($response);
+        $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>'sc-library-semantic-knowledge-landscape/1.0','state'=>'unavailable','error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
+    }
+
+    public function proxy_publication_embedding_map(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/publication-embedding-maps/map', 'sc-library-publication-embedding-map/1.0');
+    }
+
+    public function proxy_publication_embedding_neighborhood(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) {
+            return new WP_REST_Response(['schema'=>'sc-library-semantic-neighborhood/1.0','error'=>'Library backend not configured'], 503);
+        }
+        $record_id = rawurlencode(sanitize_text_field((string) $request->get_param('record_id')));
+        $url = add_query_arg([
+            'limit' => min(50, max(1, (int) $request->get_param('limit'))),
+            'min_similarity' => max(-1.0, min(1.0, (float) $request->get_param('min_similarity'))),
+        ], self::base_url() . '/v1/publication-embedding-maps/' . $record_id . '/neighborhood');
+        $response = wp_remote_get($url, ['timeout'=>max(self::timeout(),12),'redirection'=>0,'headers'=>['Accept'=>'application/json']]);
+        if (is_wp_error($response)) {
+            return new WP_REST_Response(['schema'=>'sc-library-semantic-neighborhood/1.0','error'=>$response->get_error_message()], 502);
+        }
+        $code=(int) wp_remote_retrieve_response_code($response);
+        $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>'sc-library-semantic-neighborhood/1.0','error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
     }
 
     public function proxy_neural_reranking_readiness(WP_REST_Request $request): WP_REST_Response {

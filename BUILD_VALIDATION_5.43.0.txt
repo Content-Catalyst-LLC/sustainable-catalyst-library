@@ -1,0 +1,13 @@
+=== Knowledge Library v5.43.0 / backend v2.54.0 / Publication Embedding Maps & Semantic Knowledge Landscape validation ===
+PASS: tests/test_publication_embedding_maps_v5430.py: 10 assertions
+PASS: tests/test_neural_reranking_v5420.py: 9 assertions
+PASS: tests/test_semantic_similarity_representation_search_v5410.py: 8 assertions
+PASS: tests/test_scientific_embedding_governance_v5400.py: 6 assertions
+PASS: tests/test_embedding_backfill_timestamp_repair_v54001.py: 2 assertions
+PASS: 35 mandatory Python release assertions
+PASS: v5.43.0 and preserved neural/semantic/embedding JSON schemas parse
+PASS: WordPress PHP lint
+PASS: WordPress JavaScript syntax
+ok  	sustainablecatalyst.com/library/go-ingestion-runtime	(cached)
+INFO: cargo unavailable; production Docker Rust build remains mandatory
+PASS: Knowledge Library v5.43.0 Publication Embedding Maps & Semantic Knowledge Landscape validation complete

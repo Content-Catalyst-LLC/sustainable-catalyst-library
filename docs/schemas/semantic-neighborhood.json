@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/semantic-neighborhood.json",
+  "title": "Sustainable Catalyst Semantic Neighborhood",
+  "type": "object",
+  "required": ["schema", "record_id", "neighbors", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-semantic-neighborhood/1.0"},
+    "record_id": {"type": "string"},
+    "neighbors": {"type": "array", "items": {"type": "object"}},
+    "guardrails": {"type": "object"}
+  },
+  "additionalProperties": true
+}

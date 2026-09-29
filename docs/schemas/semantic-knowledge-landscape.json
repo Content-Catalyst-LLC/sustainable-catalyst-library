@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/semantic-knowledge-landscape.json",
+  "title": "Sustainable Catalyst Semantic Knowledge Landscape Readiness",
+  "type": "object",
+  "required": ["schema", "state", "projection", "same_specification_only", "current_content_only", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-semantic-knowledge-landscape/1.0"},
+    "state": {"type": "string"},
+    "projection": {"const": "sc-library-deterministic-pca-projection/1.0"},
+    "provider_required_to_render_stored_map": {"type": "boolean"},
+    "same_specification_only": {"type": "boolean"},
+    "current_content_only": {"type": "boolean"},
+    "guardrails": {"type": "object"}
+  },
+  "additionalProperties": true
+}

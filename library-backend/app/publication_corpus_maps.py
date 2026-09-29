@@ -16,6 +16,7 @@ from .temporal_knowledge import build_temporal_knowledge_evolution
 from .methodology_intelligence import build_methodology_intelligence
 from .research_gap_novelty import build_research_gap_novelty
 from .semantic import default_embedding_client
+from .publication_embedding_maps import build_publication_embedding_map
 from .settings import settings
 
 CORPUS_KNOWLEDGE_MAP_CONTRACT = "sc-library-publication-corpus-knowledge-map/1.0"
@@ -539,6 +540,7 @@ def build_publication_corpus_knowledge_map(
                     "truncated": False,
                 },
                 "semantic_analysis": semantic_status,
+        "publication_embedding_map": publication_embedding_map,
                 "methodology_intelligence": build_methodology_intelligence([]),
                 "research_gap_novelty": build_research_gap_novelty([]),
                 "boundaries": {
@@ -697,7 +699,7 @@ def build_publication_corpus_knowledge_map(
         if include_semantic_similarity and len(records) >= 2:
             cur.execute(
                 """
-                SELECT e.record_id,e.provider,e.model,e.dimensions,e.embedding
+                SELECT e.record_id,e.provider,e.model,e.dimensions,e.embedding,e.specification_fingerprint,e.representation_id
                   FROM library_record_embeddings e
                   JOIN library_records r ON r.record_id=e.record_id AND r.content_hash=e.content_hash
                  WHERE e.record_id=ANY(%s)
@@ -762,7 +764,7 @@ def build_publication_corpus_knowledge_map(
                 for i in range(len(ids)):
                     for j in range(i + 1, len(ids)):
                         a, b = vectors[ids[i]], vectors[ids[j]]
-                        if a.get("provider") != b.get("provider") or a.get("model") != b.get("model") or a.get("dimensions") != b.get("dimensions"):
+                        if (a.get("provider") != b.get("provider") or a.get("model") != b.get("model") or a.get("dimensions") != b.get("dimensions") or a.get("specification_fingerprint") != b.get("specification_fingerprint")):
                             continue
                         score = _cosine(list(a.get("embedding") or []), list(b.get("embedding") or []))
                         if score >= semantic_threshold:
@@ -770,6 +772,8 @@ def build_publication_corpus_knowledge_map(
                                 edges, ids[i], ids[j], "embedding-cosine-similarity", directed=False,
                                 weight=score, similarity=round(score, 6), analytical=True,
                                 truth_assertion=False, provider=a.get("provider"), model=a.get("model"),
+                                specification_fingerprint=a.get("specification_fingerprint"),
+                                source_representation_id=a.get("representation_id"), target_representation_id=b.get("representation_id"),
                             )
 
     # v5.23.0: reviewed findings/claims become source-bound analytical overlay nodes.
@@ -973,6 +977,11 @@ def build_publication_corpus_knowledge_map(
     _refs = sorted([{"record_id": str(n.get("id") or ""), "content_hash": str(n.get("source_content_hash") or "")} for n in node_items if n.get("kind") == "publication"], key=lambda x: x["record_id"])
     _corpus_fingerprint = hashlib.sha256(json.dumps(_refs, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
     research_graph = build_research_graph_manifest({"nodes": node_items, "edges": edge_items})
+    publication_embedding_map = build_publication_embedding_map(
+        source_key=source_key, object_type=object_type, record_ids=list(records),
+        similarity_threshold=semantic_threshold, neighbors_per_point=8, max_edges=1200,
+        max_publications=max_publications,
+    )
 
     return {
         "schema": CORPUS_KNOWLEDGE_MAP_CONTRACT,
@@ -1030,6 +1039,7 @@ def build_publication_corpus_knowledge_map(
             {"key": "topic-graph", "label": "Topic Graph", "purpose": "Measured topic co-occurrence across the publication corpus"},
             {"key": "citation-overlay", "label": "Citation Overlay", "purpose": "Explicit citation structure within the selected corpus"},
             {"key": "semantic-overlay", "label": "Semantic Overlay", "purpose": "Publication similarity from current stored embeddings only"},
+            {"key": "semantic-embedding-map", "label": "Embedding Map", "purpose": "Deterministic 2D projection of same-specification current publication representations with traceable semantic neighborhoods"},
             {"key": "relationship-matrix", "label": "Relationship Matrix", "purpose": "Pairwise analytical relationship inspection"},
             {"key": "topic-regions", "label": "Topic Regions", "purpose": "Corpus-scale topic regions from repeated measured co-occurrence"},
             {"key": "temporal-dynamics", "label": "Temporal Dynamics", "purpose": "Publication and topic evolution through time"},
@@ -1057,7 +1067,7 @@ def build_publication_corpus_knowledge_map(
             "layout": "force-directed-multilayer-with-regions-and-time",
             "node_channels": ["kind", "weighted_degree", "publication_count", "source_type"],
             "edge_channels": ["relationship_basis", "weight", "directed", "evidence_count"],
-            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens", "inspect-methodology-profile", "compare-methodologies", "filter-study-design", "inspect-gap-candidate", "inspect-novelty-candidate", "filter-gap-kind", "inspect-review-protocol", "inspect-screening-decision", "compare-review-snapshots", "inspect-living-update-candidate", "compare-living-review-snapshots", "inspect-explicit-change-event", "native-neighborhood-query", "native-reachability-query", "native-component-analysis", "native-subgraph-extraction", "native-structural-stats", "build-research-corpus", "inspect-corpus-manifest", "export-corpus-dataset", "inspect-row-provenance", "inspect-runtime-environment", "inspect-execution-lineage", "verify-runtime-replay", "compare-runtime-output"],
+            "interactions": ["zoom", "pan", "select", "filter", "focus", "inspect-source", "toggle-layer", "drill-to-publication", "cluster-focus", "time-filter", "linked-view-selection", "relationship-matrix-inspection", "orbit-terrain", "select-elevation-metric", "play-time", "scrub-time", "visual-query", "cross-filter", "cross-highlight", "isolate-selection", "matrix-cell-select", "terrain-peak-select", "region-select", "embedding-map-select", "semantic-neighborhood-inspect", "portable-query-state", "research-graph-query", "evidence-pathfind", "highlight-path", "inspect-scientific-object", "trace-document-reference", "inspect-source-identity", "review-duplicate-candidate", "inspect-entity-identity", "inspect-temporal-event", "snapshot-as-of-date", "compare-temporal-snapshots", "switch-temporal-lens", "inspect-methodology-profile", "compare-methodologies", "filter-study-design", "inspect-gap-candidate", "inspect-novelty-candidate", "filter-gap-kind", "inspect-review-protocol", "inspect-screening-decision", "compare-review-snapshots", "inspect-living-update-candidate", "compare-living-review-snapshots", "inspect-explicit-change-event", "native-neighborhood-query", "native-reachability-query", "native-component-analysis", "native-subgraph-extraction", "native-structural-stats", "build-research-corpus", "inspect-corpus-manifest", "export-corpus-dataset", "inspect-row-provenance", "inspect-runtime-environment", "inspect-execution-lineage", "verify-runtime-replay", "compare-runtime-output"],
             "core_visual_runtime_targets": [
                 "/v1/visual-runtime/unified",
                 "/v1/visual-runtime/grammar",
@@ -1076,6 +1086,8 @@ def build_publication_corpus_knowledge_map(
                 "publication-topic-cooccurrence",
                 "source-span-cooccurrence",
                 "stored-embedding-cosine-similarity-if-available",
+                "same-specification-publication-embedding-map",
+                "deterministic-centered-pca-projection",
                 "cross-publication-topic-jaccard",
                 "deterministic-topic-regions",
                 "living-review-snapshot-comparison",

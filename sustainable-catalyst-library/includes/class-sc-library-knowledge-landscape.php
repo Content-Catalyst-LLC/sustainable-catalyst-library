@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) { exit; }
 
 /**
- * v5.39.0.1 — Knowledge Landscape Desktop Layout & Semantic Availability Repair.
+ * v5.43.0 — Publication Embedding Maps & Semantic Knowledge Landscape.
  *
  * Renders an interactive analytical graph from the Library Python backend.
  * Relationships remain typed by their actual basis: citation, reviewed concept
  * association, source-span co-occurrence, or real stored-embedding similarity.
  */
 final class SC_Library_Knowledge_Landscape {
-    public const VERSION = '5.39.0.1';
+    public const VERSION = '5.43.0';
     public const SHORTCODE = 'sc_library_knowledge_landscape';
 
     public function register_hooks(): void {
@@ -94,6 +94,7 @@ final class SC_Library_Knowledge_Landscape {
                 'topic_regions' => [],
                 'temporal_dynamics' => ['years' => []],
                 'knowledge_terrain_4d' => ['topic_anchors' => []],
+                'publication_embedding_map' => ['available' => false, 'points' => [], 'edges' => [], 'neighborhoods' => []],
             ];
             $async_config = [
                 'endpoint' => esc_url_raw(rest_url(SC_Library_Python_Backend::REST_NAMESPACE . '/backend/publication-corpus-knowledge-map')),
@@ -146,6 +147,7 @@ final class SC_Library_Knowledge_Landscape {
                 <button type="button" data-sc-kl-view="temporal-dynamics"><?php esc_html_e('Temporal Dynamics', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="relationship-matrix"><?php esc_html_e('Relationship Matrix', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="semantic-overlay" aria-describedby="<?php echo esc_attr($id); ?>-semantic-notice"><?php esc_html_e('Semantic Overlay', 'sustainable-catalyst-library'); ?></button>
+                <button type="button" data-sc-kl-view="semantic-embedding-map" aria-describedby="<?php echo esc_attr($id); ?>-semantic-notice"><?php esc_html_e('Embedding Map', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="findings-claims"><?php esc_html_e('Findings & Claims', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="contradiction-overlay"><?php esc_html_e('Contradictions', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="evidence-synthesis"><?php esc_html_e('Evidence Synthesis', 'sustainable-catalyst-library'); ?></button>

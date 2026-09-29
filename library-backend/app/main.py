@@ -41,6 +41,9 @@ from .publication_visualizations import (
 )
 from .publication_knowledge_maps import build_publication_knowledge_map, knowledge_map_readiness
 from .publication_corpus_maps import build_publication_corpus_knowledge_map
+from .publication_embedding_maps import (
+    build_publication_embedding_map, embedding_map_readiness, semantic_neighborhood,
+)
 from .visual_research_sessions import build_visual_research_session_package
 from .visual_evidence_trace import build_visual_evidence_trace
 from .research_graph_pathfinding import find_research_paths, query_research_graph
@@ -335,6 +338,15 @@ def health() -> dict[str, Any]:
             "publication_knowledge_map_workspace_portable": True,
             "publication_corpus_integration": True,
             "multi_publication_knowledge_landscape": True,
+            "publication_embedding_maps": True,
+            "publication_embedding_map_deterministic_pca": True,
+            "publication_embedding_map_same_specification_only": True,
+            "publication_embedding_map_current_content_only": True,
+            "publication_semantic_neighborhoods": True,
+            "publication_embedding_map_provider_required_to_render_stored_map": False,
+            "publication_embedding_map_proximity_is_evidence": False,
+            "publication_embedding_map_proximity_is_truth": False,
+            "publication_embedding_map_proximity_is_causality": False,
             "publication_topic_regions": True,
             "publication_temporal_dynamics": True,
             "publication_relationship_matrix": True,
@@ -2508,6 +2520,39 @@ def _publication_corpus_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+@app.get("/v1/publication-embedding-maps/readiness")
+def publication_embedding_maps_readiness() -> dict[str, Any]:
+    return embedding_map_readiness()
+
+
+@app.post("/v1/publication-embedding-maps/map")
+def publication_embedding_maps_build(payload: dict[str, Any]) -> dict[str, Any]:
+    raw_ids = payload.get("record_ids") or []
+    if isinstance(raw_ids, str):
+        record_ids = [x.strip() for x in raw_ids.split(",") if x.strip()]
+    elif isinstance(raw_ids, list):
+        record_ids = [str(x).strip() for x in raw_ids if str(x).strip()]
+    else:
+        record_ids = []
+    return build_publication_embedding_map(
+        source_key=str(payload.get("source_key") or "wordpress-main"),
+        object_type=str(payload.get("object_type") or ""),
+        record_ids=record_ids[:1000],
+        similarity_threshold=float(payload.get("similarity_threshold", 0.72)),
+        neighbors_per_point=int(payload.get("neighbors_per_point", 8)),
+        max_edges=int(payload.get("max_edges", 1200)),
+        max_publications=int(payload.get("max_publications", 250)),
+    )
+
+
+@app.get("/v1/publication-embedding-maps/{record_id}/neighborhood")
+def publication_embedding_neighborhood(record_id: str, limit: int = 12, min_similarity: float = 0.0) -> dict[str, Any]:
+    try:
+        return semantic_neighborhood(record_id, limit=limit, min_similarity=min_similarity)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
 @app.post("/v1/retrieval-evaluation/evaluate")
 def retrieval_evaluation_evaluate(payload: dict[str, Any]) -> dict[str, Any]:
     return evaluate_retrieval(payload)
@@ -3099,6 +3144,10 @@ def search_readiness() -> dict[str, Any]:
         "neural_reranking_contract": "sc-library-neural-reranking/1.0",
         "neural_reranking_evaluation_contract": "sc-library-neural-reranking-evaluation/1.0",
         "neural_reranking_guardrail": "provider-relevance-score-is-not-probability-evidence-or-truth-and-result-set-is-preserved",
+        "publication_embedding_maps": embedding_map_readiness(),
+        "publication_embedding_map_contract": "sc-library-publication-embedding-map/1.0",
+        "semantic_knowledge_landscape_contract": "sc-library-semantic-knowledge-landscape/1.0",
+        "publication_embedding_map_guardrail": "projection-and-proximity-are-analytical-signals-not-evidence-truth-or-causality",
         "temporal_knowledge_evolution": True,
         "temporal_snapshot_guardrail": "historical-availability-is-distinct-from-retrospective-status",
         "methodology_intelligence": True,
