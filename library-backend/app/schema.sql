@@ -462,3 +462,73 @@ CREATE INDEX IF NOT EXISTS library_publication_visualizations_review_idx
     ON library_publication_visualizations(review_state,updated_at DESC);
 CREATE INDEX IF NOT EXISTS library_publication_visualizations_core_idx
     ON library_publication_visualizations(core_outbox_event_id) WHERE core_outbox_event_id IS NOT NULL;
+
+-- v2.56.0 — Original-Language Corpus Ingestion & Preservation.
+-- Exact source bytes/text remain immutable preservation artifacts. Any normalized
+-- representation is stored separately with explicit transformation lineage.
+CREATE TABLE IF NOT EXISTS library_original_language_captures (
+    capture_id text PRIMARY KEY,
+    capture_fingerprint char(64) NOT NULL UNIQUE,
+    record_id text,
+    source_id text,
+    source_record_id text,
+    source_uri text,
+    language_bcp47 text NOT NULL,
+    script_iso15924 varchar(4),
+    language_variant text,
+    orthography_variant text,
+    media_type text NOT NULL DEFAULT 'text/plain',
+    charset text NOT NULL DEFAULT 'utf-8',
+    raw_payload bytea NOT NULL,
+    raw_payload_sha256 char(64) NOT NULL,
+    raw_text text NOT NULL,
+    raw_text_sha256 char(64) NOT NULL,
+    source_metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    retrieved_at timestamptz NOT NULL DEFAULT now(),
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_original_language_capture_record_idx ON library_original_language_captures(record_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS library_original_language_capture_source_idx ON library_original_language_captures(source_id, source_record_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS library_original_language_capture_language_idx ON library_original_language_captures(language_bcp47, script_iso15924, created_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS library_original_language_capture_payload_uidx ON library_original_language_captures(raw_payload_sha256, source_id, source_record_id);
+
+CREATE TABLE IF NOT EXISTS library_text_representations (
+    representation_id text PRIMARY KEY,
+    capture_id text NOT NULL REFERENCES library_original_language_captures(capture_id) ON DELETE RESTRICT,
+    representation_kind text NOT NULL CHECK (representation_kind IN ('original','unicode-normalized','transliteration','translation','ocr','htr','transcription','editorial-normalization')),
+    language_bcp47 text NOT NULL,
+    script_iso15924 varchar(4),
+    language_variant text,
+    orthography_variant text,
+    text_content text NOT NULL,
+    text_sha256 char(64) NOT NULL,
+    canonical_original boolean NOT NULL DEFAULT false,
+    derived boolean NOT NULL DEFAULT true,
+    normalization_form varchar(4),
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (NOT canonical_original OR (representation_kind='original' AND derived=false)),
+    CHECK (representation_kind<>'original' OR canonical_original=true)
+);
+CREATE INDEX IF NOT EXISTS library_text_representations_capture_idx ON library_text_representations(capture_id, created_at ASC);
+CREATE INDEX IF NOT EXISTS library_text_representations_language_idx ON library_text_representations(language_bcp47, script_iso15924, representation_kind);
+CREATE UNIQUE INDEX IF NOT EXISTS library_text_representations_original_uidx ON library_text_representations(capture_id) WHERE canonical_original=true;
+
+CREATE TABLE IF NOT EXISTS library_text_transformations (
+    transformation_id text PRIMARY KEY,
+    capture_id text NOT NULL REFERENCES library_original_language_captures(capture_id) ON DELETE RESTRICT,
+    input_representation_id text NOT NULL REFERENCES library_text_representations(representation_id) ON DELETE RESTRICT,
+    output_representation_id text NOT NULL REFERENCES library_text_representations(representation_id) ON DELETE RESTRICT,
+    operation text NOT NULL,
+    parameters jsonb NOT NULL DEFAULT '{}'::jsonb,
+    automatic boolean NOT NULL DEFAULT false,
+    lossless_claim boolean NOT NULL DEFAULT false,
+    translation boolean NOT NULL DEFAULT false,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (input_representation_id<>output_representation_id)
+);
+CREATE INDEX IF NOT EXISTS library_text_transformations_capture_idx ON library_text_transformations(capture_id, created_at ASC);
+CREATE INDEX IF NOT EXISTS library_text_transformations_input_idx ON library_text_transformations(input_representation_id, created_at ASC);
+CREATE INDEX IF NOT EXISTS library_text_transformations_output_idx ON library_text_transformations(output_representation_id, created_at ASC);

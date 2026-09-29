@@ -8,12 +8,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.44.0
+Stable tag: 5.45.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
+
+Sustainable Catalyst Library v5.45.0 adds Original-Language Corpus Ingestion & Preservation: exact source-byte and decoded-text capture, BCP 47 language identity, ISO 15924 script identity, language/orthography variants, SHA-256 preservation fingerprints, canonical original representations, and explicit derived Unicode-normalization lineage. Translation remains a separate derived representation and never replaces the original source.
 
 Sustainable Catalyst Library v5.44.0 adds the Global Source Federation Registry & Connector Contracts: a canonical registry of institutions, research sources, collections, and connector execution contracts that reuses existing scholarly, institutional, biomedical, regulatory, browser-handoff, and v4.8 federation infrastructure. Registry membership or connector health does not imply source quality, evidence truth, endorsement, partnership, or automatic import/promotion.
 
@@ -408,6 +410,14 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= 5.45.0 =
+* Added Original-Language Corpus Ingestion & Preservation with byte-exact source payload storage and decoded original text preservation.
+* Added BCP 47 language, ISO 15924 script, language-variant, and orthography-variant identity with deterministic capture and representation IDs.
+* Added canonical original-text representations plus separately stored Unicode-normalized derivatives and transformation lineage.
+* Added backend v2.56.0 readiness, validation, package, signed capture-ingestion, and signed capture-retrieval endpoints.
+* Added original-language fields to Research Corpus Builder exports and a WordPress readiness/status surface.
+* Translation, transliteration, OCR/HTR, and transcription do not silently replace original-language content; automatic translation/evidence/truth/Core promotion remain disabled.
 
 = 5.44.0 =
 * Added Global Source Federation Registry & Connector Contracts with stable institution, source, collection, and connector identities.

@@ -1,0 +1,60 @@
+SUSTAINABLE CATALYST KNOWLEDGE LIBRARY v5.45.0
+Original-Language Corpus Ingestion & Preservation
+Backend: v2.56.0
+
+IMPORTANT
+- Preserve Git lineage: v5.44.0 should be committed/tagged before v5.45.0.
+- Deploy backend v2.55.0 before v2.56.0 if v5.44 has not yet been deployed.
+- The v5.45 deployment does not ingest a sample source, translate content, or queue embeddings.
+
+1) MAC — UNPACK RELEASE
+
+cd ~/Downloads
+rm -rf "$HOME/Downloads/sc-library-v5.45.0-release"
+unzip -q \
+  "$HOME/Downloads/sustainable-catalyst-library-v5.45.0-release-bundle.zip" \
+  -d "$HOME/Downloads/sc-library-v5.45.0-release"
+cd "$HOME/Downloads/sc-library-v5.45.0-release"
+
+2) MAC — VALIDATE / COMMIT / PUSH / TAG
+
+chmod +x install_and_push_sustainable_catalyst_library_v5_45_0_macos.sh
+./install_and_push_sustainable_catalyst_library_v5_45_0_macos.sh \
+  "$HOME/Downloads/sustainable-catalyst-library"
+
+Expected tag: v5.45.0
+
+3) MAC — COPY BACKEND TO CONTABO
+
+cd ~/Downloads/sc-library-v5.45.0-release
+scp -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+  sustainable-catalyst-library-backend-v2.56.0.zip \
+  upgrade_library_backend_v2_56_0_contabo.sh \
+  catalystadmin@94.72.113.77:/tmp/
+
+ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+  catalystadmin@94.72.113.77
+
+4) CONTABO — DEPLOY BACKEND
+
+cd /tmp
+chmod +x upgrade_library_backend_v2_56_0_contabo.sh
+sudo ./upgrade_library_backend_v2_56_0_contabo.sh \
+  /tmp/sustainable-catalyst-library-backend-v2.56.0.zip
+
+Expected final line:
+PASS: Library backend v2.56.0 Original-Language Corpus Ingestion & Preservation deployed and verified.
+
+5) WORDPRESS
+
+Install/upgrade using:
+sustainable-catalyst-library-v5.45.0-wordpress.zip
+
+6) OPTIONAL READ-ONLY CHECKS
+
+curl -s http://127.0.0.1:8087/health | python3 -m json.tool
+curl -s http://127.0.0.1:8087/v1/original-language-corpus/readiness | python3 -m json.tool
+curl -s http://127.0.0.1:8087/v1/global-source-federation/readiness | python3 -m json.tool
+curl -s http://127.0.0.1:8087/v1/runtime/research/status | python3 -m json.tool
+
+Do not manually insert test captures into production merely to verify the release. The deployment verifier checks schemas and non-persisting package generation.

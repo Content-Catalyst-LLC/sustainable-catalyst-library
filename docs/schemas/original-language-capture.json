@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/original-language-capture.json",
+  "title": "Original Language Capture",
+  "type": "object",
+  "required": ["schema", "capture_id", "capture_fingerprint_sha256", "language_bcp47", "raw_payload_sha256", "raw_text_sha256", "representations", "transformations", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-original-language-capture/1.0"},
+    "capture_id": {"type": "string", "pattern": "^olc:[0-9a-f]{32}$"},
+    "capture_fingerprint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "record_id": {"type": ["string", "null"]},
+    "source_id": {"type": ["string", "null"]},
+    "source_record_id": {"type": ["string", "null"]},
+    "source_uri": {"type": ["string", "null"]},
+    "language_bcp47": {"type": "string", "minLength": 2},
+    "script_iso15924": {"type": ["string", "null"], "pattern": "^[A-Z][a-z]{3}$"},
+    "language_variant": {"type": ["string", "null"]},
+    "orthography_variant": {"type": ["string", "null"]},
+    "media_type": {"type": "string"},
+    "charset": {"type": "string"},
+    "raw_payload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "raw_text_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "raw_byte_length": {"type": "integer", "minimum": 0},
+    "raw_character_length": {"type": "integer", "minimum": 0},
+    "representations": {"type": "array", "minItems": 1, "items": {"$ref": "text-representation.json"}},
+    "transformations": {"type": "array", "items": {"$ref": "text-transformation.json"}},
+    "guardrails": {"type": "object"}
+  },
+  "additionalProperties": true
+}

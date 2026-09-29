@@ -86,6 +86,16 @@ from .settings import settings
 from .operations import integrity_audit, operations_status, prune_records
 from .institutional_sources import InstitutionalSourceError, build_registry
 from .global_source_federation import registry as global_source_federation_registry
+from .original_language_corpus import (
+    CAPTURE_CONTRACT as ORIGINAL_LANGUAGE_CAPTURE_CONTRACT,
+    CORPUS_CONTRACT as ORIGINAL_LANGUAGE_CORPUS_CONTRACT,
+    READINESS_CONTRACT as ORIGINAL_LANGUAGE_READINESS_CONTRACT,
+    build_capture_package,
+    get_capture as get_original_language_capture,
+    ingest_capture as ingest_original_language_capture,
+    readiness as original_language_corpus_readiness,
+    validate_capture_payload,
+)
 from .biomedical_sources import BiomedicalSourceError, build_biomedical_registry
 from .fda_regulatory import FDARegulatoryError, build_fda_regulatory_registry
 from .medical_terminology import MedicalTerminologyError, MedicalTerminologyResolver, WHOICD11Connector
@@ -324,6 +334,18 @@ def health() -> dict[str, Any]:
             "global_source_automatic_platform_core_promotion": False,
             "global_source_original_language_preserved_as_received": True,
             "global_source_automatic_translation": False,
+            "original_language_corpus_ingestion": True,
+            "original_language_raw_payload_preservation": True,
+            "original_language_raw_text_preservation": True,
+            "original_language_sha256_content_addressing": True,
+            "original_language_script_variant_identity": True,
+            "original_language_unicode_normalization_is_derived": True,
+            "original_language_translation_is_derived": True,
+            "original_language_normalized_text_replaces_original": False,
+            "original_language_automatic_translation": False,
+            "original_language_automatic_evidence_promotion": False,
+            "original_language_automatic_truth_promotion": False,
+            "original_language_automatic_platform_core_promotion": False,
             "core_aware_search_results": True,
             "citation_graph": True,
             "citation_exact_identifier_resolution": True,
@@ -2152,6 +2174,61 @@ def global_source_federation_connector(connector_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="global source connector not found") from exc
 
 
+@app.get("/v1/original-language-corpus/readiness")
+def original_language_corpus_readiness_endpoint() -> dict[str, Any]:
+    return original_language_corpus_readiness()
+
+
+@app.post("/v1/original-language-corpus/validate")
+def original_language_corpus_validate(payload: dict[str, Any]) -> dict[str, Any]:
+    return validate_capture_payload(payload)
+
+
+@app.post("/v1/original-language-corpus/package")
+def original_language_corpus_package(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        package = build_capture_package(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    for key in ("_raw_bytes", "_raw_text", "_normalized_text", "_source_metadata", "_provenance"):
+        package.pop(key, None)
+    package["persisted"] = False
+    return package
+
+
+@app.post("/v1/admin/original-language-corpus/captures")
+async def original_language_corpus_ingest(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8")) if body else {}
+        if not isinstance(payload, dict):
+            raise ValueError("capture payload must be an object")
+        return ingest_original_language_capture(payload)
+    except (ValueError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/admin/original-language-corpus/captures/{capture_id}")
+async def original_language_corpus_capture(
+    capture_id: str,
+    request: Request,
+    include_text: bool = Query(default=False),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return get_original_language_capture(capture_id, include_text=include_text)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="original-language capture not found") from exc
+
+
 @app.get("/v1/institutional-research-network")
 def institutional_research_network_manifest() -> dict[str, Any]:
     return institutional_research_network.manifest()
@@ -3212,6 +3289,10 @@ def search_readiness() -> dict[str, Any]:
         "global_source_federation_contract": "sc-library-global-source-federation-registry/1.0",
         "global_source_connector_contract": "sc-library-global-source-connector-contract/1.0",
         "global_source_federation_guardrail": "registry-membership-and-connector-health-do-not-imply-source-quality-evidence-truth-endorsement-or-partnership",
+        "original_language_corpus": original_language_corpus_readiness(),
+        "original_language_corpus_contract": ORIGINAL_LANGUAGE_CORPUS_CONTRACT,
+        "original_language_capture_contract": ORIGINAL_LANGUAGE_CAPTURE_CONTRACT,
+        "original_language_corpus_guardrail": "original-source-bytes-and-text-remain-canonical-and-translation-normalization-are-derived-representations",
         "temporal_knowledge_evolution": True,
         "temporal_snapshot_guardrail": "historical-availability-is-distinct-from-retrospective-status",
         "methodology_intelligence": True,

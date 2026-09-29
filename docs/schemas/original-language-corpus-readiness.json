@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/original-language-corpus-readiness.json",
+  "title": "Original Language Corpus Readiness",
+  "type": "object",
+  "required": ["schema", "contract", "version", "state", "counts", "preservation", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-original-language-corpus-readiness/1.0"},
+    "contract": {"const": "sc-library-original-language-corpus/1.0"},
+    "version": {"const": "5.45.0"},
+    "state": {"enum": ["ready", "schema-unavailable"]},
+    "counts": {"type": "object"},
+    "preservation": {"type": "object"},
+    "guardrails": {"type": "object"}
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/text-transformation.json",
+  "title": "Text Transformation",
+  "type": "object",
+  "required": ["schema", "transformation_id", "capture_id", "input_representation_id", "output_representation_id", "operation", "parameters", "automatic", "lossless_claim", "translation"],
+  "properties": {
+    "schema": {"const": "sc-library-text-transformation/1.0"},
+    "transformation_id": {"type": "string", "pattern": "^textxfm:[0-9a-f]{32}$"},
+    "capture_id": {"type": "string"},
+    "input_representation_id": {"type": "string"},
+    "output_representation_id": {"type": "string"},
+    "operation": {"type": "string"},
+    "parameters": {"type": "object"},
+    "automatic": {"type": "boolean"},
+    "lossless_claim": {"type": "boolean"},
+    "translation": {"type": "boolean"}
+  },
+  "additionalProperties": true
+}

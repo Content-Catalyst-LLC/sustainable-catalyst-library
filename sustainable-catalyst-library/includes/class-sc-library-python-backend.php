@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) { exit; }
  * v5.16.0 adds publication visualization readiness and public Research Library delivery for reviewed renderer-neutral specs.
  * v5.18.0 adds multi-publication analytical structures while preserving canonical Publications manifest scoping and the hardened corpus deployment validator.
  * v5.28.0 adds stateless retrieval evaluation, bounded adaptive-ranking profiles, and transparent reranking/search proxies.
- * v5.44.0 exposes the Global Source Federation Registry and governed connector-contract surfaces from backend v2.55.0.
+ * v5.45.0 exposes Original-Language Corpus preservation surfaces while retaining the v5.44 Global Source Federation Registry from backend v2.56.0.
  */
 final class SC_Library_Python_Backend {
     public const VERSION = '5.6.0.35';
@@ -526,6 +526,21 @@ final class SC_Library_Python_Backend {
             'methods' => WP_REST_Server::CREATABLE,
             'permission_callback' => static function () { return current_user_can('manage_options'); },
             'callback' => [$this, 'proxy_global_source_federation_validate_connector'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/original-language-corpus/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_original_language_corpus_readiness'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/original-language-corpus/validate', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => [$this, 'proxy_original_language_corpus_validate'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/original-language-corpus/package', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => [$this, 'proxy_original_language_corpus_package'],
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-embedding-maps/readiness', [
             'methods' => WP_REST_Server::READABLE,
@@ -1411,6 +1426,19 @@ final class SC_Library_Python_Backend {
 
     public function proxy_global_source_federation_validate_connector(WP_REST_Request $request): WP_REST_Response {
         return $this->proxy_retrieval_post($request, '/v1/global-source-federation/connectors/validate', 'sc-library-global-source-connector-validation/1.0');
+    }
+
+    public function proxy_original_language_corpus_readiness(WP_REST_Request $request): WP_REST_Response {
+        unset($request);
+        return $this->proxy_global_source_federation_get('/v1/original-language-corpus/readiness', [], 'sc-library-original-language-corpus-readiness/1.0');
+    }
+
+    public function proxy_original_language_corpus_validate(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/original-language-corpus/validate', 'sc-library-original-language-validation/1.0');
+    }
+
+    public function proxy_original_language_corpus_package(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/original-language-corpus/package', 'sc-library-original-language-capture/1.0');
     }
 
     public function proxy_publication_embedding_maps_readiness(WP_REST_Request $request): WP_REST_Response {

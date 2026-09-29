@@ -92,6 +92,12 @@ def _normalize_record(record: dict[str, Any]) -> dict[str, Any]:
         "source_version": _clean(record.get("source_version") or record.get("version")) or None,
         "source_hash": _clean(record.get("source_hash") or record.get("content_hash") or record.get("sha256")) or None,
         "source_locator": _dict(record.get("source_locator")) or None,
+        "original_language": _clean(record.get("original_language") or record.get("language_bcp47") or record.get("language")) or None,
+        "script_iso15924": _clean(record.get("script_iso15924")) or None,
+        "language_variant": _clean(record.get("language_variant")) or None,
+        "orthography_variant": _clean(record.get("orthography_variant")) or None,
+        "original_language_capture_id": _clean(record.get("original_language_capture_id")) or None,
+        "original_language_representation_id": _clean(record.get("original_language_representation_id")) or None,
         "metadata": _dict(record.get("metadata")) or None,
     }
     normalized["record_fingerprint_sha256"] = _stable_hash({k: v for k, v in normalized.items() if k != "record_fingerprint_sha256"})
@@ -185,7 +191,11 @@ def _resolve_fields(fields: Any) -> list[str]:
     requested = _string_list(fields)
     if not requested:
         return list(DEFAULT_FIELDS)
-    allowed = set(DEFAULT_FIELDS + ["source_key", "source_version", "source_hash", "source_locator", "metadata", "record_fingerprint_sha256"])
+    allowed = set(DEFAULT_FIELDS + [
+        "source_key", "source_version", "source_hash", "source_locator", "metadata", "record_fingerprint_sha256",
+        "original_language", "script_iso15924", "language_variant", "orthography_variant",
+        "original_language_capture_id", "original_language_representation_id",
+    ])
     unknown = [f for f in requested if f not in allowed]
     if unknown:
         raise ValueError("unsupported dataset fields: " + ", ".join(unknown))
