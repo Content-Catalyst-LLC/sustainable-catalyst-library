@@ -3,7 +3,7 @@
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
  * Description: Sustainable Catalyst Library v5.47.0 adds Linguistic Corpus Objects, Concordance & KWIC: reproducible corpus/document/token objects, character offsets, source-representation lineage, deterministic concordance and KWIC windows, and frequency analysis without silently inferring morphology, syntax, meaning, or truth.
- * Version: 5.47.0
+ * Version: 5.48.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.47.0');
+define('SC_LIBRARY_VERSION', '5.48.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
@@ -82,6 +82,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-global-source-federatio
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-original-language-corpus.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-ocr-htr-transcription-lineage.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-linguistic-corpus.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-language-resolution.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-fda-regulatory-intelligence.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-medical-terminology.php';
@@ -170,6 +171,7 @@ final class SC_Library_Plugin {
         $original_language_corpus = new SC_Library_Original_Language_Corpus();
         $ocr_htr_transcription_lineage = new SC_Library_OCR_HTR_Transcription_Lineage();
         $linguistic_corpus = new SC_Library_Linguistic_Corpus();
+        $cross_language_resolution = new SC_Library_Cross_Language_Resolution();
         $biomedical_evidence = new SC_Library_Biomedical_Evidence();
         $fda_regulatory_intelligence = new SC_Library_FDA_Regulatory_Intelligence();
         $medical_terminology = new SC_Library_Medical_Terminology();
@@ -264,6 +266,7 @@ final class SC_Library_Plugin {
         $original_language_corpus->register_hooks();
         $ocr_htr_transcription_lineage->register_hooks();
         $linguistic_corpus->register_hooks();
+        $cross_language_resolution->register_hooks();
         $biomedical_evidence->register_hooks();
         $fda_regulatory_intelligence->register_hooks();
         $medical_terminology->register_hooks();

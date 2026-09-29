@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cross-Language Resolution Readiness",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "state",
+    "counts",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-cross-language-resolution-readiness/1.0"
+    },
+    "version": {
+      "const": "5.48.0"
+    },
+    "state": {
+      "type": "string"
+    },
+    "counts": {
+      "type": "object"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

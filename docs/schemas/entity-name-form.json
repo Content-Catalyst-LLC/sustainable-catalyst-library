@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Entity Name Form",
+  "type": "object",
+  "required": [
+    "schema",
+    "form_id",
+    "entity_id",
+    "text",
+    "normalized_key",
+    "relation_type"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-entity-name-form/1.0"
+    },
+    "form_id": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    },
+    "relation_type": {
+      "type": "string"
+    },
+    "valid_from_year": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "valid_to_year": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  }
+}

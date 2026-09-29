@@ -106,6 +106,22 @@ from .ocr_htr_transcription_lineage import (
     readiness as ocr_htr_transcription_readiness,
     validate_derivation_payload,
 )
+from .cross_language_resolution import (
+    AUTHORITY_CONTRACT as CROSS_LANGUAGE_AUTHORITY_CONTRACT,
+    CASE_CONTRACT as ENTITY_RESOLUTION_CASE_CONTRACT,
+    DECISION_CONTRACT as ENTITY_RESOLUTION_DECISION_CONTRACT,
+    READINESS_CONTRACT as CROSS_LANGUAGE_RESOLUTION_READINESS_CONTRACT,
+    build_authority_package as build_cross_language_authority_package,
+    build_resolution_case,
+    generate_candidates as generate_entity_resolution_candidates,
+    get_resolution_case,
+    ingest_authority_registry,
+    ingest_resolution_case,
+    ingest_resolution_decision,
+    readiness as cross_language_resolution_readiness,
+    validate_authority_payload as validate_cross_language_authority_payload,
+    validate_decision_payload,
+)
 from .linguistic_corpus import (
     CORPUS_CONTRACT as LINGUISTIC_CORPUS_CONTRACT,
     CONCORDANCE_CONTRACT as CONCORDANCE_QUERY_CONTRACT,
@@ -396,6 +412,13 @@ def health() -> dict[str, Any]:
             "linguistic_automatic_evidence_promotion": False,
             "linguistic_automatic_truth_promotion": False,
             "linguistic_automatic_platform_core_promotion": False,
+            "cross_language_entity_resolution": True,
+            "cross_language_name_forms": True,
+            "historical_toponym_validity_windows": True,
+            "explicit_transliteration_forms": True,
+            "entity_resolution_ambiguity_preserved": True,
+            "entity_resolution_automatic_merge": False,
+            "entity_resolution_automatic_truth_promotion": False,
             "core_aware_search_results": True,
             "citation_graph": True,
             "citation_exact_identifier_resolution": True,
@@ -2445,6 +2468,97 @@ async def linguistic_corpus_persisted_kwic(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
+
+@app.get("/v1/cross-language-resolution/readiness")
+def cross_language_resolution_readiness_endpoint() -> dict[str, Any]:
+    return cross_language_resolution_readiness()
+
+
+@app.post("/v1/cross-language-resolution/validate-authority")
+def cross_language_resolution_validate_authority(payload: dict[str, Any]) -> dict[str, Any]:
+    return validate_cross_language_authority_payload(payload)
+
+
+@app.post("/v1/cross-language-resolution/candidates")
+def cross_language_resolution_candidates(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        authority_payload = payload.get("authority") or {}
+        query = payload.get("query") or {}
+        limit = int(payload.get("limit", 25))
+        authority = build_cross_language_authority_package(authority_payload)
+        return generate_entity_resolution_candidates(authority, query, limit=limit)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/cross-language-resolution/case")
+def cross_language_resolution_case(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return build_resolution_case(payload.get("authority") or {}, payload.get("query") or {}, limit=int(payload.get("limit",25)))
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/cross-language-authorities")
+async def cross_language_authority_ingest(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8")) if body else {}
+        if not isinstance(payload, dict): raise ValueError("authority payload must be an object")
+        return ingest_authority_registry(payload)
+    except (ValueError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/cross-language-resolution-cases")
+async def cross_language_resolution_case_ingest(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8")) if body else {}
+        return ingest_resolution_case(payload.get("query") or payload, limit=int(payload.get("limit",25)))
+    except (ValueError, TypeError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/admin/cross-language-resolution-cases/{case_id:path}")
+async def cross_language_resolution_case_get(
+    case_id: str,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try: return get_resolution_case(case_id)
+    except KeyError as exc: raise HTTPException(status_code=404, detail="resolution case not found") from exc
+
+
+@app.post("/v1/admin/cross-language-resolution-cases/{case_id:path}/decision")
+async def cross_language_resolution_decision_ingest(
+    case_id: str,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8")) if body else {}
+        return ingest_resolution_decision(case_id, payload)
+    except KeyError as exc: raise HTTPException(status_code=404, detail="resolution case not found") from exc
+    except (ValueError, json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 @app.get("/v1/institutional-research-network")
 def institutional_research_network_manifest() -> dict[str, Any]:
     return institutional_research_network.manifest()
@@ -3518,6 +3632,9 @@ def search_readiness() -> dict[str, Any]:
         "concordance_query_contract": CONCORDANCE_QUERY_CONTRACT,
         "kwic_result_contract": KWIC_RESULT_CONTRACT,
         "linguistic_corpus_guardrail": "tokenization-concordance-and-frequency-are-reproducible-analytical-views-not-morphology-meaning-intent-evidence-or-truth",
+        "cross_language_resolution": cross_language_resolution_readiness(),
+        "cross_language_resolution_contract": CROSS_LANGUAGE_RESOLUTION_READINESS_CONTRACT,
+        "cross_language_resolution_guardrail": "candidate-ranking-and-name-toponym-similarity-do-not-establish-identity-evidence-or-truth",
         "temporal_knowledge_evolution": True,
         "temporal_snapshot_guardrail": "historical-availability-is-distinct-from-retrospective-status",
         "methodology_intelligence": True,

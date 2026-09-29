@@ -687,3 +687,90 @@ CREATE TABLE IF NOT EXISTS library_linguistic_tokens (
 CREATE INDEX IF NOT EXISTS library_linguistic_tokens_corpus_normalized_idx ON library_linguistic_tokens(corpus_id, normalized_text, document_id, sequence);
 CREATE INDEX IF NOT EXISTS library_linguistic_tokens_document_idx ON library_linguistic_tokens(document_id, sequence ASC);
 CREATE INDEX IF NOT EXISTS library_linguistic_tokens_representation_idx ON library_linguistic_tokens(representation_id, sequence ASC);
+
+
+-- v2.59.0 — Cross-Language Entity, Name & Historical Toponym Resolution.
+-- Candidate ranking is descriptive and never constitutes automatic identity, evidence, or truth.
+CREATE TABLE IF NOT EXISTS library_cross_language_entities (
+    entity_id text PRIMARY KEY,
+    entity_type text NOT NULL CHECK (entity_type IN ('person','organization','place','work','event','concept','group','jurisdiction','other')),
+    canonical_name text NOT NULL,
+    authority_namespace text,
+    authority_key text,
+    country_code varchar(3),
+    latitude double precision CHECK (latitude IS NULL OR (latitude >= -90 AND latitude <= 90)),
+    longitude double precision CHECK (longitude IS NULL OR (longitude >= -180 AND longitude <= 180)),
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (authority_namespace, authority_key)
+);
+CREATE INDEX IF NOT EXISTS library_cross_language_entities_type_idx ON library_cross_language_entities(entity_type, canonical_name);
+
+CREATE TABLE IF NOT EXISTS library_entity_name_forms (
+    form_id text PRIMARY KEY,
+    entity_id text NOT NULL REFERENCES library_cross_language_entities(entity_id) ON DELETE RESTRICT,
+    name_text text NOT NULL,
+    normalized_key text NOT NULL,
+    diacritic_fold_key text NOT NULL,
+    language_bcp47 text,
+    script_iso15924 varchar(4),
+    language_variant text,
+    orthography_variant text,
+    relation_type text NOT NULL CHECK (relation_type IN ('canonical','alias','variant','historical','endonym','exonym','transliteration','abbreviation','former','other')),
+    transliteration_system text,
+    valid_from_year integer,
+    valid_to_year integer,
+    source_reference text,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (valid_from_year IS NULL OR valid_to_year IS NULL OR valid_to_year >= valid_from_year)
+);
+CREATE INDEX IF NOT EXISTS library_entity_name_forms_normalized_idx ON library_entity_name_forms(normalized_key, entity_id);
+CREATE INDEX IF NOT EXISTS library_entity_name_forms_fold_idx ON library_entity_name_forms(diacritic_fold_key, entity_id);
+CREATE INDEX IF NOT EXISTS library_entity_name_forms_language_script_idx ON library_entity_name_forms(language_bcp47, script_iso15924, entity_id);
+CREATE INDEX IF NOT EXISTS library_entity_name_forms_historical_idx ON library_entity_name_forms(entity_id, valid_from_year, valid_to_year);
+
+CREATE TABLE IF NOT EXISTS library_entity_resolution_cases (
+    case_id text PRIMARY KEY,
+    query_payload jsonb NOT NULL,
+    query_fingerprint char(64) NOT NULL,
+    authority_fingerprint char(64) NOT NULL,
+    candidate_count integer NOT NULL DEFAULT 0 CHECK (candidate_count >= 0),
+    ambiguity jsonb NOT NULL DEFAULT '{}'::jsonb,
+    guardrails jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_entity_resolution_cases_query_idx ON library_entity_resolution_cases(query_fingerprint, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_entity_resolution_candidates (
+    candidate_id text PRIMARY KEY,
+    case_id text NOT NULL REFERENCES library_entity_resolution_cases(case_id) ON DELETE RESTRICT,
+    entity_id text NOT NULL REFERENCES library_cross_language_entities(entity_id) ON DELETE RESTRICT,
+    matched_form_id text NOT NULL REFERENCES library_entity_name_forms(form_id) ON DELETE RESTRICT,
+    rank integer NOT NULL CHECK (rank > 0),
+    score double precision NOT NULL CHECK (score >= 0.0 AND score <= 1.0),
+    signals jsonb NOT NULL DEFAULT '[]'::jsonb,
+    temporal_status text NOT NULL,
+    payload jsonb NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (case_id, rank, entity_id)
+);
+CREATE INDEX IF NOT EXISTS library_entity_resolution_candidates_case_idx ON library_entity_resolution_candidates(case_id, rank ASC);
+CREATE INDEX IF NOT EXISTS library_entity_resolution_candidates_entity_idx ON library_entity_resolution_candidates(entity_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_entity_resolution_decisions (
+    decision_id text PRIMARY KEY,
+    case_id text NOT NULL REFERENCES library_entity_resolution_cases(case_id) ON DELETE RESTRICT,
+    state text NOT NULL CHECK (state IN ('accepted','rejected','ambiguous','unresolved')),
+    selected_candidate_id text REFERENCES library_entity_resolution_candidates(candidate_id) ON DELETE RESTRICT,
+    adjudicator text,
+    rationale text,
+    evidence_refs jsonb NOT NULL DEFAULT '[]'::jsonb,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    decision_fingerprint char(64) NOT NULL UNIQUE,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CHECK ((state = 'accepted' AND selected_candidate_id IS NOT NULL) OR (state <> 'accepted' AND selected_candidate_id IS NULL))
+);
+CREATE INDEX IF NOT EXISTS library_entity_resolution_decisions_case_idx ON library_entity_resolution_decisions(case_id, created_at DESC);

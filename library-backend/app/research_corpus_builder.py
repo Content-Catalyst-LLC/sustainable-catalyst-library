@@ -207,6 +207,7 @@ def _resolve_fields(fields: Any) -> list[str]:
         "text_derivation_kind", "text_derivation_run_id", "text_derivation_source_asset_id",
         "text_derivation_engine_fingerprint", "text_derivation_review_state",
         "linguistic_corpus_id", "linguistic_document_id", "linguistic_tokenizer_fingerprint", "linguistic_token_count",
+        "entity_resolution_case_ids", "resolved_entity_ids", "entity_resolution_decision_ids",
     ])
     unknown = [f for f in requested if f not in allowed]
     if unknown:

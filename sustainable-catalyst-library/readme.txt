@@ -8,14 +8,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.47.0
+Stable tag: 5.48.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.47.0 adds Linguistic Corpus Objects, Concordance & KWIC on top of the original-language and OCR/HTR/transcription lineage foundation. It creates reproducible corpus/document/token objects with source-representation lineage, deterministic Unicode tokenization, character offsets, phrase-aware concordance, KWIC windows, and frequency tables. Tokenization is an operational segmentation profile, not morphology, part-of-speech, syntax, meaning, intent, evidence, truth, or importance.
+Sustainable Catalyst Library v5.48.0 adds Cross-Language Entity, Name & Historical Toponym Resolution. It preserves multilingual names, aliases, declared transliterations, endonyms/exonyms, historical toponyms, language/script identity, validity windows, candidate-ranking signals, ambiguity, and explicit adjudication provenance. Candidate rank never silently becomes identity, evidence, or truth.
 
 Sustainable Catalyst Library v5.46.0 adds OCR, HTR & Transcription Lineage on top of original-language preservation. It preserves source-media payload fingerprints, OCR/HTR/transcription engine and model identity, parameters, page geometry or timecodes, confidence measurements, explicit review state, and derived-text representation lineage. Recognition/transcription output never replaces the original source, and confidence is not treated as truth probability.
 
@@ -414,6 +414,13 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= 5.48.0 =
+* Added cross-language entity authority objects and multilingual name-form objects.
+* Added historical toponym validity windows and temporal-context ranking signals.
+* Added explicit declared-transliteration support without automatic transliteration.
+* Added deterministic resolution cases/candidates plus signed explicit decision persistence.
+* Preserved ambiguity and prohibited automatic entity merge, evidence promotion, and truth promotion.
 
 = 5.47.0 =
 * Adds backend v2.58.0 Linguistic Corpus Objects, Concordance & KWIC.

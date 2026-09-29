@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Entity Resolution Decision",
+  "type": "object",
+  "required": [
+    "schema"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-entity-resolution-decision/1.0"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "accepted",
+        "rejected",
+        "ambiguous",
+        "unresolved"
+      ]
+    },
+    "selected_candidate_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

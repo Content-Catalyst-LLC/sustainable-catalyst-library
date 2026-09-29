@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Historical Toponym",
+  "type": "object",
+  "required": [
+    "schema",
+    "entity_id",
+    "text"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-historical-toponym/1.0"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    },
+    "valid_from_year": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "valid_to_year": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  }
+}

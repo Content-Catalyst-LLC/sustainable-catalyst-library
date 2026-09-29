@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Entity Resolution Case",
+  "type": "object",
+  "required": [
+    "schema",
+    "query_fingerprint_sha256",
+    "candidates",
+    "ambiguity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-entity-resolution-case/1.0"
+    },
+    "case_id": {
+      "type": "string"
+    },
+    "query_fingerprint_sha256": {
+      "type": "string"
+    },
+    "candidates": {
+      "type": "array"
+    },
+    "ambiguity": {
+      "type": "object"
+    }
+  }
+}

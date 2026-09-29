@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cross-Language Entity Authority",
+  "type": "object",
+  "required": [
+    "schema",
+    "entity_id",
+    "entity_type",
+    "canonical_name",
+    "names"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-cross-language-entity-authority/1.0"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "entity_type": {
+      "type": "string"
+    },
+    "canonical_name": {
+      "type": "string"
+    },
+    "names": {
+      "type": "array"
+    }
+  }
+}
