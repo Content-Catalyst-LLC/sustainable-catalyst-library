@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/text-derivation-run.json",
+  "title": "OCR HTR Transcription Derivation Run",
+  "type": "object",
+  "required": ["schema", "lineage_contract", "run_id", "run_fingerprint_sha256", "derivation_kind", "output_representation", "engine", "review_state", "segments", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-text-derivation-run/1.0"},
+    "lineage_contract": {"const": "sc-library-ocr-htr-transcription-lineage/1.0"},
+    "run_id": {"type": "string", "pattern": "^textrun:[0-9a-f]{32}$"},
+    "run_fingerprint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "derivation_kind": {"enum": ["ocr", "htr", "transcription"]},
+    "source_asset": {"type": ["object", "null"]},
+    "source_asset_id": {"type": ["string", "null"]},
+    "source_asset_sha256": {"type": ["string", "null"]},
+    "input_representation_id": {"type": ["string", "null"]},
+    "output_representation": {"type": "object"},
+    "engine": {"type": "object"},
+    "confidence_summary": {"type": "object"},
+    "review_state": {"enum": ["unreviewed", "in-review", "human-reviewed", "accepted", "rejected"]},
+    "segments": {"type": "array", "items": {"type": "object"}},
+    "guardrails": {"type": "object"}
+  },
+  "additionalProperties": true
+}

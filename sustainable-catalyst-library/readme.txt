@@ -8,12 +8,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.45.0
+Stable tag: 5.46.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
+
+Sustainable Catalyst Library v5.46.0 adds OCR, HTR & Transcription Lineage on top of original-language preservation. It preserves source-media payload fingerprints, OCR/HTR/transcription engine and model identity, parameters, page geometry or timecodes, confidence measurements, explicit review state, and derived-text representation lineage. Recognition/transcription output never replaces the original source, and confidence is not treated as truth probability.
 
 Sustainable Catalyst Library v5.45.0 adds Original-Language Corpus Ingestion & Preservation: exact source-byte and decoded-text capture, BCP 47 language identity, ISO 15924 script identity, language/orthography variants, SHA-256 preservation fingerprints, canonical original representations, and explicit derived Unicode-normalization lineage. Translation remains a separate derived representation and never replaces the original source.
 

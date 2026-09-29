@@ -3,18 +3,81 @@
   "$id": "https://sustainablecatalyst.com/schemas/text-representation.json",
   "title": "Text Representation",
   "type": "object",
-  "required": ["schema", "representation_id", "capture_id", "representation_kind", "language_bcp47", "text_sha256", "canonical_original", "derived"],
+  "required": [
+    "schema",
+    "representation_id",
+    "representation_kind",
+    "language_bcp47",
+    "text_sha256",
+    "canonical_original",
+    "derived"
+  ],
   "properties": {
-    "schema": {"const": "sc-library-text-representation/1.0"},
-    "representation_id": {"type": "string", "pattern": "^textrep:[0-9a-f]{32}$"},
-    "capture_id": {"type": "string", "pattern": "^olc:[0-9a-f]{32}$"},
-    "representation_kind": {"enum": ["original", "unicode-normalized", "transliteration", "translation", "ocr", "htr", "transcription", "editorial-normalization"]},
-    "language_bcp47": {"type": "string"},
-    "script_iso15924": {"type": ["string", "null"]},
-    "text_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "canonical_original": {"type": "boolean"},
-    "derived": {"type": "boolean"},
-    "normalization_form": {"type": ["string", "null"]}
+    "schema": {
+      "enum": [
+        "sc-library-text-representation/1.0",
+        "sc-library-text-representation/1.1"
+      ]
+    },
+    "representation_id": {
+      "type": "string",
+      "pattern": "^textrep:[0-9a-f]{32}$"
+    },
+    "capture_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "representation_kind": {
+      "enum": [
+        "original",
+        "unicode-normalized",
+        "transliteration",
+        "translation",
+        "ocr",
+        "htr",
+        "transcription",
+        "editorial-normalization"
+      ]
+    },
+    "language_bcp47": {
+      "type": "string"
+    },
+    "script_iso15924": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "text_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "canonical_original": {
+      "type": "boolean"
+    },
+    "derived": {
+      "type": "boolean"
+    },
+    "normalization_form": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_asset_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "derivation_run_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
   },
   "additionalProperties": true
 }

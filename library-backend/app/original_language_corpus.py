@@ -399,8 +399,10 @@ def readiness() -> dict[str, Any]:
             "automatic_truth_promotion": False,
             "automatic_platform_core_promotion": False,
         },
-        "next_lineage": {
+        "integrated_lineage": {
             "ocr_htr_transcription_lineage": "v5.46.0",
+        },
+        "next_lineage": {
             "linguistic_corpus_objects": "v5.47.0",
         },
     }

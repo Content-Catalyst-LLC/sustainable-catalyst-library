@@ -532,3 +532,90 @@ CREATE TABLE IF NOT EXISTS library_text_transformations (
 CREATE INDEX IF NOT EXISTS library_text_transformations_capture_idx ON library_text_transformations(capture_id, created_at ASC);
 CREATE INDEX IF NOT EXISTS library_text_transformations_input_idx ON library_text_transformations(input_representation_id, created_at ASC);
 CREATE INDEX IF NOT EXISTS library_text_transformations_output_idx ON library_text_transformations(output_representation_id, created_at ASC);
+
+-- v2.57.0 — OCR, HTR & Transcription Lineage.
+-- Media source bytes are preserved independently of text captures because OCR/HTR
+-- and transcription may originate from images, PDFs, audio, or video rather than text.
+CREATE TABLE IF NOT EXISTS library_source_media_assets (
+    source_asset_id text PRIMARY KEY,
+    asset_fingerprint char(64) NOT NULL UNIQUE,
+    record_id text,
+    source_id text,
+    source_record_id text,
+    source_uri text,
+    media_type text NOT NULL DEFAULT 'application/octet-stream',
+    raw_payload bytea NOT NULL,
+    raw_payload_sha256 char(64) NOT NULL,
+    source_metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_source_media_assets_record_idx ON library_source_media_assets(record_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS library_source_media_assets_source_idx ON library_source_media_assets(source_id, source_record_id, created_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS library_source_media_assets_payload_uidx ON library_source_media_assets(raw_payload_sha256, source_id, source_record_id);
+
+ALTER TABLE library_text_representations ADD COLUMN IF NOT EXISTS source_asset_id text;
+ALTER TABLE library_text_representations ALTER COLUMN capture_id DROP NOT NULL;
+CREATE INDEX IF NOT EXISTS library_text_representations_source_asset_idx ON library_text_representations(source_asset_id, representation_kind, created_at ASC);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname='library_text_representations_source_asset_fk'
+    ) THEN
+        ALTER TABLE library_text_representations
+            ADD CONSTRAINT library_text_representations_source_asset_fk
+            FOREIGN KEY (source_asset_id) REFERENCES library_source_media_assets(source_asset_id) ON DELETE RESTRICT;
+    END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS library_text_derivation_runs (
+    run_id text PRIMARY KEY,
+    run_fingerprint char(64) NOT NULL UNIQUE,
+    derivation_kind text NOT NULL CHECK (derivation_kind IN ('ocr','htr','transcription')),
+    source_asset_id text REFERENCES library_source_media_assets(source_asset_id) ON DELETE RESTRICT,
+    input_representation_id text REFERENCES library_text_representations(representation_id) ON DELETE RESTRICT,
+    output_representation_id text NOT NULL REFERENCES library_text_representations(representation_id) ON DELETE RESTRICT,
+    engine_provider text NOT NULL,
+    engine_name text NOT NULL,
+    engine_version text,
+    model_name text,
+    model_version text,
+    engine_spec_fingerprint char(64) NOT NULL,
+    parameters jsonb NOT NULL DEFAULT '{}'::jsonb,
+    language_bcp47 text NOT NULL,
+    script_iso15924 varchar(4),
+    output_text_sha256 char(64) NOT NULL,
+    confidence_summary jsonb NOT NULL DEFAULT '{}'::jsonb,
+    review_state text NOT NULL DEFAULT 'unreviewed' CHECK (review_state IN ('unreviewed','in-review','human-reviewed','accepted','rejected')),
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (source_asset_id IS NOT NULL OR input_representation_id IS NOT NULL)
+);
+CREATE INDEX IF NOT EXISTS library_text_derivation_runs_kind_idx ON library_text_derivation_runs(derivation_kind, created_at DESC);
+CREATE INDEX IF NOT EXISTS library_text_derivation_runs_source_idx ON library_text_derivation_runs(source_asset_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS library_text_derivation_runs_input_idx ON library_text_derivation_runs(input_representation_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS library_text_derivation_runs_output_idx ON library_text_derivation_runs(output_representation_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS library_text_derivation_runs_engine_idx ON library_text_derivation_runs(engine_spec_fingerprint, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_text_derivation_segments (
+    segment_id text PRIMARY KEY,
+    run_id text NOT NULL REFERENCES library_text_derivation_runs(run_id) ON DELETE RESTRICT,
+    sequence integer NOT NULL CHECK (sequence > 0),
+    segment_kind text NOT NULL,
+    page_number integer,
+    start_ms bigint,
+    end_ms bigint,
+    bounding_box jsonb,
+    speaker_label text,
+    text_content text NOT NULL,
+    text_sha256 char(64) NOT NULL,
+    confidence double precision CHECK (confidence IS NULL OR (confidence >= 0.0 AND confidence <= 1.0)),
+    review_state text NOT NULL DEFAULT 'unreviewed' CHECK (review_state IN ('unreviewed','in-review','human-reviewed','accepted','rejected')),
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE (run_id, sequence),
+    CHECK (start_ms IS NULL OR start_ms >= 0),
+    CHECK (end_ms IS NULL OR (start_ms IS NOT NULL AND end_ms >= start_ms))
+);
+CREATE INDEX IF NOT EXISTS library_text_derivation_segments_run_idx ON library_text_derivation_segments(run_id, sequence ASC);
+CREATE INDEX IF NOT EXISTS library_text_derivation_segments_page_idx ON library_text_derivation_segments(run_id, page_number, sequence ASC);

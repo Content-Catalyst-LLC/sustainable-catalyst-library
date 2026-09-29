@@ -98,6 +98,11 @@ def _normalize_record(record: dict[str, Any]) -> dict[str, Any]:
         "orthography_variant": _clean(record.get("orthography_variant")) or None,
         "original_language_capture_id": _clean(record.get("original_language_capture_id")) or None,
         "original_language_representation_id": _clean(record.get("original_language_representation_id")) or None,
+        "text_derivation_kind": _clean(record.get("text_derivation_kind") or record.get("derivation_kind")) or None,
+        "text_derivation_run_id": _clean(record.get("text_derivation_run_id") or record.get("derivation_run_id")) or None,
+        "text_derivation_source_asset_id": _clean(record.get("text_derivation_source_asset_id") or record.get("source_asset_id")) or None,
+        "text_derivation_engine_fingerprint": _clean(record.get("text_derivation_engine_fingerprint") or record.get("engine_spec_fingerprint")) or None,
+        "text_derivation_review_state": _clean(record.get("text_derivation_review_state") or record.get("review_state")) or None,
         "metadata": _dict(record.get("metadata")) or None,
     }
     normalized["record_fingerprint_sha256"] = _stable_hash({k: v for k, v in normalized.items() if k != "record_fingerprint_sha256"})
@@ -195,6 +200,8 @@ def _resolve_fields(fields: Any) -> list[str]:
         "source_key", "source_version", "source_hash", "source_locator", "metadata", "record_fingerprint_sha256",
         "original_language", "script_iso15924", "language_variant", "orthography_variant",
         "original_language_capture_id", "original_language_representation_id",
+        "text_derivation_kind", "text_derivation_run_id", "text_derivation_source_asset_id",
+        "text_derivation_engine_fingerprint", "text_derivation_review_state",
     ])
     unknown = [f for f in requested if f not in allowed]
     if unknown:

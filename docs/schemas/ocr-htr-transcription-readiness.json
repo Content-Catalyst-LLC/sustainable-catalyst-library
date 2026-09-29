@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/ocr-htr-transcription-readiness.json",
+  "title": "OCR HTR Transcription Readiness",
+  "type": "object",
+  "required": ["schema", "contract", "version", "state", "counts", "lineage", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-ocr-htr-transcription-readiness/1.0"},
+    "contract": {"const": "sc-library-ocr-htr-transcription-lineage/1.0"},
+    "version": {"const": "5.46.0"},
+    "state": {"enum": ["ready", "schema-unavailable"]},
+    "counts": {"type": "object"},
+    "lineage": {"type": "object"},
+    "guardrails": {"type": "object"}
+  },
+  "additionalProperties": true
+}

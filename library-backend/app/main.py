@@ -96,6 +96,16 @@ from .original_language_corpus import (
     readiness as original_language_corpus_readiness,
     validate_capture_payload,
 )
+from .ocr_htr_transcription_lineage import (
+    LINEAGE_CONTRACT as OCR_HTR_TRANSCRIPTION_LINEAGE_CONTRACT,
+    READINESS_CONTRACT as OCR_HTR_TRANSCRIPTION_READINESS_CONTRACT,
+    RUN_CONTRACT as TEXT_DERIVATION_RUN_CONTRACT,
+    build_derivation_package,
+    get_derivation as get_text_derivation_run,
+    ingest_derivation as ingest_text_derivation,
+    readiness as ocr_htr_transcription_readiness,
+    validate_derivation_payload,
+)
 from .biomedical_sources import BiomedicalSourceError, build_biomedical_registry
 from .fda_regulatory import FDARegulatoryError, build_fda_regulatory_registry
 from .medical_terminology import MedicalTerminologyError, MedicalTerminologyResolver, WHOICD11Connector
@@ -346,6 +356,17 @@ def health() -> dict[str, Any]:
             "original_language_automatic_evidence_promotion": False,
             "original_language_automatic_truth_promotion": False,
             "original_language_automatic_platform_core_promotion": False,
+            "ocr_htr_transcription_lineage": True,
+            "ocr_htr_transcription_source_media_preservation": True,
+            "ocr_htr_transcription_engine_model_provenance": True,
+            "ocr_htr_transcription_segment_lineage": True,
+            "ocr_htr_transcription_review_state": True,
+            "ocr_htr_transcription_confidence_is_truth_probability": False,
+            "ocr_htr_transcription_output_replaces_original": False,
+            "ocr_htr_transcription_automatic_translation": False,
+            "ocr_htr_transcription_automatic_evidence_promotion": False,
+            "ocr_htr_transcription_automatic_truth_promotion": False,
+            "ocr_htr_transcription_automatic_platform_core_promotion": False,
             "core_aware_search_results": True,
             "citation_graph": True,
             "citation_exact_identifier_resolution": True,
@@ -2229,6 +2250,61 @@ async def original_language_corpus_capture(
         raise HTTPException(status_code=404, detail="original-language capture not found") from exc
 
 
+@app.get("/v1/ocr-htr-transcription/readiness")
+def ocr_htr_transcription_readiness_endpoint() -> dict[str, Any]:
+    return ocr_htr_transcription_readiness()
+
+
+@app.post("/v1/ocr-htr-transcription/validate")
+def ocr_htr_transcription_validate(payload: dict[str, Any]) -> dict[str, Any]:
+    return validate_derivation_payload(payload)
+
+
+@app.post("/v1/ocr-htr-transcription/package")
+def ocr_htr_transcription_package(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        package = build_derivation_package(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    for key in ("_source_bytes", "_output_text", "_source_metadata", "_provenance"):
+        package.pop(key, None)
+    package["persisted"] = False
+    return package
+
+
+@app.post("/v1/admin/ocr-htr-transcription/runs")
+async def ocr_htr_transcription_ingest(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8")) if body else {}
+        if not isinstance(payload, dict):
+            raise ValueError("derivation payload must be an object")
+        return ingest_text_derivation(payload)
+    except (ValueError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/admin/ocr-htr-transcription/runs/{run_id}")
+async def ocr_htr_transcription_run(
+    run_id: str,
+    request: Request,
+    include_text: bool = Query(default=False),
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return get_text_derivation_run(run_id, include_text=include_text)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="text derivation run not found") from exc
+
+
 @app.get("/v1/institutional-research-network")
 def institutional_research_network_manifest() -> dict[str, Any]:
     return institutional_research_network.manifest()
@@ -3293,6 +3369,10 @@ def search_readiness() -> dict[str, Any]:
         "original_language_corpus_contract": ORIGINAL_LANGUAGE_CORPUS_CONTRACT,
         "original_language_capture_contract": ORIGINAL_LANGUAGE_CAPTURE_CONTRACT,
         "original_language_corpus_guardrail": "original-source-bytes-and-text-remain-canonical-and-translation-normalization-are-derived-representations",
+        "ocr_htr_transcription": ocr_htr_transcription_readiness(),
+        "ocr_htr_transcription_lineage_contract": OCR_HTR_TRANSCRIPTION_LINEAGE_CONTRACT,
+        "text_derivation_run_contract": TEXT_DERIVATION_RUN_CONTRACT,
+        "ocr_htr_transcription_guardrail": "recognition-and-transcription-output-is-derived-text-and-confidence-is-not-truth-probability",
         "temporal_knowledge_evolution": True,
         "temporal_snapshot_guardrail": "historical-availability-is-distinct-from-retrospective-status",
         "methodology_intelligence": True,

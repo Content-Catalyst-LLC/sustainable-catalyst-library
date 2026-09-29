@@ -542,6 +542,21 @@ final class SC_Library_Python_Backend {
             'permission_callback' => static function () { return current_user_can('manage_options'); },
             'callback' => [$this, 'proxy_original_language_corpus_package'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/ocr-htr-transcription/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_ocr_htr_transcription_readiness'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/ocr-htr-transcription/validate', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => [$this, 'proxy_ocr_htr_transcription_validate'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/ocr-htr-transcription/package', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => [$this, 'proxy_ocr_htr_transcription_package'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-embedding-maps/readiness', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
@@ -1439,6 +1454,19 @@ final class SC_Library_Python_Backend {
 
     public function proxy_original_language_corpus_package(WP_REST_Request $request): WP_REST_Response {
         return $this->proxy_retrieval_post($request, '/v1/original-language-corpus/package', 'sc-library-original-language-capture/1.0');
+    }
+
+    public function proxy_ocr_htr_transcription_readiness(WP_REST_Request $request): WP_REST_Response {
+        unset($request);
+        return $this->proxy_global_source_federation_get('/v1/ocr-htr-transcription/readiness', [], 'sc-library-ocr-htr-transcription-readiness/1.0');
+    }
+
+    public function proxy_ocr_htr_transcription_validate(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/ocr-htr-transcription/validate', 'sc-library-text-derivation-validation/1.0');
+    }
+
+    public function proxy_ocr_htr_transcription_package(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/ocr-htr-transcription/package', 'sc-library-text-derivation-run/1.0');
     }
 
     public function proxy_publication_embedding_maps_readiness(WP_REST_Request $request): WP_REST_Response {
