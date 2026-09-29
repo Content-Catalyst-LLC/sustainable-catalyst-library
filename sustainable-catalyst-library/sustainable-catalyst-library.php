@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.43.0 adds governed publication embedding maps, deterministic semantic projection, traceable semantic neighborhoods, and a first-class Embedding Map view in the Knowledge Landscape.
- * Version: 5.43.0
+ * Description: Sustainable Catalyst Library v5.44.0 adds the Global Source Federation Registry & Connector Contracts: stable institution/source/collection identities, connector capability manifests, execution authority, provenance requirements, and federation governance without replacing existing connectors.
+ * Version: 5.44.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.43.0');
+define('SC_LIBRARY_VERSION', '5.44.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
@@ -78,6 +78,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-research-network-consol
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-homepage-console.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-public-interface-assets.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-institutional-research-sources.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-global-source-federation-registry.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-fda-regulatory-intelligence.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-medical-terminology.php';
@@ -162,6 +163,7 @@ final class SC_Library_Plugin {
         $homepage_console = new SC_Library_Homepage_Console();
         $public_interface_assets = new SC_Library_Public_Interface_Assets();
         $institutional_research_sources = new SC_Library_Institutional_Research_Sources();
+        $global_source_federation_registry = new SC_Library_Global_Source_Federation_Registry();
         $biomedical_evidence = new SC_Library_Biomedical_Evidence();
         $fda_regulatory_intelligence = new SC_Library_FDA_Regulatory_Intelligence();
         $medical_terminology = new SC_Library_Medical_Terminology();
@@ -252,6 +254,7 @@ final class SC_Library_Plugin {
         $homepage_console->register_hooks();
         $public_interface_assets->register_hooks();
         $institutional_research_sources->register_hooks();
+        $global_source_federation_registry->register_hooks();
         $biomedical_evidence->register_hooks();
         $fda_regulatory_intelligence->register_hooks();
         $medical_terminology->register_hooks();

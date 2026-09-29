@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/global-source.json",
+  "title": "Sustainable Catalyst Global Source Descriptor",
+  "type": "object",
+  "required": ["schema", "source_id", "name", "institution_id", "source_family", "access_mode", "collection_ids", "connector_id", "status"],
+  "properties": {
+    "schema": {"const": "sc-library-global-source/1.0"},
+    "source_id": {"type": "string", "minLength": 1},
+    "name": {"type": "string", "minLength": 1},
+    "institution_id": {"type": "string", "minLength": 1},
+    "source_family": {"type": "string", "minLength": 1},
+    "homepage": {"type": "string"},
+    "access_mode": {"type": "string"},
+    "coverage_scope": {"type": "array", "items": {"type": "string"}},
+    "content_types": {"type": "array", "items": {"type": "string"}},
+    "collection_ids": {"type": "array", "items": {"type": "string"}},
+    "connector_id": {"type": "string", "minLength": 1},
+    "compatibility_aliases": {"type": "array", "items": {"type": "string"}},
+    "status": {"type": "string"}
+  },
+  "additionalProperties": true
+}

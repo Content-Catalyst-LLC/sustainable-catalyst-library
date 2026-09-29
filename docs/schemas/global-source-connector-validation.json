@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/global-source-connector-validation.json",
+  "title": "Sustainable Catalyst Global Source Connector Validation",
+  "type": "object",
+  "required": ["schema", "valid", "errors", "missing_required_fields", "guardrail_violations", "normalized_contract", "contract_fingerprint_sha256"],
+  "properties": {
+    "schema": {"const": "sc-library-global-source-connector-validation/1.0"},
+    "valid": {"type": "boolean"},
+    "errors": {"type": "array", "items": {"type": "string"}},
+    "missing_required_fields": {"type": "array", "items": {"type": "string"}},
+    "guardrail_violations": {"type": "array", "items": {"type": "string"}},
+    "normalized_contract": {"type": "object"},
+    "contract_fingerprint_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "governance": {"type": "object"}
+  },
+  "additionalProperties": true
+}

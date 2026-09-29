@@ -85,6 +85,7 @@ from .security import constant_time_equal, sha256_hex, sign_request, valid_times
 from .settings import settings
 from .operations import integrity_audit, operations_status, prune_records
 from .institutional_sources import InstitutionalSourceError, build_registry
+from .global_source_federation import registry as global_source_federation_registry
 from .biomedical_sources import BiomedicalSourceError, build_biomedical_registry
 from .fda_regulatory import FDARegulatoryError, build_fda_regulatory_registry
 from .medical_terminology import MedicalTerminologyError, MedicalTerminologyResolver, WHOICD11Connector
@@ -308,6 +309,21 @@ def health() -> dict[str, Any]:
             "semantic_similarity_automatic_evidence_promotion": False,
             "semantic_similarity_automatic_truth_promotion": False,
             "semantic_similarity_automatic_causality_inference": False,
+            "global_source_federation_registry": True,
+            "global_source_connector_contracts": True,
+            "global_source_registry_reuses_legacy_connectors": True,
+            "global_source_registry_reuses_v4_8_federation_transport": True,
+            "global_source_registry_parallel_execution_stack": False,
+            "global_source_registry_membership_implies_endorsement": False,
+            "global_source_registry_membership_implies_partnership": False,
+            "global_source_connector_health_implies_source_quality": False,
+            "global_source_connector_health_implies_evidence_truth": False,
+            "global_source_automatic_import": False,
+            "global_source_automatic_evidence_promotion": False,
+            "global_source_automatic_truth_promotion": False,
+            "global_source_automatic_platform_core_promotion": False,
+            "global_source_original_language_preserved_as_received": True,
+            "global_source_automatic_translation": False,
             "core_aware_search_results": True,
             "citation_graph": True,
             "citation_exact_identifier_resolution": True,
@@ -2092,6 +2108,50 @@ def carbon_nature_research_context(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
+@app.get("/v1/global-source-federation/readiness")
+def global_source_federation_readiness() -> dict[str, Any]:
+    return global_source_federation_registry.readiness()
+
+
+@app.get("/v1/global-source-federation/registry")
+def global_source_federation_registry_snapshot(
+    family: str = Query(default="", max_length=120),
+    capability: str = Query(default="", max_length=120),
+    collection: str = Query(default="", max_length=120),
+    authority: str = Query(default="", max_length=160),
+    q: str = Query(default="", max_length=240),
+) -> dict[str, Any]:
+    return global_source_federation_registry.snapshot(
+        family=family, capability=capability, collection=collection, authority=authority, q=q,
+    )
+
+
+@app.get("/v1/global-source-federation/collections")
+def global_source_federation_collections() -> dict[str, Any]:
+    return global_source_federation_registry.collections()
+
+
+@app.get("/v1/global-source-federation/sources/{source_id}")
+def global_source_federation_source(source_id: str) -> dict[str, Any]:
+    try:
+        return global_source_federation_registry.source(source_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="global source not found") from exc
+
+
+@app.post("/v1/global-source-federation/connectors/validate")
+def global_source_federation_validate_connector(payload: dict[str, Any]) -> dict[str, Any]:
+    return global_source_federation_registry.validate_connector_manifest(payload)
+
+
+@app.get("/v1/global-source-federation/connectors/{connector_id}")
+def global_source_federation_connector(connector_id: str) -> dict[str, Any]:
+    try:
+        return global_source_federation_registry.connector(connector_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="global source connector not found") from exc
+
+
 @app.get("/v1/institutional-research-network")
 def institutional_research_network_manifest() -> dict[str, Any]:
     return institutional_research_network.manifest()
@@ -3148,6 +3208,10 @@ def search_readiness() -> dict[str, Any]:
         "publication_embedding_map_contract": "sc-library-publication-embedding-map/1.0",
         "semantic_knowledge_landscape_contract": "sc-library-semantic-knowledge-landscape/1.0",
         "publication_embedding_map_guardrail": "projection-and-proximity-are-analytical-signals-not-evidence-truth-or-causality",
+        "global_source_federation": global_source_federation_registry.readiness(),
+        "global_source_federation_contract": "sc-library-global-source-federation-registry/1.0",
+        "global_source_connector_contract": "sc-library-global-source-connector-contract/1.0",
+        "global_source_federation_guardrail": "registry-membership-and-connector-health-do-not-imply-source-quality-evidence-truth-endorsement-or-partnership",
         "temporal_knowledge_evolution": True,
         "temporal_snapshot_guardrail": "historical-availability-is-distinct-from-retrospective-status",
         "methodology_intelligence": True,

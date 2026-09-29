@@ -13,9 +13,10 @@ if (!defined('ABSPATH')) { exit; }
  * v5.16.0 adds publication visualization readiness and public Research Library delivery for reviewed renderer-neutral specs.
  * v5.18.0 adds multi-publication analytical structures while preserving canonical Publications manifest scoping and the hardened corpus deployment validator.
  * v5.28.0 adds stateless retrieval evaluation, bounded adaptive-ranking profiles, and transparent reranking/search proxies.
+ * v5.44.0 exposes the Global Source Federation Registry and governed connector-contract surfaces from backend v2.55.0.
  */
 final class SC_Library_Python_Backend {
-    public const VERSION = '5.6.0.34';
+    public const VERSION = '5.6.0.35';
     public const BACKEND_SCHEMA = 'sc-library-backend-ingest/1.0';
     public const REST_NAMESPACE = 'sc-library/v1';
     public const CRON_HOOK = 'sc_library_python_backend_sync_post';
@@ -488,6 +489,43 @@ final class SC_Library_Python_Backend {
             'methods' => WP_REST_Server::CREATABLE,
             'permission_callback' => '__return_true',
             'callback' => [$this, 'proxy_adaptive_search'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/global-source-federation/readiness', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_global_source_federation_readiness'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/global-source-federation/registry', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_global_source_federation_registry'],
+            'args' => [
+                'family' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'capability' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'collection' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'authority' => ['sanitize_callback' => 'sanitize_key', 'default' => ''],
+                'q' => ['sanitize_callback' => 'sanitize_text_field', 'default' => ''],
+            ],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/global-source-federation/collections', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_global_source_federation_collections'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/global-source-federation/sources/(?P<source_id>[a-z0-9-]+)', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_global_source_federation_source'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/global-source-federation/connectors/(?P<connector_id>[a-z0-9-]+)', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
+            'callback' => [$this, 'proxy_global_source_federation_connector'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/global-source-federation/connectors/validate', [
+            'methods' => WP_REST_Server::CREATABLE,
+            'permission_callback' => static function () { return current_user_can('manage_options'); },
+            'callback' => [$this, 'proxy_global_source_federation_validate_connector'],
         ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/publication-embedding-maps/readiness', [
             'methods' => WP_REST_Server::READABLE,
@@ -1319,6 +1357,60 @@ final class SC_Library_Python_Backend {
 
     public function proxy_adaptive_search(WP_REST_Request $request): WP_REST_Response {
         return $this->proxy_retrieval_post($request, '/v1/search/adaptive', 'sc-library-hybrid-retrieval/1.0');
+    }
+
+    private function proxy_global_source_federation_get(string $backend_path, array $params = [], string $fallback_schema = 'sc-library-global-source-federation-registry/1.0'): WP_REST_Response {
+        if (!self::configured()) {
+            return new WP_REST_Response(['schema'=>$fallback_schema,'state'=>'unavailable','error'=>'Library backend not configured'], 503);
+        }
+        $url = self::base_url() . $backend_path;
+        if ($params) { $url = add_query_arg(array_filter($params, static fn($value) => '' !== (string) $value), $url); }
+        $response = wp_remote_get($url, [
+            'timeout' => max(self::timeout(), 12),
+            'redirection' => 2,
+            'headers' => ['Accept'=>'application/json'],
+        ]);
+        if (is_wp_error($response)) {
+            return new WP_REST_Response(['schema'=>$fallback_schema,'state'=>'unavailable','error'=>$response->get_error_message()], 502);
+        }
+        $code=(int) wp_remote_retrieve_response_code($response);
+        $result=json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($result)) { $result=['schema'=>$fallback_schema,'state'=>'unavailable','error'=>'Invalid backend JSON']; }
+        return new WP_REST_Response($result, $code ?: 502);
+    }
+
+    public function proxy_global_source_federation_readiness(WP_REST_Request $request): WP_REST_Response {
+        unset($request);
+        return $this->proxy_global_source_federation_get('/v1/global-source-federation/readiness', [], 'sc-library-global-source-federation-readiness/1.0');
+    }
+
+    public function proxy_global_source_federation_registry(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_global_source_federation_get('/v1/global-source-federation/registry', [
+            'family' => sanitize_key((string) $request->get_param('family')),
+            'capability' => sanitize_key((string) $request->get_param('capability')),
+            'collection' => sanitize_key((string) $request->get_param('collection')),
+            'authority' => sanitize_key((string) $request->get_param('authority')),
+            'q' => sanitize_text_field((string) $request->get_param('q')),
+        ]);
+    }
+
+    public function proxy_global_source_federation_collections(WP_REST_Request $request): WP_REST_Response {
+        unset($request);
+        return $this->proxy_global_source_federation_get('/v1/global-source-federation/collections', [], 'sc-library-global-source-collection/1.0');
+    }
+
+    public function proxy_global_source_federation_source(WP_REST_Request $request): WP_REST_Response {
+        $source_id = rawurlencode(sanitize_key((string) $request['source_id']));
+        return $this->proxy_global_source_federation_get('/v1/global-source-federation/sources/' . $source_id, [], 'sc-library-global-source/1.0');
+    }
+
+    public function proxy_global_source_federation_connector(WP_REST_Request $request): WP_REST_Response {
+        $connector_id = rawurlencode(sanitize_key((string) $request['connector_id']));
+        return $this->proxy_global_source_federation_get('/v1/global-source-federation/connectors/' . $connector_id, [], 'sc-library-global-source-connector-contract/1.0');
+    }
+
+    public function proxy_global_source_federation_validate_connector(WP_REST_Request $request): WP_REST_Response {
+        return $this->proxy_retrieval_post($request, '/v1/global-source-federation/connectors/validate', 'sc-library-global-source-connector-validation/1.0');
     }
 
     public function proxy_publication_embedding_maps_readiness(WP_REST_Request $request): WP_REST_Response {

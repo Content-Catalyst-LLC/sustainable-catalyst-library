@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/global-source-federation-registry.json",
+  "title": "Sustainable Catalyst Global Source Federation Registry",
+  "type": "object",
+  "required": ["schema", "version", "registry_fingerprint_sha256", "sources", "connectors", "governance"],
+  "properties": {
+    "schema": {"const": "sc-library-global-source-federation-registry/1.0"},
+    "version": {"type": "string"},
+    "registry_fingerprint_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "sources": {"type": "array", "items": {"$ref": "global-source.json"}},
+    "connectors": {"type": "array", "items": {"$ref": "global-source-connector-contract.json"}},
+    "institutions": {"type": "array", "items": {"type": "object"}},
+    "collections": {"type": "array", "items": {"type": "object"}},
+    "governance": {"type": "object"}
+  },
+  "additionalProperties": true
+}

@@ -8,14 +8,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.43.0
+Stable tag: 5.44.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
 
-Sustainable Catalyst Library v5.43.0 adds Publication Embedding Maps & Semantic Knowledge Landscape: deterministic two-dimensional projection of current governed publication representations, one embedding specification per map, traceable semantic neighborhoods and similarity edges, representation/specification provenance, and a first-class Embedding Map view in the Knowledge Landscape. Projection proximity is an analytical semantic signal, not evidence, truth, causality, or automatic Platform Core promotion.
+Sustainable Catalyst Library v5.44.0 adds the Global Source Federation Registry & Connector Contracts: a canonical registry of institutions, research sources, collections, and connector execution contracts that reuses existing scholarly, institutional, biomedical, regulatory, browser-handoff, and v4.8 federation infrastructure. Registry membership or connector health does not imply source quality, evidence truth, endorsement, partnership, or automatic import/promotion.
 
 Sustainable Catalyst Library v5.42.0 adds Neural Reranking & Retrieval Evaluation on top of v5.41 governed similarity search: provider-neutral reranking, deterministic reranker specifications, preserved baseline ranks and result sets, transparent provider relevance scores, and judged baseline-vs-reranked evaluation. When no neural reranker is configured, results remain in baseline order and no fake neural scores are generated.
 
@@ -408,6 +408,13 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= 5.44.0 =
+* Added Global Source Federation Registry & Connector Contracts with stable institution, source, collection, and connector identities.
+* Added backend v2.55.0 registry/readiness/source/collection/connector/validation endpoints and WordPress proxy routes.
+* Reuses legacy v2.6 scholarly connectors and v4.8 federation transport rather than creating a parallel connector execution stack.
+* Separates registry membership and connector health from source quality, user trust, evidence truth, endorsement, partnership, and Platform Core promotion.
+* Preserves source language as received and performs no automatic translation; original-language ingestion remains the next release block.
 
 = 5.43.0 =
 * Adds governed publication embedding maps and deterministic centered PCA projection.
