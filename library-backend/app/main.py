@@ -149,6 +149,12 @@ from .cross_language_resolution import (
     validate_authority_payload as validate_cross_language_authority_payload,
     validate_decision_payload,
 )
+from .cross_civilizational_linking import (
+    LINK_CONTRACT as CROSS_CIVILIZATIONAL_LINK_CONTRACT, READINESS_CONTRACT as CROSS_CIVILIZATIONAL_LINKING_READINESS_CONTRACT,
+    build_link as build_cross_civilizational_link, build_link_package as build_cross_civilizational_link_package,
+    get_link as get_cross_civilizational_link, ingest_link as ingest_cross_civilizational_link,
+    readiness as cross_civilizational_linking_readiness, validate_link_payload as validate_cross_civilizational_link,
+)
 from .translation_alignment import (
     MATRIX_CONTRACT as TRANSLATION_ALIGNMENT_MATRIX_CONTRACT,
     READINESS_CONTRACT as TRANSLATION_ALIGNMENT_READINESS_CONTRACT,
@@ -580,6 +586,9 @@ def health() -> dict[str, Any]:
             "translation_alignment_generates_translation": False,
             "translation_alignment_generates_transliteration": False,
             "translation_alignment_confidence_is_truth_probability": False,
+            "cross_civilizational_evidence_scientific_data_linking": True,
+            "cross_civilizational_interpretation_boundary_required": True,
+            "cross_civilizational_link_implies_evidence_truth": False,
             "research_job_completion_implies_evidence_truth": False,
             "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
@@ -2641,6 +2650,30 @@ async def cross_language_resolution_decision_ingest(
 
 
 
+@app.get("/v1/cross-civilizational-linking/readiness")
+def cross_civilizational_linking_readiness_endpoint() -> dict[str, Any]: return cross_civilizational_linking_readiness()
+@app.post("/v1/cross-civilizational-linking/validate")
+def cross_civilizational_linking_validate(payload: dict[str, Any]) -> dict[str, Any]: return validate_cross_civilizational_link(payload)
+@app.post("/v1/cross-civilizational-linking/link")
+def cross_civilizational_linking_build(payload: dict[str, Any]) -> dict[str, Any]:
+    try: return build_cross_civilizational_link(payload)
+    except (ValueError,TypeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+@app.post("/v1/cross-civilizational-linking/package")
+def cross_civilizational_linking_package(payload: dict[str, Any]) -> dict[str, Any]:
+    try: return build_cross_civilizational_link_package(payload)
+    except (ValueError,TypeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+@app.post("/v1/admin/cross-civilizational-links")
+async def cross_civilizational_linking_ingest(request: Request,authorization: str|None=Header(default=None),x_sc_timestamp: str|None=Header(default=None),x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}; return ingest_cross_civilizational_link(payload)
+    except (ValueError,TypeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+@app.get("/v1/admin/cross-civilizational-links/{link_id:path}")
+async def cross_civilizational_linking_get(link_id: str,request: Request,authorization: str|None=Header(default=None),x_sc_timestamp: str|None=Header(default=None),x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return get_cross_civilizational_link(link_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="cross-civilizational link not found") from exc
+
 @app.get("/v1/translation-alignment/readiness")
 def translation_alignment_readiness_endpoint() -> dict[str, Any]:
     return translation_alignment_readiness()
@@ -4025,6 +4058,9 @@ def search_readiness() -> dict[str, Any]:
         "kwic_result_contract": KWIC_RESULT_CONTRACT,
         "linguistic_corpus_guardrail": "tokenization-concordance-and-frequency-are-reproducible-analytical-views-not-morphology-meaning-intent-evidence-or-truth",
         "cross_language_resolution": cross_language_resolution_readiness(),
+        "cross_civilizational_linking": cross_civilizational_linking_readiness(),
+        "cross_civilizational_link_contract": CROSS_CIVILIZATIONAL_LINK_CONTRACT,
+        "cross_civilizational_linking_readiness_contract": CROSS_CIVILIZATIONAL_LINKING_READINESS_CONTRACT,
         "translation_alignment": translation_alignment_readiness(),
         "translation_alignment_contract": TRANSLATION_ALIGNMENT_MATRIX_CONTRACT,
         "translation_alignment_readiness_contract": TRANSLATION_ALIGNMENT_READINESS_CONTRACT,

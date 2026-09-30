@@ -1,0 +1,8 @@
+<?php
+if (!defined('ABSPATH')) { exit; }
+final class SC_Library_Cross_Civilizational_Linking {
+ public const VERSION='5.55.0'; public const SCHEMA='sc-library-cross-civilizational-linking-readiness/1.0';
+ public function register_hooks(): void { add_shortcode('sc_cross_civilizational_linking_status',[$this,'shortcode']); }
+ private static function readiness(): array { if (!SC_Library_Python_Backend::configured()) return ['schema'=>self::SCHEMA,'state'=>'unavailable','counts'=>[]]; $r=wp_remote_get(SC_Library_Python_Backend::base_url().'/v1/cross-civilizational-linking/readiness',['timeout'=>12]); if (is_wp_error($r)||200!==(int)wp_remote_retrieve_response_code($r)) return ['schema'=>self::SCHEMA,'state'=>'unavailable','counts'=>[]]; $b=json_decode((string)wp_remote_retrieve_body($r),true); return is_array($b)?$b:['schema'=>self::SCHEMA,'state'=>'unavailable','counts'=>[]]; }
+ public function shortcode(array $atts=[]): string { $atts=shortcode_atts(['title'=>'Cross-Civilizational Evidence & Scientific Data Linking'],$atts,'sc_cross_civilizational_linking_status'); $p=self::readiness(); $c=(array)($p['counts']??[]); ob_start(); ?><section class="sc-cross-civilizational-linking"><p class="sc-kicker">Knowledge Library v5.55.0</p><h2><?php echo esc_html((string)$atts['title']); ?></h2><p>Links preserve source traditions, languages, chronology, geography, methods, units, provenance, and interpretation boundaries. A link does not establish truth, causality, consensus, or civilizational equivalence.</p><dl><dt>State</dt><dd><?php echo esc_html((string)($p['state']??'unavailable')); ?></dd><dt>Links</dt><dd><?php echo esc_html((string)((int)($c['links']??0))); ?></dd></dl></section><?php return (string)ob_get_clean(); }
+}

@@ -1074,3 +1074,14 @@ CREATE TABLE IF NOT EXISTS library_text_alignment_links (
 );
 CREATE INDEX IF NOT EXISTS library_text_alignment_links_matrix_idx ON library_text_alignment_links(matrix_id,sequence);
 CREATE INDEX IF NOT EXISTS library_text_alignment_links_review_idx ON library_text_alignment_links(review_state,matrix_id);
+
+
+-- Knowledge Library v5.55.0 / backend v2.66.0
+CREATE TABLE IF NOT EXISTS library_cross_civilizational_links (
+ link_id text PRIMARY KEY, source_object_id text NOT NULL, source_object_type text NOT NULL, target_object_id text NOT NULL, target_object_type text NOT NULL, source_evidence_class text NOT NULL, target_evidence_class text NOT NULL, link_type text NOT NULL, basis jsonb NOT NULL, interpretation_boundary text NOT NULL, confidence double precision, confidence_kind text, review_state text NOT NULL DEFAULT 'unreviewed', source_context jsonb NOT NULL, target_context jsonb NOT NULL, link_fingerprint char(64) NOT NULL UNIQUE, provenance jsonb NOT NULL DEFAULT '{}'::jsonb, metadata jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), CHECK (source_object_id <> target_object_id OR source_object_type <> target_object_type), CHECK (confidence IS NULL OR (confidence >= 0 AND confidence <= 1))
+);
+CREATE INDEX IF NOT EXISTS library_cross_civilizational_links_source_idx ON library_cross_civilizational_links(source_object_type,source_object_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS library_cross_civilizational_links_target_idx ON library_cross_civilizational_links(target_object_type,target_object_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS library_cross_civilizational_links_type_idx ON library_cross_civilizational_links(link_type,review_state,created_at DESC);
+CREATE TABLE IF NOT EXISTS library_cross_civilizational_link_events (event_id bigserial PRIMARY KEY,link_id text NOT NULL REFERENCES library_cross_civilizational_links(link_id) ON DELETE CASCADE,event_type text NOT NULL,details jsonb NOT NULL DEFAULT '{}'::jsonb,created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS library_cross_civilizational_link_events_link_idx ON library_cross_civilizational_link_events(link_id,event_id DESC);

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cross-Civilizational Linking Readiness",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "backend_version",
+    "state"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-cross-civilizational-linking-readiness/1.0"
+    },
+    "version": {
+      "const": "5.55.0"
+    },
+    "backend_version": {
+      "const": "2.66.0"
+    },
+    "state": {
+      "type": "string"
+    }
+  }
+}

@@ -1,5 +1,11 @@
 # Changelog
 
+## v5.55.0 — Cross-Civilizational Evidence & Scientific Data Linking
+
+- Added provenance-bound links across textual/historical evidence and scientific datasets.
+- Preserves language, chronology, geography, methods, units, uncertainty, provenance, and interpretation limits.
+- Added active `knowledge.link.cross-civilizational` Python research worker capability.
+
 ## v5.54.0 — Translation & Transliteration Alignment Matrix
 
 - Adds source/target text-representation alignment matrices bound to exact SHA-256 text identity.

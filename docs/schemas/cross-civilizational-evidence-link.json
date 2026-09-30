@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cross-Civilizational Evidence Link",
+  "type": "object",
+  "required": [
+    "schema",
+    "link_id",
+    "source",
+    "target",
+    "link_type",
+    "interpretation_boundary",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-cross-civilizational-evidence-link/1.0"
+    },
+    "link_id": {
+      "type": "string"
+    },
+    "source": {
+      "type": "object"
+    },
+    "target": {
+      "type": "object"
+    },
+    "link_type": {
+      "type": "string"
+    },
+    "basis": {
+      "type": "object"
+    },
+    "interpretation_boundary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}
