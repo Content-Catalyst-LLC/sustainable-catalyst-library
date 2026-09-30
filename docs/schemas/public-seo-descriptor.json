@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sc-library-public-seo-descriptor/1.0",
+  "type": "object",
+  "required": [
+    "schema",
+    "record_id",
+    "title",
+    "description",
+    "canonical_url",
+    "robots"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-public-seo-descriptor/1.0"
+    },
+    "canonical_url": {
+      "type": "string"
+    },
+    "robots": {
+      "const": "index,follow"
+    }
+  }
+}

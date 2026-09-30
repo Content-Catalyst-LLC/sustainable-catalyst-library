@@ -4,16 +4,16 @@ from hashlib import sha256
 import json
 from typing import Any
 
-WEB_VERSION = "1.1.0"
+WEB_VERSION = "1.2.0"
 CONTRACT = "sc-library-web-application/1.0"
 READINESS_CONTRACT = "sc-library-web-readiness/1.0"
 
 SURFACES: tuple[dict[str, Any], ...] = (
-    {"id":"search","label":"Search","route":"#/search","api":"/api/library/v1/search","public":True},
-    {"id":"reader","label":"Reader","route":"#/record/{record_id}","api":"/api/library/v1/records/{record_id}","public":True},
-    {"id":"discover","label":"Discover","route":"#/discover","api":"/api/library/v1/capabilities","public":True},
-    {"id":"system","label":"System","route":"#/system","api":"/api/library/v1/readiness","public":True},
-    {"id":"account","label":"Account","route":"#/account","api":"/api/library/v1/session","public":True},
+    {"id":"search","label":"Search","route":"/search","api":"/api/library/v1/search","public":True,"index":False},
+    {"id":"reader","label":"Reader","route":"/record/{record_id}","api":"/api/library/v1/records/{record_id}","public":True,"index":True},
+    {"id":"discover","label":"Discover","route":"/discover","api":"/api/library/v1/capabilities","public":True,"index":True},
+    {"id":"system","label":"System","route":"/system","api":"/api/library/v1/readiness","public":True,"index":False},
+    {"id":"account","label":"Account","route":"/account","api":"/api/library/v1/session","public":True,"index":False},
 )
 
 
@@ -35,10 +35,10 @@ def application_contract() -> dict[str, Any]:
         "application_id": "sustainable-catalyst-library-web",
         "application_contract_id": "library-web-application:" + fp[:32],
         "application_fingerprint_sha256": fp,
-        "library_version": "5.62.0",
-        "backend_version": "2.73.0",
+        "library_version": "5.63.0",
+        "backend_version": "2.74.0",
         "web_version": WEB_VERSION,
-        "state": "foundation",
+        "state": "public-routing-ready",
         "deployment_model": "independent-static-web-service",
         "api": {"version":"1.0","base_path":"/api/library/v1","same_origin_proxy_supported":True},
         "surfaces": [dict(x) for x in SURFACES],

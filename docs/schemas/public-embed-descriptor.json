@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sc-library-public-embed-descriptor/1.0",
+  "type": "object",
+  "required": [
+    "schema",
+    "record_id",
+    "src",
+    "sandbox",
+    "write_authority"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-public-embed-descriptor/1.0"
+    },
+    "write_authority": {
+      "const": false
+    }
+  }
+}

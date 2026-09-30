@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sc-library-public-routing-seo-embed-bridge/1.0",
+  "type": "object",
+  "required": [
+    "schema",
+    "library_version",
+    "backend_version",
+    "web_version",
+    "public_origin",
+    "routes",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-public-routing-seo-embed-bridge/1.0"
+    },
+    "public_origin": {
+      "type": "string",
+      "pattern": "^https?://"
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 6
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

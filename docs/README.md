@@ -9,3 +9,5 @@
 - `postgresql-schema.sql` — schema reference.
 
 - `architecture/library-runtime-authority.md` — v5.58 authoritative runtime boundary and WordPress adapter contract.
+
+- `architecture/public-routing-seo-embed-bridge.md` — canonical public routing, SEO metadata and embed bridge.

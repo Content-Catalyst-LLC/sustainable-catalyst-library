@@ -178,6 +178,7 @@ from .independent_api import (
 )
 from .web_application import application_contract as library_web_application_contract, readiness as library_web_readiness
 from .wordpress_thin_adapter import contract as wordpress_thin_adapter_contract, readiness as wordpress_thin_adapter_readiness
+from .public_routing import contract as public_routing_contract, readiness as public_routing_readiness, record_seo_descriptor, record_embed_descriptor
 from .identity_access import (
     COOKIE_NAME as LIBRARY_SESSION_COOKIE, access_decision as library_access_decision, authenticate_password as library_authenticate_password,
     bind_role as library_bind_role, boundary_contract as library_identity_boundary_contract, create_access_grant as library_create_access_grant,
@@ -660,11 +661,13 @@ def health() -> dict[str, Any]:
             "new_research_capability_may_require_wordpress": False,
             "wordpress_adapter_role": "thin-adapter",
             "wordpress_thin_adapter": True,
+            "public_routing_seo_embed_bridge": True,
+            "public_origin_authority": "library-web",
             "wordpress_thin_adapter_backend_contract": True,
             "wordpress_thin_adapter_research_authority": False,
             "direct_library_api_clients": True,
             "independent_library_web_application": True,
-            "library_web_version": "1.1.0",
+            "library_web_version": "1.2.0",
             "library_web_direct_api_v1": True,
             "wordpress_required_for_library_web": False,
             "library_web_owns_research_state": False,
@@ -2741,11 +2744,11 @@ async def cross_language_resolution_decision_ingest(
 
 
 
-# Knowledge Library v5.62.0 — WordPress Thin Adapter
+# Knowledge Library v5.63.0 — Public Routing, SEO & Embed Bridge
 @app.get("/api/library/v1")
 def library_api_v1_root() -> dict[str, Any]:
     c = library_api_service_contract()
-    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.62.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes"}}
+    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.63.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes"}}
 
 @app.get("/api/library/v1/service")
 def library_api_v1_service() -> dict[str, Any]: return library_api_service_contract()
@@ -2753,7 +2756,7 @@ def library_api_v1_service() -> dict[str, Any]: return library_api_service_contr
 @app.get("/api/library/v1/health")
 def library_api_v1_health() -> dict[str, Any]:
     db_state, detail = database_state()
-    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.62.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
+    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.63.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
 
 @app.get("/api/library/v1/readiness")
 def library_api_v1_readiness() -> dict[str, Any]: return library_api_readiness()
@@ -2807,6 +2810,25 @@ def library_api_v1_wordpress_adapter() -> dict[str, Any]: return wordpress_thin_
 
 @app.get("/api/library/v1/wordpress-adapter/readiness")
 def library_api_v1_wordpress_adapter_readiness() -> dict[str, Any]: return wordpress_thin_adapter_readiness()
+
+
+@app.get("/api/library/v1/public-routing")
+def library_api_v1_public_routing() -> dict[str, Any]: return public_routing_contract()
+
+@app.get("/api/library/v1/public-routing/readiness")
+def library_api_v1_public_routing_readiness() -> dict[str, Any]: return public_routing_readiness()
+
+@app.get("/api/library/v1/seo/records/{record_id:path}")
+def library_api_v1_record_seo(record_id: str) -> dict[str, Any]:
+    record = get_record(record_id, include_body=False)
+    if record is None: raise HTTPException(status_code=404, detail=library_api_error_envelope("record-not-found","Library record not found",status=404))
+    return record_seo_descriptor(record_id, record)
+
+@app.get("/api/library/v1/embed/records/{record_id:path}")
+def library_api_v1_record_embed(record_id: str) -> dict[str, Any]:
+    record = get_record(record_id, include_body=False)
+    if record is None: raise HTTPException(status_code=404, detail=library_api_error_envelope("record-not-found","Library record not found",status=404))
+    return record_embed_descriptor(record_id, record)
 
 
 def _library_session_from_request(request: Request, *, rotate_csrf: bool = False):

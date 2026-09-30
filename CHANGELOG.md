@@ -1,3 +1,9 @@
+## v5.63.0 — Public Routing, SEO & Embed Bridge
+- Backend v2.74.0 publishes a canonical public routing contract, route-level indexing policy, record SEO descriptors, and sandboxed embed descriptors.
+- Library Web v1.2.0 moves from hash-only navigation to clean public paths while preserving the direct `/api/library/v1` backend path.
+- Default canonical public origin is `https://library.sustainablecatalyst.com`, configurable through `SC_LIBRARY_PUBLIC_ORIGIN`.
+- WordPress adds a read-only public bridge with launch and embed shortcodes; it remains non-authoritative and is not a proxy requirement.
+
 ## v5.60.0 — Independent Library Web Application Foundation
 
 - Adds standalone `library-web` v1.0.0 with Search, Reader, Discover and System surfaces.

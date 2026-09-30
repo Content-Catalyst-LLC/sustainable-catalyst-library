@@ -1,4 +1,4 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "1.1.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "1.2.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
 const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null };
 
@@ -23,17 +23,58 @@ function setApiStatus(ok, label) {
   pill.lastChild.textContent = label; pill.querySelector("span").setAttribute("aria-label", ok ? "online" : "offline");
 }
 
+function currentRoute() {
+  const hashRaw=(location.hash || "").replace(/^#\/?/, "");
+  if (hashRaw) return hashRaw;
+  return location.pathname.replace(/^\/+|\/+$/g, "") || "search";
+}
+
 function route() {
-  const raw=(location.hash || "#/search").slice(2); const [name="search", ...rest]=raw.split("/");
+  const raw=currentRoute(); const [name="search", ...rest]=raw.split("/");
   const view = ["search","discover","system","account"].includes(name) ? name : name === "record" ? "record" : "search";
   $$(".view").forEach(el => { el.hidden = el.dataset.view !== view; });
   $$('[data-nav]').forEach(a => a.setAttribute('aria-current', a.dataset.nav===view ? 'page' : 'false'));
+  updatePublicMetadata(view, rest);
   if (view === "discover") loadCapabilities();
   if (view === "system") loadSystem();
   if (view === "account") loadSession();
   if (view === "record" && rest.length) loadRecord(decodeURIComponent(rest.join("/")));
   requestAnimationFrame(() => $("#main")?.focus({preventScroll:true}));
 }
+
+function navigate(path) {
+  if (location.pathname !== path || location.hash) history.pushState({}, "", path);
+  route();
+}
+
+function updatePublicMetadata(view, rest=[]) {
+  const origin=String(config.publicOrigin || location.origin).replace(/\/$/, "");
+  let path=view === "search" ? "/search" : `/${view}`;
+  if (view === "record" && rest.length) path=`/record/${encodeURIComponent(decodeURIComponent(rest.join("/")))}`;
+  const canonical=document.querySelector('link[rel="canonical"]') || document.head.appendChild(Object.assign(document.createElement('link'),{rel:'canonical'}));
+  canonical.href=origin + (path === "/search" ? path : path);
+  const robots=document.querySelector('meta[name="robots"]') || document.head.appendChild(Object.assign(document.createElement('meta'),{name:'robots'}));
+  robots.content=["search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
+}
+
+function setMeta(name, content, property=false) {
+  const selector=property ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+  const node=document.querySelector(selector) || document.head.appendChild(Object.assign(document.createElement('meta'), property ? {property:name}:{name}));
+  node.content=content || "";
+}
+
+function applySeoDescriptor(seo) {
+  if (!seo) return;
+  document.title=seo.title ? `${seo.title} — Sustainable Catalyst Knowledge Library` : 'Sustainable Catalyst Knowledge Library';
+  setMeta('description', seo.description || '');
+  setMeta('robots', seo.robots || 'index,follow');
+  setMeta('og:type', seo.open_graph?.type || 'article', true);
+  setMeta('og:title', seo.open_graph?.title || seo.title || '', true);
+  setMeta('og:description', seo.open_graph?.description || seo.description || '', true);
+  setMeta('og:url', seo.open_graph?.url || seo.canonical_url || '', true);
+  const canonical=document.querySelector('link[rel="canonical"]'); if (canonical && seo.canonical_url) canonical.href=seo.canonical_url;
+}
+
 
 function pick(record, keys) { for (const k of keys) if (record?.[k] != null && record[k] !== "") return record[k]; return null; }
 function resultTitle(record) { return pick(record,["title","name","label","display_title","record_id","id"]) || "Untitled record"; }
@@ -48,7 +89,7 @@ function renderResults(items, append=false) {
   for (const record of items) {
     const id=resultId(record); const card=document.createElement("article"); card.className="result-card";
     const title=escapeHtml(resultTitle(record)); const summary=escapeHtml(text(resultSummary(record)).slice(0,700)); const type=escapeHtml(objectType(record));
-    card.innerHTML=`<div class="result-meta"><span>${type}</span>${record.year?`<span>${escapeHtml(record.year)}</span>`:""}</div><h3>${id?`<a href="#/record/${encodeURIComponent(id)}">${title}</a>`:title}</h3><p>${summary}</p>`;
+    card.innerHTML=`<div class="result-meta"><span>${type}</span>${record.year?`<span>${escapeHtml(record.year)}</span>`:""}</div><h3>${id?`<a href="/record/${encodeURIComponent(id)}" data-app-link>${title}</a>`:title}</h3><p>${summary}</p>`;
     frag.append(card);
   }
   target.append(frag);
@@ -71,6 +112,7 @@ async function loadRecord(id) {
   $("#reader-id").textContent=id; const target=$("#reader"); target.innerHTML='<p class="empty-state">Loading record…</p>';
   try {
     const data=await api(`/records/${encodeURIComponent(id)}?include_body=true`); const r=data.record || {};
+    api(`/seo/records/${encodeURIComponent(id)}`).then(applySeoDescriptor).catch(()=>{});
     const title=escapeHtml(resultTitle(r)); const body=pick(r,["body_text","body","content","abstract","summary","description"]) || "No readable body is available for this record.";
     const source=pick(r,["source_name","source","source_key"]); const type=objectType(r);
     target.innerHTML=`<header><p class="eyebrow">${escapeHtml(type)}</p><h1>${title}</h1><div class="reader-meta">${source?`<span>Source: ${escapeHtml(source)}</span>`:""}${r.year?`<span>Year: ${escapeHtml(r.year)}</span>`:""}</div></header><div class="reader-body">${escapeHtml(body).split(/\n{2,}/).map(p=>`<p>${p.replace(/\n/g,"<br>")}</p>`).join("")}</div><details><summary>Record metadata</summary><pre>${escapeHtml(JSON.stringify(r,null,2))}</pre></details>`;
@@ -101,16 +143,19 @@ async function loadSystem() {
 }
 
 async function bootstrap() {
+  if (new URLSearchParams(location.search).get('embed') === '1') document.body.classList.add('embed-mode');
   try { const data=await api('/service'); setApiStatus(true,`API ${data.api_version || '1.0'} online`); }
   catch { setApiStatus(false,'API unavailable'); }
   route();
 }
 
-$("#search-form").addEventListener("submit", event => { event.preventDefault(); location.hash="#/search"; search(); });
+$("#search-form").addEventListener("submit", event => { event.preventDefault(); navigate("/search"); search(); });
 $("#load-more").addEventListener("click",()=>search({append:true}));
-$("#reader-back").addEventListener("click",()=>history.length>1?history.back():(location.hash="#/search"));
+$("#reader-back").addEventListener("click",()=>history.length>1?history.back():navigate("/search"));
 $("#login-form")?.addEventListener("submit",login);
 window.addEventListener("hashchange",route);
+window.addEventListener("popstate",route);
+document.addEventListener('click',event=>{const a=event.target.closest('a[data-app-link], nav a'); if(!a) return; const url=new URL(a.href,location.href); if(url.origin!==location.origin) return; event.preventDefault(); navigate(url.pathname);});
 bootstrap();
 
 
@@ -138,7 +183,7 @@ async function login(event) {
   event.preventDefault(); const error=$("#login-error"); error.hidden=true;
   const handle=$("#login-handle").value.trim(); const password=$("#login-password").value;
   try {
-    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v1.1.0'})});
+    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v1.2.0'})});
     $("#login-password").value=''; renderSession(session);
   } catch (e) { error.textContent=e.message; error.hidden=false; }
 }

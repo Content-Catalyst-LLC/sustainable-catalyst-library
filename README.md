@@ -3,7 +3,7 @@
 # Sustainable Catalyst Knowledge Library
 
 Current release: **v5.61.0 — Library Identity, Session & Access Boundary**  
-Backend: **v2.72.0** · Library Web: **v1.1.0** · API: **v1.0**
+Backend: **v2.74.0** · Library Web: **v1.2.0** · API: **v1.0**
 
 The Library service now owns identity, sessions, roles/scopes, and access decisions. WordPress remains an optional non-authoritative adapter.
 
@@ -47,4 +47,4 @@ v5.54.0 adds governed alignment matrices between preserved original-language tex
 `library-web/` is the first standalone Knowledge Library client. It calls `/api/library/v1` directly and does not require WordPress.
 
 
-Current release: v5.62.0 — WordPress Thin Adapter (backend v2.73.0; Library Web v1.1.0).
+Current release: v5.63.0 — Public Routing, SEO & Embed Bridge (backend v2.74.0; Library Web v1.2.0).

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.62.0 establishes the WordPress Thin Adapter: WordPress is limited to routing, SEO/public metadata, launch/embed surfaces, health/status, optional identity handoff, and legacy presentation compatibility while Library services remain authoritative.
- * Version: 5.62.0
+ * Description: Sustainable Catalyst Library v5.63.0 establishes the Public Routing, SEO & Embed Bridge for the independent Library Web application while WordPress remains a non-authoritative thin adapter.
+ * Version: 5.63.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.62.0');
+define('SC_LIBRARY_VERSION', '5.63.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'thin-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);
@@ -98,6 +98,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-api-v1.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-web-application.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-identity-access.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-wordpress-thin-adapter.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-public-routing-bridge.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-civilizational-linking.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-translation-alignment.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence.php';
@@ -198,6 +199,7 @@ final class SC_Library_Plugin {
         $library_api_v1 = new SC_Library_API_V1();
         $library_web_application = new SC_Library_Web_Application();
         $wordpress_thin_adapter = new SC_Library_WordPress_Thin_Adapter();
+        $public_routing_bridge = new SC_Library_Public_Routing_Bridge();
         $cross_civilizational_linking = new SC_Library_Cross_Civilizational_Linking();
         $translation_alignment = new SC_Library_Translation_Alignment();
         $cross_language_resolution = new SC_Library_Cross_Language_Resolution();

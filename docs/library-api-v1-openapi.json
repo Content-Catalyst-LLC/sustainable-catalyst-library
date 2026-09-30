@@ -320,6 +320,66 @@
           }
         }
       }
+    },
+    "/public-routing": {
+      "get": {
+        "summary": "Public routing, SEO and embed bridge contract",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/public-routing/readiness": {
+      "get": {
+        "summary": "Public routing bridge readiness",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/seo/records/{record_id}": {
+      "get": {
+        "summary": "Record SEO descriptor",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/embed/records/{record_id}": {
+      "get": {
+        "summary": "Record embed descriptor",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
     }
   },
   "components": {

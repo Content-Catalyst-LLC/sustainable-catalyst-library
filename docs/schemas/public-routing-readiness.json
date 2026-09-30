@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sc-library-public-routing-readiness/1.0",
+  "type": "object",
+  "required": [
+    "schema",
+    "state",
+    "public_origin",
+    "wordpress_required"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-public-routing-readiness/1.0"
+    },
+    "state": {
+      "enum": [
+        "ready",
+        "degraded"
+      ]
+    },
+    "public_origin": {
+      "type": "string"
+    },
+    "wordpress_required": {
+      "const": false
+    }
+  }
+}

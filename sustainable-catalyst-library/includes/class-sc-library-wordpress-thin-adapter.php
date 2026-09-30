@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 final class SC_Library_WordPress_Thin_Adapter {
-    public const VERSION = '5.62.0';
+    public const VERSION = '5.63.0';
     public const SCHEMA = 'sc-library-wordpress-thin-adapter/1.0';
     public const ROLE = 'thin-adapter';
 
@@ -89,7 +89,7 @@ final class SC_Library_WordPress_Thin_Adapter {
         $contract = self::local_contract();
         ob_start(); ?>
         <section class="sc-library-wordpress-thin-adapter" data-schema="<?php echo esc_attr(self::SCHEMA); ?>">
-            <p class="sc-kicker">Knowledge Library v5.62.0</p>
+            <p class="sc-kicker">Knowledge Library v5.63.0</p>
             <h2><?php echo esc_html((string) $atts['title']); ?></h2>
             <p>WordPress is a thin presentation adapter. Authoritative research state, execution, identities, sessions, artifacts, pipelines, federation, and Platform Core governance remain outside WordPress.</p>
             <dl>
