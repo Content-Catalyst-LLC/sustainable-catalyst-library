@@ -169,6 +169,13 @@ from .global_knowledge_federation import (
     readiness as global_knowledge_federation_readiness,
     validate_certification_payload as validate_global_knowledge_federation_certification,
 )
+from .independent_api import (
+    CONTRACT as LIBRARY_API_SERVICE_CONTRACT, READINESS_CONTRACT as LIBRARY_API_READINESS_CONTRACT,
+    capability_catalog as library_api_capability_catalog, error_envelope as library_api_error_envelope,
+    page_envelope as library_api_page_envelope, persist_service_contract as persist_library_api_service_contract,
+    readiness as library_api_readiness, route_catalog as library_api_route_catalog,
+    service_contract as library_api_service_contract, validate_service_contract as validate_library_api_service_contract,
+)
 from .runtime_authority import (
     CERTIFICATION_CONTRACT as RUNTIME_AUTHORITY_CERTIFICATION_CONTRACT,
     READINESS_CONTRACT as RUNTIME_AUTHORITY_READINESS_CONTRACT,
@@ -382,6 +389,10 @@ def health() -> dict[str, Any]:
         "database_detail": detail,
         "capabilities": {
             "postgresql": True,
+            "independent_library_api_v1": True,
+            "library_api_v1_wordpress_independent": True,
+            "library_api_v1_stable_service_contract": True,
+            "library_api_v1_base_path": "/api/library/v1",
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
             "record_chunks": True,
@@ -2700,6 +2711,79 @@ async def cross_language_resolution_decision_ingest(
     except (ValueError, json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
+
+
+
+# Knowledge Library v5.59.0 — Independent Library API v1 & Service Contract
+@app.get("/api/library/v1")
+def library_api_v1_root() -> dict[str, Any]:
+    c = library_api_service_contract()
+    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.59.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes"}}
+
+@app.get("/api/library/v1/service")
+def library_api_v1_service() -> dict[str, Any]: return library_api_service_contract()
+
+@app.get("/api/library/v1/health")
+def library_api_v1_health() -> dict[str, Any]:
+    db_state, detail = database_state()
+    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.59.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
+
+@app.get("/api/library/v1/readiness")
+def library_api_v1_readiness() -> dict[str, Any]: return library_api_readiness()
+
+@app.get("/api/library/v1/capabilities")
+def library_api_v1_capabilities() -> dict[str, Any]: return library_api_capability_catalog()
+
+@app.get("/api/library/v1/routes")
+def library_api_v1_routes() -> dict[str, Any]:
+    routes=library_api_route_catalog(); return {"schema":"sc-library-api-route-catalog/1.0","api_version":"1.0","count":len(routes),"routes":routes}
+
+@app.get("/api/library/v1/stats")
+def library_api_v1_stats() -> dict[str, Any]: return {"schema":"sc-library-api-stats/1.0","data":stats()}
+
+@app.get("/api/library/v1/search")
+def library_api_v1_search(q: str="", object_type: str|None=None, source_key: str|None=None, topic: str|None=None, year_from: int|None=None, year_to: int|None=None, sort: str="relevance", limit: int=20, offset: int=0, mode: str="hybrid") -> dict[str, Any]:
+    result=hybrid_search_records(q,object_type,source_key,topic,year_from,year_to,sort,limit,offset,mode,True)
+    items=list(result.get("results") or [])
+    page=library_api_page_envelope(items,limit=int(result.get("limit",limit)),offset=int(result.get("offset",offset)),total=result.get("total"))
+    return {"schema":"sc-library-api-search-response/1.0","query":result.get("query",q),"filters":result.get("filters",{}),"retrieval":result.get("retrieval",{}),**page}
+
+@app.get("/api/library/v1/records/{record_id:path}")
+def library_api_v1_record(record_id: str, include_body: bool=True) -> dict[str, Any]:
+    record=get_record(record_id,include_body=include_body)
+    if record is None: raise HTTPException(status_code=404,detail=library_api_error_envelope("record-not-found","Library record not found",status=404))
+    return {"schema":"sc-library-api-record/1.0","record":record}
+
+@app.get("/api/library/v1/runtime-authority")
+def library_api_v1_runtime_authority() -> dict[str, Any]: return runtime_authority_readiness()
+
+@app.get("/api/library/v1/federation/readiness")
+def library_api_v1_federation_readiness() -> dict[str, Any]: return global_knowledge_federation_readiness()
+
+@app.get("/api/library/v1/artifacts/readiness")
+def library_api_v1_artifact_readiness() -> dict[str, Any]: return artifact_storage_readiness()
+
+@app.get("/api/library/v1/pipelines/readiness")
+def library_api_v1_pipeline_readiness() -> dict[str, Any]: return pipeline_readiness()
+
+@app.get("/api/library/v1/compute/readiness")
+def library_api_v1_compute_readiness() -> dict[str, Any]: return compute_broker_readiness()
+
+@app.post("/api/library/v1/research-jobs")
+async def library_api_v1_submit_research_job(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return {"schema":"sc-library-api-research-job-response/1.0","job":submit_research_job(payload)}
+    except (ValueError,TypeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=library_api_error_envelope("invalid-research-job",str(exc),status=400)) from exc
+
+@app.post("/api/library/v1/admin/service-contracts")
+async def library_api_v1_persist_service_contract(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return persist_library_api_service_contract(payload.get("provenance") if isinstance(payload,dict) else {})
+    except (ValueError,TypeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=library_api_error_envelope("invalid-service-contract",str(exc),status=400)) from exc
 
 @app.get("/v1/runtime-authority/readiness")
 def runtime_authority_readiness_endpoint() -> dict[str, Any]:

@@ -1,5 +1,14 @@
 # Changelog
 
+## v5.59.0 — Independent Library API v1 & Service Contract
+
+- Publishes the stable `/api/library/v1` WordPress-independent service boundary.
+- Adds versioned service metadata, readiness, capability/route discovery, search, records, stats, and signed durable research-job submission.
+- Defines stable error and pagination envelopes plus API compatibility rules.
+- Adds deterministic service-contract fingerprinting and optional signed contract publication lineage.
+- Keeps legacy `/v1/*` routes as compatibility/internal surfaces rather than silently treating them as the new public contract.
+- Preserves v5.58 runtime authority: WordPress is a client adapter and is not required for API v1 execution.
+
 ## v5.58.0 — Library Runtime Authority & WordPress Decoupling Foundation
 
 - Makes the Library API/Python/PostgreSQL service boundary authoritative for research execution and state.

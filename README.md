@@ -1,11 +1,19 @@
 # Sustainable Catalyst Knowledge Library
 
-**Current release:** v5.58.0 — Library Runtime Authority & WordPress Decoupling Foundation  
-**Backend:** v2.69.0  
+**Current release:** v5.59.0 — Independent Library API v1 & Service Contract  
+**Backend:** v2.70.0  
 **Go ingestion runtime:** v0.1.0  
 **Rust graph runtime:** v0.2.0
 
 The Knowledge Library is the research publishing, source-intelligence, corpus, retrieval, preservation, and connected-knowledge layer of Sustainable Catalyst.
+
+## v5.59 Independent Library API v1
+
+The Library now publishes a stable WordPress-independent service contract at `/api/library/v1`. The contract owns service metadata, health/readiness, capability discovery, route discovery, search/record reads, stable pagination/error envelopes, and signed durable research-job submission. Existing `/v1/*` routes remain compatibility/internal surfaces and are not the API v1 stability boundary.
+
+**Compatibility rule:** breaking API changes require a new major API version. Additive fields may be introduced within v1, and clients must ignore unknown fields. WordPress is not required to execute API v1.
+
+See `docs/library-api-v1-openapi.json` and `docs/architecture/library-api-v1.md`.
 
 ## v5.58 runtime authority
 

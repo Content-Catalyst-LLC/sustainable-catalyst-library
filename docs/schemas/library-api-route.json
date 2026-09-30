@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library API Route",
+  "type": "object",
+  "required": [
+    "schema",
+    "method",
+    "path",
+    "name",
+    "access",
+    "stability"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-api-route/1.0"
+    },
+    "method": {
+      "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ]
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^/api/library/v1"
+    },
+    "name": {
+      "type": "string"
+    },
+    "access": {
+      "enum": [
+        "public",
+        "signed-service",
+        "signed-admin"
+      ]
+    },
+    "stability": {
+      "enum": [
+        "stable",
+        "experimental",
+        "deprecated"
+      ]
+    }
+  }
+}

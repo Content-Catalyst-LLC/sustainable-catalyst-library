@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library API Page",
+  "type": "object",
+  "required": [
+    "schema",
+    "items",
+    "page"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-api-page/1.0"
+    },
+    "items": {
+      "type": "array"
+    },
+    "page": {
+      "type": "object",
+      "required": [
+        "limit",
+        "offset",
+        "count"
+      ]
+    }
+  }
+}

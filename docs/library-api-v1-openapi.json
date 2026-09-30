@@ -1,0 +1,159 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sustainable Catalyst Knowledge Library API",
+    "version": "1.0.0",
+    "description": "Stable WordPress-independent Knowledge Library service contract."
+  },
+  "servers": [
+    {
+      "url": "/api/library/v1"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "libraryServiceRoot",
+        "responses": {
+          "200": {
+            "description": "Service metadata"
+          }
+        }
+      }
+    },
+    "/service": {
+      "get": {
+        "operationId": "libraryServiceContract",
+        "responses": {
+          "200": {
+            "description": "Service contract"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "libraryApiHealth",
+        "responses": {
+          "200": {
+            "description": "Health"
+          }
+        }
+      }
+    },
+    "/readiness": {
+      "get": {
+        "operationId": "libraryApiReadiness",
+        "responses": {
+          "200": {
+            "description": "Readiness"
+          }
+        }
+      }
+    },
+    "/capabilities": {
+      "get": {
+        "operationId": "libraryApiCapabilities",
+        "responses": {
+          "200": {
+            "description": "Capabilities"
+          }
+        }
+      }
+    },
+    "/routes": {
+      "get": {
+        "operationId": "libraryApiRoutes",
+        "responses": {
+          "200": {
+            "description": "Route catalog"
+          }
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "operationId": "librarySearch",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results"
+          }
+        }
+      }
+    },
+    "/records/{record_id}": {
+      "get": {
+        "operationId": "libraryRecord",
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Record"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/research-jobs": {
+      "post": {
+        "operationId": "submitResearchJob",
+        "security": [
+          {
+            "signedService": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Durable research job"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "signedService": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-SC-Signature",
+        "description": "Signed service request; Authorization and X-SC-Timestamp are also required."
+      }
+    }
+  }
+}

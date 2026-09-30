@@ -8,7 +8,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.58.0
+Stable tag: 5.59.0
 License: GPLv2 or later
 
 WordPress adapter for the independent Sustainable Catalyst Knowledge Library research platform. WordPress provides publishing, routing, SEO, embeds, compatibility surfaces, and health integration; the Library API/backend owns authoritative research state and execution.
@@ -428,6 +428,12 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= 5.59.0 =
+* Added stable WordPress-independent /api/library/v1 service contract.
+* Added service metadata, readiness, capability and route discovery, search/record access, stable error/pagination envelopes, and signed durable research-job submission.
+* WordPress remains a non-authoritative adapter; existing /v1 routes remain compatibility/internal surfaces.
+
 
 = 5.56.0 =
 * Added provenance-backed descriptive source-quality signals and source-transparency profiles.

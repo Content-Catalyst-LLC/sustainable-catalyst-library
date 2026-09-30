@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library API Readiness",
+  "type": "object",
+  "required": [
+    "schema",
+    "api_version",
+    "base_path",
+    "state",
+    "wordpress_required"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-api-readiness/1.0"
+    },
+    "api_version": {
+      "const": "1.0"
+    },
+    "base_path": {
+      "const": "/api/library/v1"
+    },
+    "state": {
+      "enum": [
+        "ready",
+        "degraded",
+        "unavailable"
+      ]
+    },
+    "wordpress_required": {
+      "const": false
+    }
+  }
+}

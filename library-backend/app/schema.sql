@@ -1190,3 +1190,31 @@ CREATE TABLE IF NOT EXISTS library_runtime_authority_events (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS library_runtime_authority_events_cert_idx ON library_runtime_authority_events(certification_id,event_id DESC);
+
+
+-- Independent Library API v1 & Service Contract (Library v5.59.0 / backend v2.70.0)
+-- This records API contract publication. WordPress is not an API runtime dependency.
+CREATE TABLE IF NOT EXISTS library_api_service_contracts (
+    contract_id text PRIMARY KEY,
+    api_version text NOT NULL,
+    state text NOT NULL CHECK (state IN ('stable','superseded','revoked')),
+    base_path text NOT NULL,
+    route_catalog jsonb NOT NULL,
+    capability_catalog jsonb NOT NULL,
+    auth_contract jsonb NOT NULL,
+    error_contract text NOT NULL,
+    pagination_contract text NOT NULL,
+    contract_fingerprint char(64) NOT NULL UNIQUE,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    guardrails jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_api_service_contracts_version_idx ON library_api_service_contracts(api_version,created_at DESC);
+CREATE TABLE IF NOT EXISTS library_api_service_contract_events (
+    event_id bigserial PRIMARY KEY,
+    contract_id text NOT NULL REFERENCES library_api_service_contracts(contract_id) ON DELETE RESTRICT,
+    event_type text NOT NULL,
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_api_service_contract_events_contract_idx ON library_api_service_contract_events(contract_id,event_id DESC);

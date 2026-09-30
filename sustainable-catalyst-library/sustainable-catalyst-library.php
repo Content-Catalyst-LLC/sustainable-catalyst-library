@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.58.0 formalizes Library runtime authority and the WordPress decoupling foundation: the Library API/backend owns research execution and state while WordPress becomes a non-authoritative publishing, routing, and embed adapter.
- * Version: 5.58.0
+ * Description: Sustainable Catalyst Library v5.59.0 publishes Independent Library API v1: a stable /api/library/v1 service contract independent of WordPress, with versioned service metadata, capabilities, readiness, search/record access, signed research-job submission, stable errors, and pagination.
+ * Version: 5.59.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.58.0');
+define('SC_LIBRARY_VERSION', '5.59.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'publishing-routing-embed-adapter');
 define('SC_LIBRARY_RESEARCH_RUNTIME_AUTHORITY', 'library-api');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
@@ -92,6 +92,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-language-resoluti
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-source-transparency.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-global-knowledge-federation.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-runtime-authority.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-api-v1.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-civilizational-linking.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-translation-alignment.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence.php';
@@ -189,6 +190,7 @@ final class SC_Library_Plugin {
         $source_transparency = new SC_Library_Source_Transparency();
         $global_knowledge_federation = new SC_Library_Global_Knowledge_Federation();
         $runtime_authority = new SC_Library_Runtime_Authority();
+        $library_api_v1 = new SC_Library_API_V1();
         $cross_civilizational_linking = new SC_Library_Cross_Civilizational_Linking();
         $translation_alignment = new SC_Library_Translation_Alignment();
         $cross_language_resolution = new SC_Library_Cross_Language_Resolution();
@@ -293,6 +295,7 @@ final class SC_Library_Plugin {
         $source_transparency->register_hooks();
         $global_knowledge_federation->register_hooks();
         $runtime_authority->register_hooks();
+        $library_api_v1->register_hooks();
         $cross_civilizational_linking->register_hooks();
         $translation_alignment->register_hooks();
         $cross_language_resolution->register_hooks();
