@@ -1,3 +1,10 @@
+## v5.60.0 — Independent Library Web Application Foundation
+
+- Adds standalone `library-web` v1.0.0 with Search, Reader, Discover and System surfaces.
+- Adds direct same-origin `/api/library/v1` proxying to the authoritative backend.
+- Adds web-application contract/readiness endpoints to backend v2.71.0.
+- Keeps WordPress as an optional launch/embed adapter rather than application runtime.
+
 # Changelog
 
 ## v5.59.0 — Independent Library API v1 & Service Contract

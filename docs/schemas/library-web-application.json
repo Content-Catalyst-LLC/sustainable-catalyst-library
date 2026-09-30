@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Library Web Application",
+  "type": "object",
+  "required": [
+    "schema",
+    "application_id",
+    "library_version",
+    "backend_version",
+    "web_version",
+    "api",
+    "surfaces",
+    "wordpress"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-web-application/1.0"
+    },
+    "application_id": {
+      "const": "sustainable-catalyst-library-web"
+    },
+    "library_version": {
+      "const": "5.60.0"
+    },
+    "backend_version": {
+      "const": "2.71.0"
+    },
+    "web_version": {
+      "const": "1.0.0"
+    },
+    "wordpress": {
+      "type": "object"
+    },
+    "api": {
+      "type": "object"
+    },
+    "surfaces": {
+      "type": "array",
+      "minItems": 4
+    }
+  }
+}

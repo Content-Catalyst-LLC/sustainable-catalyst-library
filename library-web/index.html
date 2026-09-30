@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#111111">
+  <meta name="description" content="Sustainable Catalyst Knowledge Library — independent research discovery and reading application.">
+  <title>Sustainable Catalyst Knowledge Library</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#/search" aria-label="Knowledge Library home">
+        <span class="brand-mark">SC</span><span><strong>Sustainable Catalyst</strong><small>Knowledge Library</small></span>
+      </a>
+      <nav aria-label="Library">
+        <a data-nav="search" href="#/search">Search</a>
+        <a data-nav="discover" href="#/discover">Discover</a>
+        <a data-nav="system" href="#/system">System</a>
+      </nav>
+      <div class="status-pill" id="api-status" aria-live="polite"><span></span>Connecting</div>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <section class="view" data-view="search">
+        <div class="hero">
+          <p class="eyebrow">Independent research knowledge platform</p>
+          <h1>Search the Knowledge Library</h1>
+          <p>Discover publications, source records, datasets, research objects, and connected evidence through the Library API.</p>
+          <form id="search-form" class="search-form" role="search">
+            <label class="sr-only" for="query">Search the Knowledge Library</label>
+            <input id="query" name="q" type="search" placeholder="Search publications, topics, sources, evidence…" autocomplete="off">
+            <select id="search-mode" aria-label="Search mode"><option value="hybrid">Hybrid</option><option value="lexical">Lexical</option><option value="semantic">Semantic</option></select>
+            <button type="submit">Search</button>
+          </form>
+        </div>
+        <div class="workspace">
+          <aside class="sidebar"><h2>Research scope</h2><p>Results come directly from <code>/api/library/v1</code>. WordPress is not in the request path.</p><dl id="search-meta"></dl></aside>
+          <section class="content-panel"><div class="panel-heading"><h2>Results</h2><span id="result-count"></span></div><div id="search-results" class="result-list"><p class="empty-state">Enter a question, topic, title, author, or source to begin.</p></div><button id="load-more" class="secondary-button" hidden>Load more</button></section>
+        </div>
+      </section>
+
+      <section class="view" data-view="record" hidden>
+        <div class="reader-toolbar"><button id="reader-back" class="text-button">← Back</button><span id="reader-id"></span></div>
+        <article id="reader" class="reader"><p class="empty-state">Loading record…</p></article>
+      </section>
+
+      <section class="view" data-view="discover" hidden>
+        <div class="page-heading"><p class="eyebrow">Capability registry</p><h1>Discover the research stack</h1><p>Browse the service capabilities exposed by the independent Library API.</p></div>
+        <div id="capability-grid" class="card-grid"></div>
+      </section>
+
+      <section class="view" data-view="system" hidden>
+        <div class="page-heading"><p class="eyebrow">Runtime observability</p><h1>Library system status</h1><p>Direct readiness checks for the API, runtime authority, federation, artifacts, pipelines, and compute broker.</p></div>
+        <div id="system-grid" class="card-grid"></div>
+      </section>
+    </main>
+
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v1.0.0 · API v1</span></footer>
+  </div>
+  <script src="/config.js"></script>
+  <script type="module" src="/assets/app.js"></script>
+</body>
+</html>

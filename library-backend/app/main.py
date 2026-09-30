@@ -176,6 +176,7 @@ from .independent_api import (
     readiness as library_api_readiness, route_catalog as library_api_route_catalog,
     service_contract as library_api_service_contract, validate_service_contract as validate_library_api_service_contract,
 )
+from .web_application import application_contract as library_web_application_contract, readiness as library_web_readiness
 from .runtime_authority import (
     CERTIFICATION_CONTRACT as RUNTIME_AUTHORITY_CERTIFICATION_CONTRACT,
     READINESS_CONTRACT as RUNTIME_AUTHORITY_READINESS_CONTRACT,
@@ -651,6 +652,11 @@ def health() -> dict[str, Any]:
             "new_research_capability_may_require_wordpress": False,
             "wordpress_adapter_role": "publishing-routing-embed-adapter",
             "direct_library_api_clients": True,
+            "independent_library_web_application": True,
+            "library_web_version": "1.0.0",
+            "library_web_direct_api_v1": True,
+            "wordpress_required_for_library_web": False,
+            "library_web_owns_research_state": False,
             "research_job_completion_implies_evidence_truth": False,
             "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
@@ -2714,11 +2720,11 @@ async def cross_language_resolution_decision_ingest(
 
 
 
-# Knowledge Library v5.59.0 — Independent Library API v1 & Service Contract
+# Knowledge Library v5.60.0 — Independent Library Web Application Foundation
 @app.get("/api/library/v1")
 def library_api_v1_root() -> dict[str, Any]:
     c = library_api_service_contract()
-    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.59.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes"}}
+    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.60.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes"}}
 
 @app.get("/api/library/v1/service")
 def library_api_v1_service() -> dict[str, Any]: return library_api_service_contract()
@@ -2726,7 +2732,7 @@ def library_api_v1_service() -> dict[str, Any]: return library_api_service_contr
 @app.get("/api/library/v1/health")
 def library_api_v1_health() -> dict[str, Any]:
     db_state, detail = database_state()
-    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.59.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
+    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.60.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
 
 @app.get("/api/library/v1/readiness")
 def library_api_v1_readiness() -> dict[str, Any]: return library_api_readiness()
@@ -2768,6 +2774,12 @@ def library_api_v1_pipeline_readiness() -> dict[str, Any]: return pipeline_readi
 
 @app.get("/api/library/v1/compute/readiness")
 def library_api_v1_compute_readiness() -> dict[str, Any]: return compute_broker_readiness()
+
+@app.get("/api/library/v1/web-application")
+def library_api_v1_web_application() -> dict[str, Any]: return library_web_application_contract()
+
+@app.get("/api/library/v1/web-application/readiness")
+def library_api_v1_web_application_readiness() -> dict[str, Any]: return library_web_readiness()
 
 @app.post("/api/library/v1/research-jobs")
 async def library_api_v1_submit_research_job(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:

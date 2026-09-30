@@ -1,0 +1,9 @@
+{
+  "name": "Sustainable Catalyst Knowledge Library",
+  "short_name": "Knowledge Library",
+  "start_url": "/#/search",
+  "display": "standalone",
+  "background_color": "#f5f5f3",
+  "theme_color": "#111111",
+  "description": "Independent Sustainable Catalyst Knowledge Library web application."
+}

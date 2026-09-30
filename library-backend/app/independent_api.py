@@ -29,6 +29,8 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"GET","path":"/api/library/v1/artifacts/readiness","name":"artifact-readiness","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/pipelines/readiness","name":"pipeline-readiness","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/compute/readiness","name":"compute-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/web-application","name":"web-application","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/web-application/readiness","name":"web-application-readiness","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-jobs","name":"submit-research-job","access":"signed-service","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/service-contracts","name":"persist-service-contract","access":"signed-admin","stability":"stable"},
 )
@@ -42,6 +44,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},
     "cross-civilizational": {"resources":["evidence-links","scientific-data-links"],"direct_api":True},
     "platform-core": {"resources":["bindings","handoffs","outbox"],"direct_api":True,"authority":"platform-core"},
+    "web-application": {"resources":["search-shell","reader","discovery","system-status"],"direct_api":True,"authority":"client"},
 }
 
 
@@ -128,8 +131,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "5.59.0",
-        "backend_version": "2.70.0",
+        "library_version": "5.60.0",
+        "backend_version": "2.71.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -184,8 +187,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "5.59.0",
-        "backend_version": "2.70.0",
+        "library_version": "5.60.0",
+        "backend_version": "2.71.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

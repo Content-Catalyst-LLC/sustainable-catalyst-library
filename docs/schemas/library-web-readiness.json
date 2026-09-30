@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Library Web Readiness",
+  "type": "object",
+  "required": [
+    "schema",
+    "state",
+    "web_version",
+    "api_version",
+    "wordpress_required"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-web-readiness/1.0"
+    },
+    "state": {
+      "enum": [
+        "ready",
+        "degraded",
+        "unavailable"
+      ]
+    },
+    "web_version": {
+      "const": "1.0.0"
+    },
+    "api_version": {
+      "const": "1.0"
+    },
+    "wordpress_required": {
+      "const": false
+    }
+  }
+}

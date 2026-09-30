@@ -52,7 +52,7 @@ class Settings:
     environment: str = os.getenv("SC_LIBRARY_ENVIRONMENT", "production").strip()
     database_url: str = os.getenv("DATABASE_URL", "").strip()
     api_key: str = os.getenv("SC_LIBRARY_BACKEND_API_KEY", "").strip()
-    allowed_origins_raw: str = os.getenv("SC_LIBRARY_ALLOWED_ORIGINS", "https://sustainablecatalyst.com").strip()
+    allowed_origins_raw: str = os.getenv("SC_LIBRARY_ALLOWED_ORIGINS", "https://sustainablecatalyst.com,https://library.sustainablecatalyst.com").strip()
     max_batch_records: int = _as_int("SC_LIBRARY_MAX_BATCH_RECORDS", 200, 1, 1000)
     max_body_bytes: int = _as_int("SC_LIBRARY_MAX_BODY_MB", 12, 1, 50) * 1024 * 1024
     request_skew_seconds: int = _as_int("SC_LIBRARY_REQUEST_SKEW_SECONDS", 300, 30, 900)

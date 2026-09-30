@@ -144,6 +144,26 @@
           }
         }
       }
+    },
+    "/web-application": {
+      "get": {
+        "summary": "Independent Library web application contract",
+        "responses": {
+          "200": {
+            "description": "Web application contract"
+          }
+        }
+      }
+    },
+    "/web-application/readiness": {
+      "get": {
+        "summary": "Independent Library web application readiness",
+        "responses": {
+          "200": {
+            "description": "Web application readiness"
+          }
+        }
+      }
     }
   },
   "components": {

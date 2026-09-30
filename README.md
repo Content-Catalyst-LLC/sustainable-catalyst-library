@@ -1,7 +1,8 @@
 # Sustainable Catalyst Knowledge Library
 
-**Current release:** v5.59.0 — Independent Library API v1 & Service Contract  
-**Backend:** v2.70.0  
+**Current release:** v5.60.0 — Independent Library Web Application Foundation  
+**Backend:** v2.71.0  
+**Web:** v1.0.0  
 **Go ingestion runtime:** v0.1.0  
 **Rust graph runtime:** v0.2.0
 
@@ -31,3 +32,7 @@ See `docs/README.md`, `docs/architecture/library-backend.md`, and `CHANGELOG.md`
 
 
 v5.54.0 adds governed alignment matrices between preserved original-language text representations and derived translations/transliterations. Alignment binds exact source/target text hashes and character spans, supports 1:1, 1:N, N:1, N:M, added/omitted/uncertain relationships, and preserves transformation provenance and explicit review state. The Library never generates a translation or transliteration merely to satisfy an alignment request.
+
+## Independent web application
+
+`library-web/` is the first standalone Knowledge Library client. It calls `/api/library/v1` directly and does not require WordPress.

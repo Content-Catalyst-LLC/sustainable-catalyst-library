@@ -8,7 +8,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.59.0
+Stable tag: 5.60.0
 License: GPLv2 or later
 
 WordPress adapter for the independent Sustainable Catalyst Knowledge Library research platform. WordPress provides publishing, routing, SEO, embeds, compatibility surfaces, and health integration; the Library API/backend owns authoritative research state and execution.
@@ -1691,3 +1691,7 @@ Adds target-side runtime consumer compatibility metadata and certified contract-
 * Adds descriptive methodology comparison and reporting-coverage diagnostics without automatic quality scores, formal risk-of-bias judgments, causal-validity judgments, or truth promotion.
 * Adds methodology-profile graph objects linked to publications while keeping methodology relations outside default evidence-path traversal.
 * Adds [sc_library_methodology_intelligence].
+
+= 5.60.0 =
+* Adds the Independent Library Web Application Foundation (web v1.0.0).
+* WordPress remains an optional publishing/routing/embed adapter; the web app calls Library API v1 directly.
