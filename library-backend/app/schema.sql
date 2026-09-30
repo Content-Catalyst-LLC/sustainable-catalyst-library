@@ -1164,3 +1164,29 @@ CREATE TABLE IF NOT EXISTS library_global_knowledge_federation_events (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS library_global_knowledge_federation_events_cert_idx ON library_global_knowledge_federation_events(certification_id,event_id DESC);
+
+
+-- Library Runtime Authority & WordPress Decoupling Foundation (Library v5.58.0 / backend v2.69.0)
+-- PostgreSQL records certification of the dependency/ownership boundary; WordPress is a non-authoritative client adapter.
+CREATE TABLE IF NOT EXISTS library_runtime_authority_certifications (
+    certification_id text PRIMARY KEY,
+    authority_id text NOT NULL,
+    state text NOT NULL CHECK (state IN ('certified','superseded','revoked')),
+    component_snapshot jsonb NOT NULL,
+    client_snapshot jsonb NOT NULL,
+    ownership_snapshot jsonb NOT NULL,
+    dependency_graph jsonb NOT NULL,
+    certification_fingerprint char(64) NOT NULL UNIQUE,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    guardrails jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_runtime_authority_certifications_authority_idx ON library_runtime_authority_certifications(authority_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS library_runtime_authority_events (
+    event_id bigserial PRIMARY KEY,
+    certification_id text NOT NULL REFERENCES library_runtime_authority_certifications(certification_id) ON DELETE RESTRICT,
+    event_type text NOT NULL,
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_runtime_authority_events_cert_idx ON library_runtime_authority_events(certification_id,event_id DESC);

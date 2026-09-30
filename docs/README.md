@@ -7,3 +7,5 @@
 - `examples/` — client and integration examples.
 - `openapi.json` — API contract snapshot.
 - `postgresql-schema.sql` — schema reference.
+
+- `architecture/library-runtime-authority.md` — v5.58 authoritative runtime boundary and WordPress adapter contract.

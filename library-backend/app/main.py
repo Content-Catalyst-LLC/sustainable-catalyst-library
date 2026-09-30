@@ -169,6 +169,15 @@ from .global_knowledge_federation import (
     readiness as global_knowledge_federation_readiness,
     validate_certification_payload as validate_global_knowledge_federation_certification,
 )
+from .runtime_authority import (
+    CERTIFICATION_CONTRACT as RUNTIME_AUTHORITY_CERTIFICATION_CONTRACT,
+    READINESS_CONTRACT as RUNTIME_AUTHORITY_READINESS_CONTRACT,
+    build_certification as build_runtime_authority_certification,
+    ingest_certification as ingest_runtime_authority_certification,
+    readiness as runtime_authority_readiness,
+    validate_certification_payload as validate_runtime_authority_certification,
+    dependency_graph as runtime_authority_dependency_graph,
+)
 from .cross_civilizational_linking import (
     LINK_CONTRACT as CROSS_CIVILIZATIONAL_LINK_CONTRACT, READINESS_CONTRACT as CROSS_CIVILIZATIONAL_LINKING_READINESS_CONTRACT,
     build_link as build_cross_civilizational_link, build_link_package as build_cross_civilizational_link_package,
@@ -622,6 +631,15 @@ def health() -> dict[str, Any]:
             "global_knowledge_federation_component_certification": True,
             "global_knowledge_federation_governance_boundaries_preserved": True,
             "global_knowledge_federation_automatic_core_promotion": False,
+            "library_runtime_authority_wordpress_decoupling_foundation": True,
+            "library_api_authoritative_runtime_boundary": True,
+            "python_backend_authoritative_library_runtime": True,
+            "postgresql_authoritative_library_research_state": True,
+            "wordpress_authoritative_research_runtime": False,
+            "wordpress_required_for_research_execution": False,
+            "new_research_capability_may_require_wordpress": False,
+            "wordpress_adapter_role": "publishing-routing-embed-adapter",
+            "direct_library_api_clients": True,
             "research_job_completion_implies_evidence_truth": False,
             "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
@@ -2682,6 +2700,38 @@ async def cross_language_resolution_decision_ingest(
     except (ValueError, json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
+
+@app.get("/v1/runtime-authority/readiness")
+def runtime_authority_readiness_endpoint() -> dict[str, Any]:
+    return runtime_authority_readiness()
+
+@app.get("/v1/runtime-authority/dependency-graph")
+def runtime_authority_dependency_graph_endpoint() -> dict[str, Any]:
+    return runtime_authority_dependency_graph()
+
+@app.post("/v1/runtime-authority/validate")
+def runtime_authority_validate_endpoint(payload: dict[str, Any]) -> dict[str, Any]:
+    return validate_runtime_authority_certification(payload)
+
+@app.post("/v1/runtime-authority/certification")
+def runtime_authority_certification_endpoint(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return build_runtime_authority_certification(payload)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+@app.post("/v1/admin/runtime-authority-certifications")
+async def runtime_authority_ingest_endpoint(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return ingest_runtime_authority_certification(json.loads(body.decode("utf-8")) if body else {})
+    except (ValueError, TypeError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 @app.get("/v1/global-knowledge-federation/readiness")
 def global_knowledge_federation_readiness_endpoint() -> dict[str, Any]: return global_knowledge_federation_readiness()

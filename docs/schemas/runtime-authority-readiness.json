@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Runtime Authority Readiness",
+  "type": "object",
+  "required": ["schema", "version", "backend_version", "state", "wordpress", "wordpress_dependency_count", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-runtime-authority-readiness/1.0"},
+    "version": {"const": "5.58.0"},
+    "backend_version": {"const": "2.69.0"},
+    "state": {"enum": ["ready", "degraded", "unavailable"]},
+    "wordpress_dependency_count": {"const": 0},
+    "wordpress": {
+      "type": "object",
+      "properties": {
+        "authoritative": {"const": false},
+        "required_for_research_execution": {"const": false}
+      }
+    },
+    "guardrails": {"type": "object"}
+  }
+}

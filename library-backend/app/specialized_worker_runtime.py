@@ -10,7 +10,7 @@ DEAD_LETTER_CONTRACT='sc-library-job-dead-letter/1.0'
 READINESS_CONTRACT='sc-library-specialized-worker-readiness/1.0'
 FAILURE_ISOLATION_CONTRACT='sc-library-worker-failure-isolation/1.0'
 PROFILES={
- 'python.research':{'runtimes':['python'],'capabilities':['entity.resolve','corpus.kwic','corpus.frequency','artifact.persist','artifact.verify','language.align','knowledge.link.cross-civilizational','source.transparency.assess','federation.certify.global'],'execution_mode':'local','active':True,'default_concurrency':2},
+ 'python.research':{'runtimes':['python'],'capabilities':['entity.resolve','corpus.kwic','corpus.frequency','artifact.persist','artifact.verify','language.align','knowledge.link.cross-civilizational','source.transparency.assess','federation.certify.global','architecture.certify.runtime-authority'],'execution_mode':'local','active':True,'default_concurrency':2},
  'go.ingestion':{'runtimes':['go'],'capabilities':['ingestion.submit'],'execution_mode':'handoff','active':True,'default_concurrency':2},
  'rust.graph':{'runtimes':['rust'],'capabilities':['graph.query'],'execution_mode':'local-native','active':True,'default_concurrency':2},
  'ocr.document':{'runtimes':['ocr'],'capabilities':['document.ocr'],'execution_mode':'provider','active':False,'default_concurrency':1},
@@ -105,6 +105,9 @@ def execute_job(job,worker_class):
     if worker_class=='python.research' and cap=='federation.certify.global':
         from .global_knowledge_federation import build_certification
         return {'kind':'global-knowledge-federation-certification','result':build_certification(manifest.get('certification') or manifest)}
+    if worker_class=='python.research' and cap=='architecture.certify.runtime-authority':
+        from .runtime_authority import build_certification
+        return {'kind':'library-runtime-authority-certification','result':build_certification(manifest.get('certification') or manifest)}
     if worker_class=='python.research' and cap=='artifact.verify':
         from .artifact_storage import verify_artifact
         return {'kind':'artifact-verify','verification':verify_artifact(_clean(manifest.get('artifact_id')))}

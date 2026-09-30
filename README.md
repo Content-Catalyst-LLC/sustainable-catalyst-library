@@ -1,11 +1,19 @@
 # Sustainable Catalyst Knowledge Library
 
-**Current release:** v5.57.0 — Global Knowledge Federation  
-**Backend:** v2.68.0  
+**Current release:** v5.58.0 — Library Runtime Authority & WordPress Decoupling Foundation  
+**Backend:** v2.69.0  
 **Go ingestion runtime:** v0.1.0  
 **Rust graph runtime:** v0.2.0
 
 The Knowledge Library is the research publishing, source-intelligence, corpus, retrieval, preservation, and connected-knowledge layer of Sustainable Catalyst.
+
+## v5.58 runtime authority
+
+The Knowledge Library is now architecturally defined as an independent research service. The Library API, Python backend, PostgreSQL state, retrieval/indexes, jobs, workers, artifact storage, pipelines, compute broker, native runtimes, federation, and Platform Core contracts form the authoritative runtime. WordPress is a non-authoritative client adapter for publishing, routing, SEO, embeds, authentication handoff, and public-site integration.
+
+**Permanent rule:** no new Knowledge Library research capability may require WordPress to execute.
+
+See `docs/architecture/library-runtime-authority.md`.
 
 v5.53.0 adds a distributed compute broker above the durable v5.49 job fabric, v5.50 worker fleet, v5.51 artifact store, and v5.52 checkpointed pipeline engine. It performs capability discovery, deterministic operational placement, worker-class affinity, queue admission/backpressure, configurable running/queue limits, and descriptive runtime observability. Runtime health, latency, throughput, or placement never imply research quality, evidence validity, or result truth.
 

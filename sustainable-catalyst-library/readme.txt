@@ -8,12 +8,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.57.0
+Stable tag: 5.58.0
 License: GPLv2 or later
 
-A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
+WordPress adapter for the independent Sustainable Catalyst Knowledge Library research platform. WordPress provides publishing, routing, SEO, embeds, compatibility surfaces, and health integration; the Library API/backend owns authoritative research state and execution.
 
 == Description ==
+
+Sustainable Catalyst Library v5.58.0 establishes the Library Runtime Authority & WordPress Decoupling Foundation. The Library API, Python backend, PostgreSQL, search/vector infrastructure, durable jobs, workers, artifact storage, pipelines, compute broker, native runtimes, federation, and Platform Core contracts are authoritative. WordPress is formally a non-authoritative publishing, routing, SEO, launch/embed, authentication-handoff, and compatibility adapter and is not required for research execution.
 
 Sustainable Catalyst Library v5.57.0 establishes the Global Knowledge Federation milestone. It certifies source federation, original-language preservation, OCR/HTR/transcription lineage, linguistic corpora, cross-language entity resolution, durable jobs/workers/artifacts/pipelines/compute, translation/transliteration alignment, cross-civilizational linking, and source transparency/trust as one interoperable system while preserving each layer's separate provenance and governance boundary.
 

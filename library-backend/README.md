@@ -1,3 +1,8 @@
+
+## Runtime authority (v2.69.0 / Library v5.58.0)
+
+The backend is part of the authoritative Knowledge Library runtime. WordPress is a non-authoritative publishing/routing/embed adapter and is not required for research execution. Direct service clients may use the Library API without traversing WordPress. The authoritative dependency and object-ownership contracts are exposed at `/v1/runtime-authority/readiness` and `/v1/runtime-authority/dependency-graph`.
+
 # Sustainable Catalyst Library Backend v2.29.0
 
 Adds multi-publication knowledge-landscape analysis while preserving the existing ingestion, retrieval, citation, extraction, and Platform Core bridge contracts.

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Runtime Authority Certification",
+  "type": "object",
+  "required": ["schema", "version", "backend_version", "certification_id", "state", "components", "clients", "ownership", "dependency_graph", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-runtime-authority-certification/1.0"},
+    "version": {"const": "5.58.0"},
+    "backend_version": {"const": "2.69.0"},
+    "certification_id": {"type": "string"},
+    "state": {"const": "certified"},
+    "components": {"type": "object"},
+    "clients": {"type": "object"},
+    "ownership": {"type": "object"},
+    "dependency_graph": {"type": "object"},
+    "guardrails": {"type": "object"}
+  }
+}

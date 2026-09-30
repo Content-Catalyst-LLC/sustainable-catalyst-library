@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.58.0 — Library Runtime Authority & WordPress Decoupling Foundation
+
+- Makes the Library API/Python/PostgreSQL service boundary authoritative for research execution and state.
+- Formalizes WordPress as a non-authoritative publishing, routing, SEO, embed, authentication-handoff, and compatibility adapter.
+- Adds deterministic runtime-authority certification, ownership map, client-adapter registry, and dependency graph with zero WordPress dependencies.
+- Adds the permanent rule that no new Knowledge Library research capability may require WordPress to execute.
+- Adds `architecture.certify.runtime-authority` to the active Python research worker.
+
 ## v5.57.0 — Global Knowledge Federation
 
 - Certifies 13 federation, language, provenance, trust, artifact, pipeline, and compute layers as one interoperable Knowledge Library milestone.
