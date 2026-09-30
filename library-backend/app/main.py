@@ -161,6 +161,14 @@ from .source_transparency import (
     validate_signal as validate_source_quality_signal, validate_profile as validate_source_transparency_profile,
     validate_policy as validate_user_trust_policy,
 )
+from .global_knowledge_federation import (
+    CERTIFICATION_CONTRACT as GLOBAL_KNOWLEDGE_FEDERATION_CERTIFICATION_CONTRACT,
+    READINESS_CONTRACT as GLOBAL_KNOWLEDGE_FEDERATION_READINESS_CONTRACT,
+    build_certification as build_global_knowledge_federation_certification,
+    ingest_certification as ingest_global_knowledge_federation_certification,
+    readiness as global_knowledge_federation_readiness,
+    validate_certification_payload as validate_global_knowledge_federation_certification,
+)
 from .cross_civilizational_linking import (
     LINK_CONTRACT as CROSS_CIVILIZATIONAL_LINK_CONTRACT, READINESS_CONTRACT as CROSS_CIVILIZATIONAL_LINKING_READINESS_CONTRACT,
     build_link as build_cross_civilizational_link, build_link_package as build_cross_civilizational_link_package,
@@ -610,6 +618,10 @@ def health() -> dict[str, Any]:
             "user_trust_policy_changes_source_signals": False,
             "system_default_trust_verdict": False,
             "source_quality_signals_separate_from_user_trust_choices": True,
+            "global_knowledge_federation": True,
+            "global_knowledge_federation_component_certification": True,
+            "global_knowledge_federation_governance_boundaries_preserved": True,
+            "global_knowledge_federation_automatic_core_promotion": False,
             "research_job_completion_implies_evidence_truth": False,
             "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
@@ -2671,6 +2683,20 @@ async def cross_language_resolution_decision_ingest(
 
 
 
+@app.get("/v1/global-knowledge-federation/readiness")
+def global_knowledge_federation_readiness_endpoint() -> dict[str, Any]: return global_knowledge_federation_readiness()
+@app.post("/v1/global-knowledge-federation/validate")
+def global_knowledge_federation_validate_endpoint(payload: dict[str, Any]) -> dict[str, Any]: return validate_global_knowledge_federation_certification(payload)
+@app.post("/v1/global-knowledge-federation/certification")
+def global_knowledge_federation_certification_endpoint(payload: dict[str, Any]) -> dict[str, Any]:
+    try: return build_global_knowledge_federation_certification(payload)
+    except (ValueError,TypeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+@app.post("/v1/admin/global-knowledge-federation-certifications")
+async def global_knowledge_federation_ingest_endpoint(request: Request,authorization: str|None=Header(default=None),x_sc_timestamp: str|None=Header(default=None),x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return ingest_global_knowledge_federation_certification(json.loads(body.decode("utf-8")) if body else {})
+    except (ValueError,TypeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
 @app.get("/v1/source-transparency/readiness")
 def source_transparency_readiness_endpoint() -> dict[str, Any]: return source_transparency_readiness()
 @app.post("/v1/source-transparency/validate-signal")
@@ -4115,6 +4141,9 @@ def search_readiness() -> dict[str, Any]:
         "kwic_result_contract": KWIC_RESULT_CONTRACT,
         "linguistic_corpus_guardrail": "tokenization-concordance-and-frequency-are-reproducible-analytical-views-not-morphology-meaning-intent-evidence-or-truth",
         "cross_language_resolution": cross_language_resolution_readiness(),
+        "global_knowledge_federation": global_knowledge_federation_readiness(),
+        "global_knowledge_federation_certification_contract": GLOBAL_KNOWLEDGE_FEDERATION_CERTIFICATION_CONTRACT,
+        "global_knowledge_federation_readiness_contract": GLOBAL_KNOWLEDGE_FEDERATION_READINESS_CONTRACT,
         "source_transparency": source_transparency_readiness(),
         "source_quality_signal_contract": SOURCE_QUALITY_SIGNAL_CONTRACT,
         "source_transparency_profile_contract": SOURCE_TRANSPARENCY_PROFILE_CONTRACT,

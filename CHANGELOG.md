@@ -1,5 +1,12 @@
 # Changelog
 
+## v5.57.0 — Global Knowledge Federation
+
+- Certifies 13 federation, language, provenance, trust, artifact, pipeline, and compute layers as one interoperable Knowledge Library milestone.
+- Preserves original-language canonicality, transformation lineage, source-quality/trust separation, and Platform Core governance boundaries.
+- Adds deterministic federation certifications and append-only certification events.
+- Adds active `federation.certify.global` Python research worker capability.
+
 ## v5.56.0 — Source Transparency, Quality Signals & User Trust Policies
 
 - Adds provenance-backed descriptive source-quality signals and source-transparency profiles.

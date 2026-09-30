@@ -1141,3 +1141,26 @@ CREATE TABLE IF NOT EXISTS library_user_trust_policy_events (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS library_user_trust_policy_events_policy_idx ON library_user_trust_policy_events(policy_id,event_id DESC);
+
+
+-- Global Knowledge Federation milestone (Library v5.57.0 / backend v2.68.0)
+CREATE TABLE IF NOT EXISTS library_global_knowledge_federation_certifications (
+    certification_id text PRIMARY KEY,
+    federation_id text NOT NULL,
+    state text NOT NULL CHECK (state IN ('certified','superseded','revoked')),
+    component_snapshot jsonb NOT NULL,
+    scope jsonb NOT NULL DEFAULT '{}'::jsonb,
+    certification_fingerprint char(64) NOT NULL UNIQUE,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    guardrails jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_global_knowledge_federation_certifications_federation_idx ON library_global_knowledge_federation_certifications(federation_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS library_global_knowledge_federation_events (
+    event_id bigserial PRIMARY KEY,
+    certification_id text NOT NULL REFERENCES library_global_knowledge_federation_certifications(certification_id) ON DELETE RESTRICT,
+    event_type text NOT NULL,
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_global_knowledge_federation_events_cert_idx ON library_global_knowledge_federation_events(certification_id,event_id DESC);

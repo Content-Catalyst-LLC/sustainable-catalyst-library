@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Global Knowledge Federation Readiness",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "backend_version",
+    "state",
+    "component_count",
+    "ready_component_count"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-global-knowledge-federation-readiness/1.0"
+    },
+    "version": {
+      "const": "5.57.0"
+    },
+    "backend_version": {
+      "const": "2.68.0"
+    },
+    "state": {
+      "enum": [
+        "ready",
+        "degraded",
+        "unavailable"
+      ]
+    }
+  }
+}

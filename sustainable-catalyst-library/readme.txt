@@ -8,12 +8,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.56.0
+Stable tag: 5.57.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
+
+Sustainable Catalyst Library v5.57.0 establishes the Global Knowledge Federation milestone. It certifies source federation, original-language preservation, OCR/HTR/transcription lineage, linguistic corpora, cross-language entity resolution, durable jobs/workers/artifacts/pipelines/compute, translation/transliteration alignment, cross-civilizational linking, and source transparency/trust as one interoperable system while preserving each layer's separate provenance and governance boundary.
 
 Sustainable Catalyst Library v5.54.0 adds Translation & Transliteration Alignment Matrix. It aligns already-preserved original-language and derived translation/transliteration representations with exact text hashes, character spans, transformation provenance, alignment method/engine identity, confidence signals, ambiguity, and review state. Alignment never generates translation/transliteration, never replaces canonical original-language text, and never treats confidence or correspondence as evidence or truth.
 

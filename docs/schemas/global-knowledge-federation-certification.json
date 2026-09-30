@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Global Knowledge Federation Certification",
+  "type": "object",
+  "required": [
+    "schema",
+    "certification_id",
+    "state",
+    "components",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-global-knowledge-federation-certification/1.0"
+    },
+    "state": {
+      "const": "certified"
+    },
+    "components": {
+      "type": "object"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}
