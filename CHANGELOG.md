@@ -91,3 +91,10 @@
 - Redis Streams for rebuildable dispatch/wake-up coordination.
 
 For earlier releases, inspect the corresponding Git tag.
+
+## v5.61.0.1 — Library Web Port Allocation & Deployment Collision Repair
+- Removed the fixed `127.0.0.1:8091` Library Web host-port assumption.
+- Added `SC_LIBRARY_WEB_BIND_PORT` to the Library Web Compose contract.
+- Production deployment now selects the first free localhost port from 8092-8099 unless `SC_LIBRARY_WEB_PORT` is explicitly supplied.
+- The deployer refuses to remove or replace non-Library containers that own a requested port.
+- Backend v2.72.0, Library Web application v1.1.0, API v1, and WordPress adapter v5.61.0 remain unchanged.

@@ -1,3 +1,5 @@
+> Current patch: **v5.61.0.1 — Library Web Port Allocation & Deployment Collision Repair**
+
 # Sustainable Catalyst Knowledge Library
 
 Current release: **v5.61.0 — Library Identity, Session & Access Boundary**  

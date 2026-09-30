@@ -1,16 +1,14 @@
 # Sustainable Catalyst Knowledge Library Web
 
-**Web:** v1.1.0  
-**Library:** v5.61.0  
-**API:** v1 (`/api/library/v1`)
+**Application:** v1.1.0  
+**Deployment repair:** Library v5.61.0.1  
+**API:** v1
 
-This is the first independent Knowledge Library web application. It is a deployable static client served by Nginx and talks directly to the authoritative Library API. WordPress is not required for application execution.
+This is the independent Knowledge Library web client. It talks directly to the authoritative Library API and does not require WordPress.
 
-## Foundation surfaces
+## Local bind port
+The container listens on port 8080 internally. The host bind port is configured with `SC_LIBRARY_WEB_BIND_PORT` and defaults to 8092 when Compose is invoked directly.
 
-- Search: hybrid/lexical/semantic Library search.
-- Reader: direct record retrieval and readable record body/metadata.
-- Discover: API capability-family browser.
-- System: API/runtime-authority/federation/artifact/pipeline/compute readiness.
+The production deployment script does not assume a fixed host port. If `SC_LIBRARY_WEB_PORT` is not supplied, it selects the first free localhost port from 8092-8099, writes that selection to `.env`, and verifies the deployed client through that port.
 
-The application contains no API keys or research state. Nginx proxies same-origin `/api/library/*` requests directly to `sc-library-backend:8080` on the `sc-internal` network.
+Port 8091 is intentionally not used by default because the production VPS already uses it for Site Intelligence.
