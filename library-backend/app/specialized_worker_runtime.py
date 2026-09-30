@@ -80,7 +80,7 @@ def lease_for_worker(worker_id):
     if w['state']!='active': return {'schema':'sc-library-worker-lease/1.0','leased':False,'worker_id':worker_id,'reason':'worker-not-active','worker_state':w['state'],'guardrails':guardrails()}
     with get_pool().connection() as conn, conn.cursor() as cur: cur.execute("SELECT count(*) AS n FROM library_research_job_attempts WHERE worker_id=%s AND state IN ('leased','running')",(worker_id,)); active=int(cur.fetchone()['n'])
     if active>=int(w['concurrency_limit']): return {'schema':'sc-library-worker-lease/1.0','leased':False,'worker_id':worker_id,'reason':'concurrency-limit','active_attempts':active,'guardrails':guardrails()}
-    return lease_next_job({'worker_id':worker_id,'capabilities':w['capabilities'],'runtimes':w['runtimes'],'runtime_id':w['worker_class'],'execution_metadata':{'worker_class':w['worker_class'],'isolation':'worker'}})
+    return lease_next_job({'worker_id':worker_id,'worker_class':w['worker_class'],'capabilities':w['capabilities'],'runtimes':w['runtimes'],'runtime_id':w['worker_class'],'execution_metadata':{'worker_class':w['worker_class'],'isolation':'worker','compute_broker_affinity':True}})
 def execute_job(job,worker_class):
     manifest=job.get('input_manifest') if isinstance(job.get('input_manifest'),dict) else {}; cap=_clean(job.get('capability'))
     if worker_class=='python.research' and cap=='entity.resolve':

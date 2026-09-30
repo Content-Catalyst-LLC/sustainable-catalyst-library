@@ -29,3 +29,9 @@ Library v5.51.0 separates heavyweight research bytes from authoritative relation
 The safe baseline backend is a shared filesystem volume mounted at `/data/artifacts`. An S3-compatible adapter uses the same deterministic `sha256/<prefix>/<digest>` key contract, so switching storage providers does not change artifact identity. S3-compatible configuration may target MinIO, Cloudflare R2, AWS S3, or another compatible provider.
 
 Artifacts are immutable by content identity. Lifecycle tombstoning does not silently delete bytes. Physical retention and purge are separate governance concerns.
+
+## Distributed compute broker
+
+Library v5.53.0 adds an operational broker above the durable job/worker layers. It performs capability discovery, deterministic worker-class/runtime placement, admission/backpressure, and descriptive runtime observability. It does not create a second scheduler: admitted work is still persisted through `library_research_jobs` and leased by the existing specialized workers.
+
+Placement decisions may use capability compatibility, worker state/freshness, concurrency, queue depth, and configured operational limits. They must not treat latency, success rate, runtime language, or worker availability as evidence quality or research correctness signals.

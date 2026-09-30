@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Runtime Observation Capture",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "backend_version",
+    "captured",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-runtime-observation/1.0"
+    },
+    "version": {
+      "const": "5.53.0"
+    },
+    "backend_version": {
+      "const": "2.64.0"
+    },
+    "captured": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "observed_at": {
+      "type": "string"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

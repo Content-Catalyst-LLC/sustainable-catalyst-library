@@ -8,12 +8,16 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.52.0
+Stable tag: 5.53.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
+
+Sustainable Catalyst Library v5.53.0 adds Distributed Research Compute Broker & Runtime Observability. It discovers runtime capabilities across the specialized worker catalog, makes deterministic operational placement decisions, applies bounded queue/running admission limits, records placement lineage, and exposes descriptive worker/queue/latency/failure observability. Runtime health, lower latency, throughput, or placement never imply research quality, source validity, evidence truth, model correctness, or automatic Platform Core promotion. PostgreSQL remains authoritative for job state and Redis remains dispatch coordination only.
+
+Sustainable Catalyst Library v5.52.0 adds Checkpointed Ingestion & Research Pipeline Engine. Pipeline definitions, runs, stage runs, and events are PostgreSQL-authoritative; acyclic stage DAGs compile into the existing durable job fabric, completed checkpoints are reused on resume, and v5.51 artifact identities remain attached to stage outputs.
 
 Sustainable Catalyst Library v5.51.0 adds Research Artifact & Object Storage Fabric. Heavyweight PDFs, scans, OCR/HTR intermediates, corpora, embedding exports, model outputs, visualization assets, investigation packages, and reproducibility outputs can be represented as immutable SHA-256 content-addressed artifacts. PostgreSQL remains authoritative for artifact identity, metadata, provenance, derivation lineage, integrity events, and lifecycle state while bytes live in a shared filesystem object store or an S3-compatible provider. Artifact presence and checksum integrity do not imply source validity, evidence truth, or automatic Platform Core promotion.
 

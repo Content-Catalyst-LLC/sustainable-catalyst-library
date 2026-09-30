@@ -984,3 +984,42 @@ CREATE TABLE IF NOT EXISTS library_research_pipeline_events (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS library_research_pipeline_events_run_idx ON library_research_pipeline_events(run_id,event_id DESC);
+
+
+-- Distributed Research Compute Broker & Runtime Observability (Library v5.53.0 / backend v2.64.0)
+-- Placement is operational only. PostgreSQL remains authoritative for job state; the broker
+-- records admission/placement lineage and descriptive runtime observations.
+CREATE TABLE IF NOT EXISTS library_compute_runtime_observations (
+    observation_id bigserial PRIMARY KEY,
+    worker_id text REFERENCES library_research_workers(worker_id) ON DELETE SET NULL,
+    worker_class text NOT NULL,
+    state text NOT NULL,
+    active_attempts integer NOT NULL DEFAULT 0 CHECK (active_attempts >= 0),
+    concurrency_limit integer NOT NULL DEFAULT 1 CHECK (concurrency_limit >= 1),
+    available_slots integer NOT NULL DEFAULT 0 CHECK (available_slots >= 0),
+    recent_completed integer NOT NULL DEFAULT 0 CHECK (recent_completed >= 0),
+    recent_failures integer NOT NULL DEFAULT 0 CHECK (recent_failures >= 0),
+    p50_latency_ms double precision,
+    heartbeat_age_seconds double precision,
+    metrics jsonb NOT NULL DEFAULT '{}'::jsonb,
+    observed_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_compute_runtime_observations_worker_idx ON library_compute_runtime_observations(worker_class,observed_at DESC);
+CREATE INDEX IF NOT EXISTS library_compute_runtime_observations_time_idx ON library_compute_runtime_observations(observed_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_compute_placement_events (
+    placement_id text PRIMARY KEY,
+    job_id text REFERENCES library_research_jobs(job_id) ON DELETE SET NULL,
+    compute_request_fingerprint char(64) NOT NULL,
+    admission_state text NOT NULL CHECK (admission_state IN ('admitted','deferred','rejected')),
+    reason text NOT NULL,
+    selected_worker_class text,
+    selected_runtime text,
+    decision_fingerprint char(64) NOT NULL,
+    candidates jsonb NOT NULL DEFAULT '[]'::jsonb,
+    queue_snapshot jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_compute_placement_events_job_idx ON library_compute_placement_events(job_id,created_at DESC) WHERE job_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS library_compute_placement_events_runtime_idx ON library_compute_placement_events(selected_runtime,created_at DESC);
+CREATE INDEX IF NOT EXISTS library_compute_placement_events_admission_idx ON library_compute_placement_events(admission_state,created_at DESC);

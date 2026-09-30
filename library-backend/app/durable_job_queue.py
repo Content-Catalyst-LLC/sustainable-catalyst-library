@@ -209,12 +209,16 @@ def lease_next_job(payload: dict[str, Any]) -> dict[str, Any]:
     if not worker_id: raise ValueError("worker-id-required")
     capabilities=[_clean(x).lower() for x in (payload.get("capabilities") or []) if _clean(x)]
     runtimes=[_clean(x).lower() for x in (payload.get("runtimes") or []) if _clean(x)]
+    worker_class=_clean(payload.get("worker_class"))
     lease_seconds=max(30,min(3600,int(payload.get("lease_seconds") or settings.job_lease_seconds)))
     pool=get_pool(); row=None
     with pool.connection() as conn, conn.cursor() as cur:
         clauses=["state IN ('queued','retry')","available_at<=now()"] ; params=[]
         if capabilities: clauses.append("capability = ANY(%s)"); params.append(capabilities)
         if runtimes: clauses.append("(requested_runtime='auto' OR requested_runtime = ANY(%s))"); params.append(runtimes)
+        if worker_class:
+            clauses.append("COALESCE(resource_hints->'compute_broker'->>'selected_worker_class','') IN ('',%s)")
+            params.append(worker_class)
         cur.execute(f"SELECT * FROM library_research_jobs WHERE {' AND '.join(clauses)} ORDER BY priority DESC,available_at ASC,created_at ASC FOR UPDATE SKIP LOCKED LIMIT 1",params)
         row=cur.fetchone()
         if not row: conn.commit(); return {"schema":ATTEMPT_CONTRACT,"leased":False,"worker_id":worker_id,"guardrails":guardrails()}

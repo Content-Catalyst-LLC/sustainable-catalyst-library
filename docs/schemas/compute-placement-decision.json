@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Compute Placement Decision",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "backend_version",
+    "admission",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-compute-placement-decision/1.0"
+    },
+    "version": {
+      "const": "5.53.0"
+    },
+    "backend_version": {
+      "const": "2.64.0"
+    },
+    "placement_id": {
+      "type": "string"
+    },
+    "compute_request_fingerprint_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "admission": {
+      "type": "object"
+    },
+    "selected": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "candidates": {
+      "type": "array"
+    },
+    "placement_decision_fingerprint_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

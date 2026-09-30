@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Compute Admission",
+  "type": "object",
+  "required": [
+    "schema",
+    "state",
+    "reason"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-compute-admission/1.0"
+    },
+    "state": {
+      "enum": [
+        "admitted",
+        "deferred",
+        "rejected"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "limits": {
+      "type": "object"
+    }
+  }
+}

@@ -85,6 +85,11 @@ from .checkpointed_pipeline import (
     build_pipeline_package, build_run_plan, get_pipeline_run, persist_pipeline, pipeline_readiness,
     resume_pipeline_run, start_pipeline_run, validate_pipeline,
 )
+from .distributed_compute_broker import (
+    BROKER_READINESS_CONTRACT as COMPUTE_BROKER_READINESS_CONTRACT,
+    capability_catalog as compute_capability_catalog, broker_readiness as compute_broker_readiness,
+    capture_runtime_observations, plan_compute, runtime_observability, submit_compute, validate_compute_request,
+)
 from .research_corpus_builder import build_research_corpus, export_research_corpus
 from .unified_runtime_contract import (
     EXECUTION_ENVELOPE_SCHEMA,
@@ -554,6 +559,14 @@ def health() -> dict[str, Any]:
             "research_pipeline_stages_use_durable_jobs": True,
             "research_pipeline_is_second_scheduler": False,
             "research_pipeline_completion_implies_evidence_truth": False,
+            "distributed_research_compute_broker": True,
+            "compute_broker_runtime_capability_discovery": True,
+            "compute_broker_operational_placement": True,
+            "compute_broker_worker_affinity": True,
+            "compute_broker_queue_backpressure": True,
+            "compute_broker_runtime_observability": True,
+            "compute_broker_historical_observations": True,
+            "compute_broker_placement_is_research_quality_judgment": False,
             "research_job_completion_implies_evidence_truth": False,
             "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
@@ -2839,6 +2852,36 @@ async def pipeline_run_resume_endpoint(run_id:str,request:Request,authorization:
     await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
     try: return resume_pipeline_run(run_id)
     except KeyError as exc: raise HTTPException(status_code=404,detail="pipeline run not found") from exc
+
+@app.get("/v1/compute-broker/readiness")
+def compute_broker_readiness_endpoint() -> dict[str,Any]:
+    return compute_broker_readiness()
+
+@app.get("/v1/compute-broker/capabilities")
+def compute_broker_capabilities_endpoint() -> dict[str,Any]:
+    return compute_capability_catalog()
+
+@app.get("/v1/compute-broker/observability")
+def compute_broker_observability_endpoint() -> dict[str,Any]:
+    return runtime_observability()
+
+@app.post("/v1/compute-broker/validate")
+def compute_broker_validate_endpoint(payload:dict[str,Any]) -> dict[str,Any]:
+    return validate_compute_request(payload)
+
+@app.post("/v1/compute-broker/plan")
+def compute_broker_plan_endpoint(payload:dict[str,Any]) -> dict[str,Any]:
+    return plan_compute(payload)
+
+@app.post("/v1/admin/compute-broker/submit")
+async def compute_broker_submit_endpoint(request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
+    return submit_compute(payload)
+
+@app.post("/v1/admin/compute-broker/observe")
+async def compute_broker_observe_endpoint(request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    return capture_runtime_observations()
 
 @app.get("/v1/institutional-research-network")
 def institutional_research_network_manifest() -> dict[str, Any]:

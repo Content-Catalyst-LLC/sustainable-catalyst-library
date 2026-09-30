@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Runtime Observability",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "backend_version",
+    "state",
+    "workers",
+    "queues",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-runtime-observability/1.0"
+    },
+    "version": {
+      "const": "5.53.0"
+    },
+    "backend_version": {
+      "const": "2.64.0"
+    },
+    "state": {
+      "enum": [
+        "ready",
+        "unavailable"
+      ]
+    },
+    "workers": {
+      "type": "array"
+    },
+    "queues": {
+      "type": "object"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

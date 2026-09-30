@@ -127,6 +127,12 @@ class Settings:
     pipeline_max_stages: int = _as_int("SC_LIBRARY_PIPELINE_MAX_STAGES", 100, 1, 1000)
     pipeline_resume_enabled: bool = _as_bool("SC_LIBRARY_PIPELINE_RESUME_ENABLED", True)
 
+    # Distributed Research Compute Broker & Runtime Observability (Library v5.53.0 / backend v2.64.0)
+    compute_max_queued_jobs: int = _as_int("SC_LIBRARY_COMPUTE_MAX_QUEUED_JOBS", 5000, 100, 1000000)
+    compute_max_running_jobs: int = _as_int("SC_LIBRARY_COMPUTE_MAX_RUNNING_JOBS", 256, 1, 10000)
+    compute_max_capability_queue: int = _as_int("SC_LIBRARY_COMPUTE_MAX_CAPABILITY_QUEUE", 1000, 10, 100000)
+    compute_observation_window_minutes: int = _as_int("SC_LIBRARY_COMPUTE_OBSERVATION_WINDOW_MINUTES", 60, 5, 1440)
+
     @property
     def allowed_origins(self) -> list[str]:
         return [item.strip().rstrip("/") for item in self.allowed_origins_raw.split(",") if item.strip()]

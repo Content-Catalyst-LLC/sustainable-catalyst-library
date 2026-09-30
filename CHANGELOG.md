@@ -1,5 +1,15 @@
 # Changelog
 
+## v5.53.0 — Distributed Research Compute Broker & Runtime Observability
+
+- Adds a capability catalog spanning active and standby specialized runtime profiles.
+- Adds deterministic operational placement based on compatibility, worker freshness, concurrency, queue pressure, and configured limits.
+- Adds global queue/running limits and per-capability queue backpressure without creating a second scheduler.
+- Adds worker-class affinity for brokered durable jobs while preserving backward compatibility for ordinary jobs.
+- Adds descriptive runtime health, recent completion/failure, p50 latency, available-slot, and queue observability.
+- Adds PostgreSQL placement-event lineage and optional persisted runtime observations.
+- Keeps runtime metrics separate from research quality, evidence validity, truth, and Platform Core governance.
+
 ## v5.52.0 — Checkpointed Ingestion & Research Pipeline Engine
 
 - Adds PostgreSQL-authoritative pipeline definitions, runs, stage runs, and pipeline event lineage.
