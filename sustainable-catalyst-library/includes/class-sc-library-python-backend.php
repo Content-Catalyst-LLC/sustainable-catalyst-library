@@ -603,6 +603,15 @@ final class SC_Library_Python_Backend {
         register_rest_route(self::REST_NAMESPACE, '/backend/compute-broker/observability', [
             'methods' => 'GET', 'permission_callback' => static fn() => current_user_can('manage_options'), 'callback' => [$this, 'proxy_compute_broker_observability'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/translation-alignment/readiness', [
+            'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_translation_alignment_readiness'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/translation-alignment/validate', [
+            'methods' => 'POST', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_translation_alignment_validate'],
+        ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/translation-alignment/matrix', [
+            'methods' => 'POST', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_translation_alignment_matrix'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/cross-language-resolution/readiness', [
             'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_cross_language_resolution_readiness'],
         ]);
@@ -2132,4 +2141,19 @@ final class SC_Library_Python_Backend {
     public function proxy_cross_language_resolution_candidates(WP_REST_Request $request): WP_REST_Response { return $this->proxy_cross_language_post($request,'/v1/cross-language-resolution/candidates','sc-library-entity-resolution-case/1.0'); }
     public function proxy_cross_language_resolution_case(WP_REST_Request $request): WP_REST_Response { return $this->proxy_cross_language_post($request,'/v1/cross-language-resolution/case','sc-library-entity-resolution-case/1.0'); }
 
+
+    public function proxy_translation_alignment_readiness(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) return new WP_REST_Response(['schema'=>'sc-library-translation-alignment-readiness/1.0','state'=>'unavailable'],503);
+        $r=wp_remote_get(self::base_url().'/v1/translation-alignment/readiness',['timeout'=>self::timeout(),'redirection'=>2,'headers'=>['Accept'=>'application/json']]);
+        if (is_wp_error($r)) return new WP_REST_Response(['schema'=>'sc-library-translation-alignment-readiness/1.0','state'=>'unavailable','error'=>$r->get_error_message()],502);
+        $body=json_decode((string)wp_remote_retrieve_body($r),true); return new WP_REST_Response(is_array($body)?$body:['schema'=>'sc-library-translation-alignment-readiness/1.0','state'=>'unavailable'],(int)wp_remote_retrieve_response_code($r)?:502);
+    }
+    private function proxy_translation_alignment_post(WP_REST_Request $request,string $path,string $schema): WP_REST_Response {
+        if (!self::configured()) return new WP_REST_Response(['schema'=>$schema,'valid'=>false,'errors'=>['backend-unavailable']],503);
+        $r=wp_remote_post(self::base_url().$path,['timeout'=>max(self::timeout(),15),'redirection'=>2,'headers'=>['Accept'=>'application/json','Content-Type'=>'application/json'],'body'=>wp_json_encode($request->get_json_params())]);
+        if (is_wp_error($r)) return new WP_REST_Response(['schema'=>$schema,'valid'=>false,'errors'=>[$r->get_error_message()]],502);
+        $body=json_decode((string)wp_remote_retrieve_body($r),true); return new WP_REST_Response(is_array($body)?$body:['schema'=>$schema,'valid'=>false],(int)wp_remote_retrieve_response_code($r)?:502);
+    }
+    public function proxy_translation_alignment_validate(WP_REST_Request $request): WP_REST_Response { return $this->proxy_translation_alignment_post($request,'/v1/translation-alignment/validate','sc-library-translation-alignment-validation/1.0'); }
+    public function proxy_translation_alignment_matrix(WP_REST_Request $request): WP_REST_Response { return $this->proxy_translation_alignment_post($request,'/v1/translation-alignment/matrix','sc-library-translation-transliteration-alignment-matrix/1.0'); }
 }

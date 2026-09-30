@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Text Alignment Link",
+  "type": "object",
+  "required": ["schema", "alignment_id", "sequence", "relation_type", "source_spans", "target_spans", "cardinality", "review_state"],
+  "properties": {
+    "schema": {"const": "sc-library-text-alignment-link/1.0"},
+    "alignment_id": {"type": "string"},
+    "sequence": {"type": "integer", "minimum": 1},
+    "relation_type": {"enum": ["aligned", "partial", "omitted", "added", "uncertain"]},
+    "source_spans": {"type": "array"},
+    "target_spans": {"type": "array"},
+    "cardinality": {"type": "string"},
+    "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "review_state": {"enum": ["unreviewed", "machine-reviewed", "human-reviewed", "accepted", "rejected", "needs-review"]}
+  }
+}

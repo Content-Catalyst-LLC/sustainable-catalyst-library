@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Translation & Transliteration Alignment Matrix",
+  "type": "object",
+  "required": ["schema", "matrix_id", "source", "target", "transformation_kind", "links", "matrix_fingerprint_sha256"],
+  "properties": {
+    "schema": {"const": "sc-library-translation-transliteration-alignment-matrix/1.0"},
+    "matrix_id": {"type": "string"},
+    "matrix_fingerprint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "transformation_kind": {"enum": ["translation", "transliteration"]},
+    "source": {"type": "object"},
+    "target": {"type": "object"},
+    "links": {"type": "array", "items": {"$ref": "text-alignment-link.json"}}
+  }
+}

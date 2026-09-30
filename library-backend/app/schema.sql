@@ -1023,3 +1023,54 @@ CREATE TABLE IF NOT EXISTS library_compute_placement_events (
 CREATE INDEX IF NOT EXISTS library_compute_placement_events_job_idx ON library_compute_placement_events(job_id,created_at DESC) WHERE job_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS library_compute_placement_events_runtime_idx ON library_compute_placement_events(selected_runtime,created_at DESC);
 CREATE INDEX IF NOT EXISTS library_compute_placement_events_admission_idx ON library_compute_placement_events(admission_state,created_at DESC);
+
+-- Knowledge Library v5.54.0 / backend v2.65.0
+-- Translation & Transliteration Alignment Matrix.
+-- Alignments bind preserved text representations; they never generate translation/transliteration.
+CREATE TABLE IF NOT EXISTS library_text_alignment_matrices (
+    matrix_id text PRIMARY KEY,
+    source_representation_id text NOT NULL REFERENCES library_text_representations(representation_id) ON DELETE RESTRICT,
+    target_representation_id text NOT NULL REFERENCES library_text_representations(representation_id) ON DELETE RESTRICT,
+    transformation_kind text NOT NULL CHECK (transformation_kind IN ('translation','transliteration')),
+    transformation_id text REFERENCES library_text_transformations(transformation_id) ON DELETE RESTRICT,
+    source_language_bcp47 text NOT NULL,
+    source_script_iso15924 varchar(4),
+    target_language_bcp47 text NOT NULL,
+    target_script_iso15924 varchar(4),
+    source_text_sha256 char(64) NOT NULL,
+    target_text_sha256 char(64) NOT NULL,
+    alignment_method text NOT NULL,
+    alignment_engine text,
+    alignment_engine_version text,
+    review_state text NOT NULL DEFAULT 'unreviewed',
+    matrix_fingerprint char(64) NOT NULL UNIQUE,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (source_representation_id <> target_representation_id)
+);
+CREATE INDEX IF NOT EXISTS library_text_alignment_matrices_source_idx ON library_text_alignment_matrices(source_representation_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS library_text_alignment_matrices_target_idx ON library_text_alignment_matrices(target_representation_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS library_text_alignment_matrices_language_idx ON library_text_alignment_matrices(source_language_bcp47,target_language_bcp47,transformation_kind);
+
+CREATE TABLE IF NOT EXISTS library_text_alignment_links (
+    alignment_id text PRIMARY KEY,
+    matrix_id text NOT NULL REFERENCES library_text_alignment_matrices(matrix_id) ON DELETE CASCADE,
+    sequence integer NOT NULL CHECK (sequence >= 1),
+    relation_type text NOT NULL CHECK (relation_type IN ('aligned','partial','omitted','added','uncertain')),
+    source_spans jsonb NOT NULL DEFAULT '[]'::jsonb,
+    target_spans jsonb NOT NULL DEFAULT '[]'::jsonb,
+    cardinality text NOT NULL,
+    confidence double precision,
+    confidence_kind text,
+    review_state text NOT NULL DEFAULT 'unreviewed',
+    rationale text,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (confidence IS NULL OR (confidence >= 0 AND confidence <= 1)),
+    UNIQUE(matrix_id,sequence)
+);
+CREATE INDEX IF NOT EXISTS library_text_alignment_links_matrix_idx ON library_text_alignment_links(matrix_id,sequence);
+CREATE INDEX IF NOT EXISTS library_text_alignment_links_review_idx ON library_text_alignment_links(review_state,matrix_id);

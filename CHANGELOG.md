@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.54.0 — Translation & Transliteration Alignment Matrix
+
+- Adds source/target text-representation alignment matrices bound to exact SHA-256 text identity.
+- Supports 1:1, 1:N, N:1, N:M, omitted, added, partial, and uncertain alignment relations.
+- Preserves BCP 47 language, ISO 15924 script, transformation identity, alignment method/engine, confidence signal, review state, and provenance.
+- Adds signed persistence and a `language.align` Python worker capability through the durable compute fabric.
+- Translation and transliteration remain derived representations; alignment never generates or canonically replaces source-language text.
+
 ## v5.53.0 — Distributed Research Compute Broker & Runtime Observability
 
 - Adds a capability catalog spanning active and standby specialized runtime profiles.

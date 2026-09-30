@@ -10,7 +10,7 @@ DEAD_LETTER_CONTRACT='sc-library-job-dead-letter/1.0'
 READINESS_CONTRACT='sc-library-specialized-worker-readiness/1.0'
 FAILURE_ISOLATION_CONTRACT='sc-library-worker-failure-isolation/1.0'
 PROFILES={
- 'python.research':{'runtimes':['python'],'capabilities':['entity.resolve','corpus.kwic','corpus.frequency','artifact.persist','artifact.verify'],'execution_mode':'local','active':True,'default_concurrency':2},
+ 'python.research':{'runtimes':['python'],'capabilities':['entity.resolve','corpus.kwic','corpus.frequency','artifact.persist','artifact.verify','language.align'],'execution_mode':'local','active':True,'default_concurrency':2},
  'go.ingestion':{'runtimes':['go'],'capabilities':['ingestion.submit'],'execution_mode':'handoff','active':True,'default_concurrency':2},
  'rust.graph':{'runtimes':['rust'],'capabilities':['graph.query'],'execution_mode':'local-native','active':True,'default_concurrency':2},
  'ocr.document':{'runtimes':['ocr'],'capabilities':['document.ocr'],'execution_mode':'provider','active':False,'default_concurrency':1},
@@ -93,6 +93,9 @@ def execute_job(job,worker_class):
     if worker_class=='python.research' and cap=='artifact.persist':
         from .artifact_storage import persist_artifact
         return {'kind':'artifact-persist','artifact':persist_artifact(manifest.get('artifact') or manifest)}
+    if worker_class=='python.research' and cap=='language.align':
+        from .translation_alignment import build_alignment_matrix
+        return {'kind':'translation-alignment-matrix','result':build_alignment_matrix(manifest.get('alignment') or manifest)}
     if worker_class=='python.research' and cap=='artifact.verify':
         from .artifact_storage import verify_artifact
         return {'kind':'artifact-verify','verification':verify_artifact(_clean(manifest.get('artifact_id')))}

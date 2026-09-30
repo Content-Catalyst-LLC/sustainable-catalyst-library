@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Translation Alignment Readiness",
+  "type": "object",
+  "required": ["schema", "version", "backend_version", "state", "counts", "capabilities", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-translation-alignment-readiness/1.0"},
+    "version": {"const": "5.54.0"},
+    "backend_version": {"const": "2.65.0"},
+    "state": {"enum": ["ready", "schema-unavailable"]}
+  }
+}

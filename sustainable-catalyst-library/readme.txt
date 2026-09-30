@@ -8,12 +8,14 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.53.0
+Stable tag: 5.54.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
 
 == Description ==
+
+Sustainable Catalyst Library v5.54.0 adds Translation & Transliteration Alignment Matrix. It aligns already-preserved original-language and derived translation/transliteration representations with exact text hashes, character spans, transformation provenance, alignment method/engine identity, confidence signals, ambiguity, and review state. Alignment never generates translation/transliteration, never replaces canonical original-language text, and never treats confidence or correspondence as evidence or truth.
 
 Sustainable Catalyst Library v5.53.0 adds Distributed Research Compute Broker & Runtime Observability. It discovers runtime capabilities across the specialized worker catalog, makes deterministic operational placement decisions, applies bounded queue/running admission limits, records placement lineage, and exposes descriptive worker/queue/latency/failure observability. Runtime health, lower latency, throughput, or placement never imply research quality, source validity, evidence truth, model correctness, or automatic Platform Core promotion. PostgreSQL remains authoritative for job state and Redis remains dispatch coordination only.
 
@@ -422,6 +424,13 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= 5.54.0 =
+* Added translation/transliteration alignment matrices bound to preserved text representations.
+* Added exact source/target span hashes and 1:1, 1:N, N:1, N:M, omitted, added, partial, and uncertain relations.
+* Added transformation, language/script, alignment-method, confidence, review-state, and provenance lineage.
+* Added signed persistence and language.align worker capability.
+* Alignment does not generate translation/transliteration or promote correspondence to evidence/truth.
 
 = 5.52.0 =
 * Added checkpointed ingestion and research pipeline definitions, DAG validation, stage checkpoints, resumable runs, idempotent stage jobs, and artifact-backed pipeline lineage.

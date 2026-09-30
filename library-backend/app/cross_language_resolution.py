@@ -340,4 +340,4 @@ def readiness() -> dict[str,Any]:
     return {"schema":READINESS_CONTRACT,"version":"5.48.0","backend_version":"2.59.0","state":state,"counts":counts,
             "capabilities":{"cross_language_entity_authorities":True,"multilingual_name_forms":True,"explicit_transliteration_forms":True,"historical_toponym_validity_windows":True,"temporal_context_candidate_ranking":True,"ambiguity_preservation":True,"explicit_resolution_decisions":True,"signed_persistence":True},
             "guardrails":guardrails(),"lineage":{"linguistic_corpus":"v5.47.0","ocr_htr_transcription":"v5.46.0","original_language":"v5.45.0"},
-            "next_lineage":{"translation_transliteration_alignment_matrix":"v5.49.0"}}
+            "next_lineage":{"translation_transliteration_alignment_matrix":"v5.54.0"}}

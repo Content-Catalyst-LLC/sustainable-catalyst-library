@@ -149,6 +149,12 @@ from .cross_language_resolution import (
     validate_authority_payload as validate_cross_language_authority_payload,
     validate_decision_payload,
 )
+from .translation_alignment import (
+    MATRIX_CONTRACT as TRANSLATION_ALIGNMENT_MATRIX_CONTRACT,
+    READINESS_CONTRACT as TRANSLATION_ALIGNMENT_READINESS_CONTRACT,
+    build_alignment_matrix, build_alignment_package, get_alignment_matrix, ingest_alignment_matrix,
+    readiness as translation_alignment_readiness, validate_alignment_payload,
+)
 from .linguistic_corpus import (
     CORPUS_CONTRACT as LINGUISTIC_CORPUS_CONTRACT,
     CONCORDANCE_CONTRACT as CONCORDANCE_QUERY_CONTRACT,
@@ -567,6 +573,13 @@ def health() -> dict[str, Any]:
             "compute_broker_runtime_observability": True,
             "compute_broker_historical_observations": True,
             "compute_broker_placement_is_research_quality_judgment": False,
+            "translation_transliteration_alignment_matrix": True,
+            "translation_alignment_exact_text_hash_binding": True,
+            "translation_alignment_character_spans": True,
+            "translation_alignment_transformation_lineage": True,
+            "translation_alignment_generates_translation": False,
+            "translation_alignment_generates_transliteration": False,
+            "translation_alignment_confidence_is_truth_probability": False,
             "research_job_completion_implies_evidence_truth": False,
             "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
@@ -2628,6 +2641,61 @@ async def cross_language_resolution_decision_ingest(
 
 
 
+@app.get("/v1/translation-alignment/readiness")
+def translation_alignment_readiness_endpoint() -> dict[str, Any]:
+    return translation_alignment_readiness()
+
+
+@app.post("/v1/translation-alignment/validate")
+def translation_alignment_validate(payload: dict[str, Any]) -> dict[str, Any]:
+    return validate_alignment_payload(payload)
+
+
+@app.post("/v1/translation-alignment/matrix")
+def translation_alignment_matrix(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return build_alignment_matrix(payload)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/translation-alignment/package")
+def translation_alignment_package(payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return build_alignment_package(payload)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/admin/translation-alignments")
+async def translation_alignment_ingest(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        payload = json.loads(body.decode("utf-8")) if body else {}
+        if not isinstance(payload, dict): raise ValueError("alignment payload must be an object")
+        return ingest_alignment_matrix(payload)
+    except (ValueError, TypeError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/v1/admin/translation-alignments/{matrix_id:path}")
+async def translation_alignment_get(
+    matrix_id: str,
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try: return get_alignment_matrix(matrix_id)
+    except KeyError as exc: raise HTTPException(status_code=404, detail="alignment matrix not found") from exc
+
+
 @app.get("/v1/execution-fabric/readiness")
 def execution_fabric_readiness_endpoint() -> dict[str, Any]:
     return execution_fabric_readiness()
@@ -3957,6 +4025,10 @@ def search_readiness() -> dict[str, Any]:
         "kwic_result_contract": KWIC_RESULT_CONTRACT,
         "linguistic_corpus_guardrail": "tokenization-concordance-and-frequency-are-reproducible-analytical-views-not-morphology-meaning-intent-evidence-or-truth",
         "cross_language_resolution": cross_language_resolution_readiness(),
+        "translation_alignment": translation_alignment_readiness(),
+        "translation_alignment_contract": TRANSLATION_ALIGNMENT_MATRIX_CONTRACT,
+        "translation_alignment_readiness_contract": TRANSLATION_ALIGNMENT_READINESS_CONTRACT,
+        "translation_alignment_guardrail": "alignment-binds-derived-translation-or-transliteration-to-preserved-source-text-but-does-not-generate-translation-establish-semantic-identity-evidence-or-truth",
         "cross_language_resolution_contract": CROSS_LANGUAGE_RESOLUTION_READINESS_CONTRACT,
         "cross_language_resolution_guardrail": "candidate-ranking-and-name-toponym-similarity-do-not-establish-identity-evidence-or-truth",
         "temporal_knowledge_evolution": True,
