@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library User Trust Policy",
+  "type": "object",
+  "required": ["schema", "policy_id", "owner_id", "name", "scope", "rules", "default_action", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-user-trust-policy/1.0"},
+    "policy_id": {"type": "string"},
+    "owner_id": {"type": "string"},
+    "scope": {"enum": ["personal", "project", "team", "institutional"]},
+    "rules": {"type": "array"},
+    "guardrails": {"type": "object"}
+  }
+}

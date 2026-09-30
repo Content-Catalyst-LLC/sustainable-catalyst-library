@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.56.0 — Source Transparency, Quality Signals & User Trust Policies
+
+- Adds provenance-backed descriptive source-quality signals and source-transparency profiles.
+- Keeps user trust policies owner-scoped and separate from source signals.
+- Adds stateless trust-policy evaluation without rewriting source history or quality signals.
+- Prohibits aggregate credibility/trust scores, automatic source endorsement, evidence weighting, and Platform Core promotion.
+- Adds `source.transparency.assess` to the active Python research worker.
+
 ## v5.55.0 — Cross-Civilizational Evidence & Scientific Data Linking
 
 - Added provenance-bound links across textual/historical evidence and scientific datasets.

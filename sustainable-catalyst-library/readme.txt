@@ -8,7 +8,7 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.55.0
+Stable tag: 5.56.0
 License: GPLv2 or later
 
 A unified WordPress Living Knowledge System for public discovery, research workspaces, institutional operations, preservation, APIs, and PostgreSQL portability.
@@ -424,6 +424,13 @@ Subsystem version: 0.5.0 — AFOLU Research Librarian Intelligence.
 Use [sc_carbon_nature_intelligence] to expose the Library-native Carbon & Nature explorer. v0.5.0 preserves the governed AFOLU/Nature-Based Solutions ontology, Carbon Sequestration Measure Registry, Carbon Evidence & Methodology Graph, and Carbon Project Object Model & Provenance, then adds deterministic AFOLU research-intent detection, research-question framing, source-role planning, evidence-gap diagnostics, freshness review, and governed cross-product handoffs. The Research Librarian augmentation sends the research question only to the Library backend and does not send private project notes, notebooks, evidence matrices, source-bundle contents, claims, or other private project context.
 
 == Changelog ==
+
+= 5.56.0 =
+* Added provenance-backed descriptive source-quality signals and source-transparency profiles.
+* Added owner-scoped user trust policies that remain separate from source-quality observations.
+* Added stateless trust-policy evaluation without changing source signals or source history.
+* Prohibited aggregate credibility scores, system-default trust verdicts, automatic evidence weighting, and automatic Platform Core promotion.
+* Added active `source.transparency.assess` Python worker capability.
 
 = 5.55.0 =
 * Added Cross-Civilizational Evidence & Scientific Data Linking with explicit interpretation boundaries and provenance-preserving relationship classes.

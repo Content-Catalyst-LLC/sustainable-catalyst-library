@@ -149,6 +149,18 @@ from .cross_language_resolution import (
     validate_authority_payload as validate_cross_language_authority_payload,
     validate_decision_payload,
 )
+from .source_transparency import (
+    SIGNAL_CONTRACT as SOURCE_QUALITY_SIGNAL_CONTRACT,
+    PROFILE_CONTRACT as SOURCE_TRANSPARENCY_PROFILE_CONTRACT,
+    POLICY_CONTRACT as USER_TRUST_POLICY_CONTRACT,
+    READINESS_CONTRACT as SOURCE_TRANSPARENCY_READINESS_CONTRACT,
+    build_signal as build_source_quality_signal, build_profile as build_source_transparency_profile,
+    build_policy as build_user_trust_policy, evaluate_policy as evaluate_user_trust_policy,
+    ingest_signal as ingest_source_quality_signal, ingest_profile as ingest_source_transparency_profile,
+    ingest_policy as ingest_user_trust_policy, readiness as source_transparency_readiness,
+    validate_signal as validate_source_quality_signal, validate_profile as validate_source_transparency_profile,
+    validate_policy as validate_user_trust_policy,
+)
 from .cross_civilizational_linking import (
     LINK_CONTRACT as CROSS_CIVILIZATIONAL_LINK_CONTRACT, READINESS_CONTRACT as CROSS_CIVILIZATIONAL_LINKING_READINESS_CONTRACT,
     build_link as build_cross_civilizational_link, build_link_package as build_cross_civilizational_link_package,
@@ -589,6 +601,15 @@ def health() -> dict[str, Any]:
             "cross_civilizational_evidence_scientific_data_linking": True,
             "cross_civilizational_interpretation_boundary_required": True,
             "cross_civilizational_link_implies_evidence_truth": False,
+            "source_transparency_quality_signals_user_trust_policies": True,
+            "source_quality_signals_descriptive": True,
+            "source_quality_signal_is_credibility_verdict": False,
+            "source_quality_signal_implies_evidence_truth": False,
+            "source_quality_signal_implies_source_endorsement": False,
+            "user_trust_policies": True,
+            "user_trust_policy_changes_source_signals": False,
+            "system_default_trust_verdict": False,
+            "source_quality_signals_separate_from_user_trust_choices": True,
             "research_job_completion_implies_evidence_truth": False,
             "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
@@ -2650,6 +2671,42 @@ async def cross_language_resolution_decision_ingest(
 
 
 
+@app.get("/v1/source-transparency/readiness")
+def source_transparency_readiness_endpoint() -> dict[str, Any]: return source_transparency_readiness()
+@app.post("/v1/source-transparency/validate-signal")
+def source_transparency_validate_signal(payload: dict[str, Any]) -> dict[str, Any]: return validate_source_quality_signal(payload)
+@app.post("/v1/source-transparency/signal")
+def source_transparency_build_signal(payload: dict[str, Any]) -> dict[str, Any]:
+    try: return build_source_quality_signal(payload)
+    except (ValueError,TypeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+@app.post("/v1/source-transparency/profile")
+def source_transparency_build_profile(payload: dict[str, Any]) -> dict[str, Any]:
+    try: return build_source_transparency_profile(payload)
+    except (ValueError,TypeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+@app.post("/v1/source-transparency/trust-policy")
+def source_transparency_build_policy(payload: dict[str, Any]) -> dict[str, Any]:
+    try: return build_user_trust_policy(payload)
+    except (ValueError,TypeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+@app.post("/v1/source-transparency/evaluate-policy")
+def source_transparency_evaluate_policy(payload: dict[str, Any]) -> dict[str, Any]:
+    try: return evaluate_user_trust_policy(payload.get("policy") or {}, payload.get("profile") or {})
+    except (ValueError,TypeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+@app.post("/v1/admin/source-quality-signals")
+async def source_transparency_ingest_signal(request: Request,authorization: str|None=Header(default=None),x_sc_timestamp: str|None=Header(default=None),x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return ingest_source_quality_signal(json.loads(body.decode("utf-8")) if body else {})
+    except (ValueError,TypeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+@app.post("/v1/admin/source-transparency-profiles")
+async def source_transparency_ingest_profile(request: Request,authorization: str|None=Header(default=None),x_sc_timestamp: str|None=Header(default=None),x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return ingest_source_transparency_profile(json.loads(body.decode("utf-8")) if body else {})
+    except (ValueError,TypeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+@app.post("/v1/admin/user-trust-policies")
+async def source_transparency_ingest_policy(request: Request,authorization: str|None=Header(default=None),x_sc_timestamp: str|None=Header(default=None),x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return ingest_user_trust_policy(json.loads(body.decode("utf-8")) if body else {})
+    except (ValueError,TypeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
 @app.get("/v1/cross-civilizational-linking/readiness")
 def cross_civilizational_linking_readiness_endpoint() -> dict[str, Any]: return cross_civilizational_linking_readiness()
 @app.post("/v1/cross-civilizational-linking/validate")
@@ -4058,6 +4115,12 @@ def search_readiness() -> dict[str, Any]:
         "kwic_result_contract": KWIC_RESULT_CONTRACT,
         "linguistic_corpus_guardrail": "tokenization-concordance-and-frequency-are-reproducible-analytical-views-not-morphology-meaning-intent-evidence-or-truth",
         "cross_language_resolution": cross_language_resolution_readiness(),
+        "source_transparency": source_transparency_readiness(),
+        "source_quality_signal_contract": SOURCE_QUALITY_SIGNAL_CONTRACT,
+        "source_transparency_profile_contract": SOURCE_TRANSPARENCY_PROFILE_CONTRACT,
+        "user_trust_policy_contract": USER_TRUST_POLICY_CONTRACT,
+        "source_transparency_readiness_contract": SOURCE_TRANSPARENCY_READINESS_CONTRACT,
+        "source_transparency_guardrail": "descriptive-source-quality-signals-remain-separate-from-user-defined-trust-policies-and-neither-establishes-evidence-truth-or-source-endorsement",
         "cross_civilizational_linking": cross_civilizational_linking_readiness(),
         "cross_civilizational_link_contract": CROSS_CIVILIZATIONAL_LINK_CONTRACT,
         "cross_civilizational_linking_readiness_contract": CROSS_CIVILIZATIONAL_LINKING_READINESS_CONTRACT,

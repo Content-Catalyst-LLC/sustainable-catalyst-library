@@ -1,7 +1,7 @@
 # Sustainable Catalyst Knowledge Library
 
-**Current release:** v5.55.0 — Cross-Civilizational Evidence & Scientific Data Linking  
-**Backend:** v2.66.0  
+**Current release:** v5.56.0 — Source Transparency, Quality Signals & User Trust Policies  
+**Backend:** v2.67.0  
 **Go ingestion runtime:** v0.1.0  
 **Rust graph runtime:** v0.2.0
 

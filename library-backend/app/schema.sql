@@ -1085,3 +1085,59 @@ CREATE INDEX IF NOT EXISTS library_cross_civilizational_links_target_idx ON libr
 CREATE INDEX IF NOT EXISTS library_cross_civilizational_links_type_idx ON library_cross_civilizational_links(link_type,review_state,created_at DESC);
 CREATE TABLE IF NOT EXISTS library_cross_civilizational_link_events (event_id bigserial PRIMARY KEY,link_id text NOT NULL REFERENCES library_cross_civilizational_links(link_id) ON DELETE CASCADE,event_type text NOT NULL,details jsonb NOT NULL DEFAULT '{}'::jsonb,created_at timestamptz NOT NULL DEFAULT now());
 CREATE INDEX IF NOT EXISTS library_cross_civilizational_link_events_link_idx ON library_cross_civilizational_link_events(link_id,event_id DESC);
+
+-- Source Transparency, Quality Signals & User Trust Policies (Library v5.56.0 / backend v2.67.0)
+-- Descriptive source-quality signals remain separate from user-defined trust choices.
+CREATE TABLE IF NOT EXISTS library_source_quality_signals (
+    signal_id text PRIMARY KEY,
+    source_object_id text NOT NULL,
+    source_object_type text NOT NULL,
+    signal_type text NOT NULL,
+    value_kind text NOT NULL,
+    value jsonb NOT NULL,
+    observed_at timestamptz,
+    observation_basis text,
+    signal_fingerprint char(64) NOT NULL UNIQUE,
+    provenance jsonb NOT NULL,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_source_quality_signals_source_idx ON library_source_quality_signals(source_object_id,signal_type,created_at DESC);
+CREATE INDEX IF NOT EXISTS library_source_quality_signals_type_idx ON library_source_quality_signals(signal_type,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_source_transparency_profiles (
+    profile_id text PRIMARY KEY,
+    source_object_id text NOT NULL,
+    source_object_type text NOT NULL,
+    signal_ids text[] NOT NULL DEFAULT '{}',
+    profile_context jsonb NOT NULL DEFAULT '{}'::jsonb,
+    profile_fingerprint char(64) NOT NULL UNIQUE,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_source_transparency_profiles_source_idx ON library_source_transparency_profiles(source_object_id,updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_user_trust_policies (
+    policy_id text PRIMARY KEY,
+    owner_id text NOT NULL,
+    name text NOT NULL,
+    scope text NOT NULL CHECK (scope IN ('personal','project','team','institutional')),
+    state text NOT NULL DEFAULT 'draft' CHECK (state IN ('draft','active','disabled','archived')),
+    rules jsonb NOT NULL,
+    default_action text NOT NULL DEFAULT 'allow' CHECK (default_action IN ('include','exclude','flag','prioritize-review','require-human-review','allow')),
+    policy_fingerprint char(64) NOT NULL,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_user_trust_policies_owner_idx ON library_user_trust_policies(owner_id,state,updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_user_trust_policy_events (
+    event_id bigserial PRIMARY KEY,
+    policy_id text NOT NULL REFERENCES library_user_trust_policies(policy_id) ON DELETE RESTRICT,
+    event_type text NOT NULL,
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_user_trust_policy_events_policy_idx ON library_user_trust_policy_events(policy_id,event_id DESC);

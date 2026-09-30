@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Source Quality Signal",
+  "type": "object",
+  "required": ["schema", "signal_id", "source_object_id", "signal_type", "value_kind", "value", "provenance", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-source-quality-signal/1.0"},
+    "signal_id": {"type": "string"},
+    "source_object_id": {"type": "string"},
+    "signal_type": {"type": "string"},
+    "value_kind": {"type": "string"},
+    "value": {},
+    "provenance": {"type": "object"},
+    "guardrails": {"type": "object"}
+  }
+}

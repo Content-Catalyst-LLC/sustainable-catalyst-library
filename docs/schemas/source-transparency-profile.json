@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Source Transparency Profile",
+  "type": "object",
+  "required": ["schema", "profile_id", "source_object_id", "signals", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-source-transparency-profile/1.0"},
+    "profile_id": {"type": "string"},
+    "source_object_id": {"type": "string"},
+    "signals": {"type": "array"},
+    "aggregate_quality_score": {"type": ["null"]},
+    "guardrails": {"type": "object"}
+  }
+}

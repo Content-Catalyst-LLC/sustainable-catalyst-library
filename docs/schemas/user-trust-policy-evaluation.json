@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library User Trust Policy Evaluation",
+  "type": "object",
+  "required": ["schema", "evaluation_id", "policy_id", "profile_id", "disposition", "source_signals_unchanged", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-user-trust-policy-evaluation/1.0"},
+    "evaluation_id": {"type": "string"},
+    "disposition": {"enum": ["include", "exclude", "flag", "prioritize-review", "require-human-review", "allow"]},
+    "source_signals_unchanged": {"const": true},
+    "guardrails": {"type": "object"}
+  }
+}

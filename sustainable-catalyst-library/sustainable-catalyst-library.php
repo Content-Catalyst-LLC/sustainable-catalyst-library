@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.55.0 adds Cross-Civilizational Evidence & Scientific Data Linking with provenance-bound links across textual, historical, archaeological, observational, environmental, geospatial, statistical, and scientific data.
- * Version: 5.55.0
+ * Description: Sustainable Catalyst Library v5.56.0 adds Source Transparency, Quality Signals & User Trust Policies with provenance-backed descriptive source signals kept separate from user-defined trust choices.
+ * Version: 5.56.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.55.0');
+define('SC_LIBRARY_VERSION', '5.56.0');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
@@ -87,6 +87,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-original-language-corpu
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-ocr-htr-transcription-lineage.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-linguistic-corpus.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-language-resolution.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-source-transparency.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-civilizational-linking.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-translation-alignment.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence.php';
@@ -181,6 +182,7 @@ final class SC_Library_Plugin {
         $original_language_corpus = new SC_Library_Original_Language_Corpus();
         $ocr_htr_transcription_lineage = new SC_Library_OCR_HTR_Transcription_Lineage();
         $linguistic_corpus = new SC_Library_Linguistic_Corpus();
+        $source_transparency = new SC_Library_Source_Transparency();
         $cross_civilizational_linking = new SC_Library_Cross_Civilizational_Linking();
         $translation_alignment = new SC_Library_Translation_Alignment();
         $cross_language_resolution = new SC_Library_Cross_Language_Resolution();
@@ -282,6 +284,7 @@ final class SC_Library_Plugin {
         $original_language_corpus->register_hooks();
         $ocr_htr_transcription_lineage->register_hooks();
         $linguistic_corpus->register_hooks();
+        $source_transparency->register_hooks();
         $cross_civilizational_linking->register_hooks();
         $translation_alignment->register_hooks();
         $cross_language_resolution->register_hooks();
