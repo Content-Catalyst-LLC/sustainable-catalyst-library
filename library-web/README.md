@@ -1,7 +1,7 @@
 # Sustainable Catalyst Knowledge Library Web
 
-**Web:** v1.0.0  
-**Library:** v5.60.0  
+**Web:** v1.1.0  
+**Library:** v5.61.0  
 **API:** v1 (`/api/library/v1`)
 
 This is the first independent Knowledge Library web application. It is a deployable static client served by Nginx and talks directly to the authoritative Library API. WordPress is not required for application execution.

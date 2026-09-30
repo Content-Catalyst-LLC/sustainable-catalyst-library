@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Library Access Decision",
+  "type": "object",
+  "required": [
+    "schema",
+    "required_scope",
+    "allowed",
+    "reason"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-access-decision/1.0"
+    },
+    "required_scope": {
+      "type": "string"
+    },
+    "allowed": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

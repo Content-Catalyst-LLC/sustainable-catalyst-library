@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Library Session",
+  "type": "object",
+  "required": [
+    "schema",
+    "session_id",
+    "identity",
+    "roles",
+    "scopes",
+    "expires_at",
+    "state"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-session/1.0"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "identity": {
+      "type": "object"
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scopes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expires_at": {
+      "type": "string"
+    },
+    "state": {
+      "const": "active"
+    }
+  }
+}

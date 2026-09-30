@@ -20,6 +20,7 @@
         <a data-nav="search" href="#/search">Search</a>
         <a data-nav="discover" href="#/discover">Discover</a>
         <a data-nav="system" href="#/system">System</a>
+        <a data-nav="account" href="#/account">Account</a>
       </nav>
       <div class="status-pill" id="api-status" aria-live="polite"><span></span>Connecting</div>
     </header>
@@ -57,9 +58,17 @@
         <div class="page-heading"><p class="eyebrow">Runtime observability</p><h1>Library system status</h1><p>Direct readiness checks for the API, runtime authority, federation, artifacts, pipelines, and compute broker.</p></div>
         <div id="system-grid" class="card-grid"></div>
       </section>
+
+      <section class="view" data-view="account" hidden>
+        <div class="page-heading"><p class="eyebrow">Service-native identity</p><h1>Library account</h1><p>Authenticate directly with the Knowledge Library. WordPress users and cookies are not authoritative Library sessions.</p></div>
+        <div class="account-layout">
+          <section class="info-card" id="session-card"><h2>Session</h2><div id="session-state"><p class="empty-state">Checking session…</p></div></section>
+          <section class="info-card" id="login-card"><h2>Sign in</h2><form id="login-form" class="login-form"><label>Handle<input id="login-handle" name="handle" autocomplete="username" required></label><label>Password<input id="login-password" name="password" type="password" autocomplete="current-password" minlength="12" required></label><button type="submit">Sign in</button><p class="form-note">Accounts are provisioned by the Library service. Public research reads do not require an account.</p></form><p id="login-error" class="error-state" hidden></p></section>
+        </div>
+      </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v1.0.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v1.1.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

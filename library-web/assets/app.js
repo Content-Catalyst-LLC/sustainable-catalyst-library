@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "1.0.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "1.1.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -8,7 +8,7 @@ const escapeHtml = (value="") => String(value).replace(/[&<>"']/g, c => ({"&":"&
 const text = value => value == null ? "" : String(value);
 
 async function api(path, options={}) {
-  const response = await fetch(`${API}${path}`, { headers: { Accept: "application/json", ...(options.headers||{}) }, ...options });
+  const response = await fetch(`${API}${path}`, { credentials: "same-origin", headers: { Accept: "application/json", ...(options.body ? {"Content-Type":"application/json"} : {}), ...(options.headers||{}) }, ...options });
   let body = null;
   try { body = await response.json(); } catch { body = null; }
   if (!response.ok) {
@@ -25,11 +25,12 @@ function setApiStatus(ok, label) {
 
 function route() {
   const raw=(location.hash || "#/search").slice(2); const [name="search", ...rest]=raw.split("/");
-  const view = ["search","discover","system"].includes(name) ? name : name === "record" ? "record" : "search";
+  const view = ["search","discover","system","account"].includes(name) ? name : name === "record" ? "record" : "search";
   $$(".view").forEach(el => { el.hidden = el.dataset.view !== view; });
   $$('[data-nav]').forEach(a => a.setAttribute('aria-current', a.dataset.nav===view ? 'page' : 'false'));
   if (view === "discover") loadCapabilities();
   if (view === "system") loadSystem();
+  if (view === "account") loadSession();
   if (view === "record" && rest.length) loadRecord(decodeURIComponent(rest.join("/")));
   requestAnimationFrame(() => $("#main")?.focus({preventScroll:true}));
 }
@@ -108,5 +109,43 @@ async function bootstrap() {
 $("#search-form").addEventListener("submit", event => { event.preventDefault(); location.hash="#/search"; search(); });
 $("#load-more").addEventListener("click",()=>search({append:true}));
 $("#reader-back").addEventListener("click",()=>history.length>1?history.back():(location.hash="#/search"));
+$("#login-form")?.addEventListener("submit",login);
 window.addEventListener("hashchange",route);
 bootstrap();
+
+
+function renderSession(session) {
+  const target=$("#session-state"); const login=$("#login-card");
+  if (!session?.authenticated) {
+    state.session=null; state.csrfToken=null; login.hidden=false;
+    target.innerHTML='<p class="empty-state">You are not signed in. Public Library search and reading remain available.</p>';
+    return;
+  }
+  state.session=session; if (session.csrf_token) state.csrfToken=session.csrf_token; login.hidden=true;
+  const identity=session.identity || {}; const roles=(session.roles||[]).map(escapeHtml).join(', ') || 'none';
+  const scopes=(session.scopes||[]).map(x=>`<li><code>${escapeHtml(x)}</code></li>`).join('');
+  target.innerHTML=`<p class="eyebrow">Authenticated</p><h3>${escapeHtml(identity.display_name || identity.handle || identity.identity_id)}</h3><dl class="account-meta"><dt>Handle</dt><dd>${escapeHtml(identity.handle || '')}</dd><dt>Roles</dt><dd>${roles}</dd><dt>Expires</dt><dd>${escapeHtml(session.expires_at || '')}</dd></dl><h3>Effective scopes</h3><ul>${scopes}</ul><button id="logout-button" class="secondary-button">Sign out</button>`;
+  $("#logout-button")?.addEventListener('click', logout);
+}
+
+async function loadSession() {
+  const target=$("#session-state"); if (!target) return; target.innerHTML='<p class="empty-state">Checking session…</p>';
+  try { renderSession(await api('/session')); }
+  catch (error) { target.innerHTML=`<p class="error-state">${escapeHtml(error.message)}</p>`; }
+}
+
+async function login(event) {
+  event.preventDefault(); const error=$("#login-error"); error.hidden=true;
+  const handle=$("#login-handle").value.trim(); const password=$("#login-password").value;
+  try {
+    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v1.1.0'})});
+    $("#login-password").value=''; renderSession(session);
+  } catch (e) { error.textContent=e.message; error.hidden=false; }
+}
+
+async function logout() {
+  try {
+    await api('/session/logout',{method:'POST',headers: state.csrfToken ? {'X-SC-CSRF-Token':state.csrfToken}: {}});
+  } catch (e) { /* cookie is still cleared on the next valid logout/session expiry */ }
+  state.session=null; state.csrfToken=null; await loadSession();
+}

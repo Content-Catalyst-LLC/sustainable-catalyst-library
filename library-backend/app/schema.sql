@@ -1218,3 +1218,90 @@ CREATE TABLE IF NOT EXISTS library_api_service_contract_events (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS library_api_service_contract_events_contract_idx ON library_api_service_contract_events(contract_id,event_id DESC);
+
+-- Library Identity, Session & Access Boundary (Library v5.61.0 / backend v2.72.0)
+-- Library identities and sessions are authoritative in the Library service. WordPress may bridge
+-- an identity assertion later, but WordPress users/cookies are not authoritative Library sessions.
+CREATE TABLE IF NOT EXISTS library_identities (
+    identity_id text PRIMARY KEY,
+    principal_type text NOT NULL CHECK (principal_type IN ('user','service','institution')),
+    handle text NOT NULL,
+    handle_normalized text NOT NULL UNIQUE,
+    display_name text NOT NULL,
+    status text NOT NULL DEFAULT 'active' CHECK (status IN ('active','suspended','disabled')),
+    attributes jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_identities_type_status_idx ON library_identities(principal_type,status,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_identity_credentials (
+    credential_id text PRIMARY KEY,
+    identity_id text NOT NULL REFERENCES library_identities(identity_id) ON DELETE CASCADE,
+    credential_type text NOT NULL CHECK (credential_type IN ('password','external-assertion')),
+    secret_hash text NOT NULL,
+    state text NOT NULL DEFAULT 'active' CHECK (state IN ('active','superseded','revoked')),
+    failed_attempts integer NOT NULL DEFAULT 0 CHECK (failed_attempts >= 0),
+    locked_until timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    last_used_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS library_identity_credentials_identity_idx ON library_identity_credentials(identity_id,credential_type,state,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_identity_role_bindings (
+    binding_id text PRIMARY KEY,
+    identity_id text NOT NULL REFERENCES library_identities(identity_id) ON DELETE CASCADE,
+    role text NOT NULL CHECK (role IN ('reader','institution-member','researcher','steward','admin','service')),
+    resource_type text NOT NULL DEFAULT 'global',
+    resource_id text NOT NULL DEFAULT '*',
+    state text NOT NULL DEFAULT 'active' CHECK (state IN ('active','revoked')),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE(identity_id,role,resource_type,resource_id)
+);
+CREATE INDEX IF NOT EXISTS library_identity_role_bindings_identity_idx ON library_identity_role_bindings(identity_id,state,role);
+
+CREATE TABLE IF NOT EXISTS library_sessions (
+    session_id text PRIMARY KEY,
+    identity_id text NOT NULL REFERENCES library_identities(identity_id) ON DELETE CASCADE,
+    token_sha256 char(64) NOT NULL UNIQUE,
+    csrf_sha256 char(64) NOT NULL,
+    state text NOT NULL DEFAULT 'active' CHECK (state IN ('active','revoked','expired')),
+    issued_at timestamptz NOT NULL,
+    expires_at timestamptz NOT NULL,
+    last_seen_at timestamptz,
+    revoked_at timestamptz,
+    revocation_reason text,
+    client_label text,
+    user_agent_sha256 char(64),
+    remote_addr_sha256 char(64),
+    roles_snapshot jsonb NOT NULL DEFAULT '[]'::jsonb,
+    scopes_snapshot jsonb NOT NULL DEFAULT '[]'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (expires_at > issued_at)
+);
+CREATE INDEX IF NOT EXISTS library_sessions_identity_idx ON library_sessions(identity_id,state,expires_at DESC);
+CREATE INDEX IF NOT EXISTS library_sessions_expiry_idx ON library_sessions(state,expires_at);
+
+CREATE TABLE IF NOT EXISTS library_access_grants (
+    grant_id text PRIMARY KEY,
+    identity_id text NOT NULL REFERENCES library_identities(identity_id) ON DELETE CASCADE,
+    resource_type text NOT NULL,
+    resource_id text NOT NULL,
+    action text NOT NULL,
+    effect text NOT NULL CHECK (effect IN ('allow','deny')),
+    expires_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_access_grants_identity_idx ON library_access_grants(identity_id,resource_type,resource_id,action,effect);
+
+CREATE TABLE IF NOT EXISTS library_identity_events (
+    event_id bigserial PRIMARY KEY,
+    identity_id text REFERENCES library_identities(identity_id) ON DELETE SET NULL,
+    event_type text NOT NULL,
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_identity_events_identity_idx ON library_identity_events(identity_id,event_id DESC);
+

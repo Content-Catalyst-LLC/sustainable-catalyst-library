@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Library Identity Access Readiness",
+  "type": "object",
+  "required": [
+    "schema",
+    "state",
+    "wordpress_required",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-identity-access-readiness/1.0"
+    },
+    "state": {
+      "enum": [
+        "ready",
+        "degraded"
+      ]
+    },
+    "wordpress_required": {
+      "const": false
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

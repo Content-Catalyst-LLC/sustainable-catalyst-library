@@ -4,7 +4,7 @@ from hashlib import sha256
 import json
 from typing import Any
 
-WEB_VERSION = "1.0.0"
+WEB_VERSION = "1.1.0"
 CONTRACT = "sc-library-web-application/1.0"
 READINESS_CONTRACT = "sc-library-web-readiness/1.0"
 
@@ -13,6 +13,7 @@ SURFACES: tuple[dict[str, Any], ...] = (
     {"id":"reader","label":"Reader","route":"#/record/{record_id}","api":"/api/library/v1/records/{record_id}","public":True},
     {"id":"discover","label":"Discover","route":"#/discover","api":"/api/library/v1/capabilities","public":True},
     {"id":"system","label":"System","route":"#/system","api":"/api/library/v1/readiness","public":True},
+    {"id":"account","label":"Account","route":"#/account","api":"/api/library/v1/session","public":True},
 )
 
 
@@ -34,8 +35,8 @@ def application_contract() -> dict[str, Any]:
         "application_id": "sustainable-catalyst-library-web",
         "application_contract_id": "library-web-application:" + fp[:32],
         "application_fingerprint_sha256": fp,
-        "library_version": "5.60.0",
-        "backend_version": "2.71.0",
+        "library_version": "5.61.0",
+        "backend_version": "2.72.0",
         "web_version": WEB_VERSION,
         "state": "foundation",
         "deployment_model": "independent-static-web-service",
@@ -49,6 +50,8 @@ def application_contract() -> dict[str, Any]:
             "api_v1_is_authoritative_service_boundary": True,
             "web_client_may_be_replaced_without_data_migration": True,
             "client_side_secrets_permitted": False,
+            "library_session_authority": True,
+            "wordpress_session_authority": False,
         },
     }
 

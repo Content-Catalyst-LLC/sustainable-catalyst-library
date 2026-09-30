@@ -177,6 +177,13 @@ from .independent_api import (
     service_contract as library_api_service_contract, validate_service_contract as validate_library_api_service_contract,
 )
 from .web_application import application_contract as library_web_application_contract, readiness as library_web_readiness
+from .identity_access import (
+    COOKIE_NAME as LIBRARY_SESSION_COOKIE, access_decision as library_access_decision, authenticate_password as library_authenticate_password,
+    bind_role as library_bind_role, boundary_contract as library_identity_boundary_contract, create_access_grant as library_create_access_grant,
+    create_identity as library_create_identity, create_session as library_create_session, evaluate_session_access as library_evaluate_session_access,
+    readiness as library_identity_readiness, resolve_session as library_resolve_session, revoke_session as library_revoke_session,
+    set_password as library_set_password, validate_csrf as library_validate_csrf,
+)
 from .runtime_authority import (
     CERTIFICATION_CONTRACT as RUNTIME_AUTHORITY_CERTIFICATION_CONTRACT,
     READINESS_CONTRACT as RUNTIME_AUTHORITY_READINESS_CONTRACT,
@@ -653,10 +660,20 @@ def health() -> dict[str, Any]:
             "wordpress_adapter_role": "publishing-routing-embed-adapter",
             "direct_library_api_clients": True,
             "independent_library_web_application": True,
-            "library_web_version": "1.0.0",
+            "library_web_version": "1.1.0",
             "library_web_direct_api_v1": True,
             "wordpress_required_for_library_web": False,
             "library_web_owns_research_state": False,
+            "library_identity_session_access_boundary": True,
+            "library_identity_authority": "library-service",
+            "library_session_authority": "library-service",
+            "library_access_authority": "library-service",
+            "library_password_hash": "argon2id",
+            "library_session_token_storage": "sha256-only",
+            "library_sessions_revocable": True,
+            "library_access_deny_precedence": True,
+            "wordpress_identity_authoritative": False,
+            "wordpress_cookie_is_library_session": False,
             "research_job_completion_implies_evidence_truth": False,
             "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
@@ -2720,11 +2737,11 @@ async def cross_language_resolution_decision_ingest(
 
 
 
-# Knowledge Library v5.60.0 — Independent Library Web Application Foundation
+# Knowledge Library v5.61.0 — Library Identity, Session & Access Boundary
 @app.get("/api/library/v1")
 def library_api_v1_root() -> dict[str, Any]:
     c = library_api_service_contract()
-    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.60.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes"}}
+    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.61.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes"}}
 
 @app.get("/api/library/v1/service")
 def library_api_v1_service() -> dict[str, Any]: return library_api_service_contract()
@@ -2732,7 +2749,7 @@ def library_api_v1_service() -> dict[str, Any]: return library_api_service_contr
 @app.get("/api/library/v1/health")
 def library_api_v1_health() -> dict[str, Any]:
     db_state, detail = database_state()
-    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.60.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
+    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.61.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
 
 @app.get("/api/library/v1/readiness")
 def library_api_v1_readiness() -> dict[str, Any]: return library_api_readiness()
@@ -2780,6 +2797,91 @@ def library_api_v1_web_application() -> dict[str, Any]: return library_web_appli
 
 @app.get("/api/library/v1/web-application/readiness")
 def library_api_v1_web_application_readiness() -> dict[str, Any]: return library_web_readiness()
+
+
+def _library_session_from_request(request: Request, *, rotate_csrf: bool = False):
+    return library_resolve_session(request.cookies.get(settings.session_cookie_name or LIBRARY_SESSION_COOKIE), rotate_csrf=rotate_csrf)
+
+@app.get("/api/library/v1/identity")
+def library_api_v1_identity_boundary() -> dict[str, Any]:
+    return library_identity_boundary_contract()
+
+@app.get("/api/library/v1/identity/readiness")
+def library_api_v1_identity_readiness() -> dict[str, Any]:
+    return library_identity_readiness()
+
+@app.get("/api/library/v1/session")
+def library_api_v1_current_session(request: Request) -> dict[str, Any]:
+    session=_library_session_from_request(request,rotate_csrf=True)
+    if session is None:
+        return {"schema":"sc-library-session-state/1.0","authenticated":False,"identity":None,"roles":[],"scopes":[],"wordpress_required":False}
+    return {"schema":"sc-library-session-state/1.0","authenticated":True,**session,"wordpress_required":False}
+
+@app.post("/api/library/v1/session/login")
+async def library_api_v1_session_login(request: Request):
+    try:
+        payload=await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400,detail=library_api_error_envelope("invalid-json","Login payload must be JSON",status=400)) from exc
+    identity=library_authenticate_password(str(payload.get("handle") or ""),str(payload.get("password") or ""))
+    if identity is None:
+        raise HTTPException(status_code=401,detail=library_api_error_envelope("invalid-credentials","Invalid credentials",status=401))
+    remote=request.client.host if request.client else None
+    session=library_create_session(identity,ttl_seconds=settings.session_ttl_seconds,client_label=str(payload.get("client_label") or "library-web"),user_agent=request.headers.get("user-agent"),remote_addr=remote)
+    body={k:v for k,v in session.items() if k!="token"}
+    response=JSONResponse({"schema":"sc-library-session-login/1.0","authenticated":True,**body})
+    response.set_cookie(settings.session_cookie_name or LIBRARY_SESSION_COOKIE,session["token"],max_age=settings.session_ttl_seconds,httponly=True,secure=settings.session_cookie_secure,samesite=settings.session_cookie_samesite,path="/")
+    return response
+
+@app.post("/api/library/v1/session/logout")
+def library_api_v1_session_logout(request: Request, x_sc_csrf_token: str | None = Header(default=None)):
+    session=_library_session_from_request(request,rotate_csrf=False)
+    if session is None:
+        response=JSONResponse({"schema":"sc-library-session-logout/1.0","authenticated":False,"revoked":False})
+        response.delete_cookie(settings.session_cookie_name or LIBRARY_SESSION_COOKIE,path="/")
+        return response
+    if not library_validate_csrf(session["session_id"],x_sc_csrf_token):
+        raise HTTPException(status_code=403,detail=library_api_error_envelope("csrf-required","Valid session CSRF token required",status=403))
+    revoked=library_revoke_session(session["session_id"],reason="logout")
+    response=JSONResponse({"schema":"sc-library-session-logout/1.0","authenticated":False,"revoked":revoked})
+    response.delete_cookie(settings.session_cookie_name or LIBRARY_SESSION_COOKIE,path="/")
+    return response
+
+@app.get("/api/library/v1/access/evaluate")
+def library_api_v1_access_evaluate(request: Request, required_scope: str="library:read", resource_type: str|None=None, resource_id: str|None=None, public_read: bool=False) -> dict[str, Any]:
+    session=_library_session_from_request(request,rotate_csrf=False)
+    return library_evaluate_session_access(session,required_scope=required_scope,resource_type=resource_type,resource_id=resource_id,public_read=public_read)
+
+@app.post("/api/library/v1/admin/identities")
+async def library_api_v1_identity_create(request: Request, authorization: str | None = Header(default=None), x_sc_timestamp: str | None = Header(default=None), x_sc_signature: str | None = Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return library_create_identity(json.loads(body.decode("utf-8")) if body else {})
+    except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/identities/{identity_id:path}/password")
+async def library_api_v1_identity_password(identity_id: str, request: Request, authorization: str | None = Header(default=None), x_sc_timestamp: str | None = Header(default=None), x_sc_signature: str | None = Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return library_set_password(identity_id,str(payload.get("password") or ""))
+    except KeyError as exc: raise HTTPException(status_code=404,detail="identity not found") from exc
+    except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/identities/{identity_id:path}/roles")
+async def library_api_v1_identity_role(identity_id: str, request: Request, authorization: str | None = Header(default=None), x_sc_timestamp: str | None = Header(default=None), x_sc_signature: str | None = Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return library_bind_role(identity_id,str(payload.get("role") or ""),resource_type=str(payload.get("resource_type") or "global"),resource_id=str(payload.get("resource_id") or "*"))
+    except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/access-grants")
+async def library_api_v1_access_grant(request: Request, authorization: str | None = Header(default=None), x_sc_timestamp: str | None = Header(default=None), x_sc_signature: str | None = Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return library_create_access_grant(str(payload.get("identity_id") or ""),resource_type=str(payload.get("resource_type") or "*"),resource_id=str(payload.get("resource_id") or "*"),action=str(payload.get("action") or "library:read"),effect=str(payload.get("effect") or "allow"))
+    except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
 
 @app.post("/api/library/v1/research-jobs")
 async def library_api_v1_submit_research_job(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:

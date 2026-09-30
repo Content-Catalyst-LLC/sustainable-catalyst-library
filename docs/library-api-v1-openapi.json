@@ -164,6 +164,142 @@
           }
         }
       }
+    },
+    "/identity": {
+      "get": {
+        "summary": "Identity/session/access boundary contract",
+        "responses": {
+          "200": {
+            "description": "Identity boundary"
+          }
+        }
+      }
+    },
+    "/identity/readiness": {
+      "get": {
+        "summary": "Identity boundary readiness",
+        "responses": {
+          "200": {
+            "description": "Identity readiness"
+          }
+        }
+      }
+    },
+    "/session": {
+      "get": {
+        "summary": "Current Library session",
+        "responses": {
+          "200": {
+            "description": "Session state"
+          }
+        }
+      }
+    },
+    "/session/login": {
+      "post": {
+        "summary": "Exchange Library credentials for an opaque service-native session",
+        "responses": {
+          "200": {
+            "description": "Authenticated session"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/session/logout": {
+      "post": {
+        "summary": "Revoke current Library session",
+        "parameters": [
+          {
+            "name": "X-SC-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session revoked"
+          },
+          "403": {
+            "description": "CSRF required"
+          }
+        }
+      }
+    },
+    "/access/evaluate": {
+      "get": {
+        "summary": "Evaluate current session against a scope/resource",
+        "responses": {
+          "200": {
+            "description": "Access decision"
+          }
+        }
+      }
+    },
+    "/admin/identities": {
+      "post": {
+        "summary": "Create or update a Library identity",
+        "security": [
+          {
+            "signedService": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/admin/identities/{identity_id}/password": {
+      "post": {
+        "summary": "Set Library password credential",
+        "security": [
+          {
+            "signedService": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/admin/identities/{identity_id}/roles": {
+      "post": {
+        "summary": "Bind a Library role",
+        "security": [
+          {
+            "signedService": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/admin/access-grants": {
+      "post": {
+        "summary": "Create explicit Library access grant",
+        "security": [
+          {
+            "signedService": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Created"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -173,6 +309,12 @@
         "in": "header",
         "name": "X-SC-Signature",
         "description": "Signed service request; Authorization and X-SC-Timestamp are also required."
+      },
+      "librarySession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sc_library_session",
+        "description": "Opaque revocable Library session cookie; token is never stored in plaintext server-side."
       }
     }
   }

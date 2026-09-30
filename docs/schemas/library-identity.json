@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Library Identity",
+  "type": "object",
+  "required": [
+    "schema",
+    "identity_id",
+    "principal_type",
+    "handle",
+    "status"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-identity/1.0"
+    },
+    "identity_id": {
+      "type": "string"
+    },
+    "principal_type": {
+      "enum": [
+        "user",
+        "service",
+        "institution"
+      ]
+    },
+    "handle": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "active",
+        "suspended",
+        "disabled"
+      ]
+    }
+  }
+}

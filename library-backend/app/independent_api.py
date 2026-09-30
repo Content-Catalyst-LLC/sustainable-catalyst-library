@@ -31,6 +31,16 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"GET","path":"/api/library/v1/compute/readiness","name":"compute-readiness","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/web-application","name":"web-application","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/web-application/readiness","name":"web-application-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/identity","name":"identity-boundary","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/identity/readiness","name":"identity-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/session","name":"current-session","access":"session-optional","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/session/login","name":"session-login","access":"public-credential-exchange","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/session/logout","name":"session-logout","access":"session-csrf","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/access/evaluate","name":"access-evaluate","access":"session-optional","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/identities","name":"identity-create","access":"signed-admin","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/identities/{identity_id}/password","name":"identity-password-set","access":"signed-admin","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/identities/{identity_id}/roles","name":"identity-role-bind","access":"signed-admin","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/access-grants","name":"identity-access-grant","access":"signed-admin","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-jobs","name":"submit-research-job","access":"signed-service","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/service-contracts","name":"persist-service-contract","access":"signed-admin","stability":"stable"},
 )
@@ -45,6 +55,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "cross-civilizational": {"resources":["evidence-links","scientific-data-links"],"direct_api":True},
     "platform-core": {"resources":["bindings","handoffs","outbox"],"direct_api":True,"authority":"platform-core"},
     "web-application": {"resources":["search-shell","reader","discovery","system-status"],"direct_api":True,"authority":"client"},
+    "identity-access": {"resources":["identities","sessions","roles","access-grants"],"direct_api":True,"authority":"library-service"},
 }
 
 
@@ -99,6 +110,13 @@ def auth_contract() -> dict[str, Any]:
             "headers": ["Authorization", "X-SC-Timestamp", "X-SC-Signature"],
             "signature_scope": "method + request-path + timestamp + raw-body",
         },
+        "library_session": {
+            "required": False,
+            "cookie": "sc_library_session",
+            "model": "opaque-revocable-server-session",
+            "csrf_header_for_cookie_mutations": "X-SC-CSRF-Token",
+            "wordpress_cookie_authoritative": False,
+        },
     }
 
 
@@ -131,8 +149,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "5.60.0",
-        "backend_version": "2.71.0",
+        "library_version": "5.61.0",
+        "backend_version": "2.72.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -187,8 +205,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "5.60.0",
-        "backend_version": "2.71.0",
+        "library_version": "5.61.0",
+        "backend_version": "2.72.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

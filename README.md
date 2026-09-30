@@ -1,5 +1,12 @@
 # Sustainable Catalyst Knowledge Library
 
+Current release: **v5.61.0 — Library Identity, Session & Access Boundary**  
+Backend: **v2.72.0** · Library Web: **v1.1.0** · API: **v1.0**
+
+The Library service now owns identity, sessions, roles/scopes, and access decisions. WordPress remains an optional non-authoritative adapter.
+
+# Sustainable Catalyst Knowledge Library
+
 **Current release:** v5.60.0 — Independent Library Web Application Foundation  
 **Backend:** v2.71.0  
 **Web:** v1.0.0  

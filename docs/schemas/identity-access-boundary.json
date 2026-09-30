@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Library Identity Access Boundary",
+  "type": "object",
+  "required": [
+    "schema",
+    "identity_authority",
+    "session_authority",
+    "access_authority",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-identity-access-boundary/1.0"
+    },
+    "identity_authority": {
+      "const": "library-service"
+    },
+    "session_authority": {
+      "const": "library-service"
+    },
+    "access_authority": {
+      "const": "library-service"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.60.0 adds the Independent Library Web Application Foundation: a standalone search, reader, discovery, and system-status client using /api/library/v1 directly while WordPress remains an optional publishing/routing/embed adapter.
- * Version: 5.60.0
+ * Description: Sustainable Catalyst Library v5.61.0 adds the Library Identity, Session & Access Boundary: service-native identities, revocable sessions, roles/scopes, and explicit access grants while WordPress remains an optional non-authoritative identity bridge.
+ * Version: 5.61.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.60.0');
+define('SC_LIBRARY_VERSION', '5.61.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'publishing-routing-embed-adapter');
 define('SC_LIBRARY_RESEARCH_RUNTIME_AUTHORITY', 'library-api');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
@@ -94,6 +94,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-global-knowledge-federa
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-runtime-authority.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-api-v1.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-web-application.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-identity-access.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-civilizational-linking.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-translation-alignment.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence.php';

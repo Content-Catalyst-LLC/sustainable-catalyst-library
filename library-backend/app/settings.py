@@ -133,6 +133,14 @@ class Settings:
     compute_max_capability_queue: int = _as_int("SC_LIBRARY_COMPUTE_MAX_CAPABILITY_QUEUE", 1000, 10, 100000)
     compute_observation_window_minutes: int = _as_int("SC_LIBRARY_COMPUTE_OBSERVATION_WINDOW_MINUTES", 60, 5, 1440)
 
+    # Library Identity, Session & Access Boundary (Library v5.61.0 / backend v2.72.0)
+    session_ttl_seconds: int = _as_int("SC_LIBRARY_SESSION_TTL_SECONDS", 43200, 300, 604800)
+    session_cookie_name: str = os.getenv("SC_LIBRARY_SESSION_COOKIE_NAME", "sc_library_session").strip() or "sc_library_session"
+    session_cookie_secure: bool = _as_bool("SC_LIBRARY_SESSION_COOKIE_SECURE", True)
+    session_cookie_samesite: str = (os.getenv("SC_LIBRARY_SESSION_COOKIE_SAMESITE", "lax").strip().lower() if os.getenv("SC_LIBRARY_SESSION_COOKIE_SAMESITE", "lax").strip().lower() in {"lax","strict","none"} else "lax")
+    login_max_failures: int = _as_int("SC_LIBRARY_LOGIN_MAX_FAILURES", 5, 2, 20)
+    login_lockout_seconds: int = _as_int("SC_LIBRARY_LOGIN_LOCKOUT_SECONDS", 900, 60, 86400)
+
     @property
     def allowed_origins(self) -> list[str]:
         return [item.strip().rstrip("/") for item in self.allowed_origins_raw.split(",") if item.strip()]
