@@ -300,6 +300,26 @@
           }
         }
       }
+    },
+    "/wordpress-adapter": {
+      "get": {
+        "operationId": "libraryWordPressThinAdapterContract",
+        "responses": {
+          "200": {
+            "description": "WordPress thin-adapter contract"
+          }
+        }
+      }
+    },
+    "/wordpress-adapter/readiness": {
+      "get": {
+        "operationId": "libraryWordPressThinAdapterReadiness",
+        "responses": {
+          "200": {
+            "description": "WordPress thin-adapter readiness"
+          }
+        }
+      }
     }
   },
   "components": {

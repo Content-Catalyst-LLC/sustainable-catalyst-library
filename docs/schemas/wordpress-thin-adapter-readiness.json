@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sc-library-wordpress-thin-adapter-readiness/1.0",
+  "title": "Knowledge Library WordPress Thin Adapter Readiness",
+  "type": "object",
+  "required": [
+    "schema",
+    "state",
+    "wordpress_dependency_count",
+    "adapter",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-wordpress-thin-adapter-readiness/1.0"
+    },
+    "state": {
+      "enum": [
+        "ready",
+        "blocked"
+      ]
+    },
+    "wordpress_dependency_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "adapter": {
+      "type": "object"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

@@ -8,12 +8,15 @@ Tags: knowledge-base, knowledge-graph, relationships, provenance, research-works
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 5.60.0
+Stable tag: 5.62.0
 License: GPLv2 or later
 
 WordPress adapter for the independent Sustainable Catalyst Knowledge Library research platform. WordPress provides publishing, routing, SEO, embeds, compatibility surfaces, and health integration; the Library API/backend owns authoritative research state and execution.
 
 == Description ==
+
+Sustainable Catalyst Library v5.62.0 establishes the WordPress Thin Adapter. WordPress is constrained to public routing, SEO/public metadata, launch/embed surfaces, health/status display, optional identity handoff, and legacy presentation compatibility. It is not authoritative for research objects, jobs, artifacts, pipelines, compute, identities, sessions, credentials, federation, trust policy, or Platform Core promotion. The authoritative contract is exposed directly by Library API v1.
+
 
 Sustainable Catalyst Library v5.58.0 establishes the Library Runtime Authority & WordPress Decoupling Foundation. The Library API, Python backend, PostgreSQL, search/vector infrastructure, durable jobs, workers, artifact storage, pipelines, compute broker, native runtimes, federation, and Platform Core contracts are authoritative. WordPress is formally a non-authoritative publishing, routing, SEO, launch/embed, authentication-handoff, and compatibility adapter and is not required for research execution.
 

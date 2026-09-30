@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.61.0 adds the Library Identity, Session & Access Boundary: service-native identities, revocable sessions, roles/scopes, and explicit access grants while WordPress remains an optional non-authoritative identity bridge.
- * Version: 5.61.0
+ * Description: Sustainable Catalyst Library v5.62.0 establishes the WordPress Thin Adapter: WordPress is limited to routing, SEO/public metadata, launch/embed surfaces, health/status, optional identity handoff, and legacy presentation compatibility while Library services remain authoritative.
+ * Version: 5.62.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,8 +15,10 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.61.0');
-define('SC_LIBRARY_WORDPRESS_ROLE', 'publishing-routing-embed-adapter');
+define('SC_LIBRARY_VERSION', '5.62.0');
+define('SC_LIBRARY_WORDPRESS_ROLE', 'thin-adapter');
+define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
+define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);
 define('SC_LIBRARY_RESEARCH_RUNTIME_AUTHORITY', 'library-api');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
@@ -95,6 +97,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-runtime-authority.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-api-v1.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-web-application.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-identity-access.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-wordpress-thin-adapter.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-civilizational-linking.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-translation-alignment.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence.php';
@@ -194,6 +197,7 @@ final class SC_Library_Plugin {
         $runtime_authority = new SC_Library_Runtime_Authority();
         $library_api_v1 = new SC_Library_API_V1();
         $library_web_application = new SC_Library_Web_Application();
+        $wordpress_thin_adapter = new SC_Library_WordPress_Thin_Adapter();
         $cross_civilizational_linking = new SC_Library_Cross_Civilizational_Linking();
         $translation_alignment = new SC_Library_Translation_Alignment();
         $cross_language_resolution = new SC_Library_Cross_Language_Resolution();
@@ -300,6 +304,7 @@ final class SC_Library_Plugin {
         $runtime_authority->register_hooks();
         $library_api_v1->register_hooks();
         $library_web_application->register_hooks();
+        $wordpress_thin_adapter->register_hooks();
         $cross_civilizational_linking->register_hooks();
         $translation_alignment->register_hooks();
         $cross_language_resolution->register_hooks();

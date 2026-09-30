@@ -98,3 +98,11 @@ For earlier releases, inspect the corresponding Git tag.
 - Production deployment now selects the first free localhost port from 8092-8099 unless `SC_LIBRARY_WEB_PORT` is explicitly supplied.
 - The deployer refuses to remove or replace non-Library containers that own a requested port.
 - Backend v2.72.0, Library Web application v1.1.0, API v1, and WordPress adapter v5.61.0 remain unchanged.
+
+
+## v5.62.0 — WordPress Thin Adapter
+- Adds the explicit WordPress thin-adapter allowlist/denylist and API v1 contract.
+- Limits WordPress authority to presentation/routing/SEO/embed/health/optional identity-handoff roles.
+- Keeps research state, execution, jobs, artifacts, pipelines, compute, identity/session authority, federation, trust policy, and Platform Core promotion outside WordPress.
+- Adds `/api/library/v1/wordpress-adapter` and `/api/library/v1/wordpress-adapter/readiness`.
+- Preserves legacy WordPress presentation modules as non-authoritative compatibility surfaces while the independent Library Web application continues to call API v1 directly.

@@ -177,6 +177,7 @@ from .independent_api import (
     service_contract as library_api_service_contract, validate_service_contract as validate_library_api_service_contract,
 )
 from .web_application import application_contract as library_web_application_contract, readiness as library_web_readiness
+from .wordpress_thin_adapter import contract as wordpress_thin_adapter_contract, readiness as wordpress_thin_adapter_readiness
 from .identity_access import (
     COOKIE_NAME as LIBRARY_SESSION_COOKIE, access_decision as library_access_decision, authenticate_password as library_authenticate_password,
     bind_role as library_bind_role, boundary_contract as library_identity_boundary_contract, create_access_grant as library_create_access_grant,
@@ -657,7 +658,10 @@ def health() -> dict[str, Any]:
             "wordpress_authoritative_research_runtime": False,
             "wordpress_required_for_research_execution": False,
             "new_research_capability_may_require_wordpress": False,
-            "wordpress_adapter_role": "publishing-routing-embed-adapter",
+            "wordpress_adapter_role": "thin-adapter",
+            "wordpress_thin_adapter": True,
+            "wordpress_thin_adapter_backend_contract": True,
+            "wordpress_thin_adapter_research_authority": False,
             "direct_library_api_clients": True,
             "independent_library_web_application": True,
             "library_web_version": "1.1.0",
@@ -2737,11 +2741,11 @@ async def cross_language_resolution_decision_ingest(
 
 
 
-# Knowledge Library v5.61.0 — Library Identity, Session & Access Boundary
+# Knowledge Library v5.62.0 — WordPress Thin Adapter
 @app.get("/api/library/v1")
 def library_api_v1_root() -> dict[str, Any]:
     c = library_api_service_contract()
-    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.61.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes"}}
+    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.62.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes"}}
 
 @app.get("/api/library/v1/service")
 def library_api_v1_service() -> dict[str, Any]: return library_api_service_contract()
@@ -2749,7 +2753,7 @@ def library_api_v1_service() -> dict[str, Any]: return library_api_service_contr
 @app.get("/api/library/v1/health")
 def library_api_v1_health() -> dict[str, Any]:
     db_state, detail = database_state()
-    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.61.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
+    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.62.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
 
 @app.get("/api/library/v1/readiness")
 def library_api_v1_readiness() -> dict[str, Any]: return library_api_readiness()
@@ -2797,6 +2801,12 @@ def library_api_v1_web_application() -> dict[str, Any]: return library_web_appli
 
 @app.get("/api/library/v1/web-application/readiness")
 def library_api_v1_web_application_readiness() -> dict[str, Any]: return library_web_readiness()
+
+@app.get("/api/library/v1/wordpress-adapter")
+def library_api_v1_wordpress_adapter() -> dict[str, Any]: return wordpress_thin_adapter_contract()
+
+@app.get("/api/library/v1/wordpress-adapter/readiness")
+def library_api_v1_wordpress_adapter_readiness() -> dict[str, Any]: return wordpress_thin_adapter_readiness()
 
 
 def _library_session_from_request(request: Request, *, rotate_csrf: bool = False):
