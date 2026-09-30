@@ -594,6 +594,9 @@ final class SC_Library_Python_Backend {
         register_rest_route(self::REST_NAMESPACE, '/backend/artifact-storage/readiness', [
             'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_artifact_storage_readiness'],
         ]);
+        register_rest_route(self::REST_NAMESPACE, '/backend/pipeline-engine/readiness', [
+            'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_pipeline_engine_readiness'],
+        ]);
         register_rest_route(self::REST_NAMESPACE, '/backend/cross-language-resolution/readiness', [
             'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => [$this, 'proxy_cross_language_resolution_readiness'],
         ]);
@@ -2083,6 +2086,13 @@ final class SC_Library_Python_Backend {
         $r=wp_remote_get(self::base_url().'/v1/artifact-storage/readiness',['timeout'=>self::timeout(),'redirection'=>2,'headers'=>['Accept'=>'application/json']]);
         if (is_wp_error($r)) return new WP_REST_Response(['schema'=>'sc-library-artifact-storage-readiness/1.0','state'=>'unavailable','error'=>$r->get_error_message()],502);
         $body=json_decode((string)wp_remote_retrieve_body($r),true); return new WP_REST_Response(is_array($body)?$body:['schema'=>'sc-library-artifact-storage-readiness/1.0','state'=>'unavailable'],(int)wp_remote_retrieve_response_code($r)?:502);
+    }
+
+    public function proxy_pipeline_engine_readiness(WP_REST_Request $request): WP_REST_Response {
+        if (!self::configured()) return new WP_REST_Response(['schema'=>'sc-library-pipeline-engine-readiness/1.0','state'=>'unavailable'],503);
+        $r=wp_remote_get(self::base_url().'/v1/pipeline-engine/readiness',['timeout'=>self::timeout(),'redirection'=>2,'headers'=>['Accept'=>'application/json']]);
+        if (is_wp_error($r)) return new WP_REST_Response(['schema'=>'sc-library-pipeline-engine-readiness/1.0','state'=>'unavailable','error'=>$r->get_error_message()],502);
+        $body=json_decode((string)wp_remote_retrieve_body($r),true); return new WP_REST_Response(is_array($body)?$body:['schema'=>'sc-library-pipeline-engine-readiness/1.0','state'=>'unavailable'],(int)wp_remote_retrieve_response_code($r)?:502);
     }
 
     public function proxy_cross_language_resolution_readiness(WP_REST_Request $request): WP_REST_Response {

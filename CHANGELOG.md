@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.52.0 — Checkpointed Ingestion & Research Pipeline Engine
+
+- Adds PostgreSQL-authoritative pipeline definitions, runs, stage runs, and pipeline event lineage.
+- Validates acyclic stage DAGs and compiles ready stages into the existing durable research-job fabric.
+- Adds deterministic stage-job idempotency, stage checkpoints, dependency checkpoint reuse, and resume-after-failure.
+- Preserves v5.51 content-addressed artifact identities as pipeline stage outputs.
+- Keeps completed checkpoints immutable by default and does not infer evidence truth from pipeline completion.
+
 ## v5.51.0 — Research Artifact & Object Storage Fabric
 - Immutable SHA-256 content-addressed research artifact identities and storage keys.
 - PostgreSQL-authoritative artifact metadata, provenance, lifecycle, derivation links, and integrity events.

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Pipeline Checkpoint",
+  "type": "object",
+  "required": ["schema", "run_id", "stage_id", "job_id", "checkpoint_fingerprint_sha256"],
+  "properties": {
+    "schema": {"const": "sc-library-pipeline-checkpoint/1.0"},
+    "run_id": {"type": "string"},
+    "stage_id": {"type": "string"},
+    "job_id": {"type": "string"},
+    "artifact_ids": {"type": "array", "items": {"type": "string"}},
+    "checkpoint_fingerprint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

@@ -5,13 +5,18 @@ from .durable_job_queue import start_job, complete_job
 
 def wid(profile): return os.getenv('SC_LIBRARY_WORKER_ID','').strip() or f'{profile}:{socket.gethostname()}'
 def run(profile):
-    worker=wid(profile); register_worker({'worker_id':worker,'worker_class':profile,'metadata':{'pid':os.getpid(),'agent':'v5.51.0'}})
+    worker=wid(profile); register_worker({'worker_id':worker,'worker_class':profile,'metadata':{'pid':os.getpid(),'agent':'v5.52.0'}})
     while True:
         heartbeat_worker(worker,{'agent_state':'polling'}); job=lease_for_worker(worker)
         if not job.get('leased'): time.sleep(2); continue
         try:
             start_job(job['job_id'],worker); out=execute_job(job,profile); complete_job(job['job_id'],worker,out); record_worker_success(worker)
-        except Exception as exc: isolate_worker_failure(worker,job['job_id'],error_class=exc.__class__.__name__,error_detail=str(exc),retryable=exc.__class__.__name__ not in {'ValueError','KeyError'})
+            from .checkpointed_pipeline import record_job_completion
+            record_job_completion(job['job_id'],out)
+        except Exception as exc:
+            isolate_worker_failure(worker,job['job_id'],error_class=exc.__class__.__name__,error_detail=str(exc),retryable=exc.__class__.__name__ not in {'ValueError','KeyError'})
+            from .checkpointed_pipeline import record_job_failure
+            record_job_failure(job['job_id'],failure_class=exc.__class__.__name__,failure_detail=str(exc))
 def health(profile):
     if get_worker(wid(profile)).get('state') not in {'active','standby'}: raise SystemExit(1)
 if __name__=='__main__':

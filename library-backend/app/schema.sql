@@ -915,3 +915,72 @@ CREATE TABLE IF NOT EXISTS library_artifact_events (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS library_artifact_events_artifact_idx ON library_artifact_events(artifact_id,event_id DESC);
+
+-- Checkpointed Ingestion & Research Pipeline Engine (Library v5.52.0 / backend v2.63.0)
+-- Pipeline definitions/runs are PostgreSQL-authoritative. Stages compile into the existing
+-- durable research-job fabric; the pipeline engine is not a second scheduler.
+CREATE TABLE IF NOT EXISTS library_research_pipeline_definitions (
+    pipeline_id text PRIMARY KEY,
+    name text NOT NULL,
+    pipeline_version text NOT NULL,
+    description text,
+    definition jsonb NOT NULL,
+    topological_order text[] NOT NULL,
+    pipeline_fingerprint char(64) NOT NULL,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_research_pipeline_definitions_fingerprint_idx ON library_research_pipeline_definitions(pipeline_fingerprint);
+
+CREATE TABLE IF NOT EXISTS library_research_pipeline_runs (
+    run_id text PRIMARY KEY,
+    pipeline_id text NOT NULL REFERENCES library_research_pipeline_definitions(pipeline_id) ON DELETE RESTRICT,
+    state text NOT NULL DEFAULT 'pending' CHECK (state IN ('pending','running','retry','complete','failed','cancelled','blocked')),
+    idempotency_key varchar(128) NOT NULL UNIQUE,
+    input_manifest jsonb NOT NULL DEFAULT '{}'::jsonb,
+    output_manifest jsonb NOT NULL DEFAULT '{}'::jsonb,
+    run_fingerprint char(64) NOT NULL,
+    resume_count integer NOT NULL DEFAULT 0 CHECK (resume_count >= 0),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    completed_at timestamptz,
+    cancelled_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS library_research_pipeline_runs_pipeline_idx ON library_research_pipeline_runs(pipeline_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS library_research_pipeline_runs_state_idx ON library_research_pipeline_runs(state,updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_research_pipeline_stage_runs (
+    stage_run_id text PRIMARY KEY,
+    run_id text NOT NULL REFERENCES library_research_pipeline_runs(run_id) ON DELETE CASCADE,
+    stage_id text NOT NULL,
+    capability text NOT NULL,
+    requested_runtime text NOT NULL DEFAULT 'auto',
+    depends_on text[] NOT NULL DEFAULT '{}'::text[],
+    state text NOT NULL DEFAULT 'pending' CHECK (state IN ('pending','queued','leased','running','retry','complete','failed','cancelled','blocked','skipped')),
+    job_id text REFERENCES library_research_jobs(job_id) ON DELETE SET NULL,
+    max_attempts integer NOT NULL DEFAULT 5 CHECK (max_attempts BETWEEN 1 AND 20),
+    optional boolean NOT NULL DEFAULT false,
+    stage_fingerprint char(64) NOT NULL,
+    checkpoint jsonb NOT NULL DEFAULT '{}'::jsonb,
+    checkpoint_fingerprint char(64),
+    output_artifact_ids text[] NOT NULL DEFAULT '{}'::text[],
+    failure_class text,
+    failure_detail text,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    completed_at timestamptz,
+    UNIQUE(run_id,stage_id)
+);
+CREATE INDEX IF NOT EXISTS library_research_pipeline_stage_runs_run_idx ON library_research_pipeline_stage_runs(run_id,state,created_at);
+CREATE INDEX IF NOT EXISTS library_research_pipeline_stage_runs_job_idx ON library_research_pipeline_stage_runs(job_id) WHERE job_id IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS library_research_pipeline_events (
+    event_id bigserial PRIMARY KEY,
+    run_id text NOT NULL REFERENCES library_research_pipeline_runs(run_id) ON DELETE CASCADE,
+    stage_run_id text REFERENCES library_research_pipeline_stage_runs(stage_run_id) ON DELETE CASCADE,
+    event_type text NOT NULL,
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_research_pipeline_events_run_idx ON library_research_pipeline_events(run_id,event_id DESC);

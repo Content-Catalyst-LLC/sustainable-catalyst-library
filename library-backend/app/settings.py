@@ -123,6 +123,10 @@ class Settings:
     artifact_s3_access_key: str = os.getenv("SC_LIBRARY_ARTIFACT_S3_ACCESS_KEY", "").strip()
     artifact_s3_secret_key: str = os.getenv("SC_LIBRARY_ARTIFACT_S3_SECRET_KEY", "").strip()
 
+    # Checkpointed Ingestion & Research Pipeline Engine (Library v5.52.0 / backend v2.63.0)
+    pipeline_max_stages: int = _as_int("SC_LIBRARY_PIPELINE_MAX_STAGES", 100, 1, 1000)
+    pipeline_resume_enabled: bool = _as_bool("SC_LIBRARY_PIPELINE_RESUME_ENABLED", True)
+
     @property
     def allowed_origins(self) -> list[str]:
         return [item.strip().rstrip("/") for item in self.allowed_origins_raw.split(",") if item.strip()]

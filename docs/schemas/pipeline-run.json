@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Pipeline Run",
+  "type": "object",
+  "required": ["schema", "run_id", "pipeline_id", "state"],
+  "properties": {
+    "schema": {"const": "sc-library-pipeline-run/1.0"},
+    "run_id": {"type": "string"},
+    "pipeline_id": {"type": "string"},
+    "state": {"enum": ["pending", "running", "retry", "complete", "failed", "cancelled", "blocked"]}
+  }
+}

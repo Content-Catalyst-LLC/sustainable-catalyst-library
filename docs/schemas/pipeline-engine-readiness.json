@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SC Library Pipeline Engine Readiness",
+  "type": "object",
+  "required": ["schema", "version", "backend_version", "state", "capabilities", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-pipeline-engine-readiness/1.0"},
+    "version": {"const": "5.52.0"},
+    "backend_version": {"const": "2.63.0"},
+    "state": {"enum": ["ready", "unavailable"]}
+  }
+}

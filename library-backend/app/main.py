@@ -80,6 +80,11 @@ from .artifact_storage import (
     artifact_storage_readiness, build_artifact_manifest, get_artifact, persist_artifact, read_artifact_bytes,
     set_lifecycle as set_artifact_lifecycle, validate_artifact_payload, verify_artifact,
 )
+from .checkpointed_pipeline import (
+    PIPELINE_CONTRACT as RESEARCH_PIPELINE_CONTRACT, READINESS_CONTRACT as PIPELINE_ENGINE_READINESS_CONTRACT,
+    build_pipeline_package, build_run_plan, get_pipeline_run, persist_pipeline, pipeline_readiness,
+    resume_pipeline_run, start_pipeline_run, validate_pipeline,
+)
 from .research_corpus_builder import build_research_corpus, export_research_corpus
 from .unified_runtime_contract import (
     EXECUTION_ENVELOPE_SCHEMA,
@@ -541,6 +546,14 @@ def health() -> dict[str, Any]:
             "research_artifact_s3_compatible_backend": True,
             "research_artifact_postgresql_bytes": False,
             "research_artifact_presence_implies_evidence_truth": False,
+            "checkpointed_research_pipeline_engine": True,
+            "research_pipeline_dag_validation": True,
+            "research_pipeline_stage_checkpoints": True,
+            "research_pipeline_resume_after_failure": True,
+            "research_pipeline_completed_checkpoint_reuse": True,
+            "research_pipeline_stages_use_durable_jobs": True,
+            "research_pipeline_is_second_scheduler": False,
+            "research_pipeline_completion_implies_evidence_truth": False,
             "research_job_completion_implies_evidence_truth": False,
             "research_job_automatic_core_promotion": False,
             "native_graph_query_engine": True,
@@ -2784,6 +2797,48 @@ async def artifact_lifecycle_endpoint(artifact_id:str,request:Request,authorizat
     try: return set_artifact_lifecycle(artifact_id,str(payload.get("state") or ""),str(payload.get("reason") or ""))
     except KeyError as exc: raise HTTPException(status_code=404,detail="artifact not found") from exc
     except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.get("/v1/pipeline-engine/readiness")
+def pipeline_engine_readiness_endpoint() -> dict[str,Any]:
+    return pipeline_readiness()
+
+@app.post("/v1/pipeline-engine/validate")
+def pipeline_engine_validate_endpoint(payload:dict[str,Any]) -> dict[str,Any]:
+    return validate_pipeline(payload)
+
+@app.post("/v1/pipeline-engine/package")
+def pipeline_engine_package_endpoint(payload:dict[str,Any]) -> dict[str,Any]:
+    try: return build_pipeline_package(payload)
+    except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.post("/v1/pipeline-engine/plan")
+def pipeline_engine_plan_endpoint(payload:dict[str,Any]) -> dict[str,Any]:
+    try: return build_run_plan(payload.get("pipeline") if isinstance(payload.get("pipeline"),dict) else payload, payload.get("input_manifest") if isinstance(payload.get("input_manifest"),dict) else {}, idempotency_key=str(payload.get("idempotency_key") or ""))
+    except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.post("/v1/admin/pipelines")
+async def pipeline_persist_endpoint(request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
+    try: return persist_pipeline(payload)
+    except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.post("/v1/admin/pipelines/{pipeline_id:path}/runs")
+async def pipeline_run_start_endpoint(pipeline_id:str,request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature); payload=json.loads(body.decode("utf-8")) if body else {}
+    try: return start_pipeline_run(pipeline_id,payload)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="pipeline not found") from exc
+
+@app.get("/v1/admin/pipeline-runs/{run_id:path}")
+def pipeline_run_get_endpoint(run_id:str,authorization:str|None=Header(default=None)) -> dict[str,Any]:
+    require_admin_bearer(authorization)
+    try: return get_pipeline_run(run_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="pipeline run not found") from exc
+
+@app.post("/v1/admin/pipeline-runs/{run_id:path}/resume")
+async def pipeline_run_resume_endpoint(run_id:str,request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return resume_pipeline_run(run_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="pipeline run not found") from exc
 
 @app.get("/v1/institutional-research-network")
 def institutional_research_network_manifest() -> dict[str, Any]:

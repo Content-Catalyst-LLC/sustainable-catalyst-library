@@ -1,7 +1,7 @@
 # Sustainable Catalyst Knowledge Library
 
-**Current release:** v5.51.0 — Research Artifact & Object Storage Fabric  
-**Backend:** v2.62.0  
+**Current release:** v5.52.0 — Checkpointed Ingestion & Research Pipeline Engine  
+**Backend:** v2.63.0  
 **Go ingestion runtime:** v0.1.0  
 **Rust graph runtime:** v0.2.0
 
