@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Library Release Manifest",
+  "type": "object",
+  "required": [
+    "release_version",
+    "backend_version",
+    "web_version",
+    "wordpress_version",
+    "artifacts"
+  ],
+  "properties": {
+    "release_version": {
+      "type": "string"
+    },
+    "backend_version": {
+      "type": "string"
+    },
+    "web_version": {
+      "type": "string"
+    },
+    "wordpress_version": {
+      "type": "string"
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 4
+    }
+  }
+}

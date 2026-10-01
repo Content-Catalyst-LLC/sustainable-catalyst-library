@@ -46,6 +46,11 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/admin/state-migration/import","name":"wordpress-state-migration-import","access":"signed-admin","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/state-migration/{run_id}/certify","name":"wordpress-state-migration-certify","access":"signed-admin","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/state-migration/certifications/{certification_id}","name":"wordpress-state-retirement-certification","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/release-engineering","name":"release-engineering-contract","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/release-engineering/readiness","name":"release-engineering-readiness","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/releases/validate","name":"release-manifest-validate","access":"signed-admin","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/releases/plans","name":"deployment-plan-create","access":"signed-admin","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/releases/certify","name":"deployment-certify","access":"signed-admin","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/public-routing","name":"public-routing-bridge","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/public-routing/readiness","name":"public-routing-readiness","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/seo/records/{record_id}","name":"record-seo-descriptor","access":"public","stability":"stable"},
@@ -77,6 +82,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "public-web": {"resources":["canonical-routing","record-seo","launch-links","record-embeds","public-origin"],"direct_api":True,"authority":"library-service-contract"},
     "cross-product-integration": {"resources":["research-librarian","workspace","research-lab","workbench","decision-studio","site-intelligence"],"direct_api":True,"authority":"library-service"},
     "state-migration": {"resources":["wordpress-inventory","migration-manifest","migration-import","retirement-certification"],"direct_api":True,"authority":"library-service"},
+    "release-engineering": {"resources":["release-manifests","deployment-plans","preflight","rollback","deployment-certification"],"direct_api":True,"authority":"library-service"},
 }
 
 
@@ -170,8 +176,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "5.65.0",
-        "backend_version": "2.76.0",
+        "library_version": "5.66.0",
+        "backend_version": "2.77.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -226,8 +232,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "5.65.0",
-        "backend_version": "2.76.0",
+        "library_version": "5.66.0",
+        "backend_version": "2.77.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

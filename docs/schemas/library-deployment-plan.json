@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Library Deployment Plan",
+  "type": "object",
+  "required": [
+    "environment",
+    "manifest",
+    "current",
+    "snapshot_retained"
+  ],
+  "properties": {
+    "environment": {
+      "enum": [
+        "staging",
+        "production"
+      ]
+    },
+    "snapshot_retained": {
+      "type": "boolean"
+    }
+  }
+}

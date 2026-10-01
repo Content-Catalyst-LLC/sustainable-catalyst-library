@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sustainable Catalyst Knowledge Library API",
-    "version": "1.0.0",
+    "version": "1.0",
     "description": "Stable WordPress-independent Knowledge Library service contract."
   },
   "servers": [
@@ -577,6 +577,56 @@
           },
           "404": {
             "description": "Migration run not found"
+          }
+        }
+      }
+    },
+    "/release-engineering": {
+      "get": {
+        "summary": "Release engineering contract",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/release-engineering/readiness": {
+      "get": {
+        "summary": "Release engineering readiness",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/releases/validate": {
+      "post": {
+        "summary": "Validate release manifest",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/releases/plans": {
+      "post": {
+        "summary": "Persist deployment plan",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/releases/certify": {
+      "post": {
+        "summary": "Certify deployment",
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

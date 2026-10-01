@@ -189,6 +189,12 @@ from .state_migration import (
     validate_manifest as validate_wordpress_state_migration_manifest, import_manifest as import_wordpress_state_migration_manifest,
     certify_migration as certify_wordpress_state_migration, get_certification as get_wordpress_state_retirement_certification,
 )
+from .release_engineering import (
+    contract as library_release_engineering_contract, readiness as library_release_engineering_readiness,
+    validate_release_manifest as validate_library_release_manifest, persist_release_manifest as persist_library_release_manifest,
+    build_deployment_plan as build_library_deployment_plan, persist_deployment_plan as persist_library_deployment_plan,
+    build_certification as build_library_deployment_certification, persist_certification as persist_library_deployment_certification,
+)
 from .identity_access import (
     COOKIE_NAME as LIBRARY_SESSION_COOKIE, access_decision as library_access_decision, authenticate_password as library_authenticate_password,
     bind_role as library_bind_role, boundary_contract as library_identity_boundary_contract, create_access_grant as library_create_access_grant,
@@ -681,6 +687,7 @@ def health() -> dict[str, Any]:
             "cross_product_wordpress_required": False,
             "cross_product_downstream_library_authority": False,
             "wordpress_state_migration_and_retirement": True,
+            "independent_release_and_deployment_engineering": True,
             "automatic_wordpress_data_deletion": False,
             "independent_library_web_application": True,
             "library_web_version": "1.2.0",
@@ -2760,11 +2767,11 @@ async def cross_language_resolution_decision_ingest(
 
 
 
-# Knowledge Library v5.65.0 — Library State Migration & WordPress Data Retirement
+# Knowledge Library v5.66.0 — Library State Migration & WordPress Data Retirement
 @app.get("/api/library/v1")
 def library_api_v1_root() -> dict[str, Any]:
     c = library_api_service_contract()
-    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.65.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes","integrations":"/api/library/v1/integrations"}}
+    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.66.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes","integrations":"/api/library/v1/integrations","release_engineering":"/api/library/v1/release-engineering"}}
 
 @app.get("/api/library/v1/service")
 def library_api_v1_service() -> dict[str, Any]: return library_api_service_contract()
@@ -2772,7 +2779,7 @@ def library_api_v1_service() -> dict[str, Any]: return library_api_service_contr
 @app.get("/api/library/v1/health")
 def library_api_v1_health() -> dict[str, Any]:
     db_state, detail = database_state()
-    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.65.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
+    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.66.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
 
 @app.get("/api/library/v1/readiness")
 def library_api_v1_readiness() -> dict[str, Any]: return library_api_readiness()
@@ -2891,6 +2898,37 @@ async def library_api_v1_state_migration_certify(run_id: str, request: Request, 
         payload=json.loads(body.decode("utf-8")) if body else {}
         return certify_wordpress_state_migration(run_id,payload)
     except KeyError as exc: raise HTTPException(status_code=404, detail=library_api_error_envelope("migration-run-not-found","Migration run not found",status=404)) from exc
+    except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/api/library/v1/release-engineering")
+def library_api_v1_release_engineering() -> dict[str, Any]: return library_release_engineering_contract()
+
+@app.get("/api/library/v1/release-engineering/readiness")
+def library_api_v1_release_engineering_readiness() -> dict[str, Any]: return library_release_engineering_readiness()
+
+@app.post("/api/library/v1/admin/releases/validate")
+async def library_api_v1_release_validate(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return validate_library_release_manifest(payload)
+    except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/releases/plans")
+async def library_api_v1_release_plan(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return persist_library_deployment_plan(payload)
+    except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/releases/certify")
+async def library_api_v1_release_certify(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return persist_library_deployment_certification(payload)
     except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 @app.get("/api/library/v1/public-routing")

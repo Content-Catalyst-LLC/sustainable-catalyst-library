@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.65.0 migrates legacy WordPress research state into the authoritative Library service and introduces certified WordPress research-state authority retirement.
- * Version: 5.65.0
+ * Description: Sustainable Catalyst Library v5.66.0 adds Library-owned release manifests, deployment plans, preflight and rollback contracts, and independent release readiness while keeping WordPress read-only.
+ * Version: 5.66.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.65.0');
+define('SC_LIBRARY_VERSION', '5.66.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'thin-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);
@@ -101,6 +101,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-wordpress-thin-adapter.
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-public-routing-bridge.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-product-service-integration.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-state-migration.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-release-engineering.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-civilizational-linking.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-translation-alignment.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence.php';
@@ -204,6 +205,7 @@ final class SC_Library_Plugin {
         $public_routing_bridge = new SC_Library_Public_Routing_Bridge();
         $cross_product_service_integration = new SC_Library_Cross_Product_Service_Integration();
         $state_migration = new SC_Library_State_Migration();
+        $release_engineering = new SC_Library_Release_Engineering();
         $cross_civilizational_linking = new SC_Library_Cross_Civilizational_Linking();
         $translation_alignment = new SC_Library_Translation_Alignment();
         $cross_language_resolution = new SC_Library_Cross_Language_Resolution();
@@ -248,6 +250,7 @@ final class SC_Library_Plugin {
 
         $cross_product_service_integration->register_hooks();
         $state_migration->register_hooks();
+        $release_engineering->register_hooks();
         $legacy_state_retired = (bool) get_option(SC_Library_State_Migration::RETIRED_OPTION, false);
         $taxonomies->register_hooks();
         $relationships->register_hooks();

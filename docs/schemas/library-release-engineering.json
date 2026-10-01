@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Library Release Engineering",
+  "type": "object",
+  "required": [
+    "schema",
+    "library_version",
+    "backend_version",
+    "authority",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-release-engineering/1.0"
+    },
+    "library_version": {
+      "type": "string"
+    },
+    "backend_version": {
+      "type": "string"
+    },
+    "authority": {
+      "const": "library-service"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}
