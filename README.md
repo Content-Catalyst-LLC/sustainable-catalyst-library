@@ -1,6 +1,14 @@
 # Sustainable Catalyst Knowledge Library
 
-Current release: **v5.66.0 — Independent Library Release & Deployment Engineering**. The Library now owns versioned release manifests, deployment plans, preflight and rollback contracts, and deployment certification independently of WordPress.
+Current release: **v5.67.0**. Backend: **v2.78.0** · Library Web: **v1.2.0** · API: **v1.0**.
+
+# Sustainable Catalyst Knowledge Library
+
+Current release: **v5.66.0**. Backend: **v2.77.0** · Library Web: **v1.2.0** · API: **v1.0**.
+
+# Sustainable Catalyst Knowledge Library
+
+Current release: **v5.65.0 — Direct Cross-Product Library Service Integration**. The authoritative Library API can now be consumed directly by Research Librarian AI, Workspace, Research Lab, Workbench, Decision Studio, and Site Intelligence through machine-readable service contracts and scoped handoff rules.
 
 # Sustainable Catalyst Knowledge Library
 

@@ -1386,49 +1386,10 @@ CREATE TABLE IF NOT EXISTS library_wordpress_retirement_certifications (
 
 
 -- Independent Library Release & Deployment Engineering (Library v5.66.0 / backend v2.77.0)
-CREATE TABLE IF NOT EXISTS library_release_manifests (
-    manifest_id text PRIMARY KEY,
-    release_version text NOT NULL,
-    backend_version text NOT NULL,
-    web_version text NOT NULL,
-    wordpress_version text NOT NULL,
-    manifest_sha256 char(64) NOT NULL UNIQUE,
-    artifacts jsonb NOT NULL,
-    guardrails jsonb NOT NULL DEFAULT '{}'::jsonb,
-    created_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX IF NOT EXISTS library_release_manifests_version_idx ON library_release_manifests(release_version, created_at DESC);
+CREATE TABLE IF NOT EXISTS library_release_certifications (certification_id text PRIMARY KEY, release_id text NOT NULL, manifest_sha256 text NOT NULL, environment text NOT NULL, state text NOT NULL, details jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS library_release_events (event_id bigserial PRIMARY KEY, release_id text NOT NULL, event_type text NOT NULL, details jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());
 
-CREATE TABLE IF NOT EXISTS library_deployment_plans (
-    plan_id text PRIMARY KEY,
-    manifest_id text NOT NULL REFERENCES library_release_manifests(manifest_id) ON DELETE RESTRICT,
-    environment text NOT NULL CHECK (environment IN ('staging','production')),
-    current_state jsonb NOT NULL DEFAULT '{}'::jsonb,
-    snapshot_retained boolean NOT NULL DEFAULT false,
-    phases jsonb NOT NULL,
-    rollback jsonb NOT NULL,
-    status text NOT NULL DEFAULT 'planned' CHECK (status IN ('planned','applying','failed','rolled-back','certified')),
-    created_at timestamptz NOT NULL DEFAULT now(),
-    certified_at timestamptz
-);
-CREATE INDEX IF NOT EXISTS library_deployment_plans_status_idx ON library_deployment_plans(environment,status,created_at DESC);
 
-CREATE TABLE IF NOT EXISTS library_deployment_events (
-    event_id bigserial PRIMARY KEY,
-    manifest_id text REFERENCES library_release_manifests(manifest_id) ON DELETE SET NULL,
-    plan_id text REFERENCES library_deployment_plans(plan_id) ON DELETE SET NULL,
-    event_type text NOT NULL,
-    details jsonb NOT NULL DEFAULT '{}'::jsonb,
-    created_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX IF NOT EXISTS library_deployment_events_plan_idx ON library_deployment_events(plan_id,event_id DESC);
-
-CREATE TABLE IF NOT EXISTS library_deployment_certifications (
-    certification_id text PRIMARY KEY,
-    plan_id text NOT NULL UNIQUE REFERENCES library_deployment_plans(plan_id) ON DELETE RESTRICT,
-    certification_sha256 char(64) NOT NULL UNIQUE,
-    library_version text NOT NULL,
-    backend_version text NOT NULL,
-    details jsonb NOT NULL DEFAULT '{}'::jsonb,
-    certified_at timestamptz NOT NULL DEFAULT now()
-);
+-- WordPress-Failure Independence & Runtime Certification (Library v5.67.0 / backend v2.78.0)
+CREATE TABLE IF NOT EXISTS library_runtime_independence_certifications (certification_id text PRIMARY KEY, certification_sha256 text NOT NULL, wordpress_state text NOT NULL, certified boolean NOT NULL, probes jsonb NOT NULL DEFAULT '{}'::jsonb, guardrails jsonb NOT NULL DEFAULT '{}'::jsonb, certified_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS library_runtime_independence_events (event_id bigserial PRIMARY KEY, certification_id text NOT NULL, event_type text NOT NULL, details jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());

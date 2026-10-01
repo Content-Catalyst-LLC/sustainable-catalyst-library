@@ -1383,3 +1383,13 @@ CREATE TABLE IF NOT EXISTS library_wordpress_retirement_certifications (
     details jsonb NOT NULL DEFAULT '{}'::jsonb,
     certified_at timestamptz NOT NULL DEFAULT now()
 );
+
+
+-- Independent Library Release & Deployment Engineering (Library v5.66.0 / backend v2.77.0)
+CREATE TABLE IF NOT EXISTS library_release_certifications (certification_id text PRIMARY KEY, release_id text NOT NULL, manifest_sha256 text NOT NULL, environment text NOT NULL, state text NOT NULL, details jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS library_release_events (event_id bigserial PRIMARY KEY, release_id text NOT NULL, event_type text NOT NULL, details jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());
+
+
+-- WordPress-Failure Independence & Runtime Certification (Library v5.67.0 / backend v2.78.0)
+CREATE TABLE IF NOT EXISTS library_runtime_independence_certifications (certification_id text PRIMARY KEY, certification_sha256 text NOT NULL, wordpress_state text NOT NULL, certified boolean NOT NULL, probes jsonb NOT NULL DEFAULT '{}'::jsonb, guardrails jsonb NOT NULL DEFAULT '{}'::jsonb, certified_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS library_runtime_independence_events (event_id bigserial PRIMARY KEY, certification_id text NOT NULL, event_type text NOT NULL, details jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());

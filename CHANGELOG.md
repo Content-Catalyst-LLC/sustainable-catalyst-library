@@ -1,10 +1,10 @@
-# Changelog
+## 5.67.0 — WordPress-Failure Independence & Runtime Certification
+- Certifies the authoritative Library runtime with WordPress failed/unreachable/disabled across API, identity, retrieval, execution, integrations, routing and independent web.
 
 ## 5.66.0 — Independent Library Release & Deployment Engineering
-- Added backend v2.77.0 release-engineering contracts, manifest validation, deployment planning, preflight, rollback, and certification.
-- Added durable release manifest, deployment plan/event, and certification tables.
-- Added stable API v1 release-engineering surfaces and a read-only WordPress release status adapter.
-- Added Library-owned production deployment orchestration with artifact hashing, predecessor checks, snapshots, backend-first ordering, and rollback metadata.
+- Library-owned release manifests, integrity/preflight/rollback contracts, and WordPress-independent deployment authority.
+
+# Changelog
 
 ## 5.65.0 — Library State Migration & WordPress Data Retirement
 - Adds signed, hash-verified migration manifests for legacy WordPress-held Library research state.

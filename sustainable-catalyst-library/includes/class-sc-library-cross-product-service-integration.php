@@ -1,7 +1,7 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 final class SC_Library_Cross_Product_Service_Integration {
-    public const VERSION = '5.65.0';
+    public const VERSION = '5.66.0';
     public function register_hooks(): void {
         add_action('rest_api_init', [$this, 'register_rest']);
         add_shortcode('sc_library_cross_product_integration_status', [$this, 'shortcode']);

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sustainable Catalyst Knowledge Library API",
-    "version": "1.0",
+    "version": "1.0.0",
     "description": "Stable WordPress-independent Knowledge Library service contract."
   },
   "servers": [
@@ -581,9 +581,9 @@
         }
       }
     },
-    "/release-engineering": {
+    "/api/library/v1/release-engineering": {
       "get": {
-        "summary": "Release engineering contract",
+        "summary": "Independent release manifest",
         "responses": {
           "200": {
             "description": "OK"
@@ -591,7 +591,7 @@
         }
       }
     },
-    "/release-engineering/readiness": {
+    "/api/library/v1/release-engineering/readiness": {
       "get": {
         "summary": "Release engineering readiness",
         "responses": {
@@ -601,9 +601,9 @@
         }
       }
     },
-    "/admin/releases/validate": {
-      "post": {
-        "summary": "Validate release manifest",
+    "/api/library/v1/runtime-certification": {
+      "get": {
+        "summary": "WordPress failure independence certification",
         "responses": {
           "200": {
             "description": "OK"
@@ -611,19 +611,9 @@
         }
       }
     },
-    "/admin/releases/plans": {
-      "post": {
-        "summary": "Persist deployment plan",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/admin/releases/certify": {
-      "post": {
-        "summary": "Certify deployment",
+    "/api/library/v1/runtime-certification/readiness": {
+      "get": {
+        "summary": "Runtime certification readiness",
         "responses": {
           "200": {
             "description": "OK"

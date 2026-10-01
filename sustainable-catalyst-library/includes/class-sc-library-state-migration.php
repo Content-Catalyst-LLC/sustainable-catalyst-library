@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 final class SC_Library_State_Migration {
-    public const VERSION = '5.65.0';
+    public const VERSION = '5.66.0';
     public const RETIRED_OPTION = 'sc_library_legacy_research_state_retired';
     public const RETIREMENT_META_OPTION = 'sc_library_legacy_research_state_retirement';
 

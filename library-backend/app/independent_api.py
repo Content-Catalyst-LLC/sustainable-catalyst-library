@@ -46,11 +46,6 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/admin/state-migration/import","name":"wordpress-state-migration-import","access":"signed-admin","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/state-migration/{run_id}/certify","name":"wordpress-state-migration-certify","access":"signed-admin","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/state-migration/certifications/{certification_id}","name":"wordpress-state-retirement-certification","access":"public","stability":"stable"},
-    {"method":"GET","path":"/api/library/v1/release-engineering","name":"release-engineering-contract","access":"public","stability":"stable"},
-    {"method":"GET","path":"/api/library/v1/release-engineering/readiness","name":"release-engineering-readiness","access":"public","stability":"stable"},
-    {"method":"POST","path":"/api/library/v1/admin/releases/validate","name":"release-manifest-validate","access":"signed-admin","stability":"stable"},
-    {"method":"POST","path":"/api/library/v1/admin/releases/plans","name":"deployment-plan-create","access":"signed-admin","stability":"stable"},
-    {"method":"POST","path":"/api/library/v1/admin/releases/certify","name":"deployment-certify","access":"signed-admin","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/public-routing","name":"public-routing-bridge","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/public-routing/readiness","name":"public-routing-readiness","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/seo/records/{record_id}","name":"record-seo-descriptor","access":"public","stability":"stable"},
@@ -65,6 +60,12 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/admin/access-grants","name":"identity-access-grant","access":"signed-admin","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-jobs","name":"submit-research-job","access":"signed-service","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/service-contracts","name":"persist-service-contract","access":"signed-admin","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/release-engineering","name":"release-engineering","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/release-engineering/readiness","name":"release-engineering-readiness","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/release-engineering/validate","name":"release-engineering-validate","access":"signed-service","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/runtime-certification","name":"runtime-certification","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/runtime-certification/readiness","name":"runtime-certification-readiness","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/runtime-certification/evaluate","name":"runtime-certification-evaluate","access":"signed-service","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -82,7 +83,8 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "public-web": {"resources":["canonical-routing","record-seo","launch-links","record-embeds","public-origin"],"direct_api":True,"authority":"library-service-contract"},
     "cross-product-integration": {"resources":["research-librarian","workspace","research-lab","workbench","decision-studio","site-intelligence"],"direct_api":True,"authority":"library-service"},
     "state-migration": {"resources":["wordpress-inventory","migration-manifest","migration-import","retirement-certification"],"direct_api":True,"authority":"library-service"},
-    "release-engineering": {"resources":["release-manifests","deployment-plans","preflight","rollback","deployment-certification"],"direct_api":True,"authority":"library-service"},
+    "release-engineering": {"resources":["manifest","preflight","rollback","artifact-integrity"],"direct_api":True,"authority":"library-service"},
+    "runtime-certification": {"resources":["wordpress-failure","runtime-probes","certification"],"direct_api":True,"authority":"library-service"},
 }
 
 
@@ -113,7 +115,6 @@ def guardrails() -> dict[str, bool]:
 
 def route_catalog() -> list[dict[str, Any]]:
     return [{"schema": ROUTE_CONTRACT, **dict(r)} for r in ROUTES]
-
 
 def capability_catalog() -> dict[str, Any]:
     return {
