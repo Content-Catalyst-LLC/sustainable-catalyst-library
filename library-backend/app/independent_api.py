@@ -90,6 +90,12 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/admin/catalog/records/validate","name":"catalog-record-validate","access":"signed-admin","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/catalog/records","name":"catalog-record-upsert","access":"signed-admin","stability":"stable"},
     {"method":"DELETE","path":"/api/library/v1/admin/catalog/records/{record_id}","name":"catalog-record-delete","access":"signed-admin","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/retrieval","name":"python-retrieval-orchestration","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/retrieval/readiness","name":"python-retrieval-orchestration-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/retrieval/facets","name":"retrieval-facets","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/retrieval/search","name":"retrieval-search","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/retrieval/plan","name":"retrieval-plan","access":"signed-service","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/retrieval/search","name":"retrieval-search-admin","access":"signed-service","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification","name":"runtime-certification","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification/readiness","name":"runtime-certification-readiness","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/runtime-certification/evaluate","name":"runtime-certification-evaluate","access":"signed-service","stability":"stable"},
@@ -116,6 +122,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "catalog-domain": {"resources":["catalog-contract","catalog-write","research-object","record-revisioning","publication-state"],"direct_api":True,"authority":"python-backend"},
     "research-state": {"resources":["projects","project-references","source-bundles","saved-searches","watchlists","research-queue","collections"],"direct_api":True,"authority":"python-backend"},
     "source-ingestion": {"resources":["source-packets","record-normalization","normalization-lineage","record-ingest","source-state"],"direct_api":True,"authority":"python-backend"},
+    "retrieval-orchestration": {"resources":["query-normalization","search-plans","lexical","hybrid","semantic","neural-reranking","adaptive-reranking","facets","result-envelopes"],"direct_api":True,"authority":"python-backend"},
     "runtime-certification": {"resources":["wordpress-failure","runtime-probes","certification"],"direct_api":True,"authority":"library-service"},
 }
 
@@ -209,8 +216,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "5.72.0",
-        "backend_version": "2.83.0",
+        "library_version": "5.73.0",
+        "backend_version": "2.84.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -265,8 +272,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "5.72.0",
-        "backend_version": "2.83.0",
+        "library_version": "5.73.0",
+        "backend_version": "2.84.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

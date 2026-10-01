@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-retrieval-plan.json",
+  "title": "Sustainable Catalyst Library Retrieval Plan",
+  "type": "object",
+  "required": [
+    "schema",
+    "plan_id",
+    "plan_fingerprint_sha256",
+    "normalized",
+    "stages"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-retrieval-plan/1.0"
+    },
+    "plan_id": {
+      "type": "string"
+    },
+    "plan_fingerprint_sha256": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64
+    },
+    "normalized": {
+      "type": "object"
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

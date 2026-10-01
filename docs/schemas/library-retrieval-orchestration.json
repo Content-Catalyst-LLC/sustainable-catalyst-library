@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-retrieval-orchestration.json",
+  "title": "Sustainable Catalyst Library Retrieval Orchestration",
+  "type": "object",
+  "required": [
+    "schema",
+    "authority",
+    "modes",
+    "rerank_modes",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-python-retrieval-orchestration/1.0"
+    },
+    "authority": {
+      "const": "python-backend"
+    },
+    "modes": {
+      "type": "array"
+    },
+    "rerank_modes": {
+      "type": "array"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

@@ -988,6 +988,66 @@
           }
         ]
       }
+    },
+    "/retrieval": {
+      "get": {
+        "summary": "Python retrieval orchestration contract",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/retrieval/readiness": {
+      "get": {
+        "summary": "Retrieval orchestration readiness",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/retrieval/facets": {
+      "get": {
+        "summary": "Retrieval facets",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/retrieval/search": {
+      "get": {
+        "summary": "Orchestrated public search",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/retrieval/plan": {
+      "post": {
+        "summary": "Build signed retrieval plan",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/retrieval/search": {
+      "post": {
+        "summary": "Execute signed advanced retrieval",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {

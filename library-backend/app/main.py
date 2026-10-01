@@ -206,6 +206,11 @@ from .source_ingestion import (
     normalize_payload as normalize_library_source_ingestion, ingest_normalized as ingest_library_normalized_records,
     source_state as library_source_ingestion_state,
 )
+from .retrieval_orchestration import (
+    contract as library_retrieval_contract, readiness as library_retrieval_readiness,
+    facet_snapshot as library_retrieval_facets, plan as plan_library_retrieval,
+    execute as orchestrate_library_search,
+)
 from .runtime_independence import evaluate as evaluate_wordpress_failure_independence, readiness as wordpress_failure_independence_readiness
 from .release_engineering import release_manifest as library_release_manifest, readiness as library_release_engineering_readiness, validate_deployment_plan as validate_library_deployment_plan
 from .state_migration import (
@@ -446,6 +451,9 @@ def health() -> dict[str, Any]:
             "python_catalog_service_authority": True,
             "python_research_state_authority": True,
             "python_source_ingestion_authority": True,
+            "python_retrieval_orchestration_authority": True,
+            "search_ranking_authority": "python-backend",
+            "legacy_search_routes_converge_on_orchestrator": True,
             "source_normalization_authority": "python-backend",
             "normalization_lineage_persistence": True,
             "wordpress_source_ingestion_authority": False,
@@ -2813,7 +2821,7 @@ async def cross_language_resolution_decision_ingest(
 @app.get("/api/library/v1")
 def library_api_v1_root() -> dict[str, Any]:
     c = library_api_service_contract()
-    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.66.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes","integrations":"/api/library/v1/integrations"}}
+    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.73.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes","integrations":"/api/library/v1/integrations"}}
 
 @app.get("/api/library/v1/service")
 def library_api_v1_service() -> dict[str, Any]: return library_api_service_contract()
@@ -2821,7 +2829,7 @@ def library_api_v1_service() -> dict[str, Any]: return library_api_service_contr
 @app.get("/api/library/v1/health")
 def library_api_v1_health() -> dict[str, Any]:
     db_state, detail = database_state()
-    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.66.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
+    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.73.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
 
 @app.get("/api/library/v1/readiness")
 def library_api_v1_readiness() -> dict[str, Any]: return library_api_readiness()
@@ -2838,10 +2846,10 @@ def library_api_v1_stats() -> dict[str, Any]: return {"schema":"sc-library-api-s
 
 @app.get("/api/library/v1/search")
 def library_api_v1_search(q: str="", object_type: str|None=None, source_key: str|None=None, topic: str|None=None, year_from: int|None=None, year_to: int|None=None, sort: str="relevance", limit: int=20, offset: int=0, mode: str="hybrid") -> dict[str, Any]:
-    result=hybrid_search_records(q,object_type,source_key,topic,year_from,year_to,sort,limit,offset,mode,True)
+    result=orchestrate_library_search({"q":q,"object_type":object_type,"source_key":source_key,"topic":topic,"year_from":year_from,"year_to":year_to,"sort":sort,"limit":limit,"offset":offset,"mode":mode,"rerank":"none","include_core":True})
     items=list(result.get("results") or [])
     page=library_api_page_envelope(items,limit=int(result.get("limit",limit)),offset=int(result.get("offset",offset)),total=result.get("total"))
-    return {"schema":"sc-library-api-search-response/1.0","query":result.get("query",q),"filters":result.get("filters",{}),"retrieval":result.get("retrieval",{}),**page}
+    return {"schema":"sc-library-api-search-response/1.0","query":result.get("query",q),"filters":result.get("filters",{}),"retrieval":result.get("retrieval",{}),"reranking":result.get("reranking",{}),"orchestration":result.get("orchestration",{}),**page}
 
 @app.get("/api/library/v1/records/{record_id:path}")
 def library_api_v1_record(record_id: str, include_body: bool=True) -> dict[str, Any]:
@@ -3057,6 +3065,41 @@ async def library_api_v1_ingestion_source_state(source_key: str, request: Reques
     except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
     if result is None: raise HTTPException(status_code=404,detail="source-not-found")
     return result
+
+@app.get("/api/library/v1/retrieval")
+def library_api_v1_retrieval_contract() -> dict[str, Any]:
+    return library_retrieval_contract()
+
+@app.get("/api/library/v1/retrieval/readiness")
+def library_api_v1_retrieval_readiness() -> dict[str, Any]:
+    return library_retrieval_readiness()
+
+@app.get("/api/library/v1/retrieval/facets")
+def library_api_v1_retrieval_facets() -> dict[str, Any]:
+    return library_retrieval_facets()
+
+@app.get("/api/library/v1/retrieval/search")
+def library_api_v1_retrieval_search(q: str="", object_type: str|None=None, source_key: str|None=None, topic: str|None=None, year_from: int|None=None, year_to: int|None=None, sort: str="relevance", limit: int=20, offset: int=0, mode: str="hybrid", include_core: bool=True) -> dict[str, Any]:
+    try:
+        return orchestrate_library_search({"q":q,"object_type":object_type,"source_key":source_key,"topic":topic,"year_from":year_from,"year_to":year_to,"sort":sort,"limit":limit,"offset":offset,"mode":mode,"rerank":"none","include_core":include_core})
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/retrieval/plan")
+async def library_api_v1_retrieval_plan(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: payload=json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+    try: return plan_library_retrieval(payload)
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/retrieval/search")
+async def library_api_v1_retrieval_search_admin(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: payload=json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+    try: return orchestrate_library_search(payload)
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()
@@ -3735,10 +3778,11 @@ def search(
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0, le=100000),
 ) -> dict[str, Any]:
-    return hybrid_search_records(
-        q, object_type, source_key, topic, year_from, year_to, sort, limit, offset,
-        mode=mode, include_core=include_core,
-    )
+    return orchestrate_library_search({
+        "q": q, "object_type": object_type, "source_key": source_key, "topic": topic,
+        "year_from": year_from, "year_to": year_to, "sort": sort, "limit": limit,
+        "offset": offset, "mode": mode, "rerank": "none", "include_core": include_core,
+    })
 
 
 @app.get("/v1/semantic-similarity/readiness")

@@ -1,6 +1,6 @@
 {
   "schema": "sc-library-php-domain-retirement-inventory/1.0",
-  "library_version": "5.72.0",
+  "library_version": "5.73.0",
   "policy": "New PHP files require explicit inventory classification; new research/domain authority belongs in Python by default.",
   "categories": [
     "wordpress-integration",
@@ -261,7 +261,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-dynamic-explorer.php",
       "classification": "retire-candidate",
       "bytes": 18678,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python retrieval/search orchestration authority is active in v5.73.0; retain temporarily for WordPress presentation and measured compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-editor.php",
@@ -351,7 +351,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-global-research-discovery-federated-search.php",
       "classification": "retire-candidate",
       "bytes": 22342,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python retrieval/search orchestration authority is active in v5.73.0; retain temporarily for WordPress presentation and measured compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-global-research-federation.php",
@@ -453,7 +453,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-knowledge-landscape.php",
       "classification": "retire-candidate",
       "bytes": 45332,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python retrieval/search orchestration authority is active in v5.73.0; retain temporarily for WordPress presentation and measured compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-knowledge-pathways-article-maps.php",
@@ -753,7 +753,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-retrieval-evaluation.php",
       "classification": "retire-candidate",
       "bytes": 5457,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python retrieval/search orchestration authority is active in v5.73.0; retain temporarily for WordPress presentation and measured compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-runtime-authority.php",
