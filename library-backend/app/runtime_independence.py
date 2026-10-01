@@ -2,9 +2,9 @@ from __future__ import annotations
 from hashlib import sha256
 import json
 from typing import Any
-LIBRARY_VERSION = "5.71.0"; BACKEND_VERSION = "2.82.0"
+LIBRARY_VERSION = "5.72.0"; BACKEND_VERSION = "2.83.0"
 CONTRACT="sc-library-wordpress-failure-independence-certification/1.0"; READINESS_CONTRACT="sc-library-wordpress-failure-independence-readiness/1.0"
-REQUIRED_PROBES=("api","database","search-records","identity-session","artifacts","pipelines","compute","cross-product-integrations","client-framework","domain-authority","catalog-service","research-state","public-routing","library-web")
+REQUIRED_PROBES=("api","database","search-records","identity-session","artifacts","pipelines","compute","cross-product-integrations","client-framework","domain-authority","catalog-service","research-state","ingestion-service","public-routing","library-web")
 def _canon(v): return json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=False,default=str)
 def _fp(v): return sha256(_canon(v).encode()).hexdigest()
 def guardrails(): return {"wordpress_must_be_unavailable_during_certification":True,"wordpress_is_authoritative_dependency":False,"wordpress_failure_may_break_editorial_adapter":True,"wordpress_failure_may_break_library_api":False,"wordpress_failure_may_break_library_web":False,"wordpress_failure_may_break_identity_sessions":False,"wordpress_failure_may_break_research_execution":False,"wordpress_failure_may_break_cross_product_clients":False,"certification_implies_research_truth":False,"automatic_platform_core_promotion":False}

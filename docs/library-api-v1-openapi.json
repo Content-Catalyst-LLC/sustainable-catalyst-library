@@ -923,6 +923,71 @@
           }
         ]
       }
+    },
+    "/ingestion": {
+      "get": {
+        "summary": "Python source-ingestion service contract",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/ingestion/readiness": {
+      "get": {
+        "summary": "Python source-ingestion readiness",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/admin/ingestion/normalize": {
+      "post": {
+        "summary": "Normalize and validate a source ingestion packet",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
+    },
+    "/admin/ingestion/records": {
+      "post": {
+        "summary": "Normalize and ingest source records",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
+    },
+    "/admin/ingestion/sources/{source_key}": {
+      "get": {
+        "summary": "Read source ingestion and normalization state",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
     }
   },
   "components": {

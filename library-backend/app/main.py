@@ -201,6 +201,11 @@ from .research_state import (
     enqueue_research_item as enqueue_library_research_item, create_collection as create_library_research_collection,
     add_collection_item as add_library_research_collection_item,
 )
+from .source_ingestion import (
+    contract as library_source_ingestion_contract, readiness as library_source_ingestion_readiness,
+    normalize_payload as normalize_library_source_ingestion, ingest_normalized as ingest_library_normalized_records,
+    source_state as library_source_ingestion_state,
+)
 from .runtime_independence import evaluate as evaluate_wordpress_failure_independence, readiness as wordpress_failure_independence_readiness
 from .release_engineering import release_manifest as library_release_manifest, readiness as library_release_engineering_readiness, validate_deployment_plan as validate_library_deployment_plan
 from .state_migration import (
@@ -440,6 +445,10 @@ def health() -> dict[str, Any]:
             "python_domain_service_authority": True,
             "python_catalog_service_authority": True,
             "python_research_state_authority": True,
+            "python_source_ingestion_authority": True,
+            "source_normalization_authority": "python-backend",
+            "normalization_lineage_persistence": True,
+            "wordpress_source_ingestion_authority": False,
             "research_projects_state_authority": "python-backend",
             "saved_research_state_authority": "python-backend",
             "wordpress_research_state_authority": False,
@@ -1189,7 +1198,8 @@ async def ingest_records_route(
         )
     if any(record.source_key != batch.source.source_key for record in batch.records):
         raise HTTPException(status_code=400, detail="record source_key does not match batch source")
-    return ingest_records(batch, sha256_hex(body))
+    legacy_payload={"source":batch.source.model_dump(mode="json"),"records":[record.model_dump(mode="json") for record in batch.records]}
+    return ingest_library_normalized_records(legacy_payload, sha256_hex(body))
 
 
 @app.post("/v1/ingest/edges")
@@ -3016,6 +3026,37 @@ async def library_api_v1_research_collection_item(collection_id: str, request: R
     payload=await _library_research_state_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
     try: return add_library_research_collection_item(collection_id,payload)
     except Exception as exc: _library_research_state_error(exc)
+
+@app.get("/api/library/v1/ingestion")
+def library_api_v1_ingestion() -> dict[str, Any]: return library_source_ingestion_contract()
+
+@app.get("/api/library/v1/ingestion/readiness")
+def library_api_v1_ingestion_readiness() -> dict[str, Any]: return library_source_ingestion_readiness()
+
+@app.post("/api/library/v1/admin/ingestion/normalize")
+async def library_api_v1_ingestion_normalize(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: payload=json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+    result=normalize_library_source_ingestion(payload)
+    if not result.get("valid"): raise HTTPException(status_code=422,detail=result)
+    return result
+
+@app.post("/api/library/v1/admin/ingestion/records")
+async def library_api_v1_ingestion_records(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: payload=json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+    try: return ingest_library_normalized_records(payload,sha256_hex(body))
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/admin/ingestion/sources/{source_key:path}")
+async def library_api_v1_ingestion_source_state(source_key: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: result=library_source_ingestion_state(source_key)
+    except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+    if result is None: raise HTTPException(status_code=404,detail="source-not-found")
+    return result
 
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()

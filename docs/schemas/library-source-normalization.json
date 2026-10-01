@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-source-normalization-v1.json",
+  "title": "Sustainable Catalyst Library Source Normalization Result",
+  "type": "object",
+  "required": ["schema", "valid", "library_version", "backend_version", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-source-normalization/1.0"},
+    "valid": {"type": "boolean"},
+    "library_version": {"const": "5.72.0"},
+    "backend_version": {"const": "2.83.0"},
+    "input_sha256": {"type": "string"},
+    "normalized_sha256": {"type": "string"},
+    "operations": {"type": "array", "items": {"type": "string"}},
+    "normalized": {"type": "object"},
+    "guardrails": {"type": "object"}
+  }
+}

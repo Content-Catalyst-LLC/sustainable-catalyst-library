@@ -72,6 +72,11 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"GET","path":"/api/library/v1/catalog/readiness","name":"python-catalog-service-readiness","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/research-state","name":"python-research-state-service","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/research-state/readiness","name":"python-research-state-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/ingestion","name":"python-source-ingestion-service","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/ingestion/readiness","name":"python-source-ingestion-readiness","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/ingestion/normalize","name":"source-ingestion-normalize","access":"signed-service","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/ingestion/records","name":"source-ingestion-records","access":"signed-service","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/admin/ingestion/sources/{source_key}","name":"source-ingestion-state","access":"signed-service","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/admin/research-state/owners/{owner_identity_id}","name":"research-state-owner-snapshot","access":"signed-service","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/research-state/projects","name":"research-project-upsert","access":"signed-service","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/research-state/projects/{project_id}/references","name":"project-reference-upsert","access":"signed-service","stability":"stable"},
@@ -110,6 +115,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "python-domain-authority": {"resources":["domain-registry","php-retirement-policy","migration-plan","authority-readiness"],"direct_api":True,"authority":"python-backend"},
     "catalog-domain": {"resources":["catalog-contract","catalog-write","research-object","record-revisioning","publication-state"],"direct_api":True,"authority":"python-backend"},
     "research-state": {"resources":["projects","project-references","source-bundles","saved-searches","watchlists","research-queue","collections"],"direct_api":True,"authority":"python-backend"},
+    "source-ingestion": {"resources":["source-packets","record-normalization","normalization-lineage","record-ingest","source-state"],"direct_api":True,"authority":"python-backend"},
     "runtime-certification": {"resources":["wordpress-failure","runtime-probes","certification"],"direct_api":True,"authority":"library-service"},
 }
 
@@ -203,8 +209,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "5.71.0",
-        "backend_version": "2.82.0",
+        "library_version": "5.72.0",
+        "backend_version": "2.83.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -259,8 +265,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "5.71.0",
-        "backend_version": "2.82.0",
+        "library_version": "5.72.0",
+        "backend_version": "2.83.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

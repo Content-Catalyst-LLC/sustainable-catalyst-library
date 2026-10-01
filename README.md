@@ -1,5 +1,11 @@
 # Sustainable Catalyst Knowledge Library
 
+Current release: **v5.72.0 — Python Source Ingestion & Normalization Service**. Backend: **v2.83.0** · Python SDK: **v0.4.0** · JS/TS Client: **v0.4.0** · Library Web: **v1.2.0** · API: **v1.0**.
+
+This release makes Python/FastAPI authoritative for source ingestion and normalization while preserving the existing PostgreSQL record model, revisioning, chunking, embedding invalidation, provenance, and source identities. WordPress remains an optional upload/configuration/presentation adapter.
+
+# Sustainable Catalyst Knowledge Library
+
 Current release: **v5.71.0 — Python Research Projects, Collections & Saved Research State**. Backend: **v2.82.0** · Python SDK: **v0.3.0** · JS/TS Client: **v0.3.0** · Library Web: **v1.2.0** · API: **v1.0**.
 
 This release moves identity-owned research projects, references-only source bundles, saved searches, passive watchlists, research queue items, and personal research collections to Python/FastAPI with PostgreSQL as the durable state authority. WordPress remains an optional thin presentation and API-client adapter.

@@ -1,6 +1,6 @@
 {
   "schema": "sc-library-php-domain-retirement-inventory/1.0",
-  "library_version": "5.71.0",
+  "library_version": "5.72.0",
   "policy": "New PHP files require explicit inventory classification; new research/domain authority belongs in Python by default.",
   "categories": [
     "wordpress-integration",
@@ -363,7 +363,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-global-source-federation-registry.php",
       "classification": "retire-candidate",
       "bytes": 4345,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python source-ingestion and normalization authority is active in v5.72.0; retain temporarily for WordPress compatibility, presentation, and measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-hardening.php",
@@ -393,13 +393,13 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-indexer.php",
       "classification": "retire-candidate",
       "bytes": 34530,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python source-ingestion and normalization authority is active in v5.72.0; retain temporarily for WordPress compatibility, presentation, and measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-ingestion-job-fabric.php",
       "classification": "retire-candidate",
       "bytes": 2391,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python source-ingestion and normalization authority is active in v5.72.0; retain temporarily for WordPress compatibility, presentation, and measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-institutional-collections-archives.php",
@@ -423,7 +423,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-institutional-research-sources.php",
       "classification": "retire-candidate",
       "bytes": 8603,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python source-ingestion and normalization authority is active in v5.72.0; retain temporarily for WordPress compatibility, presentation, and measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-institutional-team-libraries.php",
@@ -777,7 +777,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-scanner.php",
       "classification": "retire-candidate",
       "bytes": 41346,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python source-ingestion and normalization authority is active in v5.72.0; retain temporarily for WordPress compatibility, presentation, and measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-scholarly-library-connectors.php",

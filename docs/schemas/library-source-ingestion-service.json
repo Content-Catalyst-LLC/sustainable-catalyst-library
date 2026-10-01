@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-source-ingestion-service-v1.json",
+  "title": "Sustainable Catalyst Library Python Source Ingestion Service",
+  "type": "object",
+  "required": ["schema", "library_version", "backend_version", "state", "authority", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-python-source-ingestion-service/1.0"},
+    "library_version": {"const": "5.72.0"},
+    "backend_version": {"const": "2.83.0"},
+    "state": {"const": "authoritative"},
+    "authority": {"const": "python-backend"},
+    "guardrails": {"type": "object"}
+  }
+}

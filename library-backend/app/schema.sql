@@ -1515,3 +1515,23 @@ CREATE TABLE IF NOT EXISTS library_research_collection_items (
     UNIQUE(collection_id,ref_type,ref_id)
 );
 CREATE INDEX IF NOT EXISTS library_research_collection_items_idx ON library_research_collection_items(collection_id, created_at DESC);
+
+-- v2.83.0 / Library v5.72.0 — Python Source Ingestion & Normalization Service.
+-- PostgreSQL records deterministic normalization lineage for every API-owned source ingestion.
+CREATE TABLE IF NOT EXISTS library_ingestion_normalization_runs (
+    normalization_id text PRIMARY KEY,
+    source_key text NOT NULL REFERENCES library_sources(source_key) ON UPDATE CASCADE ON DELETE CASCADE,
+    request_hash text NOT NULL,
+    input_sha256 text NOT NULL,
+    normalized_sha256 text NOT NULL,
+    received_count integer NOT NULL DEFAULT 0 CHECK (received_count >= 0),
+    changed_count integer NOT NULL DEFAULT 0 CHECK (changed_count >= 0),
+    unchanged_count integer NOT NULL DEFAULT 0 CHECK (unchanged_count >= 0),
+    operations jsonb NOT NULL DEFAULT '[]'::jsonb,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_ingestion_normalization_source_idx
+    ON library_ingestion_normalization_runs(source_key, created_at DESC);
+CREATE INDEX IF NOT EXISTS library_ingestion_normalization_hash_idx
+    ON library_ingestion_normalization_runs(normalized_sha256);

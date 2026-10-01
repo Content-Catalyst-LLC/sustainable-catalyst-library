@@ -1,3 +1,13 @@
+## 5.72.0 — Python Source Ingestion & Normalization Service
+- Advances the backend to v2.83.0 and first-party clients to v0.4.0.
+- Makes Python/FastAPI authoritative for source packet validation, record normalization, and source ingestion.
+- Routes legacy `/v1/ingest/records` through the canonical Python normalization service before repository ingestion.
+- Adds deterministic normalization hashes, explicit transformation operations, and PostgreSQL normalization lineage.
+- Preserves the existing record revision, chunking, embedding invalidation, Core-binding staleness, candidate supersession, and ingest-event path.
+- Adds API v1 ingestion contract/readiness, normalization, ingestion, and source-state endpoints.
+- Adds source-ingestion coverage to WordPress-failure certification.
+- Keeps legacy PHP scanner/indexer/ingestion surfaces as retire-candidates; no new PHP domain authority is added.
+
 ## 5.71.0 — Python Research Projects, Collections & Saved Research State
 - Advances the backend to v2.82.0 and first-party clients to v0.3.0.
 - Makes Python/PostgreSQL authoritative for Library-identity-owned research projects and saved research continuity state.
