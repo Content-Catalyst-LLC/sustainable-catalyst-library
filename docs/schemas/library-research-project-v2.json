@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-research-project-v2.json",
+  "title": "Sustainable Catalyst Library Research Project v2",
+  "type": "object",
+  "required": ["schema", "project_id", "owner_identity_id", "urn", "title", "status", "visibility", "authority"],
+  "properties": {
+    "schema": {"const": "sc-library-research-project/2.0"},
+    "project_id": {"type": "string"},
+    "owner_identity_id": {"type": "string"},
+    "urn": {"type": "string"},
+    "title": {"type": "string"},
+    "research_question": {"type": "string"},
+    "description": {"type": "string"},
+    "status": {"enum": ["active", "on_hold", "complete", "archived"]},
+    "visibility": {"enum": ["private", "shared", "public"]},
+    "metadata": {"type": "object"},
+    "authority": {"const": "python-backend"}
+  }
+}

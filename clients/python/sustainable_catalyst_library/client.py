@@ -103,6 +103,9 @@ class LibraryClient:
     def get(self, path: str, query: dict[str, Any] | None = None) -> Any:
         return self.request("GET", path, query=query)
 
+    def get_signed(self, path: str, query: dict[str, Any] | None = None) -> Any:
+        return self.request("GET", path, query=query, signed=True)
+
     def post_signed(self, path: str, payload: Any) -> Any:
         return self.request("POST", path, payload=payload, signed=True)
 
@@ -117,6 +120,17 @@ class LibraryClient:
     def client_framework(self): return self.get("/client-framework")
     def catalog(self): return self.get("/catalog")
     def catalog_readiness(self): return self.get("/catalog/readiness")
+    def research_state(self): return self.get("/research-state")
+    def research_state_readiness(self): return self.get("/research-state/readiness")
+    def research_state_for_owner(self, owner_identity_id: str): return self.get_signed("/admin/research-state/owners/" + parse.quote(owner_identity_id, safe=""))
+    def create_research_project(self, payload: dict[str, Any]): return self.post_signed("/admin/research-state/projects", payload)
+    def add_project_reference(self, project_id: str, payload: dict[str, Any]): return self.post_signed("/admin/research-state/projects/" + parse.quote(project_id, safe="") + "/references", payload)
+    def create_source_bundle(self, project_id: str, payload: dict[str, Any]): return self.post_signed("/admin/research-state/projects/" + parse.quote(project_id, safe="") + "/bundles", payload)
+    def save_search(self, payload: dict[str, Any]): return self.post_signed("/admin/research-state/saved-searches", payload)
+    def save_watchlist(self, payload: dict[str, Any]): return self.post_signed("/admin/research-state/watchlists", payload)
+    def enqueue_research(self, payload: dict[str, Any]): return self.post_signed("/admin/research-state/queue", payload)
+    def create_collection(self, payload: dict[str, Any]): return self.post_signed("/admin/research-state/collections", payload)
+    def add_collection_item(self, collection_id: str, payload: dict[str, Any]): return self.post_signed("/admin/research-state/collections/" + parse.quote(collection_id, safe="") + "/items", payload)
     def research_object(self, record_id: str, *, include_body: bool = True): return self.get("/research-objects/" + parse.quote(record_id, safe=""), {"include_body": str(include_body).lower()})
     def validate_catalog_record(self, payload: dict[str, Any]): return self.post_signed("/admin/catalog/records/validate", payload)
     def upsert_catalog_record(self, payload: dict[str, Any]): return self.post_signed("/admin/catalog/records", payload)

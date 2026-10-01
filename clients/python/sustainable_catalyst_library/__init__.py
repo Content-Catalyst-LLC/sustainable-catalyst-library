@@ -1,4 +1,4 @@
 from .client import LibraryClient, LibraryError, ProductAdapter, sign_request
 
 __all__ = ["LibraryClient", "LibraryError", "ProductAdapter", "sign_request"]
-__version__ = "0.2.0"
+__version__ = "0.3.0"

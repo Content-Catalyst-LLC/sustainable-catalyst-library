@@ -1393,3 +1393,125 @@ CREATE TABLE IF NOT EXISTS library_release_events (event_id bigserial PRIMARY KE
 -- WordPress-Failure Independence & Runtime Certification (Library v5.67.0 / backend v2.78.0)
 CREATE TABLE IF NOT EXISTS library_runtime_independence_certifications (certification_id text PRIMARY KEY, certification_sha256 text NOT NULL, wordpress_state text NOT NULL, certified boolean NOT NULL, probes jsonb NOT NULL DEFAULT '{}'::jsonb, guardrails jsonb NOT NULL DEFAULT '{}'::jsonb, certified_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE IF NOT EXISTS library_runtime_independence_events (event_id bigserial PRIMARY KEY, certification_id text NOT NULL, event_type text NOT NULL, details jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());
+
+-- v2.82.0 / Library v5.71.0 — Python Research Projects, Collections & Saved Research State.
+-- PostgreSQL is authoritative for Library identity-owned private research continuity.
+CREATE TABLE IF NOT EXISTS library_research_projects (
+    project_id text PRIMARY KEY,
+    owner_identity_id text NOT NULL REFERENCES library_identities(identity_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    urn text NOT NULL UNIQUE,
+    title text NOT NULL,
+    research_question text NOT NULL DEFAULT '',
+    description text NOT NULL DEFAULT '',
+    status text NOT NULL DEFAULT 'active' CHECK (status IN ('active','on_hold','complete','archived')),
+    visibility text NOT NULL DEFAULT 'private' CHECK (visibility IN ('private','shared','public')),
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_research_projects_owner_idx ON library_research_projects(owner_identity_id, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_project_references (
+    reference_id text PRIMARY KEY,
+    project_id text NOT NULL REFERENCES library_research_projects(project_id) ON DELETE CASCADE,
+    family text NOT NULL,
+    ref_id text NOT NULL,
+    label text NOT NULL DEFAULT '',
+    role text NOT NULL DEFAULT 'reference',
+    url text NOT NULL DEFAULT '',
+    note text NOT NULL DEFAULT '',
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE(project_id,family,ref_id)
+);
+CREATE INDEX IF NOT EXISTS library_project_references_project_idx ON library_project_references(project_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_source_bundles (
+    bundle_id text PRIMARY KEY,
+    project_id text NOT NULL REFERENCES library_research_projects(project_id) ON DELETE CASCADE,
+    urn text NOT NULL UNIQUE,
+    title text NOT NULL,
+    purpose text NOT NULL DEFAULT 'working_set',
+    description text NOT NULL DEFAULT '',
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_source_bundles_project_idx ON library_source_bundles(project_id, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_source_bundle_members (
+    bundle_id text NOT NULL REFERENCES library_source_bundles(bundle_id) ON DELETE CASCADE,
+    reference_id text NOT NULL REFERENCES library_project_references(reference_id) ON DELETE CASCADE,
+    position integer NOT NULL DEFAULT 0 CHECK (position >= 0),
+    PRIMARY KEY(bundle_id,reference_id)
+);
+
+CREATE TABLE IF NOT EXISTS library_saved_searches (
+    saved_search_id text PRIMARY KEY,
+    owner_identity_id text NOT NULL REFERENCES library_identities(identity_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    label text NOT NULL DEFAULT '',
+    query text NOT NULL,
+    scope text NOT NULL DEFAULT 'all',
+    filters jsonb NOT NULL DEFAULT '{}'::jsonb,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_saved_searches_owner_idx ON library_saved_searches(owner_identity_id, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_watchlists (
+    watchlist_id text PRIMARY KEY,
+    owner_identity_id text NOT NULL REFERENCES library_identities(identity_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    kind text NOT NULL DEFAULT 'other',
+    label text NOT NULL DEFAULT '',
+    target text NOT NULL DEFAULT '',
+    url text NOT NULL DEFAULT '',
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_watchlists_owner_idx ON library_watchlists(owner_identity_id, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_research_queue_items (
+    queue_item_id text PRIMARY KEY,
+    owner_identity_id text NOT NULL REFERENCES library_identities(identity_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    project_id text REFERENCES library_research_projects(project_id) ON DELETE SET NULL,
+    kind text NOT NULL DEFAULT 'other',
+    label text NOT NULL,
+    ref_id text NOT NULL DEFAULT '',
+    url text NOT NULL DEFAULT '',
+    note text NOT NULL DEFAULT '',
+    status text NOT NULL DEFAULT 'queued' CHECK (status IN ('queued','in_progress','done','dismissed')),
+    priority integer NOT NULL DEFAULT 0 CHECK (priority >= 0 AND priority <= 100),
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_research_queue_owner_idx ON library_research_queue_items(owner_identity_id, status, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_research_collections (
+    collection_id text PRIMARY KEY,
+    owner_identity_id text NOT NULL REFERENCES library_identities(identity_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    title text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    kind text NOT NULL DEFAULT 'research',
+    visibility text NOT NULL DEFAULT 'private' CHECK (visibility IN ('private','shared','public')),
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_research_collections_owner_idx ON library_research_collections(owner_identity_id, updated_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_research_collection_items (
+    item_id text PRIMARY KEY,
+    collection_id text NOT NULL REFERENCES library_research_collections(collection_id) ON DELETE CASCADE,
+    ref_type text NOT NULL DEFAULT 'library-record',
+    ref_id text NOT NULL,
+    label text NOT NULL DEFAULT '',
+    url text NOT NULL DEFAULT '',
+    note text NOT NULL DEFAULT '',
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE(collection_id,ref_type,ref_id)
+);
+CREATE INDEX IF NOT EXISTS library_research_collection_items_idx ON library_research_collection_items(collection_id, created_at DESC);

@@ -1,3 +1,12 @@
+## 5.71.0 — Python Research Projects, Collections & Saved Research State
+- Advances the backend to v2.82.0 and first-party clients to v0.3.0.
+- Makes Python/PostgreSQL authoritative for Library-identity-owned research projects and saved research continuity state.
+- Adds durable projects, project references, references-only source bundles, saved searches, passive watchlists, research queue items, collections, and collection items.
+- Adds API v1 research-state contract/readiness and signed service mutation/read surfaces.
+- Preserves private-by-default ownership and reference-only bundle semantics without copying binary/source content.
+- Adds research-state coverage to WordPress-failure certification.
+- Keeps legacy PHP project/saved-state/collection classes as retire-candidates only; no new PHP domain authority is added.
+
 ## 5.70.0 — Python Catalog, Publication & Research Object Service
 - Advances the backend to v2.81.0 and moves publication/catalog write authority to Python.
 - Adds the Python catalog service contract/readiness surface and canonical research-object envelopes.

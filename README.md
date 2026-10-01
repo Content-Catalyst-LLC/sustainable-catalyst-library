@@ -1,5 +1,11 @@
 # Sustainable Catalyst Knowledge Library
 
+Current release: **v5.71.0 — Python Research Projects, Collections & Saved Research State**. Backend: **v2.82.0** · Python SDK: **v0.3.0** · JS/TS Client: **v0.3.0** · Library Web: **v1.2.0** · API: **v1.0**.
+
+This release moves identity-owned research projects, references-only source bundles, saved searches, passive watchlists, research queue items, and personal research collections to Python/FastAPI with PostgreSQL as the durable state authority. WordPress remains an optional thin presentation and API-client adapter.
+
+# Sustainable Catalyst Knowledge Library
+
 Current release: **v5.70.0 — Python Catalog, Publication & Research Object Service**. Backend: **v2.81.0** · Python SDK: **v0.2.0** · JS/TS Client: **v0.2.0** · Library Web: **v1.2.0** · API: **v1.0**.
 
 This release moves publication/catalog mutation authority into Python/FastAPI, adds canonical research-object envelopes and signed catalog mutations, and keeps WordPress/PHP as a presentation and compatibility client. Existing PostgreSQL record/version/chunk infrastructure remains the single catalog persistence path.

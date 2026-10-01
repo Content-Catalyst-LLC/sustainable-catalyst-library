@@ -3,8 +3,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "5.70.0"
-BACKEND_VERSION = "2.81.0"
+LIBRARY_VERSION = "5.71.0"
+BACKEND_VERSION = "2.82.0"
 CONTRACT = "sc-library-python-domain-authority/1.0"
 READINESS_CONTRACT = "sc-library-python-domain-authority-readiness/1.0"
 MIGRATION_PLAN_CONTRACT = "sc-library-python-domain-migration-plan/1.0"
@@ -36,8 +36,9 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "wordpress_role": "presentation-and-api-client-only",
     },
     "research-projects-collections-saved-state": {
-        "authority": "migration-pending", "state": "planned-v5.71",
-        "wordpress_role": "legacy-compatible-until-cutover",
+        "authority": "python-backend", "state": "authoritative",
+        "api": ["/api/library/v1/research-state", "/api/library/v1/admin/research-state/owners/{owner_identity_id}"],
+        "wordpress_role": "presentation-and-api-client-only",
     },
     "source-ingestion-normalization": {
         "authority": "migration-pending", "state": "planned-v5.72",

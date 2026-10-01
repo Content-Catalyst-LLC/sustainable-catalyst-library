@@ -768,6 +768,161 @@
           }
         }
       }
+    },
+    "/research-state": {
+      "get": {
+        "summary": "Python research-state service contract",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/research-state/readiness": {
+      "get": {
+        "summary": "Python research-state readiness",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/admin/research-state/owners/{owner_identity_id}": {
+      "get": {
+        "summary": "Identity-owned research-state snapshot",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
+    },
+    "/admin/research-state/projects": {
+      "post": {
+        "summary": "Create or update a research project",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
+    },
+    "/admin/research-state/projects/{project_id}/references": {
+      "post": {
+        "summary": "Add or update a project reference",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
+    },
+    "/admin/research-state/projects/{project_id}/bundles": {
+      "post": {
+        "summary": "Create a references-only source bundle",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
+    },
+    "/admin/research-state/saved-searches": {
+      "post": {
+        "summary": "Create a saved search",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
+    },
+    "/admin/research-state/watchlists": {
+      "post": {
+        "summary": "Create a passive watchlist",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
+    },
+    "/admin/research-state/queue": {
+      "post": {
+        "summary": "Add a research queue item",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
+    },
+    "/admin/research-state/collections": {
+      "post": {
+        "summary": "Create a research collection",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
+    },
+    "/admin/research-state/collections/{collection_id}/items": {
+      "post": {
+        "summary": "Add a collection reference item",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "security": [
+          {
+            "signedService": []
+          }
+        ]
+      }
     }
   },
   "components": {

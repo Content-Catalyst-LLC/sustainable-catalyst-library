@@ -1,6 +1,6 @@
 {
   "schema": "sc-library-php-domain-retirement-inventory/1.0",
-  "library_version": "5.70.0",
+  "library_version": "5.71.0",
   "policy": "New PHP files require explicit inventory classification; new research/domain authority belongs in Python by default.",
   "categories": [
     "wordpress-integration",
@@ -567,7 +567,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-personal-collections-recommendations.php",
       "classification": "retire-candidate",
       "bytes": 32858,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python/PostgreSQL research-state authority is active in v5.71.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-pipeline-engine.php",
@@ -681,7 +681,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-research-collections-curated-spaces.php",
       "classification": "retire-candidate",
       "bytes": 38369,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python/PostgreSQL research-state authority is active in v5.71.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-research-corpus-builder.php",
@@ -771,7 +771,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-saved-searches-watchlists-queue.php",
       "classification": "retire-candidate",
       "bytes": 35130,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python/PostgreSQL research-state authority is active in v5.71.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-scanner.php",
@@ -843,7 +843,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-unified-research-projects-source-bundles.php",
       "classification": "retire-candidate",
       "bytes": 60657,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python/PostgreSQL research-state authority is active in v5.71.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-unified-runtime.php",

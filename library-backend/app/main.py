@@ -193,6 +193,14 @@ from .catalog_service import (
     get_research_object as get_library_research_object,
     delete_catalog_record as delete_library_catalog_record,
 )
+from .research_state import (
+    contract as library_research_state_contract, readiness as library_research_state_readiness,
+    owner_state as library_research_owner_state, upsert_project as upsert_library_research_project,
+    add_project_reference as add_library_project_reference, create_source_bundle as create_library_source_bundle,
+    create_saved_search as create_library_saved_search, create_watchlist as create_library_watchlist,
+    enqueue_research_item as enqueue_library_research_item, create_collection as create_library_research_collection,
+    add_collection_item as add_library_research_collection_item,
+)
 from .runtime_independence import evaluate as evaluate_wordpress_failure_independence, readiness as wordpress_failure_independence_readiness
 from .release_engineering import release_manifest as library_release_manifest, readiness as library_release_engineering_readiness, validate_deployment_plan as validate_library_deployment_plan
 from .state_migration import (
@@ -431,6 +439,10 @@ def health() -> dict[str, Any]:
             "library_api_v1_base_path": "/api/library/v1",
             "python_domain_service_authority": True,
             "python_catalog_service_authority": True,
+            "python_research_state_authority": True,
+            "research_projects_state_authority": "python-backend",
+            "saved_research_state_authority": "python-backend",
+            "wordpress_research_state_authority": False,
             "publication_catalog_write_authority": "python-backend",
             "research_object_envelopes": True,
             "wordpress_publication_domain_authority": False,
@@ -2930,6 +2942,80 @@ async def library_api_v1_catalog_upsert(request: Request, authorization: str|Non
 async def library_api_v1_catalog_delete(record_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
     await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
     return delete_library_catalog_record(record_id)
+
+
+def _library_research_state_error(exc: Exception):
+    if isinstance(exc, PermissionError): raise HTTPException(status_code=403,detail=str(exc))
+    if isinstance(exc, KeyError): raise HTTPException(status_code=404,detail=str(exc).strip("'"))
+    if isinstance(exc, ValueError): raise HTTPException(status_code=422,detail=str(exc))
+    raise exc
+
+@app.get("/api/library/v1/research-state")
+def library_api_v1_research_state() -> dict[str, Any]: return library_research_state_contract()
+
+@app.get("/api/library/v1/research-state/readiness")
+def library_api_v1_research_state_readiness() -> dict[str, Any]: return library_research_state_readiness()
+
+@app.get("/api/library/v1/admin/research-state/owners/{owner_identity_id:path}")
+async def library_api_v1_research_owner_state(owner_identity_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return library_research_owner_state(owner_identity_id)
+    except Exception as exc: _library_research_state_error(exc)
+
+async def _library_research_state_signed_json(request: Request, authorization: str|None, timestamp: str|None, signature: str|None) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,timestamp,signature)
+    try: payload=json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+    if not isinstance(payload,dict): raise HTTPException(status_code=422,detail="payload-must-be-object")
+    return payload
+
+@app.post("/api/library/v1/admin/research-state/projects")
+async def library_api_v1_research_project_upsert(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    payload=await _library_research_state_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return upsert_library_research_project(payload)
+    except Exception as exc: _library_research_state_error(exc)
+
+@app.post("/api/library/v1/admin/research-state/projects/{project_id:path}/references")
+async def library_api_v1_project_reference(project_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    payload=await _library_research_state_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return add_library_project_reference(project_id,payload)
+    except Exception as exc: _library_research_state_error(exc)
+
+@app.post("/api/library/v1/admin/research-state/projects/{project_id:path}/bundles")
+async def library_api_v1_source_bundle(project_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    payload=await _library_research_state_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return create_library_source_bundle(project_id,payload)
+    except Exception as exc: _library_research_state_error(exc)
+
+@app.post("/api/library/v1/admin/research-state/saved-searches")
+async def library_api_v1_saved_search(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    payload=await _library_research_state_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return create_library_saved_search(payload)
+    except Exception as exc: _library_research_state_error(exc)
+
+@app.post("/api/library/v1/admin/research-state/watchlists")
+async def library_api_v1_watchlist(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    payload=await _library_research_state_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return create_library_watchlist(payload)
+    except Exception as exc: _library_research_state_error(exc)
+
+@app.post("/api/library/v1/admin/research-state/queue")
+async def library_api_v1_research_queue(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    payload=await _library_research_state_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return enqueue_library_research_item(payload)
+    except Exception as exc: _library_research_state_error(exc)
+
+@app.post("/api/library/v1/admin/research-state/collections")
+async def library_api_v1_research_collection(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    payload=await _library_research_state_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return create_library_research_collection(payload)
+    except Exception as exc: _library_research_state_error(exc)
+
+@app.post("/api/library/v1/admin/research-state/collections/{collection_id:path}/items")
+async def library_api_v1_research_collection_item(collection_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    payload=await _library_research_state_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return add_library_research_collection_item(collection_id,payload)
+    except Exception as exc: _library_research_state_error(exc)
 
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()
