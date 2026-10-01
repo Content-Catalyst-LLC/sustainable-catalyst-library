@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library 5.67.0.1 backend identity and deployment-integrity repair.
- * Version: 5.67.0.1
+ * Description: Sustainable Catalyst Library 5.67.0.2 WordPress runtime boot integrity repair.
+ * Version: 5.67.0.2
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.67.0.1');
+define('SC_LIBRARY_VERSION', '5.67.0.2');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'thin-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);
@@ -101,6 +101,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-wordpress-thin-adapter.
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-public-routing-bridge.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-product-service-integration.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-state-migration.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-runtime-certification.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-civilizational-linking.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-translation-alignment.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence.php';

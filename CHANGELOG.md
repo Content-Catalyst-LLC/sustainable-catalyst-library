@@ -1,3 +1,11 @@
+## 5.67.0.2 — WordPress Runtime Boot Integrity Repair
+- Permanently loads `class-sc-library-runtime-certification.php` before `SC_Library_Runtime_Certification` is instantiated.
+- Aligns the WordPress thin-adapter release identity and backend runtime-certification Library identity with v5.67.0.2.
+- Keeps backend capability/version at v2.78.0, Library Web at v1.2.0, and API at v1.0.
+- Adds source-order validation so the missing-loader defect cannot silently recur.
+- Adds deployment-time WP-CLI boot verification and rollback-safe WordPress installation.
+- Adds no new research capability.
+
 ## 5.67.0.1 — Backend Release Identity & Deployment Integrity Repair
 - Corrects the authoritative backend package version marker so `/health` reports backend v2.78.0.
 - Aligns the WordPress thin-adapter plugin header, `SC_LIBRARY_VERSION`, and runtime-certification adapter with Library v5.67.0.1.

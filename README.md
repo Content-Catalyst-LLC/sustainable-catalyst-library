@@ -1,5 +1,11 @@
 # Sustainable Catalyst Knowledge Library
 
+Current release: **v5.67.0.2 — WordPress Runtime Boot Integrity Repair**. Backend: **v2.78.0** · Library Web: **v1.2.0** · API: **v1.0**.
+
+This patch permanently loads the runtime-certification adapter before instantiation, aligns backend certification identity with Library v5.67.0.2, and adds deployment-time WordPress boot verification with rollback. It adds no new research capability.
+
+# Sustainable Catalyst Knowledge Library
+
 Current release: **v5.67.0.1 — Backend Release Identity & Deployment Integrity Repair**. Backend: **v2.78.0** · Library Web: **v1.2.0** · API: **v1.0**.
 
 This patch aligns the backend and WordPress release identities, preserves the production `.env` during backend replacement, and certifies against the canonical host endpoint `127.0.0.1:8087`. It adds no new research capability.
