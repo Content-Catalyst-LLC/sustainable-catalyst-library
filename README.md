@@ -1,5 +1,11 @@
 # Sustainable Catalyst Knowledge Library
 
+Current release: **v5.70.0 — Python Catalog, Publication & Research Object Service**. Backend: **v2.81.0** · Python SDK: **v0.2.0** · JS/TS Client: **v0.2.0** · Library Web: **v1.2.0** · API: **v1.0**.
+
+This release moves publication/catalog mutation authority into Python/FastAPI, adds canonical research-object envelopes and signed catalog mutations, and keeps WordPress/PHP as a presentation and compatibility client. Existing PostgreSQL record/version/chunk infrastructure remains the single catalog persistence path.
+
+# Sustainable Catalyst Knowledge Library
+
 Current release: **v5.69.0 — Python Domain Service Migration Foundation**. Backend: **v2.80.0** · Python SDK: **v0.1.0** · JS/TS Client: **v0.1.0** · Library Web: **v1.2.0** · API: **v1.0**.
 
 This release makes Python/FastAPI the default authority for Library domain behavior, introduces a machine-readable domain-authority and migration-plan contract, establishes a checked-in PHP retirement inventory and drift gate, and keeps WordPress as an optional presentation/integration adapter. Legacy PHP domain behavior is retired incrementally after parity and rollback certification rather than rewritten wholesale.

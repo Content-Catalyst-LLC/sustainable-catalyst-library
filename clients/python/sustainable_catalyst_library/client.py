@@ -106,12 +106,21 @@ class LibraryClient:
     def post_signed(self, path: str, payload: Any) -> Any:
         return self.request("POST", path, payload=payload, signed=True)
 
+    def delete_signed(self, path: str) -> Any:
+        return self.request("DELETE", path, signed=True)
+
     def health(self): return self.get("/health")
     def readiness(self): return self.get("/readiness")
     def service(self): return self.get("/service")
     def capabilities(self): return self.get("/capabilities")
     def routes(self): return self.get("/routes")
     def client_framework(self): return self.get("/client-framework")
+    def catalog(self): return self.get("/catalog")
+    def catalog_readiness(self): return self.get("/catalog/readiness")
+    def research_object(self, record_id: str, *, include_body: bool = True): return self.get("/research-objects/" + parse.quote(record_id, safe=""), {"include_body": str(include_body).lower()})
+    def validate_catalog_record(self, payload: dict[str, Any]): return self.post_signed("/admin/catalog/records/validate", payload)
+    def upsert_catalog_record(self, payload: dict[str, Any]): return self.post_signed("/admin/catalog/records", payload)
+    def delete_catalog_record(self, record_id: str): return self.delete_signed("/admin/catalog/records/" + parse.quote(record_id, safe=""))
     def search(self, q: str = "", **filters): return self.get("/search", {"q": q, **filters})
     def record(self, record_id: str, *, include_body: bool = True): return self.get("/records/" + parse.quote(record_id, safe=""), {"include_body": str(include_body).lower()})
     def stats(self): return self.get("/stats")

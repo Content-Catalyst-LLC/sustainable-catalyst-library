@@ -1,3 +1,12 @@
+## 5.70.0 — Python Catalog, Publication & Research Object Service
+- Advances the backend to v2.81.0 and moves publication/catalog write authority to Python.
+- Adds the Python catalog service contract/readiness surface and canonical research-object envelopes.
+- Adds signed API v1 catalog validate/upsert/delete operations backed by existing PostgreSQL record revisioning.
+- Reuses existing chunking, content hashing, embedding invalidation/re-indexing, extraction supersession and Platform Core stale-binding behavior.
+- Advances first-party Python and JavaScript/TypeScript clients to v0.2.0 with catalog/research-object methods.
+- Adds catalog-service coverage to WordPress-failure certification.
+- Adds no new PHP domain implementation; legacy publication/indexing PHP remains explicitly classified as retire-candidate.
+
 ## 5.69.0 — Python Domain Service Migration Foundation
 - Advances the Library backend to v2.80.0.
 - Declares Python/FastAPI as the default authority for Library domain behavior.

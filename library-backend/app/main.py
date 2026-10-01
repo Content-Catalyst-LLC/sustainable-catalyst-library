@@ -186,6 +186,13 @@ from .cross_product_integration import (
 )
 from .client_framework import contract as library_client_framework_contract, readiness as library_client_framework_readiness
 from .domain_authority import contract as library_domain_authority_contract, readiness as library_domain_authority_readiness, migration_plan as library_domain_migration_plan
+from .catalog_service import (
+    contract as library_catalog_contract, readiness as library_catalog_readiness,
+    validate_upsert_payload as validate_library_catalog_upsert,
+    upsert_record as upsert_library_catalog_record,
+    get_research_object as get_library_research_object,
+    delete_catalog_record as delete_library_catalog_record,
+)
 from .runtime_independence import evaluate as evaluate_wordpress_failure_independence, readiness as wordpress_failure_independence_readiness
 from .release_engineering import release_manifest as library_release_manifest, readiness as library_release_engineering_readiness, validate_deployment_plan as validate_library_deployment_plan
 from .state_migration import (
@@ -423,6 +430,10 @@ def health() -> dict[str, Any]:
             "cross_product_client_adapters": True,
             "library_api_v1_base_path": "/api/library/v1",
             "python_domain_service_authority": True,
+            "python_catalog_service_authority": True,
+            "publication_catalog_write_authority": "python-backend",
+            "research_object_envelopes": True,
+            "wordpress_publication_domain_authority": False,
             "wordpress_php_domain_authority": False,
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
@@ -2886,6 +2897,39 @@ def library_api_v1_domain_authority() -> dict[str, Any]: return library_domain_a
 def library_api_v1_domain_authority_readiness() -> dict[str, Any]: return library_domain_authority_readiness()
 @app.get("/api/library/v1/domain-authority/migration-plan")
 def library_api_v1_domain_migration_plan() -> dict[str, Any]: return library_domain_migration_plan()
+
+@app.get("/api/library/v1/catalog")
+def library_api_v1_catalog() -> dict[str, Any]: return library_catalog_contract()
+
+@app.get("/api/library/v1/catalog/readiness")
+def library_api_v1_catalog_readiness() -> dict[str, Any]: return library_catalog_readiness()
+
+@app.get("/api/library/v1/research-objects/{record_id:path}")
+def library_api_v1_research_object(record_id: str, include_body: bool=True) -> dict[str, Any]:
+    obj=get_library_research_object(record_id,include_body=include_body,public_only=True)
+    if obj is None: raise HTTPException(status_code=404,detail=library_api_error_envelope("research-object-not-found","Library research object not found",status=404))
+    return obj
+
+@app.post("/api/library/v1/admin/catalog/records/validate")
+async def library_api_v1_catalog_validate(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: payload=json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+    return validate_library_catalog_upsert(payload)
+
+@app.post("/api/library/v1/admin/catalog/records")
+async def library_api_v1_catalog_upsert(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: payload=json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+    validation=validate_library_catalog_upsert(payload)
+    if not validation.get("valid"): raise HTTPException(status_code=422,detail=validation)
+    return upsert_library_catalog_record(payload,sha256_hex(body))
+
+@app.delete("/api/library/v1/admin/catalog/records/{record_id:path}")
+async def library_api_v1_catalog_delete(record_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    return delete_library_catalog_record(record_id)
 
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()

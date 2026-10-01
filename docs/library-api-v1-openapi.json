@@ -670,6 +670,104 @@
           }
         }
       }
+    },
+    "/catalog": {
+      "get": {
+        "operationId": "libraryCatalogContract",
+        "responses": {
+          "200": {
+            "description": "Python catalog domain service contract"
+          }
+        }
+      }
+    },
+    "/catalog/readiness": {
+      "get": {
+        "operationId": "libraryCatalogReadiness",
+        "responses": {
+          "200": {
+            "description": "Python catalog domain service readiness"
+          }
+        }
+      }
+    },
+    "/research-objects/{record_id}": {
+      "get": {
+        "operationId": "libraryResearchObject",
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Canonical research-object envelope"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/admin/catalog/records/validate": {
+      "post": {
+        "operationId": "validateCatalogRecord",
+        "security": [
+          {
+            "signedAdmin": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog record validation result"
+          }
+        }
+      }
+    },
+    "/admin/catalog/records": {
+      "post": {
+        "operationId": "upsertCatalogRecord",
+        "security": [
+          {
+            "signedAdmin": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog record upsert result"
+          }
+        }
+      }
+    },
+    "/admin/catalog/records/{record_id}": {
+      "delete": {
+        "operationId": "deleteCatalogRecord",
+        "security": [
+          {
+            "signedAdmin": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "record_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog record deletion result"
+          }
+        }
+      }
     }
   },
   "components": {

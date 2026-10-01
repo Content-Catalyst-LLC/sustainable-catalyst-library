@@ -68,6 +68,12 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"GET","path":"/api/library/v1/domain-authority","name":"python-domain-authority","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/domain-authority/readiness","name":"python-domain-authority-readiness","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/domain-authority/migration-plan","name":"python-domain-migration-plan","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/catalog","name":"python-catalog-service","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/catalog/readiness","name":"python-catalog-service-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-objects/{record_id}","name":"research-object","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/catalog/records/validate","name":"catalog-record-validate","access":"signed-admin","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/catalog/records","name":"catalog-record-upsert","access":"signed-admin","stability":"stable"},
+    {"method":"DELETE","path":"/api/library/v1/admin/catalog/records/{record_id}","name":"catalog-record-delete","access":"signed-admin","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification","name":"runtime-certification","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification/readiness","name":"runtime-certification-readiness","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/runtime-certification/evaluate","name":"runtime-certification-evaluate","access":"signed-service","stability":"stable"},
@@ -91,6 +97,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "release-engineering": {"resources":["manifest","preflight","rollback","artifact-integrity"],"direct_api":True,"authority":"library-service"},
     "client-framework": {"resources":["python-sdk","javascript-client","typescript-contracts","signed-requests","retries","cross-product-adapters"],"direct_api":True,"authority":"library-service"},
     "python-domain-authority": {"resources":["domain-registry","php-retirement-policy","migration-plan","authority-readiness"],"direct_api":True,"authority":"python-backend"},
+    "catalog-domain": {"resources":["catalog-contract","catalog-write","research-object","record-revisioning","publication-state"],"direct_api":True,"authority":"python-backend"},
     "runtime-certification": {"resources":["wordpress-failure","runtime-probes","certification"],"direct_api":True,"authority":"library-service"},
 }
 
@@ -184,8 +191,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "5.69.0",
-        "backend_version": "2.80.0",
+        "library_version": "5.70.0",
+        "backend_version": "2.81.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -240,8 +247,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "5.69.0",
-        "backend_version": "2.80.0",
+        "library_version": "5.70.0",
+        "backend_version": "2.81.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

@@ -1,6 +1,6 @@
 {
   "schema": "sc-library-php-domain-retirement-inventory/1.0",
-  "library_version": "5.69.0",
+  "library_version": "5.70.0",
   "policy": "New PHP files require explicit inventory classification; new research/domain authority belongs in Python by default.",
   "categories": [
     "wordpress-integration",
@@ -866,7 +866,7 @@
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-wordpress-thin-adapter.php",
       "classification": "wordpress-integration",
-      "bytes": 5048,
+      "bytes": 5103,
       "justification": "WordPress lifecycle, API bridge, routing, status, or compatibility adapter."
     },
     {

@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 final class SC_Library_WordPress_Thin_Adapter {
-    public const VERSION = '5.69.0';
+    public const VERSION = '5.70.0';
     public const SCHEMA = 'sc-library-wordpress-thin-adapter/1.0';
     public const ROLE = 'thin-adapter';
 
@@ -33,6 +33,7 @@ final class SC_Library_WordPress_Thin_Adapter {
                 'api-client-adaptation',
             ],
             'prohibited_authorities' => [
+                'publication-catalog-write-authority',
                 'domain-logic-authority',
                 'research-object-authority',
                 'research-execution-authority',

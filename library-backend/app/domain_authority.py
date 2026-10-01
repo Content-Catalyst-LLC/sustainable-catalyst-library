@@ -3,8 +3,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "5.69.0"
-BACKEND_VERSION = "2.80.0"
+LIBRARY_VERSION = "5.70.0"
+BACKEND_VERSION = "2.81.0"
 CONTRACT = "sc-library-python-domain-authority/1.0"
 READINESS_CONTRACT = "sc-library-python-domain-authority-readiness/1.0"
 MIGRATION_PLAN_CONTRACT = "sc-library-python-domain-migration-plan/1.0"
@@ -12,7 +12,7 @@ MIGRATION_PLAN_CONTRACT = "sc-library-python-domain-migration-plan/1.0"
 DOMAINS: dict[str, dict[str, Any]] = {
     "catalog-record-read": {
         "authority": "python-backend", "state": "authoritative",
-        "api": ["/api/library/v1/search", "/api/library/v1/records/{record_id}", "/api/library/v1/stats"],
+        "api": ["/api/library/v1/search", "/api/library/v1/records/{record_id}", "/api/library/v1/research-objects/{record_id}", "/api/library/v1/stats"],
         "wordpress_role": "presentation-and-linking-only",
     },
     "identity-session-access": {
@@ -31,8 +31,9 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "wordpress_role": "none-required",
     },
     "publication-catalog-write": {
-        "authority": "migration-pending", "state": "planned-v5.70",
-        "wordpress_role": "legacy-compatible-until-cutover",
+        "authority": "python-backend", "state": "authoritative",
+        "api": ["/api/library/v1/catalog", "/api/library/v1/admin/catalog/records", "/api/library/v1/research-objects/{record_id}"],
+        "wordpress_role": "presentation-and-api-client-only",
     },
     "research-projects-collections-saved-state": {
         "authority": "migration-pending", "state": "planned-v5.71",
@@ -108,7 +109,7 @@ def contract() -> dict[str, Any]:
         "contract_fingerprint_sha256": fp,
         "library_version": LIBRARY_VERSION,
         "backend_version": BACKEND_VERSION,
-        "state": "migration-foundation-ready",
+        "state": "migration-active",
         "default_domain_authority": "python-backend",
         "wordpress_role": "optional-thin-adapter",
         "authoritative_domains": authoritative,

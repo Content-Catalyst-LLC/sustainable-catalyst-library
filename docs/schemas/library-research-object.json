@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-research-object.json",
+  "title": "Sustainable Catalyst Library Research Object",
+  "type": "object",
+  "required": [
+    "schema",
+    "identity",
+    "source",
+    "publication",
+    "descriptive",
+    "content",
+    "metadata",
+    "authority"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-research-object/1.0"
+    },
+    "authority": {
+      "const": "python-backend"
+    },
+    "identity": {
+      "type": "object"
+    },
+    "source": {
+      "type": "object"
+    },
+    "publication": {
+      "type": "object"
+    },
+    "descriptive": {
+      "type": "object"
+    },
+    "content": {
+      "type": "object"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  }
+}
