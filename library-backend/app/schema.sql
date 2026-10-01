@@ -1305,3 +1305,29 @@ CREATE TABLE IF NOT EXISTS library_identity_events (
 );
 CREATE INDEX IF NOT EXISTS library_identity_events_identity_idx ON library_identity_events(identity_id,event_id DESC);
 
+-- Direct Cross-Product Library Service Integration (Library v5.64.0 / backend v2.75.0)
+-- Stores only non-secret service binding metadata. Credentials remain environment/secret-manager material.
+CREATE TABLE IF NOT EXISTS library_cross_product_service_bindings (
+    binding_id text PRIMARY KEY,
+    product_key text NOT NULL UNIQUE CHECK (product_key IN ('research-librarian','workspace','research-lab','workbench','decision-studio','site-intelligence')),
+    service_identity_id text REFERENCES library_identities(identity_id) ON DELETE SET NULL,
+    client_base_url text NOT NULL DEFAULT '',
+    status text NOT NULL DEFAULT 'active' CHECK (status IN ('active','disabled')),
+    capability_families jsonb NOT NULL DEFAULT '[]'::jsonb,
+    scopes jsonb NOT NULL DEFAULT '[]'::jsonb,
+    metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_cross_product_service_bindings_status_idx ON library_cross_product_service_bindings(status,product_key);
+
+CREATE TABLE IF NOT EXISTS library_cross_product_service_events (
+    event_id bigserial PRIMARY KEY,
+    binding_id text REFERENCES library_cross_product_service_bindings(binding_id) ON DELETE SET NULL,
+    product_key text NOT NULL,
+    event_type text NOT NULL,
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_cross_product_service_events_product_idx ON library_cross_product_service_events(product_key,event_id DESC);
+

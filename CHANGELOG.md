@@ -1,3 +1,12 @@
+# Changelog
+
+## 5.64.0 — Direct Cross-Product Library Service Integration
+- Added six first-class direct Library service consumer contracts.
+- Added cross-product readiness, product manifest, signed exchange validation, and admin binding APIs.
+- Added non-secret service binding persistence and event lineage.
+- Added service-principal/scoped-access expectations and product handoff contracts.
+- Preserved Library research-state authority, WordPress independence, and Platform Core governed-meaning boundary.
+
 ## v5.63.0 — Public Routing, SEO & Embed Bridge
 - Backend v2.74.0 publishes a canonical public routing contract, route-level indexing policy, record SEO descriptors, and sandboxed embed descriptors.
 - Library Web v1.2.0 moves from hash-only navigation to clean public paths while preserving the direct `/api/library/v1` backend path.

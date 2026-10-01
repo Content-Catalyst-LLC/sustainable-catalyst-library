@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cross-Product Service Binding",
+  "type": "object",
+  "required": [
+    "schema",
+    "binding_id",
+    "product_key",
+    "status",
+    "secret_material_persisted"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-cross-product-service-binding/1.0"
+    },
+    "binding_id": {
+      "type": "string"
+    },
+    "product_key": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "active",
+        "disabled"
+      ]
+    },
+    "secret_material_persisted": {
+      "const": false
+    }
+  }
+}

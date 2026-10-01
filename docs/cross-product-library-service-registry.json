@@ -1,0 +1,451 @@
+{
+  "api_version": "1.0",
+  "authority": "library-service",
+  "backend_version": "2.75.0",
+  "guardrails": {
+    "downstream_derivatives_may_have_downstream_ownership": true,
+    "downstream_products_are_library_authorities": false,
+    "downstream_products_may_mutate_library_state_without_scope": false,
+    "handoffs_preserve_source_ids_and_provenance": true,
+    "integration_readiness_implies_research_truth": false,
+    "library_auto_promotes_to_platform_core": false,
+    "library_object_ids_remain_library_owned": true,
+    "platform_core_owns_governed_research_meaning": true,
+    "products_call_library_api_directly": true,
+    "service_bindings_persist_no_secret_material": true,
+    "service_credentials_are_never_returned_by_contract": true,
+    "wordpress_required_for_cross_product_calls": false
+  },
+  "library_version": "5.64.0",
+  "platform_core_boundary": "governed-research-meaning-and-exchange",
+  "product_count": 6,
+  "products": {
+    "decision-studio": {
+      "api_version": "1.0",
+      "authoritative_for_library_state": false,
+      "backend_version": "2.75.0",
+      "base_path": "/api/library/v1",
+      "capability_families": [
+        "discovery",
+        "artifacts",
+        "transparency",
+        "cross-civilizational",
+        "platform-core"
+      ],
+      "direct_library_api": true,
+      "display_name": "Decision Studio",
+      "guardrails": {
+        "downstream_derivatives_may_have_downstream_ownership": true,
+        "downstream_products_are_library_authorities": false,
+        "downstream_products_may_mutate_library_state_without_scope": false,
+        "handoffs_preserve_source_ids_and_provenance": true,
+        "integration_readiness_implies_research_truth": false,
+        "library_auto_promotes_to_platform_core": false,
+        "library_object_ids_remain_library_owned": true,
+        "platform_core_owns_governed_research_meaning": true,
+        "products_call_library_api_directly": true,
+        "service_bindings_persist_no_secret_material": true,
+        "service_credentials_are_never_returned_by_contract": true,
+        "wordpress_required_for_cross_product_calls": false
+      },
+      "handoff_types": [
+        "record-reference",
+        "source-bundle",
+        "artifact-reference",
+        "evidence-context",
+        "core-handoff"
+      ],
+      "integration_id": "library-product-integration:decision-studio:d1d4e80b4e5bd3b1",
+      "library_version": "5.64.0",
+      "ownership": {
+        "downstream_derivative_objects": "decision-studio",
+        "governed_research_meaning": "platform-core",
+        "library_artifacts": "library",
+        "library_jobs": "library",
+        "library_records": "library"
+      },
+      "product_key": "decision-studio",
+      "required_scopes": [
+        "library:read",
+        "projects:read",
+        "artifacts:read"
+      ],
+      "role": "decision-support-client",
+      "schema": "sc-library-cross-product-client/1.0",
+      "service_principal_template": {
+        "credential_material_in_contract": false,
+        "credential_transport": "signed-service-request",
+        "handle": "sc-decision-studio",
+        "principal_type": "service",
+        "required_scopes": [
+          "library:read",
+          "projects:read",
+          "artifacts:read"
+        ],
+        "role": "service"
+      },
+      "wordpress_required": false
+    },
+    "research-lab": {
+      "api_version": "1.0",
+      "authoritative_for_library_state": false,
+      "backend_version": "2.75.0",
+      "base_path": "/api/library/v1",
+      "capability_families": [
+        "discovery",
+        "language",
+        "artifacts",
+        "research-execution",
+        "platform-core"
+      ],
+      "direct_library_api": true,
+      "display_name": "Research Lab",
+      "guardrails": {
+        "downstream_derivatives_may_have_downstream_ownership": true,
+        "downstream_products_are_library_authorities": false,
+        "downstream_products_may_mutate_library_state_without_scope": false,
+        "handoffs_preserve_source_ids_and_provenance": true,
+        "integration_readiness_implies_research_truth": false,
+        "library_auto_promotes_to_platform_core": false,
+        "library_object_ids_remain_library_owned": true,
+        "platform_core_owns_governed_research_meaning": true,
+        "products_call_library_api_directly": true,
+        "service_bindings_persist_no_secret_material": true,
+        "service_credentials_are_never_returned_by_contract": true,
+        "wordpress_required_for_cross_product_calls": false
+      },
+      "handoff_types": [
+        "record-reference",
+        "corpus-reference",
+        "artifact-reference",
+        "research-job",
+        "experiment-context",
+        "core-handoff"
+      ],
+      "integration_id": "library-product-integration:research-lab:f5fc337523b07186",
+      "library_version": "5.64.0",
+      "ownership": {
+        "downstream_derivative_objects": "research-lab",
+        "governed_research_meaning": "platform-core",
+        "library_artifacts": "library",
+        "library_jobs": "library",
+        "library_records": "library"
+      },
+      "product_key": "research-lab",
+      "required_scopes": [
+        "library:read",
+        "projects:read",
+        "projects:write",
+        "artifacts:read",
+        "artifacts:write",
+        "jobs:submit",
+        "service:execute"
+      ],
+      "role": "scientific-experimentation-client",
+      "schema": "sc-library-cross-product-client/1.0",
+      "service_principal_template": {
+        "credential_material_in_contract": false,
+        "credential_transport": "signed-service-request",
+        "handle": "sc-research-lab",
+        "principal_type": "service",
+        "required_scopes": [
+          "library:read",
+          "projects:read",
+          "projects:write",
+          "artifacts:read",
+          "artifacts:write",
+          "jobs:submit",
+          "service:execute"
+        ],
+        "role": "service"
+      },
+      "wordpress_required": false
+    },
+    "research-librarian": {
+      "api_version": "1.0",
+      "authoritative_for_library_state": false,
+      "backend_version": "2.75.0",
+      "base_path": "/api/library/v1",
+      "capability_families": [
+        "discovery",
+        "federation",
+        "language",
+        "transparency",
+        "cross-civilizational",
+        "artifacts"
+      ],
+      "direct_library_api": true,
+      "display_name": "Research Librarian AI",
+      "guardrails": {
+        "downstream_derivatives_may_have_downstream_ownership": true,
+        "downstream_products_are_library_authorities": false,
+        "downstream_products_may_mutate_library_state_without_scope": false,
+        "handoffs_preserve_source_ids_and_provenance": true,
+        "integration_readiness_implies_research_truth": false,
+        "library_auto_promotes_to_platform_core": false,
+        "library_object_ids_remain_library_owned": true,
+        "platform_core_owns_governed_research_meaning": true,
+        "products_call_library_api_directly": true,
+        "service_bindings_persist_no_secret_material": true,
+        "service_credentials_are_never_returned_by_contract": true,
+        "wordpress_required_for_cross_product_calls": false
+      },
+      "handoff_types": [
+        "record-reference",
+        "source-bundle",
+        "artifact-reference",
+        "research-job",
+        "project-context"
+      ],
+      "integration_id": "library-product-integration:research-librarian:05f9e3892b21d4cd",
+      "library_version": "5.64.0",
+      "ownership": {
+        "downstream_derivative_objects": "research-librarian",
+        "governed_research_meaning": "platform-core",
+        "library_artifacts": "library",
+        "library_jobs": "library",
+        "library_records": "library"
+      },
+      "product_key": "research-librarian",
+      "required_scopes": [
+        "library:read",
+        "private:read",
+        "projects:read",
+        "artifacts:read",
+        "jobs:submit"
+      ],
+      "role": "research-discovery-and-guidance-client",
+      "schema": "sc-library-cross-product-client/1.0",
+      "service_principal_template": {
+        "credential_material_in_contract": false,
+        "credential_transport": "signed-service-request",
+        "handle": "sc-research-librarian",
+        "principal_type": "service",
+        "required_scopes": [
+          "library:read",
+          "private:read",
+          "projects:read",
+          "artifacts:read",
+          "jobs:submit"
+        ],
+        "role": "service"
+      },
+      "wordpress_required": false
+    },
+    "site-intelligence": {
+      "api_version": "1.0",
+      "authoritative_for_library_state": false,
+      "backend_version": "2.75.0",
+      "base_path": "/api/library/v1",
+      "capability_families": [
+        "discovery",
+        "federation",
+        "artifacts",
+        "platform-core"
+      ],
+      "direct_library_api": true,
+      "display_name": "Site Intelligence",
+      "guardrails": {
+        "downstream_derivatives_may_have_downstream_ownership": true,
+        "downstream_products_are_library_authorities": false,
+        "downstream_products_may_mutate_library_state_without_scope": false,
+        "handoffs_preserve_source_ids_and_provenance": true,
+        "integration_readiness_implies_research_truth": false,
+        "library_auto_promotes_to_platform_core": false,
+        "library_object_ids_remain_library_owned": true,
+        "platform_core_owns_governed_research_meaning": true,
+        "products_call_library_api_directly": true,
+        "service_bindings_persist_no_secret_material": true,
+        "service_credentials_are_never_returned_by_contract": true,
+        "wordpress_required_for_cross_product_calls": false
+      },
+      "handoff_types": [
+        "record-reference",
+        "source-bundle",
+        "artifact-reference",
+        "geospatial-context",
+        "core-handoff"
+      ],
+      "integration_id": "library-product-integration:site-intelligence:00a13b6d9090e167",
+      "library_version": "5.64.0",
+      "ownership": {
+        "downstream_derivative_objects": "site-intelligence",
+        "governed_research_meaning": "platform-core",
+        "library_artifacts": "library",
+        "library_jobs": "library",
+        "library_records": "library"
+      },
+      "product_key": "site-intelligence",
+      "required_scopes": [
+        "library:read",
+        "projects:read",
+        "artifacts:read",
+        "service:execute"
+      ],
+      "role": "geospatial-and-country-intelligence-client",
+      "schema": "sc-library-cross-product-client/1.0",
+      "service_principal_template": {
+        "credential_material_in_contract": false,
+        "credential_transport": "signed-service-request",
+        "handle": "sc-site-intelligence",
+        "principal_type": "service",
+        "required_scopes": [
+          "library:read",
+          "projects:read",
+          "artifacts:read",
+          "service:execute"
+        ],
+        "role": "service"
+      },
+      "wordpress_required": false
+    },
+    "workbench": {
+      "api_version": "1.0",
+      "authoritative_for_library_state": false,
+      "backend_version": "2.75.0",
+      "base_path": "/api/library/v1",
+      "capability_families": [
+        "discovery",
+        "artifacts",
+        "research-execution",
+        "platform-core"
+      ],
+      "direct_library_api": true,
+      "display_name": "Workbench",
+      "guardrails": {
+        "downstream_derivatives_may_have_downstream_ownership": true,
+        "downstream_products_are_library_authorities": false,
+        "downstream_products_may_mutate_library_state_without_scope": false,
+        "handoffs_preserve_source_ids_and_provenance": true,
+        "integration_readiness_implies_research_truth": false,
+        "library_auto_promotes_to_platform_core": false,
+        "library_object_ids_remain_library_owned": true,
+        "platform_core_owns_governed_research_meaning": true,
+        "products_call_library_api_directly": true,
+        "service_bindings_persist_no_secret_material": true,
+        "service_credentials_are_never_returned_by_contract": true,
+        "wordpress_required_for_cross_product_calls": false
+      },
+      "handoff_types": [
+        "record-reference",
+        "artifact-reference",
+        "research-job",
+        "runtime-handoff",
+        "core-handoff"
+      ],
+      "integration_id": "library-product-integration:workbench:e4300ce37ecf5742",
+      "library_version": "5.64.0",
+      "ownership": {
+        "downstream_derivative_objects": "workbench",
+        "governed_research_meaning": "platform-core",
+        "library_artifacts": "library",
+        "library_jobs": "library",
+        "library_records": "library"
+      },
+      "product_key": "workbench",
+      "required_scopes": [
+        "library:read",
+        "projects:read",
+        "artifacts:read",
+        "artifacts:write",
+        "jobs:submit",
+        "service:execute"
+      ],
+      "role": "scientific-compute-and-prototyping-client",
+      "schema": "sc-library-cross-product-client/1.0",
+      "service_principal_template": {
+        "credential_material_in_contract": false,
+        "credential_transport": "signed-service-request",
+        "handle": "sc-workbench",
+        "principal_type": "service",
+        "required_scopes": [
+          "library:read",
+          "projects:read",
+          "artifacts:read",
+          "artifacts:write",
+          "jobs:submit",
+          "service:execute"
+        ],
+        "role": "service"
+      },
+      "wordpress_required": false
+    },
+    "workspace": {
+      "api_version": "1.0",
+      "authoritative_for_library_state": false,
+      "backend_version": "2.75.0",
+      "base_path": "/api/library/v1",
+      "capability_families": [
+        "discovery",
+        "artifacts",
+        "research-execution",
+        "platform-core"
+      ],
+      "direct_library_api": true,
+      "display_name": "Workspace",
+      "guardrails": {
+        "downstream_derivatives_may_have_downstream_ownership": true,
+        "downstream_products_are_library_authorities": false,
+        "downstream_products_may_mutate_library_state_without_scope": false,
+        "handoffs_preserve_source_ids_and_provenance": true,
+        "integration_readiness_implies_research_truth": false,
+        "library_auto_promotes_to_platform_core": false,
+        "library_object_ids_remain_library_owned": true,
+        "platform_core_owns_governed_research_meaning": true,
+        "products_call_library_api_directly": true,
+        "service_bindings_persist_no_secret_material": true,
+        "service_credentials_are_never_returned_by_contract": true,
+        "wordpress_required_for_cross_product_calls": false
+      },
+      "handoff_types": [
+        "record-reference",
+        "artifact-reference",
+        "research-job",
+        "runtime-handoff",
+        "project-context",
+        "core-handoff"
+      ],
+      "integration_id": "library-product-integration:workspace:50bbec621ebdafce",
+      "library_version": "5.64.0",
+      "ownership": {
+        "downstream_derivative_objects": "workspace",
+        "governed_research_meaning": "platform-core",
+        "library_artifacts": "library",
+        "library_jobs": "library",
+        "library_records": "library"
+      },
+      "product_key": "workspace",
+      "required_scopes": [
+        "library:read",
+        "projects:read",
+        "projects:write",
+        "artifacts:read",
+        "artifacts:write",
+        "jobs:submit",
+        "service:execute"
+      ],
+      "role": "compute-and-reproducibility-client",
+      "schema": "sc-library-cross-product-client/1.0",
+      "service_principal_template": {
+        "credential_material_in_contract": false,
+        "credential_transport": "signed-service-request",
+        "handle": "sc-workspace",
+        "principal_type": "service",
+        "required_scopes": [
+          "library:read",
+          "projects:read",
+          "projects:write",
+          "artifacts:read",
+          "artifacts:write",
+          "jobs:submit",
+          "service:execute"
+        ],
+        "role": "service"
+      },
+      "wordpress_required": false
+    }
+  },
+  "registry_fingerprint_sha256": "22e58d1a5a2de26f2a4999960b7ffa7bba459ae0b0204dc6398c5a2fb34b5e9e",
+  "registry_id": "library-cross-product-registry:22e58d1a5a2de26f2a4999960b7ffa7b",
+  "schema": "sc-library-cross-product-service-integration/1.0"
+}

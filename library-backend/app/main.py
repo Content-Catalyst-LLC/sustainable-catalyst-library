@@ -179,6 +179,11 @@ from .independent_api import (
 from .web_application import application_contract as library_web_application_contract, readiness as library_web_readiness
 from .wordpress_thin_adapter import contract as wordpress_thin_adapter_contract, readiness as wordpress_thin_adapter_readiness
 from .public_routing import contract as public_routing_contract, readiness as public_routing_readiness, record_seo_descriptor, record_embed_descriptor
+from .cross_product_integration import (
+    registry_contract as cross_product_registry_contract, readiness as cross_product_integration_readiness,
+    product_contract as cross_product_product_contract, validate_exchange as validate_cross_product_exchange,
+    persist_binding as persist_cross_product_binding,
+)
 from .identity_access import (
     COOKIE_NAME as LIBRARY_SESSION_COOKIE, access_decision as library_access_decision, authenticate_password as library_authenticate_password,
     bind_role as library_bind_role, boundary_contract as library_identity_boundary_contract, create_access_grant as library_create_access_grant,
@@ -666,6 +671,10 @@ def health() -> dict[str, Any]:
             "wordpress_thin_adapter_backend_contract": True,
             "wordpress_thin_adapter_research_authority": False,
             "direct_library_api_clients": True,
+            "direct_cross_product_library_service_integration": True,
+            "cross_product_client_count": 6,
+            "cross_product_wordpress_required": False,
+            "cross_product_downstream_library_authority": False,
             "independent_library_web_application": True,
             "library_web_version": "1.2.0",
             "library_web_direct_api_v1": True,
@@ -2744,11 +2753,11 @@ async def cross_language_resolution_decision_ingest(
 
 
 
-# Knowledge Library v5.63.0 — Public Routing, SEO & Embed Bridge
+# Knowledge Library v5.64.0 — Direct Cross-Product Library Service Integration
 @app.get("/api/library/v1")
 def library_api_v1_root() -> dict[str, Any]:
     c = library_api_service_contract()
-    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.63.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes"}}
+    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.64.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes","integrations":"/api/library/v1/integrations"}}
 
 @app.get("/api/library/v1/service")
 def library_api_v1_service() -> dict[str, Any]: return library_api_service_contract()
@@ -2756,7 +2765,7 @@ def library_api_v1_service() -> dict[str, Any]: return library_api_service_contr
 @app.get("/api/library/v1/health")
 def library_api_v1_health() -> dict[str, Any]:
     db_state, detail = database_state()
-    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.63.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
+    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.64.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
 
 @app.get("/api/library/v1/readiness")
 def library_api_v1_readiness() -> dict[str, Any]: return library_api_readiness()
@@ -2811,6 +2820,35 @@ def library_api_v1_wordpress_adapter() -> dict[str, Any]: return wordpress_thin_
 @app.get("/api/library/v1/wordpress-adapter/readiness")
 def library_api_v1_wordpress_adapter_readiness() -> dict[str, Any]: return wordpress_thin_adapter_readiness()
 
+
+@app.get("/api/library/v1/integrations")
+def library_api_v1_integrations() -> dict[str, Any]: return cross_product_registry_contract()
+
+@app.get("/api/library/v1/integrations/readiness")
+def library_api_v1_integrations_readiness() -> dict[str, Any]: return cross_product_integration_readiness()
+
+@app.get("/api/library/v1/integrations/{product_key}")
+def library_api_v1_integration_product(product_key: str) -> dict[str, Any]:
+    try: return cross_product_product_contract(product_key)
+    except KeyError as exc: raise HTTPException(status_code=404, detail=library_api_error_envelope("integration-not-found","Cross-product integration not found",status=404)) from exc
+
+@app.post("/api/library/v1/integrations/{product_key}/exchange/validate")
+async def library_api_v1_integration_validate(product_key: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return validate_cross_product_exchange(product_key,payload)
+    except KeyError as exc: raise HTTPException(status_code=404, detail=library_api_error_envelope("integration-not-found","Cross-product integration not found",status=404)) from exc
+    except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/integrations/{product_key}/bindings")
+async def library_api_v1_integration_binding(product_key: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return persist_cross_product_binding(product_key,payload)
+    except KeyError as exc: raise HTTPException(status_code=404, detail=library_api_error_envelope("integration-not-found","Cross-product integration not found",status=404)) from exc
+    except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 @app.get("/api/library/v1/public-routing")
 def library_api_v1_public_routing() -> dict[str, Any]: return public_routing_contract()

@@ -380,6 +380,105 @@
           }
         ]
       }
+    },
+    "/integrations": {
+      "get": {
+        "summary": "List direct Sustainable Catalyst product integrations",
+        "responses": {
+          "200": {
+            "description": "Cross-product service registry"
+          }
+        }
+      }
+    },
+    "/integrations/readiness": {
+      "get": {
+        "summary": "Cross-product integration readiness",
+        "responses": {
+          "200": {
+            "description": "Integration readiness"
+          }
+        }
+      }
+    },
+    "/integrations/{product_key}": {
+      "get": {
+        "summary": "Get one product service contract",
+        "parameters": [
+          {
+            "name": "product_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product client contract"
+          },
+          "404": {
+            "description": "Unknown product"
+          }
+        }
+      }
+    },
+    "/integrations/{product_key}/exchange/validate": {
+      "post": {
+        "summary": "Validate a scoped cross-product exchange",
+        "security": [
+          {
+            "signedService": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exchange validation"
+          },
+          "404": {
+            "description": "Unknown product"
+          }
+        }
+      }
+    },
+    "/admin/integrations/{product_key}/bindings": {
+      "post": {
+        "summary": "Persist non-secret product service binding metadata",
+        "security": [
+          {
+            "signedService": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Service binding"
+          },
+          "404": {
+            "description": "Unknown product"
+          }
+        }
+      }
     }
   },
   "components": {

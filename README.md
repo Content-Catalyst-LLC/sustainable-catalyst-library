@@ -1,4 +1,6 @@
-> Current patch: **v5.61.0.1 — Library Web Port Allocation & Deployment Collision Repair**
+# Sustainable Catalyst Knowledge Library
+
+Current release: **v5.64.0 — Direct Cross-Product Library Service Integration**. The authoritative Library API can now be consumed directly by Research Librarian AI, Workspace, Research Lab, Workbench, Decision Studio, and Site Intelligence through machine-readable service contracts and scoped handoff rules.
 
 # Sustainable Catalyst Knowledge Library
 

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cross-Product Exchange Validation",
+  "type": "object",
+  "required": [
+    "schema",
+    "product_key",
+    "valid",
+    "errors",
+    "contract"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-cross-product-exchange-validation/1.0"
+    },
+    "product_key": {
+      "type": "string"
+    },
+    "valid": {
+      "type": "boolean"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "contract": {
+      "type": "object"
+    }
+  }
+}

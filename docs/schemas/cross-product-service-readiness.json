@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cross-Product Library Service Readiness",
+  "type": "object",
+  "required": [
+    "schema",
+    "state",
+    "product_count",
+    "products",
+    "wordpress_required"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-cross-product-service-readiness/1.0"
+    },
+    "state": {
+      "enum": [
+        "ready",
+        "blocked"
+      ]
+    },
+    "product_count": {
+      "type": "integer"
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "wordpress_required": {
+      "const": false
+    }
+  }
+}

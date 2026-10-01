@@ -40,6 +40,7 @@ CLIENT_ADAPTERS: dict[str, dict[str, Any]] = {
     "research-lab": {"role": "service-client", "authoritative": False, "required_for_research_execution": False},
     "workbench": {"role": "service-client", "authoritative": False, "required_for_research_execution": False},
     "site-intelligence": {"role": "service-client", "authoritative": False, "required_for_research_execution": False},
+    "decision-studio": {"role": "service-client", "authoritative": False, "required_for_research_execution": False},
 }
 
 RESEARCH_OBJECT_OWNERSHIP = {

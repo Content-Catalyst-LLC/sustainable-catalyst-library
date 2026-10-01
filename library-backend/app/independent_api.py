@@ -35,6 +35,11 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"GET","path":"/api/library/v1/identity/readiness","name":"identity-readiness","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/wordpress-adapter","name":"wordpress-thin-adapter","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/wordpress-adapter/readiness","name":"wordpress-thin-adapter-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/integrations","name":"cross-product-integrations","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/integrations/readiness","name":"cross-product-integration-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/integrations/{product_key}","name":"cross-product-client-contract","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/integrations/{product_key}/exchange/validate","name":"cross-product-exchange-validate","access":"signed-service","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/integrations/{product_key}/bindings","name":"cross-product-binding-upsert","access":"signed-admin","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/public-routing","name":"public-routing-bridge","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/public-routing/readiness","name":"public-routing-readiness","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/seo/records/{record_id}","name":"record-seo-descriptor","access":"public","stability":"stable"},
@@ -64,6 +69,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "identity-access": {"resources":["identities","sessions","roles","access-grants"],"direct_api":True,"authority":"library-service"},
     "wordpress-adapter": {"resources":["routing","seo","embeds","health","identity-handoff","legacy-presentation"],"direct_api":True,"authority":"client-adapter"},
     "public-web": {"resources":["canonical-routing","record-seo","launch-links","record-embeds","public-origin"],"direct_api":True,"authority":"library-service-contract"},
+    "cross-product-integration": {"resources":["research-librarian","workspace","research-lab","workbench","decision-studio","site-intelligence"],"direct_api":True,"authority":"library-service"},
 }
 
 
@@ -157,8 +163,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "5.63.0",
-        "backend_version": "2.74.0",
+        "library_version": "5.64.0",
+        "backend_version": "2.75.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -213,8 +219,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "5.63.0",
-        "backend_version": "2.74.0",
+        "library_version": "5.64.0",
+        "backend_version": "2.75.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

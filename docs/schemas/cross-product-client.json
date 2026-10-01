@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cross-Product Library Client",
+  "type": "object",
+  "required": [
+    "schema",
+    "product_key",
+    "direct_library_api",
+    "capability_families",
+    "required_scopes",
+    "handoff_types"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-cross-product-client/1.0"
+    },
+    "product_key": {
+      "type": "string"
+    },
+    "direct_library_api": {
+      "const": true
+    },
+    "capability_families": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_scopes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "handoff_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
