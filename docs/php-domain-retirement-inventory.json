@@ -1,0 +1,885 @@
+{
+  "schema": "sc-library-php-domain-retirement-inventory/1.0",
+  "library_version": "5.69.0",
+  "policy": "New PHP files require explicit inventory classification; new research/domain authority belongs in Python by default.",
+  "categories": [
+    "wordpress-integration",
+    "presentation",
+    "retire-candidate",
+    "legacy"
+  ],
+  "summary": {
+    "php_include_files": 144,
+    "adapter_or_presentation_files": 15,
+    "retire_candidate_files": 129,
+    "retirement_score_percent": 10.42,
+    "adapter_aligned_bytes_percent": 9.84,
+    "metric_note": "Migration progress indicator only; not a quality or security score."
+  },
+  "entries": [
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-access-intelligence-ii.php",
+      "classification": "retire-candidate",
+      "bytes": 26911,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-activator.php",
+      "classification": "wordpress-integration",
+      "bytes": 59529,
+      "justification": "WordPress lifecycle, API bridge, routing, status, or compatibility adapter."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-admin.php",
+      "classification": "wordpress-integration",
+      "bytes": 59184,
+      "justification": "WordPress lifecycle, API bridge, routing, status, or compatibility adapter."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-annotations.php",
+      "classification": "retire-candidate",
+      "bytes": 9054,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-api-embeds-interoperability.php",
+      "classification": "retire-candidate",
+      "bytes": 20421,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-api-v1.php",
+      "classification": "wordpress-integration",
+      "bytes": 1939,
+      "justification": "WordPress lifecycle, API bridge, routing, status, or compatibility adapter."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-artifact-storage.php",
+      "classification": "retire-candidate",
+      "bytes": 2470,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-biomedical-evidence-grading.php",
+      "classification": "retire-candidate",
+      "bytes": 6170,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-biomedical-evidence-graph.php",
+      "classification": "retire-candidate",
+      "bytes": 8134,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-biomedical-evidence.php",
+      "classification": "retire-candidate",
+      "bytes": 6740,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-boards.php",
+      "classification": "retire-candidate",
+      "bytes": 10589,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-books.php",
+      "classification": "retire-candidate",
+      "bytes": 12985,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-canonical-route-identity.php",
+      "classification": "retire-candidate",
+      "bytes": 13378,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-capability-hub.php",
+      "classification": "retire-candidate",
+      "bytes": 24343,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-carbon-nature-intelligence.php",
+      "classification": "retire-candidate",
+      "bytes": 35301,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-citation-source-manager.php",
+      "classification": "retire-candidate",
+      "bytes": 161744,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-citation-source-reliability.php",
+      "classification": "retire-candidate",
+      "bytes": 47209,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-citation-studio.php",
+      "classification": "retire-candidate",
+      "bytes": 45928,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-clinical-trial-intelligence.php",
+      "classification": "retire-candidate",
+      "bytes": 9868,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-collaboration.php",
+      "classification": "retire-candidate",
+      "bytes": 64084,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-collaborative-research-rooms.php",
+      "classification": "retire-candidate",
+      "bytes": 40311,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-collaborative-review-publishing.php",
+      "classification": "retire-candidate",
+      "bytes": 139745,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-compute-broker.php",
+      "classification": "retire-candidate",
+      "bytes": 2206,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-connected-institutional-platform.php",
+      "classification": "retire-candidate",
+      "bytes": 124106,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-connected-public-research-infrastructure.php",
+      "classification": "retire-candidate",
+      "bytes": 40612,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-connected-research-environment.php",
+      "classification": "retire-candidate",
+      "bytes": 105395,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-connected-research-reliability.php",
+      "classification": "retire-candidate",
+      "bytes": 59388,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-connector-holdings-reliability.php",
+      "classification": "retire-candidate",
+      "bytes": 74504,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-cross-civilizational-linking.php",
+      "classification": "retire-candidate",
+      "bytes": 1743,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-cross-language-resolution.php",
+      "classification": "retire-candidate",
+      "bytes": 2740,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-cross-product-research-handoffs.php",
+      "classification": "retire-candidate",
+      "bytes": 113242,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-cross-product-service-integration.php",
+      "classification": "retire-candidate",
+      "bytes": 1540,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-developer-api.php",
+      "classification": "retire-candidate",
+      "bytes": 88310,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-discovery-interface-reliability.php",
+      "classification": "retire-candidate",
+      "bytes": 5051,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-document-ocr-processing.php",
+      "classification": "retire-candidate",
+      "bytes": 123754,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-document-ocr-reliability.php",
+      "classification": "retire-candidate",
+      "bytes": 30094,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-document-production.php",
+      "classification": "retire-candidate",
+      "bytes": 36319,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-document-public-repository.php",
+      "classification": "retire-candidate",
+      "bytes": 84613,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-document-repository-hardening.php",
+      "classification": "retire-candidate",
+      "bytes": 5083,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-documentation.php",
+      "classification": "retire-candidate",
+      "bytes": 46157,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-dynamic-explorer.php",
+      "classification": "retire-candidate",
+      "bytes": 18678,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-editor.php",
+      "classification": "retire-candidate",
+      "bytes": 27302,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-energy-systems-intelligence.php",
+      "classification": "retire-candidate",
+      "bytes": 90150,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-evidence-claim-linking.php",
+      "classification": "retire-candidate",
+      "bytes": 151094,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-evidence-matrix-claim-intelligence.php",
+      "classification": "retire-candidate",
+      "bytes": 54517,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-execution-fabric.php",
+      "classification": "retire-candidate",
+      "bytes": 2428,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-execution-lineage.php",
+      "classification": "retire-candidate",
+      "bytes": 3206,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-extension-bootstrap-v402.php",
+      "classification": "retire-candidate",
+      "bytes": 9222,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-fda-regulatory-intelligence.php",
+      "classification": "retire-candidate",
+      "bytes": 6869,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-field-spotlights.php",
+      "classification": "presentation",
+      "bytes": 76856,
+      "justification": "WordPress presentation surface; must not become research/domain authority."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-foundation-documents.php",
+      "classification": "retire-candidate",
+      "bytes": 56925,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-foundation-pages.php",
+      "classification": "presentation",
+      "bytes": 53776,
+      "justification": "WordPress presentation surface; must not become research/domain authority."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-foundation-system-v200.php",
+      "classification": "retire-candidate",
+      "bytes": 60584,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-foundations-first-edition-v210.php",
+      "classification": "retire-candidate",
+      "bytes": 25659,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-global-knowledge-federation.php",
+      "classification": "retire-candidate",
+      "bytes": 2041,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-global-research-discovery-federated-search.php",
+      "classification": "retire-candidate",
+      "bytes": 22342,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-global-research-federation.php",
+      "classification": "retire-candidate",
+      "bytes": 46754,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-global-source-federation-registry.php",
+      "classification": "retire-candidate",
+      "bytes": 4345,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-hardening.php",
+      "classification": "retire-candidate",
+      "bytes": 76330,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-homepage-console.php",
+      "classification": "presentation",
+      "bytes": 14544,
+      "justification": "WordPress presentation surface; must not become research/domain authority."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-homepage-spotlight.php",
+      "classification": "presentation",
+      "bytes": 102436,
+      "justification": "WordPress presentation surface; must not become research/domain authority."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-identity-access.php",
+      "classification": "retire-candidate",
+      "bytes": 652,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-indexer.php",
+      "classification": "retire-candidate",
+      "bytes": 34530,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-ingestion-job-fabric.php",
+      "classification": "retire-candidate",
+      "bytes": 2391,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-institutional-collections-archives.php",
+      "classification": "retire-candidate",
+      "bytes": 142031,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-institutional-connector-expansion.php",
+      "classification": "retire-candidate",
+      "bytes": 15105,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-institutional-research-network.php",
+      "classification": "retire-candidate",
+      "bytes": 10928,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-institutional-research-sources.php",
+      "classification": "retire-candidate",
+      "bytes": 8603,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-institutional-team-libraries.php",
+      "classification": "retire-candidate",
+      "bytes": 36070,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-integrations.php",
+      "classification": "retire-candidate",
+      "bytes": 18514,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-knowledge-graph-evidence-intelligence.php",
+      "classification": "retire-candidate",
+      "bytes": 36263,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-knowledge-graph.php",
+      "classification": "retire-candidate",
+      "bytes": 85176,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-knowledge-landscape.php",
+      "classification": "retire-candidate",
+      "bytes": 45332,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-knowledge-pathways-article-maps.php",
+      "classification": "retire-candidate",
+      "bytes": 105822,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-linguistic-corpus.php",
+      "classification": "retire-candidate",
+      "bytes": 3417,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-literature-review.php",
+      "classification": "retire-candidate",
+      "bytes": 2929,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-living-evidence.php",
+      "classification": "retire-candidate",
+      "bytes": 2819,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-medical-terminology.php",
+      "classification": "retire-candidate",
+      "bytes": 5903,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-metadata-quality-entity-resolution.php",
+      "classification": "retire-candidate",
+      "bytes": 22662,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-methodology-intelligence.php",
+      "classification": "retire-candidate",
+      "bytes": 4992,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-multimedia.php",
+      "classification": "retire-candidate",
+      "bytes": 62926,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-native-graph-runtime.php",
+      "classification": "retire-candidate",
+      "bytes": 4288,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-notebook.php",
+      "classification": "retire-candidate",
+      "bytes": 18553,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-ocr-htr-transcription-lineage.php",
+      "classification": "retire-candidate",
+      "bytes": 3556,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-open-course-finder.php",
+      "classification": "retire-candidate",
+      "bytes": 53880,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-open-learning-ii.php",
+      "classification": "retire-candidate",
+      "bytes": 22813,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-orchestrator.php",
+      "classification": "retire-candidate",
+      "bytes": 68740,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-original-language-corpus.php",
+      "classification": "retire-candidate",
+      "bytes": 3217,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-pdf-bulk-import-repair.php",
+      "classification": "retire-candidate",
+      "bytes": 68824,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-pdf-conversion-reliability.php",
+      "classification": "retire-candidate",
+      "bytes": 49724,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-pdf-to-document.php",
+      "classification": "retire-candidate",
+      "bytes": 63739,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-personal-collections-recommendations.php",
+      "classification": "retire-candidate",
+      "bytes": 32858,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-pipeline-engine.php",
+      "classification": "retire-candidate",
+      "bytes": 2127,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-planner.php",
+      "classification": "retire-candidate",
+      "bytes": 81697,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-planning-analytics.php",
+      "classification": "retire-candidate",
+      "bytes": 53553,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-portability.php",
+      "classification": "retire-candidate",
+      "bytes": 157103,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-preservation.php",
+      "classification": "retire-candidate",
+      "bytes": 72133,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-private-organizational-knowledge.php",
+      "classification": "retire-candidate",
+      "bytes": 22744,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-public-api-export-federation.php",
+      "classification": "retire-candidate",
+      "bytes": 119181,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-public-evidence-claim-navigation.php",
+      "classification": "retire-candidate",
+      "bytes": 32459,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-public-interface-assets.php",
+      "classification": "presentation",
+      "bytes": 2360,
+      "justification": "WordPress presentation surface; must not become research/domain authority."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-public-library-network.php",
+      "classification": "retire-candidate",
+      "bytes": 20194,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-public-routing-bridge.php",
+      "classification": "wordpress-integration",
+      "bytes": 4556,
+      "justification": "WordPress lifecycle, API bridge, routing, status, or compatibility adapter."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-publication-visualizations.php",
+      "classification": "retire-candidate",
+      "bytes": 8386,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-publications-research-graph.php",
+      "classification": "retire-candidate",
+      "bytes": 31734,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-publications.php",
+      "classification": "retire-candidate",
+      "bytes": 51412,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-python-backend.php",
+      "classification": "wordpress-integration",
+      "bytes": 142089,
+      "justification": "WordPress lifecycle, API bridge, routing, status, or compatibility adapter."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-python-operations.php",
+      "classification": "retire-candidate",
+      "bytes": 16456,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-reading-notebook-annotations.php",
+      "classification": "retire-candidate",
+      "bytes": 71772,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-relationships.php",
+      "classification": "retire-candidate",
+      "bytes": 11232,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-research-collections-curated-spaces.php",
+      "classification": "retire-candidate",
+      "bytes": 38369,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-research-corpus-builder.php",
+      "classification": "retire-candidate",
+      "bytes": 3449,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-research-document-builder.php",
+      "classification": "retire-candidate",
+      "bytes": 51893,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-research-gap-novelty.php",
+      "classification": "retire-candidate",
+      "bytes": 4166,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-research-identity-authority-network.php",
+      "classification": "retire-candidate",
+      "bytes": 32277,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-research-librarian-access-intelligence.php",
+      "classification": "retire-candidate",
+      "bytes": 29891,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-research-librarian-document-intelligence.php",
+      "classification": "retire-candidate",
+      "bytes": 131250,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-research-librarian-project-aware-guidance.php",
+      "classification": "retire-candidate",
+      "bytes": 30827,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-research-network-console.php",
+      "classification": "retire-candidate",
+      "bytes": 14520,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-research-portability-preservation.php",
+      "classification": "retire-candidate",
+      "bytes": 21454,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-research-quality-governance.php",
+      "classification": "retire-candidate",
+      "bytes": 139474,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-rest.php",
+      "classification": "wordpress-integration",
+      "bytes": 40410,
+      "justification": "WordPress lifecycle, API bridge, routing, status, or compatibility adapter."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-retrieval-evaluation.php",
+      "classification": "retire-candidate",
+      "bytes": 5457,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-runtime-authority.php",
+      "classification": "retire-candidate",
+      "bytes": 2889,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-runtime-certification.php",
+      "classification": "wordpress-integration",
+      "bytes": 962,
+      "justification": "WordPress lifecycle, API bridge, routing, status, or compatibility adapter."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-saved-searches-watchlists-queue.php",
+      "classification": "retire-candidate",
+      "bytes": 35130,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-scanner.php",
+      "classification": "retire-candidate",
+      "bytes": 41346,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-scholarly-library-connectors.php",
+      "classification": "retire-candidate",
+      "bytes": 222295,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-shortcodes.php",
+      "classification": "presentation",
+      "bytes": 20504,
+      "justification": "WordPress presentation surface; must not become research/domain authority."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-source-transparency.php",
+      "classification": "retire-candidate",
+      "bytes": 2252,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-source-versioning-integrity.php",
+      "classification": "retire-candidate",
+      "bytes": 123118,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-state-migration.php",
+      "classification": "retire-candidate",
+      "bytes": 12445,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-taxonomies.php",
+      "classification": "retire-candidate",
+      "bytes": 5817,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-temporal-evolution.php",
+      "classification": "retire-candidate",
+      "bytes": 5288,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-topics-concepts-relationships.php",
+      "classification": "retire-candidate",
+      "bytes": 137840,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-translation-alignment.php",
+      "classification": "retire-candidate",
+      "bytes": 2554,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-unified-personal-research-environment.php",
+      "classification": "retire-candidate",
+      "bytes": 17963,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-unified-research-projects-source-bundles.php",
+      "classification": "retire-candidate",
+      "bytes": 60657,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-unified-runtime.php",
+      "classification": "retire-candidate",
+      "bytes": 3109,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-unified-system.php",
+      "classification": "retire-candidate",
+      "bytes": 45620,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-web-application.php",
+      "classification": "presentation",
+      "bytes": 730,
+      "justification": "WordPress presentation surface; must not become research/domain authority."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-wordpress-thin-adapter.php",
+      "classification": "wordpress-integration",
+      "bytes": 5048,
+      "justification": "WordPress lifecycle, API bridge, routing, status, or compatibility adapter."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-workspace-bidirectional-continuity.php",
+      "classification": "retire-candidate",
+      "bytes": 18327,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    },
+    {
+      "path": "sustainable-catalyst-library/includes/class-sc-library-workspaces.php",
+      "classification": "retire-candidate",
+      "bytes": 44275,
+      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+    }
+  ]
+}

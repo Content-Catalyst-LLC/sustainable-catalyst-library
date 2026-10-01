@@ -185,6 +185,7 @@ from .cross_product_integration import (
     persist_binding as persist_cross_product_binding,
 )
 from .client_framework import contract as library_client_framework_contract, readiness as library_client_framework_readiness
+from .domain_authority import contract as library_domain_authority_contract, readiness as library_domain_authority_readiness, migration_plan as library_domain_migration_plan
 from .runtime_independence import evaluate as evaluate_wordpress_failure_independence, readiness as wordpress_failure_independence_readiness
 from .release_engineering import release_manifest as library_release_manifest, readiness as library_release_engineering_readiness, validate_deployment_plan as validate_library_deployment_plan
 from .state_migration import (
@@ -421,6 +422,9 @@ def health() -> dict[str, Any]:
             "typescript_client_contracts": True,
             "cross_product_client_adapters": True,
             "library_api_v1_base_path": "/api/library/v1",
+            "python_domain_service_authority": True,
+            "wordpress_php_domain_authority": False,
+            "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
             "record_chunks": True,
@@ -2875,6 +2879,13 @@ async def library_api_v1_integration_binding(product_key: str, request: Request,
 def library_api_v1_client_framework() -> dict[str, Any]: return library_client_framework_contract()
 @app.get("/api/library/v1/client-framework/readiness")
 def library_api_v1_client_framework_readiness() -> dict[str, Any]: return library_client_framework_readiness()
+
+@app.get("/api/library/v1/domain-authority")
+def library_api_v1_domain_authority() -> dict[str, Any]: return library_domain_authority_contract()
+@app.get("/api/library/v1/domain-authority/readiness")
+def library_api_v1_domain_authority_readiness() -> dict[str, Any]: return library_domain_authority_readiness()
+@app.get("/api/library/v1/domain-authority/migration-plan")
+def library_api_v1_domain_migration_plan() -> dict[str, Any]: return library_domain_migration_plan()
 
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()

@@ -640,6 +640,36 @@
           }
         }
       }
+    },
+    "/domain-authority": {
+      "get": {
+        "operationId": "libraryPythonDomainAuthority",
+        "responses": {
+          "200": {
+            "description": "Python domain authority contract"
+          }
+        }
+      }
+    },
+    "/domain-authority/readiness": {
+      "get": {
+        "operationId": "libraryPythonDomainAuthorityReadiness",
+        "responses": {
+          "200": {
+            "description": "Python domain authority readiness"
+          }
+        }
+      }
+    },
+    "/domain-authority/migration-plan": {
+      "get": {
+        "operationId": "libraryPythonDomainMigrationPlan",
+        "responses": {
+          "200": {
+            "description": "Python domain migration sequence"
+          }
+        }
+      }
     }
   },
   "components": {

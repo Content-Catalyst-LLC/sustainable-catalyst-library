@@ -1,3 +1,14 @@
+## 5.69.0 — Python Domain Service Migration Foundation
+- Advances the Library backend to v2.80.0.
+- Declares Python/FastAPI as the default authority for Library domain behavior.
+- Adds `/api/library/v1/domain-authority`, `/domain-authority/readiness`, and `/domain-authority/migration-plan`.
+- Adds an explicit migration sequence through v5.80.0 and distinguishes already-authoritative Python domains from pending cutovers.
+- Adds a checked-in PHP retirement inventory; new PHP include files fail validation until explicitly classified.
+- Adds a PHP retirement progress metric without treating it as a quality/security score.
+- Tightens the WordPress thin-adapter contract to prohibit domain-logic authority while allowing presentation, routing, SEO, lifecycle and API-client adaptation.
+- Adds domain-authority readiness to WordPress-failure runtime certification.
+- Performs no destructive mass rewrite and introduces no database migration.
+
 ## 5.68.0 — Library SDK, Client & Integration Framework
 - Adds backend v2.79.0 client-framework discovery and readiness contracts.
 - Adds first-party Python SDK v0.1.0 with API v1 reads, signed writes, retries, error mapping, and six product adapters.

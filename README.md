@@ -1,5 +1,11 @@
 # Sustainable Catalyst Knowledge Library
 
+Current release: **v5.69.0 — Python Domain Service Migration Foundation**. Backend: **v2.80.0** · Python SDK: **v0.1.0** · JS/TS Client: **v0.1.0** · Library Web: **v1.2.0** · API: **v1.0**.
+
+This release makes Python/FastAPI the default authority for Library domain behavior, introduces a machine-readable domain-authority and migration-plan contract, establishes a checked-in PHP retirement inventory and drift gate, and keeps WordPress as an optional presentation/integration adapter. Legacy PHP domain behavior is retired incrementally after parity and rollback certification rather than rewritten wholesale.
+
+# Sustainable Catalyst Knowledge Library
+
 Current release: **v5.68.0 — Library SDK, Client & Integration Framework**. Backend: **v2.79.0** · Python SDK: **v0.1.0** · JS/TS Client: **v0.1.0** · Library Web: **v1.2.0** · API: **v1.0**.
 
 This release adds first-party Python and JavaScript/TypeScript clients, typed API contracts, capability discovery, bounded transport retries, stable error mapping, signed-write helpers, and adapters for the six Sustainable Catalyst product consumers. WordPress remains optional and non-authoritative.

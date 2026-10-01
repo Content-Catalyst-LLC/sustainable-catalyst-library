@@ -3,8 +3,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "5.68.0"
-BACKEND_VERSION = "2.79.0"
+LIBRARY_VERSION = "5.69.0"
+BACKEND_VERSION = "2.80.0"
 SDK_VERSION = "0.1.0"
 CONTRACT = "sc-library-client-framework/1.0"
 READINESS_CONTRACT = "sc-library-client-framework-readiness/1.0"

@@ -2,7 +2,7 @@ from __future__ import annotations
 from hashlib import sha256
 import json
 from typing import Any
-LIBRARY_VERSION="5.68.0"; BACKEND_VERSION="2.79.0"
+LIBRARY_VERSION = "5.69.0"; BACKEND_VERSION = "2.80.0"
 CONTRACT="sc-library-independent-release-engineering/1.0"; READINESS_CONTRACT="sc-library-independent-release-engineering-readiness/1.0"
 def _canon(v:Any)->str: return json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=False,default=str)
 def _fp(v:Any)->str: return sha256(_canon(v).encode()).hexdigest()
