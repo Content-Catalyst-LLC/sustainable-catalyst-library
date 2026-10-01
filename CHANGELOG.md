@@ -1,3 +1,11 @@
+## 5.67.0.1 — Backend Release Identity & Deployment Integrity Repair
+- Corrects the authoritative backend package version marker so `/health` reports backend v2.78.0.
+- Aligns the WordPress thin-adapter plugin header, `SC_LIBRARY_VERSION`, and runtime-certification adapter with Library v5.67.0.1.
+- Requires deployment tooling to preserve the production `.env` across backend directory replacement.
+- Uses the canonical host-side Library backend endpoint `127.0.0.1:8087` for production certification instead of port 8080.
+- Adds release-integrity validation for version markers, port topology, secret preservation, and WordPress-independence certification.
+- Adds no new research capability and does not change Library Web v1.2.0 or API v1.0.
+
 ## 5.67.0 — WordPress-Failure Independence & Runtime Certification
 - Certifies the authoritative Library runtime with WordPress failed/unreachable/disabled across API, identity, retrieval, execution, integrations, routing and independent web.
 
