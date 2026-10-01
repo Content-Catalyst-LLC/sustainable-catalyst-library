@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/wordpress-state-migration-manifest.json",
+  "title": "WordPress State Migration Manifest",
+  "type": "object",
+  "required": ["schema", "source_site", "item_count", "items"],
+  "properties": {
+    "schema": {"const": "sc-library-wordpress-state-migration-manifest/1.0"},
+    "source_site": {"type": "string"},
+    "item_count": {"type": "integer", "minimum": 0},
+    "items": {
+      "type": "array",
+      "maxItems": 5000,
+      "items": {
+        "type": "object",
+        "required": ["domain", "source_kind", "source_key", "source_id", "payload"],
+        "properties": {
+          "domain": {"type": "string"},
+          "source_kind": {"enum": ["table", "post_type"]},
+          "source_key": {"type": "string"},
+          "source_id": {"type": "string"},
+          "content_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "payload": {},
+          "provenance": {"type": "object"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

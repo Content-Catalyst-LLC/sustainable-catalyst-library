@@ -1331,3 +1331,55 @@ CREATE TABLE IF NOT EXISTS library_cross_product_service_events (
 );
 CREATE INDEX IF NOT EXISTS library_cross_product_service_events_product_idx ON library_cross_product_service_events(product_key,event_id DESC);
 
+
+-- Library State Migration & WordPress Data Retirement (Library v5.65.0 / backend v2.76.0)
+CREATE TABLE IF NOT EXISTS library_wordpress_state_migration_runs (
+    run_id text PRIMARY KEY,
+    manifest_sha256 text NOT NULL UNIQUE,
+    source_site text NOT NULL DEFAULT '',
+    expected_items integer NOT NULL CHECK (expected_items >= 0),
+    imported_items integer NOT NULL DEFAULT 0 CHECK (imported_items >= 0),
+    status text NOT NULL DEFAULT 'importing',
+    retirement_eligible boolean NOT NULL DEFAULT false,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    guardrails jsonb NOT NULL DEFAULT '{}'::jsonb,
+    started_at timestamptz NOT NULL DEFAULT now(),
+    certified_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS library_wordpress_state_migration_runs_status_idx ON library_wordpress_state_migration_runs(status, started_at DESC);
+
+CREATE TABLE IF NOT EXISTS library_wordpress_state_migration_items (
+    item_id text PRIMARY KEY,
+    run_id text NOT NULL REFERENCES library_wordpress_state_migration_runs(run_id) ON DELETE CASCADE,
+    domain text NOT NULL,
+    source_kind text NOT NULL,
+    source_key text NOT NULL,
+    source_id text NOT NULL,
+    content_sha256 text NOT NULL,
+    payload jsonb NOT NULL,
+    provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
+    imported_at timestamptz NOT NULL DEFAULT now(),
+    UNIQUE(run_id, domain, source_kind, source_key, source_id)
+);
+CREATE INDEX IF NOT EXISTS library_wordpress_state_migration_items_run_idx ON library_wordpress_state_migration_items(run_id, domain, source_kind);
+
+CREATE TABLE IF NOT EXISTS library_wordpress_state_migration_events (
+    event_id bigserial PRIMARY KEY,
+    run_id text REFERENCES library_wordpress_state_migration_runs(run_id) ON DELETE SET NULL,
+    event_type text NOT NULL,
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS library_wordpress_state_migration_events_run_idx ON library_wordpress_state_migration_events(run_id, event_id DESC);
+
+CREATE TABLE IF NOT EXISTS library_wordpress_retirement_certifications (
+    certification_id text PRIMARY KEY,
+    run_id text NOT NULL UNIQUE REFERENCES library_wordpress_state_migration_runs(run_id) ON DELETE CASCADE,
+    certification_sha256 text NOT NULL UNIQUE,
+    status text NOT NULL DEFAULT 'certified',
+    item_count integer NOT NULL CHECK (item_count >= 0),
+    rollback_copy_retained boolean NOT NULL DEFAULT true,
+    destructive_delete_allowed boolean NOT NULL DEFAULT false,
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    certified_at timestamptz NOT NULL DEFAULT now()
+);

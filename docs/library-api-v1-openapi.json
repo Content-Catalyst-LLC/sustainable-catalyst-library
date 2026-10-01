@@ -479,6 +479,107 @@
           }
         }
       }
+    },
+    "/state-migration": {
+      "get": {
+        "summary": "Get WordPress legacy research-state migration contract",
+        "responses": {
+          "200": {
+            "description": "Migration contract"
+          }
+        }
+      }
+    },
+    "/state-migration/readiness": {
+      "get": {
+        "summary": "Get state migration readiness",
+        "responses": {
+          "200": {
+            "description": "Migration readiness"
+          }
+        }
+      }
+    },
+    "/state-migration/certifications/{certification_id}": {
+      "get": {
+        "summary": "Get retirement certification",
+        "parameters": [
+          {
+            "name": "certification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retirement certification"
+          },
+          "404": {
+            "description": "Certification not found"
+          }
+        }
+      }
+    },
+    "/admin/state-migration/validate": {
+      "post": {
+        "summary": "Validate a WordPress migration manifest",
+        "security": [
+          {
+            "signedService": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation result"
+          }
+        }
+      }
+    },
+    "/admin/state-migration/import": {
+      "post": {
+        "summary": "Import a certified-shape WordPress migration manifest",
+        "security": [
+          {
+            "signedService": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Migration run"
+          }
+        }
+      }
+    },
+    "/admin/state-migration/{run_id}/certify": {
+      "post": {
+        "summary": "Certify a complete migration for WordPress authority retirement",
+        "security": [
+          {
+            "signedService": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retirement certification"
+          },
+          "404": {
+            "description": "Migration run not found"
+          }
+        }
+      }
     }
   },
   "components": {

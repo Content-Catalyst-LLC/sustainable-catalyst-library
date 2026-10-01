@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.65.0 — Library State Migration & WordPress Data Retirement
+- Adds signed, hash-verified migration manifests for legacy WordPress-held Library research state.
+- Adds PostgreSQL-authoritative migration runs, imported state items, migration events, and retirement certifications.
+- Excludes credentials, sessions, users, secrets, caches, search indexes, and WordPress editorial/publication content from migration.
+- Adds WordPress WP-CLI inventory/export/retirement commands and a read-only status surface.
+- Retirement requires a backend certification and retained rollback copy; automatic or destructive WordPress data deletion is prohibited.
+- Certified retirement disables legacy WordPress research-state surfaces while preserving publishing, routing, SEO, embeds, and thin-adapter functions.
+
 ## 5.64.0 — Direct Cross-Product Library Service Integration
 - Added six first-class direct Library service consumer contracts.
 - Added cross-product readiness, product manifest, signed exchange validation, and admin binding APIs.

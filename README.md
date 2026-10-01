@@ -1,6 +1,6 @@
 # Sustainable Catalyst Knowledge Library
 
-Current release: **v5.64.0 — Direct Cross-Product Library Service Integration**. The authoritative Library API can now be consumed directly by Research Librarian AI, Workspace, Research Lab, Workbench, Decision Studio, and Site Intelligence through machine-readable service contracts and scoped handoff rules.
+Current release: **v5.65.0 — Direct Cross-Product Library Service Integration**. The authoritative Library API can now be consumed directly by Research Librarian AI, Workspace, Research Lab, Workbench, Decision Studio, and Site Intelligence through machine-readable service contracts and scoped handoff rules.
 
 # Sustainable Catalyst Knowledge Library
 

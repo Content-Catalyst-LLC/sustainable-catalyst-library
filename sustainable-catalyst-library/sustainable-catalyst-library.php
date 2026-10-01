@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library v5.64.0 establishes Direct Cross-Product Library Service Integration while WordPress remains a non-authoritative thin adapter.
- * Version: 5.64.0
+ * Description: Sustainable Catalyst Library v5.65.0 migrates legacy WordPress research state into the authoritative Library service and introduces certified WordPress research-state authority retirement.
+ * Version: 5.65.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.64.0');
+define('SC_LIBRARY_VERSION', '5.65.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'thin-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);
@@ -100,6 +100,7 @@ require_once SC_LIBRARY_DIR . 'includes/class-sc-library-identity-access.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-wordpress-thin-adapter.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-public-routing-bridge.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-product-service-integration.php';
+require_once SC_LIBRARY_DIR . 'includes/class-sc-library-state-migration.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-cross-civilizational-linking.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-translation-alignment.php';
 require_once SC_LIBRARY_DIR . 'includes/class-sc-library-biomedical-evidence.php';
@@ -202,6 +203,7 @@ final class SC_Library_Plugin {
         $wordpress_thin_adapter = new SC_Library_WordPress_Thin_Adapter();
         $public_routing_bridge = new SC_Library_Public_Routing_Bridge();
         $cross_product_service_integration = new SC_Library_Cross_Product_Service_Integration();
+        $state_migration = new SC_Library_State_Migration();
         $cross_civilizational_linking = new SC_Library_Cross_Civilizational_Linking();
         $translation_alignment = new SC_Library_Translation_Alignment();
         $cross_language_resolution = new SC_Library_Cross_Language_Resolution();
@@ -245,6 +247,8 @@ final class SC_Library_Plugin {
         }
 
         $cross_product_service_integration->register_hooks();
+        $state_migration->register_hooks();
+        $legacy_state_retired = (bool) get_option(SC_Library_State_Migration::RETIRED_OPTION, false);
         $taxonomies->register_hooks();
         $relationships->register_hooks();
         $indexer->register_hooks();
@@ -252,8 +256,8 @@ final class SC_Library_Plugin {
         $editor->register_hooks();
         $rest->register_hooks();
         $admin->register_hooks();
-        $notebook->register_hooks();
-        $boards->register_hooks();
+        if (!$legacy_state_retired) { $notebook->register_hooks(); }
+        if (!$legacy_state_retired) { $boards->register_hooks(); }
         $integrations->register_hooks();
         $annotations->register_hooks();
         $books->register_hooks();
@@ -261,14 +265,14 @@ final class SC_Library_Plugin {
         $documentation->register_hooks();
         $foundation_documents->register_hooks();
         $multimedia->register_hooks();
-        $planner->register_hooks();
+        if (!$legacy_state_retired) { $planner->register_hooks(); }
         $portability->register_hooks();
         $planning_analytics->register_hooks();
-        $workspaces->register_hooks();
-        $collaboration->register_hooks();
-        $knowledge_graph->register_hooks();
-        $orchestrator->register_hooks();
-        $developer_api->register_hooks();
+        if (!$legacy_state_retired) { $workspaces->register_hooks(); }
+        if (!$legacy_state_retired) { $collaboration->register_hooks(); }
+        if (!$legacy_state_retired) { $knowledge_graph->register_hooks(); }
+        if (!$legacy_state_retired) { $orchestrator->register_hooks(); }
+        if (!$legacy_state_retired) { $developer_api->register_hooks(); }
         $preservation->register_hooks();
         $hardening->register_hooks();
         $unified_system->register_hooks();

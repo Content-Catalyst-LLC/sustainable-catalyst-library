@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/wordpress-state-retirement-certification.json",
+  "title": "WordPress State Retirement Certification",
+  "type": "object",
+  "required": ["schema", "certification_id", "run_id", "status", "item_count", "physical_deletion_authorized"],
+  "properties": {
+    "schema": {"const": "sc-library-wordpress-state-retirement-certification/1.0"},
+    "certification_id": {"type": "string"},
+    "run_id": {"type": "string"},
+    "certification_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "status": {"const": "certified"},
+    "item_count": {"type": "integer", "minimum": 0},
+    "rollback_copy_retained": {"const": true},
+    "physical_deletion_authorized": {"const": false}
+  },
+  "additionalProperties": true
+}
