@@ -1,5 +1,11 @@
 # Sustainable Catalyst Knowledge Library
 
+Current release: **v5.68.0 — Library SDK, Client & Integration Framework**. Backend: **v2.79.0** · Python SDK: **v0.1.0** · JS/TS Client: **v0.1.0** · Library Web: **v1.2.0** · API: **v1.0**.
+
+This release adds first-party Python and JavaScript/TypeScript clients, typed API contracts, capability discovery, bounded transport retries, stable error mapping, signed-write helpers, and adapters for the six Sustainable Catalyst product consumers. WordPress remains optional and non-authoritative.
+
+# Sustainable Catalyst Knowledge Library
+
 Current release: **v5.67.0.2 — WordPress Runtime Boot Integrity Repair**. Backend: **v2.78.0** · Library Web: **v1.2.0** · API: **v1.0**.
 
 This patch permanently loads the runtime-certification adapter before instantiation, aligns backend certification identity with Library v5.67.0.2, and adds deployment-time WordPress boot verification with rollback. It adds no new research capability.

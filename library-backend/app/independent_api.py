@@ -63,6 +63,8 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"GET","path":"/api/library/v1/release-engineering","name":"release-engineering","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/release-engineering/readiness","name":"release-engineering-readiness","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/release-engineering/validate","name":"release-engineering-validate","access":"signed-service","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/client-framework","name":"client-framework","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/client-framework/readiness","name":"client-framework-readiness","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification","name":"runtime-certification","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification/readiness","name":"runtime-certification-readiness","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/runtime-certification/evaluate","name":"runtime-certification-evaluate","access":"signed-service","stability":"stable"},
@@ -84,6 +86,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "cross-product-integration": {"resources":["research-librarian","workspace","research-lab","workbench","decision-studio","site-intelligence"],"direct_api":True,"authority":"library-service"},
     "state-migration": {"resources":["wordpress-inventory","migration-manifest","migration-import","retirement-certification"],"direct_api":True,"authority":"library-service"},
     "release-engineering": {"resources":["manifest","preflight","rollback","artifact-integrity"],"direct_api":True,"authority":"library-service"},
+    "client-framework": {"resources":["python-sdk","javascript-client","typescript-contracts","signed-requests","retries","cross-product-adapters"],"direct_api":True,"authority":"library-service"},
     "runtime-certification": {"resources":["wordpress-failure","runtime-probes","certification"],"direct_api":True,"authority":"library-service"},
 }
 
@@ -177,8 +180,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "5.66.0",
-        "backend_version": "2.77.0",
+        "library_version": "5.68.0",
+        "backend_version": "2.79.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -233,8 +236,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "5.66.0",
-        "backend_version": "2.77.0",
+        "library_version": "5.68.0",
+        "backend_version": "2.79.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

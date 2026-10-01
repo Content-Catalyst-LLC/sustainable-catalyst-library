@@ -1,0 +1,11 @@
+export type Json = null | boolean | number | string | Json[] | {[key:string]:Json};
+export interface ClientOptions { apiKey?: string | null; maxRetries?: number; fetchImpl?: typeof fetch; }
+export class LibraryError extends Error { status:number|null; code:string|null; details:unknown; }
+export function signRequest(method:string,path:string,timestamp:string,body:string,key:string):Promise<string>;
+export class ProductAdapter { productKey:string; contract():Promise<any>; validateExchange(payload:Record<string,unknown>):Promise<any>; }
+export class LibraryClient {
+  constructor(baseUrl:string, options?:ClientOptions);
+  health():Promise<any>; readiness():Promise<any>; service():Promise<any>; capabilities():Promise<any>; routes():Promise<any>; clientFramework():Promise<any>;
+  search(q?:string,filters?:Record<string,unknown>):Promise<any>; record(id:string,options?:{includeBody?:boolean}):Promise<any>; stats():Promise<any>; integrations():Promise<any>;
+  submitResearchJob(payload:Record<string,unknown>):Promise<any>; product(key:string):ProductAdapter; researchLibrarian():ProductAdapter; workspace():ProductAdapter; researchLab():ProductAdapter; workbench():ProductAdapter; decisionStudio():ProductAdapter; siteIntelligence():ProductAdapter;
+}

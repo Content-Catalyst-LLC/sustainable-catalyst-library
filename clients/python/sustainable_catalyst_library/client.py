@@ -1,0 +1,134 @@
+from __future__ import annotations
+import hashlib, hmac, json, time
+from dataclasses import dataclass
+from typing import Any
+from urllib import error, parse, request
+
+PRODUCT_KEYS = (
+    "research-librarian", "workspace", "research-lab",
+    "workbench", "decision-studio", "site-intelligence",
+)
+
+
+def _canonical_body(payload: Any | None) -> bytes:
+    if payload is None:
+        return b""
+    return json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+
+
+def sign_request(method: str, path: str, timestamp: str, body: bytes, key: str) -> str:
+    body_hash = hashlib.sha256(body).hexdigest()
+    base = f"{method.upper()}\n{path}\n{timestamp}\n{body_hash}".encode("utf-8")
+    return hmac.new(key.encode("utf-8"), base, hashlib.sha256).hexdigest()
+
+
+class LibraryError(RuntimeError):
+    def __init__(self, message: str, *, status: int | None = None, code: str | None = None, details: Any = None):
+        super().__init__(message)
+        self.status = status
+        self.code = code
+        self.details = details
+
+
+@dataclass(frozen=True)
+class ProductAdapter:
+    client: "LibraryClient"
+    product_key: str
+
+    def contract(self) -> dict[str, Any]:
+        return self.client.get(f"/integrations/{parse.quote(self.product_key)}")
+
+    def validate_exchange(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self.client.post_signed(f"/integrations/{parse.quote(self.product_key)}/exchange/validate", payload)
+
+
+class LibraryClient:
+    def __init__(self, base_url: str, *, api_key: str | None = None, timeout: float = 20.0, max_retries: int = 2):
+        self.base_url = base_url.rstrip("/")
+        if not self.base_url.endswith("/api/library/v1"):
+            self.base_url += "/api/library/v1"
+        self.api_key = api_key
+        self.timeout = float(timeout)
+        self.max_retries = max(0, int(max_retries))
+
+    def _decode_error(self, exc: error.HTTPError) -> LibraryError:
+        try:
+            payload = json.loads(exc.read().decode("utf-8"))
+            detail = payload.get("error") or payload.get("detail") or payload
+        except Exception:
+            detail = None
+        if isinstance(detail, dict):
+            inner = detail.get("error") if isinstance(detail.get("error"), dict) else detail
+            return LibraryError(str(inner.get("message") or exc.reason), status=exc.code, code=inner.get("code"), details=inner.get("details"))
+        return LibraryError(str(detail or exc.reason), status=exc.code)
+
+    def request(self, method: str, path: str, *, query: dict[str, Any] | None = None, payload: Any | None = None, signed: bool = False) -> Any:
+        path = "/" + path.lstrip("/")
+        url = self.base_url + path
+        if query:
+            q = {k: v for k, v in query.items() if v is not None}
+            if q:
+                url += "?" + parse.urlencode(q, doseq=True)
+        body = _canonical_body(payload)
+        headers = {"Accept": "application/json"}
+        if payload is not None:
+            headers["Content-Type"] = "application/json"
+        if signed:
+            if not self.api_key:
+                raise LibraryError("api_key is required for signed requests")
+            ts = str(int(time.time()))
+            headers.update({
+                "Authorization": f"Bearer {self.api_key}",
+                "X-SC-Timestamp": ts,
+                "X-SC-Signature": sign_request(method, path, ts, body, self.api_key),
+            })
+        retryable = {429, 502, 503, 504}
+        for attempt in range(self.max_retries + 1):
+            try:
+                req = request.Request(url, data=body if payload is not None else None, headers=headers, method=method.upper())
+                with request.urlopen(req, timeout=self.timeout) as resp:
+                    raw = resp.read()
+                    return json.loads(raw.decode("utf-8")) if raw else None
+            except error.HTTPError as exc:
+                if exc.code in retryable and attempt < self.max_retries:
+                    time.sleep(min(0.25 * (2 ** attempt), 1.0))
+                    continue
+                raise self._decode_error(exc) from exc
+            except error.URLError as exc:
+                if attempt < self.max_retries:
+                    time.sleep(min(0.25 * (2 ** attempt), 1.0))
+                    continue
+                raise LibraryError(str(exc.reason)) from exc
+
+    def get(self, path: str, query: dict[str, Any] | None = None) -> Any:
+        return self.request("GET", path, query=query)
+
+    def post_signed(self, path: str, payload: Any) -> Any:
+        return self.request("POST", path, payload=payload, signed=True)
+
+    def health(self): return self.get("/health")
+    def readiness(self): return self.get("/readiness")
+    def service(self): return self.get("/service")
+    def capabilities(self): return self.get("/capabilities")
+    def routes(self): return self.get("/routes")
+    def client_framework(self): return self.get("/client-framework")
+    def search(self, q: str = "", **filters): return self.get("/search", {"q": q, **filters})
+    def record(self, record_id: str, *, include_body: bool = True): return self.get("/records/" + parse.quote(record_id, safe=""), {"include_body": str(include_body).lower()})
+    def stats(self): return self.get("/stats")
+    def artifacts_readiness(self): return self.get("/artifacts/readiness")
+    def pipelines_readiness(self): return self.get("/pipelines/readiness")
+    def compute_readiness(self): return self.get("/compute/readiness")
+    def integrations(self): return self.get("/integrations")
+    def submit_research_job(self, payload: dict[str, Any]): return self.post_signed("/research-jobs", payload)
+
+    def product(self, product_key: str) -> ProductAdapter:
+        if product_key not in PRODUCT_KEYS:
+            raise ValueError(f"unsupported product_key: {product_key}")
+        return ProductAdapter(self, product_key)
+
+    def research_librarian(self): return self.product("research-librarian")
+    def workspace(self): return self.product("workspace")
+    def research_lab(self): return self.product("research-lab")
+    def workbench(self): return self.product("workbench")
+    def decision_studio(self): return self.product("decision-studio")
+    def site_intelligence(self): return self.product("site-intelligence")

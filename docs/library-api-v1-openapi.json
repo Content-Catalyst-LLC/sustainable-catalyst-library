@@ -620,6 +620,26 @@
           }
         }
       }
+    },
+    "/client-framework": {
+      "get": {
+        "operationId": "libraryClientFramework",
+        "responses": {
+          "200": {
+            "description": "First-party SDK and client framework contract"
+          }
+        }
+      }
+    },
+    "/client-framework/readiness": {
+      "get": {
+        "operationId": "libraryClientFrameworkReadiness",
+        "responses": {
+          "200": {
+            "description": "SDK and client framework readiness"
+          }
+        }
+      }
     }
   },
   "components": {

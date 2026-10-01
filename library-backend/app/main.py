@@ -184,6 +184,7 @@ from .cross_product_integration import (
     product_contract as cross_product_product_contract, validate_exchange as validate_cross_product_exchange,
     persist_binding as persist_cross_product_binding,
 )
+from .client_framework import contract as library_client_framework_contract, readiness as library_client_framework_readiness
 from .runtime_independence import evaluate as evaluate_wordpress_failure_independence, readiness as wordpress_failure_independence_readiness
 from .release_engineering import release_manifest as library_release_manifest, readiness as library_release_engineering_readiness, validate_deployment_plan as validate_library_deployment_plan
 from .state_migration import (
@@ -414,6 +415,11 @@ def health() -> dict[str, Any]:
             "independent_library_api_v1": True,
             "library_api_v1_wordpress_independent": True,
             "library_api_v1_stable_service_contract": True,
+            "library_sdk_client_framework": True,
+            "first_party_python_sdk": True,
+            "first_party_javascript_client": True,
+            "typescript_client_contracts": True,
+            "cross_product_client_adapters": True,
             "library_api_v1_base_path": "/api/library/v1",
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -2864,6 +2870,11 @@ async def library_api_v1_integration_binding(product_key: str, request: Request,
     except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
+
+@app.get("/api/library/v1/client-framework")
+def library_api_v1_client_framework() -> dict[str, Any]: return library_client_framework_contract()
+@app.get("/api/library/v1/client-framework/readiness")
+def library_api_v1_client_framework_readiness() -> dict[str, Any]: return library_client_framework_readiness()
 
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()

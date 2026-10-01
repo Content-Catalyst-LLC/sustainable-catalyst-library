@@ -1,3 +1,11 @@
+## 5.68.0 — Library SDK, Client & Integration Framework
+- Adds backend v2.79.0 client-framework discovery and readiness contracts.
+- Adds first-party Python SDK v0.1.0 with API v1 reads, signed writes, retries, error mapping, and six product adapters.
+- Adds JavaScript/TypeScript client v0.1.0 with Web Crypto HMAC signing and TypeScript declarations.
+- Adds client-framework routes to API v1 and the OpenAPI document.
+- Adds the client framework to WordPress-failure runtime certification.
+- Preserves WordPress as an optional thin adapter and keeps Library Web v1.2.0 and API v1.0.
+
 ## 5.67.0.2 — WordPress Runtime Boot Integrity Repair
 - Permanently loads `class-sc-library-runtime-certification.php` before `SC_Library_Runtime_Certification` is instantiated.
 - Aligns the WordPress thin-adapter release identity and backend runtime-certification Library identity with v5.67.0.2.
