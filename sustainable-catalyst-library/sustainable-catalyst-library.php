@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library 5.74.0 Python Provenance, Citation & Evidence Graph Service.
- * Version: 5.74.0
+ * Description: Sustainable Catalyst Library 5.75.0 Python Language Intelligence & Document Processing.
+ * Version: 5.75.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.74.0');
+define('SC_LIBRARY_VERSION', '5.75.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'thin-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);

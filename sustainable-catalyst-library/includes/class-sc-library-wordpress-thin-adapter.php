@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 final class SC_Library_WordPress_Thin_Adapter {
-    public const VERSION = '5.74.0';
+    public const VERSION = '5.75.0';
     public const SCHEMA = 'sc-library-wordpress-thin-adapter/1.0';
     public const ROLE = 'thin-adapter';
 
@@ -47,6 +47,13 @@ final class SC_Library_WordPress_Thin_Adapter {
                 'provenance-authority',
                 'citation-authority',
                 'evidence-graph-authority',
+                'language-intelligence-authority',
+                'original-language-authority',
+                'ocr-htr-transcription-authority',
+                'linguistic-corpus-authority',
+                'cross-language-resolution-authority',
+                'translation-alignment-authority',
+                'document-intelligence-authority',
                 'research-execution-authority',
                 'research-job-authority',
                 'artifact-authority',

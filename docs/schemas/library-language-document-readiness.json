@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-language-document-readiness.json",
+  "title": "Sustainable Catalyst Library Language Document Readiness",
+  "type": "object",
+  "required": [
+    "schema",
+    "state",
+    "authority",
+    "components"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-python-language-document-readiness/1.0"
+    },
+    "state": {
+      "type": "string"
+    },
+    "authority": {
+      "const": "python-backend"
+    },
+    "components": {
+      "type": "object"
+    }
+  }
+}

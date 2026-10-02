@@ -217,6 +217,16 @@ from .provenance_graph_service import (
     evidence_graph as library_evidence_graph, create_citation as create_library_citation,
     import_citations as import_library_citations, core_handoff as library_citation_core_handoff,
 )
+from .language_document_service import (
+    contract as library_language_contract, readiness as library_language_readiness,
+    validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
+    validate_derivation as validate_library_language_derivation, create_derivation as create_library_language_derivation, derivation as library_language_derivation,
+    validate_corpus as validate_library_linguistic_corpus, create_corpus as create_library_linguistic_corpus, corpus as library_linguistic_corpus, corpus_kwic as library_linguistic_kwic,
+    create_authority_registry as create_library_language_authority, create_resolution_case as create_library_resolution_case,
+    resolution_case as library_resolution_case, resolution_decision as create_library_resolution_decision,
+    validate_alignment as validate_library_alignment, create_alignment as create_library_alignment, alignment as library_alignment,
+    scientific_document as library_scientific_document_intelligence,
+)
 from .runtime_independence import evaluate as evaluate_wordpress_failure_independence, readiness as wordpress_failure_independence_readiness
 from .release_engineering import release_manifest as library_release_manifest, readiness as library_release_engineering_readiness, validate_deployment_plan as validate_library_deployment_plan
 from .state_migration import (
@@ -459,6 +469,13 @@ def health() -> dict[str, Any]:
             "python_source_ingestion_authority": True,
             "python_retrieval_orchestration_authority": True,
             "python_provenance_graph_authority": True,
+            "python_language_document_authority": True,
+            "original_language_authority": "python-backend",
+            "ocr_htr_transcription_authority": "python-backend",
+            "linguistic_corpus_authority": "python-backend",
+            "cross_language_resolution_authority": "python-backend",
+            "translation_alignment_authority": "python-backend",
+            "scientific_document_intelligence_authority": "python-backend",
             "citation_authority": "python-backend",
             "evidence_graph_authority": "python-backend",
             "search_ranking_authority": "python-backend",
@@ -3154,6 +3171,104 @@ async def library_api_v1_citation_core_handoff(request: Request, authorization: 
     except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
     try: return library_citation_core_handoff(payload)
     except Exception as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/language")
+def library_api_v1_language_contract() -> dict[str, Any]: return library_language_contract()
+
+@app.get("/api/library/v1/language/readiness")
+def library_api_v1_language_readiness() -> dict[str, Any]: return library_language_readiness()
+
+@app.get("/api/library/v1/language/captures/{capture_id:path}")
+def library_api_v1_language_capture(capture_id: str, include_text: bool=False) -> dict[str, Any]:
+    try: return library_language_capture(capture_id,include_text=include_text)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="capture-not-found") from exc
+
+@app.get("/api/library/v1/language/derivations/{run_id:path}")
+def library_api_v1_language_derivation(run_id: str, include_text: bool=False) -> dict[str, Any]:
+    try: return library_language_derivation(run_id,include_text=include_text)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="derivation-not-found") from exc
+
+@app.get("/api/library/v1/language/corpora/{corpus_id:path}")
+def library_api_v1_linguistic_corpus(corpus_id: str, include_tokens: bool=False) -> dict[str, Any]:
+    try: return library_linguistic_corpus(corpus_id,include_tokens=include_tokens)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="corpus-not-found") from exc
+
+@app.get("/api/library/v1/language/corpora/{corpus_id:path}/kwic")
+def library_api_v1_linguistic_kwic(corpus_id: str, q: str, window_tokens: int=5, case_sensitive: bool=False, limit: int=100, offset: int=0) -> dict[str, Any]:
+    try: return library_linguistic_kwic(corpus_id,q,window_tokens=window_tokens,case_sensitive=case_sensitive,limit=limit,offset=offset)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="corpus-not-found") from exc
+
+@app.get("/api/library/v1/language/entity-resolution/{case_id:path}")
+def library_api_v1_language_resolution_case(case_id: str) -> dict[str, Any]:
+    try: return library_resolution_case(case_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="resolution-case-not-found") from exc
+
+@app.get("/api/library/v1/language/alignments/{matrix_id:path}")
+def library_api_v1_language_alignment(matrix_id: str) -> dict[str, Any]:
+    try: return library_alignment(matrix_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="alignment-not-found") from exc
+
+@app.get("/api/library/v1/language/documents/{record_id:path}/intelligence")
+def library_api_v1_language_document_intelligence(record_id: str) -> dict[str, Any]:
+    try: return library_scientific_document_intelligence(record_id)
+    except ValueError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+
+async def _language_signed_json(request: Request, authorization: str|None, x_sc_timestamp: str|None, x_sc_signature: str|None) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/language/captures/validate")
+async def library_api_v1_language_capture_validate(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    return validate_library_language_capture(await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+
+@app.post("/api/library/v1/admin/language/captures")
+async def library_api_v1_language_capture_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return create_library_language_capture(await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/language/derivations/validate")
+async def library_api_v1_language_derivation_validate(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    return validate_library_language_derivation(await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+
+@app.post("/api/library/v1/admin/language/derivations")
+async def library_api_v1_language_derivation_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return create_library_language_derivation(await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/language/corpora/validate")
+async def library_api_v1_language_corpus_validate(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    return validate_library_linguistic_corpus(await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+
+@app.post("/api/library/v1/admin/language/corpora")
+async def library_api_v1_language_corpus_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return create_library_linguistic_corpus(await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/language/authorities")
+async def library_api_v1_language_authority_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return create_library_language_authority(await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/language/entity-resolution/cases")
+async def library_api_v1_language_resolution_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return create_library_resolution_case(await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/language/entity-resolution/{case_id:path}/decisions")
+async def library_api_v1_language_resolution_decision(case_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return create_library_resolution_decision(case_id,await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except KeyError as exc: raise HTTPException(status_code=404,detail="resolution-case-not-found") from exc
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/language/alignments/validate")
+async def library_api_v1_language_alignment_validate(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    return validate_library_alignment(await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+
+@app.post("/api/library/v1/admin/language/alignments")
+async def library_api_v1_language_alignment_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return create_library_alignment(await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sustainable Catalyst Knowledge Library API",
-    "version": "1.0.0",
+    "version": "1.0",
     "description": "Stable WordPress-independent Knowledge Library service contract."
   },
   "servers": [
@@ -1122,6 +1122,206 @@
     "/admin/citations/core-handoff": {
       "post": {
         "summary": "Queue governed Platform Core citation handoff",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/language": {
+      "get": {
+        "summary": "Language and document service contract",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/language/readiness": {
+      "get": {
+        "summary": "Language and document readiness",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/language/captures/{capture_id}": {
+      "get": {
+        "summary": "Original-language capture",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/language/derivations/{run_id}": {
+      "get": {
+        "summary": "OCR HTR transcription derivation",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/language/corpora/{corpus_id}": {
+      "get": {
+        "summary": "Linguistic corpus",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/language/corpora/{corpus_id}/kwic": {
+      "get": {
+        "summary": "Corpus KWIC search",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/language/entity-resolution/{case_id}": {
+      "get": {
+        "summary": "Cross-language entity resolution case",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/language/alignments/{matrix_id}": {
+      "get": {
+        "summary": "Translation or transliteration alignment",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/language/documents/{record_id}/intelligence": {
+      "get": {
+        "summary": "Scientific document intelligence",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/language/captures/validate": {
+      "post": {
+        "summary": "Validate original-language capture",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/language/captures": {
+      "post": {
+        "summary": "Persist original-language capture",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/language/derivations/validate": {
+      "post": {
+        "summary": "Validate OCR HTR transcription derivation",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/language/derivations": {
+      "post": {
+        "summary": "Persist OCR HTR transcription derivation",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/language/corpora/validate": {
+      "post": {
+        "summary": "Validate linguistic corpus",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/language/corpora": {
+      "post": {
+        "summary": "Persist linguistic corpus",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/language/authorities": {
+      "post": {
+        "summary": "Persist cross-language authority registry",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/language/entity-resolution/cases": {
+      "post": {
+        "summary": "Create cross-language resolution case",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/language/entity-resolution/{case_id}/decisions": {
+      "post": {
+        "summary": "Persist cross-language resolution decision",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/language/alignments/validate": {
+      "post": {
+        "summary": "Validate translation alignment",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/language/alignments": {
+      "post": {
+        "summary": "Persist translation alignment",
         "responses": {
           "200": {
             "description": "OK"

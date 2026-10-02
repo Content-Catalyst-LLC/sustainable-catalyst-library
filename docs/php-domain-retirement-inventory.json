@@ -1,6 +1,6 @@
 {
   "schema": "sc-library-php-domain-retirement-inventory/1.0",
-  "library_version": "5.74.0",
+  "library_version": "5.75.0",
   "policy": "New PHP files require explicit inventory classification; new research/domain authority belongs in Python by default.",
   "categories": [
     "wordpress-integration",
@@ -195,7 +195,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-cross-language-resolution.php",
       "classification": "retire-candidate",
       "bytes": 2740,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python language intelligence and document-processing authority is active in v5.75.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-cross-product-research-handoffs.php",
@@ -225,13 +225,13 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-document-ocr-processing.php",
       "classification": "retire-candidate",
       "bytes": 123754,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python language intelligence and document-processing authority is active in v5.75.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-document-ocr-reliability.php",
       "classification": "retire-candidate",
       "bytes": 30094,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python language intelligence and document-processing authority is active in v5.75.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-document-production.php",
@@ -465,7 +465,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-linguistic-corpus.php",
       "classification": "retire-candidate",
       "bytes": 3417,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python language intelligence and document-processing authority is active in v5.75.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-literature-review.php",
@@ -519,7 +519,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-ocr-htr-transcription-lineage.php",
       "classification": "retire-candidate",
       "bytes": 3556,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python language intelligence and document-processing authority is active in v5.75.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-open-course-finder.php",
@@ -543,7 +543,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-original-language-corpus.php",
       "classification": "retire-candidate",
       "bytes": 3217,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python language intelligence and document-processing authority is active in v5.75.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-pdf-bulk-import-repair.php",
@@ -717,7 +717,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-research-librarian-document-intelligence.php",
       "classification": "retire-candidate",
       "bytes": 131250,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python language intelligence and document-processing authority is active in v5.75.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-research-librarian-project-aware-guidance.php",
@@ -831,7 +831,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-translation-alignment.php",
       "classification": "retire-candidate",
       "bytes": 2554,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python language intelligence and document-processing authority is active in v5.75.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-unified-personal-research-environment.php",
