@@ -183,6 +183,11 @@ from .wordpress_thin_adapter import (
     consolidation_manifest as wordpress_thin_adapter_consolidation,
     certify_consolidation as certify_wordpress_thin_adapter_consolidation,
 )
+from .independent_application_certification import (
+    contract as independent_application_contract,
+    readiness as independent_application_readiness,
+    build_certification as build_independent_application_certification,
+)
 from .public_routing import contract as public_routing_contract, readiness as public_routing_readiness, record_seo_descriptor, record_embed_descriptor
 from .cross_product_integration import (
     registry_contract as cross_product_registry_contract, readiness as cross_product_integration_readiness,
@@ -542,6 +547,10 @@ def health() -> dict[str, Any]:
             "wordpress_adapter_certification_authority": "python-backend",
             "wordpress_required_for_library_runtime": False,
             "wordpress_legacy_domain_authority": False,
+            "independent_application_certification": True,
+            "independent_application_certification_authority": "python-backend",
+            "wordpress_required_for_independent_application": False,
+            "independent_application_next_release": "6.0.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -3498,6 +3507,32 @@ async def library_api_v1_workflow_pipeline_resume(run_id: str, request: Request,
     try: return resume_library_pipeline_workflow(run_id)
     except KeyError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
     except (ValueError,RuntimeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/independent-application")
+def library_api_v1_independent_application() -> dict[str, Any]:
+    return independent_application_contract()
+
+@app.get("/api/library/v1/independent-application/readiness")
+def library_api_v1_independent_application_readiness() -> dict[str, Any]:
+    return independent_application_readiness()
+
+@app.get("/api/library/v1/independent-application/certification")
+def library_api_v1_independent_application_certification() -> dict[str, Any]:
+    return build_independent_application_certification()
+
+@app.post("/api/library/v1/admin/independent-application/certify")
+async def library_api_v1_independent_application_certify(
+    request: Request,
+    authorization: str|None=Header(default=None),
+    x_sc_timestamp: str|None=Header(default=None),
+    x_sc_signature: str|None=Header(default=None),
+) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        payload=json.loads(body.decode("utf-8")) if body else {}
+        return build_independent_application_certification(payload)
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=400,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()

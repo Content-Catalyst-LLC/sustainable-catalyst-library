@@ -4,8 +4,8 @@ import os
 from urllib.parse import quote
 from typing import Any
 
-LIBRARY_VERSION = "5.79.0"
-BACKEND_VERSION = "2.90.0"
+LIBRARY_VERSION = "5.80.0"
+BACKEND_VERSION = "2.91.0"
 WEB_VERSION = "1.2.0"
 CONTRACT = "sc-library-public-routing-seo-embed-bridge/1.0"
 READINESS_CONTRACT = "sc-library-public-routing-readiness/1.0"

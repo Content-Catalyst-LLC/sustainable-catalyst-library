@@ -157,6 +157,10 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/admin/workflows/pipelines","name":"workflow-pipeline-create","access":"signed-service","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/admin/workflows/pipelines/{run_id}","name":"workflow-pipeline-run","access":"signed-service","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/workflows/pipelines/{run_id}/resume","name":"workflow-pipeline-resume","access":"signed-service","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/independent-application","name":"independent-application-contract","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/independent-application/readiness","name":"independent-application-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/independent-application/certification","name":"independent-application-certification","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/independent-application/certify","name":"independent-application-certify","access":"signed-service","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification","name":"runtime-certification","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification/readiness","name":"runtime-certification-readiness","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/runtime-certification/evaluate","name":"runtime-certification-evaluate","access":"signed-service","stability":"stable"},
@@ -189,6 +193,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "research-package-reproducibility": {"resources":["research-packages","artifact-manifests","record-snapshots","pipeline-run-snapshots","execution-lineage","runtime-reproducibility-records","package-integrity-verification"],"direct_api":True,"authority":"python-backend"},
     "connector-federation-runtime": {"resources":["global-source-registry","sources","collections","connector-contracts","connector-runtime-status","connector-execution-plans","connector-validation","global-knowledge-federation-certification"],"direct_api":True,"authority":"python-backend"},
     "background-job-workflows": {"resources":["durable-research-jobs","job-attempts-events","specialized-workers","worker-leases","dead-letters","checkpointed-pipelines","pipeline-resume","lease-recovery","ingestion-sidecar-status"],"direct_api":True,"authority":"python-backend"},
+    "independent-application-certification": {"resources":["architecture-contract","live-probe-snapshot","wordpress-failure-independence","runtime-authority","web-application","release-engineering","certification"],"direct_api":True,"authority":"python-backend"},
     "runtime-certification": {"resources":["wordpress-failure","runtime-probes","certification"],"direct_api":True,"authority":"library-service"},
 }
 
@@ -282,8 +287,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "5.79.0",
-        "backend_version": "2.90.0",
+        "library_version": "5.80.0",
+        "backend_version": "2.91.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -338,8 +343,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "5.79.0",
-        "backend_version": "2.90.0",
+        "library_version": "5.80.0",
+        "backend_version": "2.91.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

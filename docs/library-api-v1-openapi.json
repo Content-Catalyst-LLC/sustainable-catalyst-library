@@ -1676,6 +1676,46 @@
           }
         }
       }
+    },
+    "/independent-application": {
+      "get": {
+        "operationId": "libraryIndependentApplication",
+        "responses": {
+          "200": {
+            "description": "Independent Library application certification contract"
+          }
+        }
+      }
+    },
+    "/independent-application/readiness": {
+      "get": {
+        "operationId": "libraryIndependentApplicationReadiness",
+        "responses": {
+          "200": {
+            "description": "Independent Library application certification readiness"
+          }
+        }
+      }
+    },
+    "/independent-application/certification": {
+      "get": {
+        "operationId": "libraryIndependentApplicationCertification",
+        "responses": {
+          "200": {
+            "description": "Current Independent Library application certification"
+          }
+        }
+      }
+    },
+    "/admin/independent-application/certify": {
+      "post": {
+        "operationId": "libraryIndependentApplicationCertify",
+        "responses": {
+          "200": {
+            "description": "Run signed Independent Library application certification"
+          }
+        }
+      }
     }
   },
   "components": {

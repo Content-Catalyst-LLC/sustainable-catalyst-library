@@ -13,8 +13,8 @@ from .db import get_pool
 from .models import RecordBatch, RecordPacket, SourcePacket
 from .repository import canonical_json, ingest_records
 
-LIBRARY_VERSION = "5.79.0"
-BACKEND_VERSION = "2.90.0"
+LIBRARY_VERSION = "5.80.0"
+BACKEND_VERSION = "2.91.0"
 CONTRACT = "sc-library-python-source-ingestion-service/1.0"
 READINESS_CONTRACT = "sc-library-python-source-ingestion-readiness/1.0"
 NORMALIZATION_CONTRACT = "sc-library-source-normalization/1.0"

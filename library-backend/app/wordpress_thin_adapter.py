@@ -7,8 +7,8 @@ from typing import Any
 from .runtime_authority import dependency_graph, guardrails as runtime_guardrails
 from .identity_access import boundary_contract as identity_boundary_contract
 
-LIBRARY_VERSION = "5.79.0"
-BACKEND_VERSION = "2.90.0"
+LIBRARY_VERSION = "5.80.0"
+BACKEND_VERSION = "2.91.0"
 CONTRACT = "sc-library-wordpress-thin-adapter/1.0"
 READINESS_CONTRACT = "sc-library-wordpress-thin-adapter-readiness/1.0"
 CONSOLIDATION_CONTRACT = "sc-library-wordpress-thin-adapter-consolidation/1.0"

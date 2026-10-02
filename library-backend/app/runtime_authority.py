@@ -196,8 +196,8 @@ def build_certification(payload: dict[str, Any]) -> dict[str, Any]:
     })
     return {
         "schema": CERTIFICATION_CONTRACT,
-        "version": "5.58.0",
-        "backend_version": "2.69.0",
+        "version": "5.80.0",
+        "backend_version": "2.91.0",
         "certification_id": "library-runtime-authority-certification:" + fingerprint[:32],
         "certification_fingerprint_sha256": fingerprint,
         **n,
@@ -215,7 +215,7 @@ def build_default_certification() -> dict[str, Any]:
     return build_certification({
         "components": default_component_snapshot(),
         "clients": default_client_snapshot(),
-        "provenance": {"authority": "knowledge-library", "basis": "v5.58-runtime-authority-contract"},
+        "provenance": {"authority": "knowledge-library", "basis": "v5.80-runtime-authority-contract"},
     })
 
 
@@ -269,8 +269,8 @@ def readiness() -> dict[str, Any]:
     c = build_default_certification()
     return {
         "schema": READINESS_CONTRACT,
-        "version": "5.58.0",
-        "backend_version": "2.69.0",
+        "version": "5.80.0",
+        "backend_version": "2.91.0",
         "state": "ready" if database == "ready" else "degraded",
         "database": database,
         "counts": counts,

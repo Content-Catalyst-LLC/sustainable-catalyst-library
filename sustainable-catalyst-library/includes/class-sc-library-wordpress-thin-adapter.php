@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 final class SC_Library_WordPress_Thin_Adapter {
-    public const VERSION = '5.79.0';
+    public const VERSION = '5.80.0';
     public const SCHEMA = 'sc-library-wordpress-thin-adapter/1.0';
     public const CONSOLIDATION_SCHEMA = 'sc-library-wordpress-thin-adapter-consolidation-claim/1.0';
     public const ROLE = 'thin-adapter';
@@ -78,7 +78,7 @@ final class SC_Library_WordPress_Thin_Adapter {
             ],
             'allowed_responsibilities' => self::allowed_responsibilities(),
             'prohibited_authorities' => self::prohibited_authorities(),
-            'next_gate' => 'v5.80.0-independent-library-application-certification',
+            'next_gate' => 'v6.0.0-independent-sustainable-catalyst-knowledge-library',
         ];
     }
 
