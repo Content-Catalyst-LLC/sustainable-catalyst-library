@@ -1,6 +1,6 @@
 {
   "schema": "sc-library-php-domain-retirement-inventory/1.0",
-  "library_version": "5.77.0",
+  "library_version": "5.78.0",
   "policy": "New PHP files require explicit inventory classification; new research/domain authority belongs in Python by default.",
   "categories": [
     "wordpress-integration",
@@ -399,7 +399,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-ingestion-job-fabric.php",
       "classification": "retire-candidate",
       "bytes": 2391,
-      "justification": "Python source-ingestion and normalization authority is active in v5.72.0; retain temporarily for WordPress compatibility, presentation, and measured retirement."
+      "justification": "Python background-job/workflow authority is consolidated in v5.78.0; retain temporarily for WordPress presentation and measured compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-institutional-collections-archives.php",
@@ -537,7 +537,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-orchestrator.php",
       "classification": "retire-candidate",
       "bytes": 68740,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python background-job/workflow authority is consolidated in v5.78.0; retain temporarily for WordPress presentation and measured compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-original-language-corpus.php",
@@ -573,7 +573,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-pipeline-engine.php",
       "classification": "retire-candidate",
       "bytes": 2127,
-      "justification": "Python research-package and reproducibility authority is active in v5.76.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
+      "justification": "Python background-job/workflow authority is consolidated in v5.78.0; retain temporarily for WordPress presentation and measured compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-planner.php",

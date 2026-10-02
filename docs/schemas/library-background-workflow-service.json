@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-background-workflow-service.json",
+  "title": "Sustainable Catalyst Library Background Job and Workflow Service",
+  "type": "object",
+  "required": [
+    "schema",
+    "library_version",
+    "backend_version",
+    "authority",
+    "resources",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-python-background-job-workflow-service/1.0"
+    },
+    "library_version": {
+      "const": "5.78.0"
+    },
+    "backend_version": {
+      "const": "2.89.0"
+    },
+    "authority": {
+      "const": "python-backend"
+    },
+    "resources": {
+      "type": "array"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

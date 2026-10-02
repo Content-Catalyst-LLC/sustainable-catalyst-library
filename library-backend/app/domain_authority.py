@@ -3,8 +3,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "5.77.0"
-BACKEND_VERSION = "2.88.0"
+LIBRARY_VERSION = "5.78.0"
+BACKEND_VERSION = "2.89.0"
 CONTRACT = "sc-library-python-domain-authority/1.0"
 READINESS_CONTRACT = "sc-library-python-domain-authority-readiness/1.0"
 MIGRATION_PLAN_CONTRACT = "sc-library-python-domain-migration-plan/1.0"
@@ -72,8 +72,11 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "wordpress_connector_fallback": False,
     },
     "background-workflows": {
-        "authority": "python-backend", "state": "authoritative-runtime",
-        "wordpress_role": "status-only-target",
+        "authority": "python-backend", "state": "authoritative",
+        "api": ["/api/library/v1/workflows", "/api/library/v1/workflows/readiness", "/api/library/v1/admin/workflows/jobs", "/api/library/v1/admin/workflows/pipelines", "/api/library/v1/admin/workflows/recover-expired-leases"],
+        "wordpress_role": "presentation-and-api-client-only",
+        "postgresql_job_state_authority": True,
+        "redis_job_state_authority": False,
     },
 }
 

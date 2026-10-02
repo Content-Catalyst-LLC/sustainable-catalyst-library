@@ -12,8 +12,8 @@ from .global_knowledge_federation import (
     validate_certification_payload,
 )
 
-LIBRARY_VERSION = "5.77.0"
-BACKEND_VERSION = "2.88.0"
+LIBRARY_VERSION = "5.78.0"
+BACKEND_VERSION = "2.89.0"
 CONTRACT = "sc-library-python-connector-federation-runtime/1.0"
 READINESS_CONTRACT = "sc-library-python-connector-federation-readiness/1.0"
 EXECUTION_PLAN_CONTRACT = "sc-library-connector-execution-plan/1.0"

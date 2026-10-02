@@ -1518,6 +1518,144 @@
           }
         }
       }
+    },
+    "/workflows": {
+      "get": {
+        "operationId": "libraryWorkflows",
+        "responses": {
+          "200": {
+            "description": "Background job/workflow service contract"
+          }
+        }
+      }
+    },
+    "/workflows/readiness": {
+      "get": {
+        "operationId": "libraryWorkflowsReadiness",
+        "responses": {
+          "200": {
+            "description": "Background job/workflow service readiness"
+          }
+        }
+      }
+    },
+    "/admin/workflows/validate": {
+      "post": {
+        "operationId": "libraryWorkflowValidate",
+        "responses": {
+          "200": {
+            "description": "Validate workflow control request"
+          }
+        }
+      }
+    },
+    "/admin/workflows/jobs": {
+      "get": {
+        "operationId": "libraryWorkflowJobs",
+        "responses": {
+          "200": {
+            "description": "List durable research jobs"
+          }
+        }
+      },
+      "post": {
+        "operationId": "libraryWorkflowJobSubmit",
+        "responses": {
+          "200": {
+            "description": "Submit durable research job"
+          }
+        }
+      }
+    },
+    "/admin/workflows/jobs/{job_id}": {
+      "get": {
+        "operationId": "libraryWorkflowJob",
+        "responses": {
+          "200": {
+            "description": "Get durable research job"
+          }
+        }
+      }
+    },
+    "/admin/workflows/jobs/{job_id}/cancel": {
+      "post": {
+        "operationId": "libraryWorkflowJobCancel",
+        "responses": {
+          "200": {
+            "description": "Cancel durable research job"
+          }
+        }
+      }
+    },
+    "/admin/workflows/workers": {
+      "get": {
+        "operationId": "libraryWorkflowWorkers",
+        "responses": {
+          "200": {
+            "description": "Get worker runtime snapshot"
+          }
+        }
+      }
+    },
+    "/admin/workflows/dead-letters": {
+      "get": {
+        "operationId": "libraryWorkflowDeadLetters",
+        "responses": {
+          "200": {
+            "description": "Get dead-letter snapshot"
+          }
+        }
+      }
+    },
+    "/admin/workflows/recover-expired-leases": {
+      "post": {
+        "operationId": "libraryWorkflowRecoverLeases",
+        "responses": {
+          "200": {
+            "description": "Recover expired job leases"
+          }
+        }
+      }
+    },
+    "/admin/workflows/pipelines/validate": {
+      "post": {
+        "operationId": "libraryWorkflowPipelineValidate",
+        "responses": {
+          "200": {
+            "description": "Validate pipeline definition"
+          }
+        }
+      }
+    },
+    "/admin/workflows/pipelines": {
+      "post": {
+        "operationId": "libraryWorkflowPipelineCreate",
+        "responses": {
+          "200": {
+            "description": "Create and start checkpointed pipeline"
+          }
+        }
+      }
+    },
+    "/admin/workflows/pipelines/{run_id}": {
+      "get": {
+        "operationId": "libraryWorkflowPipeline",
+        "responses": {
+          "200": {
+            "description": "Get checkpointed pipeline run"
+          }
+        }
+      }
+    },
+    "/admin/workflows/pipelines/{run_id}/resume": {
+      "post": {
+        "operationId": "libraryWorkflowPipelineResume",
+        "responses": {
+          "200": {
+            "description": "Resume checkpointed pipeline"
+          }
+        }
+      }
     }
   },
   "components": {

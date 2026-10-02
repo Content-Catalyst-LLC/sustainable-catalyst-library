@@ -9,8 +9,8 @@ from .models import RecordBatch, RecordPacket, SourcePacket
 from .query import get_record
 from .repository import delete_record, ingest_records
 
-LIBRARY_VERSION = "5.77.0"
-BACKEND_VERSION = "2.88.0"
+LIBRARY_VERSION = "5.78.0"
+BACKEND_VERSION = "2.89.0"
 CONTRACT = "sc-library-python-catalog-service/1.0"
 READINESS_CONTRACT = "sc-library-python-catalog-service-readiness/1.0"
 RESEARCH_OBJECT_CONTRACT = "sc-library-research-object/1.0"

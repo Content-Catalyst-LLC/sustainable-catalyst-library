@@ -242,6 +242,19 @@ from .connector_federation_service import (
     plan_execution as plan_library_federation_execution, federation_certification as library_federation_certification,
     validate_federation_certification as validate_library_federation_certification,
 )
+from .background_workflow_service import (
+    contract as library_workflow_contract, readiness as library_workflow_readiness,
+    validate_control as validate_library_workflow_control,
+    submit_background_job as submit_library_background_job,
+    background_job as library_background_job, background_jobs as library_background_jobs,
+    cancel_background_job as cancel_library_background_job,
+    worker_snapshot as library_workflow_workers, dead_letter_snapshot as library_workflow_dead_letters,
+    recover_workflow_leases as recover_library_workflow_leases,
+    validate_pipeline_workflow as validate_library_pipeline_workflow,
+    create_pipeline_workflow as create_library_pipeline_workflow,
+    pipeline_workflow as library_pipeline_workflow,
+    resume_pipeline_workflow as resume_library_pipeline_workflow,
+)
 from .runtime_independence import evaluate as evaluate_wordpress_failure_independence, readiness as wordpress_failure_independence_readiness
 from .release_engineering import release_manifest as library_release_manifest, readiness as library_release_engineering_readiness, validate_deployment_plan as validate_library_deployment_plan
 from .state_migration import (
@@ -493,6 +506,13 @@ def health() -> dict[str, Any]:
             "global_source_registry_authority": "python-backend",
             "connector_routing_authority": "python-backend",
             "wordpress_connector_fallback_allowed": False,
+            "python_background_workflow_authority": True,
+            "background_workflow_authority": "python-backend",
+            "research_job_authority": "python-backend",
+            "pipeline_execution_authority": "python-backend",
+            "worker_routing_authority": "python-backend",
+            "postgresql_job_state_authority": True,
+            "redis_job_state_authority": False,
             "original_language_authority": "python-backend",
             "ocr_htr_transcription_authority": "python-backend",
             "linguistic_corpus_authority": "python-backend",
@@ -3382,6 +3402,84 @@ async def library_api_v1_federation_certification_create(request: Request, autho
     try: return library_federation_certification(persist=True)
     except (ValueError,RuntimeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
+@app.get("/api/library/v1/workflows")
+def library_api_v1_workflows() -> dict[str, Any]:
+    return library_workflow_contract()
+
+@app.get("/api/library/v1/workflows/readiness")
+def library_api_v1_workflows_readiness() -> dict[str, Any]:
+    return library_workflow_readiness()
+
+async def _workflow_signed_json(request: Request, authorization: str|None, x_sc_timestamp: str|None, x_sc_signature: str|None) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/workflows/validate")
+async def library_api_v1_workflow_validate(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    return validate_library_workflow_control(await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+
+@app.get("/api/library/v1/admin/workflows/jobs")
+async def library_api_v1_workflow_jobs(request: Request, state: str="", capability: str="", limit: int=100, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return library_background_jobs(state=state,capability=capability,limit=limit)
+    except (ValueError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/admin/workflows/jobs/{job_id}")
+async def library_api_v1_workflow_job(job_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return library_background_job(job_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/workflows/jobs")
+async def library_api_v1_workflow_job_submit(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return submit_library_background_job(await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except (ValueError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/workflows/jobs/{job_id}/cancel")
+async def library_api_v1_workflow_job_cancel(job_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return cancel_library_background_job(job_id,await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except KeyError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/admin/workflows/workers")
+async def library_api_v1_workflow_workers(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    return library_workflow_workers()
+
+@app.get("/api/library/v1/admin/workflows/dead-letters")
+async def library_api_v1_workflow_dead_letters(request: Request, state: str="open", limit: int=100, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    return library_workflow_dead_letters(state=state,limit=limit)
+
+@app.post("/api/library/v1/admin/workflows/recover-expired-leases")
+async def library_api_v1_workflow_recover(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    payload=await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return recover_library_workflow_leases(limit=int(payload.get("limit") or 100))
+    except (ValueError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/workflows/pipelines/validate")
+async def library_api_v1_workflow_pipeline_validate(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    return validate_library_pipeline_workflow(await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+
+@app.post("/api/library/v1/admin/workflows/pipelines")
+async def library_api_v1_workflow_pipeline_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return create_library_pipeline_workflow(await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except (ValueError,KeyError,RuntimeError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/admin/workflows/pipelines/{run_id}")
+async def library_api_v1_workflow_pipeline(run_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return library_pipeline_workflow(run_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/workflows/pipelines/{run_id}/resume")
+async def library_api_v1_workflow_pipeline_resume(run_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await _workflow_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return resume_library_pipeline_workflow(run_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+    except (ValueError,RuntimeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()
 @app.get("/api/library/v1/runtime-certification/readiness")
@@ -3546,7 +3644,7 @@ async def library_api_v1_submit_research_job(request: Request, authorization: st
     body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
     try:
         payload=json.loads(body.decode("utf-8")) if body else {}
-        return {"schema":"sc-library-api-research-job-response/1.0","job":submit_research_job(payload)}
+        return {"schema":"sc-library-api-research-job-response/1.0","job":submit_library_background_job(payload)["job"],"workflow_authority":"python-backend"}
     except (ValueError,TypeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400,detail=library_api_error_envelope("invalid-research-job",str(exc),status=400)) from exc
 
 @app.post("/api/library/v1/admin/service-contracts")
