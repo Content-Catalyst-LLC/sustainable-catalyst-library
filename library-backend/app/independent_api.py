@@ -124,6 +124,13 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/admin/language/entity-resolution/{case_id}/decisions","name":"cross-language-resolution-decision","access":"signed-service","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/language/alignments/validate","name":"translation-alignment-validate","access":"signed-service","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/language/alignments","name":"translation-alignment-create","access":"signed-service","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/reproducibility","name":"python-research-package-reproducibility-service","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/reproducibility/readiness","name":"python-research-package-reproducibility-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/reproducibility/runtime","name":"runtime-reproducibility-status","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/reproducibility/packages/{package_id}","name":"research-reproducibility-package","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/reproducibility/packages/validate","name":"research-package-validate","access":"signed-service","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/reproducibility/packages","name":"research-package-create","access":"signed-service","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/reproducibility/packages/{package_id}/verify","name":"research-package-verify","access":"signed-service","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification","name":"runtime-certification","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification/readiness","name":"runtime-certification-readiness","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/runtime-certification/evaluate","name":"runtime-certification-evaluate","access":"signed-service","stability":"stable"},
@@ -153,6 +160,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "retrieval-orchestration": {"resources":["query-normalization","search-plans","lexical","hybrid","semantic","neural-reranking","adaptive-reranking","facets","result-envelopes"],"direct_api":True,"authority":"python-backend"},
     "provenance-graph": {"resources":["record-provenance","citations","evidence-graph","record-versions","normalization-lineage","core-bindings"],"direct_api":True,"authority":"python-backend"},
     "language-document": {"resources":["original-language","ocr-htr-transcription","linguistic-corpus","kwic","cross-language-resolution","translation-alignment","scientific-document-intelligence"],"direct_api":True,"authority":"python-backend"},
+    "research-package-reproducibility": {"resources":["research-packages","artifact-manifests","record-snapshots","pipeline-run-snapshots","execution-lineage","runtime-reproducibility-records","package-integrity-verification"],"direct_api":True,"authority":"python-backend"},
     "runtime-certification": {"resources":["wordpress-failure","runtime-probes","certification"],"direct_api":True,"authority":"library-service"},
 }
 
@@ -246,8 +254,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "5.75.0",
-        "backend_version": "2.86.0",
+        "library_version": "5.76.0",
+        "backend_version": "2.87.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -302,8 +310,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "5.75.0",
-        "backend_version": "2.86.0",
+        "library_version": "5.76.0",
+        "backend_version": "2.87.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

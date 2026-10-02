@@ -227,6 +227,13 @@ from .language_document_service import (
     validate_alignment as validate_library_alignment, create_alignment as create_library_alignment, alignment as library_alignment,
     scientific_document as library_scientific_document_intelligence,
 )
+from .research_package_service import (
+    contract as library_reproducibility_contract, readiness as library_reproducibility_readiness,
+    validate_package_payload as validate_library_research_package,
+    create_package as create_library_research_package,
+    get_package as get_library_research_package,
+    verify_package as verify_library_research_package,
+)
 from .runtime_independence import evaluate as evaluate_wordpress_failure_independence, readiness as wordpress_failure_independence_readiness
 from .release_engineering import release_manifest as library_release_manifest, readiness as library_release_engineering_readiness, validate_deployment_plan as validate_library_deployment_plan
 from .state_migration import (
@@ -470,6 +477,9 @@ def health() -> dict[str, Any]:
             "python_retrieval_orchestration_authority": True,
             "python_provenance_graph_authority": True,
             "python_language_document_authority": True,
+            "python_research_package_reproducibility_authority": True,
+            "research_package_authority": "python-backend",
+            "reproducibility_authority": "python-backend",
             "original_language_authority": "python-backend",
             "ocr_htr_transcription_authority": "python-backend",
             "linguistic_corpus_authority": "python-backend",
@@ -3269,6 +3279,40 @@ async def library_api_v1_language_alignment_validate(request: Request, authoriza
 async def library_api_v1_language_alignment_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
     try: return create_library_alignment(await _language_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
     except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/reproducibility")
+def library_api_v1_reproducibility_contract() -> dict[str, Any]: return library_reproducibility_contract()
+
+@app.get("/api/library/v1/reproducibility/readiness")
+def library_api_v1_reproducibility_readiness() -> dict[str, Any]: return library_reproducibility_readiness()
+
+@app.get("/api/library/v1/reproducibility/runtime")
+def library_api_v1_reproducibility_runtime() -> dict[str, Any]: return reproducibility_status()
+
+@app.get("/api/library/v1/reproducibility/packages/{package_id:path}")
+def library_api_v1_research_package(package_id: str, include_manifest: bool=True) -> dict[str, Any]:
+    try: return get_library_research_package(package_id,include_manifest=include_manifest)
+    except (KeyError,ValueError,RuntimeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+
+async def _reproducibility_signed_json(request: Request, authorization: str|None, x_sc_timestamp: str|None, x_sc_signature: str|None) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/reproducibility/packages/validate")
+async def library_api_v1_research_package_validate(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    return validate_library_research_package(await _reproducibility_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+
+@app.post("/api/library/v1/admin/reproducibility/packages")
+async def library_api_v1_research_package_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return create_library_research_package(await _reproducibility_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except (ValueError,KeyError,RuntimeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/reproducibility/packages/{package_id:path}/verify")
+async def library_api_v1_research_package_verify(package_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    payload=await _reproducibility_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return verify_library_research_package(package_id,payload)
+    except (ValueError,KeyError,RuntimeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()

@@ -1328,6 +1328,76 @@
           }
         }
       }
+    },
+    "/reproducibility": {
+      "get": {
+        "operationId": "libraryReproducibilityService",
+        "responses": {
+          "200": {
+            "description": "Research package/reproducibility service contract"
+          }
+        }
+      }
+    },
+    "/reproducibility/readiness": {
+      "get": {
+        "operationId": "libraryReproducibilityReadiness",
+        "responses": {
+          "200": {
+            "description": "Research package/reproducibility readiness"
+          }
+        }
+      }
+    },
+    "/reproducibility/runtime": {
+      "get": {
+        "operationId": "libraryRuntimeReproducibilityStatus",
+        "responses": {
+          "200": {
+            "description": "Runtime reproducibility status"
+          }
+        }
+      }
+    },
+    "/reproducibility/packages/{package_id}": {
+      "get": {
+        "operationId": "libraryResearchPackage",
+        "responses": {
+          "200": {
+            "description": "Research reproducibility package"
+          }
+        }
+      }
+    },
+    "/admin/reproducibility/packages/validate": {
+      "post": {
+        "operationId": "libraryResearchPackageValidate",
+        "responses": {
+          "200": {
+            "description": "Validate research package request"
+          }
+        }
+      }
+    },
+    "/admin/reproducibility/packages": {
+      "post": {
+        "operationId": "libraryResearchPackageCreate",
+        "responses": {
+          "200": {
+            "description": "Create research reproducibility package"
+          }
+        }
+      }
+    },
+    "/admin/reproducibility/packages/{package_id}/verify": {
+      "post": {
+        "operationId": "libraryResearchPackageVerify",
+        "responses": {
+          "200": {
+            "description": "Verify research reproducibility package"
+          }
+        }
+      }
     }
   },
   "components": {

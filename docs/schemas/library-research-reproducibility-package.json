@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-research-reproducibility-package.json",
+  "title": "Sustainable Catalyst Research Reproducibility Package",
+  "type": "object",
+  "required": [
+    "schema",
+    "library_version",
+    "backend_version",
+    "package_fingerprint_sha256",
+    "basis",
+    "counts",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-research-reproducibility-package/1.0"
+    },
+    "package_fingerprint_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "basis": {
+      "type": "object"
+    },
+    "counts": {
+      "type": "object"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

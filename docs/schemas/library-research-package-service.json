@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-research-package-service.json",
+  "title": "Sustainable Catalyst Library Research Package and Reproducibility Service",
+  "type": "object",
+  "required": [
+    "schema",
+    "authority",
+    "resources",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-python-research-package-reproducibility-service/1.0"
+    },
+    "authority": {
+      "const": "python-backend"
+    },
+    "resources": {
+      "type": "array"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}
