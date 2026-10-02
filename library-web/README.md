@@ -1,6 +1,6 @@
 # Sustainable Catalyst Knowledge Library Web
 
-**Application:** v2.1.0
+**Application:** v2.2.0
 **Deployment repair:** Library v5.61.0.1
 **API:** v1
 

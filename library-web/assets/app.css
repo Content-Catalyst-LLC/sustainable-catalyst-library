@@ -29,3 +29,15 @@ body.embed-mode .reader { max-width:960px; margin:0 auto; }
 .context-strip strong{color:var(--ink);font-size:.9rem}
 @media(max-width:1100px){.research-layout{grid-template-columns:220px minmax(0,1fr)}.working-set{grid-column:1/-1;position:static;max-height:none}.research-query{grid-template-columns:1fr 130px 130px auto}}
 @media(max-width:760px){.research-query{grid-template-columns:1fr}.research-layout{grid-template-columns:1fr}.research-filters{position:static}.year-row{grid-template-columns:1fr 1fr}}
+
+
+.research-navigation{display:flex;gap:8px;flex-wrap:wrap;padding:0 clamp(18px,4vw,64px) 20px}
+.research-navigation a{display:inline-flex;align-items:center;min-height:38px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink);font-size:.82rem;font-weight:800;text-decoration:none}
+.research-navigation a[aria-current="page"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.research-discovery{margin:0 clamp(18px,4vw,64px) 24px;padding:18px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow)}
+.research-pathways{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.research-pathway{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--soft)}
+.research-pathway h3{margin:2px 0 10px}.research-pathway ul{list-style:none;padding:0;margin:0;display:grid;gap:9px}.research-pathway li{display:grid;gap:3px;font-size:.78rem}.research-pathway li span{color:var(--muted);line-height:1.35}
+body[data-research-mode="discover"] #research-discovery,body[data-research-mode="search"] .research-results-panel,body[data-research-mode="working-set"] #working-set-panel{outline:2px solid var(--ink);outline-offset:2px}
+@media(max-width:1050px){.research-pathways{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.research-pathways{grid-template-columns:1fr}.research-navigation{overflow-x:auto;flex-wrap:nowrap}.research-navigation a{white-space:nowrap}}

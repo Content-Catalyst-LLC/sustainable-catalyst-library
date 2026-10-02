@@ -17,13 +17,11 @@
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="/search" aria-label="Knowledge Library home">
+      <a class="brand" href="/research" aria-label="Knowledge Library home">
         <span class="brand-mark">SC</span><span><strong>Sustainable Catalyst</strong><small>Knowledge Library</small></span>
       </a>
       <nav aria-label="Library">
         <a data-nav="research" href="/research">Research</a>
-        <a data-nav="search" href="/search">Search</a>
-        <a data-nav="discover" href="/discover">Discover</a>
         <a data-nav="system" href="/system">System</a>
         <a data-nav="account" href="/account">Account</a>
       </nav>
@@ -33,10 +31,20 @@
     <main id="main" tabindex="-1">
       <section class="view" data-view="research" hidden>
         <div class="page-heading research-heading">
-          <p class="eyebrow">Independent research interface</p>
+          <p class="eyebrow">Unified discovery & research navigation</p>
           <h1>Research across the Knowledge Library</h1>
-          <p>Search, filter, inspect provenance and evidence context, and assemble a temporary working set without moving research authority into the browser.</p>
+          <p>Move from discovery to search, record context, working sets, and saved research through one coherent Library surface.</p>
         </div>
+        <nav id="research-navigation" class="research-navigation" aria-label="Research navigation">
+          <a data-research-mode-link="overview" href="/research">Overview</a>
+          <a data-research-mode-link="discover" href="/discover">Discover</a>
+          <a data-research-mode-link="search" href="/search">Search</a>
+          <a data-research-mode-link="working-set" href="/research?mode=working-set">Working Set</a>
+        </nav>
+        <section id="research-discovery" class="research-discovery" aria-labelledby="research-discovery-title">
+          <div class="panel-heading"><div><p class="eyebrow">Research pathways</p><h2 id="research-discovery-title">Discover by research task</h2></div><span id="navigation-status">Loading navigation…</span></div>
+          <div id="research-pathways" class="research-pathways"></div>
+        </section>
         <form id="research-form" class="research-query" role="search">
           <label class="research-query-main">Research question or topic<input id="research-query" type="search" placeholder="Ask a question, enter a topic, title, author, source, or concept…" autocomplete="off"></label>
           <label>Mode<select id="research-mode"><option value="hybrid">Hybrid</option><option value="lexical">Lexical</option><option value="semantic">Semantic</option></select></label>
@@ -57,7 +65,7 @@
             <div id="research-results" class="result-list"><p class="empty-state">Enter a research question or browse with filters.</p></div>
             <button id="research-load-more" class="secondary-button" hidden>Load more</button>
           </section>
-          <aside class="working-set">
+          <aside class="working-set" id="working-set-panel">
             <div class="panel-heading"><h2>Working set</h2><span id="working-set-count">0</span></div>
             <p class="form-note">Stored only in this browser until you explicitly save records into a Library project or collection.</p>
             <div id="working-set"><p class="empty-state">No records selected.</p></div>
@@ -108,7 +116,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.1.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.2.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

@@ -201,6 +201,12 @@ from .research_interface import (
     record_context as independent_research_interface_record,
     owner_workspace as independent_research_interface_owner,
 )
+from .navigation_service import (
+    contract as unified_navigation_contract,
+    readiness as unified_navigation_readiness,
+    bootstrap as unified_navigation_bootstrap,
+    resolve_route as resolve_unified_navigation_route,
+)
 from .public_routing import contract as public_routing_contract, readiness as public_routing_readiness, record_seo_descriptor, record_embed_descriptor
 from .cross_product_integration import (
     registry_contract as cross_product_registry_contract, readiness as cross_product_integration_readiness,
@@ -566,6 +572,10 @@ def health() -> dict[str, Any]:
             "independent_application_certified_release": "6.0.0",
             "independent_library_product": True,
             "independent_library_research_interface": True,
+            "unified_discovery_research_navigation": True,
+            "navigation_authority": "python-backend-composition",
+            "canonical_research_route": "/research",
+            "legacy_search_discover_routes_supported": True,
             "research_interface_authority": "python-backend",
             "library_web_research_route": "/research",
             "research_interface_wordpress_required": False,
@@ -573,8 +583,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.0.0",
-            "library_sdk_version": "1.0.0",
+            "library_web_version": "2.2.0",
+            "library_sdk_version": "1.2.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -3531,6 +3541,22 @@ async def library_api_v1_workflow_pipeline_resume(run_id: str, request: Request,
     try: return resume_library_pipeline_workflow(run_id)
     except KeyError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
     except (ValueError,RuntimeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/navigation")
+def library_api_v1_navigation() -> dict[str, Any]:
+    return unified_navigation_contract()
+
+@app.get("/api/library/v1/navigation/readiness")
+def library_api_v1_navigation_readiness() -> dict[str, Any]:
+    return unified_navigation_readiness()
+
+@app.get("/api/library/v1/navigation/bootstrap")
+def library_api_v1_navigation_bootstrap() -> dict[str, Any]:
+    return unified_navigation_bootstrap()
+
+@app.get("/api/library/v1/navigation/resolve")
+def library_api_v1_navigation_resolve(path: str="/research") -> dict[str, Any]:
+    return resolve_unified_navigation_route(path)
 
 @app.get("/api/library/v1/research-interface")
 def library_api_v1_research_interface() -> dict[str, Any]:

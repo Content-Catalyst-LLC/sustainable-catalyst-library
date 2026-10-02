@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library 6.1.0 Optional WordPress Adapter for the Independent Library Research Interface.
- * Version: 6.1.0
+ * Description: Sustainable Catalyst Library 6.2.0 Optional WordPress Adapter for Unified Discovery & Research Navigation.
+ * Version: 6.2.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '6.1.0');
+define('SC_LIBRARY_VERSION', '6.2.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'optional-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);
@@ -25,14 +25,16 @@ define('SC_LIBRARY_WORDPRESS_LEGACY_COMPATIBILITY_PRESENT', true);
 define('SC_LIBRARY_INDEPENDENT_APPLICATION_CERTIFICATION_AUTHORITY', 'library-api');
 define('SC_LIBRARY_INDEPENDENT_APPLICATION_WORDPRESS_REQUIRED', false);
 define('SC_LIBRARY_APPLICATION_MODE', 'independent-primary');
-define('SC_LIBRARY_BACKEND_GENERATION', '3.1.0');
-define('SC_LIBRARY_WEB_GENERATION', '2.1.0');
-define('SC_LIBRARY_SDK_GENERATION', '1.1.0');
+define('SC_LIBRARY_BACKEND_GENERATION', '3.2.0');
+define('SC_LIBRARY_WEB_GENERATION', '2.2.0');
+define('SC_LIBRARY_SDK_GENERATION', '1.2.0');
 define('SC_LIBRARY_API_GENERATION', '1.0');
-define('SC_LIBRARY_NEXT_ARCHITECTURE_RELEASE', '6.2.0');
+define('SC_LIBRARY_NEXT_ARCHITECTURE_RELEASE', '6.3.0');
 define('SC_LIBRARY_RESEARCH_RUNTIME_AUTHORITY', 'library-api');
 define('SC_LIBRARY_RESEARCH_INTERFACE_AUTHORITY', 'library-api');
 define('SC_LIBRARY_RESEARCH_INTERFACE_WORDPRESS_REQUIRED', false);
+define('SC_LIBRARY_NAVIGATION_AUTHORITY', 'library-api');
+define('SC_LIBRARY_NAVIGATION_WORDPRESS_REQUIRED', false);
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);

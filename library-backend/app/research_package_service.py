@@ -11,8 +11,8 @@ from .checkpointed_pipeline import get_pipeline_run, pipeline_readiness
 from .db import get_pool
 from .execution_lineage import reproducibility_status, verify_reproducibility
 
-LIBRARY_VERSION = "6.1.0"
-BACKEND_VERSION = "3.1.0"
+LIBRARY_VERSION = "6.2.0"
+BACKEND_VERSION = "3.2.0"
 CONTRACT = "sc-library-python-research-package-reproducibility-service/1.0"
 READINESS_CONTRACT = "sc-library-python-research-package-reproducibility-readiness/1.0"
 PACKAGE_CONTRACT = "sc-library-research-reproducibility-package/1.0"

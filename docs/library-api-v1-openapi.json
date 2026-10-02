@@ -1806,6 +1806,46 @@
           }
         }
       }
+    },
+    "/navigation": {
+      "get": {
+        "operationId": "libraryUnifiedNavigation",
+        "responses": {
+          "200": {
+            "description": "Unified discovery and research navigation contract"
+          }
+        }
+      }
+    },
+    "/navigation/readiness": {
+      "get": {
+        "operationId": "libraryUnifiedNavigationReadiness",
+        "responses": {
+          "200": {
+            "description": "Unified navigation readiness"
+          }
+        }
+      }
+    },
+    "/navigation/bootstrap": {
+      "get": {
+        "operationId": "libraryUnifiedNavigationBootstrap",
+        "responses": {
+          "200": {
+            "description": "Unified navigation, research facets and discovery pathways"
+          }
+        }
+      }
+    },
+    "/navigation/resolve": {
+      "get": {
+        "operationId": "libraryUnifiedNavigationResolve",
+        "responses": {
+          "200": {
+            "description": "Resolve compatibility and canonical Library routes"
+          }
+        }
+      }
     }
   },
   "components": {

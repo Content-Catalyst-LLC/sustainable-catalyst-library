@@ -24,8 +24,8 @@ from .checkpointed_pipeline import (
 )
 from .ingestion_job_fabric import ingestion_fabric_status
 
-LIBRARY_VERSION = "6.1.0"
-BACKEND_VERSION = "3.1.0"
+LIBRARY_VERSION = "6.2.0"
+BACKEND_VERSION = "3.2.0"
 CONTRACT = "sc-library-python-background-job-workflow-service/1.0"
 READINESS_CONTRACT = "sc-library-python-background-job-workflow-readiness/1.0"
 CONTROL_VALIDATION_CONTRACT = "sc-library-workflow-control-validation/1.0"

@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.1.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.2.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, workingSet: [] };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [] };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -26,17 +26,23 @@ function setApiStatus(ok, label) {
 function currentRoute() {
   const hashRaw=(location.hash || "").replace(/^#\/?/, "");
   if (hashRaw) return hashRaw;
-  return location.pathname.replace(/^\/+|\/+$/g, "") || "search";
+  return location.pathname.replace(/^\/+|\/+$/g, "") || "research";
+}
+
+function resolveUnifiedResearchMode(name) {
+  const requested=new URLSearchParams(location.search).get("mode");
+  if (name === "search" || name === "discover") return name;
+  return ["overview","discover","search","working-set"].includes(requested) ? requested : "overview";
 }
 
 function route() {
-  const raw=currentRoute(); const [name="search", ...rest]=raw.split("/");
-  const view = ["research","search","discover","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
+  const raw=currentRoute(); const [name="research", ...rest]=raw.split("/");
+  const compatibilityResearch = name === "search" || name === "discover";
+  const view = compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
   $$(".view").forEach(el => { el.hidden = el.dataset.view !== view; });
   $$('[data-nav]').forEach(a => a.setAttribute('aria-current', a.dataset.nav===view ? 'page' : 'false'));
   updatePublicMetadata(view, rest);
-  if (view === "research") loadResearchBootstrap();
-  if (view === "discover") loadCapabilities();
+  if (view === "research") loadUnifiedNavigation(resolveUnifiedResearchMode(name));
   if (view === "system") loadSystem();
   if (view === "account") loadSession();
   if (view === "record" && rest.length) loadRecord(decodeURIComponent(rest.join("/")));
@@ -44,13 +50,16 @@ function route() {
 }
 
 function navigate(path) {
-  if (location.pathname !== path || location.hash) history.pushState({}, "", path);
+  const target=new URL(path,location.origin);
+  const current=location.pathname+location.search;
+  const next=target.pathname+target.search;
+  if (current !== next || location.hash) history.pushState({}, "", next);
   route();
 }
 
 function updatePublicMetadata(view, rest=[]) {
   const origin=String(config.publicOrigin || location.origin).replace(/\/$/, "");
-  let path=view === "search" ? "/search" : `/${view}`;
+  let path=view === "research" ? "/research" : `/${view}`;
   if (view === "record" && rest.length) path=`/record/${encodeURIComponent(decodeURIComponent(rest.join("/")))}`;
   const canonical=document.querySelector('link[rel="canonical"]') || document.head.appendChild(Object.assign(document.createElement('link'),{rel:'canonical'}));
   canonical.href=origin + (path === "/search" ? path : path);
@@ -128,6 +137,35 @@ function researchFacetOptions(select, values) {
     select.insertAdjacentHTML("beforeend",`<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`);
   }
 }
+
+function renderResearchPathways(groups=[]) {
+  const target=$("#research-pathways"); if (!target) return;
+  if (!groups.length) { target.innerHTML='<p class="empty-state">No research pathways are available.</p>'; return; }
+  target.innerHTML=groups.map(group=>`<article class="research-pathway"><p class="eyebrow">${escapeHtml(group.label || group.id)}</p><h3>${escapeHtml(group.label || group.id)}</h3><ul>${(group.items||[]).map(item=>`<li><strong>${escapeHtml(item.family)}</strong><span>${escapeHtml((item.resources||[]).slice(0,4).join(" · "))}</span></li>`).join("")}</ul></article>`).join("");
+}
+
+function applyUnifiedResearchMode(mode="overview") {
+  state.researchNavigationMode=mode;
+  document.body.dataset.researchMode=mode;
+  $$("[data-research-mode-link]").forEach(link=>link.setAttribute("aria-current",link.dataset.researchModeLink===mode ? "page" : "false"));
+  if (mode === "discover") requestAnimationFrame(()=>$("#research-discovery")?.scrollIntoView({block:"start"}));
+  if (mode === "search") requestAnimationFrame(()=>$("#research-query")?.focus({preventScroll:false}));
+  if (mode === "working-set") requestAnimationFrame(()=>$("#working-set-panel")?.scrollIntoView({block:"start"}));
+}
+
+async function loadUnifiedNavigation(mode="overview") {
+  const note=$("#navigation-status");
+  try {
+    if (!state.navigationBootstrap) state.navigationBootstrap=await api("/navigation/bootstrap");
+    renderResearchPathways(state.navigationBootstrap.pathways || []);
+    if (note) note.textContent=`Unified navigation · Web ${config.webVersion || "2.2.0"}`;
+  } catch (error) {
+    if (note) note.innerHTML=`<span class="error-state">${escapeHtml(error.message)}</span>`;
+  }
+  await loadResearchBootstrap();
+  applyUnifiedResearchMode(mode);
+}
+
 async function loadResearchBootstrap() {
   if (state.researchBootstrap) { loadWorkingSet(); return; }
   const note=$("#research-interface-status");
@@ -240,7 +278,7 @@ $("#reader-back").addEventListener("click",()=>history.length>1?history.back():n
 $("#login-form")?.addEventListener("submit",login);
 window.addEventListener("hashchange",route);
 window.addEventListener("popstate",route);
-document.addEventListener('click',event=>{const a=event.target.closest('a[data-app-link], nav a'); if(!a) return; const url=new URL(a.href,location.href); if(url.origin!==location.origin) return; event.preventDefault(); navigate(url.pathname);});
+document.addEventListener('click',event=>{const a=event.target.closest('a[data-app-link], nav a'); if(!a) return; const url=new URL(a.href,location.href); if(url.origin!==location.origin) return; event.preventDefault(); navigate(url.pathname+url.search);});
 bootstrap();
 
 
@@ -268,7 +306,7 @@ async function login(event) {
   event.preventDefault(); const error=$("#login-error"); error.hidden=true;
   const handle=$("#login-handle").value.trim(); const password=$("#login-password").value;
   try {
-    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.1.0'})});
+    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.2.0'})});
     $("#login-password").value=''; renderSession(session);
   } catch (e) { error.textContent=e.message; error.hidden=false; }
 }

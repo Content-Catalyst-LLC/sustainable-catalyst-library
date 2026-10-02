@@ -29,8 +29,8 @@ from .distributed_compute_broker import broker_readiness as compute_broker_readi
 from .cross_product_integration import readiness as cross_product_readiness
 from .public_routing import readiness as public_routing_readiness
 
-LIBRARY_VERSION = "6.1.0"
-BACKEND_VERSION = "3.1.0"
+LIBRARY_VERSION = "6.2.0"
+BACKEND_VERSION = "3.2.0"
 CONTRACT = "sc-library-independent-application-certification-service/1.0"
 READINESS_CONTRACT = "sc-library-independent-application-certification-readiness/1.0"
 CERTIFICATION_CONTRACT = "sc-library-independent-application-certification/1.0"
