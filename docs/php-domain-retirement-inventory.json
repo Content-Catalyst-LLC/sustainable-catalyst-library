@@ -1,6 +1,6 @@
 {
   "schema": "sc-library-php-domain-retirement-inventory/1.0",
-  "library_version": "5.73.0",
+  "library_version": "5.74.0",
   "policy": "New PHP files require explicit inventory classification; new research/domain authority belongs in Python by default.",
   "categories": [
     "wordpress-integration",
@@ -111,19 +111,19 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-citation-source-manager.php",
       "classification": "retire-candidate",
       "bytes": 161744,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python provenance/citation/evidence-graph authority is active in v5.74.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-citation-source-reliability.php",
       "classification": "retire-candidate",
       "bytes": 47209,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python provenance/citation/evidence-graph authority is active in v5.74.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-citation-studio.php",
       "classification": "retire-candidate",
       "bytes": 45928,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python provenance/citation/evidence-graph authority is active in v5.74.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-clinical-trial-intelligence.php",
@@ -279,13 +279,13 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-evidence-claim-linking.php",
       "classification": "retire-candidate",
       "bytes": 151094,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python provenance/citation/evidence-graph authority is active in v5.74.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-evidence-matrix-claim-intelligence.php",
       "classification": "retire-candidate",
       "bytes": 54517,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python provenance/citation/evidence-graph authority is active in v5.74.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-execution-fabric.php",
@@ -441,13 +441,13 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-knowledge-graph-evidence-intelligence.php",
       "classification": "retire-candidate",
       "bytes": 36263,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python provenance/citation/evidence-graph authority is active in v5.74.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-knowledge-graph.php",
       "classification": "retire-candidate",
       "bytes": 85176,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python provenance/citation/evidence-graph authority is active in v5.74.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-knowledge-landscape.php",
@@ -615,7 +615,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-public-evidence-claim-navigation.php",
       "classification": "retire-candidate",
       "bytes": 32459,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python provenance/citation/evidence-graph authority is active in v5.74.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-public-interface-assets.php",
@@ -645,7 +645,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-publications-research-graph.php",
       "classification": "retire-candidate",
       "bytes": 31734,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python provenance/citation/evidence-graph authority is active in v5.74.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-publications.php",
@@ -675,7 +675,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-relationships.php",
       "classification": "retire-candidate",
       "bytes": 11232,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python provenance/citation/evidence-graph authority is active in v5.74.0; retain temporarily for WordPress presentation and compatibility during measured retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-research-collections-curated-spaces.php",

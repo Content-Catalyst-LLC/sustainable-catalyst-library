@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-record-provenance.json",
+  "title": "Sustainable Catalyst Library Record Provenance",
+  "type": "object",
+  "required": [
+    "schema",
+    "record",
+    "lineage_fingerprint_sha256",
+    "record_versions"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-record-provenance/1.0"
+    },
+    "record": {
+      "type": "object"
+    },
+    "lineage_fingerprint_sha256": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64
+    },
+    "record_versions": {
+      "type": "array"
+    }
+  }
+}

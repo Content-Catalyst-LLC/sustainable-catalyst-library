@@ -1048,6 +1048,86 @@
           }
         }
       }
+    },
+    "/provenance": {
+      "get": {
+        "summary": "Python provenance, citation and evidence graph service contract",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/provenance/readiness": {
+      "get": {
+        "summary": "Provenance graph readiness",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/provenance/records/{record_id}": {
+      "get": {
+        "summary": "Record provenance lineage",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/citations/{record_id}": {
+      "get": {
+        "summary": "Record citations",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/evidence-graph/{record_id}": {
+      "get": {
+        "summary": "Evidence graph",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/citations": {
+      "post": {
+        "summary": "Create or update citation",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/citations/{record_id}/import-metadata": {
+      "post": {
+        "summary": "Import declared citation metadata",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/admin/citations/core-handoff": {
+      "post": {
+        "summary": "Queue governed Platform Core citation handoff",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {

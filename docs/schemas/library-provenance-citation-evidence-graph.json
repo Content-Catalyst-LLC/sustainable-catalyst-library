@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-provenance-citation-evidence-graph.json",
+  "title": "Sustainable Catalyst Library Provenance Citation Evidence Graph Service",
+  "type": "object",
+  "required": [
+    "schema",
+    "authority",
+    "guardrails"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-python-provenance-citation-evidence-graph/1.0"
+    },
+    "authority": {
+      "const": "python-backend"
+    },
+    "guardrails": {
+      "type": "object"
+    }
+  }
+}

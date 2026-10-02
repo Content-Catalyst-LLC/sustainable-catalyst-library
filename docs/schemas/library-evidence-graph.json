@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-evidence-graph.json",
+  "title": "Sustainable Catalyst Library Evidence Graph",
+  "type": "object",
+  "required": [
+    "schema",
+    "root_record_id",
+    "nodes",
+    "edges",
+    "graph_fingerprint_sha256"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sc-library-evidence-graph/1.0"
+    },
+    "root_record_id": {
+      "type": "string"
+    },
+    "nodes": {
+      "type": "array"
+    },
+    "edges": {
+      "type": "array"
+    },
+    "graph_fingerprint_sha256": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64
+    }
+  }
+}

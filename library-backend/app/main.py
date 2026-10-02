@@ -211,6 +211,12 @@ from .retrieval_orchestration import (
     facet_snapshot as library_retrieval_facets, plan as plan_library_retrieval,
     execute as orchestrate_library_search,
 )
+from .provenance_graph_service import (
+    contract as library_provenance_graph_contract, readiness as library_provenance_graph_readiness,
+    record_provenance as library_record_provenance, citations_for_record as library_record_citations,
+    evidence_graph as library_evidence_graph, create_citation as create_library_citation,
+    import_citations as import_library_citations, core_handoff as library_citation_core_handoff,
+)
 from .runtime_independence import evaluate as evaluate_wordpress_failure_independence, readiness as wordpress_failure_independence_readiness
 from .release_engineering import release_manifest as library_release_manifest, readiness as library_release_engineering_readiness, validate_deployment_plan as validate_library_deployment_plan
 from .state_migration import (
@@ -452,6 +458,9 @@ def health() -> dict[str, Any]:
             "python_research_state_authority": True,
             "python_source_ingestion_authority": True,
             "python_retrieval_orchestration_authority": True,
+            "python_provenance_graph_authority": True,
+            "citation_authority": "python-backend",
+            "evidence_graph_authority": "python-backend",
             "search_ranking_authority": "python-backend",
             "legacy_search_routes_converge_on_orchestrator": True,
             "source_normalization_authority": "python-backend",
@@ -2821,7 +2830,7 @@ async def cross_language_resolution_decision_ingest(
 @app.get("/api/library/v1")
 def library_api_v1_root() -> dict[str, Any]:
     c = library_api_service_contract()
-    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.73.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes","integrations":"/api/library/v1/integrations"}}
+    return {"schema":"sc-library-api-service-root/1.0","service":"sustainable-catalyst-knowledge-library","library_version":"5.74.0","backend_version":__version__,"api_version":c["api_version"],"base_path":c["base_path"],"state":c["state"],"wordpress_required":False,"links":{"service":"/api/library/v1/service","readiness":"/api/library/v1/readiness","capabilities":"/api/library/v1/capabilities","routes":"/api/library/v1/routes","integrations":"/api/library/v1/integrations"}}
 
 @app.get("/api/library/v1/service")
 def library_api_v1_service() -> dict[str, Any]: return library_api_service_contract()
@@ -2829,7 +2838,7 @@ def library_api_v1_service() -> dict[str, Any]: return library_api_service_contr
 @app.get("/api/library/v1/health")
 def library_api_v1_health() -> dict[str, Any]:
     db_state, detail = database_state()
-    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.73.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
+    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.74.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
 
 @app.get("/api/library/v1/readiness")
 def library_api_v1_readiness() -> dict[str, Any]: return library_api_readiness()
@@ -3100,6 +3109,51 @@ async def library_api_v1_retrieval_search_admin(request: Request, authorization:
     except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
     try: return orchestrate_library_search(payload)
     except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/provenance")
+def library_api_v1_provenance_contract() -> dict[str, Any]:
+    return library_provenance_graph_contract()
+
+@app.get("/api/library/v1/provenance/readiness")
+def library_api_v1_provenance_readiness() -> dict[str, Any]:
+    return library_provenance_graph_readiness()
+
+@app.get("/api/library/v1/provenance/records/{record_id:path}")
+def library_api_v1_record_provenance(record_id: str, version_limit: int=25) -> dict[str, Any]:
+    try: return library_record_provenance(record_id,version_limit=version_limit)
+    except ValueError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/citations/{record_id:path}")
+def library_api_v1_record_citations(record_id: str, direction: str="both", limit: int=100) -> dict[str, Any]:
+    try: return library_record_citations(record_id,direction=direction,limit=limit)
+    except ValueError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/evidence-graph/{record_id:path}")
+def library_api_v1_evidence_graph(record_id: str, depth: int=2, limit: int=250, include_core: bool=True) -> dict[str, Any]:
+    try: return library_evidence_graph(record_id,depth=depth,limit=limit,include_core=include_core)
+    except ValueError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/citations")
+async def library_api_v1_citation_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: payload=json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+    try: return create_library_citation(payload)
+    except Exception as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/citations/{record_id:path}/import-metadata")
+async def library_api_v1_citation_import(record_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return import_library_citations(record_id)
+    except ValueError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/citations/core-handoff")
+async def library_api_v1_citation_core_handoff(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: payload=json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+    try: return library_citation_core_handoff(payload)
+    except Exception as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()
