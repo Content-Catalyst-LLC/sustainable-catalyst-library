@@ -1716,6 +1716,36 @@
           }
         }
       }
+    },
+    "/product": {
+      "get": {
+        "operationId": "libraryProduct",
+        "responses": {
+          "200": {
+            "description": "Independent Sustainable Catalyst Knowledge Library product contract"
+          }
+        }
+      }
+    },
+    "/product/readiness": {
+      "get": {
+        "operationId": "libraryProductReadiness",
+        "responses": {
+          "200": {
+            "description": "Independent Knowledge Library product readiness"
+          }
+        }
+      }
+    },
+    "/product/release": {
+      "get": {
+        "operationId": "libraryProductRelease",
+        "responses": {
+          "200": {
+            "description": "Independent Knowledge Library release manifest"
+          }
+        }
+      }
     }
   },
   "components": {

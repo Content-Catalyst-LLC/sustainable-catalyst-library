@@ -3,8 +3,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "5.80.0"
-BACKEND_VERSION = "2.91.0"
+LIBRARY_VERSION = "6.0.0"
+BACKEND_VERSION = "3.0.0"
 CONTRACT = "sc-library-python-domain-authority/1.0"
 READINESS_CONTRACT = "sc-library-python-domain-authority-readiness/1.0"
 MIGRATION_PLAN_CONTRACT = "sc-library-python-domain-migration-plan/1.0"
@@ -71,8 +71,16 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "wordpress_role": "presentation-and-api-client-only",
         "wordpress_connector_fallback": False,
     },
+    "independent-library-product": {
+        "authority": "python-backend", "state": "independent-primary",
+        "api": ["/api/library/v1/product", "/api/library/v1/product/readiness", "/api/library/v1/product/release"],
+        "wordpress_role": "optional-adapter",
+        "api_version": "1.0",
+        "web_version": "2.0.0",
+        "sdk_version": "1.0.0",
+    },
     "independent-application-certification": {
-        "authority": "python-backend", "state": "certification-gate",
+        "authority": "python-backend", "state": "certified-foundation",
         "api": ["/api/library/v1/independent-application", "/api/library/v1/independent-application/readiness", "/api/library/v1/independent-application/certification", "/api/library/v1/admin/independent-application/certify"],
         "wordpress_role": "not-required",
         "next_release": "6.0.0",

@@ -188,6 +188,11 @@ from .independent_application_certification import (
     readiness as independent_application_readiness,
     build_certification as build_independent_application_certification,
 )
+from .independent_library_product import (
+    contract as independent_library_product_contract,
+    readiness as independent_library_product_readiness,
+    release_manifest as independent_library_product_release,
+)
 from .public_routing import contract as public_routing_contract, readiness as public_routing_readiness, record_seo_descriptor, record_embed_descriptor
 from .cross_product_integration import (
     registry_contract as cross_product_registry_contract, readiness as cross_product_integration_readiness,
@@ -550,7 +555,14 @@ def health() -> dict[str, Any]:
             "independent_application_certification": True,
             "independent_application_certification_authority": "python-backend",
             "wordpress_required_for_independent_application": False,
-            "independent_application_next_release": "6.0.0",
+            "independent_application_certified_release": "6.0.0",
+            "independent_library_product": True,
+            "library_generation": 6,
+            "library_application_mode": "independent-primary",
+            "wordpress_optional_adapter": True,
+            "api_v1_stable": True,
+            "library_web_version": "2.0.0",
+            "library_sdk_version": "1.0.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -3507,6 +3519,18 @@ async def library_api_v1_workflow_pipeline_resume(run_id: str, request: Request,
     try: return resume_library_pipeline_workflow(run_id)
     except KeyError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
     except (ValueError,RuntimeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/product")
+def library_api_v1_product() -> dict[str, Any]:
+    return independent_library_product_contract()
+
+@app.get("/api/library/v1/product/readiness")
+def library_api_v1_product_readiness() -> dict[str, Any]:
+    return independent_library_product_readiness()
+
+@app.get("/api/library/v1/product/release")
+def library_api_v1_product_release() -> dict[str, Any]:
+    return independent_library_product_release()
 
 @app.get("/api/library/v1/independent-application")
 def library_api_v1_independent_application() -> dict[str, Any]:

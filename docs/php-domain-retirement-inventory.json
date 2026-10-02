@@ -1,7 +1,7 @@
 {
   "schema": "sc-library-php-domain-retirement-inventory/1.0",
-  "library_version": "5.80.0",
-  "policy": "WordPress is an optional thin adapter. New research/domain authority belongs in Python/API v1; retire-candidate PHP remains compatibility-only until measured removal.",
+  "library_version": "6.0.0",
+  "policy": "The Knowledge Library is an independent primary application. WordPress is an optional adapter; PHP compatibility files do not hold Library research/domain authority.",
   "categories": [
     "wordpress-integration",
     "presentation",
@@ -903,5 +903,19 @@
     "legacy_compatibility_is_domain_authority": false,
     "mass_deletion_required": false,
     "next_release": "6.0.0"
+  },
+  "independent_library_product": {
+    "phase": "v6.0.0-independent-sustainable-catalyst-knowledge-library",
+    "application_mode": "independent-primary",
+    "backend_version": "3.0.0",
+    "web_version": "2.0.0",
+    "sdk_version": "1.0.0",
+    "api_version": "1.0",
+    "wordpress_role": "optional-adapter",
+    "wordpress_required": false,
+    "php_domain_authority_files": 0,
+    "legacy_compatibility_present": true,
+    "legacy_compatibility_is_domain_authority": false,
+    "next_release": "6.1.0"
   }
 }

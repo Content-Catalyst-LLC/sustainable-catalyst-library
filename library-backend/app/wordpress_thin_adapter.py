@@ -7,8 +7,8 @@ from typing import Any
 from .runtime_authority import dependency_graph, guardrails as runtime_guardrails
 from .identity_access import boundary_contract as identity_boundary_contract
 
-LIBRARY_VERSION = "5.80.0"
-BACKEND_VERSION = "2.91.0"
+LIBRARY_VERSION = "6.0.0"
+BACKEND_VERSION = "3.0.0"
 CONTRACT = "sc-library-wordpress-thin-adapter/1.0"
 READINESS_CONTRACT = "sc-library-wordpress-thin-adapter-readiness/1.0"
 CONSOLIDATION_CONTRACT = "sc-library-wordpress-thin-adapter-consolidation/1.0"
@@ -103,7 +103,7 @@ def contract() -> dict[str, Any]:
         "library_version": LIBRARY_VERSION,
         "backend_version": BACKEND_VERSION,
         "adapter": {
-            "id": "wordpress", "role": "thin-adapter", "authoritative": False,
+            "id": "wordpress", "role": "optional-adapter", "authoritative": False,
             "required_for_research_execution": False, "required_for_library_web": False,
             "consolidated": True,
         },
@@ -140,7 +140,7 @@ def certify_consolidation(payload: dict[str, Any] | None) -> dict[str, Any]:
     payload = dict(payload or {})
     errors = []
     if str(payload.get("library_version") or "") != LIBRARY_VERSION: errors.append("library-version-must-be-5.79.0")
-    if str(payload.get("wordpress_role") or "") != "thin-adapter": errors.append("wordpress-role-must-be-thin-adapter")
+    if str(payload.get("wordpress_role") or "") != "optional-adapter": errors.append("wordpress-role-must-be-optional-adapter")
     if payload.get("wordpress_authoritative") is not False: errors.append("wordpress-authoritative-must-be-false")
     if payload.get("legacy_domain_authority") is not False: errors.append("legacy-domain-authority-must-be-false")
     if payload.get("api_v1_required_for_domain_behavior") is not True: errors.append("api-v1-domain-boundary-required")
@@ -155,7 +155,7 @@ def certify_consolidation(payload: dict[str, Any] | None) -> dict[str, Any]:
     if missing: errors.append("missing-prohibited-authorities:" + ",".join(missing))
     normalized = {
         "library_version": LIBRARY_VERSION,
-        "wordpress_role": "thin-adapter",
+        "wordpress_role": "optional-adapter",
         "wordpress_authoritative": False,
         "legacy_domain_authority": False,
         "api_v1_required_for_domain_behavior": True,

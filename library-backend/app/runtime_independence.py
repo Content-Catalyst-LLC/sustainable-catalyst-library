@@ -2,7 +2,7 @@ from __future__ import annotations
 from hashlib import sha256
 import json
 from typing import Any
-LIBRARY_VERSION = "5.80.0"; BACKEND_VERSION = "2.91.0"
+LIBRARY_VERSION = "6.0.0"; BACKEND_VERSION = "3.0.0"
 CONTRACT="sc-library-wordpress-failure-independence-certification/1.0"; READINESS_CONTRACT="sc-library-wordpress-failure-independence-readiness/1.0"
 REQUIRED_PROBES=("api","database","search-records","identity-session","artifacts","pipelines","compute","cross-product-integrations","client-framework","domain-authority","catalog-service","research-state","ingestion-service","retrieval-orchestration","provenance-graph","language-document","reproducibility-service","connector-federation","workflow-service","thin-adapter-consolidation","public-routing","library-web")
 def _canon(v): return json.dumps(v,sort_keys=True,separators=(",",":"),ensure_ascii=False,default=str)
