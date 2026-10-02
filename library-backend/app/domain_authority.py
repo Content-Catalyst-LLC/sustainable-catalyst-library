@@ -3,8 +3,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "5.78.0"
-BACKEND_VERSION = "2.89.0"
+LIBRARY_VERSION = "5.79.0"
+BACKEND_VERSION = "2.90.0"
 CONTRACT = "sc-library-python-domain-authority/1.0"
 READINESS_CONTRACT = "sc-library-python-domain-authority-readiness/1.0"
 MIGRATION_PLAN_CONTRACT = "sc-library-python-domain-migration-plan/1.0"
@@ -70,6 +70,13 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "api": ["/api/library/v1/federation", "/api/library/v1/federation/sources/{source_id}", "/api/library/v1/federation/connectors/{connector_id}", "/api/library/v1/admin/federation/plan"],
         "wordpress_role": "presentation-and-api-client-only",
         "wordpress_connector_fallback": False,
+    },
+    "wordpress-thin-adapter": {
+        "authority": "python-backend", "state": "consolidated",
+        "api": ["/api/library/v1/wordpress-adapter", "/api/library/v1/wordpress-adapter/readiness", "/api/library/v1/wordpress-adapter/consolidation", "/api/library/v1/admin/wordpress-adapter/consolidation/certify"],
+        "wordpress_role": "optional-thin-adapter",
+        "php_domain_authority_files": 0,
+        "legacy_compatibility_present": True,
     },
     "background-workflows": {
         "authority": "python-backend", "state": "authoritative",

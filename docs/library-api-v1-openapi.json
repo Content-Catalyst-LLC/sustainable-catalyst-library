@@ -303,7 +303,7 @@
     },
     "/wordpress-adapter": {
       "get": {
-        "operationId": "libraryWordPressThinAdapterContract",
+        "operationId": "libraryWordpressAdapter",
         "responses": {
           "200": {
             "description": "WordPress thin-adapter contract"
@@ -313,7 +313,7 @@
     },
     "/wordpress-adapter/readiness": {
       "get": {
-        "operationId": "libraryWordPressThinAdapterReadiness",
+        "operationId": "libraryWordpressAdapterReadiness",
         "responses": {
           "200": {
             "description": "WordPress thin-adapter readiness"
@@ -1653,6 +1653,26 @@
         "responses": {
           "200": {
             "description": "Resume checkpointed pipeline"
+          }
+        }
+      }
+    },
+    "/wordpress-adapter/consolidation": {
+      "get": {
+        "operationId": "libraryWordpressAdapterConsolidation",
+        "responses": {
+          "200": {
+            "description": "WordPress thin-adapter consolidation manifest"
+          }
+        }
+      }
+    },
+    "/admin/wordpress-adapter/consolidation/certify": {
+      "post": {
+        "operationId": "libraryWordpressAdapterConsolidationCertify",
+        "responses": {
+          "200": {
+            "description": "Certify a WordPress thin-adapter consolidation claim"
           }
         }
       }

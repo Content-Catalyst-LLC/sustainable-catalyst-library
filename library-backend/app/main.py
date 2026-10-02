@@ -177,7 +177,12 @@ from .independent_api import (
     service_contract as library_api_service_contract, validate_service_contract as validate_library_api_service_contract,
 )
 from .web_application import application_contract as library_web_application_contract, readiness as library_web_readiness
-from .wordpress_thin_adapter import contract as wordpress_thin_adapter_contract, readiness as wordpress_thin_adapter_readiness
+from .wordpress_thin_adapter import (
+    contract as wordpress_thin_adapter_contract,
+    readiness as wordpress_thin_adapter_readiness,
+    consolidation_manifest as wordpress_thin_adapter_consolidation,
+    certify_consolidation as certify_wordpress_thin_adapter_consolidation,
+)
 from .public_routing import contract as public_routing_contract, readiness as public_routing_readiness, record_seo_descriptor, record_embed_descriptor
 from .cross_product_integration import (
     registry_contract as cross_product_registry_contract, readiness as cross_product_integration_readiness,
@@ -533,6 +538,10 @@ def health() -> dict[str, Any]:
             "research_object_envelopes": True,
             "wordpress_publication_domain_authority": False,
             "wordpress_php_domain_authority": False,
+            "wordpress_thin_adapter_consolidated": True,
+            "wordpress_adapter_certification_authority": "python-backend",
+            "wordpress_required_for_library_runtime": False,
+            "wordpress_legacy_domain_authority": False,
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -2952,6 +2961,16 @@ def library_api_v1_wordpress_adapter() -> dict[str, Any]: return wordpress_thin_
 
 @app.get("/api/library/v1/wordpress-adapter/readiness")
 def library_api_v1_wordpress_adapter_readiness() -> dict[str, Any]: return wordpress_thin_adapter_readiness()
+
+@app.get("/api/library/v1/wordpress-adapter/consolidation")
+def library_api_v1_wordpress_adapter_consolidation() -> dict[str, Any]:
+    return wordpress_thin_adapter_consolidation()
+
+@app.post("/api/library/v1/admin/wordpress-adapter/consolidation/certify")
+async def library_api_v1_wordpress_adapter_consolidation_certify(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return certify_wordpress_thin_adapter_consolidation(json.loads(body.decode("utf-8")) if body else {})
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
 
 
 @app.get("/api/library/v1/integrations")

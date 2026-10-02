@@ -1,7 +1,7 @@
 {
   "schema": "sc-library-php-domain-retirement-inventory/1.0",
-  "library_version": "5.78.0",
-  "policy": "New PHP files require explicit inventory classification; new research/domain authority belongs in Python by default.",
+  "library_version": "5.79.0",
+  "policy": "WordPress is an optional thin adapter. New research/domain authority belongs in Python/API v1; retire-candidate PHP remains compatibility-only until measured removal.",
   "categories": [
     "wordpress-integration",
     "presentation",
@@ -881,5 +881,15 @@
       "bytes": 44275,
       "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
     }
-  ]
+  ],
+  "consolidation": {
+    "phase": "v5.79.0-wordpress-thin-adapter-consolidation",
+    "php_domain_authority_files": 0,
+    "legacy_compatibility_present": true,
+    "mass_deletion_performed": false,
+    "php_include_files": 144,
+    "adapter_or_presentation_files": 15,
+    "retire_candidate_files": 129,
+    "next_gate": "v5.80.0-independent-library-application-certification"
+  }
 }

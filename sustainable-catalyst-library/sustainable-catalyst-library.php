@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library 5.78.0 Python Background Job & Workflow Consolidation.
- * Version: 5.78.0
+ * Description: Sustainable Catalyst Library 5.79.0 WordPress Thin Adapter Consolidation.
+ * Version: 5.79.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,10 +15,13 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.78.0');
+define('SC_LIBRARY_VERSION', '5.79.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'thin-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);
+define('SC_LIBRARY_WORDPRESS_THIN_ADAPTER_CONSOLIDATED', true);
+define('SC_LIBRARY_WORDPRESS_LEGACY_DOMAIN_AUTHORITY', false);
+define('SC_LIBRARY_WORDPRESS_LEGACY_COMPATIBILITY_PRESENT', true);
 define('SC_LIBRARY_RESEARCH_RUNTIME_AUTHORITY', 'library-api');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');

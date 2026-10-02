@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) { exit; }
 /**
  * v5.6.0 Python Research Intelligence Backend bridge.
  *
- * WordPress remains authoritative for users, editorial state, and public URLs.
+ * WordPress is an optional editorial/presentation adapter; Library API and Python services own application state and research execution.
  * The Python service receives bounded server-to-server index packets only.
  * v5.5.1 hardens bulk ingestion with payload-aware adaptive batching.
  * v5.5.2 exposes signed operations/recovery helpers used by the operations console.
@@ -114,7 +114,7 @@ final class SC_Library_Python_Backend {
         ?>
         <div class="wrap">
             <h1><?php esc_html_e('Library Python Research Intelligence Backend', 'sustainable-catalyst-library'); ?></h1>
-            <p><?php esc_html_e('WordPress remains the editorial and identity authority. The Python service provides durable indexing, search, provenance, graph relationships, and record-history intelligence.', 'sustainable-catalyst-library'); ?></p>
+            <p><?php esc_html_e('WordPress is an optional editorial and presentation adapter. Library API and Python services own durable research state, identity/session boundaries, indexing, search, provenance, graph relationships, and research execution.', 'sustainable-catalyst-library'); ?></p>
             <form method="post" action="options.php">
                 <?php settings_fields('sc_library_backend_settings'); ?>
                 <table class="form-table" role="presentation">

@@ -8,8 +8,8 @@ import json
 import secrets
 from typing import Any
 
-LIBRARY_VERSION = "5.78.0"
-BACKEND_VERSION = "2.89.0"
+LIBRARY_VERSION = "5.79.0"
+BACKEND_VERSION = "2.90.0"
 CONTRACT = "sc-library-identity-access-boundary/1.0"
 IDENTITY_CONTRACT = "sc-library-identity/1.0"
 SESSION_CONTRACT = "sc-library-session/1.0"
