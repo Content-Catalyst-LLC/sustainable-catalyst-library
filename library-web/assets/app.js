@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.0.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.1.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, workingSet: [] };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -31,10 +31,11 @@ function currentRoute() {
 
 function route() {
   const raw=currentRoute(); const [name="search", ...rest]=raw.split("/");
-  const view = ["search","discover","system","account"].includes(name) ? name : name === "record" ? "record" : "search";
+  const view = ["research","search","discover","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
   $$(".view").forEach(el => { el.hidden = el.dataset.view !== view; });
   $$('[data-nav]').forEach(a => a.setAttribute('aria-current', a.dataset.nav===view ? 'page' : 'false'));
   updatePublicMetadata(view, rest);
+  if (view === "research") loadResearchBootstrap();
   if (view === "discover") loadCapabilities();
   if (view === "system") loadSystem();
   if (view === "account") loadSession();
@@ -54,7 +55,7 @@ function updatePublicMetadata(view, rest=[]) {
   const canonical=document.querySelector('link[rel="canonical"]') || document.head.appendChild(Object.assign(document.createElement('link'),{rel:'canonical'}));
   canonical.href=origin + (path === "/search" ? path : path);
   const robots=document.querySelector('meta[name="robots"]') || document.head.appendChild(Object.assign(document.createElement('meta'),{name:'robots'}));
-  robots.content=["search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
+  robots.content=["research","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
 }
 
 function setMeta(name, content, property=false) {
@@ -95,6 +96,83 @@ function renderResults(items, append=false) {
   target.append(frag);
 }
 
+
+const WORKING_SET_KEY="sc-library-research-working-set-v1";
+
+function loadWorkingSet() {
+  try {
+    const raw=JSON.parse(localStorage.getItem(WORKING_SET_KEY) || "[]");
+    state.workingSet=Array.isArray(raw) ? raw.filter(x=>x && x.id).slice(0,100) : [];
+  } catch { state.workingSet=[]; }
+  renderWorkingSet();
+}
+function saveWorkingSet() { localStorage.setItem(WORKING_SET_KEY,JSON.stringify(state.workingSet.slice(0,100))); renderWorkingSet(); }
+function renderWorkingSet() {
+  const target=$("#working-set"); const count=$("#working-set-count"); if (!target || !count) return;
+  count.textContent=String(state.workingSet.length);
+  if (!state.workingSet.length) { target.innerHTML='<p class="empty-state">No records selected.</p>'; return; }
+  target.innerHTML=state.workingSet.map(item=>`<article class="working-item"><a href="/record/${encodeURIComponent(item.id)}" data-app-link>${escapeHtml(item.title || item.id)}</a><button type="button" data-remove-working="${escapeHtml(item.id)}" class="text-button">Remove</button></article>`).join("");
+}
+function addToWorkingSet(record) {
+  const id=resultId(record); if (!id) return;
+  if (!state.workingSet.find(x=>x.id===id)) state.workingSet.push({id,title:resultTitle(record),type:objectType(record)});
+  saveWorkingSet();
+}
+function researchFacetOptions(select, values) {
+  if (!select || !Array.isArray(values)) return;
+  const first=select.firstElementChild?.outerHTML || '<option value="">All</option>'; select.innerHTML=first;
+  for (const item of values) {
+    const value=typeof item==="string" ? item : (item?.value ?? item?.key ?? item?.id);
+    const label=typeof item==="string" ? item : (item?.label ?? item?.name ?? value);
+    if (value == null || value === "") continue;
+    select.insertAdjacentHTML("beforeend",`<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`);
+  }
+}
+async function loadResearchBootstrap() {
+  if (state.researchBootstrap) { loadWorkingSet(); return; }
+  const note=$("#research-interface-status");
+  try {
+    const data=await api("/research-interface/bootstrap"); state.researchBootstrap=data;
+    const facets=data.facets || {};
+    researchFacetOptions($("#research-object-type"), facets.object_types || facets.object_type || []);
+    researchFacetOptions($("#research-source"), facets.sources || facets.source_keys || facets.source_key || []);
+    if (note) note.textContent=`Research interface online · ${data.search?.default_mode || "hybrid"} discovery · API v1`;
+  } catch (error) { if (note) note.innerHTML=`<span class="error-state">${escapeHtml(error.message)}</span>`; }
+  loadWorkingSet();
+}
+function researchParams() {
+  const p={q:$("#research-query")?.value.trim() || "",mode:$("#research-mode")?.value || "hybrid",sort:$("#research-sort")?.value || "relevance",object_type:$("#research-object-type")?.value || "",source_key:$("#research-source")?.value || "",topic:$("#research-topic")?.value.trim() || "",year_from:$("#research-year-from")?.value || "",year_to:$("#research-year-to")?.value || "",limit:String(state.limit),offset:String(state.researchOffset)};
+  return Object.fromEntries(Object.entries(p).filter(([,v])=>v!=="" && v!=null));
+}
+function renderResearchResults(items,append=false) {
+  const target=$("#research-results"); if (!target) return; if (!append) target.innerHTML="";
+  if (!items.length && !append) { target.innerHTML='<p class="empty-state">No records matched this research scope.</p>'; return; }
+  const frag=document.createDocumentFragment();
+  for (const record of items) {
+    const id=resultId(record); const card=document.createElement("article"); card.className="result-card research-result-card";
+    const title=escapeHtml(resultTitle(record)); const summary=escapeHtml(text(resultSummary(record)).slice(0,700)); const type=escapeHtml(objectType(record));
+    card.innerHTML=`<div class="result-meta"><span>${type}</span>${record.year?`<span>${escapeHtml(record.year)}</span>`:""}</div><h3>${id?`<a href="/record/${encodeURIComponent(id)}" data-app-link>${title}</a>`:title}</h3><p>${summary}</p>${id?`<div class="result-actions"><button type="button" class="secondary-button" data-add-working="${escapeHtml(id)}">Add to working set</button><a href="/record/${encodeURIComponent(id)}" data-app-link class="text-button">Open research context</a></div>`:""}`;
+    card.dataset.record=JSON.stringify({id,title:resultTitle(record),type:objectType(record)}); frag.append(card);
+  }
+  target.append(frag);
+}
+async function researchSearch({append=false}={}) {
+  const target=$("#research-results"); if (!target) return; if (!append) state.researchOffset=0; target.setAttribute("aria-busy","true");
+  try {
+    const params=new URLSearchParams(researchParams()); const data=await api(`/research-interface/search?${params}`); const result=data.result || {}; const items=result.results || [];
+    state.researchTotal=Number(result.total ?? items.length); renderResearchResults(items,append);
+    $("#research-result-count").textContent=`${state.researchTotal.toLocaleString()} ${state.researchTotal===1?"result":"results"}`;
+    state.researchOffset += items.length; $("#research-load-more").hidden = !(items.length === state.limit && (result.total == null || state.researchOffset < Number(result.total)));
+  } catch (error) { if (!append) target.innerHTML=`<p class="error-state">${escapeHtml(error.message)}</p>`; }
+  finally { target.removeAttribute("aria-busy"); }
+}
+function clearResearchScope() {
+  for (const selector of ["#research-query","#research-topic","#research-year-from","#research-year-to"]) { const el=$(selector); if(el) el.value=""; }
+  if ($("#research-object-type")) $("#research-object-type").value=""; if ($("#research-source")) $("#research-source").value="";
+  if ($("#research-mode")) $("#research-mode").value="hybrid"; if ($("#research-sort")) $("#research-sort").value="relevance";
+  state.researchOffset=0; $("#research-results").innerHTML='<p class="empty-state">Enter a research question or browse with filters.</p>'; $("#research-result-count").textContent=""; $("#research-load-more").hidden=true;
+}
+
 async function search({append=false}={}) {
   const q=$("#query").value.trim(); const mode=$("#search-mode").value; if (!append) state.offset=0;
   state.query=q; state.mode=mode; $("#search-results").setAttribute("aria-busy","true");
@@ -111,11 +189,14 @@ async function search({append=false}={}) {
 async function loadRecord(id) {
   $("#reader-id").textContent=id; const target=$("#reader"); target.innerHTML='<p class="empty-state">Loading record…</p>';
   try {
-    const data=await api(`/records/${encodeURIComponent(id)}?include_body=true`); const r=data.record || {};
+    const context=await api(`/research-interface/records/${encodeURIComponent(id)}?include_body=true&evidence_depth=1&evidence_limit=120`);
+    const obj=context.research_object || {}; const r={...(obj.descriptive||{}),...(obj.source||{}),...(obj.publication||{}),...(obj.identity||{}),body_text:obj.content?.body_text || "",chunks:obj.content?.chunks || [],metadata:obj.metadata || {}};
     api(`/seo/records/${encodeURIComponent(id)}`).then(applySeoDescriptor).catch(()=>{});
     const title=escapeHtml(resultTitle(r)); const body=pick(r,["body_text","body","content","abstract","summary","description"]) || "No readable body is available for this record.";
     const source=pick(r,["source_name","source","source_key"]); const type=objectType(r);
-    target.innerHTML=`<header><p class="eyebrow">${escapeHtml(type)}</p><h1>${title}</h1><div class="reader-meta">${source?`<span>Source: ${escapeHtml(source)}</span>`:""}${r.year?`<span>Year: ${escapeHtml(r.year)}</span>`:""}</div></header><div class="reader-body">${escapeHtml(body).split(/\n{2,}/).map(p=>`<p>${p.replace(/\n/g,"<br>")}</p>`).join("")}</div><details><summary>Record metadata</summary><pre>${escapeHtml(JSON.stringify(r,null,2))}</pre></details>`;
+    const versions=context.provenance?.record_versions?.length || 0; const citations=context.citations?.count || 0; const nodes=context.evidence_graph?.node_count || 0; const edges=context.evidence_graph?.edge_count || 0;
+    target.innerHTML=`<header><p class="eyebrow">${escapeHtml(type)}</p><h1>${title}</h1><div class="reader-meta">${source?`<span>Source: ${escapeHtml(source)}</span>`:""}${r.published_at?`<span>Published: ${escapeHtml(r.published_at)}</span>`:""}</div></header><aside class="context-strip"><span><strong>${versions}</strong> versions</span><span><strong>${citations}</strong> citations</span><span><strong>${nodes}</strong> evidence nodes</span><span><strong>${edges}</strong> evidence edges</span><button type="button" class="secondary-button" data-reader-add="${escapeHtml(id)}">Add to working set</button></aside><div class="reader-body">${escapeHtml(body).split(/\n{2,}/).map(p=>`<p>${p.replace(/\n/g,"<br>")}</p>`).join("")}</div><details><summary>Research context</summary><pre>${escapeHtml(JSON.stringify({provenance:context.provenance,citations:context.citations,evidence_graph:context.evidence_graph},null,2))}</pre></details><details><summary>Research object metadata</summary><pre>${escapeHtml(JSON.stringify(obj,null,2))}</pre></details>`;
+    $("[data-reader-add]")?.addEventListener("click",()=>{addToWorkingSet({record_id:id,title:resultTitle(r),object_type:type});});
   } catch (error) { target.innerHTML=`<p class="error-state">${escapeHtml(error.message)}</p>`; }
 }
 
@@ -149,6 +230,10 @@ async function bootstrap() {
   route();
 }
 
+$("#research-form")?.addEventListener("submit", event => { event.preventDefault(); navigate("/research"); researchSearch(); });
+$("#research-load-more")?.addEventListener("click",()=>researchSearch({append:true}));
+$("#research-clear")?.addEventListener("click",clearResearchScope);
+$("#working-set-clear")?.addEventListener("click",()=>{state.workingSet=[];saveWorkingSet();});
 $("#search-form").addEventListener("submit", event => { event.preventDefault(); navigate("/search"); search(); });
 $("#load-more").addEventListener("click",()=>search({append:true}));
 $("#reader-back").addEventListener("click",()=>history.length>1?history.back():navigate("/search"));
@@ -183,7 +268,7 @@ async function login(event) {
   event.preventDefault(); const error=$("#login-error"); error.hidden=true;
   const handle=$("#login-handle").value.trim(); const password=$("#login-password").value;
   try {
-    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.0.0'})});
+    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.1.0'})});
     $("#login-password").value=''; renderSession(session);
   } catch (e) { error.textContent=e.message; error.hidden=false; }
 }

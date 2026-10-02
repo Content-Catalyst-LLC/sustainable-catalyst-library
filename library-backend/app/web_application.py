@@ -4,11 +4,12 @@ from hashlib import sha256
 import json
 from typing import Any
 
-WEB_VERSION = "2.0.0"
+WEB_VERSION = "2.1.0"
 CONTRACT = "sc-library-web-application/1.0"
 READINESS_CONTRACT = "sc-library-web-readiness/1.0"
 
 SURFACES: tuple[dict[str, Any], ...] = (
+    {"id":"research","label":"Research","route":"/research","api":"/api/library/v1/research-interface","public":True,"index":False},
     {"id":"search","label":"Search","route":"/search","api":"/api/library/v1/search","public":True,"index":False},
     {"id":"reader","label":"Reader","route":"/record/{record_id}","api":"/api/library/v1/records/{record_id}","public":True,"index":True},
     {"id":"discover","label":"Discover","route":"/discover","api":"/api/library/v1/capabilities","public":True,"index":True},
@@ -35,8 +36,8 @@ def application_contract() -> dict[str, Any]:
         "application_id": "sustainable-catalyst-library-web",
         "application_contract_id": "library-web-application:" + fp[:32],
         "application_fingerprint_sha256": fp,
-        "library_version": "6.0.0",
-        "backend_version": "3.0.0",
+        "library_version": "6.1.0",
+        "backend_version": "3.1.0",
         "web_version": WEB_VERSION,
         "state": "independent-primary-application",
         "deployment_model": "independent-primary-web-service",

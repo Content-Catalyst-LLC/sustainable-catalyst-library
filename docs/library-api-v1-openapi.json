@@ -1746,6 +1746,66 @@
           }
         }
       }
+    },
+    "/research-interface": {
+      "get": {
+        "operationId": "libraryResearchInterface",
+        "responses": {
+          "200": {
+            "description": "Independent Library research interface contract"
+          }
+        }
+      }
+    },
+    "/research-interface/readiness": {
+      "get": {
+        "operationId": "libraryResearchInterfaceReadiness",
+        "responses": {
+          "200": {
+            "description": "Research interface readiness"
+          }
+        }
+      }
+    },
+    "/research-interface/bootstrap": {
+      "get": {
+        "operationId": "libraryResearchInterfaceBootstrap",
+        "responses": {
+          "200": {
+            "description": "Research interface bootstrap and facets"
+          }
+        }
+      }
+    },
+    "/research-interface/search": {
+      "get": {
+        "operationId": "libraryResearchInterfaceSearch",
+        "responses": {
+          "200": {
+            "description": "Research interface faceted search"
+          }
+        }
+      }
+    },
+    "/research-interface/records/{record_id}": {
+      "get": {
+        "operationId": "libraryResearchInterfaceRecord",
+        "responses": {
+          "200": {
+            "description": "Research object with provenance citation and evidence context"
+          }
+        }
+      }
+    },
+    "/admin/research-interface/owners/{owner_identity_id}": {
+      "get": {
+        "operationId": "libraryResearchInterfaceOwnerState",
+        "responses": {
+          "200": {
+            "description": "Signed owner research-state interface handoff"
+          }
+        }
+      }
     }
   },
   "components": {

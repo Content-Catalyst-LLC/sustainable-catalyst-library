@@ -3,9 +3,9 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "6.0.0"
-BACKEND_VERSION = "3.0.0"
-SDK_VERSION = "1.0.0"
+LIBRARY_VERSION = "6.1.0"
+BACKEND_VERSION = "3.1.0"
+SDK_VERSION = "1.1.0"
 CONTRACT = "sc-library-client-framework/1.0"
 READINESS_CONTRACT = "sc-library-client-framework-readiness/1.0"
 
@@ -81,6 +81,7 @@ def contract() -> dict[str, Any]:
             "wordpress_thin_adapter_consolidation_client": True,
             "independent_application_certification_client": True,
             "independent_library_product_client": True,
+            "independent_library_research_interface_client": True,
         },
         "product_adapters": list(PRODUCT_ADAPTERS),
         "wordpress_required": False,

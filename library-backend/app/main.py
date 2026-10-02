@@ -193,6 +193,14 @@ from .independent_library_product import (
     readiness as independent_library_product_readiness,
     release_manifest as independent_library_product_release,
 )
+from .research_interface import (
+    contract as independent_research_interface_contract,
+    readiness as independent_research_interface_readiness,
+    bootstrap as independent_research_interface_bootstrap,
+    search as independent_research_interface_search,
+    record_context as independent_research_interface_record,
+    owner_workspace as independent_research_interface_owner,
+)
 from .public_routing import contract as public_routing_contract, readiness as public_routing_readiness, record_seo_descriptor, record_embed_descriptor
 from .cross_product_integration import (
     registry_contract as cross_product_registry_contract, readiness as cross_product_integration_readiness,
@@ -557,6 +565,10 @@ def health() -> dict[str, Any]:
             "wordpress_required_for_independent_application": False,
             "independent_application_certified_release": "6.0.0",
             "independent_library_product": True,
+            "independent_library_research_interface": True,
+            "research_interface_authority": "python-backend",
+            "library_web_research_route": "/research",
+            "research_interface_wordpress_required": False,
             "library_generation": 6,
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
@@ -3519,6 +3531,38 @@ async def library_api_v1_workflow_pipeline_resume(run_id: str, request: Request,
     try: return resume_library_pipeline_workflow(run_id)
     except KeyError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
     except (ValueError,RuntimeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-interface")
+def library_api_v1_research_interface() -> dict[str, Any]:
+    return independent_research_interface_contract()
+
+@app.get("/api/library/v1/research-interface/readiness")
+def library_api_v1_research_interface_readiness() -> dict[str, Any]:
+    return independent_research_interface_readiness()
+
+@app.get("/api/library/v1/research-interface/bootstrap")
+def library_api_v1_research_interface_bootstrap() -> dict[str, Any]:
+    return independent_research_interface_bootstrap()
+
+@app.get("/api/library/v1/research-interface/search")
+def library_api_v1_research_interface_search(q: str="", mode: str="hybrid", object_type: str|None=None, source_key: str|None=None, topic: str|None=None, year_from: int|None=None, year_to: int|None=None, sort: str="relevance", limit: int=20, offset: int=0) -> dict[str, Any]:
+    payload={"q":q,"mode":mode,"object_type":object_type,"source_key":source_key,"topic":topic,"year_from":year_from,"year_to":year_to,"sort":sort,"limit":limit,"offset":offset}
+    return independent_research_interface_search(payload)
+
+@app.get("/api/library/v1/research-interface/records/{record_id:path}")
+def library_api_v1_research_interface_record(record_id: str, include_body: bool=True, version_limit: int=12, evidence_depth: int=1, evidence_limit: int=120) -> dict[str, Any]:
+    try:
+        return independent_research_interface_record(record_id,include_body=include_body,version_limit=version_limit,evidence_depth=evidence_depth,evidence_limit=evidence_limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=404,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/admin/research-interface/owners/{owner_identity_id:path}")
+async def library_api_v1_research_interface_owner(owner_identity_id: str, request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try:
+        return independent_research_interface_owner(owner_identity_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404,detail=str(exc).strip(chr(39))) from exc
 
 @app.get("/api/library/v1/product")
 def library_api_v1_product() -> dict[str, Any]:

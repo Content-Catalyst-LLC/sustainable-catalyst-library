@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 final class SC_Library_WordPress_Thin_Adapter {
-    public const VERSION = '6.0.0';
+    public const VERSION = '6.1.0';
     public const SCHEMA = 'sc-library-wordpress-thin-adapter/1.0';
     public const CONSOLIDATION_SCHEMA = 'sc-library-wordpress-thin-adapter-consolidation-claim/1.0';
     public const ROLE = 'optional-adapter';
@@ -35,7 +35,7 @@ final class SC_Library_WordPress_Thin_Adapter {
             'pipeline-execution-authority','artifact-authority','pipeline-authority','compute-authority',
             'identity-authority','session-authority','credential-authority','federation-authority',
             'connector-routing-authority','connector-execution-policy-authority','global-source-registry-authority',
-            'trust-policy-authority','platform-core-promotion-authority',
+            'trust-policy-authority','research-interface-composition-authority','platform-core-promotion-authority',
         ];
     }
 
@@ -78,7 +78,7 @@ final class SC_Library_WordPress_Thin_Adapter {
             ],
             'allowed_responsibilities' => self::allowed_responsibilities(),
             'prohibited_authorities' => self::prohibited_authorities(),
-            'next_gate' => 'v6.1.0-independent-library-research-interface',
+            'next_gate' => 'v6.2.0-unified-discovery-research-navigation',
         ];
     }
 
@@ -111,7 +111,7 @@ final class SC_Library_WordPress_Thin_Adapter {
     }
 
     public function emit_adapter_meta(): void {
-        echo '<meta name="sc-library-wordpress-role" content="thin-adapter" />' . "\n";
+        echo '<meta name="sc-library-wordpress-role" content="optional-adapter" />' . "\n";
         echo '<meta name="sc-library-research-authority" content="library-api" />' . "\n";
         echo '<meta name="sc-library-wordpress-thin-adapter-consolidated" content="true" />' . "\n";
     }
