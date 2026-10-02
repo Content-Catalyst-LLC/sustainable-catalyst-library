@@ -234,6 +234,14 @@ from .research_package_service import (
     get_package as get_library_research_package,
     verify_package as verify_library_research_package,
 )
+from .connector_federation_service import (
+    contract as library_federation_contract, readiness as library_federation_readiness,
+    snapshot as library_federation_snapshot, source as library_federation_source,
+    connector as library_federation_connector, connector_status as library_federation_connector_status,
+    collections as library_federation_collections, validate_connector as validate_library_federation_connector,
+    plan_execution as plan_library_federation_execution, federation_certification as library_federation_certification,
+    validate_federation_certification as validate_library_federation_certification,
+)
 from .runtime_independence import evaluate as evaluate_wordpress_failure_independence, readiness as wordpress_failure_independence_readiness
 from .release_engineering import release_manifest as library_release_manifest, readiness as library_release_engineering_readiness, validate_deployment_plan as validate_library_deployment_plan
 from .state_migration import (
@@ -480,6 +488,11 @@ def health() -> dict[str, Any]:
             "python_research_package_reproducibility_authority": True,
             "research_package_authority": "python-backend",
             "reproducibility_authority": "python-backend",
+            "python_connector_federation_authority": True,
+            "connector_federation_authority": "python-backend",
+            "global_source_registry_authority": "python-backend",
+            "connector_routing_authority": "python-backend",
+            "wordpress_connector_fallback_allowed": False,
             "original_language_authority": "python-backend",
             "ocr_htr_transcription_authority": "python-backend",
             "linguistic_corpus_authority": "python-backend",
@@ -2897,7 +2910,7 @@ def library_api_v1_record(record_id: str, include_body: bool=True) -> dict[str, 
 def library_api_v1_runtime_authority() -> dict[str, Any]: return runtime_authority_readiness()
 
 @app.get("/api/library/v1/federation/readiness")
-def library_api_v1_federation_readiness() -> dict[str, Any]: return global_knowledge_federation_readiness()
+def library_api_v1_federation_readiness() -> dict[str, Any]: return library_federation_readiness()
 
 @app.get("/api/library/v1/artifacts/readiness")
 def library_api_v1_artifact_readiness() -> dict[str, Any]: return artifact_storage_readiness()
@@ -3313,6 +3326,61 @@ async def library_api_v1_research_package_verify(package_id: str, request: Reque
     payload=await _reproducibility_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
     try: return verify_library_research_package(package_id,payload)
     except (ValueError,KeyError,RuntimeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/federation")
+def library_api_v1_federation_contract() -> dict[str, Any]:
+    return library_federation_contract()
+
+@app.get("/api/library/v1/federation/sources")
+def library_api_v1_federation_sources(family: str="", capability: str="", collection: str="", authority: str="", q: str="") -> dict[str, Any]:
+    return library_federation_snapshot(family=family,capability=capability,collection=collection,authority=authority,q=q)
+
+@app.get("/api/library/v1/federation/sources/{source_id}")
+def library_api_v1_federation_source(source_id: str) -> dict[str, Any]:
+    try: return library_federation_source(source_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="federation-source-not-found") from exc
+
+@app.get("/api/library/v1/federation/connectors/{connector_id}")
+def library_api_v1_federation_connector(connector_id: str) -> dict[str, Any]:
+    try: return library_federation_connector(connector_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="federation-connector-not-found") from exc
+
+@app.get("/api/library/v1/federation/connectors/{connector_id}/status")
+def library_api_v1_federation_connector_status(connector_id: str) -> dict[str, Any]:
+    try: return library_federation_connector_status(connector_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="federation-connector-not-found") from exc
+
+@app.get("/api/library/v1/federation/collections")
+def library_api_v1_federation_collections() -> dict[str, Any]:
+    return library_federation_collections()
+
+@app.get("/api/library/v1/federation/certification")
+def library_api_v1_federation_certification() -> dict[str, Any]:
+    return library_federation_certification(persist=False)
+
+async def _federation_signed_json(request: Request, authorization: str|None, x_sc_timestamp: str|None, x_sc_signature: str|None) -> dict[str, Any]:
+    body=await authorize_write(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return json.loads(body.decode("utf-8")) if body else {}
+    except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/federation/connectors/validate")
+async def library_api_v1_federation_connector_validate(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    return validate_library_federation_connector(await _federation_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+
+@app.post("/api/library/v1/admin/federation/plan")
+async def library_api_v1_federation_plan(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    try: return plan_library_federation_execution(await _federation_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+    except (ValueError,KeyError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/admin/federation/certifications/validate")
+async def library_api_v1_federation_certification_validate(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    return validate_library_federation_certification(await _federation_signed_json(request,authorization,x_sc_timestamp,x_sc_signature))
+
+@app.post("/api/library/v1/admin/federation/certifications")
+async def library_api_v1_federation_certification_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
+    await _federation_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
+    try: return library_federation_certification(persist=True)
+    except (ValueError,RuntimeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/runtime-certification")
 def library_api_v1_runtime_certification() -> dict[str, Any]: return wordpress_failure_independence_readiness()

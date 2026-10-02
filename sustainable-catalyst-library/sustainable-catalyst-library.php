@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library 5.76.0 Python Research Package & Reproducibility Service.
- * Version: 5.76.0
+ * Description: Sustainable Catalyst Library 5.77.0 Python Connector & Federation Runtime.
+ * Version: 5.77.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '5.76.0');
+define('SC_LIBRARY_VERSION', '5.77.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'thin-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);

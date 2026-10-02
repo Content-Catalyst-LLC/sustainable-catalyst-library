@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-connector-execution-plan.json",
+  "title": "Sustainable Catalyst Connector Execution Plan",
+  "type": "object",
+  "required": ["schema", "plan_id", "connector_id", "source_id", "mode", "permitted", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-connector-execution-plan/1.0"},
+    "mode": {"enum": ["python-native", "browser-handoff", "python-adapter-pending", "registry-only"]},
+    "wordpress_fallback_allowed": {"const": false},
+    "guardrails": {"type": "object"}
+  }
+}

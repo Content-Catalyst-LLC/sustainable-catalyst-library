@@ -10,8 +10,8 @@ from .query import facets
 from .retrieval_evaluation import rerank_results
 from .semantic import semantic_readiness
 
-LIBRARY_VERSION = "5.76.0"
-BACKEND_VERSION = "2.87.0"
+LIBRARY_VERSION = "5.77.0"
+BACKEND_VERSION = "2.88.0"
 CONTRACT = "sc-library-python-retrieval-orchestration/1.0"
 READINESS_CONTRACT = "sc-library-python-retrieval-orchestration-readiness/1.0"
 PLAN_CONTRACT = "sc-library-retrieval-plan/1.0"

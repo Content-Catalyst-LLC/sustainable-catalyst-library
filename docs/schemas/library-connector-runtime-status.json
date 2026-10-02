@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-connector-runtime-status.json",
+  "title": "Sustainable Catalyst Connector Runtime Status",
+  "type": "object",
+  "required": ["schema", "connector_id", "source_id", "mode", "python_native", "wordpress_fallback_allowed"],
+  "properties": {
+    "schema": {"const": "sc-library-connector-runtime-status/1.0"},
+    "mode": {"enum": ["python-native", "browser-handoff", "python-adapter-pending", "registry-only"]},
+    "wordpress_fallback_allowed": {"const": false}
+  }
+}

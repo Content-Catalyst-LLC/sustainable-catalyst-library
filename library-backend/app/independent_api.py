@@ -131,6 +131,16 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/admin/reproducibility/packages/validate","name":"research-package-validate","access":"signed-service","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/reproducibility/packages","name":"research-package-create","access":"signed-service","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/reproducibility/packages/{package_id}/verify","name":"research-package-verify","access":"signed-service","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/federation","name":"python-connector-federation-runtime","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/federation/sources/{source_id}","name":"federation-source","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/federation/connectors/{connector_id}","name":"federation-connector","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/federation/connectors/{connector_id}/status","name":"federation-connector-status","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/federation/collections","name":"federation-collections","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/federation/certification","name":"federation-certification","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/federation/connectors/validate","name":"federation-connector-validate","access":"signed-service","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/federation/plan","name":"federation-plan","access":"signed-service","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/federation/certifications/validate","name":"federation-certification-validate","access":"signed-service","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/admin/federation/certifications","name":"federation-certification-create","access":"signed-service","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification","name":"runtime-certification","access":"public","stability":"stable"},
     {"method":"GET","path":"/api/library/v1/runtime-certification/readiness","name":"runtime-certification-readiness","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/admin/runtime-certification/evaluate","name":"runtime-certification-evaluate","access":"signed-service","stability":"stable"},
@@ -138,7 +148,7 @@ ROUTES: tuple[dict[str, Any], ...] = (
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "discovery": {"resources":["search","records","stats"],"direct_api":True},
-    "federation": {"resources":["sources","connectors","global-knowledge-federation"],"direct_api":True},
+    "federation": {"resources":["sources","connectors","global-knowledge-federation"],"direct_api":True,"authority":"python-backend"},
     "language": {"resources":["original-language","ocr-htr-transcription","linguistic-corpus","entity-resolution","translation-alignment"],"direct_api":True},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
@@ -161,6 +171,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "provenance-graph": {"resources":["record-provenance","citations","evidence-graph","record-versions","normalization-lineage","core-bindings"],"direct_api":True,"authority":"python-backend"},
     "language-document": {"resources":["original-language","ocr-htr-transcription","linguistic-corpus","kwic","cross-language-resolution","translation-alignment","scientific-document-intelligence"],"direct_api":True,"authority":"python-backend"},
     "research-package-reproducibility": {"resources":["research-packages","artifact-manifests","record-snapshots","pipeline-run-snapshots","execution-lineage","runtime-reproducibility-records","package-integrity-verification"],"direct_api":True,"authority":"python-backend"},
+    "connector-federation-runtime": {"resources":["global-source-registry","sources","collections","connector-contracts","connector-runtime-status","connector-execution-plans","connector-validation","global-knowledge-federation-certification"],"direct_api":True,"authority":"python-backend"},
     "runtime-certification": {"resources":["wordpress-failure","runtime-probes","certification"],"direct_api":True,"authority":"library-service"},
 }
 
@@ -254,8 +265,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "5.76.0",
-        "backend_version": "2.87.0",
+        "library_version": "5.77.0",
+        "backend_version": "2.88.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -310,8 +321,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "5.76.0",
-        "backend_version": "2.87.0",
+        "library_version": "5.77.0",
+        "backend_version": "2.88.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

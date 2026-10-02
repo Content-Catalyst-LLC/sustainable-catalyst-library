@@ -8,8 +8,8 @@ from psycopg.types.json import Jsonb
 
 from .db import get_pool
 
-LIBRARY_VERSION = "5.76.0"
-BACKEND_VERSION = "2.87.0"
+LIBRARY_VERSION = "5.77.0"
+BACKEND_VERSION = "2.88.0"
 CONTRACT = "sc-library-python-research-state-service/1.0"
 READINESS_CONTRACT = "sc-library-python-research-state-readiness/1.0"
 PROJECT_CONTRACT = "sc-library-research-project/2.0"

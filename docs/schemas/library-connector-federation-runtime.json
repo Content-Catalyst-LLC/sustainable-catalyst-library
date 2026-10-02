@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sustainablecatalyst.com/schemas/library-connector-federation-runtime.json",
+  "title": "Sustainable Catalyst Library Connector & Federation Runtime",
+  "type": "object",
+  "required": ["schema", "authority", "resources", "guardrails"],
+  "properties": {
+    "schema": {"const": "sc-library-python-connector-federation-runtime/1.0"},
+    "authority": {"const": "python-backend"},
+    "resources": {"type": "array"},
+    "guardrails": {"type": "object"}
+  }
+}

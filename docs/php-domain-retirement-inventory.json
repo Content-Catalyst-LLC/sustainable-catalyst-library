@@ -1,6 +1,6 @@
 {
   "schema": "sc-library-php-domain-retirement-inventory/1.0",
-  "library_version": "5.76.0",
+  "library_version": "5.77.0",
   "policy": "New PHP files require explicit inventory classification; new research/domain authority belongs in Python by default.",
   "categories": [
     "wordpress-integration",
@@ -183,7 +183,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-connector-holdings-reliability.php",
       "classification": "retire-candidate",
       "bytes": 74504,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python connector/federation runtime is authoritative in v5.77.0; retain only for measured WordPress compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-cross-civilizational-linking.php",
@@ -351,19 +351,19 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-global-research-discovery-federated-search.php",
       "classification": "retire-candidate",
       "bytes": 22342,
-      "justification": "Python retrieval/search orchestration authority is active in v5.73.0; retain temporarily for WordPress presentation and measured compatibility retirement."
+      "justification": "Python connector/federation runtime is authoritative in v5.77.0; retain only for measured WordPress compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-global-research-federation.php",
       "classification": "retire-candidate",
       "bytes": 46754,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python connector/federation runtime is authoritative in v5.77.0; retain only for measured WordPress compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-global-source-federation-registry.php",
       "classification": "retire-candidate",
       "bytes": 4345,
-      "justification": "Python source-ingestion and normalization authority is active in v5.72.0; retain temporarily for WordPress compatibility, presentation, and measured retirement."
+      "justification": "Python connector/federation runtime is authoritative in v5.77.0; retain only for measured WordPress compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-hardening.php",
@@ -411,7 +411,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-institutional-connector-expansion.php",
       "classification": "retire-candidate",
       "bytes": 15105,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python connector/federation runtime is authoritative in v5.77.0; retain only for measured WordPress compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-institutional-research-network.php",
@@ -783,7 +783,7 @@
       "path": "sustainable-catalyst-library/includes/class-sc-library-scholarly-library-connectors.php",
       "classification": "retire-candidate",
       "bytes": 222295,
-      "justification": "Legacy PHP capability retained for compatibility; migrate authority to Python before retirement."
+      "justification": "Python connector/federation runtime is authoritative in v5.77.0; retain only for measured WordPress compatibility retirement."
     },
     {
       "path": "sustainable-catalyst-library/includes/class-sc-library-shortcodes.php",

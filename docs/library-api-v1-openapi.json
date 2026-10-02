@@ -1398,6 +1398,126 @@
           }
         }
       }
+    },
+    "/federation": {
+      "get": {
+        "operationId": "libraryFederationService",
+        "responses": {
+          "200": {
+            "description": "Connector and federation runtime contract"
+          }
+        }
+      }
+    },
+    "/federation/readiness": {
+      "get": {
+        "operationId": "libraryFederationReadiness",
+        "responses": {
+          "200": {
+            "description": "Connector and federation readiness"
+          }
+        }
+      }
+    },
+    "/federation/sources": {
+      "get": {
+        "operationId": "libraryFederationSources",
+        "responses": {
+          "200": {
+            "description": "Filtered global source registry"
+          }
+        }
+      }
+    },
+    "/federation/sources/{source_id}": {
+      "get": {
+        "operationId": "libraryFederationSource",
+        "responses": {
+          "200": {
+            "description": "Federated source descriptor"
+          }
+        }
+      }
+    },
+    "/federation/connectors/{connector_id}": {
+      "get": {
+        "operationId": "libraryFederationConnector",
+        "responses": {
+          "200": {
+            "description": "Connector descriptor"
+          }
+        }
+      }
+    },
+    "/federation/connectors/{connector_id}/status": {
+      "get": {
+        "operationId": "libraryFederationConnectorStatus",
+        "responses": {
+          "200": {
+            "description": "Connector runtime eligibility/status"
+          }
+        }
+      }
+    },
+    "/federation/collections": {
+      "get": {
+        "operationId": "libraryFederationCollections",
+        "responses": {
+          "200": {
+            "description": "Federated source collections"
+          }
+        }
+      }
+    },
+    "/federation/certification": {
+      "get": {
+        "operationId": "libraryFederationCertification",
+        "responses": {
+          "200": {
+            "description": "Global knowledge federation certification"
+          }
+        }
+      }
+    },
+    "/admin/federation/connectors/validate": {
+      "post": {
+        "operationId": "libraryFederationConnectorValidate",
+        "responses": {
+          "200": {
+            "description": "Validate connector contract"
+          }
+        }
+      }
+    },
+    "/admin/federation/plan": {
+      "post": {
+        "operationId": "libraryFederationPlan",
+        "responses": {
+          "200": {
+            "description": "Create deterministic connector execution plan"
+          }
+        }
+      }
+    },
+    "/admin/federation/certifications/validate": {
+      "post": {
+        "operationId": "libraryFederationCertificationValidate",
+        "responses": {
+          "200": {
+            "description": "Validate federation certification"
+          }
+        }
+      }
+    },
+    "/admin/federation/certifications": {
+      "post": {
+        "operationId": "libraryFederationCertificationCreate",
+        "responses": {
+          "200": {
+            "description": "Persist federation certification"
+          }
+        }
+      }
     }
   },
   "components": {
