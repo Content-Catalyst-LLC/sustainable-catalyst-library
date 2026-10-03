@@ -279,6 +279,15 @@ from .research_graph_navigation import (
     summary as research_graph_summary,
     path as research_graph_path,
 )
+from .living_collections_projects import (
+    contract as living_research_contract,
+    readiness as living_research_readiness,
+    project_brief as living_project_brief,
+    collection_state as living_collection_state,
+    create_living_collection,
+    refresh_collection as refresh_living_collection,
+    apply_refresh as apply_living_collection_refresh,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -619,6 +628,12 @@ def health() -> dict[str, Any]:
             "research_graph_edge_family_filters": True,
             "research_graph_graph_connectivity_implies_truth": False,
             "research_graph_path_implies_causality": False,
+            "living_collections_research_projects": True,
+            "living_collection_refresh_preview": True,
+            "living_collection_explicit_apply": True,
+            "living_collection_refresh_auto_applies": False,
+            "living_project_graph_aware_briefs": True,
+            "living_project_membership_implies_truth": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -633,8 +648,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.6.0",
-            "library_sdk_version": "1.6.0",
+            "library_web_version": "2.7.0",
+            "library_sdk_version": "1.7.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -3980,6 +3995,57 @@ async def library_api_v1_current_workspace_collection_item(collection_id: str, r
     payload = await _library_workspace_json(request)
     try:
         return save_workspace_collection_item(owner, collection_id, payload)
+    except Exception as exc:
+        _library_workspace_error(exc)
+
+@app.get("/api/library/v1/living-research")
+def library_api_v1_living_research_contract() -> dict[str, Any]:
+    return living_research_contract()
+
+@app.get("/api/library/v1/living-research/readiness")
+def library_api_v1_living_research_readiness() -> dict[str, Any]:
+    return living_research_readiness()
+
+@app.get("/api/library/v1/living-research/projects/{project_id:path}/brief")
+def library_api_v1_living_project_brief(project_id: str, request: Request, include_graph: bool=False) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request)
+    try:
+        return living_project_brief(owner, project_id, include_graph=include_graph)
+    except Exception as exc:
+        _library_workspace_error(exc)
+
+@app.get("/api/library/v1/living-research/collections/{collection_id:path}")
+def library_api_v1_living_collection_state(collection_id: str, request: Request) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request)
+    try:
+        return living_collection_state(owner, collection_id)
+    except Exception as exc:
+        _library_workspace_error(exc)
+
+@app.post("/api/library/v1/living-research/collections")
+async def library_api_v1_living_collection_create(request: Request, x_sc_csrf_token: str | None = Header(default=None)) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request, csrf_token=x_sc_csrf_token, mutation=True)
+    payload = await _library_workspace_json(request)
+    try:
+        return create_living_collection(owner, payload)
+    except Exception as exc:
+        _library_workspace_error(exc)
+
+@app.post("/api/library/v1/living-research/collections/{collection_id:path}/refresh")
+async def library_api_v1_living_collection_refresh(collection_id: str, request: Request) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request)
+    payload = await _library_workspace_json(request)
+    try:
+        return refresh_living_collection(owner, collection_id, payload)
+    except Exception as exc:
+        _library_workspace_error(exc)
+
+@app.post("/api/library/v1/living-research/collections/{collection_id:path}/apply")
+async def library_api_v1_living_collection_apply(collection_id: str, request: Request, x_sc_csrf_token: str | None = Header(default=None)) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request, csrf_token=x_sc_csrf_token, mutation=True)
+    payload = await _library_workspace_json(request)
+    try:
+        return apply_living_collection_refresh(owner, collection_id, payload)
     except Exception as exc:
         _library_workspace_error(exc)
 

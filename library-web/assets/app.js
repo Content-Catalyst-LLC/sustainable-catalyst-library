@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.6.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.7.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {} };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -178,6 +178,26 @@ function populateWorkspaceProjectSelect() {
   if (state.activeProjectId && projects.some(x=>x.project_id===state.activeProjectId)) select.value=state.activeProjectId;
 }
 
+function populateLivingProjectSelect() {
+  const select=$("#workspace-living-project"); if (!select) return;
+  const projects=state.workspaceSnapshot?.projects || [];
+  select.innerHTML='<option value="">No project link</option>' + projects.map(project=>`<option value="${escapeHtml(project.project_id)}">${escapeHtml(project.title || project.project_id)}</option>`).join("");
+  if (state.activeProjectId && projects.some(x=>x.project_id===state.activeProjectId)) select.value=state.activeProjectId;
+}
+
+function renderLivingCollections() {
+  const target=$("#workspace-living-list"); if (!target) return;
+  if (!state.workspaceSnapshot) { target.innerHTML='<p class="empty-state">Sign in to load living collections.</p>'; return; }
+  const collections=(state.workspaceSnapshot.collections || []).filter(item=>Boolean(item?.metadata?.living_collection?.enabled));
+  if (!collections.length) { target.innerHTML='<p class="empty-state">No living collections yet. Create one from a research query.</p>'; return; }
+  target.innerHTML=collections.map(item=>{
+    const id=item.collection_id; const cfg=item.metadata?.living_collection || {}; const preview=state.livingRefreshes[id];
+    const candidates=preview?.candidate_additions || [];
+    const choices=candidates.length ? `<fieldset class="living-candidates"><legend>${candidates.length} candidate addition${candidates.length===1?"":"s"}</legend>${candidates.slice(0,40).map(row=>`<label><input type="checkbox" data-living-candidate="${escapeHtml(id)}" value="${escapeHtml(row.record_id)}"> <span>${escapeHtml(row.title || row.record_id)}</span></label>`).join("")}<button type="button" class="secondary-button" data-apply-living="${escapeHtml(id)}">Apply selected</button></fieldset>` : (preview ? '<p class="form-note">No new candidate additions in the current refresh.</p>' : '');
+    return `<article class="workspace-project-card" data-living-collection="${escapeHtml(id)}"><div><p class="eyebrow">Living collection${cfg.project_id?` · project linked`:""}</p><h3>${escapeHtml(item.title || id)}</h3><p>${escapeHtml(cfg.query || "No query configured")}</p></div><div class="result-actions"><button type="button" class="secondary-button" data-refresh-living="${escapeHtml(id)}">Refresh preview</button></div>${preview?`<p class="form-note">Refresh ${escapeHtml(preview.refresh_id || "")} · ${Number(preview.existing_match_count||0)} retained matches</p>`:""}${choices}</article>`;
+  }).join("");
+}
+
 function renderSavedWorkspaces() {
   const snapshot=state.workspaceSnapshot;
   const status=$("#workspace-status"), summary=$("#workspace-summary"), list=$("#workspace-project-list"), searches=$("#workspace-saved-search-list");
@@ -186,23 +206,67 @@ function renderSavedWorkspaces() {
     if (summary) summary.innerHTML="";
     if (list) list.innerHTML='<p class="empty-state">Sign in to load saved projects.</p>';
     if (searches) searches.innerHTML='<p class="empty-state">No saved searches loaded.</p>';
-    populateWorkspaceProjectSelect();
+    populateWorkspaceProjectSelect(); populateLivingProjectSelect(); renderLivingCollections();
     return;
   }
   const meta=snapshot.summary || {};
+  const livingCount=(snapshot.collections || []).filter(item=>Boolean(item?.metadata?.living_collection?.enabled)).length;
   if (status) status.textContent=`${meta.project_count || 0} projects · ${meta.reference_count || 0} references`;
-  if (summary) summary.innerHTML=`<span><strong>${meta.project_count || 0}</strong> projects</span><span><strong>${meta.reference_count || 0}</strong> references</span><span><strong>${meta.saved_search_count || 0}</strong> saved searches</span><span><strong>${meta.collection_count || 0}</strong> collections</span>`;
+  if (summary) summary.innerHTML=`<span><strong>${meta.project_count || 0}</strong> projects</span><span><strong>${meta.reference_count || 0}</strong> references</span><span><strong>${meta.saved_search_count || 0}</strong> saved searches</span><span><strong>${livingCount}</strong> living collections</span>`;
   const refs=snapshot.project_references || [];
   const bundles=snapshot.source_bundles || [];
   const projects=snapshot.projects || [];
   if (list) list.innerHTML=projects.length ? projects.map(project=>{
     const projectRefs=refs.filter(x=>x.project_id===project.project_id).length;
     const projectBundles=bundles.filter(x=>x.project_id===project.project_id).length;
-    return `<article class="workspace-project-card" data-project-id="${escapeHtml(project.project_id)}"><div><p class="eyebrow">${escapeHtml(project.status || "active")} · ${escapeHtml(project.visibility || "private")}</p><h3>${escapeHtml(project.title || project.project_id)}</h3><p>${escapeHtml(project.research_question || project.description || "No research question yet.")}</p></div><dl><dt>References</dt><dd>${projectRefs}</dd><dt>Bundles</dt><dd>${projectBundles}</dd></dl><button type="button" class="text-button" data-use-project="${escapeHtml(project.project_id)}">Use for working set</button></article>`;
+    const brief=state.projectBriefs[project.project_id];
+    const briefHtml=brief ? `<div class="context-strip"><span><strong>${Number(brief.summary?.living_collection_count||0)}</strong> living collections</span><span><strong>${Number(brief.summary?.research_queue_count||0)}</strong> queued research</span></div>` : '';
+    return `<article class="workspace-project-card" data-project-id="${escapeHtml(project.project_id)}"><div><p class="eyebrow">${escapeHtml(project.status || "active")} · ${escapeHtml(project.visibility || "private")}</p><h3>${escapeHtml(project.title || project.project_id)}</h3><p>${escapeHtml(project.research_question || project.description || "No research question yet.")}</p></div><dl><dt>References</dt><dd>${projectRefs}</dd><dt>Bundles</dt><dd>${projectBundles}</dd></dl>${briefHtml}<div class="result-actions"><button type="button" class="text-button" data-use-project="${escapeHtml(project.project_id)}">Use for working set</button><button type="button" class="text-button" data-project-brief="${escapeHtml(project.project_id)}">Load research brief</button></div></article>`;
   }).join("") : '<p class="empty-state">No projects yet. Create your first research project above.</p>';
   const saved=snapshot.saved_searches || [];
   if (searches) searches.innerHTML=saved.length ? saved.slice(0,20).map(item=>`<article class="workspace-saved-search"><strong>${escapeHtml(item.label || item.query)}</strong><span>${escapeHtml(item.query || "")}</span></article>`).join("") : '<p class="empty-state">No saved searches yet.</p>';
-  populateWorkspaceProjectSelect();
+  populateWorkspaceProjectSelect(); populateLivingProjectSelect(); renderLivingCollections();
+}
+
+async function createLivingCollection(event) {
+  event.preventDefault(); const status=$("#workspace-living-status");
+  if (!(await ensureWorkspaceSession())) { if(status) status.textContent="Sign in before creating a living collection."; return; }
+  const title=$("#workspace-living-title")?.value.trim() || ""; const query=$("#workspace-living-query")?.value.trim() || "";
+  if (!title || !query) { if(status) status.textContent="Title and query are required."; return; }
+  const payload={title,query,project_id:$("#workspace-living-project")?.value || "",mode:$("#workspace-living-mode")?.value || "hybrid",cross_language:true,limit:50};
+  try {
+    const result=await api("/living-research/collections",{method:"POST",headers:workspaceCsrfHeaders(),body:JSON.stringify(payload)});
+    if(status) status.textContent=`Created ${result.collection?.title || title}. Refresh to preview current additions.`;
+    $("#workspace-living-form")?.reset(); await loadSavedWorkspaces();
+  } catch (e) { if(status) status.textContent=e.message; }
+}
+
+async function refreshLivingCollection(collectionId) {
+  const status=$("#workspace-living-status"); if(status) status.textContent="Refreshing living collection…";
+  try {
+    const result=await api(`/living-research/collections/${encodeURIComponent(collectionId)}/refresh`,{method:"POST",body:JSON.stringify({})});
+    state.livingRefreshes[collectionId]=result; renderLivingCollections();
+    if(status) status.textContent=`Refresh preview ready: ${result.candidate_addition_count || 0} candidate additions. Nothing was added automatically.`;
+  } catch (e) { if(status) status.textContent=e.message; }
+}
+
+async function applyLivingCollection(collectionId) {
+  const status=$("#workspace-living-status");
+  const selected=$$(`[data-living-candidate="${CSS.escape(collectionId)}"]:checked`).map(input=>input.value);
+  if (!selected.length) { if(status) status.textContent="Select one or more refresh candidates first."; return; }
+  try {
+    const result=await api(`/living-research/collections/${encodeURIComponent(collectionId)}/apply`,{method:"POST",headers:workspaceCsrfHeaders(),body:JSON.stringify({selected_record_ids:selected})});
+    if(status) status.textContent=`Applied ${result.saved_count || 0} selected records.`;
+    delete state.livingRefreshes[collectionId]; await loadSavedWorkspaces(); await refreshLivingCollection(collectionId);
+  } catch (e) { if(status) status.textContent=e.message; }
+}
+
+async function loadLivingProjectBrief(projectId) {
+  const status=$("#workspace-living-status");
+  try {
+    state.projectBriefs[projectId]=await api(`/living-research/projects/${encodeURIComponent(projectId)}/brief?include_graph=false`);
+    renderSavedWorkspaces(); if(status) status.textContent="Project research brief loaded.";
+  } catch (e) { if(status) status.textContent=e.message; }
 }
 
 async function loadSavedWorkspaces() {
@@ -383,7 +447,7 @@ async function loadCapabilities() {
 
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -406,6 +470,7 @@ $("#working-set-clear")?.addEventListener("click",()=>{state.workingSet=[];saveW
 $("#working-set-save")?.addEventListener("click",saveWorkingSetToProject);
 $("#research-save-search")?.addEventListener("click",saveCurrentResearchSearch);
 $("#workspace-project-form")?.addEventListener("submit",createWorkspaceProject);
+$("#workspace-living-form")?.addEventListener("submit",createLivingCollection);
 $("#search-form").addEventListener("submit", event => { event.preventDefault(); navigate("/search"); search(); });
 $("#load-more").addEventListener("click",()=>search({append:true}));
 $("#reader-back").addEventListener("click",()=>history.length>1?history.back():navigate("/search"));
@@ -413,6 +478,11 @@ $("#login-form")?.addEventListener("submit",login);
 window.addEventListener("hashchange",route);
 window.addEventListener("popstate",route);
 document.addEventListener('click',event=>{const a=event.target.closest('a[data-app-link], nav a'); if(!a) return; const url=new URL(a.href,location.href); if(url.origin!==location.origin) return; event.preventDefault(); navigate(url.pathname+url.search);});
+document.addEventListener('click',event=>{
+  const refresh=event.target.closest('[data-refresh-living]'); if(refresh){event.preventDefault();refreshLivingCollection(refresh.dataset.refreshLiving);return;}
+  const apply=event.target.closest('[data-apply-living]'); if(apply){event.preventDefault();applyLivingCollection(apply.dataset.applyLiving);return;}
+  const brief=event.target.closest('[data-project-brief]'); if(brief){event.preventDefault();loadLivingProjectBrief(brief.dataset.projectBrief);return;}
+});
 bootstrap();
 
 
@@ -442,7 +512,7 @@ async function login(event) {
   event.preventDefault(); const error=$("#login-error"); error.hidden=true;
   const handle=$("#login-handle").value.trim(); const password=$("#login-password").value;
   try {
-    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.6.0'})});
+    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.7.0'})});
     $("#login-password").value=''; renderSession(session);
   } catch (e) { error.textContent=e.message; error.hidden=false; }
 }
