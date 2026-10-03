@@ -1,4 +1,4 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.5.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.6.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
 const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null };
 
@@ -343,6 +343,17 @@ async function search({append=false}={}) {
   finally { $("#search-results").removeAttribute("aria-busy"); }
 }
 
+async function loadEvidenceNavigation(id) {
+  const host=$("#evidence-navigation"); if (!host) return;
+  try {
+    const graph=await api(`/research-graph/records/${encodeURIComponent(id)}/neighborhood?depth=1&limit=80&include_core=true`);
+    const neighbors=(graph.nodes||[]).filter(node=>String(node.record_id||node.id||"")!==String(id)).slice(0,24);
+    const family=graph.edge_family_counts || {};
+    const cards=neighbors.length ? neighbors.map(node=>{const rid=node.record_id||node.id;const label=node.title||node.name||node.label||rid;return `<li><a href="/record/${encodeURIComponent(rid)}" data-app-link>${escapeHtml(label)}</a></li>`;}).join("") : '<li>No connected public records in this neighborhood.</li>';
+    host.innerHTML=`<summary>Evidence navigation · ${graph.node_count||0} nodes · ${graph.edge_count||0} edges</summary><p class="form-note">Graph links describe provenance, citation or declared relationships. Connectivity is not a truth or causality judgment.</p><div class="context-strip"><span><strong>${Number(family.citation||0)}</strong> citation edges</span><span><strong>${Number(family.relationship||0)}</strong> relationship edges</span></div><ul>${cards}</ul><details><summary>Graph contract</summary><pre>${escapeHtml(JSON.stringify({graph_fingerprint_sha256:graph.graph_fingerprint_sha256,edge_family_counts:graph.edge_family_counts,edge_kind_counts:graph.edge_kind_counts,guardrails:graph.guardrails},null,2))}</pre></details>`;
+  } catch (error) { host.innerHTML=`<summary>Evidence navigation unavailable</summary><p class="error-state">${escapeHtml(error.message)}</p>`; }
+}
+
 async function loadRecord(id) {
   $("#reader-id").textContent=id; const target=$("#reader"); target.innerHTML='<p class="empty-state">Loading record…</p>';
   try {
@@ -352,8 +363,9 @@ async function loadRecord(id) {
     const title=escapeHtml(resultTitle(r)); const body=pick(r,["body_text","body","content","abstract","summary","description"]) || "No readable body is available for this record.";
     const source=pick(r,["source_name","source","source_key"]); const type=objectType(r);
     const versions=context.provenance?.record_versions?.length || 0; const citations=context.citations?.count || 0; const nodes=context.evidence_graph?.node_count || 0; const edges=context.evidence_graph?.edge_count || 0;
-    target.innerHTML=`<header><p class="eyebrow">${escapeHtml(type)}</p><h1>${title}</h1><div class="reader-meta">${source?`<span>Source: ${escapeHtml(source)}</span>`:""}${r.published_at?`<span>Published: ${escapeHtml(r.published_at)}</span>`:""}</div></header><aside class="context-strip"><span><strong>${versions}</strong> versions</span><span><strong>${citations}</strong> citations</span><span><strong>${nodes}</strong> evidence nodes</span><span><strong>${edges}</strong> evidence edges</span><button type="button" class="secondary-button" data-reader-add="${escapeHtml(id)}">Add to working set</button></aside><div class="reader-body">${escapeHtml(body).split(/\n{2,}/).map(p=>`<p>${p.replace(/\n/g,"<br>")}</p>`).join("")}</div><details><summary>Research context</summary><pre>${escapeHtml(JSON.stringify({provenance:context.provenance,citations:context.citations,evidence_graph:context.evidence_graph},null,2))}</pre></details><details><summary>Research object metadata</summary><pre>${escapeHtml(JSON.stringify(obj,null,2))}</pre></details>`;
+    target.innerHTML=`<header><p class="eyebrow">${escapeHtml(type)}</p><h1>${title}</h1><div class="reader-meta">${source?`<span>Source: ${escapeHtml(source)}</span>`:""}${r.published_at?`<span>Published: ${escapeHtml(r.published_at)}</span>`:""}</div></header><aside class="context-strip"><span><strong>${versions}</strong> versions</span><span><strong>${citations}</strong> citations</span><span><strong>${nodes}</strong> evidence nodes</span><span><strong>${edges}</strong> evidence edges</span><button type="button" class="secondary-button" data-reader-add="${escapeHtml(id)}">Add to working set</button></aside><div class="reader-body">${escapeHtml(body).split(/\n{2,}/).map(p=>`<p>${p.replace(/\n/g,"<br>")}</p>`).join("")}</div><details id="evidence-navigation"><summary>Evidence navigation</summary><p class="empty-state">Loading graph…</p></details><details><summary>Research context</summary><pre>${escapeHtml(JSON.stringify({provenance:context.provenance,citations:context.citations,evidence_graph:context.evidence_graph},null,2))}</pre></details><details><summary>Research object metadata</summary><pre>${escapeHtml(JSON.stringify(obj,null,2))}</pre></details>`;
     $("[data-reader-add]")?.addEventListener("click",()=>{addToWorkingSet({record_id:id,title:resultTitle(r),object_type:type});});
+    loadEvidenceNavigation(id);
   } catch (error) { target.innerHTML=`<p class="error-state">${escapeHtml(error.message)}</p>`; }
 }
 
@@ -371,7 +383,7 @@ async function loadCapabilities() {
 
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -430,7 +442,7 @@ async function login(event) {
   event.preventDefault(); const error=$("#login-error"); error.hidden=true;
   const handle=$("#login-handle").value.trim(); const password=$("#login-password").value;
   try {
-    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.5.0'})});
+    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.6.0'})});
     $("#login-password").value=''; renderSession(session);
   } catch (e) { error.textContent=e.message; error.hidden=false; }
 }

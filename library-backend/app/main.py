@@ -272,6 +272,13 @@ from .provenance_graph_service import (
     evidence_graph as library_evidence_graph, create_citation as create_library_citation,
     import_citations as import_library_citations, core_handoff as library_citation_core_handoff,
 )
+from .research_graph_navigation import (
+    contract as research_graph_navigation_contract,
+    readiness as research_graph_navigation_readiness,
+    neighborhood as research_graph_neighborhood,
+    summary as research_graph_summary,
+    path as research_graph_path,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -606,6 +613,12 @@ def health() -> dict[str, Any]:
             "global_federation_cross_language_planning": True,
             "global_federation_user_trust_separation": True,
             "global_federation_automatic_external_fetch": False,
+            "research_graph_evidence_navigation": True,
+            "research_graph_record_neighborhoods": True,
+            "research_graph_shortest_paths": True,
+            "research_graph_edge_family_filters": True,
+            "research_graph_graph_connectivity_implies_truth": False,
+            "research_graph_path_implies_causality": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -620,8 +633,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.5.0",
-            "library_sdk_version": "1.5.0",
+            "library_web_version": "2.6.0",
+            "library_sdk_version": "1.6.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -3339,6 +3352,41 @@ def library_api_v1_record_citations(record_id: str, direction: str="both", limit
 def library_api_v1_evidence_graph(record_id: str, depth: int=2, limit: int=250, include_core: bool=True) -> dict[str, Any]:
     try: return library_evidence_graph(record_id,depth=depth,limit=limit,include_core=include_core)
     except ValueError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-graph")
+def library_api_v1_research_graph_contract() -> dict[str, Any]:
+    return research_graph_navigation_contract()
+
+@app.get("/api/library/v1/research-graph/readiness")
+def library_api_v1_research_graph_readiness() -> dict[str, Any]:
+    return research_graph_navigation_readiness()
+
+@app.get("/api/library/v1/research-graph/records/{record_id:path}/neighborhood")
+def library_api_v1_research_graph_neighborhood(record_id: str, depth: int=2, limit: int=250, include_core: bool=True, edge_families: str="") -> dict[str, Any]:
+    try:
+        return research_graph_neighborhood(record_id, depth=depth, limit=limit, include_core=include_core, edge_families=edge_families)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-graph/records/{record_id:path}/summary")
+def library_api_v1_research_graph_summary(record_id: str, depth: int=1, limit: int=250, include_core: bool=True) -> dict[str, Any]:
+    try:
+        return research_graph_summary(record_id, depth=depth, limit=limit, include_core=include_core)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-graph/path")
+async def library_api_v1_research_graph_path(request: Request) -> dict[str, Any]:
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=library_api_error_envelope("invalid-json", "Research graph path payload must be JSON", status=400)) from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=422, detail=library_api_error_envelope("payload-must-be-object", "Research graph path payload must be an object", status=422))
+    try:
+        return research_graph_path(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 @app.post("/api/library/v1/admin/citations")
 async def library_api_v1_citation_create(request: Request, authorization: str|None=Header(default=None), x_sc_timestamp: str|None=Header(default=None), x_sc_signature: str|None=Header(default=None)) -> dict[str, Any]:
