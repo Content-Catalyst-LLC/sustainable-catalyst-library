@@ -3,8 +3,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "6.9.0"
-BACKEND_VERSION = "3.9.0"
+LIBRARY_VERSION = "6.10.0"
+BACKEND_VERSION = "3.10.0"
 CONTRACT = "sc-library-python-domain-authority/1.0"
 READINESS_CONTRACT = "sc-library-python-domain-authority-readiness/1.0"
 MIGRATION_PLAN_CONTRACT = "sc-library-python-domain-migration-plan/1.0"
@@ -77,8 +77,8 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "wordpress_role": "optional-adapter",
         "canonical_web_route": "/research",
         "legacy_alias_routes": ["/search", "/discover"],
-        "web_version": "2.9.0",
-        "sdk_version": "1.9.0",
+        "web_version": "2.10.0",
+        "sdk_version": "1.10.0",
         "state_authority": "existing-python-domain-services",
     },
     "research-projects-saved-workspaces": {
@@ -88,8 +88,8 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "persistence": "existing-postgresql-research-state",
         "database_migration_required": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.9.0",
-        "sdk_version": "1.9.0",
+        "web_version": "2.10.0",
+        "sdk_version": "1.10.0",
     },
     "advanced-semantic-cross-language-discovery": {
         "authority": "python-backend", "state": "authoritative-composition",
@@ -97,8 +97,8 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "state_authority": "existing-python-retrieval-language-and-research-state-services",
         "database_migration_required": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.9.0",
-        "sdk_version": "1.9.0",
+        "web_version": "2.10.0",
+        "sdk_version": "1.10.0",
     },
     "global-knowledge-federation-ii": {
         "authority": "python-backend", "state": "authoritative-composition",
@@ -107,8 +107,8 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "database_migration_required": False,
         "external_execution": "explicit-plan-only",
         "wordpress_role": "optional-adapter",
-        "web_version": "2.9.0",
-        "sdk_version": "1.9.0",
+        "web_version": "2.10.0",
+        "sdk_version": "1.10.0",
     },
     "research-graph-evidence-navigation": {
         "authority": "python-backend", "state": "authoritative-composition",
@@ -117,8 +117,8 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "database_migration_required": False,
         "graph_store_created": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.9.0",
-        "sdk_version": "1.9.0",
+        "web_version": "2.10.0",
+        "sdk_version": "1.10.0",
     },
     "living-collections-research-projects": {
         "authority": "python-backend", "state": "authoritative-composition",
@@ -129,8 +129,8 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "database_migration_required": False,
         "automatic_collection_membership_mutation": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.9.0",
-        "sdk_version": "1.9.0",
+        "web_version": "2.10.0",
+        "sdk_version": "1.10.0",
     },
     "dataset-table-structured-evidence-objects": {
         "authority": "python-backend", "state": "authoritative-composition",
@@ -139,8 +139,8 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "database_migration_required": False,
         "automatic_truth_promotion": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.9.0",
-        "sdk_version": "1.9.0",
+        "web_version": "2.10.0",
+        "sdk_version": "1.10.0",
     },
     "scientific-literature-intelligence": {
         "authority": "python-backend", "state": "authoritative-composition",
@@ -149,15 +149,26 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "database_migration_required": False,
         "automatic_truth_promotion": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.9.0",
-        "sdk_version": "1.9.0",
+        "web_version": "2.10.0",
+        "sdk_version": "1.10.0",
+    },
+    "research-package-publishing-reproducible-exports": {
+        "authority": "python-backend", "state": "authoritative-composition",
+        "api": ["/api/library/v1/research-package-publishing", "/api/library/v1/research-package-publishing/readiness", "/api/library/v1/research-package-publishing/formats", "/api/library/v1/research-package-publishing/preview", "/api/library/v1/research-package-publishing/export", "/api/library/v1/research-package-publishing/validate", "/api/library/v1/admin/research-package-publishing/persist"],
+        "composition": ["research-package-reproducibility", "artifacts-pipelines-compute", "dataset-table-structured-evidence-objects", "scientific-literature-intelligence"],
+        "persisted_byte_authority": "existing-content-addressed-artifact-store",
+        "database_migration_required": False,
+        "external_publication_automatic": False,
+        "wordpress_role": "optional-adapter",
+        "web_version": "2.10.0",
+        "sdk_version": "1.10.0",
     },
     "independent-research-interface": {
         "authority": "python-backend", "state": "authoritative-composition",
         "api": ["/api/library/v1/research-interface", "/api/library/v1/research-interface/bootstrap", "/api/library/v1/research-interface/search", "/api/library/v1/research-interface/records/{record_id}"],
         "wordpress_role": "optional-adapter",
-        "web_version": "2.9.0",
-        "sdk_version": "1.9.0",
+        "web_version": "2.10.0",
+        "sdk_version": "1.10.0",
         "state_authority": "existing-python-domain-services",
     },
     "independent-library-product": {
@@ -165,8 +176,8 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "api": ["/api/library/v1/product", "/api/library/v1/product/readiness", "/api/library/v1/product/release"],
         "wordpress_role": "optional-adapter",
         "api_version": "1.0",
-        "web_version": "2.9.0",
-        "sdk_version": "1.9.0",
+        "web_version": "2.10.0",
+        "sdk_version": "1.10.0",
     },
     "independent-application-certification": {
         "authority": "python-backend", "state": "certified-foundation",

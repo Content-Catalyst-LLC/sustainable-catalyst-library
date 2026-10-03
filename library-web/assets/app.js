@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.9.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.10.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -360,6 +360,42 @@ async function previewWorkingSetLiterature() {
   } catch (e) { if(target) target.innerHTML=`<summary>Scientific literature preview</summary><p class="error-state">${escapeHtml(e.message)}</p>`; if(status) status.textContent=e.message; }
 }
 
+function workingSetExportPayload() {
+  const records=state.workingSet.map(item=>({record_id:item.id || item.record_id,title:item.title || item.label || item.id,source_type:item.type || item.object_type || "library-record"}));
+  const payload={title:"Working set research package",description:"Portable reproducible export prepared from the browser working set.",records};
+  if (state.structuredDatasetPreview) payload.datasets=[state.structuredDatasetPreview];
+  if (state.scientificLiteraturePreview) payload.scientific_literature=state.scientificLiteraturePreview;
+  return payload;
+}
+
+async function previewWorkingSetExport() {
+  const target=$("#working-set-export-preview");
+  const status=$("#working-set-save-status");
+  if (!state.workingSet.length) { if(status) status.textContent="Add records to the working set before preparing an export."; return; }
+  if (target) { target.hidden=false; target.innerHTML='<p class="empty-state">Preparing reproducible export preview…</p>'; }
+  try {
+    const result=await api("/research-package-publishing/preview",{method:"POST",body:JSON.stringify(workingSetExportPayload())});
+    state.researchPackageExportPreview=result;
+    if (target) target.innerHTML=`<summary>Reproducible export · ${Number(result.file_count||0)} files</summary><div class="form-note">Preview only · deterministic ZIP plan · no persistence or external publication.</div><pre>${escapeHtml(JSON.stringify({export_fingerprint_sha256:result.export_fingerprint_sha256,filename:result.filename,archive_sha256:result.archive_sha256,archive_byte_length:result.archive_byte_length,files:result.files},null,2))}</pre>`;
+    if(status) status.textContent="Reproducible export preview created without persistence.";
+  } catch (e) { if(target) target.innerHTML=`<summary>Reproducible export</summary><p class="error-state">${escapeHtml(e.message)}</p>`; if(status) status.textContent=e.message; }
+}
+
+async function downloadWorkingSetExport() {
+  const status=$("#working-set-save-status");
+  if (!state.workingSet.length) { if(status) status.textContent="Add records to the working set before exporting."; return; }
+  if(status) status.textContent="Building deterministic portable ZIP…";
+  try {
+    const result=await api("/research-package-publishing/export",{method:"POST",body:JSON.stringify(workingSetExportPayload())});
+    const binary=atob(result.archive_base64 || "");
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+    const blob=new Blob([bytes],{type:result.media_type || "application/zip"});
+    const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=result.filename || "research-package-reproducible-export.zip"; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),0);
+    if(status) status.textContent=`Portable ZIP prepared · SHA-256 ${result.archive_sha256 || "unavailable"}`;
+  } catch (e) { if(status) status.textContent=e.message; }
+}
+
 async function saveCurrentResearchSearch() {
   if (!(await ensureWorkspaceSession())) { navigate("/account?section=workspaces"); return; }
   const params=researchParams();
@@ -478,7 +514,7 @@ async function loadCapabilities() {
 
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -501,6 +537,8 @@ $("#working-set-clear")?.addEventListener("click",()=>{state.workingSet=[];saveW
 $("#working-set-save")?.addEventListener("click",saveWorkingSetToProject);
 $("#working-set-dataset-preview-button")?.addEventListener("click",previewWorkingSetDataset);
 $("#working-set-literature-preview-button")?.addEventListener("click",previewWorkingSetLiterature);
+$("#working-set-export-preview-button")?.addEventListener("click",previewWorkingSetExport);
+$("#working-set-export-download-button")?.addEventListener("click",downloadWorkingSetExport);
 $("#research-save-search")?.addEventListener("click",saveCurrentResearchSearch);
 $("#workspace-project-form")?.addEventListener("submit",createWorkspaceProject);
 $("#workspace-living-form")?.addEventListener("submit",createLivingCollection);
@@ -545,7 +583,7 @@ async function login(event) {
   event.preventDefault(); const error=$("#login-error"); error.hidden=true;
   const handle=$("#login-handle").value.trim(); const password=$("#login-password").value;
   try {
-    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.9.0'})});
+    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.10.0'})});
     $("#login-password").value=''; renderSession(session);
   } catch (e) { error.textContent=e.message; error.hidden=false; }
 }
