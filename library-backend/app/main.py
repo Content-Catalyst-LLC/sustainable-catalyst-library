@@ -884,7 +884,6 @@ def health() -> dict[str, Any]:
             "wordpress_required_for_library_release": False,
             "automatic_wordpress_data_deletion": False,
             "independent_library_web_application": True,
-            "library_web_version": "1.2.0",
             "library_web_direct_api_v1": True,
             "wordpress_required_for_library_web": False,
             "library_web_owns_research_state": False,
