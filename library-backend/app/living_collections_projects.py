@@ -465,15 +465,18 @@ def readiness() -> dict[str, Any]:
     errors: list[str] = []
     if research.get("state") != "ready":
         errors.append("research-state-not-ready")
-    if discovery.get("state") != "ready":
+    discovery_ready = bool(discovery.get("ready", discovery.get("state") in {"ready", "degraded"}))
+    if not discovery_ready:
         errors.append("advanced-discovery-not-ready")
     if graph.get("state") not in {"ready", "degraded"}:
         errors.append("research-graph-not-ready")
+    degraded = discovery.get("state") == "degraded" or graph.get("state") == "degraded"
+    readiness_state = "blocked" if errors else ("degraded" if degraded else "ready")
     return {
         "schema": READINESS_CONTRACT,
         "library_version": LIBRARY_VERSION,
         "backend_version": BACKEND_VERSION,
-        "state": "ready" if not errors else "blocked",
+        "state": readiness_state,
         "ready": not errors,
         "errors": errors,
         "database_migration_required": False,
