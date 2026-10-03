@@ -297,6 +297,16 @@ from .structured_evidence_objects import (
     structured_evidence_object as build_structured_evidence_object,
     validate_object as validate_structured_evidence_object,
 )
+from .scientific_literature_intelligence import (
+    contract as scientific_literature_contract,
+    readiness as scientific_literature_readiness,
+    schema_registry as scientific_literature_schema_registry,
+    normalize_publication as normalize_scientific_publication,
+    analyze_publication as analyze_scientific_publication,
+    literature_set as analyze_scientific_literature_set,
+    review_intelligence as analyze_scientific_literature_review,
+    validate_publication as validate_scientific_publication,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -650,6 +660,15 @@ def health() -> dict[str, Any]:
             "structured_evidence_data_shape_implies_truth": False,
             "structured_evidence_numeric_precision_implies_certainty": False,
             "structured_evidence_database_migration_required": False,
+            "scientific_literature_intelligence": True,
+            "scientific_literature_identifier_normalization": True,
+            "scientific_literature_study_design_indicators": True,
+            "scientific_literature_retraction_correction_metadata": True,
+            "scientific_literature_reproducible_review_composition": True,
+            "scientific_literature_citation_count_implies_quality": False,
+            "scientific_literature_journal_venue_implies_quality": False,
+            "scientific_literature_automatic_meta_analysis": False,
+            "scientific_literature_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -664,8 +683,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.8.0",
-            "library_sdk_version": "1.8.0",
+            "library_web_version": "2.9.0",
+            "library_sdk_version": "1.9.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -4108,6 +4127,55 @@ async def library_api_v1_structured_evidence_validate(request: Request) -> dict[
         return validate_structured_evidence_object(payload)
     except (ValueError, KeyError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/api/library/v1/scientific-literature")
+def library_api_v1_scientific_literature_contract() -> dict[str, Any]:
+    return scientific_literature_contract()
+
+@app.get("/api/library/v1/scientific-literature/readiness")
+def library_api_v1_scientific_literature_readiness() -> dict[str, Any]:
+    return scientific_literature_readiness()
+
+@app.get("/api/library/v1/scientific-literature/schemas")
+def library_api_v1_scientific_literature_schemas() -> dict[str, Any]:
+    return scientific_literature_schema_registry()
+
+@app.post("/api/library/v1/scientific-literature/publications/normalize")
+async def library_api_v1_scientific_publication_normalize(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return normalize_scientific_publication(payload)
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/scientific-literature/publications/analyze")
+async def library_api_v1_scientific_publication_analyze(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return analyze_scientific_publication(payload)
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/scientific-literature/sets/analyze")
+async def library_api_v1_scientific_literature_set_analyze(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return analyze_scientific_literature_set(payload)
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/scientific-literature/reviews/analyze")
+async def library_api_v1_scientific_literature_review_analyze(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return analyze_scientific_literature_review(payload)
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/scientific-literature/validate")
+async def library_api_v1_scientific_literature_validate(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    return validate_scientific_publication(payload)
 
 @app.get("/api/library/v1/identity")
 def library_api_v1_identity_boundary() -> dict[str, Any]:

@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.8.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.9.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -345,6 +345,21 @@ async function previewWorkingSetDataset() {
   } catch (e) { if(target) target.innerHTML=`<summary>Structured dataset preview</summary><p class="error-state">${escapeHtml(e.message)}</p>`; if(status) status.textContent=e.message; }
 }
 
+async function previewWorkingSetLiterature() {
+  const target=$("#working-set-literature-preview");
+  const status=$("#working-set-save-status");
+  if (!state.workingSet.length) { if(status) status.textContent="Add records to the working set before analyzing literature."; return; }
+  if (target) { target.hidden=false; target.innerHTML='<p class="empty-state">Analyzing scientific literature set…</p>'; }
+  try {
+    const publications=state.workingSet.map(item=>({record_id:item.id || item.record_id,title:item.title || item.label || item.id,publication_type:item.type || item.object_type || "scientific-publication",source_key:item.source_key || null}));
+    const result=await api("/scientific-literature/sets/analyze",{method:"POST",body:JSON.stringify({title:"Working set scientific literature preview",publications})});
+    state.scientificLiteraturePreview=result;
+    const metrics=result.metrics || {};
+    if (target) target.innerHTML=`<summary>Scientific literature preview · ${Number(metrics.unique_publication_count||0)} unique publications</summary><div class="form-note">Preview only · no persistence · citation counts, venues and study-design indicators are not quality or truth judgments.</div><pre>${escapeHtml(JSON.stringify({literature_set_id:result.literature_set_id,metrics,duplicates:(result.duplicates||[]).slice(0,20),publications:(result.publications||[]).slice(0,20).map(x=>({record_id:x.record_id,title:x.title,identifiers:x.identifiers,study_design_indicators:x.study_design_indicators,correction_retraction:x.correction_retraction}))},null,2))}</pre>`;
+    if(status) status.textContent="Scientific literature preview created without persistence.";
+  } catch (e) { if(target) target.innerHTML=`<summary>Scientific literature preview</summary><p class="error-state">${escapeHtml(e.message)}</p>`; if(status) status.textContent=e.message; }
+}
+
 async function saveCurrentResearchSearch() {
   if (!(await ensureWorkspaceSession())) { navigate("/account?section=workspaces"); return; }
   const params=researchParams();
@@ -463,7 +478,7 @@ async function loadCapabilities() {
 
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -485,6 +500,7 @@ $("#research-clear")?.addEventListener("click",clearResearchScope);
 $("#working-set-clear")?.addEventListener("click",()=>{state.workingSet=[];saveWorkingSet();});
 $("#working-set-save")?.addEventListener("click",saveWorkingSetToProject);
 $("#working-set-dataset-preview-button")?.addEventListener("click",previewWorkingSetDataset);
+$("#working-set-literature-preview-button")?.addEventListener("click",previewWorkingSetLiterature);
 $("#research-save-search")?.addEventListener("click",saveCurrentResearchSearch);
 $("#workspace-project-form")?.addEventListener("submit",createWorkspaceProject);
 $("#workspace-living-form")?.addEventListener("submit",createLivingCollection);
@@ -529,7 +545,7 @@ async function login(event) {
   event.preventDefault(); const error=$("#login-error"); error.hidden=true;
   const handle=$("#login-handle").value.trim(); const password=$("#login-password").value;
   try {
-    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.8.0'})});
+    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.9.0'})});
     $("#login-password").value=''; renderSession(session);
   } catch (e) { error.textContent=e.message; error.hidden=false; }
 }
