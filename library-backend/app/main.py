@@ -258,6 +258,14 @@ from .advanced_discovery import (
     execute as execute_advanced_discovery,
     execute_project as execute_project_advanced_discovery,
 )
+from .global_knowledge_federation_ii import (
+    contract as global_federation_ii_contract,
+    readiness as global_federation_ii_readiness,
+    lenses as global_federation_ii_lenses,
+    source_profile as global_federation_ii_source_profile,
+    plan as plan_global_federation_ii,
+    discover as execute_global_federation_ii_discovery,
+)
 from .provenance_graph_service import (
     contract as library_provenance_graph_contract, readiness as library_provenance_graph_readiness,
     record_provenance as library_record_provenance, citations_for_record as library_record_citations,
@@ -593,6 +601,11 @@ def health() -> dict[str, Any]:
             "unified_discovery_research_navigation": True,
             "research_projects_saved_workspaces": True,
         "advanced_semantic_cross_language_discovery": True,
+            "global_knowledge_federation_ii": True,
+            "global_federation_source_lenses": True,
+            "global_federation_cross_language_planning": True,
+            "global_federation_user_trust_separation": True,
+            "global_federation_automatic_external_fetch": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -607,8 +620,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.4.0",
-            "library_sdk_version": "1.4.0",
+            "library_web_version": "2.5.0",
+            "library_sdk_version": "1.5.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -3480,6 +3493,51 @@ async def library_api_v1_research_package_verify(package_id: str, request: Reque
     payload=await _reproducibility_signed_json(request,authorization,x_sc_timestamp,x_sc_signature)
     try: return verify_library_research_package(package_id,payload)
     except (ValueError,KeyError,RuntimeError,json.JSONDecodeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/federation/global")
+def library_api_v1_global_federation_ii_contract() -> dict[str, Any]:
+    return global_federation_ii_contract()
+
+@app.get("/api/library/v1/federation/global/readiness")
+def library_api_v1_global_federation_ii_readiness() -> dict[str, Any]:
+    return global_federation_ii_readiness()
+
+@app.get("/api/library/v1/federation/global/lenses")
+def library_api_v1_global_federation_ii_lenses() -> dict[str, Any]:
+    return global_federation_ii_lenses()
+
+@app.get("/api/library/v1/federation/global/sources/{source_id}")
+def library_api_v1_global_federation_ii_source(source_id: str) -> dict[str, Any]:
+    try:
+        return global_federation_ii_source_profile(source_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="global-federation-source-not-found") from exc
+
+@app.post("/api/library/v1/federation/global/plan")
+async def library_api_v1_global_federation_ii_plan(request: Request) -> dict[str, Any]:
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=library_api_error_envelope("invalid-json", "Federation payload must be JSON", status=400)) from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=422, detail=library_api_error_envelope("payload-must-be-object", "Federation payload must be an object", status=422))
+    try:
+        return plan_global_federation_ii(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/federation/global/discover")
+async def library_api_v1_global_federation_ii_discover(request: Request) -> dict[str, Any]:
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=library_api_error_envelope("invalid-json", "Federation discovery payload must be JSON", status=400)) from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=422, detail=library_api_error_envelope("payload-must-be-object", "Federation discovery payload must be an object", status=422))
+    try:
+        return execute_global_federation_ii_discovery(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 @app.get("/api/library/v1/federation")
 def library_api_v1_federation_contract() -> dict[str, Any]:

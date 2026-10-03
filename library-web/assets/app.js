@@ -1,4 +1,4 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.4.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.5.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
 const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null };
 
@@ -371,7 +371,7 @@ async function loadCapabilities() {
 
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -430,7 +430,7 @@ async function login(event) {
   event.preventDefault(); const error=$("#login-error"); error.hidden=true;
   const handle=$("#login-handle").value.trim(); const password=$("#login-password").value;
   try {
-    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.3.0'})});
+    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.5.0'})});
     $("#login-password").value=''; renderSession(session);
   } catch (e) { error.textContent=e.message; error.hidden=false; }
 }

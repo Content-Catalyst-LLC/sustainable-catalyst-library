@@ -12,8 +12,8 @@ from .global_knowledge_federation import (
     validate_certification_payload,
 )
 
-LIBRARY_VERSION = "6.3.0"
-BACKEND_VERSION = "3.3.0"
+LIBRARY_VERSION = "6.5.0"
+BACKEND_VERSION = "3.5.0"
 CONTRACT = "sc-library-python-connector-federation-runtime/1.0"
 READINESS_CONTRACT = "sc-library-python-connector-federation-readiness/1.0"
 EXECUTION_PLAN_CONTRACT = "sc-library-connector-execution-plan/1.0"
@@ -113,6 +113,7 @@ def contract() -> dict[str, Any]:
         "connector-execution-plans",
         "connector-manifest-validation",
         "global-knowledge-federation-certification",
+        "global-knowledge-federation-ii",
     ]
     basis = {
         "authority": "python-backend",
