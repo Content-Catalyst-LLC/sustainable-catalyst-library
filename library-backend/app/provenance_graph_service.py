@@ -12,8 +12,8 @@ from .citation_graph import (
 from .db import get_pool
 from .query import get_record, graph_neighborhood
 
-LIBRARY_VERSION = "6.2.0"
-BACKEND_VERSION = "3.2.0"
+LIBRARY_VERSION = "6.3.0"
+BACKEND_VERSION = "3.3.0"
 CONTRACT = "sc-library-python-provenance-citation-evidence-graph/1.0"
 READINESS_CONTRACT = "sc-library-python-provenance-citation-evidence-graph-readiness/1.0"
 PROVENANCE_CONTRACT = "sc-library-record-provenance/1.0"

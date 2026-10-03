@@ -26,8 +26,8 @@ from .translation_alignment import (
     readiness as alignment_readiness, validate_alignment_payload,
 )
 
-LIBRARY_VERSION = "6.2.0"
-BACKEND_VERSION = "3.2.0"
+LIBRARY_VERSION = "6.3.0"
+BACKEND_VERSION = "3.3.0"
 CONTRACT = "sc-library-python-language-document-service/1.0"
 READINESS_CONTRACT = "sc-library-python-language-document-readiness/1.0"
 DOCUMENT_INTELLIGENCE_CONTRACT = "sc-library-language-document-intelligence-envelope/1.0"

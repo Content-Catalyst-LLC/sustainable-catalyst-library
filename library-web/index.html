@@ -40,6 +40,7 @@
           <a data-research-mode-link="discover" href="/discover">Discover</a>
           <a data-research-mode-link="search" href="/search">Search</a>
           <a data-research-mode-link="working-set" href="/research?mode=working-set">Working Set</a>
+          <a data-research-mode-link="projects" href="/account?section=workspaces">Projects</a>
         </nav>
         <section id="research-discovery" class="research-discovery" aria-labelledby="research-discovery-title">
           <div class="panel-heading"><div><p class="eyebrow">Research pathways</p><h2 id="research-discovery-title">Discover by research task</h2></div><span id="navigation-status">Loading navigation…</span></div>
@@ -61,7 +62,7 @@
             <div id="research-interface-status" class="interface-note">Loading research interface…</div>
           </aside>
           <section class="content-panel research-results-panel">
-            <div class="panel-heading"><h2>Discovery</h2><span id="research-result-count"></span></div>
+            <div class="panel-heading"><h2>Discovery</h2><div class="research-result-tools"><span id="research-result-count"></span><button id="research-save-search" class="text-button" type="button">Save search</button></div></div>
             <div id="research-results" class="result-list"><p class="empty-state">Enter a research question or browse with filters.</p></div>
             <button id="research-load-more" class="secondary-button" hidden>Load more</button>
           </section>
@@ -69,6 +70,11 @@
             <div class="panel-heading"><h2>Working set</h2><span id="working-set-count">0</span></div>
             <p class="form-note">Stored only in this browser until you explicitly save records into a Library project or collection.</p>
             <div id="working-set"><p class="empty-state">No records selected.</p></div>
+            <div class="working-set-save">
+              <label>Save to project<select id="working-set-project"><option value="">Sign in to load projects</option></select></label>
+              <button id="working-set-save" class="secondary-button" type="button">Save working set</button>
+              <p id="working-set-save-status" class="form-note"></p>
+            </div>
             <button id="working-set-clear" class="text-button" type="button">Clear working set</button>
           </aside>
         </div>
@@ -112,11 +118,24 @@
         <div class="account-layout">
           <section class="info-card" id="session-card"><h2>Session</h2><div id="session-state"><p class="empty-state">Checking session…</p></div></section>
           <section class="info-card" id="login-card"><h2>Sign in</h2><form id="login-form" class="login-form"><label>Handle<input id="login-handle" name="handle" autocomplete="username" required></label><label>Password<input id="login-password" name="password" type="password" autocomplete="current-password" minlength="12" required></label><button type="submit">Sign in</button><p class="form-note">Accounts are provisioned by the Library service. Public research reads do not require an account.</p></form><p id="login-error" class="error-state" hidden></p></section>
+          <section class="info-card workspace-card" id="workspace-card">
+            <div class="panel-heading"><div><p class="eyebrow">Persistent research state</p><h2>Research projects & saved workspaces</h2></div><span id="workspace-status">Sign in required</span></div>
+            <form id="workspace-project-form" class="workspace-project-form">
+              <label>Project title<input id="workspace-project-title" required maxlength="180" placeholder="e.g. Accelerated weathering research"></label>
+              <label>Research question<input id="workspace-project-question" maxlength="4000" placeholder="Optional research question"></label>
+              <label class="workspace-project-description">Description<textarea id="workspace-project-description" maxlength="8000" rows="3" placeholder="Scope, methods, goals, or notes"></textarea></label>
+              <button type="submit">Create project</button>
+            </form>
+            <p id="workspace-project-error" class="error-state" hidden></p>
+            <div class="workspace-summary" id="workspace-summary"></div>
+            <div class="workspace-projects" id="workspace-project-list"><p class="empty-state">Sign in to load saved projects.</p></div>
+            <div class="workspace-saved-searches"><h3>Saved searches</h3><div id="workspace-saved-search-list"><p class="empty-state">No saved searches loaded.</p></div></div>
+          </section>
         </div>
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.2.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.3.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

@@ -12,10 +12,10 @@ from .research_interface import (
 from .independent_api import capability_catalog
 from .web_application import application_contract as web_application_contract
 
-LIBRARY_VERSION = "6.2.0"
-BACKEND_VERSION = "3.2.0"
-WEB_VERSION = "2.2.0"
-SDK_VERSION = "1.2.0"
+LIBRARY_VERSION = "6.3.0"
+BACKEND_VERSION = "3.3.0"
+WEB_VERSION = "2.3.0"
+SDK_VERSION = "1.3.0"
 
 CONTRACT = "sc-library-unified-discovery-research-navigation/1.0"
 READINESS_CONTRACT = "sc-library-unified-discovery-research-navigation-readiness/1.0"
@@ -59,6 +59,7 @@ def navigation_model() -> dict[str, Any]:
         {"id": "discover", "label": "Discover", "route": "/discover", "mode": "discover", "compatibility_route": True},
         {"id": "search", "label": "Search", "route": "/search", "mode": "search", "compatibility_route": True},
         {"id": "working-set", "label": "Working Set", "route": "/research?mode=working-set", "mode": "working-set"},
+        {"id": "projects", "label": "Projects", "route": "/account?section=workspaces", "mode": "projects"},
     ]
     aliases = {
         "/search": {"canonical_route": "/research", "surface": "research", "mode": "search"},
@@ -69,7 +70,7 @@ def navigation_model() -> dict[str, Any]:
         "research_modes": research_modes,
         "aliases": aliases,
         "record_context": {"route_template": "/record/{record_id}", "parent_surface": "research"},
-        "saved_research": {"route": "/account", "parent_surface": "account", "authority": "python-research-state-service"},
+        "saved_research": {"route": "/account?section=workspaces", "parent_surface": "account", "authority": "python-research-state-service", "session_api": "/api/library/v1/workspaces"},
     }
 
 def contract() -> dict[str, Any]:
@@ -95,8 +96,8 @@ def contract() -> dict[str, Any]:
         "canonical_research_route": "/research",
         "navigation": nav,
         "wordpress": {"role": "optional-adapter", "required": False, "authoritative": False},
-        "next_release": "6.3.0",
-        "next_release_name": "Research Projects & Saved Workspaces",
+        "next_release": "6.4.0",
+        "next_release_name": "Project Detail, Source Bundles & Collections",
         "guardrails": guardrails(),
     }
 

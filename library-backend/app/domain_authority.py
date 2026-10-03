@@ -3,8 +3,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "6.2.0"
-BACKEND_VERSION = "3.2.0"
+LIBRARY_VERSION = "6.3.0"
+BACKEND_VERSION = "3.3.0"
 CONTRACT = "sc-library-python-domain-authority/1.0"
 READINESS_CONTRACT = "sc-library-python-domain-authority-readiness/1.0"
 MIGRATION_PLAN_CONTRACT = "sc-library-python-domain-migration-plan/1.0"
@@ -77,16 +77,26 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "wordpress_role": "optional-adapter",
         "canonical_web_route": "/research",
         "legacy_alias_routes": ["/search", "/discover"],
-        "web_version": "2.2.0",
-        "sdk_version": "1.2.0",
+        "web_version": "2.3.0",
+        "sdk_version": "1.3.0",
         "state_authority": "existing-python-domain-services",
+    },
+    "research-projects-saved-workspaces": {
+        "authority": "python-backend", "state": "authoritative-composition",
+        "api": ["/api/library/v1/saved-workspaces", "/api/library/v1/workspaces", "/api/library/v1/workspaces/projects", "/api/library/v1/workspaces/projects/{project_id}/working-set"],
+        "state_authority": "python-research-state-service",
+        "persistence": "existing-postgresql-research-state",
+        "database_migration_required": False,
+        "wordpress_role": "optional-adapter",
+        "web_version": "2.3.0",
+        "sdk_version": "1.3.0",
     },
     "independent-research-interface": {
         "authority": "python-backend", "state": "authoritative-composition",
         "api": ["/api/library/v1/research-interface", "/api/library/v1/research-interface/bootstrap", "/api/library/v1/research-interface/search", "/api/library/v1/research-interface/records/{record_id}"],
         "wordpress_role": "optional-adapter",
-        "web_version": "2.2.0",
-        "sdk_version": "1.2.0",
+        "web_version": "2.3.0",
+        "sdk_version": "1.3.0",
         "state_authority": "existing-python-domain-services",
     },
     "independent-library-product": {
@@ -94,8 +104,8 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "api": ["/api/library/v1/product", "/api/library/v1/product/readiness", "/api/library/v1/product/release"],
         "wordpress_role": "optional-adapter",
         "api_version": "1.0",
-        "web_version": "2.2.0",
-        "sdk_version": "1.2.0",
+        "web_version": "2.3.0",
+        "sdk_version": "1.3.0",
     },
     "independent-application-certification": {
         "authority": "python-backend", "state": "certified-foundation",

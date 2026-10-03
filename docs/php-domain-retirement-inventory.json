@@ -1,6 +1,6 @@
 {
   "schema": "sc-library-php-domain-retirement-inventory/1.0",
-  "library_version": "6.2.0",
+  "library_version": "6.3.0",
   "policy": "The Knowledge Library is an independent primary application. WordPress is an optional adapter; PHP compatibility files do not hold Library research/domain authority.",
   "categories": [
     "wordpress-integration",
@@ -905,18 +905,18 @@
     "next_release": "6.0.0"
   },
   "independent_library_product": {
-    "phase": "v6.2.0-unified-discovery-research-navigation",
+    "phase": "v6.3.0-research-projects-saved-workspaces",
     "application_mode": "independent-primary",
-    "backend_version": "3.2.0",
-    "web_version": "2.2.0",
-    "sdk_version": "1.2.0",
+    "backend_version": "3.3.0",
+    "web_version": "2.3.0",
+    "sdk_version": "1.3.0",
     "api_version": "1.0",
     "wordpress_role": "optional-adapter",
     "wordpress_required": false,
     "php_domain_authority_files": 0,
     "legacy_compatibility_present": true,
     "legacy_compatibility_is_domain_authority": false,
-    "next_release": "6.3.0"
+    "next_release": "6.4.0"
   },
   "research_interface": {
     "authority": "python-backend-composition",
@@ -934,5 +934,14 @@
     ],
     "legacy_routes_primary_navigation": false,
     "wordpress_required": false
+  },
+  "saved_workspaces": {
+    "authority": "python-research-state-service",
+    "persistence": "existing-postgresql-research-state",
+    "database_migration_required": false,
+    "browser_session_auth": true,
+    "csrf_mutations": true,
+    "wordpress_required": false,
+    "browser_working_set_authoritative": false
   }
 }

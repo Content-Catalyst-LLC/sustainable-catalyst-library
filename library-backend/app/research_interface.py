@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.2.0"
-BACKEND_VERSION = "3.2.0"
-WEB_VERSION = "2.2.0"
-SDK_VERSION = "1.2.0"
+LIBRARY_VERSION = "6.3.0"
+BACKEND_VERSION = "3.3.0"
+WEB_VERSION = "2.3.0"
+SDK_VERSION = "1.3.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"
@@ -94,22 +94,24 @@ def contract() -> dict[str, Any]:
             "public_search": "/api/library/v1/research-interface/search",
             "record_context": "/api/library/v1/research-interface/records/{record_id}",
             "owner_state": "/api/library/v1/admin/research-interface/owners/{owner_identity_id}",
-            "project_write": "/api/library/v1/admin/research-state/projects",
+            "project_write": "/api/library/v1/workspaces/projects",
+            "saved_workspace": "/api/library/v1/workspaces",
             "collection_write": "/api/library/v1/admin/research-state/collections",
         },
         "working_set": {
             "default_store": "browser-local",
             "authoritative": False,
             "persistent_research_state": False,
-            "upgrade_path": "library-research-project-or-collection",
+            "upgrade_path": "library-saved-workspace-project",
+            "session_save_endpoint": "/api/library/v1/workspaces/projects/{project_id}/working-set",
         },
         "wordpress": {
             "role": "optional-adapter",
             "required": False,
             "authoritative": False,
         },
-        "next_release": "6.3.0",
-        "next_release_name": "Research Projects & Saved Workspaces",
+        "next_release": "6.4.0",
+        "next_release_name": "Project Detail, Source Bundles & Collections",
         "guardrails": guardrails(),
     }
 

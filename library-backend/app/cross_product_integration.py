@@ -4,8 +4,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "6.2.0"
-BACKEND_VERSION = "3.2.0"
+LIBRARY_VERSION = "6.3.0"
+BACKEND_VERSION = "3.3.0"
 CONTRACT = "sc-library-cross-product-service-integration/1.0"
 READINESS_CONTRACT = "sc-library-cross-product-service-readiness/1.0"
 PRODUCT_CONTRACT = "sc-library-cross-product-client/1.0"

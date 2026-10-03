@@ -5,8 +5,8 @@ import json
 from typing import Any
 from uuid import uuid4
 
-LIBRARY_VERSION = "6.2.0"
-BACKEND_VERSION = "3.2.0"
+LIBRARY_VERSION = "6.3.0"
+BACKEND_VERSION = "3.3.0"
 CONTRACT = "sc-library-wordpress-state-migration/1.0"
 READINESS_CONTRACT = "sc-library-wordpress-state-migration-readiness/1.0"
 MANIFEST_CONTRACT = "sc-library-wordpress-state-migration-manifest/1.0"

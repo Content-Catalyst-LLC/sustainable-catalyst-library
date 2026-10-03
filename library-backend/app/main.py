@@ -207,6 +207,17 @@ from .navigation_service import (
     bootstrap as unified_navigation_bootstrap,
     resolve_route as resolve_unified_navigation_route,
 )
+from .saved_workspaces import (
+    contract as saved_workspaces_contract,
+    readiness as saved_workspaces_readiness,
+    workspace_for_owner as saved_workspace_for_owner,
+    project_context as saved_workspace_project_context,
+    save_project as save_workspace_project,
+    save_working_set as save_workspace_working_set,
+    save_search as save_workspace_search,
+    save_collection as save_workspace_collection,
+    save_collection_item as save_workspace_collection_item,
+)
 from .public_routing import contract as public_routing_contract, readiness as public_routing_readiness, record_seo_descriptor, record_embed_descriptor
 from .cross_product_integration import (
     registry_contract as cross_product_registry_contract, readiness as cross_product_integration_readiness,
@@ -573,6 +584,11 @@ def health() -> dict[str, Any]:
             "independent_library_product": True,
             "independent_library_research_interface": True,
             "unified_discovery_research_navigation": True,
+            "research_projects_saved_workspaces": True,
+            "saved_workspace_authority": "python-research-state-service",
+            "saved_workspace_session_auth": True,
+            "saved_workspace_csrf_mutations": True,
+            "saved_workspace_database_migration_required": False,
             "navigation_authority": "python-backend-composition",
             "canonical_research_route": "/research",
             "legacy_search_discover_routes_supported": True,
@@ -583,8 +599,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.2.0",
-            "library_sdk_version": "1.2.0",
+            "library_web_version": "2.3.0",
+            "library_sdk_version": "1.3.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -3542,6 +3558,14 @@ async def library_api_v1_workflow_pipeline_resume(run_id: str, request: Request,
     except KeyError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
     except (ValueError,RuntimeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
+@app.get("/api/library/v1/saved-workspaces")
+def library_api_v1_saved_workspaces() -> dict[str, Any]:
+    return saved_workspaces_contract()
+
+@app.get("/api/library/v1/saved-workspaces/readiness")
+def library_api_v1_saved_workspaces_readiness() -> dict[str, Any]:
+    return saved_workspaces_readiness()
+
 @app.get("/api/library/v1/navigation")
 def library_api_v1_navigation() -> dict[str, Any]:
     return unified_navigation_contract()
@@ -3705,6 +3729,97 @@ def library_api_v1_record_embed(record_id: str) -> dict[str, Any]:
 
 def _library_session_from_request(request: Request, *, rotate_csrf: bool = False):
     return library_resolve_session(request.cookies.get(settings.session_cookie_name or LIBRARY_SESSION_COOKIE), rotate_csrf=rotate_csrf)
+
+def _library_workspace_owner(request: Request, *, csrf_token: str | None = None, mutation: bool = False) -> tuple[dict[str, Any], str]:
+    session = _library_session_from_request(request, rotate_csrf=False)
+    if session is None:
+        raise HTTPException(status_code=401, detail=library_api_error_envelope("library-session-required", "Sign in to use saved workspaces", status=401))
+    identity = session.get("identity") if isinstance(session.get("identity"), dict) else {}
+    owner_identity_id = str(identity.get("identity_id") or "").strip()
+    if not owner_identity_id:
+        raise HTTPException(status_code=403, detail=library_api_error_envelope("workspace-owner-unavailable", "Library session has no workspace owner identity", status=403))
+    if mutation and not library_validate_csrf(str(session.get("session_id") or ""), csrf_token):
+        raise HTTPException(status_code=403, detail=library_api_error_envelope("csrf-required", "Valid session CSRF token required", status=403))
+    return session, owner_identity_id
+
+async def _library_workspace_json(request: Request) -> dict[str, Any]:
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=library_api_error_envelope("invalid-json", "Workspace payload must be JSON", status=400)) from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=422, detail=library_api_error_envelope("payload-must-be-object", "Workspace payload must be an object", status=422))
+    return payload
+
+def _library_workspace_error(exc: Exception):
+    if isinstance(exc, PermissionError):
+        raise HTTPException(status_code=403, detail=str(exc))
+    if isinstance(exc, KeyError):
+        raise HTTPException(status_code=404, detail=str(exc).strip("'"))
+    if isinstance(exc, ValueError):
+        raise HTTPException(status_code=422, detail=str(exc))
+    raise exc
+
+@app.get("/api/library/v1/workspaces")
+def library_api_v1_current_workspace(request: Request) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request)
+    try:
+        return saved_workspace_for_owner(owner)
+    except Exception as exc:
+        _library_workspace_error(exc)
+
+@app.get("/api/library/v1/workspaces/projects/{project_id:path}")
+def library_api_v1_current_workspace_project(project_id: str, request: Request) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request)
+    try:
+        return saved_workspace_project_context(owner, project_id)
+    except Exception as exc:
+        _library_workspace_error(exc)
+
+@app.post("/api/library/v1/workspaces/projects")
+async def library_api_v1_current_workspace_project_save(request: Request, x_sc_csrf_token: str | None = Header(default=None)) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request, csrf_token=x_sc_csrf_token, mutation=True)
+    payload = await _library_workspace_json(request)
+    try:
+        return save_workspace_project(owner, payload)
+    except Exception as exc:
+        _library_workspace_error(exc)
+
+@app.post("/api/library/v1/workspaces/projects/{project_id:path}/working-set")
+async def library_api_v1_current_workspace_working_set_save(project_id: str, request: Request, x_sc_csrf_token: str | None = Header(default=None)) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request, csrf_token=x_sc_csrf_token, mutation=True)
+    payload = await _library_workspace_json(request)
+    try:
+        return save_workspace_working_set(owner, project_id, payload)
+    except Exception as exc:
+        _library_workspace_error(exc)
+
+@app.post("/api/library/v1/workspaces/saved-searches")
+async def library_api_v1_current_workspace_saved_search(request: Request, x_sc_csrf_token: str | None = Header(default=None)) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request, csrf_token=x_sc_csrf_token, mutation=True)
+    payload = await _library_workspace_json(request)
+    try:
+        return save_workspace_search(owner, payload)
+    except Exception as exc:
+        _library_workspace_error(exc)
+
+@app.post("/api/library/v1/workspaces/collections")
+async def library_api_v1_current_workspace_collection(request: Request, x_sc_csrf_token: str | None = Header(default=None)) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request, csrf_token=x_sc_csrf_token, mutation=True)
+    payload = await _library_workspace_json(request)
+    try:
+        return save_workspace_collection(owner, payload)
+    except Exception as exc:
+        _library_workspace_error(exc)
+
+@app.post("/api/library/v1/workspaces/collections/{collection_id:path}/items")
+async def library_api_v1_current_workspace_collection_item(collection_id: str, request: Request, x_sc_csrf_token: str | None = Header(default=None)) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request, csrf_token=x_sc_csrf_token, mutation=True)
+    payload = await _library_workspace_json(request)
+    try:
+        return save_workspace_collection_item(owner, collection_id, payload)
+    except Exception as exc:
+        _library_workspace_error(exc)
 
 @app.get("/api/library/v1/identity")
 def library_api_v1_identity_boundary() -> dict[str, Any]:

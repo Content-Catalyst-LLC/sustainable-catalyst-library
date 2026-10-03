@@ -128,6 +128,8 @@ class LibraryClient:
     def retrieval_readiness(self): return self.get("/retrieval/readiness")
     def provenance(self): return self.get("/provenance")
     def provenance_readiness(self): return self.get("/provenance/readiness")
+    def saved_workspaces(self): return self.get("/saved-workspaces")
+    def saved_workspaces_readiness(self): return self.get("/saved-workspaces/readiness")
     def navigation(self): return self.get("/navigation")
     def navigation_readiness(self): return self.get("/navigation/readiness")
     def navigation_bootstrap(self): return self.get("/navigation/bootstrap")

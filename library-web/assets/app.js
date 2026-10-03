@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.2.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.3.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [] };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -44,7 +44,7 @@ function route() {
   updatePublicMetadata(view, rest);
   if (view === "research") loadUnifiedNavigation(resolveUnifiedResearchMode(name));
   if (view === "system") loadSystem();
-  if (view === "account") loadSession();
+  if (view === "account") loadSession().then(()=>{ if(new URLSearchParams(location.search).get("section")==="workspaces") requestAnimationFrame(()=>$("#workspace-card")?.scrollIntoView({block:"start"})); });
   if (view === "record" && rest.length) loadRecord(decodeURIComponent(rest.join("/")));
   requestAnimationFrame(() => $("#main")?.focus({preventScroll:true}));
 }
@@ -166,6 +166,118 @@ async function loadUnifiedNavigation(mode="overview") {
   applyUnifiedResearchMode(mode);
 }
 
+
+function workspaceCsrfHeaders() {
+  return state.csrfToken ? {"X-SC-CSRF-Token": state.csrfToken} : {};
+}
+
+function populateWorkspaceProjectSelect() {
+  const select=$("#working-set-project"); if (!select) return;
+  const projects=state.workspaceSnapshot?.projects || [];
+  select.innerHTML=projects.length ? '<option value="">Choose a project</option>' + projects.map(project=>`<option value="${escapeHtml(project.project_id)}">${escapeHtml(project.title || project.project_id)}</option>`).join("") : '<option value="">No saved projects yet</option>';
+  if (state.activeProjectId && projects.some(x=>x.project_id===state.activeProjectId)) select.value=state.activeProjectId;
+}
+
+function renderSavedWorkspaces() {
+  const snapshot=state.workspaceSnapshot;
+  const status=$("#workspace-status"), summary=$("#workspace-summary"), list=$("#workspace-project-list"), searches=$("#workspace-saved-search-list");
+  if (!snapshot) {
+    if (status) status.textContent=state.session?.authenticated ? "Workspace unavailable" : "Sign in required";
+    if (summary) summary.innerHTML="";
+    if (list) list.innerHTML='<p class="empty-state">Sign in to load saved projects.</p>';
+    if (searches) searches.innerHTML='<p class="empty-state">No saved searches loaded.</p>';
+    populateWorkspaceProjectSelect();
+    return;
+  }
+  const meta=snapshot.summary || {};
+  if (status) status.textContent=`${meta.project_count || 0} projects · ${meta.reference_count || 0} references`;
+  if (summary) summary.innerHTML=`<span><strong>${meta.project_count || 0}</strong> projects</span><span><strong>${meta.reference_count || 0}</strong> references</span><span><strong>${meta.saved_search_count || 0}</strong> saved searches</span><span><strong>${meta.collection_count || 0}</strong> collections</span>`;
+  const refs=snapshot.project_references || [];
+  const bundles=snapshot.source_bundles || [];
+  const projects=snapshot.projects || [];
+  if (list) list.innerHTML=projects.length ? projects.map(project=>{
+    const projectRefs=refs.filter(x=>x.project_id===project.project_id).length;
+    const projectBundles=bundles.filter(x=>x.project_id===project.project_id).length;
+    return `<article class="workspace-project-card" data-project-id="${escapeHtml(project.project_id)}"><div><p class="eyebrow">${escapeHtml(project.status || "active")} · ${escapeHtml(project.visibility || "private")}</p><h3>${escapeHtml(project.title || project.project_id)}</h3><p>${escapeHtml(project.research_question || project.description || "No research question yet.")}</p></div><dl><dt>References</dt><dd>${projectRefs}</dd><dt>Bundles</dt><dd>${projectBundles}</dd></dl><button type="button" class="text-button" data-use-project="${escapeHtml(project.project_id)}">Use for working set</button></article>`;
+  }).join("") : '<p class="empty-state">No projects yet. Create your first research project above.</p>';
+  const saved=snapshot.saved_searches || [];
+  if (searches) searches.innerHTML=saved.length ? saved.slice(0,20).map(item=>`<article class="workspace-saved-search"><strong>${escapeHtml(item.label || item.query)}</strong><span>${escapeHtml(item.query || "")}</span></article>`).join("") : '<p class="empty-state">No saved searches yet.</p>';
+  populateWorkspaceProjectSelect();
+}
+
+async function loadSavedWorkspaces() {
+  if (!state.session?.authenticated) {
+    state.workspaceSnapshot=null; renderSavedWorkspaces(); return null;
+  }
+  try {
+    const snapshot=await api("/workspaces");
+    state.workspaceSnapshot=snapshot;
+    renderSavedWorkspaces();
+    return snapshot;
+  } catch (error) {
+    state.workspaceSnapshot=null; renderSavedWorkspaces();
+    const status=$("#workspace-status"); if(status) status.textContent=error.message;
+    return null;
+  }
+}
+
+async function ensureWorkspaceSession() {
+  if (state.session?.authenticated && state.csrfToken) return true;
+  try {
+    const session=await api("/session");
+    renderSession(session);
+    return Boolean(session?.authenticated && state.csrfToken);
+  } catch { return false; }
+}
+
+async function createWorkspaceProject(event) {
+  event.preventDefault();
+  const error=$("#workspace-project-error"); if(error) error.hidden=true;
+  if (!(await ensureWorkspaceSession())) {
+    if(error){error.textContent="Sign in before creating a saved research project.";error.hidden=false;}
+    return;
+  }
+  const title=$("#workspace-project-title")?.value.trim() || "";
+  if (!title) return;
+  const payload={title,research_question:$("#workspace-project-question")?.value.trim() || "",description:$("#workspace-project-description")?.value.trim() || "",visibility:"private",status:"active"};
+  try {
+    const project=await api("/workspaces/projects",{method:"POST",headers:workspaceCsrfHeaders(),body:JSON.stringify(payload)});
+    state.activeProjectId=project.project_id;
+    $("#workspace-project-form")?.reset();
+    await loadSavedWorkspaces();
+  } catch (e) {
+    if(error){error.textContent=e.message;error.hidden=false;}
+  }
+}
+
+async function saveWorkingSetToProject() {
+  const status=$("#working-set-save-status");
+  if (!state.workingSet.length) { if(status) status.textContent="Add records to the working set first."; return; }
+  if (!(await ensureWorkspaceSession())) { if(status) status.textContent="Sign in to save this working set."; navigate("/account?section=workspaces"); return; }
+  const projectId=$("#working-set-project")?.value || state.activeProjectId || "";
+  if (!projectId) { if(status) status.textContent="Choose or create a project first."; navigate("/account?section=workspaces"); return; }
+  if(status) status.textContent="Saving…";
+  try {
+    const result=await api(`/workspaces/projects/${encodeURIComponent(projectId)}/working-set`,{method:"POST",headers:workspaceCsrfHeaders(),body:JSON.stringify({records:state.workingSet})});
+    state.activeProjectId=projectId;
+    if(status) status.textContent=`Saved ${result.saved_count || 0} records to the project.`;
+    await loadSavedWorkspaces();
+  } catch (e) { if(status) status.textContent=e.message; }
+}
+
+async function saveCurrentResearchSearch() {
+  if (!(await ensureWorkspaceSession())) { navigate("/account?section=workspaces"); return; }
+  const params=researchParams();
+  const query=params.q || "";
+  if (!query) { $("#research-interface-status").textContent="Enter a query before saving a search."; return; }
+  const payload={label:query.slice(0,180),query,scope:"all",filters:Object.fromEntries(Object.entries(params).filter(([k])=>!["q","limit","offset"].includes(k)))};
+  try {
+    await api("/workspaces/saved-searches",{method:"POST",headers:workspaceCsrfHeaders(),body:JSON.stringify(payload)});
+    $("#research-interface-status").textContent="Search saved to your Library workspace.";
+    await loadSavedWorkspaces();
+  } catch (e) { $("#research-interface-status").textContent=e.message; }
+}
+
 async function loadResearchBootstrap() {
   if (state.researchBootstrap) { loadWorkingSet(); return; }
   const note=$("#research-interface-status");
@@ -272,6 +384,9 @@ $("#research-form")?.addEventListener("submit", event => { event.preventDefault(
 $("#research-load-more")?.addEventListener("click",()=>researchSearch({append:true}));
 $("#research-clear")?.addEventListener("click",clearResearchScope);
 $("#working-set-clear")?.addEventListener("click",()=>{state.workingSet=[];saveWorkingSet();});
+$("#working-set-save")?.addEventListener("click",saveWorkingSetToProject);
+$("#research-save-search")?.addEventListener("click",saveCurrentResearchSearch);
+$("#workspace-project-form")?.addEventListener("submit",createWorkspaceProject);
 $("#search-form").addEventListener("submit", event => { event.preventDefault(); navigate("/search"); search(); });
 $("#load-more").addEventListener("click",()=>search({append:true}));
 $("#reader-back").addEventListener("click",()=>history.length>1?history.back():navigate("/search"));
@@ -285,11 +400,13 @@ bootstrap();
 function renderSession(session) {
   const target=$("#session-state"); const login=$("#login-card");
   if (!session?.authenticated) {
-    state.session=null; state.csrfToken=null; login.hidden=false;
+    state.session=null; state.csrfToken=null; state.workspaceSnapshot=null; state.activeProjectId=null; login.hidden=false;
     target.innerHTML='<p class="empty-state">You are not signed in. Public Library search and reading remain available.</p>';
+    renderSavedWorkspaces();
     return;
   }
   state.session=session; if (session.csrf_token) state.csrfToken=session.csrf_token; login.hidden=true;
+  loadSavedWorkspaces();
   const identity=session.identity || {}; const roles=(session.roles||[]).map(escapeHtml).join(', ') || 'none';
   const scopes=(session.scopes||[]).map(x=>`<li><code>${escapeHtml(x)}</code></li>`).join('');
   target.innerHTML=`<p class="eyebrow">Authenticated</p><h3>${escapeHtml(identity.display_name || identity.handle || identity.identity_id)}</h3><dl class="account-meta"><dt>Handle</dt><dd>${escapeHtml(identity.handle || '')}</dd><dt>Roles</dt><dd>${roles}</dd><dt>Expires</dt><dd>${escapeHtml(session.expires_at || '')}</dd></dl><h3>Effective scopes</h3><ul>${scopes}</ul><button id="logout-button" class="secondary-button">Sign out</button>`;
@@ -306,7 +423,7 @@ async function login(event) {
   event.preventDefault(); const error=$("#login-error"); error.hidden=true;
   const handle=$("#login-handle").value.trim(); const password=$("#login-password").value;
   try {
-    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.2.0'})});
+    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.3.0'})});
     $("#login-password").value=''; renderSession(session);
   } catch (e) { error.textContent=e.message; error.hidden=false; }
 }
@@ -315,5 +432,5 @@ async function logout() {
   try {
     await api('/session/logout',{method:'POST',headers: state.csrfToken ? {'X-SC-CSRF-Token':state.csrfToken}: {}});
   } catch (e) { /* cookie is still cleared on the next valid logout/session expiry */ }
-  state.session=null; state.csrfToken=null; await loadSession();
+  state.session=null; state.csrfToken=null; state.workspaceSnapshot=null; state.activeProjectId=null; renderSavedWorkspaces(); await loadSession();
 }

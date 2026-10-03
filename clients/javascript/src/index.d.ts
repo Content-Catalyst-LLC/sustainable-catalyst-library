@@ -6,6 +6,7 @@ export class ProductAdapter { productKey:string; contract():Promise<any>; valida
 export class LibraryClient {
   constructor(baseUrl:string, options?:ClientOptions);
   health():Promise<any>; readiness():Promise<any>; service():Promise<any>; capabilities():Promise<any>; routes():Promise<any>; clientFramework():Promise<any>; catalog():Promise<any>; catalogReadiness():Promise<any>; researchObject(id:string,options?:{includeBody?:boolean}):Promise<any>; validateCatalogRecord(payload:Record<string,unknown>):Promise<any>; upsertCatalogRecord(payload:Record<string,unknown>):Promise<any>; deleteCatalogRecord(id:string):Promise<any>;
+  savedWorkspaces():Promise<any>; savedWorkspacesReadiness():Promise<any>;
   navigation():Promise<any>; navigationReadiness():Promise<any>; navigationBootstrap():Promise<any>; resolveNavigation(path:string):Promise<any>;
   researchInterface():Promise<any>; researchInterfaceReadiness():Promise<any>; researchInterfaceBootstrap():Promise<any>; researchInterfaceSearch(q?:string,options?:Record<string,unknown>):Promise<any>; researchInterfaceRecord(id:string,options?:{includeBody?:boolean,versionLimit?:number,evidenceDepth?:number,evidenceLimit?:number}):Promise<any>; researchInterfaceOwnerState(id:string):Promise<any>;
   libraryProduct():Promise<any>; libraryProductReadiness():Promise<any>; libraryProductRelease():Promise<any>;

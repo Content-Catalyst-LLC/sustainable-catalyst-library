@@ -1846,6 +1846,96 @@
           }
         }
       }
+    },
+    "/saved-workspaces": {
+      "get": {
+        "operationId": "librarySavedWorkspaces",
+        "responses": {
+          "200": {
+            "description": "Research Projects & Saved Workspaces contract"
+          }
+        }
+      }
+    },
+    "/saved-workspaces/readiness": {
+      "get": {
+        "operationId": "librarySavedWorkspacesReadiness",
+        "responses": {
+          "200": {
+            "description": "Saved workspace readiness"
+          }
+        }
+      }
+    },
+    "/workspaces": {
+      "get": {
+        "operationId": "libraryCurrentWorkspace",
+        "responses": {
+          "200": {
+            "description": "Current Library-session owner's saved workspace"
+          }
+        }
+      }
+    },
+    "/workspaces/projects/{project_id}": {
+      "get": {
+        "operationId": "libraryCurrentWorkspaceProject",
+        "responses": {
+          "200": {
+            "description": "Current owner's project context"
+          }
+        }
+      }
+    },
+    "/workspaces/projects": {
+      "post": {
+        "operationId": "libraryCurrentWorkspaceProjectSave",
+        "responses": {
+          "200": {
+            "description": "Create or update a current-owner research project"
+          }
+        }
+      }
+    },
+    "/workspaces/projects/{project_id}/working-set": {
+      "post": {
+        "operationId": "libraryCurrentWorkspaceWorkingSetSave",
+        "responses": {
+          "200": {
+            "description": "Save browser working-set records into a project"
+          }
+        }
+      }
+    },
+    "/workspaces/saved-searches": {
+      "post": {
+        "operationId": "libraryCurrentWorkspaceSavedSearch",
+        "responses": {
+          "200": {
+            "description": "Save the current owner's research search"
+          }
+        }
+      }
+    },
+    "/workspaces/collections": {
+      "post": {
+        "operationId": "libraryCurrentWorkspaceCollectionSave",
+        "responses": {
+          "200": {
+            "description": "Create a current-owner research collection"
+          }
+        }
+      }
+    },
+    "/workspaces/collections/{collection_id}/items": {
+      "post": {
+        "operationId": "libraryCurrentWorkspaceCollectionItemSave",
+        "responses": {
+          "200": {
+            "description": "Save an item into a current-owner collection"
+          }
+        }
+      }
     }
   },
   "components": {
