@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.7.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.8.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {} };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -329,6 +329,22 @@ async function saveWorkingSetToProject() {
   } catch (e) { if(status) status.textContent=e.message; }
 }
 
+async function previewWorkingSetDataset() {
+  const target=$("#working-set-dataset-preview");
+  const status=$("#working-set-save-status");
+  if (!state.workingSet.length) { if(status) status.textContent="Add records to the working set before previewing a dataset."; return; }
+  if (target) { target.hidden=false; target.innerHTML='<p class="empty-state">Building structured dataset preview…</p>'; }
+  try {
+    const records=state.workingSet.map(item=>({record_id:item.id || item.record_id,title:item.title || item.label || item.id,source_type:item.type || item.object_type || "library-record"}));
+    const dataset=await api("/structured-evidence/datasets",{method:"POST",body:JSON.stringify({title:"Working set dataset preview",records,fields:["record_id","title","source_type"]})});
+    state.structuredDatasetPreview=dataset;
+    const cols=(dataset.columns || []).map(c=>c.name);
+    const rows=(dataset.rows || []).slice(0,20);
+    if (target) target.innerHTML=`<summary>Structured dataset preview · ${Number(dataset.row_count||0)} rows × ${Number(dataset.column_count||0)} columns</summary><div class="form-note">Preview only · not persisted · structure is not an evidence-strength or truth judgment.</div><pre>${escapeHtml(JSON.stringify({dataset_id:dataset.dataset_id,columns:cols,rows,row_provenance:(dataset.row_provenance||[]).slice(0,20)},null,2))}</pre>`;
+    if(status) status.textContent="Structured dataset preview created without persistence.";
+  } catch (e) { if(target) target.innerHTML=`<summary>Structured dataset preview</summary><p class="error-state">${escapeHtml(e.message)}</p>`; if(status) status.textContent=e.message; }
+}
+
 async function saveCurrentResearchSearch() {
   if (!(await ensureWorkspaceSession())) { navigate("/account?section=workspaces"); return; }
   const params=researchParams();
@@ -447,7 +463,7 @@ async function loadCapabilities() {
 
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -468,6 +484,7 @@ $("#research-load-more")?.addEventListener("click",()=>researchSearch({append:tr
 $("#research-clear")?.addEventListener("click",clearResearchScope);
 $("#working-set-clear")?.addEventListener("click",()=>{state.workingSet=[];saveWorkingSet();});
 $("#working-set-save")?.addEventListener("click",saveWorkingSetToProject);
+$("#working-set-dataset-preview-button")?.addEventListener("click",previewWorkingSetDataset);
 $("#research-save-search")?.addEventListener("click",saveCurrentResearchSearch);
 $("#workspace-project-form")?.addEventListener("submit",createWorkspaceProject);
 $("#workspace-living-form")?.addEventListener("submit",createLivingCollection);
@@ -512,7 +529,7 @@ async function login(event) {
   event.preventDefault(); const error=$("#login-error"); error.hidden=true;
   const handle=$("#login-handle").value.trim(); const password=$("#login-password").value;
   try {
-    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.7.0'})});
+    const session=await api('/session/login',{method:'POST',body:JSON.stringify({handle,password,client_label:'library-web-v2.8.0'})});
     $("#login-password").value=''; renderSession(session);
   } catch (e) { error.textContent=e.message; error.hidden=false; }
 }

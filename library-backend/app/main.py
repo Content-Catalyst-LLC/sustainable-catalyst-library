@@ -288,6 +288,15 @@ from .living_collections_projects import (
     refresh_collection as refresh_living_collection,
     apply_refresh as apply_living_collection_refresh,
 )
+from .structured_evidence_objects import (
+    contract as structured_evidence_contract,
+    readiness as structured_evidence_readiness,
+    schema_registry as structured_evidence_schema_registry,
+    dataset_object as build_structured_dataset,
+    table_object as build_structured_table,
+    structured_evidence_object as build_structured_evidence_object,
+    validate_object as validate_structured_evidence_object,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -634,6 +643,13 @@ def health() -> dict[str, Any]:
             "living_collection_refresh_auto_applies": False,
             "living_project_graph_aware_briefs": True,
             "living_project_membership_implies_truth": False,
+            "dataset_table_structured_evidence_objects": True,
+            "structured_evidence_row_provenance": True,
+            "structured_evidence_cell_provenance": True,
+            "structured_evidence_explicit_annotation_only": True,
+            "structured_evidence_data_shape_implies_truth": False,
+            "structured_evidence_numeric_precision_implies_certainty": False,
+            "structured_evidence_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -648,8 +664,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.7.0",
-            "library_sdk_version": "1.7.0",
+            "library_web_version": "2.8.0",
+            "library_sdk_version": "1.8.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -4048,6 +4064,50 @@ async def library_api_v1_living_collection_apply(collection_id: str, request: Re
         return apply_living_collection_refresh(owner, collection_id, payload)
     except Exception as exc:
         _library_workspace_error(exc)
+
+@app.get("/api/library/v1/structured-evidence")
+def library_api_v1_structured_evidence_contract() -> dict[str, Any]:
+    return structured_evidence_contract()
+
+@app.get("/api/library/v1/structured-evidence/readiness")
+def library_api_v1_structured_evidence_readiness() -> dict[str, Any]:
+    return structured_evidence_readiness()
+
+@app.get("/api/library/v1/structured-evidence/schemas")
+def library_api_v1_structured_evidence_schemas() -> dict[str, Any]:
+    return structured_evidence_schema_registry()
+
+@app.post("/api/library/v1/structured-evidence/datasets")
+async def library_api_v1_structured_dataset(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return build_structured_dataset(payload)
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/structured-evidence/tables")
+async def library_api_v1_structured_table(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return build_structured_table(payload)
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/structured-evidence/objects")
+async def library_api_v1_structured_evidence_object(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return build_structured_evidence_object(payload)
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/structured-evidence/validate")
+async def library_api_v1_structured_evidence_validate(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return validate_structured_evidence_object(payload)
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 @app.get("/api/library/v1/identity")
 def library_api_v1_identity_boundary() -> dict[str, Any]:

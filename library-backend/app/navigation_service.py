@@ -12,10 +12,10 @@ from .research_interface import (
 from .independent_api import capability_catalog
 from .web_application import application_contract as web_application_contract
 
-LIBRARY_VERSION = "6.7.0"
-BACKEND_VERSION = "3.7.0"
-WEB_VERSION = "2.7.0"
-SDK_VERSION = "1.7.0"
+LIBRARY_VERSION = "6.8.0"
+BACKEND_VERSION = "3.8.0"
+WEB_VERSION = "2.8.0"
+SDK_VERSION = "1.8.0"
 
 CONTRACT = "sc-library-unified-discovery-research-navigation/1.0"
 READINESS_CONTRACT = "sc-library-unified-discovery-research-navigation-readiness/1.0"
@@ -96,8 +96,8 @@ def contract() -> dict[str, Any]:
         "canonical_research_route": "/research",
         "navigation": nav,
         "wordpress": {"role": "optional-adapter", "required": False, "authoritative": False},
-        "next_release": "6.8.0",
-        "next_release_name": "Dataset, Table & Structured Evidence Objects",
+        "next_release": "6.9.0",
+        "next_release_name": "Scientific Literature Intelligence",
         "guardrails": guardrails(),
     }
 
