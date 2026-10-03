@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) { exit; }
 
 final class SC_Library_WordPress_Thin_Adapter {
-    public const VERSION = '6.3.0';
+    public const VERSION = '6.4.0';
     public const SCHEMA = 'sc-library-wordpress-thin-adapter/1.0';
     public const CONSOLIDATION_SCHEMA = 'sc-library-wordpress-thin-adapter-consolidation-claim/1.0';
     public const ROLE = 'optional-adapter';
@@ -35,7 +35,7 @@ final class SC_Library_WordPress_Thin_Adapter {
             'pipeline-execution-authority','artifact-authority','pipeline-authority','compute-authority',
             'identity-authority','session-authority','credential-authority','federation-authority',
             'connector-routing-authority','connector-execution-policy-authority','global-source-registry-authority',
-            'trust-policy-authority','research-interface-composition-authority','saved-workspace-composition-authority','discovery-navigation-authority','platform-core-promotion-authority',
+            'trust-policy-authority','research-interface-composition-authority','saved-workspace-composition-authority','advanced-discovery-ranking-authority','cross-language-query-expansion-authority','discovery-navigation-authority','platform-core-promotion-authority',
         ];
     }
 
@@ -78,7 +78,7 @@ final class SC_Library_WordPress_Thin_Adapter {
             ],
             'allowed_responsibilities' => self::allowed_responsibilities(),
             'prohibited_authorities' => self::prohibited_authorities(),
-            'next_gate' => 'v6.4.0-project-detail-source-bundles-collections',
+            'next_gate' => 'v6.5.0-global-knowledge-federation-ii',
         ];
     }
 

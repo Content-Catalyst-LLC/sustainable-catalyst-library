@@ -1936,6 +1936,96 @@
           }
         }
       }
+    },
+    "/discovery": {
+      "get": {
+        "operationId": "advancedDiscoveryContract",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/discovery/readiness": {
+      "get": {
+        "operationId": "advancedDiscoveryReadiness",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/discovery/plan": {
+      "post": {
+        "operationId": "advancedDiscoveryPlan",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/discovery/search": {
+      "post": {
+        "operationId": "advancedDiscoverySearch",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/discovery/projects/{project_id}/search": {
+      "post": {
+        "operationId": "projectAdvancedDiscoverySearch",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
     }
   },
   "components": {

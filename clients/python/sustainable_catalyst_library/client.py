@@ -103,6 +103,9 @@ class LibraryClient:
     def get(self, path: str, query: dict[str, Any] | None = None) -> Any:
         return self.request("GET", path, query=query)
 
+    def post(self, path: str, payload: Any) -> Any:
+        return self.request("POST", path, payload=payload)
+
     def get_signed(self, path: str, query: dict[str, Any] | None = None) -> Any:
         return self.request("GET", path, query=query, signed=True)
 
@@ -126,6 +129,11 @@ class LibraryClient:
     def ingestion_readiness(self): return self.get("/ingestion/readiness")
     def retrieval(self): return self.get("/retrieval")
     def retrieval_readiness(self): return self.get("/retrieval/readiness")
+    def advanced_discovery(self): return self.get("/discovery")
+    def advanced_discovery_readiness(self): return self.get("/discovery/readiness")
+    def advanced_discovery_plan(self, payload: dict[str, Any]): return self.post("/discovery/plan", payload)
+    def advanced_discovery_search(self, payload: dict[str, Any]): return self.post("/discovery/search", payload)
+    def project_advanced_discovery_search(self, project_id: str, payload: dict[str, Any]): return self.post("/discovery/projects/" + parse.quote(project_id, safe="") + "/search", payload)
     def provenance(self): return self.get("/provenance")
     def provenance_readiness(self): return self.get("/provenance/readiness")
     def saved_workspaces(self): return self.get("/saved-workspaces")

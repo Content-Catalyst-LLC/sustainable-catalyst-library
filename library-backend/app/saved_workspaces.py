@@ -14,10 +14,10 @@ from .research_state import (
     add_collection_item,
 )
 
-LIBRARY_VERSION = "6.3.0"
-BACKEND_VERSION = "3.3.0"
-WEB_VERSION = "2.3.0"
-SDK_VERSION = "1.3.0"
+LIBRARY_VERSION = "6.4.0"
+BACKEND_VERSION = "3.4.0"
+WEB_VERSION = "2.4.0"
+SDK_VERSION = "1.4.0"
 
 CONTRACT = "sc-library-research-projects-saved-workspaces/1.0"
 READINESS_CONTRACT = "sc-library-research-projects-saved-workspaces-readiness/1.0"
@@ -105,8 +105,8 @@ def contract() -> dict[str, Any]:
             "save_target": "research-project-references",
             "maximum_records_per_save": MAX_WORKING_SET_SAVE,
         },
-        "next_release": "6.4.0",
-        "next_release_name": "Project Detail, Source Bundles & Collections",
+        "next_release": "6.5.0",
+        "next_release_name": "Global Knowledge Federation II",
         "guardrails": guardrails(),
     }
 

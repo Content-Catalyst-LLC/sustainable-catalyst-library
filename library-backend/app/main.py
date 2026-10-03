@@ -251,6 +251,13 @@ from .retrieval_orchestration import (
     facet_snapshot as library_retrieval_facets, plan as plan_library_retrieval,
     execute as orchestrate_library_search,
 )
+from .advanced_discovery import (
+    contract as advanced_discovery_contract,
+    readiness as advanced_discovery_readiness,
+    plan as plan_advanced_discovery,
+    execute as execute_advanced_discovery,
+    execute_project as execute_project_advanced_discovery,
+)
 from .provenance_graph_service import (
     contract as library_provenance_graph_contract, readiness as library_provenance_graph_readiness,
     record_provenance as library_record_provenance, citations_for_record as library_record_citations,
@@ -585,6 +592,7 @@ def health() -> dict[str, Any]:
             "independent_library_research_interface": True,
             "unified_discovery_research_navigation": True,
             "research_projects_saved_workspaces": True,
+        "advanced_semantic_cross_language_discovery": True,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -599,8 +607,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.3.0",
-            "library_sdk_version": "1.3.0",
+            "library_web_version": "2.4.0",
+            "library_sdk_version": "1.4.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -3247,6 +3255,55 @@ async def library_api_v1_retrieval_search_admin(request: Request, authorization:
     except json.JSONDecodeError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
     try: return orchestrate_library_search(payload)
     except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/discovery")
+def library_api_v1_advanced_discovery_contract() -> dict[str, Any]:
+    return advanced_discovery_contract()
+
+@app.get("/api/library/v1/discovery/readiness")
+def library_api_v1_advanced_discovery_readiness() -> dict[str, Any]:
+    return advanced_discovery_readiness()
+
+@app.post("/api/library/v1/discovery/plan")
+async def library_api_v1_advanced_discovery_plan(request: Request) -> dict[str, Any]:
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=library_api_error_envelope("invalid-json", "Discovery payload must be JSON", status=400)) from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=422, detail=library_api_error_envelope("payload-must-be-object", "Discovery payload must be an object", status=422))
+    try:
+        return plan_advanced_discovery(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/discovery/search")
+async def library_api_v1_advanced_discovery_search(request: Request) -> dict[str, Any]:
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=library_api_error_envelope("invalid-json", "Discovery payload must be JSON", status=400)) from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=422, detail=library_api_error_envelope("payload-must-be-object", "Discovery payload must be an object", status=422))
+    try:
+        return execute_advanced_discovery(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/discovery/projects/{project_id:path}/search")
+async def library_api_v1_project_advanced_discovery_search(project_id: str, request: Request) -> dict[str, Any]:
+    _, owner = _library_workspace_owner(request)
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=library_api_error_envelope("invalid-json", "Discovery payload must be JSON", status=400)) from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=422, detail=library_api_error_envelope("payload-must-be-object", "Discovery payload must be an object", status=422))
+    try:
+        project = saved_workspace_project_context(owner, project_id)
+        return execute_project_advanced_discovery(payload, project)
+    except Exception as exc:
+        _library_workspace_error(exc)
 
 @app.get("/api/library/v1/provenance")
 def library_api_v1_provenance_contract() -> dict[str, Any]:

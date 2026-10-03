@@ -481,7 +481,7 @@ final class SC_Library_Energy_Systems_Intelligence {
 
             <div class="sc-es__guardrail">
                 <strong><?php esc_html_e('Gateway activation ≠ target execution.', 'sustainable-catalyst-library'); ?></strong>
-                <?php esc_html_e('v1.6.0 adds explicit grid, storage and adequacy contracts with Workbench v6.3.0 deterministic execution and Lab v0.103.0 seeded reliability uncertainty analysis. Site Intelligence v4.41.0 remains the spatial evidence source. Metrics never become an automatic real-grid reliability declaration, outage prediction, technology ranking or recommendation.', 'sustainable-catalyst-library'); ?>
+                <?php esc_html_e('v1.6.0 adds explicit grid, storage and adequacy contracts with Workbench v6.4.0 deterministic execution and Lab v0.103.0 seeded reliability uncertainty analysis. Site Intelligence v4.41.0 remains the spatial evidence source. Metrics never become an automatic real-grid reliability declaration, outage prediction, technology ranking or recommendation.', 'sustainable-catalyst-library'); ?>
             </div>
 
             <div class="sc-es__modebar" role="tablist" aria-label="Energy Systems explorers">
@@ -504,7 +504,7 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel is-active" data-es-panel="grid">
-                <div class="sc-es__panel-heading"><strong>Grid, Storage &amp; Reliability Analysis</strong><span>Structure explicit storage and adequacy scenarios, execute deterministic metrics in Workbench v6.3.0, and examine seeded uncertainty in Lab v0.103.0. Site Intelligence v4.41.0 contributes source-bound spatial evidence without declaring reliability.</span></div>
+                <div class="sc-es__panel-heading"><strong>Grid, Storage &amp; Reliability Analysis</strong><span>Structure explicit storage and adequacy scenarios, execute deterministic metrics in Workbench v6.4.0, and examine seeded uncertainty in Lab v0.103.0. Site Intelligence v4.41.0 contributes source-bound spatial evidence without declaring reliability.</span></div>
                 <div class="sc-es__cards">
                     <article><h3>Storage operation</h3><p>Round-trip energy and state-of-charge trajectories use explicit capacity, power, efficiency, minimum-SOC and timestep inputs. No technology defaults are inferred.</p></article>
                     <article><h3>Adequacy metrics</h3><p>Reserve margin, peak-demand coverage, loss-of-load events/hours, energy not served and maximum shortfall are calculated only from supplied scenario series.</p></article>
@@ -514,7 +514,7 @@ final class SC_Library_Energy_Systems_Intelligence {
             </div>
 
             <div class="sc-es__panel" data-es-panel="uncertainty" hidden>
-                <div class="sc-es__panel-heading"><strong>Energy Modeling &amp; Uncertainty</strong><span>Design reproducible uncertainty studies in Lab v0.103.0 around explicit Workbench v6.3.0 calculations. Distributions, sampling seed, calculation inputs, and output path remain explicit.</span></div>
+                <div class="sc-es__panel-heading"><strong>Energy Modeling &amp; Uncertainty</strong><span>Design reproducible uncertainty studies in Lab v0.103.0 around explicit Workbench v6.4.0 calculations. Distributions, sampling seed, calculation inputs, and output path remain explicit.</span></div>
                 <div class="sc-es__cards">
                     <article><h3>Seeded sampling</h3><p>Monte Carlo and Latin hypercube designs using uniform, normal, lognormal, or triangular input distributions.</p></article>
                     <article><h3>Uncertainty analysis</h3><p>Empirical distributions, central intervals, threshold probabilities, and reproducible result identities.</p></article>

@@ -313,8 +313,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "6.3.0",
-        "backend_version": "3.3.0",
+        "library_version": "6.4.0",
+        "backend_version": "3.4.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -369,8 +369,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "6.3.0",
-        "backend_version": "3.3.0",
+        "library_version": "6.4.0",
+        "backend_version": "3.4.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",

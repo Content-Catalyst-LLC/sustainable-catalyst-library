@@ -13,10 +13,10 @@ from .client_framework import readiness as client_framework_readiness
 from .release_engineering import readiness as release_engineering_readiness
 from .wordpress_thin_adapter import readiness as wordpress_adapter_readiness
 
-LIBRARY_VERSION = "6.3.0"
-BACKEND_VERSION = "3.3.0"
-WEB_VERSION = "2.3.0"
-SDK_VERSION = "1.3.0"
+LIBRARY_VERSION = "6.4.0"
+BACKEND_VERSION = "3.4.0"
+WEB_VERSION = "2.4.0"
+SDK_VERSION = "1.4.0"
 API_VERSION = "1.0"
 
 CONTRACT = "sc-independent-sustainable-catalyst-knowledge-library/1.0"
@@ -108,8 +108,8 @@ def contract() -> dict[str, Any]:
             "destructive_data_migration_required": False,
         },
         "certification_basis": "v5.80.0-independent-library-application-certification",
-        "next_release": "6.4.0",
-        "next_release_name": "Project Detail, Source Bundles & Collections",
+        "next_release": "6.5.0",
+        "next_release_name": "Global Knowledge Federation II",
         "guardrails": guardrails(),
     }
 

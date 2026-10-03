@@ -1,4 +1,4 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.3.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.4.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
 const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null };
 
@@ -309,9 +309,16 @@ function renderResearchResults(items,append=false) {
 async function researchSearch({append=false}={}) {
   const target=$("#research-results"); if (!target) return; if (!append) state.researchOffset=0; target.setAttribute("aria-busy","true");
   try {
-    const params=new URLSearchParams(researchParams()); const data=await api(`/research-interface/search?${params}`); const result=data.result || {}; const items=result.results || [];
+    const params=researchParams();
+    const payload={...params,limit:Number(params.limit || state.limit),offset:Number(params.offset || state.researchOffset),cross_language:true,rerank:"neural"};
+    if (payload.year_from) payload.year_from=Number(payload.year_from); if (payload.year_to) payload.year_to=Number(payload.year_to);
+    const projectId=state.session?.authenticated ? (state.activeProjectId || "") : "";
+    const endpoint=projectId ? `/discovery/projects/${encodeURIComponent(projectId)}/search` : "/discovery/search";
+    const data=await api(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const result=data || {}; const items=result.results || [];
     state.researchTotal=Number(result.total ?? items.length); renderResearchResults(items,append);
     $("#research-result-count").textContent=`${state.researchTotal.toLocaleString()} ${state.researchTotal===1?"result":"results"}`;
+    const note=$("#research-interface-status"); if(note){const repCount=(result.query_representations||[]).length;note.textContent=`Advanced discovery · ${repCount || 1} query representation${repCount===1?"":"s"} · ${result.cross_language_expansion_state || "original query"}${projectId?" · project-aware":""}`;}
     state.researchOffset += items.length; $("#research-load-more").hidden = !(items.length === state.limit && (result.total == null || state.researchOffset < Number(result.total)));
   } catch (error) { if (!append) target.innerHTML=`<p class="error-state">${escapeHtml(error.message)}</p>`; }
   finally { target.removeAttribute("aria-busy"); }
