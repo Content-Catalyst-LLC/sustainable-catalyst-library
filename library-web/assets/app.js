@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.15.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.16.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null, archiveBootstrap: null, archiveSources: [], archiveSearchResult: null, criticismBootstrap: null, timelineBootstrap: null, timelineEvents: [] };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null, archiveBootstrap: null, archiveSources: [], archiveSearchResult: null, criticismBootstrap: null, timelineBootstrap: null, timelineEvents: [], notesBootstrap: null, researchNotes: [] };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -38,18 +38,20 @@ function resolveUnifiedResearchMode(name) {
 function route() {
   const raw=currentRoute(); const [name="research", ...rest]=raw.split("/");
   const compatibilityResearch = name === "search" || name === "discover";
+  const notesResearch = name === "research" && rest[0] === "notes";
   const timelineResearch = name === "research" && rest[0] === "archives" && rest[1] === "timeline";
   const criticismResearch = name === "research" && rest[0] === "archives" && rest[1] === "compare";
   const archiveResearch = name === "research" && rest[0] === "archives" && !criticismResearch && !timelineResearch;
-  const view = timelineResearch ? "timeline" : criticismResearch ? "criticism" : archiveResearch ? "archives" : compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
+  const view = notesResearch ? "notes" : timelineResearch ? "timeline" : criticismResearch ? "criticism" : archiveResearch ? "archives" : compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
   $$(".view").forEach(el => { el.hidden = el.dataset.view !== view; });
-  const navView=["archives","criticism","timeline"].includes(view) ? "research" : view;
+  const navView=["archives","criticism","timeline","notes"].includes(view) ? "research" : view;
   $$('[data-nav]').forEach(a => a.setAttribute('aria-current', a.dataset.nav===navView ? 'page' : 'false'));
   updatePublicMetadata(view, rest);
   if (view === "research") loadUnifiedNavigation(resolveUnifiedResearchMode(name));
   if (view === "archives") loadHistoricalArchiveWorkspace();
   if (view === "criticism") loadPrimarySourceCriticismWorkspace();
   if (view === "timeline") loadHistoricalEventTimelineWorkspace();
+  if (view === "notes") loadResearchNotesWorkspace();
   if (view === "system") loadSystem();
   if (view === "account") loadSession().then(()=>{ if(new URLSearchParams(location.search).get("section")==="workspaces") requestAnimationFrame(()=>$("#workspace-card")?.scrollIntoView({block:"start"})); });
   if (view === "record" && rest.length) loadRecord(decodeURIComponent(rest.join("/")));
@@ -66,12 +68,12 @@ function navigate(path) {
 
 function updatePublicMetadata(view, rest=[]) {
   const origin=String(config.publicOrigin || location.origin).replace(/\/$/, "");
-  let path=view === "research" ? "/research" : view === "archives" ? "/research/archives" : view === "criticism" ? "/research/archives/compare" : view === "timeline" ? "/research/archives/timeline" : `/${view}`;
+  let path=view === "research" ? "/research" : view === "archives" ? "/research/archives" : view === "criticism" ? "/research/archives/compare" : view === "timeline" ? "/research/archives/timeline" : view === "notes" ? "/research/notes" : `/${view}`;
   if (view === "record" && rest.length) path=`/record/${encodeURIComponent(decodeURIComponent(rest.join("/")))}`;
   const canonical=document.querySelector('link[rel="canonical"]') || document.head.appendChild(Object.assign(document.createElement('link'),{rel:'canonical'}));
   canonical.href=origin + (path === "/search" ? path : path);
   const robots=document.querySelector('meta[name="robots"]') || document.head.appendChild(Object.assign(document.createElement('meta'),{name:'robots'}));
-  robots.content=["research","archives","criticism","timeline","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
+  robots.content=["research","archives","criticism","timeline","notes","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
 }
 
 function setMeta(name, content, property=false) {
@@ -706,9 +708,21 @@ async function buildHistoricalTimeline(){const events=state.timelineEvents||[];i
 async function buildHistoricalTimelineCoverage(){const events=state.timelineEvents||[];const sources=state.archiveSources||[];if(!events.length){timelineOutput('Source coverage',{error:'Add events first.'});return;}try{const data=await api('/historical-archives/timeline-workspace/source-coverage',{method:'POST',body:JSON.stringify({events,sources})});timelineOutput('Historical event source coverage',data);}catch(e){timelineOutput('Source coverage',{error:e.message});}}
 async function compareHistoricalTimelineChronologies(){const current=state.timelineEvents||[];if(!current.length){timelineOutput('Chronology comparison',{error:'Build the current event set first.'});return;}try{const others=parseTimelineArray('#timeline-chronologies');if(!others.length){timelineOutput('Chronology comparison',{error:'Enter at least one additional chronology JSON object.'});return;}const chronologies=[{chronology_id:'current-browser-timeline',title:$("#timeline-title")?.value.trim()||'Current timeline',events:current,relationships:parseTimelineArray('#timeline-relationships')},...others];const data=await api('/historical-archives/timeline-workspace/compare',{method:'POST',body:JSON.stringify({chronologies})});timelineOutput('Competing chronology comparison',data);}catch(e){timelineOutput('Chronology comparison',{error:e.message});}}
 
+
+const NOTES_STORAGE_KEY='sc-library-research-notes-v1';
+function notesOutput(label,data){const t=$("#notes-output");if(t)t.innerHTML=`<p class="eyebrow">${escapeHtml(label)}</p><pre>${escapeHtml(JSON.stringify(data,null,2))}</pre>`;}
+function loadBrowserResearchNotes(){try{const raw=localStorage.getItem(NOTES_STORAGE_KEY);const parsed=raw?JSON.parse(raw):[];state.researchNotes=Array.isArray(parsed)?parsed:[];}catch{state.researchNotes=[];}}
+function persistBrowserResearchNotes(){try{localStorage.setItem(NOTES_STORAGE_KEY,JSON.stringify(state.researchNotes||[]));}catch{}}
+function renderResearchNotes(){const t=$("#notes-list");if(!t)return;const notes=state.researchNotes||[];if(!notes.length){t.innerHTML='<p class="empty-state">No notes yet.</p>';return;}t.innerHTML=notes.map((n,i)=>`<article class="archive-source-row"><div><strong>${escapeHtml(n.title||n.note_type||"Note")}</strong><p>${escapeHtml(n.target?.title||n.target?.id||n.target?.uri||"target")} · ${escapeHtml(n.note_type||"observation")}</p><p>${escapeHtml(String(n.body||"").slice(0,240))}</p></div><button type="button" class="text-button" data-note-remove="${i}">Remove</button></article>`).join("");}
+async function loadResearchNotesWorkspace(){loadBrowserResearchNotes();renderResearchNotes();const status=$("#notes-readiness");try{const data=state.notesBootstrap||await api('/annotations/bootstrap');state.notesBootstrap=data;const r=data.readiness||{};if(status)status.innerHTML=`<span><strong>${escapeHtml(r.state||"unknown")}</strong> workspace</span><span><strong>${Number(data.note_types?.length||0)}</strong> note types</span><span>Browser-local continuity</span><span>Web ${escapeHtml(data.web_version||config.webVersion||"")}</span>`;const kinds=$("#notes-target-kind");if(kinds)kinds.innerHTML=(data.target_kinds||[]).map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(String(x).replaceAll('-',' '))}</option>`).join("");const types=$("#notes-type");if(types)types.innerHTML=(data.note_types||[]).map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(String(x).replaceAll('-',' '))}</option>`).join("");}catch(e){if(status)status.innerHTML=`<span class="error-state">${escapeHtml(e.message)}</span>`;}}
+function parseNotesRelations(){const raw=$("#notes-relations")?.value.trim()||"";if(!raw)return[];const value=JSON.parse(raw);if(!Array.isArray(value))throw new Error('Expected a JSON array of note relationships.');return value;}
+async function addResearchNote(event){event?.preventDefault();const payload={note_type:$("#notes-type")?.value||"observation",title:$("#notes-title")?.value.trim()||null,body:$("#notes-body")?.value.trim()||"",target:{kind:$("#notes-target-kind")?.value||"other",id:$("#notes-target-id")?.value.trim()||null,uri:$("#notes-target-uri")?.value.trim()||null,title:$("#notes-target-title")?.value.trim()||null,version:$("#notes-target-version")?.value.trim()||null,content_sha256:$("#notes-target-hash")?.value.trim()||null},anchor:{page:$("#notes-page")?.value.trim()||null,section:$("#notes-section")?.value.trim()||null,selected_quote:$("#notes-quote")?.value.trim()||null},tags:($("#notes-tags")?.value||"").split(",").map(x=>x.trim()).filter(Boolean),reviewed:!!$("#notes-reviewed")?.checked};if(!payload.body)return;try{const note=await api('/annotations/normalize',{method:'POST',body:JSON.stringify(payload)});state.researchNotes.push(note);persistBrowserResearchNotes();renderResearchNotes();notesOutput('Research annotation added',note);$("#notes-form")?.reset();}catch(e){notesOutput('Annotation error',{error:e.message});}}
+async function buildResearchNotebook(){try{const payload={title:$("#notes-notebook-title")?.value.trim()||"Scholarly notes",research_question:$("#notes-research-question")?.value.trim()||null,annotations:state.researchNotes||[],relations:parseNotesRelations()};const data=await api('/annotations/notebook',{method:'POST',body:JSON.stringify(payload)});notesOutput('Scholarly notebook',data);}catch(e){notesOutput('Notebook error',{error:e.message});}}
+async function exportResearchNotes(){try{const payload={title:$("#notes-notebook-title")?.value.trim()||"Scholarly notes",research_question:$("#notes-research-question")?.value.trim()||null,annotations:state.researchNotes||[],relations:parseNotesRelations()};const data=await api('/annotations/export',{method:'POST',body:JSON.stringify(payload)});notesOutput('Scholarly notes export',data);const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sustainable-catalyst-scholarly-notes.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){notesOutput('Export error',{error:e.message});}}
+
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Historical archives workspace','/historical-archives/workspace/readiness'],['Primary-source comparison & source criticism','/historical-archives/source-criticism/readiness'],['Research timeline & historical events','/historical-archives/timeline-workspace/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Historical archives workspace','/historical-archives/workspace/readiness'],['Primary-source comparison & source criticism','/historical-archives/source-criticism/readiness'],['Research timeline & historical events','/historical-archives/timeline-workspace/readiness'],['Research annotation & scholarly notes','/annotations/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -724,6 +738,10 @@ async function bootstrap() {
   route();
 }
 
+$("#notes-form")?.addEventListener("submit",addResearchNote);
+$("#notes-clear")?.addEventListener("click",()=>{state.researchNotes=[];persistBrowserResearchNotes();renderResearchNotes();});
+$("#notes-build")?.addEventListener("click",buildResearchNotebook);
+$("#notes-export")?.addEventListener("click",exportResearchNotes);
 $("#timeline-event-form")?.addEventListener("submit",addHistoricalTimelineEvent);
 $("#timeline-clear-events")?.addEventListener("click",()=>{state.timelineEvents=[];renderTimelineEvents();});
 $("#timeline-build")?.addEventListener("click",buildHistoricalTimeline);
@@ -764,6 +782,7 @@ document.addEventListener('click',event=>{
   const brief=event.target.closest('[data-project-brief]'); if(brief){event.preventDefault();loadLivingProjectBrief(brief.dataset.projectBrief);return;}
 });
 document.addEventListener('click',event=>{
+  const noteRemove=event.target.closest('[data-note-remove]'); if(noteRemove){event.preventDefault();state.researchNotes.splice(Number(noteRemove.dataset.noteRemove),1);persistBrowserResearchNotes();renderResearchNotes();return;}
   const timelineRemove=event.target.closest('[data-timeline-remove]'); if(timelineRemove){event.preventDefault();state.timelineEvents.splice(Number(timelineRemove.dataset.timelineRemove),1);renderTimelineEvents();return;}
   const add=event.target.closest('[data-archive-add-result]'); if(add){event.preventDefault();addArchiveSearchResult(Number(add.dataset.archiveAddResult));return;}
   const inspect=event.target.closest('[data-archive-inspect]'); if(inspect){event.preventDefault();const source=state.archiveSources[Number(inspect.dataset.archiveInspect)];if(source) archiveOutput('Primary source',source);return;}

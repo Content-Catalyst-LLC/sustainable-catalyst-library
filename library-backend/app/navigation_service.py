@@ -12,10 +12,10 @@ from .research_interface import (
 from .independent_api import capability_catalog
 from .web_application import application_contract as web_application_contract
 
-LIBRARY_VERSION = "6.15.0"
-BACKEND_VERSION = "3.15.0"
-WEB_VERSION = "2.15.0"
-SDK_VERSION = "1.15.0"
+LIBRARY_VERSION = "6.16.0"
+BACKEND_VERSION = "3.16.0"
+WEB_VERSION = "2.16.0"
+SDK_VERSION = "1.16.0"
 
 CONTRACT = "sc-library-unified-discovery-research-navigation/1.0"
 READINESS_CONTRACT = "sc-library-unified-discovery-research-navigation-readiness/1.0"
@@ -62,6 +62,7 @@ def navigation_model() -> dict[str, Any]:
         {"id": "archives", "label": "Archives", "route": "/research/archives", "mode": "archives"},
         {"id": "source-criticism", "label": "Compare Sources", "route": "/research/archives/compare", "mode": "source-criticism"},
         {"id": "historical-timeline", "label": "Timeline", "route": "/research/archives/timeline", "mode": "historical-timeline"},
+        {"id": "research-notes", "label": "Notes", "route": "/research/notes", "mode": "research-notes"},
         {"id": "projects", "label": "Projects", "route": "/account?section=workspaces", "mode": "projects"},
     ]
     aliases = {
@@ -99,8 +100,8 @@ def contract() -> dict[str, Any]:
         "canonical_research_route": "/research",
         "navigation": nav,
         "wordpress": {"role": "optional-adapter", "required": False, "authoritative": False},
-        "next_release": "6.16.0",
-        "next_release_name": "Research Annotation & Scholarly Notes",
+        "next_release": "6.17.0",
+        "next_release_name": "Citation Workspace & Bibliographic Intelligence",
         "guardrails": guardrails(),
     }
 
@@ -166,6 +167,8 @@ def resolve_route(path: str) -> dict[str, Any]:
     alias = nav["aliases"].get(raw)
     if alias:
         resolved = {"requested_route": raw, **alias, "compatibility_alias": True}
+    elif raw == "/research/notes":
+        resolved = {"requested_route": raw, "canonical_route": raw, "surface": "research", "mode": "research-notes", "compatibility_alias": False}
     elif raw == "/research/archives/timeline":
         resolved = {"requested_route": raw, "canonical_route": raw, "surface": "research", "mode": "historical-timeline", "compatibility_alias": False}
     elif raw == "/research/archives/compare":

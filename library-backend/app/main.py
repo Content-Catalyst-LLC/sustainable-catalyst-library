@@ -370,6 +370,15 @@ from .historical_event_timeline import (
     source_coverage as historical_event_source_coverage,
     compare_chronologies as compare_historical_chronologies,
 )
+from .research_annotation_notes import (
+    contract as research_annotation_contract,
+    readiness as research_annotation_readiness,
+    bootstrap as research_annotation_bootstrap,
+    normalize_annotation as normalize_research_annotation,
+    normalize_relation as normalize_annotation_relation,
+    build_notebook as build_scholarly_notebook,
+    export_notes as export_scholarly_notes,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -774,6 +783,12 @@ def health() -> dict[str, Any]:
             "historical_event_uncertainty_preservation": True,
             "historical_event_automatic_chronology_reconciliation": False,
             "historical_event_database_migration_required": False,
+            "research_annotation_scholarly_notes_workspace": True,
+            "research_annotation_notes_route": "/research/notes",
+            "research_annotation_browser_local_continuity": True,
+            "research_annotation_server_persistence": False,
+            "research_annotation_automatic_evidence_promotion": False,
+            "research_annotation_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -788,8 +803,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.15.0",
-            "library_sdk_version": "1.15.0",
+            "library_web_version": "2.16.0",
+            "library_sdk_version": "1.16.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -4595,6 +4610,50 @@ async def library_api_v1_historical_chronology_compare(request: Request) -> dict
     payload = await _library_workspace_json(request)
     try:
         return compare_historical_chronologies(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/api/library/v1/annotations")
+def library_api_v1_research_annotation_contract() -> dict[str, Any]:
+    return research_annotation_contract()
+
+@app.get("/api/library/v1/annotations/readiness")
+def library_api_v1_research_annotation_readiness() -> dict[str, Any]:
+    return research_annotation_readiness()
+
+@app.get("/api/library/v1/annotations/bootstrap")
+def library_api_v1_research_annotation_bootstrap() -> dict[str, Any]:
+    return research_annotation_bootstrap()
+
+@app.post("/api/library/v1/annotations/normalize")
+async def library_api_v1_research_annotation_normalize(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return normalize_research_annotation(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/annotations/relations/normalize")
+async def library_api_v1_annotation_relation_normalize(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return normalize_annotation_relation(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/annotations/notebook")
+async def library_api_v1_scholarly_notebook_build(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return build_scholarly_notebook(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/annotations/export")
+async def library_api_v1_scholarly_notes_export(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return export_scholarly_notes(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

@@ -118,6 +118,7 @@
           <a href="/research/archives" aria-current="page">Archives</a>
           <a href="/research/archives/compare" data-app-link>Compare & criticize</a>
           <a href="/research/archives/timeline" data-app-link>Timeline</a>
+          <a href="/research/notes" data-app-link>Notes</a>
           <a href="/account?section=workspaces" data-app-link>Projects</a>
         </nav>
         <div id="archive-readiness" class="context-strip"><span>Loading archive workspace…</span></div>
@@ -186,6 +187,7 @@
           <a href="/research/archives" data-app-link>Archives</a>
           <a href="/research/archives/compare" aria-current="page">Compare & criticize</a>
           <a href="/research/archives/timeline" data-app-link>Timeline</a>
+          <a href="/research/notes" data-app-link>Notes</a>
         </nav>
         <div id="criticism-readiness" class="context-strip"><span>Loading source-criticism workspace…</span></div>
         <div class="criticism-layout">
@@ -223,6 +225,7 @@
           <a href="/research/archives" data-app-link>Archives</a>
           <a href="/research/archives/compare" data-app-link>Compare & criticize</a>
           <a href="/research/archives/timeline" aria-current="page">Timeline</a>
+          <a href="/research/notes" data-app-link>Notes</a>
         </nav>
         <div id="timeline-readiness" class="context-strip"><span>Loading historical-event workspace…</span></div>
         <div class="timeline-layout">
@@ -266,6 +269,59 @@
         <section class="info-card">
           <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Timeline analysis</h2></div></div>
           <div id="timeline-output"><p class="empty-state">Timeline, source-coverage, and chronology-comparison output appears here.</p></div>
+        </section>
+      </section>
+
+      <section class="view" data-view="notes" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Research annotations · scholarly notes · explicit anchors</p>
+          <h1>Research Annotation & Scholarly Notes</h1>
+          <p>Attach interpretive notes, questions, summaries, critique, and methodological observations to explicit research targets and locators without turning annotations into source content, evidence truth, or citations by default.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Scholarly notes workspace navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/archives" data-app-link>Archives</a>
+          <a href="/research/archives/timeline" data-app-link>Timeline</a>
+          <a href="/research/notes" aria-current="page">Notes</a>
+        </nav>
+        <div id="notes-readiness" class="context-strip"><span>Loading scholarly-notes workspace…</span></div>
+        <div class="notes-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Anchored annotation</p><h2>Add scholarly note</h2></div></div>
+            <form id="notes-form" class="archive-source-form">
+              <label>Target kind<select id="notes-target-kind"><option value="library-record">Library record</option></select></label>
+              <label>Target ID<input id="notes-target-id" placeholder="record:…, primary-source:…, historical-event:…"></label>
+              <label>Target URI<input id="notes-target-uri" type="url" placeholder="optional when target ID is available"></label>
+              <label>Target title<input id="notes-target-title"></label>
+              <label>Target version<input id="notes-target-version"></label>
+              <label>Content SHA-256<input id="notes-target-hash" maxlength="64"></label>
+              <label>Page / page label<input id="notes-page"></label>
+              <label>Section<input id="notes-section"></label>
+              <label class="archive-wide">Selected quote<textarea id="notes-quote" rows="4" placeholder="Preserved as user-provided text; not automatically verified against the target."></textarea></label>
+              <label>Note type<select id="notes-type"><option value="observation">Observation</option></select></label>
+              <label>Title<input id="notes-title"></label>
+              <label class="archive-wide">Note<textarea id="notes-body" rows="7" required></textarea></label>
+              <label class="archive-wide">Tags<input id="notes-tags" placeholder="comma-separated"></label>
+              <label class="checkbox-row"><input id="notes-reviewed" type="checkbox"> Reviewed</label>
+              <button type="submit">Normalize & add note</button>
+            </form>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Working notebook</p><h2>Browser-local notes</h2></div><button id="notes-clear" class="text-button" type="button">Clear</button></div>
+            <p class="form-note">Browser storage provides local continuity only. It is not authoritative Library persistence.</p>
+            <div id="notes-list"><p class="empty-state">No notes yet.</p></div>
+            <label>Notebook title<input id="notes-notebook-title" value="Scholarly notes"></label>
+            <label>Research question<textarea id="notes-research-question" rows="3"></textarea></label>
+            <label>Note relationships (JSON)<textarea id="notes-relations" rows="8" placeholder='[{"source_annotation_id":"research-annotation:…","target_annotation_id":"research-annotation:…","relation":"contextualizes","basis":"…"}]'></textarea></label>
+            <div class="archive-actions">
+              <button id="notes-build" type="button">Build notebook</button>
+              <button id="notes-export" type="button" class="secondary-button">Export JSON</button>
+            </div>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Notebook analysis</h2></div></div>
+          <div id="notes-output"><p class="empty-state">Normalized notes, notebook composition, and export manifests appear here.</p></div>
         </section>
       </section>
 
@@ -319,7 +375,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.15.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.16.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

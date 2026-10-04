@@ -115,3 +115,7 @@ Library v6.14.0 adds `/research/archives/compare` for structured source criticis
 ## Research Timeline & Historical Event Workspace
 
 Library v6.15.0 adds `/research/archives/timeline` for source-linked historical events, uncertainty-preserving chronologies, event/source coverage, and explicit comparison of competing timelines without automatic reconciliation.
+
+## Research Annotation & Scholarly Notes
+
+Library v6.16.0 adds `/research/notes` for explicit target-anchored scholarly notes, browser-local working continuity, notebook composition, and JSON export without automatic evidence, citation, or truth promotion.

@@ -1,3 +1,12 @@
+## 6.16.0 — Research Annotation & Scholarly Notes
+
+- Added dedicated `/research/notes` workspace for annotations across records, primary sources, historical events, timelines, datasets, publications, and other explicit research targets.
+- Added locator-aware annotation objects, scholarly note types, tags, references, human-asserted note relationships, notebook composition, unresolved-question preservation, and deterministic JSON export.
+- Added browser-local note continuity while explicitly keeping browser storage non-authoritative and server-side note persistence disabled in this release.
+- Notes, quotes, locators, tags and relationships do not automatically become verified source content, evidence, claims, citations, truth status, or Platform Core objects.
+- Synchronized Library 6.16.0 / backend 3.16.0 / web 2.16.0 / SDK 1.16.0.
+- No database migration; WordPress remains optional.
+
 ## 6.15.0 — Research Timeline & Historical Event Workspace
 
 - Added dedicated `/research/archives/timeline` workspace.

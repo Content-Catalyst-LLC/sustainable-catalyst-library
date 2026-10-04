@@ -221,6 +221,13 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/historical-archives/timeline-workspace/build","name":"historical-event-timeline-build","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/historical-archives/timeline-workspace/source-coverage","name":"historical-event-source-coverage","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/historical-archives/timeline-workspace/compare","name":"historical-chronology-compare","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/annotations","name":"research-annotation-scholarly-notes-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/annotations/readiness","name":"research-annotation-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/annotations/bootstrap","name":"research-annotation-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/annotations/normalize","name":"research-annotation-normalize","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/annotations/relations/normalize","name":"annotation-relation-normalize","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/annotations/notebook","name":"scholarly-notebook-build","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/annotations/export","name":"scholarly-notes-export","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
