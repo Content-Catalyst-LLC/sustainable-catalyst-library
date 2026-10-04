@@ -1,3 +1,12 @@
+## 6.12.0 — Historical Archive & Primary-Source Intelligence
+- Advances Library to v6.12.0, backend to v3.12.0, Web to v2.12.0, and first-party SDKs to v1.12.0.
+- Adds canonical historical primary-source objects with archival hierarchy, shelfmarks, identifiers, original language/script, rights/access metadata, and digital-surrogate lineage.
+- Preserves uncertain historical dates without manufacturing false precision.
+- Distinguishes original objects/text from scans, OCR, HTR, transcriptions, translations, editions, excerpts, and annotations.
+- Adds source-criticism observations and research questions without authenticity certification or truth scoring.
+- Adds cross-source comparison, archival search planning over Institutional Repository Federation, uncertainty-preserving timelines, reproducible source packets, and explicit ingestion handoffs.
+- Adds no database migration and no WordPress/PHP domain authority.
+
 ## 5.72.0 — Python Source Ingestion & Normalization Service
 - Advances the backend to v2.83.0 and first-party clients to v0.4.0.
 - Makes Python/FastAPI authoritative for source packet validation, record normalization, and source ingestion.

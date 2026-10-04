@@ -327,6 +327,21 @@ from .institutional_repository_federation import (
     import_handoff as institutional_repository_import_handoff,
     schema_registry as institutional_repository_schema_registry,
 )
+from .historical_archive_primary_source import (
+    contract as historical_archive_primary_source_contract,
+    readiness as historical_archive_primary_source_readiness,
+    schema_registry as historical_archive_primary_source_schema_registry,
+    source_type_registry as historical_source_type_registry,
+    normalize_date_assertion as normalize_historical_date_assertion,
+    normalize_primary_source,
+    provenance_chain as primary_source_provenance_chain,
+    analyze_primary_source,
+    compare_primary_sources,
+    plan_archive_search as plan_historical_archive_search,
+    build_timeline as build_historical_primary_source_timeline,
+    build_primary_source_packet,
+    ingestion_handoff as historical_primary_source_ingestion_handoff,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -706,6 +721,16 @@ def health() -> dict[str, Any]:
             "institutional_repository_visibility_implies_endorsement": False,
             "institutional_repository_metadata_visibility_implies_reuse_permission": False,
             "institutional_repository_database_migration_required": False,
+            "historical_archive_primary_source_intelligence": True,
+            "historical_archive_archival_hierarchy": True,
+            "historical_archive_uncertain_date_preservation": True,
+            "historical_archive_original_and_derived_representation_lineage": True,
+            "historical_archive_source_criticism_without_truth_scoring": True,
+            "historical_archive_cross_source_comparison": True,
+            "historical_archive_primary_source_packets": True,
+            "historical_archive_automatic_import": False,
+            "historical_archive_primary_source_label_implies_truth": False,
+            "historical_archive_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -720,8 +745,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.11.0",
-            "library_sdk_version": "1.11.0",
+            "library_web_version": "2.12.0",
+            "library_sdk_version": "1.12.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -3086,7 +3111,7 @@ def library_api_v1_service() -> dict[str, Any]: return library_api_service_contr
 @app.get("/api/library/v1/health")
 def library_api_v1_health() -> dict[str, Any]:
     db_state, detail = database_state()
-    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"5.74.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
+    return {"schema":"sc-library-api-health/1.0","ok":db_state=="online","service":"sustainable-catalyst-knowledge-library","library_version":"6.12.0","backend_version":__version__,"api_version":"1.0","database":db_state,"database_detail":detail,"wordpress_required":False}
 
 @app.get("/api/library/v1/readiness")
 def library_api_v1_readiness() -> dict[str, Any]: return library_api_readiness()
@@ -4302,6 +4327,91 @@ async def library_api_v1_institutional_repository_handoff(request: Request) -> d
     payload = await _library_workspace_json(request)
     try:
         return institutional_repository_import_handoff(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/api/library/v1/historical-archives")
+def library_api_v1_historical_archive_primary_source_contract() -> dict[str, Any]:
+    return historical_archive_primary_source_contract()
+
+@app.get("/api/library/v1/historical-archives/readiness")
+def library_api_v1_historical_archive_primary_source_readiness() -> dict[str, Any]:
+    return historical_archive_primary_source_readiness()
+
+@app.get("/api/library/v1/historical-archives/schemas")
+def library_api_v1_historical_archive_primary_source_schemas() -> dict[str, Any]:
+    return historical_archive_primary_source_schema_registry()
+
+@app.get("/api/library/v1/historical-archives/source-types")
+def library_api_v1_historical_source_types() -> dict[str, Any]:
+    return historical_source_type_registry()
+
+@app.post("/api/library/v1/historical-archives/dates/normalize")
+async def library_api_v1_historical_date_normalize(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    return normalize_historical_date_assertion(payload.get("date") if "date" in payload else payload)
+
+@app.post("/api/library/v1/historical-archives/primary-sources/normalize")
+async def library_api_v1_primary_source_normalize(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return normalize_primary_source(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/primary-sources/provenance")
+async def library_api_v1_primary_source_provenance(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return primary_source_provenance_chain(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/primary-sources/analyze")
+async def library_api_v1_primary_source_analyze(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return analyze_primary_source(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/primary-sources/compare")
+async def library_api_v1_primary_source_compare(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return compare_primary_sources(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/search/plan")
+async def library_api_v1_historical_archive_search_plan(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return plan_historical_archive_search(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/timeline")
+async def library_api_v1_historical_primary_source_timeline(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return build_historical_primary_source_timeline(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/packets")
+async def library_api_v1_historical_primary_source_packet(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return build_primary_source_packet(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/handoff")
+async def library_api_v1_historical_primary_source_handoff(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return historical_primary_source_ingestion_handoff(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

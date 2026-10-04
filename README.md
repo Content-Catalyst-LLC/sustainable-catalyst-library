@@ -1,5 +1,11 @@
 # Sustainable Catalyst Knowledge Library
 
+Current release: **v6.12.0 — Historical Archive & Primary-Source Intelligence**. Backend: **v3.12.0** · Python SDK: **v1.12.0** · JS/TS Client: **v1.12.0** · Library Web: **v2.12.0** · API: **v1.0 stable**.
+
+This release makes historical archives and primary sources first-class research objects with archival hierarchy, uncertain-date preservation, original/derived representation lineage, source-criticism observations, cross-source comparison, archive search planning, timelines, reproducible packets, and explicit ingestion handoffs. WordPress remains optional and non-authoritative.
+
+# Sustainable Catalyst Knowledge Library
+
 Current release: **v5.72.0 — Python Source Ingestion & Normalization Service**. Backend: **v2.83.0** · Python SDK: **v0.4.0** · JS/TS Client: **v0.4.0** · Library Web: **v1.2.0** · API: **v1.0**.
 
 This release makes Python/FastAPI authoritative for source ingestion and normalization while preserving the existing PostgreSQL record model, revisioning, chunking, embedding invalidation, provenance, and source identities. WordPress remains an optional upload/configuration/presentation adapter.

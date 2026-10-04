@@ -220,6 +220,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "research-interface": {"resources":["contract","readiness","bootstrap","faceted-search","working-set-handoff","record-context","provenance","citations","evidence-graph","saved-research-handoff"],"direct_api":True,"authority":"python-backend"},
     "independent-library-product": {"resources":["product-contract","product-readiness","release-manifest","api-v1","library-web-v2","sdk-v1","optional-wordpress-adapter"],"direct_api":True,"authority":"python-backend"},
     "independent-application-certification": {"resources":["architecture-contract","live-probe-snapshot","wordpress-failure-independence","runtime-authority","web-application","release-engineering","certification"],"direct_api":True,"authority":"python-backend"},
+    "historical-archive-primary-source-intelligence": {"resources":["source-types","date-assertions","primary-source-objects","provenance-chains","source-criticism","cross-source-comparison","archive-search-plans","timelines","research-packets","ingestion-handoffs"],"direct_api":True,"authority":"python-backend"},
     "runtime-certification": {"resources":["wordpress-failure","runtime-probes","certification"],"direct_api":True,"authority":"library-service"},
 }
 
@@ -313,8 +314,8 @@ def service_contract() -> dict[str, Any]:
         "schema": CONTRACT,
         "contract_id": "library-api-service-contract:" + fingerprint[:32],
         "contract_fingerprint_sha256": fingerprint,
-        "library_version": "6.4.0",
-        "backend_version": "3.4.0",
+        "library_version": "6.12.0",
+        "backend_version": "3.12.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "stable",
@@ -369,8 +370,8 @@ def readiness() -> dict[str, Any]:
     contract = service_contract()
     return {
         "schema": READINESS_CONTRACT,
-        "library_version": "6.4.0",
-        "backend_version": "3.4.0",
+        "library_version": "6.12.0",
+        "backend_version": "3.12.0",
         "api_version": API_VERSION,
         "base_path": API_PREFIX,
         "state": "ready" if db_state == "ready" else "degraded",
