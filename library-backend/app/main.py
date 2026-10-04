@@ -316,6 +316,17 @@ from .research_package_publishing import (
     validate_export as validate_research_package_export,
     persist_export as persist_research_package_export,
 )
+from .institutional_repository_federation import (
+    contract as institutional_repository_federation_contract,
+    readiness as institutional_repository_federation_readiness,
+    repository_profiles as institutional_repository_profiles,
+    repository_profile as institutional_repository_profile,
+    plan as plan_institutional_repository_federation,
+    search as search_institutional_repository_federation,
+    repository_snapshot as institutional_repository_snapshot,
+    import_handoff as institutional_repository_import_handoff,
+    schema_registry as institutional_repository_schema_registry,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -685,6 +696,16 @@ def health() -> dict[str, Any]:
             "research_package_export_external_publication": False,
             "research_package_export_integrity_implies_truth": False,
             "research_package_publishing_database_migration_required": False,
+            "institutional_repository_federation": True,
+            "institutional_repository_profiles": True,
+            "institutional_repository_bounded_federated_search": True,
+            "institutional_repository_exact_doi_deduplication": True,
+            "institutional_repository_source_provenance_ledger": True,
+            "institutional_repository_oai_pmh_bounded_harvest": True,
+            "institutional_repository_automatic_import": False,
+            "institutional_repository_visibility_implies_endorsement": False,
+            "institutional_repository_metadata_visibility_implies_reuse_permission": False,
+            "institutional_repository_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -699,8 +720,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.10.0",
-            "library_sdk_version": "1.10.0",
+            "library_web_version": "2.11.0",
+            "library_sdk_version": "1.11.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -4232,6 +4253,56 @@ async def library_api_v1_research_package_publishing_persist(request: Request, a
     try:
         return persist_research_package_export(payload)
     except (ValueError, KeyError, RuntimeError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/api/library/v1/institutional-repositories")
+def library_api_v1_institutional_repository_federation_contract() -> dict[str, Any]:
+    return institutional_repository_federation_contract()
+
+@app.get("/api/library/v1/institutional-repositories/readiness")
+def library_api_v1_institutional_repository_federation_readiness() -> dict[str, Any]:
+    return institutional_repository_federation_readiness()
+
+@app.get("/api/library/v1/institutional-repositories/schemas")
+def library_api_v1_institutional_repository_federation_schemas() -> dict[str, Any]:
+    return institutional_repository_schema_registry()
+
+@app.get("/api/library/v1/institutional-repositories/repositories")
+def library_api_v1_institutional_repository_profiles() -> dict[str, Any]:
+    profiles = institutional_repository_profiles()
+    return {"schema":"sc-library-institutional-repository-profiles/1.0","library_version":"6.11.0","backend_version":"3.11.0","count":len(profiles),"repositories":profiles}
+
+@app.get("/api/library/v1/institutional-repositories/repositories/{source_key}")
+def library_api_v1_institutional_repository_profile(source_key: str) -> dict[str, Any]:
+    try:
+        return institutional_repository_profile(source_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="institutional-repository-not-found") from exc
+
+@app.post("/api/library/v1/institutional-repositories/plan")
+async def library_api_v1_institutional_repository_plan(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return plan_institutional_repository_federation(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/institutional-repositories/search")
+async def library_api_v1_institutional_repository_search(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return search_institutional_repository_federation(payload, network=institutional_research_network)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/institutional-repositories/handoff")
+async def library_api_v1_institutional_repository_handoff(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return institutional_repository_import_handoff(payload)
+    except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 @app.get("/api/library/v1/identity")

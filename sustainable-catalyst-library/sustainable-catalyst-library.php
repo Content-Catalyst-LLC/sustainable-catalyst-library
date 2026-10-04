@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library 6.10.0 Optional WordPress Adapter for Research Package Publishing & Reproducible Exports.
- * Version: 6.10.0
+ * Description: Sustainable Catalyst Library 6.11.0 Optional WordPress Adapter for Institutional Repository Federation.
+ * Version: 6.11.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '6.10.0');
+define('SC_LIBRARY_VERSION', '6.11.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'optional-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);
@@ -25,11 +25,11 @@ define('SC_LIBRARY_WORDPRESS_LEGACY_COMPATIBILITY_PRESENT', true);
 define('SC_LIBRARY_INDEPENDENT_APPLICATION_CERTIFICATION_AUTHORITY', 'library-api');
 define('SC_LIBRARY_INDEPENDENT_APPLICATION_WORDPRESS_REQUIRED', false);
 define('SC_LIBRARY_APPLICATION_MODE', 'independent-primary');
-define('SC_LIBRARY_BACKEND_GENERATION', '3.10.0');
-define('SC_LIBRARY_WEB_GENERATION', '2.10.0');
-define('SC_LIBRARY_SDK_GENERATION', '1.10.0');
+define('SC_LIBRARY_BACKEND_GENERATION', '3.11.0');
+define('SC_LIBRARY_WEB_GENERATION', '2.11.0');
+define('SC_LIBRARY_SDK_GENERATION', '1.11.0');
 define('SC_LIBRARY_API_GENERATION', '1.0');
-define('SC_LIBRARY_NEXT_ARCHITECTURE_RELEASE', '6.11.0');
+define('SC_LIBRARY_NEXT_ARCHITECTURE_RELEASE', '6.12.0');
 define('SC_LIBRARY_RESEARCH_RUNTIME_AUTHORITY', 'library-api');
 define('SC_LIBRARY_RESEARCH_INTERFACE_AUTHORITY', 'library-api');
 define('SC_LIBRARY_RESEARCH_INTERFACE_WORDPRESS_REQUIRED', false);
@@ -51,6 +51,8 @@ define('SC_LIBRARY_SCIENTIFIC_LITERATURE_AUTHORITY', 'library-api');
 define('SC_LIBRARY_SCIENTIFIC_LITERATURE_WORDPRESS_REQUIRED', false);
 define('SC_LIBRARY_RESEARCH_PACKAGE_PUBLISHING_AUTHORITY', 'library-api');
 define('SC_LIBRARY_RESEARCH_PACKAGE_PUBLISHING_WORDPRESS_REQUIRED', false);
+define('SC_LIBRARY_INSTITUTIONAL_REPOSITORY_FEDERATION_AUTHORITY', 'library-api');
+define('SC_LIBRARY_INSTITUTIONAL_REPOSITORY_FEDERATION_WORDPRESS_REQUIRED', false);
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);
