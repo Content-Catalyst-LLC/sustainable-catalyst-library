@@ -117,6 +117,7 @@
           <a href="/research" data-app-link>Research home</a>
           <a href="/research/archives" aria-current="page">Archives</a>
           <a href="/research/archives/compare" data-app-link>Compare & criticize</a>
+          <a href="/research/archives/timeline" data-app-link>Timeline</a>
           <a href="/account?section=workspaces" data-app-link>Projects</a>
         </nav>
         <div id="archive-readiness" class="context-strip"><span>Loading archive workspace…</span></div>
@@ -184,6 +185,7 @@
           <a href="/research" data-app-link>Research home</a>
           <a href="/research/archives" data-app-link>Archives</a>
           <a href="/research/archives/compare" aria-current="page">Compare & criticize</a>
+          <a href="/research/archives/timeline" data-app-link>Timeline</a>
         </nav>
         <div id="criticism-readiness" class="context-strip"><span>Loading source-criticism workspace…</span></div>
         <div class="criticism-layout">
@@ -207,6 +209,63 @@
         <section class="info-card">
           <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Comparison & criticism</h2></div></div>
           <div id="criticism-output"><p class="empty-state">Matrices and corroboration ledgers appear here.</p></div>
+        </section>
+      </section>
+
+      <section class="view" data-view="timeline" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Historical events · uncertain dates · competing chronologies</p>
+          <h1>Research Timeline & Historical Event Workspace</h1>
+          <p>Build source-linked historical event objects, preserve exact and uncertain date ranges, inspect source coverage, and compare competing chronologies without manufacturing false precision or automatically selecting a preferred account.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Historical timeline workspace navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/archives" data-app-link>Archives</a>
+          <a href="/research/archives/compare" data-app-link>Compare & criticize</a>
+          <a href="/research/archives/timeline" aria-current="page">Timeline</a>
+        </nav>
+        <div id="timeline-readiness" class="context-strip"><span>Loading historical-event workspace…</span></div>
+        <div class="timeline-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Archival source context</p><h2>Available primary sources</h2></div></div>
+            <p class="form-note">Sources are inherited from the current in-browser Archives source set. Their count is descriptive, not a confidence score.</p>
+            <div id="timeline-source-list"><p class="empty-state">Add sources in the Archives workspace to link them to events.</p></div>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Historical event editor</p><h2>Add event</h2></div></div>
+            <form id="timeline-event-form" class="archive-source-form">
+              <label>Title<input id="timeline-event-title" required></label>
+              <label>Event type<select id="timeline-event-type"><option value="other">Other</option></select></label>
+              <label>Date or date expression<input id="timeline-event-date" placeholder="circa 1912, before 1945, 1970-1975"></label>
+              <label>Explicit event key<input id="timeline-event-key" placeholder="optional shared key for chronology comparison"></label>
+              <label>Place<input id="timeline-event-place"></label>
+              <label>Actors<input id="timeline-event-actors" placeholder="comma-separated"></label>
+              <label class="archive-wide">Source IDs<input id="timeline-event-source-ids" placeholder="comma-separated primary_source_id values"></label>
+              <label class="archive-wide">Description<textarea id="timeline-event-description" rows="4"></textarea></label>
+              <button type="submit">Normalize & add event</button>
+            </form>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Working chronology</p><h2>Historical events</h2></div><button id="timeline-clear-events" class="text-button" type="button">Clear</button></div>
+            <label>Timeline title<input id="timeline-title" value="Research timeline"></label>
+            <label>Research question<textarea id="timeline-research-question" rows="3"></textarea></label>
+            <div id="timeline-event-list"><p class="empty-state">No events added.</p></div>
+            <label>Event relationships (JSON)<textarea id="timeline-relationships" rows="7" placeholder='[{"event_a":"historical-event:…","event_b":"historical-event:…","relation":"precedes","basis":"…"}]'></textarea></label>
+            <div class="archive-actions">
+              <button id="timeline-build" type="button">Build timeline</button>
+              <button id="timeline-coverage" type="button" class="secondary-button">Source coverage</button>
+            </div>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Competing chronologies</p><h2>Compare chronologies</h2></div></div>
+          <p class="form-note">Enter a JSON array of additional chronologies. Cross-chronology alignment occurs only for events sharing an explicit <code>event_key</code>; no fuzzy event merge or winner selection occurs.</p>
+          <textarea id="timeline-chronologies" rows="10" placeholder='[{"chronology_id":"alternative-a","title":"Alternative chronology","events":[{"title":"Event","event_key":"event-1","date":"circa 1972"}]}]'></textarea>
+          <button id="timeline-compare" type="button" class="secondary-button">Compare chronologies</button>
+        </section>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Timeline analysis</h2></div></div>
+          <div id="timeline-output"><p class="empty-state">Timeline, source-coverage, and chronology-comparison output appears here.</p></div>
         </section>
       </section>
 
@@ -260,7 +319,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.14.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.15.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

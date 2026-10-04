@@ -214,6 +214,13 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/historical-archives/source-criticism/analyze","name":"primary-source-criticism-analyze","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/historical-archives/source-criticism/matrix","name":"primary-source-criticism-matrix","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/historical-archives/source-criticism/corroboration","name":"primary-source-corroboration-ledger","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/historical-archives/timeline-workspace","name":"historical-event-timeline-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/historical-archives/timeline-workspace/readiness","name":"historical-event-timeline-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/historical-archives/timeline-workspace/bootstrap","name":"historical-event-timeline-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/historical-archives/timeline-workspace/events/normalize","name":"historical-event-normalize","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/historical-archives/timeline-workspace/build","name":"historical-event-timeline-build","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/historical-archives/timeline-workspace/source-coverage","name":"historical-event-source-coverage","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/historical-archives/timeline-workspace/compare","name":"historical-chronology-compare","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {

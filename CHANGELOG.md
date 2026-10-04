@@ -1,3 +1,12 @@
+## 6.15.0 — Research Timeline & Historical Event Workspace
+
+- Added dedicated `/research/archives/timeline` workspace.
+- Added historical event objects with source-linked assertions, explicit event keys, uncertain/range dates, and human-asserted event relationships.
+- Added uncertainty-preserving timeline construction, event/source coverage matrices, and comparison of competing chronologies.
+- Cross-chronology alignment requires explicit shared event keys; no fuzzy event merging, winner selection, causal inference, or false date precision is introduced.
+- Synchronized Library 6.15.0 / backend 3.15.0 / web 2.15.0 / SDK 1.15.0 and corrected top-level health generation markers.
+- No database migration; WordPress remains optional.
+
 ## 6.14.0 — Primary-Source Comparison & Source Criticism Workspace
 
 - Added dedicated `/research/archives/compare` workspace.

@@ -361,6 +361,15 @@ from .primary_source_comparison_criticism import (
     comparison_matrix as primary_source_criticism_matrix,
     corroboration_ledger as primary_source_corroboration_ledger,
 )
+from .historical_event_timeline import (
+    contract as historical_event_timeline_contract,
+    readiness as historical_event_timeline_readiness,
+    bootstrap as historical_event_timeline_bootstrap,
+    normalize_event as normalize_historical_event,
+    build_timeline as build_historical_event_timeline,
+    source_coverage as historical_event_source_coverage,
+    compare_chronologies as compare_historical_chronologies,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -760,6 +769,11 @@ def health() -> dict[str, Any]:
             "primary_source_criticism_truth_scoring": False,
             "primary_source_criticism_automatic_ranking": False,
             "primary_source_criticism_database_migration_required": False,
+            "historical_event_timeline_workspace": True,
+            "historical_event_timeline_route": "/research/archives/timeline",
+            "historical_event_uncertainty_preservation": True,
+            "historical_event_automatic_chronology_reconciliation": False,
+            "historical_event_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -774,8 +788,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.12.0",
-            "library_sdk_version": "1.12.0",
+            "library_web_version": "2.15.0",
+            "library_sdk_version": "1.15.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -4537,6 +4551,50 @@ async def library_api_v1_primary_source_corroboration_ledger(request: Request) -
     payload = await _library_workspace_json(request)
     try:
         return primary_source_corroboration_ledger(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/api/library/v1/historical-archives/timeline-workspace")
+def library_api_v1_historical_event_timeline_contract() -> dict[str, Any]:
+    return historical_event_timeline_contract()
+
+@app.get("/api/library/v1/historical-archives/timeline-workspace/readiness")
+def library_api_v1_historical_event_timeline_readiness() -> dict[str, Any]:
+    return historical_event_timeline_readiness()
+
+@app.get("/api/library/v1/historical-archives/timeline-workspace/bootstrap")
+def library_api_v1_historical_event_timeline_bootstrap() -> dict[str, Any]:
+    return historical_event_timeline_bootstrap()
+
+@app.post("/api/library/v1/historical-archives/timeline-workspace/events/normalize")
+async def library_api_v1_historical_event_normalize(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return normalize_historical_event(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/timeline-workspace/build")
+async def library_api_v1_historical_event_timeline_build(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return build_historical_event_timeline(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/timeline-workspace/source-coverage")
+async def library_api_v1_historical_event_source_coverage(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return historical_event_source_coverage(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/timeline-workspace/compare")
+async def library_api_v1_historical_chronology_compare(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return compare_historical_chronologies(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

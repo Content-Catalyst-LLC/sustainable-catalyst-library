@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.14.0"
-BACKEND_VERSION = "3.14.0"
-WEB_VERSION = "2.14.0"
-SDK_VERSION = "1.14.0"
+LIBRARY_VERSION = "6.15.0"
+BACKEND_VERSION = "3.15.0"
+WEB_VERSION = "2.15.0"
+SDK_VERSION = "1.15.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"
@@ -60,6 +60,7 @@ def contract() -> dict[str, Any]:
         {"id": "working-set", "route": "/research#working-set", "purpose": "browser-local-source-shortlist"},
         {"id": "historical-archives", "route": "/research/archives", "purpose": "primary-source-and-archival-research-workspace"},
         {"id": "primary-source-criticism", "route": "/research/archives/compare", "purpose": "primary-source-comparison-and-source-criticism-workspace"},
+        {"id": "historical-event-timeline", "route": "/research/archives/timeline", "purpose": "uncertainty-preserving-historical-event-and-chronology-workspace"},
         {"id": "record-context", "route": "/record/{record_id}", "purpose": "research-object-provenance-citations-evidence"},
         {"id": "saved-research", "route": "/account", "purpose": "service-native-project-and-collection-handoff"},
     ]
@@ -112,8 +113,8 @@ def contract() -> dict[str, Any]:
             "required": False,
             "authoritative": False,
         },
-        "next_release": "6.15.0",
-        "next_release_name": "Research Timeline & Historical Event Workspace",
+        "next_release": "6.16.0",
+        "next_release_name": "Research Annotation & Scholarly Notes",
         "guardrails": guardrails(),
     }
 

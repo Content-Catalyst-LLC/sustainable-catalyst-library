@@ -111,3 +111,7 @@ Library v6.13.0 adds the standalone `/research/archives` workspace for explicit 
 ## Primary-Source Comparison & Source Criticism Workspace
 
 Library v6.14.0 adds `/research/archives/compare` for structured source criticism, comparison matrices, explicit source relationships, and corroboration/contradiction ledgers without truth or reliability scoring.
+
+## Research Timeline & Historical Event Workspace
+
+Library v6.15.0 adds `/research/archives/timeline` for source-linked historical events, uncertainty-preserving chronologies, event/source coverage, and explicit comparison of competing timelines without automatic reconciliation.
