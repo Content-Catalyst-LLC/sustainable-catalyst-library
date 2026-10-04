@@ -4,7 +4,7 @@ from hashlib import sha256
 import json
 from typing import Any
 
-WEB_VERSION = "2.13.0"
+WEB_VERSION = "2.14.0"
 CONTRACT = "sc-library-web-application/1.0"
 READINESS_CONTRACT = "sc-library-web-readiness/1.0"
 
@@ -12,6 +12,7 @@ SURFACES: tuple[dict[str, Any], ...] = (
     {"id":"workspaces","label":"Workspaces","route":"/account?section=workspaces","api":"/api/library/v1/workspaces","public":False,"index":False},
     {"id":"research","label":"Research","route":"/research","api":"/api/library/v1/navigation","public":True,"index":False},
     {"id":"historical-archives","label":"Archives","route":"/research/archives","api":"/api/library/v1/historical-archives/workspace","public":True,"index":False,"parent_surface":"research"},
+    {"id":"primary-source-criticism","label":"Source Criticism","route":"/research/archives/compare","api":"/api/library/v1/historical-archives/source-criticism","public":True,"index":False,"parent_surface":"historical-archives"},
     {"id":"search","label":"Search","route":"/search","api":"/api/library/v1/search","public":True,"index":False,"alias_of":"research","navigation_mode":"search"},
     {"id":"reader","label":"Reader","route":"/record/{record_id}","api":"/api/library/v1/records/{record_id}","public":True,"index":True},
     {"id":"discover","label":"Discover","route":"/discover","api":"/api/library/v1/capabilities","public":True,"index":False,"alias_of":"research","navigation_mode":"discover"},
@@ -38,8 +39,8 @@ def application_contract() -> dict[str, Any]:
         "application_id": "sustainable-catalyst-library-web",
         "application_contract_id": "library-web-application:" + fp[:32],
         "application_fingerprint_sha256": fp,
-        "library_version": "6.13.0",
-        "backend_version": "3.13.0",
+        "library_version": "6.14.0",
+        "backend_version": "3.14.0",
         "web_version": WEB_VERSION,
         "state": "independent-primary-application",
         "deployment_model": "independent-primary-web-service",

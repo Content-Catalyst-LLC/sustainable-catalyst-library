@@ -107,3 +107,7 @@ Current release: v5.63.0 — Public Routing, SEO & Embed Bridge (backend v2.74.0
 ## Historical Archives Research Workspace
 
 Library v6.13.0 adds the standalone `/research/archives` workspace for explicit repository search, primary-source inspection, comparison, uncertain timelines, and reproducible packet/handoff previews. WordPress is not required.
+
+## Primary-Source Comparison & Source Criticism Workspace
+
+Library v6.14.0 adds `/research/archives/compare` for structured source criticism, comparison matrices, explicit source relationships, and corroboration/contradiction ledgers without truth or reliability scoring.

@@ -353,6 +353,14 @@ from .historical_archive_workspace import (
     packet_workspace as historical_archives_packet_workspace,
     handoff_workspace as historical_archives_handoff_workspace,
 )
+from .primary_source_comparison_criticism import (
+    contract as primary_source_criticism_contract,
+    readiness as primary_source_criticism_readiness,
+    bootstrap as primary_source_criticism_bootstrap,
+    analyze_source as primary_source_criticism_analyze,
+    comparison_matrix as primary_source_criticism_matrix,
+    corroboration_ledger as primary_source_corroboration_ledger,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -747,6 +755,11 @@ def health() -> dict[str, Any]:
             "historical_archives_workspace_explicit_search_execution": True,
             "historical_archives_workspace_automatic_import": False,
             "historical_archives_workspace_database_migration_required": False,
+            "primary_source_comparison_source_criticism_workspace": True,
+            "primary_source_criticism_route": "/research/archives/compare",
+            "primary_source_criticism_truth_scoring": False,
+            "primary_source_criticism_automatic_ranking": False,
+            "primary_source_criticism_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -4488,6 +4501,42 @@ async def library_api_v1_historical_archives_handoff_workspace(request: Request)
     payload = await _library_workspace_json(request)
     try:
         return historical_archives_handoff_workspace(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/api/library/v1/historical-archives/source-criticism")
+def library_api_v1_primary_source_criticism_contract() -> dict[str, Any]:
+    return primary_source_criticism_contract()
+
+@app.get("/api/library/v1/historical-archives/source-criticism/readiness")
+def library_api_v1_primary_source_criticism_readiness() -> dict[str, Any]:
+    return primary_source_criticism_readiness()
+
+@app.get("/api/library/v1/historical-archives/source-criticism/bootstrap")
+def library_api_v1_primary_source_criticism_bootstrap() -> dict[str, Any]:
+    return primary_source_criticism_bootstrap()
+
+@app.post("/api/library/v1/historical-archives/source-criticism/analyze")
+async def library_api_v1_primary_source_criticism_analyze(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return primary_source_criticism_analyze(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/source-criticism/matrix")
+async def library_api_v1_primary_source_criticism_matrix(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return primary_source_criticism_matrix(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/source-criticism/corroboration")
+async def library_api_v1_primary_source_corroboration_ledger(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return primary_source_corroboration_ledger(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

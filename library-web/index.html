@@ -116,6 +116,7 @@
         <nav class="research-navigation" aria-label="Archive workspace navigation">
           <a href="/research" data-app-link>Research home</a>
           <a href="/research/archives" aria-current="page">Archives</a>
+          <a href="/research/archives/compare" data-app-link>Compare & criticize</a>
           <a href="/account?section=workspaces" data-app-link>Projects</a>
         </nav>
         <div id="archive-readiness" class="context-strip"><span>Loading archive workspace…</span></div>
@@ -173,6 +174,42 @@
         </section>
       </section>
 
+      <section class="view" data-view="criticism" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Primary sources · comparison · source criticism</p>
+          <h1>Primary-Source Comparison & Source Criticism Workspace</h1>
+          <p>Compare archival sources dimension by dimension, preserve provenance and mediation, record human judgments explicitly, and map corroboration or contradiction without converting those observations into truth, reliability, or authenticity scores.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Source criticism workspace navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/archives" data-app-link>Archives</a>
+          <a href="/research/archives/compare" aria-current="page">Compare & criticize</a>
+        </nav>
+        <div id="criticism-readiness" class="context-strip"><span>Loading source-criticism workspace…</span></div>
+        <div class="criticism-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Current source set</p><h2>Sources to compare</h2></div></div>
+            <div id="criticism-source-list"><p class="empty-state">Add at least two sources in the Archives workspace, then return here.</p></div>
+            <button id="criticism-matrix" type="button">Build source-criticism matrix</button>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Human-asserted relationships</p><h2>Relationship observations</h2></div></div>
+            <p class="form-note">Optional JSON array. Relationships remain explicit human assertions and are never treated as truth.</p>
+            <textarea id="criticism-relationships" rows="8" placeholder='[{"source_a":"primary-source:…","source_b":"primary-source:…","relationship":"responds-to","basis":"…"}]'></textarea>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Claim-source ledger</p><h2>Corroboration & contradiction</h2></div></div>
+            <p class="form-note">Optional JSON array of claims and source observations. Counts are descriptive, not probabilities.</p>
+            <textarea id="criticism-claims" rows="10" placeholder='[{"text":"Claim…","observations":[{"source_id":"primary-source:…","relation":"supports","basis":"…"}]}]'></textarea>
+            <button id="criticism-ledger" type="button" class="secondary-button">Build corroboration ledger</button>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Comparison & criticism</h2></div></div>
+          <div id="criticism-output"><p class="empty-state">Matrices and corroboration ledgers appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="record" hidden>
         <div class="reader-toolbar"><button id="reader-back" class="text-button">← Back</button><span id="reader-id"></span></div>
         <article id="reader" class="reader"><p class="empty-state">Loading record…</p></article>
@@ -223,7 +260,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.13.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.14.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

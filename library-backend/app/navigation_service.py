@@ -12,10 +12,10 @@ from .research_interface import (
 from .independent_api import capability_catalog
 from .web_application import application_contract as web_application_contract
 
-LIBRARY_VERSION = "6.13.0"
-BACKEND_VERSION = "3.13.0"
-WEB_VERSION = "2.13.0"
-SDK_VERSION = "1.13.0"
+LIBRARY_VERSION = "6.14.0"
+BACKEND_VERSION = "3.14.0"
+WEB_VERSION = "2.14.0"
+SDK_VERSION = "1.14.0"
 
 CONTRACT = "sc-library-unified-discovery-research-navigation/1.0"
 READINESS_CONTRACT = "sc-library-unified-discovery-research-navigation-readiness/1.0"
@@ -60,6 +60,7 @@ def navigation_model() -> dict[str, Any]:
         {"id": "search", "label": "Search", "route": "/search", "mode": "search", "compatibility_route": True},
         {"id": "working-set", "label": "Working Set", "route": "/research?mode=working-set", "mode": "working-set"},
         {"id": "archives", "label": "Archives", "route": "/research/archives", "mode": "archives"},
+        {"id": "source-criticism", "label": "Compare Sources", "route": "/research/archives/compare", "mode": "source-criticism"},
         {"id": "projects", "label": "Projects", "route": "/account?section=workspaces", "mode": "projects"},
     ]
     aliases = {
@@ -97,8 +98,8 @@ def contract() -> dict[str, Any]:
         "canonical_research_route": "/research",
         "navigation": nav,
         "wordpress": {"role": "optional-adapter", "required": False, "authoritative": False},
-        "next_release": "6.14.0",
-        "next_release_name": "Primary-Source Comparison & Source Criticism Workspace",
+        "next_release": "6.15.0",
+        "next_release_name": "Research Timeline & Historical Event Workspace",
         "guardrails": guardrails(),
     }
 
@@ -164,6 +165,8 @@ def resolve_route(path: str) -> dict[str, Any]:
     alias = nav["aliases"].get(raw)
     if alias:
         resolved = {"requested_route": raw, **alias, "compatibility_alias": True}
+    elif raw == "/research/archives/compare":
+        resolved = {"requested_route": raw, "canonical_route": raw, "surface": "research", "mode": "source-criticism", "compatibility_alias": False}
     elif raw == "/research/archives":
         resolved = {"requested_route": raw, "canonical_route": raw, "surface": "research", "mode": "archives", "compatibility_alias": False}
     elif raw in {"/research", "/system", "/account"}:

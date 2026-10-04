@@ -1,3 +1,11 @@
+## 6.14.0 — Primary-Source Comparison & Source Criticism Workspace
+
+- Added dedicated `/research/archives/compare` workspace.
+- Added ten-dimension non-scoring source criticism, comparison matrices, explicit source relationships, and claim/source corroboration ledgers.
+- Preserves disagreement, ambiguity, mediation, and unresolved questions without automatic ranking or adjudication.
+- Synchronized Library 6.14.0 / backend 3.14.0 / web 2.14.0 / SDK 1.14.0.
+- No database migration; WordPress remains optional.
+
 ## 6.13.0 — Historical Archives Research Workspace
 
 - Added standalone `/research/archives` workspace backed by Python/FastAPI authority.

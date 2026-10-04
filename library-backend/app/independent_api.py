@@ -208,6 +208,12 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/historical-archives/workspace/timeline","name":"historical-archives-timeline-workspace","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/historical-archives/workspace/packet","name":"historical-archives-packet-workspace","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/historical-archives/workspace/handoff","name":"historical-archives-handoff-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/historical-archives/source-criticism","name":"primary-source-criticism-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/historical-archives/source-criticism/readiness","name":"primary-source-criticism-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/historical-archives/source-criticism/bootstrap","name":"primary-source-criticism-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/historical-archives/source-criticism/analyze","name":"primary-source-criticism-analyze","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/historical-archives/source-criticism/matrix","name":"primary-source-criticism-matrix","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/historical-archives/source-criticism/corroboration","name":"primary-source-corroboration-ledger","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
