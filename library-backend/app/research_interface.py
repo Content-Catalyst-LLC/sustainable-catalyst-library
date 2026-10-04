@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.11.0"
-BACKEND_VERSION = "3.11.0"
-WEB_VERSION = "2.11.0"
-SDK_VERSION = "1.11.0"
+LIBRARY_VERSION = "6.12.0"
+BACKEND_VERSION = "3.12.0"
+WEB_VERSION = "2.12.0"
+SDK_VERSION = "1.12.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"

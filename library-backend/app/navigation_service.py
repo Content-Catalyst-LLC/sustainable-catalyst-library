@@ -12,10 +12,10 @@ from .research_interface import (
 from .independent_api import capability_catalog
 from .web_application import application_contract as web_application_contract
 
-LIBRARY_VERSION = "6.11.0"
-BACKEND_VERSION = "3.11.0"
-WEB_VERSION = "2.11.0"
-SDK_VERSION = "1.11.0"
+LIBRARY_VERSION = "6.12.0"
+BACKEND_VERSION = "3.12.0"
+WEB_VERSION = "2.12.0"
+SDK_VERSION = "1.12.0"
 
 CONTRACT = "sc-library-unified-discovery-research-navigation/1.0"
 READINESS_CONTRACT = "sc-library-unified-discovery-research-navigation-readiness/1.0"

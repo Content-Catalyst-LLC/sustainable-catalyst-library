@@ -4,7 +4,7 @@ from hashlib import sha256
 import json
 from typing import Any
 
-WEB_VERSION = "2.11.0"
+WEB_VERSION = "2.12.0"
 CONTRACT = "sc-library-web-application/1.0"
 READINESS_CONTRACT = "sc-library-web-readiness/1.0"
 
@@ -37,8 +37,8 @@ def application_contract() -> dict[str, Any]:
         "application_id": "sustainable-catalyst-library-web",
         "application_contract_id": "library-web-application:" + fp[:32],
         "application_fingerprint_sha256": fp,
-        "library_version": "6.11.0",
-        "backend_version": "3.11.0",
+        "library_version": "6.12.0",
+        "backend_version": "3.12.0",
         "web_version": WEB_VERSION,
         "state": "independent-primary-application",
         "deployment_model": "independent-primary-web-service",
