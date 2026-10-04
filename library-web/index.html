@@ -40,6 +40,7 @@
           <a data-research-mode-link="discover" href="/discover">Discover</a>
           <a data-research-mode-link="search" href="/search">Search</a>
           <a data-research-mode-link="working-set" href="/research?mode=working-set">Working Set</a>
+          <a data-research-mode-link="archives" href="/research/archives">Archives</a>
           <a data-research-mode-link="projects" href="/account?section=workspaces">Projects</a>
         </nav>
         <section id="research-discovery" class="research-discovery" aria-labelledby="research-discovery-title">
@@ -106,6 +107,72 @@
         </div>
       </section>
 
+      <section class="view" data-view="archives" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Historical archives & primary sources</p>
+          <h1>Historical Archives Research Workspace</h1>
+          <p>Search institutional repositories, inspect archival context and derivation lineage, compare primary sources, preserve uncertain dates, and assemble reproducible research packets without treating provenance as truth or authenticity certification.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Archive workspace navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/archives" aria-current="page">Archives</a>
+          <a href="/account?section=workspaces" data-app-link>Projects</a>
+        </nav>
+        <div id="archive-readiness" class="context-strip"><span>Loading archive workspace…</span></div>
+
+        <section class="info-card archive-search-card">
+          <div class="panel-heading"><div><p class="eyebrow">Repository discovery</p><h2>Search historical archives</h2></div><span id="archive-search-state"></span></div>
+          <form id="archive-search-form" class="research-query">
+            <label class="research-query-main">Research question or archival query<input id="archive-query" type="search" placeholder="e.g. accelerated weathering correspondence 1970s" required></label>
+            <label>Repository keys<input id="archive-source-keys" type="text" placeholder="optional, comma-separated"></label>
+            <label>Start year<input id="archive-start-year" type="number" min="-9999" max="9999"></label>
+            <label>End year<input id="archive-end-year" type="number" min="-9999" max="9999"></label>
+            <button type="submit">Search archives</button>
+          </form>
+          <p class="form-note">Search execution occurs only when you submit this form. Results are not automatically imported into the Library.</p>
+          <div id="archive-search-results" class="research-results"><p class="empty-state">No archive search has been run.</p></div>
+        </section>
+
+        <div class="archive-workspace-grid">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Primary-source editor</p><h2>Add a source</h2></div></div>
+            <form id="archive-source-form" class="archive-source-form">
+              <label>Title<input id="archive-source-title" required></label>
+              <label>Source type<select id="archive-source-type"><option value="other-primary">Other primary source</option></select></label>
+              <label>Date or date expression<input id="archive-source-date" placeholder="circa 1912, before 1945, 1970-1975"></label>
+              <label>Repository<input id="archive-source-repository" placeholder="Institution or archive"></label>
+              <label>Repository source key<input id="archive-source-repository-key" placeholder="optional connector key"></label>
+              <label>Collection<input id="archive-source-collection"></label>
+              <label>Series<input id="archive-source-series"></label>
+              <label>Folder<input id="archive-source-folder"></label>
+              <label>Reference / shelfmark<input id="archive-source-shelfmark"></label>
+              <label>Original language<input id="archive-source-language" placeholder="en, ga, fa, zh…"></label>
+              <label>Digital surrogate URL<input id="archive-source-url" type="url"></label>
+              <label class="archive-wide">Notes<textarea id="archive-source-notes" rows="4"></textarea></label>
+              <button type="submit">Normalize & add source</button>
+            </form>
+          </section>
+
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Working source set</p><h2>Primary sources</h2></div><button id="archive-clear-sources" class="text-button" type="button">Clear</button></div>
+            <div id="archive-source-list"><p class="empty-state">Add sources from archive results or the source editor.</p></div>
+            <label>Project ID<input id="archive-project-id" placeholder="optional project identifier"></label>
+            <label>Research question<textarea id="archive-research-question" rows="3" placeholder="Question this packet is meant to investigate"></textarea></label>
+            <div class="archive-actions">
+              <button id="archive-compare" type="button">Compare sources</button>
+              <button id="archive-timeline" type="button" class="secondary-button">Build timeline</button>
+              <button id="archive-packet" type="button" class="secondary-button">Preview packet</button>
+              <button id="archive-handoff" type="button" class="secondary-button">Preview ingestion handoff</button>
+            </div>
+          </section>
+        </div>
+
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Analysis</h2></div></div>
+          <div id="archive-output"><p class="empty-state">Source criticism, comparisons, timelines, packet manifests, and handoff previews appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="record" hidden>
         <div class="reader-toolbar"><button id="reader-back" class="text-button">← Back</button><span id="reader-id"></span></div>
         <article id="reader" class="reader"><p class="empty-state">Loading record…</p></article>
@@ -156,7 +223,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.12.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.13.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

@@ -102,3 +102,8 @@ v5.54.0 adds governed alignment matrices between preserved original-language tex
 
 
 Current release: v5.63.0 — Public Routing, SEO & Embed Bridge (backend v2.74.0; Library Web v1.2.0).
+
+
+## Historical Archives Research Workspace
+
+Library v6.13.0 adds the standalone `/research/archives` workspace for explicit repository search, primary-source inspection, comparison, uncertain timelines, and reproducible packet/handoff previews. WordPress is not required.

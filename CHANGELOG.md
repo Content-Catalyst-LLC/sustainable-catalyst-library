@@ -1,3 +1,10 @@
+## 6.13.0 — Historical Archives Research Workspace
+
+- Added standalone `/research/archives` workspace backed by Python/FastAPI authority.
+- Added explicit archive search execution, source criticism, comparison, uncertainty-preserving timelines, packet previews, and ingestion-handoff previews.
+- Synchronized Library 6.13.0 / backend 3.13.0 / web 2.13.0 / SDK 1.13.0.
+- No database migration; WordPress remains optional.
+
 ## 6.12.0 — Historical Archive & Primary-Source Intelligence
 - Advances Library to v6.12.0, backend to v3.12.0, Web to v2.12.0, and first-party SDKs to v1.12.0.
 - Adds canonical historical primary-source objects with archival hierarchy, shelfmarks, identifiers, original language/script, rights/access metadata, and digital-surrogate lineage.

@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.12.0"
-BACKEND_VERSION = "3.12.0"
-WEB_VERSION = "2.12.0"
-SDK_VERSION = "1.12.0"
+LIBRARY_VERSION = "6.13.0"
+BACKEND_VERSION = "3.13.0"
+WEB_VERSION = "2.13.0"
+SDK_VERSION = "1.13.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"
@@ -58,6 +58,7 @@ def contract() -> dict[str, Any]:
         {"id": "research-home", "route": "/research", "purpose": "integrated-research-entry"},
         {"id": "discovery", "route": "/research#discovery", "purpose": "faceted-search-and-retrieval"},
         {"id": "working-set", "route": "/research#working-set", "purpose": "browser-local-source-shortlist"},
+        {"id": "historical-archives", "route": "/research/archives", "purpose": "primary-source-and-archival-research-workspace"},
         {"id": "record-context", "route": "/record/{record_id}", "purpose": "research-object-provenance-citations-evidence"},
         {"id": "saved-research", "route": "/account", "purpose": "service-native-project-and-collection-handoff"},
     ]
@@ -110,8 +111,8 @@ def contract() -> dict[str, Any]:
             "required": False,
             "authoritative": False,
         },
-        "next_release": "6.5.0",
-        "next_release_name": "Global Knowledge Federation II",
+        "next_release": "6.14.0",
+        "next_release_name": "Primary-Source Comparison & Source Criticism Workspace",
         "guardrails": guardrails(),
     }
 

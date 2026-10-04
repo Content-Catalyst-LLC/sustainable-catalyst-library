@@ -342,6 +342,17 @@ from .historical_archive_primary_source import (
     build_primary_source_packet,
     ingestion_handoff as historical_primary_source_ingestion_handoff,
 )
+from .historical_archive_workspace import (
+    contract as historical_archives_workspace_contract,
+    readiness as historical_archives_workspace_readiness,
+    bootstrap as historical_archives_workspace_bootstrap,
+    search_workspace as historical_archives_workspace_search,
+    source_workspace as historical_archives_source_workspace,
+    compare_workspace as historical_archives_compare_workspace,
+    timeline_workspace as historical_archives_timeline_workspace,
+    packet_workspace as historical_archives_packet_workspace,
+    handoff_workspace as historical_archives_handoff_workspace,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -731,6 +742,11 @@ def health() -> dict[str, Any]:
             "historical_archive_automatic_import": False,
             "historical_archive_primary_source_label_implies_truth": False,
             "historical_archive_database_migration_required": False,
+            "historical_archives_research_workspace": True,
+            "historical_archives_workspace_route": "/research/archives",
+            "historical_archives_workspace_explicit_search_execution": True,
+            "historical_archives_workspace_automatic_import": False,
+            "historical_archives_workspace_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -4412,6 +4428,66 @@ async def library_api_v1_historical_primary_source_handoff(request: Request) -> 
     payload = await _library_workspace_json(request)
     try:
         return historical_primary_source_ingestion_handoff(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/api/library/v1/historical-archives/workspace")
+def library_api_v1_historical_archives_workspace_contract() -> dict[str, Any]:
+    return historical_archives_workspace_contract()
+
+@app.get("/api/library/v1/historical-archives/workspace/readiness")
+def library_api_v1_historical_archives_workspace_readiness() -> dict[str, Any]:
+    return historical_archives_workspace_readiness()
+
+@app.get("/api/library/v1/historical-archives/workspace/bootstrap")
+def library_api_v1_historical_archives_workspace_bootstrap() -> dict[str, Any]:
+    return historical_archives_workspace_bootstrap()
+
+@app.post("/api/library/v1/historical-archives/workspace/search")
+async def library_api_v1_historical_archives_workspace_search(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return historical_archives_workspace_search(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/workspace/source")
+async def library_api_v1_historical_archives_source_workspace(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return historical_archives_source_workspace(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/workspace/compare")
+async def library_api_v1_historical_archives_compare_workspace(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return historical_archives_compare_workspace(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/workspace/timeline")
+async def library_api_v1_historical_archives_timeline_workspace(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return historical_archives_timeline_workspace(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/workspace/packet")
+async def library_api_v1_historical_archives_packet_workspace(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return historical_archives_packet_workspace(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/historical-archives/workspace/handoff")
+async def library_api_v1_historical_archives_handoff_workspace(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return historical_archives_handoff_workspace(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

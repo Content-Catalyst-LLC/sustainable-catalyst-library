@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.11.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.13.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null, archiveBootstrap: null, archiveSources: [], archiveSearchResult: null };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -38,11 +38,14 @@ function resolveUnifiedResearchMode(name) {
 function route() {
   const raw=currentRoute(); const [name="research", ...rest]=raw.split("/");
   const compatibilityResearch = name === "search" || name === "discover";
-  const view = compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
+  const archiveResearch = name === "research" && rest[0] === "archives";
+  const view = archiveResearch ? "archives" : compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
   $$(".view").forEach(el => { el.hidden = el.dataset.view !== view; });
-  $$('[data-nav]').forEach(a => a.setAttribute('aria-current', a.dataset.nav===view ? 'page' : 'false'));
+  const navView=view === "archives" ? "research" : view;
+  $$('[data-nav]').forEach(a => a.setAttribute('aria-current', a.dataset.nav===navView ? 'page' : 'false'));
   updatePublicMetadata(view, rest);
   if (view === "research") loadUnifiedNavigation(resolveUnifiedResearchMode(name));
+  if (view === "archives") loadHistoricalArchiveWorkspace();
   if (view === "system") loadSystem();
   if (view === "account") loadSession().then(()=>{ if(new URLSearchParams(location.search).get("section")==="workspaces") requestAnimationFrame(()=>$("#workspace-card")?.scrollIntoView({block:"start"})); });
   if (view === "record" && rest.length) loadRecord(decodeURIComponent(rest.join("/")));
@@ -59,12 +62,12 @@ function navigate(path) {
 
 function updatePublicMetadata(view, rest=[]) {
   const origin=String(config.publicOrigin || location.origin).replace(/\/$/, "");
-  let path=view === "research" ? "/research" : `/${view}`;
+  let path=view === "research" ? "/research" : view === "archives" ? "/research/archives" : `/${view}`;
   if (view === "record" && rest.length) path=`/record/${encodeURIComponent(decodeURIComponent(rest.join("/")))}`;
   const canonical=document.querySelector('link[rel="canonical"]') || document.head.appendChild(Object.assign(document.createElement('link'),{rel:'canonical'}));
   canonical.href=origin + (path === "/search" ? path : path);
   const robots=document.querySelector('meta[name="robots"]') || document.head.appendChild(Object.assign(document.createElement('meta'),{name:'robots'}));
-  robots.content=["research","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
+  robots.content=["research","archives","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
 }
 
 function setMeta(name, content, property=false) {
@@ -527,9 +530,162 @@ async function loadCapabilities() {
   } catch (error) { target.innerHTML=`<p class="error-state">${escapeHtml(error.message)}</p>`; }
 }
 
+
+function archivePayloadFromEditor() {
+  const sourceKey=$("#archive-source-repository-key")?.value.trim() || "";
+  return {
+    title: $("#archive-source-title")?.value.trim() || "",
+    source_type: $("#archive-source-type")?.value || "other-primary",
+    date: $("#archive-source-date")?.value.trim() || "",
+    repository: {
+      name: $("#archive-source-repository")?.value.trim() || "",
+      source_key: sourceKey || null,
+    },
+    archival_context: {
+      collection: $("#archive-source-collection")?.value.trim() || "",
+      series: $("#archive-source-series")?.value.trim() || "",
+      folder: $("#archive-source-folder")?.value.trim() || "",
+      shelfmark: $("#archive-source-shelfmark")?.value.trim() || "",
+    },
+    original_language: $("#archive-source-language")?.value.trim() || "",
+    digital_surrogate: { url: $("#archive-source-url")?.value.trim() || "" },
+    notes: $("#archive-source-notes")?.value.trim() || "",
+  };
+}
+
+function archiveRecordToSource(record={}) {
+  return {
+    title: record.title || record.name || record.label || "Untitled archival record",
+    source_type: "other-primary",
+    creators: record.authors || record.creators || [],
+    date: record.published_at || record.date || "",
+    repository: {
+      name: record.institution || record.repository || record.source_name || "",
+      source_key: record.source_key || (record.source_keys || [])[0] || null,
+    },
+    archival_context: {
+      collection: record.collection || "",
+      series: record.series || "",
+      folder: record.folder || "",
+      shelfmark: record.shelfmark || record.call_number || record.reference_code || "",
+    },
+    digital_surrogate: { url: record.source_url || record.url || "" },
+    identifiers: record.persistent_id ? [{scheme:"repository",value:record.persistent_id}] : [],
+    notes: "Added from an explicit institutional repository search result.",
+  };
+}
+
+function archiveOutput(label, data) {
+  const target=$("#archive-output");
+  if (!target) return;
+  target.innerHTML=`<p class="eyebrow">${escapeHtml(label)}</p><pre>${escapeHtml(JSON.stringify(data,null,2))}</pre>`;
+}
+
+function renderArchiveSources() {
+  const target=$("#archive-source-list"); if (!target) return;
+  const sources=state.archiveSources || [];
+  if (!sources.length) { target.innerHTML='<p class="empty-state">Add sources from archive results or the source editor.</p>'; return; }
+  target.innerHTML=sources.map((source,index)=>{
+    const date=source.creation_date?.display || source.date || "undated";
+    const shelf=source.archival_context?.shelfmark || "no reference code";
+    const repo=source.repository?.name || source.repository?.source_key || "repository not specified";
+    return `<article class="archive-source-row"><div><strong>${escapeHtml(source.title || "Untitled source")}</strong><p>${escapeHtml(date)} · ${escapeHtml(repo)} · ${escapeHtml(shelf)}</p></div><div><button type="button" class="text-button" data-archive-inspect="${index}">Inspect</button><button type="button" class="text-button" data-archive-remove="${index}">Remove</button></div></article>`;
+  }).join("");
+}
+
+function populateArchiveBootstrap(data) {
+  state.archiveBootstrap=data;
+  const readiness=data.readiness || {};
+  const status=$("#archive-readiness");
+  if (status) status.innerHTML=`<span><strong>${escapeHtml(readiness.state || "unknown")}</strong> workspace</span><span><strong>${Number(readiness.repository_profile_count || 0)}</strong> repository profiles</span><span>Web ${escapeHtml(data.web_version || config.webVersion || "")}</span><span>No automatic import</span>`;
+  const select=$("#archive-source-type");
+  if (select) {
+    select.innerHTML=(data.source_types || []).map(row=>`<option value="${escapeHtml(row.key)}">${escapeHtml(row.label)}</option>`).join("") || '<option value="other-primary">Other primary source</option>';
+  }
+  const keys=$("#archive-source-keys");
+  if (keys && !keys.getAttribute("list")) {
+    const id="archive-repository-keys"; keys.setAttribute("list",id);
+    const datalist=document.createElement("datalist"); datalist.id=id;
+    datalist.innerHTML=(data.repositories || []).map(row=>`<option value="${escapeHtml(row.source_key)}">${escapeHtml(row.institution || row.repository || row.source_key)}</option>`).join("");
+    keys.insertAdjacentElement("afterend",datalist);
+  }
+}
+
+async function loadHistoricalArchiveWorkspace() {
+  if (state.archiveBootstrap) { populateArchiveBootstrap(state.archiveBootstrap); renderArchiveSources(); return; }
+  const status=$("#archive-readiness"); if (status) status.innerHTML='<span>Loading archive workspace…</span>';
+  try {
+    const data=await api('/historical-archives/workspace/bootstrap');
+    populateArchiveBootstrap(data); renderArchiveSources();
+  } catch (error) {
+    if (status) status.innerHTML=`<span class="error-state">${escapeHtml(error.message)}</span>`;
+  }
+}
+
+async function runHistoricalArchiveSearch(event) {
+  event?.preventDefault();
+  const q=$("#archive-query")?.value.trim() || "";
+  if (!q) return;
+  const sourceKeys=($("#archive-source-keys")?.value || "").split(",").map(x=>x.trim()).filter(Boolean);
+  const startRaw=$("#archive-start-year")?.value; const endRaw=$("#archive-end-year")?.value;
+  const payload={q,source_keys:sourceKeys,execute:true,limit_per_source:8,max_sources:20};
+  if (startRaw) payload.start_year=Number(startRaw);
+  if (endRaw) payload.end_year=Number(endRaw);
+  const target=$("#archive-search-results"); const stateLabel=$("#archive-search-state");
+  target.innerHTML='<p class="empty-state">Searching configured repositories…</p>'; if(stateLabel) stateLabel.textContent='Running explicit search…';
+  try {
+    const data=await api('/historical-archives/workspace/search',{method:'POST',body:JSON.stringify(payload)});
+    state.archiveSearchResult=data;
+    const records=data.result?.records || [];
+    if(stateLabel) stateLabel.textContent=`${data.execution_state || "complete"} · ${records.length} records`;
+    if(!records.length) {
+      target.innerHTML=`<p class="empty-state">No records returned.${data.error?` ${escapeHtml(data.error)}`:""}</p><details><summary>Search plan</summary><pre>${escapeHtml(JSON.stringify(data.plan,null,2))}</pre></details>`;
+      return;
+    }
+    target.innerHTML=records.map((record,index)=>`<article class="research-result"><div><p class="eyebrow">${escapeHtml((record.source_keys || [record.source_key]).filter(Boolean).join(", "))}</p><h3>${escapeHtml(record.title || "Untitled archival record")}</h3><p>${escapeHtml(record.published_at || record.date || "Date not supplied")}</p></div><button type="button" class="secondary-button" data-archive-add-result="${index}">Add source</button></article>`).join("") + `<details><summary>Search plan & provenance</summary><pre>${escapeHtml(JSON.stringify({plan:data.plan,source_status:data.result?.source_status,reproducibility:data.result?.reproducibility},null,2))}</pre></details>`;
+  } catch(error) {
+    if(stateLabel) stateLabel.textContent='Search unavailable';
+    target.innerHTML=`<p class="error-state">${escapeHtml(error.message)}</p>`;
+  }
+}
+
+async function addHistoricalArchiveSource(event) {
+  event?.preventDefault();
+  const payload=archivePayloadFromEditor();
+  if(!payload.title) return;
+  try {
+    const data=await api('/historical-archives/workspace/source',{method:'POST',body:JSON.stringify({source:payload})});
+    state.archiveSources.push(data.source); renderArchiveSources(); archiveOutput('Source criticism',data);
+    $("#archive-source-form")?.reset();
+    populateArchiveBootstrap(state.archiveBootstrap || {});
+  } catch(error) { archiveOutput('Source error',{error:error.message}); }
+}
+
+async function addArchiveSearchResult(index) {
+  const record=state.archiveSearchResult?.result?.records?.[index]; if(!record) return;
+  try {
+    const data=await api('/historical-archives/workspace/source',{method:'POST',body:JSON.stringify({source:archiveRecordToSource(record)})});
+    state.archiveSources.push(data.source); renderArchiveSources(); archiveOutput('Source added from repository result',data);
+  } catch(error) { archiveOutput('Source error',{error:error.message}); }
+}
+
+async function runArchiveWorkspaceAction(kind) {
+  const sources=state.archiveSources || [];
+  const project_id=$("#archive-project-id")?.value.trim() || null;
+  const research_question=$("#archive-research-question")?.value.trim() || null;
+  const routes={compare:'/historical-archives/workspace/compare',timeline:'/historical-archives/workspace/timeline',packet:'/historical-archives/workspace/packet',handoff:'/historical-archives/workspace/handoff'};
+  const labels={compare:'Primary-source comparison',timeline:'Historical timeline',packet:'Research packet preview',handoff:'Ingestion handoff preview'};
+  if(kind==='compare' && sources.length<2){archiveOutput(labels[kind],{error:'Add at least two sources before comparing.'});return;}
+  if(kind!=='compare' && !sources.length){archiveOutput(labels[kind],{error:'Add at least one source first.'});return;}
+  try {
+    const data=await api(routes[kind],{method:'POST',body:JSON.stringify({sources,project_id,research_question})});
+    archiveOutput(labels[kind],data);
+  } catch(error) { archiveOutput(labels[kind],{error:error.message}); }
+}
+
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Historical archives workspace','/historical-archives/workspace/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -545,6 +701,13 @@ async function bootstrap() {
   route();
 }
 
+$("#archive-search-form")?.addEventListener("submit",runHistoricalArchiveSearch);
+$("#archive-source-form")?.addEventListener("submit",addHistoricalArchiveSource);
+$("#archive-clear-sources")?.addEventListener("click",()=>{state.archiveSources=[];renderArchiveSources();});
+$("#archive-compare")?.addEventListener("click",()=>runArchiveWorkspaceAction("compare"));
+$("#archive-timeline")?.addEventListener("click",()=>runArchiveWorkspaceAction("timeline"));
+$("#archive-packet")?.addEventListener("click",()=>runArchiveWorkspaceAction("packet"));
+$("#archive-handoff")?.addEventListener("click",()=>runArchiveWorkspaceAction("handoff"));
 $("#research-form")?.addEventListener("submit", event => { event.preventDefault(); navigate("/research"); researchSearch(); });
 $("#research-load-more")?.addEventListener("click",()=>researchSearch({append:true}));
 $("#research-clear")?.addEventListener("click",clearResearchScope);
@@ -569,6 +732,11 @@ document.addEventListener('click',event=>{
   const refresh=event.target.closest('[data-refresh-living]'); if(refresh){event.preventDefault();refreshLivingCollection(refresh.dataset.refreshLiving);return;}
   const apply=event.target.closest('[data-apply-living]'); if(apply){event.preventDefault();applyLivingCollection(apply.dataset.applyLiving);return;}
   const brief=event.target.closest('[data-project-brief]'); if(brief){event.preventDefault();loadLivingProjectBrief(brief.dataset.projectBrief);return;}
+});
+document.addEventListener('click',event=>{
+  const add=event.target.closest('[data-archive-add-result]'); if(add){event.preventDefault();addArchiveSearchResult(Number(add.dataset.archiveAddResult));return;}
+  const inspect=event.target.closest('[data-archive-inspect]'); if(inspect){event.preventDefault();const source=state.archiveSources[Number(inspect.dataset.archiveInspect)];if(source) archiveOutput('Primary source',source);return;}
+  const remove=event.target.closest('[data-archive-remove]'); if(remove){event.preventDefault();state.archiveSources.splice(Number(remove.dataset.archiveRemove),1);renderArchiveSources();return;}
 });
 bootstrap();
 

@@ -3,8 +3,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "6.12.0"
-BACKEND_VERSION = "3.12.0"
+LIBRARY_VERSION = "6.13.0"
+BACKEND_VERSION = "3.13.0"
 CONTRACT = "sc-library-python-domain-authority/1.0"
 READINESS_CONTRACT = "sc-library-python-domain-authority-readiness/1.0"
 MIGRATION_PLAN_CONTRACT = "sc-library-python-domain-migration-plan/1.0"
@@ -77,7 +77,7 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "wordpress_role": "optional-adapter",
         "canonical_web_route": "/research",
         "legacy_alias_routes": ["/search", "/discover"],
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
         "state_authority": "existing-python-domain-services",
     },
@@ -88,7 +88,7 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "persistence": "existing-postgresql-research-state",
         "database_migration_required": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
     },
     "advanced-semantic-cross-language-discovery": {
@@ -97,7 +97,7 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "state_authority": "existing-python-retrieval-language-and-research-state-services",
         "database_migration_required": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
     },
     "global-knowledge-federation-ii": {
@@ -107,7 +107,7 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "database_migration_required": False,
         "external_execution": "explicit-plan-only",
         "wordpress_role": "optional-adapter",
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
     },
     "research-graph-evidence-navigation": {
@@ -117,7 +117,7 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "database_migration_required": False,
         "graph_store_created": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
     },
     "living-collections-research-projects": {
@@ -129,7 +129,7 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "database_migration_required": False,
         "automatic_collection_membership_mutation": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
     },
     "dataset-table-structured-evidence-objects": {
@@ -139,7 +139,7 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "database_migration_required": False,
         "automatic_truth_promotion": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
     },
     "scientific-literature-intelligence": {
@@ -149,7 +149,7 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "database_migration_required": False,
         "automatic_truth_promotion": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
     },
     "research-package-publishing-reproducible-exports": {
@@ -160,7 +160,7 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "database_migration_required": False,
         "external_publication_automatic": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
     },
     "institutional-repository-federation": {
@@ -172,14 +172,14 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "automatic_repository_harvest": False,
         "automatic_library_import": False,
         "wordpress_role": "optional-adapter",
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
     },
     "independent-research-interface": {
         "authority": "python-backend", "state": "authoritative-composition",
         "api": ["/api/library/v1/research-interface", "/api/library/v1/research-interface/bootstrap", "/api/library/v1/research-interface/search", "/api/library/v1/research-interface/records/{record_id}"],
         "wordpress_role": "optional-adapter",
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
         "state_authority": "existing-python-domain-services",
     },
@@ -188,7 +188,7 @@ DOMAINS: dict[str, dict[str, Any]] = {
         "api": ["/api/library/v1/product", "/api/library/v1/product/readiness", "/api/library/v1/product/release"],
         "wordpress_role": "optional-adapter",
         "api_version": "1.0",
-        "web_version": "2.12.0",
+        "web_version": "2.13.0",
         "sdk_version": "1.12.0",
     },
     "independent-application-certification": {
