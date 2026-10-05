@@ -389,6 +389,18 @@ from .citation_bibliographic_workspace import (
     export_bibliography as export_research_bibliography,
     citation_authority_handoff_preview,
 )
+from .research_package_composer_workspace import (
+    contract as research_package_composer_contract,
+    readiness as research_package_composer_readiness,
+    bootstrap as research_package_composer_bootstrap,
+    compose_package as compose_research_package,
+    completeness_audit as research_package_completeness_audit,
+    provenance_audit as research_package_provenance_audit,
+    dependency_map as research_package_dependency_map,
+    publishing_handoff_preview as research_package_composer_publishing_handoff_preview,
+    reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
+    export_package_draft as export_research_package_composition,
+)
 from .geospatial_place_research_workspace import (
     contract as geospatial_research_contract,
     readiness as geospatial_research_readiness,
@@ -949,6 +961,14 @@ def health() -> dict[str, Any]:
             "geospatial_automatic_identity_inference": False,
             "geospatial_missing_crs_assumed": False,
             "geospatial_database_migration_required": False,
+            "research_package_composer_workspace": True,
+            "research_package_composer_route": "/research/package",
+            "research_package_composer_draft_only": True,
+            "research_package_composer_server_persistence": False,
+            "research_package_composer_automatic_publication": False,
+            "research_package_composer_signed_reproducibility_required": True,
+            "research_package_composer_existing_package_authority_preserved": True,
+            "research_package_composer_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -963,8 +983,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.24.0",
-            "library_sdk_version": "1.24.0",
+            "library_web_version": "2.25.0",
+            "library_sdk_version": "1.25.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5270,6 +5290,60 @@ async def library_api_v1_geospatial_investigation_handoff(request: Request) -> d
 async def library_api_v1_geospatial_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_geospatial_research(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-package-composer")
+def library_api_v1_research_package_composer_contract() -> dict[str, Any]:
+    return research_package_composer_contract()
+
+@app.get("/api/library/v1/research-package-composer/readiness")
+def library_api_v1_research_package_composer_readiness() -> dict[str, Any]:
+    return research_package_composer_readiness()
+
+@app.get("/api/library/v1/research-package-composer/bootstrap")
+def library_api_v1_research_package_composer_bootstrap() -> dict[str, Any]:
+    return research_package_composer_bootstrap()
+
+@app.post("/api/library/v1/research-package-composer/compose")
+async def library_api_v1_research_package_compose(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return compose_research_package(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-package-composer/completeness-audit")
+async def library_api_v1_research_package_completeness(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_package_completeness_audit(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-package-composer/provenance-audit")
+async def library_api_v1_research_package_provenance(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_package_provenance_audit(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-package-composer/dependency-map")
+async def library_api_v1_research_package_dependencies(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_package_dependency_map(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-package-composer/publishing-handoff-preview")
+async def library_api_v1_research_package_composer_publishing(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_package_composer_publishing_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-package-composer/reproducibility-handoff-preview")
+async def library_api_v1_research_package_composer_reproducibility(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_package_composer_reproducibility_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-package-composer/export")
+async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_research_package_composition(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/citations/{record_id:path}")

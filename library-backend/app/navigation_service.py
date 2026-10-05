@@ -12,10 +12,10 @@ from .research_interface import (
 from .independent_api import capability_catalog
 from .web_application import application_contract as web_application_contract
 
-LIBRARY_VERSION = "6.24.0"
-BACKEND_VERSION = "3.24.0"
-WEB_VERSION = "2.24.0"
-SDK_VERSION = "1.24.0"
+LIBRARY_VERSION = "6.25.0"
+BACKEND_VERSION = "3.25.0"
+WEB_VERSION = "2.25.0"
+SDK_VERSION = "1.25.0"
 
 CONTRACT = "sc-library-unified-discovery-research-navigation/1.0"
 READINESS_CONTRACT = "sc-library-unified-discovery-research-navigation-readiness/1.0"
@@ -71,6 +71,7 @@ def navigation_model() -> dict[str, Any]:
         {"id": "research-evidence", "label": "Evidence", "route": "/research/evidence", "mode": "research-evidence"},
         {"id": "research-data", "label": "Data", "route": "/research/data", "mode": "research-data"},
         {"id": "research-geospatial", "label": "Geospatial", "route": "/research/geospatial", "mode": "research-geospatial"},
+        {"id": "research-package", "label": "Package", "route": "/research/package", "mode": "research-package"},
         {"id": "projects", "label": "Projects", "route": "/account?section=workspaces", "mode": "projects"},
     ]
     aliases = {
@@ -108,8 +109,8 @@ def contract() -> dict[str, Any]:
         "canonical_research_route": "/research",
         "navigation": nav,
         "wordpress": {"role": "optional-adapter", "required": False, "authoritative": False},
-        "next_release": "6.25.0",
-        "next_release_name": "Research Package Composer",
+        "next_release": "6.26.0",
+        "next_release_name": "Publication & Research Output Studio",
         "guardrails": guardrails(),
     }
 
@@ -175,6 +176,8 @@ def resolve_route(path: str) -> dict[str, Any]:
     alias = nav["aliases"].get(raw)
     if alias:
         resolved = {"requested_route": raw, **alias, "compatibility_alias": True}
+    elif raw == "/research/package":
+        resolved = {"requested_route": raw, "canonical_route": raw, "surface": "research", "mode": "research-package", "compatibility_alias": False}
     elif raw == "/research/geospatial":
         resolved = {"requested_route": raw, "canonical_route": raw, "surface": "research", "mode": "research-geospatial", "compatibility_alias": False}
     elif raw == "/research/data":

@@ -311,6 +311,16 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/geospatial-research/evidence-handoff-preview","name":"geospatial-evidence-handoff-preview","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/geospatial-research/investigation-handoff-preview","name":"geospatial-investigation-handoff-preview","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/geospatial-research/export","name":"geospatial-research-export","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-package-composer","name":"research-package-composer-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-package-composer/readiness","name":"research-package-composer-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-package-composer/bootstrap","name":"research-package-composer-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-package-composer/compose","name":"research-package-composer-compose","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-package-composer/completeness-audit","name":"research-package-composer-completeness-audit","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-package-composer/provenance-audit","name":"research-package-composer-provenance-audit","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-package-composer/dependency-map","name":"research-package-composer-dependency-map","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-package-composer/publishing-handoff-preview","name":"research-package-composer-publishing-handoff-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-package-composer/reproducibility-handoff-preview","name":"research-package-composer-reproducibility-handoff-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-package-composer/export","name":"research-package-composer-export","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -324,6 +334,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "evidence-matrix-analysis": {"resources":["claim-inventory","evidence-inventory","claim-evidence-links","matrix","support-profiles","contradictions","provenance-coverage","source-dependencies","gaps","handoffs"],"direct_api":True,"authority":"python-backend-composition"},
     "dataset-statistical-evidence": {"resources":["dataset-discovery","dataset-profiles","variable-dictionaries","statistical-results","uncertainty-audits","gap-analysis","evidence-handoff","investigation-handoff"],"direct_api":True,"authority":"python-backend-composition"},
     "geospatial-place-research": {"resources":["places","spatial-features","layers","crs","temporal-validity","relation-preview","coverage-audit","evidence-handoff","investigation-handoff"],"direct_api":True,"authority":"python-backend-composition"},
+    "research-package-composer": {"resources":["typed-components","composition-manifest","completeness-audit","provenance-audit","dependency-map","publishing-handoff","reproducibility-handoff","draft-export"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},

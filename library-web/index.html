@@ -725,6 +725,56 @@
         </section>
       </section>
 
+      <section class="view" data-view="package" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Compose · audit · provenance · dependencies · publish preview</p>
+          <h1>Research Package Composer</h1>
+          <p>Assemble typed outputs from the Library research stack into a reproducible package draft while preserving component provenance, dependencies, references, and authority boundaries. Draft composition does not publish or persist research automatically.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Research package navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/investigation" data-app-link>Investigation</a>
+          <a href="/research/evidence" data-app-link>Evidence</a>
+          <a href="/research/data" data-app-link>Data</a>
+          <a href="/research/geospatial" data-app-link>Geospatial</a>
+          <a href="/research/package" aria-current="page">Package</a>
+        </nav>
+        <div id="package-composer-readiness" class="context-strip"><span>Loading package composer…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Package frame</p><h2>Title, question &amp; scope</h2></div></div>
+            <label>Title<input id="package-composer-title" value="Research package"></label>
+            <label>Project ID<input id="package-composer-project-id" placeholder="Optional project identifier"></label>
+            <label class="archive-wide">Research question<textarea id="package-composer-question" rows="4"></textarea></label>
+            <label class="archive-wide">Description<textarea id="package-composer-description" rows="4"></textarea></label>
+            <label class="archive-wide">Scope<textarea id="package-composer-scope" rows="4"></textarea></label>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Composition</p><h2>Components &amp; requirements</h2></div></div>
+            <label class="archive-wide">Components JSON<textarea id="package-composer-components" rows="12" placeholder='[{"component_id":"investigation","component_type":"investigation","source_route":"/research/investigation","provenance_state":"complete","payload":{}}]'></textarea></label>
+            <label class="archive-wide">Section order JSON<textarea id="package-composer-order" rows="5" placeholder='["investigation","evidence","data"]'></textarea></label>
+            <label class="archive-wide">Requirements JSON<textarea id="package-composer-requirements" rows="6" placeholder='[{"component_type":"investigation","minimum":1}]'></textarea></label>
+            <label class="archive-wide">References JSON<textarea id="package-composer-references" rows="7" placeholder='{"record_ids":[],"artifact_ids":[],"pipeline_run_ids":[],"reproducibility_records":[]}'></textarea></label>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Composer controls</p><h2>Audit before handoff</h2></div></div>
+          <div class="archive-actions">
+            <button id="package-composer-compose" type="button">Compose package</button>
+            <button id="package-composer-completeness" type="button">Completeness audit</button>
+            <button id="package-composer-provenance" type="button">Provenance audit</button>
+            <button id="package-composer-dependencies" type="button">Dependency map</button>
+            <button id="package-composer-publishing" type="button" class="secondary-button">Publishing handoff preview</button>
+            <button id="package-composer-reproducibility" type="button" class="secondary-button">Reproducibility handoff preview</button>
+            <button id="package-composer-export" type="button" class="secondary-button">Export draft JSON</button>
+          </div>
+        </section>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Composer output</p><h2>Research package draft</h2></div></div>
+          <div id="package-composer-output"><p class="empty-state">Composition manifests, audits, dependency maps, and handoff previews appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="record" hidden>
         <div class="reader-toolbar"><button id="reader-back" class="text-button">← Back</button><span id="reader-id"></span></div>
         <article id="reader" class="reader"><p class="empty-state">Loading record…</p></article>
@@ -775,7 +825,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.24.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.25.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

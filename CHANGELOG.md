@@ -1,3 +1,12 @@
+## 6.25.0 — Research Package Composer
+
+- Added `/research/package` as a draft composition workspace over investigation, synthesis, evidence, statistical, geospatial, citation, annotation, timeline, corpus, entity/place, primary-source, dataset, record, artifact, publication, and method outputs.
+- Added typed component assembly, explicit section ordering and dependency maps, completeness audits against user-declared requirements, provenance audits, deterministic draft exports, portable publishing handoff previews, and signed reproducibility-package handoff previews.
+- Preserves existing authority boundaries: the composer is not the Research Package reproducibility authority, portable publishing authority, structured-state authority, or artifact-byte store.
+- Draft completeness and package integrity never imply research truth, source validity, evidence strength, or publication readiness.
+- Synchronized Library 6.25.0 / backend 3.25.0 / web 2.25.0 / SDK 1.25.0.
+- No database migration; WordPress remains optional.
+
 ## 6.24.0 — Geospatial & Place-Based Research Workspace
 
 - Added `/research/geospatial` as a geospatial/place-based research workspace over Entity/Place, Statistical Evidence, Structured Evidence, Federation, Investigation, and Evidence Matrix layers.
