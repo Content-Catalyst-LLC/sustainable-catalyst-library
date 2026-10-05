@@ -3530,11 +3530,6 @@ def library_api_v1_record_provenance(record_id: str, version_limit: int=25) -> d
     try: return library_record_provenance(record_id,version_limit=version_limit)
     except ValueError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
 
-@app.get("/api/library/v1/citations/{record_id:path}")
-def library_api_v1_record_citations(record_id: str, direction: str="both", limit: int=100) -> dict[str, Any]:
-    try: return library_record_citations(record_id,direction=direction,limit=limit)
-    except ValueError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
-
 @app.get("/api/library/v1/evidence-graph/{record_id:path}")
 def library_api_v1_evidence_graph(record_id: str, depth: int=2, limit: int=250, include_core: bool=True) -> dict[str, Any]:
     try: return library_evidence_graph(record_id,depth=depth,limit=limit,include_core=include_core)
@@ -4725,6 +4720,12 @@ async def library_api_v1_citation_authority_handoff_preview(request: Request) ->
         return citation_authority_handoff_preview(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/api/library/v1/citations/{record_id:path}")
+def library_api_v1_record_citations(record_id: str, direction: str="both", limit: int=100) -> dict[str, Any]:
+    try: return library_record_citations(record_id,direction=direction,limit=limit)
+    except ValueError as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+
 
 @app.get("/api/library/v1/identity")
 def library_api_v1_identity_boundary() -> dict[str, Any]:

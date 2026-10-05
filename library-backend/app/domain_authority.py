@@ -3,8 +3,8 @@ from hashlib import sha256
 import json
 from typing import Any
 
-LIBRARY_VERSION = "6.17.0"
-BACKEND_VERSION = "3.17.0"
+LIBRARY_VERSION = "6.17.0.1"
+BACKEND_VERSION = "3.17.0.1"
 CONTRACT = "sc-library-python-domain-authority/1.0"
 READINESS_CONTRACT = "sc-library-python-domain-authority-readiness/1.0"
 MIGRATION_PLAN_CONTRACT = "sc-library-python-domain-migration-plan/1.0"

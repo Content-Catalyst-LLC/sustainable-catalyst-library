@@ -14,8 +14,8 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.17.0"
-BACKEND_VERSION = "3.17.0"
+LIBRARY_VERSION = "6.17.0.1"
+BACKEND_VERSION = "3.17.0.1"
 WEB_VERSION = "2.17.0"
 SDK_VERSION = "1.17.0"
 

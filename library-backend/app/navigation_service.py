@@ -12,8 +12,8 @@ from .research_interface import (
 from .independent_api import capability_catalog
 from .web_application import application_contract as web_application_contract
 
-LIBRARY_VERSION = "6.17.0"
-BACKEND_VERSION = "3.17.0"
+LIBRARY_VERSION = "6.17.0.1"
+BACKEND_VERSION = "3.17.0.1"
 WEB_VERSION = "2.17.0"
 SDK_VERSION = "1.17.0"
 

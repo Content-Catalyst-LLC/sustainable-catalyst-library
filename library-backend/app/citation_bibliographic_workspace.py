@@ -10,8 +10,8 @@ try:
 except Exception:  # local/synthetic validation fallback
     provenance_citation_readiness = None
 
-LIBRARY_VERSION = "6.17.0"
-BACKEND_VERSION = "3.17.0"
+LIBRARY_VERSION = "6.17.0.1"
+BACKEND_VERSION = "3.17.0.1"
 WEB_VERSION = "2.17.0"
 SDK_VERSION = "1.17.0"
 

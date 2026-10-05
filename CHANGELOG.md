@@ -1,3 +1,10 @@
+## 6.17.0.1 — Citation Workspace Route Precedence Repair
+
+- Repairs FastAPI route ordering so `/api/library/v1/citations/workspace`, `/readiness`, and `/bootstrap` resolve before the legacy `/api/library/v1/citations/{record_id:path}` catch-all.
+- Preserves the existing durable Python/PostgreSQL citation authority and all v6.17 bibliographic workspace semantics.
+- Library 6.17.0.1 / backend 3.17.0.1; Web remains 2.17.0 and SDK remains 1.17.0.
+- No database migration. WordPress remains optional/non-authoritative.
+
 ## 6.17.0 — Citation Workspace & Bibliographic Intelligence
 
 - Added dedicated `/research/citations` workspace for bibliographic normalization, collection composition, duplicate-candidate analysis, and portable citation exports.
