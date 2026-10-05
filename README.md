@@ -125,3 +125,5 @@ Library v6.16.0 adds `/research/notes` for explicit target-anchored scholarly no
 Library v6.17.0 adds `/research/citations` for bibliographic normalization, duplicate review, bibliography composition, and portable JSON/BibTeX/RIS export while preserving the existing Python/PostgreSQL citation service as durable citation authority.
 
 Library v6.17.0.1 repairs citation workspace route precedence so static `/citations/workspace/*` endpoints resolve before the legacy record-citation catch-all. Web 2.17.0 and SDK 1.17.0 are unchanged.
+
+Library v6.18.0 adds `/research/corpus`, a computational-linguistics workspace over the existing v5.47 durable linguistic-corpus authority, with frequency, KWIC, n-gram, co-occurrence, lineage, and export analysis.

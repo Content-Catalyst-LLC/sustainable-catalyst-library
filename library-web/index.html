@@ -385,6 +385,49 @@
         </section>
       </section>
 
+      <section class="view" data-view="corpus" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Corpus construction · concordance · frequencies · n-grams · co-occurrence</p>
+          <h1>Corpus & Computational Linguistics Workspace</h1>
+          <p>Assemble or inspect corpora while preserving original-language and derived-representation lineage. Analyze token frequencies, KWIC contexts, n-grams, and co-occurrence without treating counts as meaning, evidence strength, or truth.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Corpus workspace navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/notes" data-app-link>Notes</a>
+          <a href="/research/citations" data-app-link>Citations</a>
+          <a href="/research/corpus" aria-current="page">Corpus</a>
+        </nav>
+        <div id="corpus-readiness" class="context-strip"><span>Loading computational-linguistics workspace…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Working corpus</p><h2>Preview text corpus</h2></div></div>
+            <p class="form-note">Preview text is analyzed in-memory only. Persisting a corpus requires an explicit signed handoff to the existing v5.47 corpus authority.</p>
+            <label>Corpus title<input id="corpus-title" value="Computational linguistics working corpus"></label>
+            <label>Representation ID<input id="corpus-representation-id" value="workspace-text:1"></label>
+            <label>Language (BCP 47)<input id="corpus-language" value="en"></label>
+            <label>Script (ISO 15924)<input id="corpus-script" value="Latn"></label>
+            <label>Source kind<select id="corpus-source-kind"><option value="original">original</option><option value="unicode-normalized">unicode-normalized</option><option value="ocr">ocr</option><option value="htr">htr</option><option value="transcription">transcription</option><option value="other-derived">other-derived</option></select></label>
+            <label class="archive-wide">Text<textarea id="corpus-text" rows="12" placeholder="Paste text for a non-persistent corpus preview."></textarea></label>
+            <div class="archive-actions"><button id="corpus-preview" type="button">Build preview</button><button id="corpus-handoff" type="button" class="secondary-button">Persistence handoff preview</button></div>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Analysis controls</p><h2>Computational analysis</h2></div></div>
+            <label>Persisted corpus ID<input id="corpus-id" placeholder="Optional: lingcorpus:…"></label>
+            <p class="form-note">When a persisted corpus ID is supplied, analysis uses the existing PostgreSQL corpus. Otherwise it uses the text preview at left.</p>
+            <label>KWIC query<input id="corpus-query" placeholder="word or phrase"></label>
+            <label>Co-occurrence term<input id="corpus-term" placeholder="single normalized term"></label>
+            <label>N-gram size<select id="corpus-ngram-n"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label>
+            <label>Context window<input id="corpus-window" type="number" value="5" min="1" max="50"></label>
+            <label>Row limit<input id="corpus-limit" type="number" value="100" min="1" max="1000"></label>
+            <div class="archive-actions"><button id="corpus-frequency" type="button">Frequency</button><button id="corpus-kwic" type="button">KWIC</button><button id="corpus-ngrams" type="button">N-grams</button><button id="corpus-cooccurrence" type="button">Co-occurrence</button><button id="corpus-export" type="button" class="secondary-button">Export analysis JSON</button></div>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Corpus analysis</h2></div></div>
+          <div id="corpus-output"><p class="empty-state">Corpus preview, frequencies, KWIC, n-grams, co-occurrence, and export manifests appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="record" hidden>
         <div class="reader-toolbar"><button id="reader-back" class="text-button">← Back</button><span id="reader-id"></span></div>
         <article id="reader" class="reader"><p class="empty-state">Loading record…</p></article>
@@ -435,7 +478,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.17.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.18.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

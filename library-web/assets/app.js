@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.17.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.18.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null, archiveBootstrap: null, archiveSources: [], archiveSearchResult: null, criticismBootstrap: null, timelineBootstrap: null, timelineEvents: [], notesBootstrap: null, researchNotes: [], citationsBootstrap: null, bibliographyItems: [] };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null, archiveBootstrap: null, archiveSources: [], archiveSearchResult: null, criticismBootstrap: null, timelineBootstrap: null, timelineEvents: [], notesBootstrap: null, researchNotes: [], citationsBootstrap: null, bibliographyItems: [], corpusBootstrap: null };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -38,14 +38,15 @@ function resolveUnifiedResearchMode(name) {
 function route() {
   const raw=currentRoute(); const [name="research", ...rest]=raw.split("/");
   const compatibilityResearch = name === "search" || name === "discover";
+  const corpusResearch = name === "research" && rest[0] === "corpus";
   const citationsResearch = name === "research" && rest[0] === "citations";
   const notesResearch = name === "research" && rest[0] === "notes";
   const timelineResearch = name === "research" && rest[0] === "archives" && rest[1] === "timeline";
   const criticismResearch = name === "research" && rest[0] === "archives" && rest[1] === "compare";
   const archiveResearch = name === "research" && rest[0] === "archives" && !criticismResearch && !timelineResearch;
-  const view = citationsResearch ? "citations" : notesResearch ? "notes" : timelineResearch ? "timeline" : criticismResearch ? "criticism" : archiveResearch ? "archives" : compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
+  const view = corpusResearch ? "corpus" : citationsResearch ? "citations" : notesResearch ? "notes" : timelineResearch ? "timeline" : criticismResearch ? "criticism" : archiveResearch ? "archives" : compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
   $$(".view").forEach(el => { el.hidden = el.dataset.view !== view; });
-  const navView=["archives","criticism","timeline","notes","citations"].includes(view) ? "research" : view;
+  const navView=["archives","criticism","timeline","notes","citations","corpus"].includes(view) ? "research" : view;
   $$('[data-nav]').forEach(a => a.setAttribute('aria-current', a.dataset.nav===navView ? 'page' : 'false'));
   updatePublicMetadata(view, rest);
   if (view === "research") loadUnifiedNavigation(resolveUnifiedResearchMode(name));
@@ -54,6 +55,7 @@ function route() {
   if (view === "timeline") loadHistoricalEventTimelineWorkspace();
   if (view === "notes") loadResearchNotesWorkspace();
   if (view === "citations") loadCitationWorkspace();
+  if (view === "corpus") loadCorpusWorkspace();
   if (view === "system") loadSystem();
   if (view === "account") loadSession().then(()=>{ if(new URLSearchParams(location.search).get("section")==="workspaces") requestAnimationFrame(()=>$("#workspace-card")?.scrollIntoView({block:"start"})); });
   if (view === "record" && rest.length) loadRecord(decodeURIComponent(rest.join("/")));
@@ -70,12 +72,12 @@ function navigate(path) {
 
 function updatePublicMetadata(view, rest=[]) {
   const origin=String(config.publicOrigin || location.origin).replace(/\/$/, "");
-  let path=view === "research" ? "/research" : view === "archives" ? "/research/archives" : view === "criticism" ? "/research/archives/compare" : view === "timeline" ? "/research/archives/timeline" : view === "notes" ? "/research/notes" : view === "citations" ? "/research/citations" : `/${view}`;
+  let path=view === "research" ? "/research" : view === "archives" ? "/research/archives" : view === "criticism" ? "/research/archives/compare" : view === "timeline" ? "/research/archives/timeline" : view === "notes" ? "/research/notes" : view === "citations" ? "/research/citations" : view === "corpus" ? "/research/corpus" : `/${view}`;
   if (view === "record" && rest.length) path=`/record/${encodeURIComponent(decodeURIComponent(rest.join("/")))}`;
   const canonical=document.querySelector('link[rel="canonical"]') || document.head.appendChild(Object.assign(document.createElement('link'),{rel:'canonical'}));
   canonical.href=origin + (path === "/search" ? path : path);
   const robots=document.querySelector('meta[name="robots"]') || document.head.appendChild(Object.assign(document.createElement('meta'),{name:'robots'}));
-  robots.content=["research","archives","criticism","timeline","notes","citations","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
+  robots.content=["research","archives","criticism","timeline","notes","citations","corpus","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
 }
 
 function setMeta(name, content, property=false) {
@@ -734,9 +736,18 @@ async function buildCitationBibliography(){try{const data=await api('/citations/
 async function findBibliographicDuplicates(){try{const data=await api('/citations/workspace/duplicates',{method:'POST',body:JSON.stringify({items:state.bibliographyItems||[]})});citationsOutput('Duplicate candidates',data);}catch(e){citationsOutput('Duplicate analysis error',{error:e.message});}}
 async function exportCitationBibliography(){try{const fmt=$("#citations-export-format")?.value||'json';const data=await api('/citations/workspace/export',{method:'POST',body:JSON.stringify({title:$("#citations-bibliography-title")?.value.trim()||"Research bibliography",items:state.bibliographyItems||[],format:fmt})});citationsOutput('Bibliography export',data);const blob=new Blob([data.content||""],{type:data.media_type||'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=data.filename||'sustainable-catalyst-bibliography.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){citationsOutput('Bibliography export error',{error:e.message});}}
 
+function corpusOutput(label,data){const t=$("#corpus-output");if(t)t.innerHTML=`<p class="eyebrow">${escapeHtml(label)}</p><pre>${escapeHtml(JSON.stringify(data,null,2))}</pre>`;}
+function corpusWorkspacePayload(){const corpusId=$("#corpus-id")?.value.trim()||"";if(corpusId)return {corpus_id:corpusId};return {title:$("#corpus-title")?.value.trim()||"Computational linguistics working corpus",representation_id:$("#corpus-representation-id")?.value.trim()||"workspace-text:1",language_bcp47:$("#corpus-language")?.value.trim()||"und",script_iso15924:$("#corpus-script")?.value.trim()||null,source_kind:$("#corpus-source-kind")?.value||"original",text:$("#corpus-text")?.value||""};}
+function corpusAnalysisPayload(){return {...corpusWorkspacePayload(),query:$("#corpus-query")?.value.trim()||"",term:$("#corpus-term")?.value.trim()||"",n:Number($("#corpus-ngram-n")?.value||2),window_tokens:Number($("#corpus-window")?.value||5),limit:Number($("#corpus-limit")?.value||100)};}
+async function loadCorpusWorkspace(){const status=$("#corpus-readiness");try{const data=state.corpusBootstrap||await api('/corpus-workspace/bootstrap');state.corpusBootstrap=data;const r=data.readiness||{};if(status)status.innerHTML=`<span><strong>${escapeHtml(r.state||"unknown")}</strong> workspace</span><span>v5.47 durable corpus authority preserved</span><span><strong>${escapeHtml(data.tokenizer?.profile||"tokenizer")}</strong></span><span>Web ${escapeHtml(data.web_version||config.webVersion||"")}</span>`;}catch(e){if(status)status.innerHTML=`<span class="error-state">${escapeHtml(e.message)}</span>`;}}
+async function runCorpusAction(path,label){try{const data=await api(`/corpus-workspace/${path}`,{method:'POST',body:JSON.stringify(corpusAnalysisPayload())});corpusOutput(label,data);}catch(e){corpusOutput(`${label} error`,{error:e.message});}}
+async function previewCorpus(){try{const data=await api('/corpus-workspace/preview',{method:'POST',body:JSON.stringify(corpusWorkspacePayload())});corpusOutput('Corpus preview',data);}catch(e){corpusOutput('Corpus preview error',{error:e.message});}}
+async function corpusHandoffPreview(){try{const payload=corpusWorkspacePayload();delete payload.corpus_id;const data=await api('/corpus-workspace/persistence-handoff-preview',{method:'POST',body:JSON.stringify(payload)});corpusOutput('Persistence handoff preview',data);}catch(e){corpusOutput('Persistence handoff error',{error:e.message});}}
+async function exportCorpusAnalysis(){try{const data=await api('/corpus-workspace/export',{method:'POST',body:JSON.stringify(corpusAnalysisPayload())});corpusOutput('Computational linguistics export',data);const blob=new Blob([data.content||""],{type:data.media_type||'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=data.filename||'sustainable-catalyst-computational-linguistics-analysis.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){corpusOutput('Export error',{error:e.message});}}
+
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Historical archives workspace','/historical-archives/workspace/readiness'],['Primary-source comparison & source criticism','/historical-archives/source-criticism/readiness'],['Research timeline & historical events','/historical-archives/timeline-workspace/readiness'],['Research annotation & scholarly notes','/annotations/readiness'],['Citation workspace & bibliographic intelligence','/citations/workspace/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Historical archives workspace','/historical-archives/workspace/readiness'],['Primary-source comparison & source criticism','/historical-archives/source-criticism/readiness'],['Research timeline & historical events','/historical-archives/timeline-workspace/readiness'],['Research annotation & scholarly notes','/annotations/readiness'],['Citation workspace & bibliographic intelligence','/citations/workspace/readiness'],['Corpus & computational linguistics','/corpus-workspace/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -752,6 +763,13 @@ async function bootstrap() {
   route();
 }
 
+$("#corpus-preview")?.addEventListener("click",previewCorpus);
+$("#corpus-handoff")?.addEventListener("click",corpusHandoffPreview);
+$("#corpus-frequency")?.addEventListener("click",()=>runCorpusAction("frequency","Frequency analysis"));
+$("#corpus-kwic")?.addEventListener("click",()=>runCorpusAction("kwic","KWIC"));
+$("#corpus-ngrams")?.addEventListener("click",()=>runCorpusAction("ngrams","N-gram analysis"));
+$("#corpus-cooccurrence")?.addEventListener("click",()=>runCorpusAction("cooccurrence","Co-occurrence analysis"));
+$("#corpus-export")?.addEventListener("click",exportCorpusAnalysis);
 $("#citations-form")?.addEventListener("submit",addBibliographicItem);
 $("#citations-clear")?.addEventListener("click",()=>{state.bibliographyItems=[];persistBrowserBibliography();renderBibliographyItems();});
 $("#citations-build")?.addEventListener("click",buildCitationBibliography);

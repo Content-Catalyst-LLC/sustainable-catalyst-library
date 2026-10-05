@@ -236,12 +236,23 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/citations/workspace/duplicates","name":"bibliographic-duplicate-analysis","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/citations/workspace/export","name":"bibliography-export","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/citations/workspace/handoff-preview","name":"citation-authority-handoff-preview","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/corpus-workspace","name":"corpus-computational-linguistics-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/corpus-workspace/readiness","name":"corpus-computational-linguistics-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/corpus-workspace/bootstrap","name":"corpus-computational-linguistics-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/corpus-workspace/preview","name":"computational-linguistics-corpus-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/corpus-workspace/frequency","name":"computational-linguistics-frequency","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/corpus-workspace/kwic","name":"computational-linguistics-kwic","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/corpus-workspace/ngrams","name":"computational-linguistics-ngrams","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/corpus-workspace/cooccurrence","name":"computational-linguistics-cooccurrence","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/corpus-workspace/export","name":"computational-linguistics-export","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/corpus-workspace/persistence-handoff-preview","name":"linguistic-corpus-persistence-handoff-preview","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "discovery": {"resources":["search","records","stats"],"direct_api":True},
     "federation": {"resources":["sources","connectors","global-knowledge-federation"],"direct_api":True,"authority":"python-backend"},
     "language": {"resources":["original-language","ocr-htr-transcription","linguistic-corpus","entity-resolution","translation-alignment"],"direct_api":True},
+    "computational-linguistics": {"resources":["corpus-workspace","frequency","kwic","ngrams","cooccurrence","analysis-export"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},

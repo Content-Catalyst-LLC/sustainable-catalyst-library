@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.17.0.1"
-BACKEND_VERSION = "3.17.0.1"
-WEB_VERSION = "2.17.0"
-SDK_VERSION = "1.17.0"
+LIBRARY_VERSION = "6.18.0"
+BACKEND_VERSION = "3.18.0"
+WEB_VERSION = "2.18.0"
+SDK_VERSION = "1.18.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"
@@ -63,6 +63,7 @@ def contract() -> dict[str, Any]:
         {"id": "historical-event-timeline", "route": "/research/archives/timeline", "purpose": "uncertainty-preserving-historical-event-and-chronology-workspace"},
         {"id": "research-annotation-notes", "route": "/research/notes", "purpose": "source-anchored-research-annotation-and-scholarly-notes-workspace"},
         {"id": "citation-bibliographic-workspace", "route": "/research/citations", "purpose": "citation-workspace-and-bibliographic-intelligence"},
+        {"id": "corpus-computational-linguistics-workspace", "route": "/research/corpus", "purpose": "corpus-and-computational-linguistics-analysis"},
         {"id": "record-context", "route": "/record/{record_id}", "purpose": "research-object-provenance-citations-evidence"},
         {"id": "saved-research", "route": "/account", "purpose": "service-native-project-and-collection-handoff"},
     ]
@@ -115,8 +116,8 @@ def contract() -> dict[str, Any]:
             "required": False,
             "authoritative": False,
         },
-        "next_release": "6.18.0",
-        "next_release_name": "Corpus & Computational Linguistics Workspace",
+        "next_release": "6.19.0",
+        "next_release_name": "Entity, Place & Historical Toponym Workspace",
         "guardrails": guardrails(),
     }
 

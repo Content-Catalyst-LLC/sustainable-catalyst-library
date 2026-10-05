@@ -1,3 +1,12 @@
+## 6.18.0 — Corpus & Computational Linguistics Workspace
+
+- Added `/research/corpus` as a researcher-facing corpus and computational-linguistics workspace over the existing v5.47 Python/PostgreSQL linguistic-corpus authority.
+- Added non-persistent corpus preview, persisted-corpus analysis, token frequency tables, KWIC/concordance, n-gram analysis, co-occurrence analysis, representation-lineage visibility, and reproducible JSON analysis exports.
+- Added an explicit persistence handoff preview to the existing signed `/admin/language/corpora` authority; the workspace never creates a second corpus store or auto-persists preview corpora.
+- Preserves original-language-first analysis and explicit derived-representation lineage; frequency, KWIC, n-grams, and co-occurrence are descriptive and never promoted to meaning, importance, evidence, truth, or causation.
+- Synchronized Library 6.18.0 / backend 3.18.0 / web 2.18.0 / SDK 1.18.0.
+- No database migration; WordPress remains optional.
+
 ## 6.17.0.1 — Citation Workspace Route Precedence Repair
 
 - Repairs FastAPI route ordering so `/api/library/v1/citations/workspace`, `/readiness`, and `/bootstrap` resolve before the legacy `/api/library/v1/citations/{record_id:path}` catch-all.

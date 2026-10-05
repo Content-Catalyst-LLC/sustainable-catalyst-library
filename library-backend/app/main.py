@@ -389,6 +389,18 @@ from .citation_bibliographic_workspace import (
     export_bibliography as export_research_bibliography,
     citation_authority_handoff_preview,
 )
+from .corpus_computational_linguistics_workspace import (
+    contract as corpus_workspace_contract,
+    readiness as corpus_workspace_readiness,
+    bootstrap as corpus_workspace_bootstrap,
+    preview_corpus as preview_computational_corpus,
+    frequency_analysis as computational_corpus_frequency,
+    kwic_analysis as computational_corpus_kwic,
+    ngram_analysis as computational_corpus_ngrams,
+    cooccurrence_analysis as computational_corpus_cooccurrence,
+    export_analysis as export_computational_linguistics_analysis,
+    persistence_handoff_preview as computational_corpus_persistence_handoff_preview,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -806,6 +818,13 @@ def health() -> dict[str, Any]:
             "citation_workspace_automatic_persistence": False,
             "citation_workspace_automatic_duplicate_merge": False,
             "citation_workspace_database_migration_required": False,
+            "corpus_computational_linguistics_workspace": True,
+            "corpus_computational_linguistics_route": "/research/corpus",
+            "corpus_existing_v547_durable_authority_preserved": True,
+            "corpus_workspace_preview_persistence": False,
+            "corpus_workspace_frequency_kwic_ngrams_cooccurrence": True,
+            "corpus_workspace_automatic_translation": False,
+            "corpus_workspace_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -820,8 +839,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.17.0",
-            "library_sdk_version": "1.17.0",
+            "library_web_version": "2.18.0",
+            "library_sdk_version": "1.18.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -4720,6 +4739,60 @@ async def library_api_v1_citation_authority_handoff_preview(request: Request) ->
         return citation_authority_handoff_preview(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/api/library/v1/corpus-workspace")
+def library_api_v1_corpus_workspace_contract() -> dict[str, Any]:
+    return corpus_workspace_contract()
+
+@app.get("/api/library/v1/corpus-workspace/readiness")
+def library_api_v1_corpus_workspace_readiness() -> dict[str, Any]:
+    return corpus_workspace_readiness()
+
+@app.get("/api/library/v1/corpus-workspace/bootstrap")
+def library_api_v1_corpus_workspace_bootstrap() -> dict[str, Any]:
+    return corpus_workspace_bootstrap()
+
+@app.post("/api/library/v1/corpus-workspace/preview")
+async def library_api_v1_corpus_workspace_preview(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return preview_computational_corpus(payload)
+    except (ValueError,KeyError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/corpus-workspace/frequency")
+async def library_api_v1_corpus_workspace_frequency(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return computational_corpus_frequency(payload)
+    except (ValueError,KeyError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/corpus-workspace/kwic")
+async def library_api_v1_corpus_workspace_kwic(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return computational_corpus_kwic(payload)
+    except (ValueError,KeyError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/corpus-workspace/ngrams")
+async def library_api_v1_corpus_workspace_ngrams(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return computational_corpus_ngrams(payload)
+    except (ValueError,KeyError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/corpus-workspace/cooccurrence")
+async def library_api_v1_corpus_workspace_cooccurrence(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return computational_corpus_cooccurrence(payload)
+    except (ValueError,KeyError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/corpus-workspace/export")
+async def library_api_v1_corpus_workspace_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_computational_linguistics_analysis(payload)
+    except (ValueError,KeyError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/corpus-workspace/persistence-handoff-preview")
+async def library_api_v1_corpus_workspace_persistence_handoff_preview(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return computational_corpus_persistence_handoff_preview(payload)
+    except (ValueError,KeyError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/citations/{record_id:path}")
 def library_api_v1_record_citations(record_id: str, direction: str="both", limit: int=100) -> dict[str, Any]:
