@@ -341,6 +341,14 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/research-knowledge-graph/neighborhood","name":"unified-research-knowledge-graph-neighborhood","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-knowledge-graph/path","name":"unified-research-knowledge-graph-path","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-knowledge-graph/export","name":"unified-research-knowledge-graph-export","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/workspace-integration","name":"library-workspace-research-integration","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/workspace-integration/readiness","name":"library-workspace-research-integration-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/workspace-integration/bootstrap","name":"library-workspace-research-integration-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/workspace-integration/handoff/library-to-workspace","name":"library-to-workspace-handoff","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/workspace-integration/handoff/validate","name":"library-workspace-handoff-validation","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/workspace-integration/results/registration-preview","name":"workspace-result-registration-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/workspace-integration/round-trip-audit","name":"library-workspace-round-trip-audit","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/workspace-integration/export","name":"library-workspace-exchange-export","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -357,6 +365,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "research-package-composer": {"resources":["typed-components","composition-manifest","completeness-audit","provenance-audit","dependency-map","publishing-handoff","reproducibility-handoff","draft-export"],"direct_api":True,"authority":"python-backend-composition"},
     "research-publication-studio": {"resources":["publication-profiles","structured-sections","contributors","figures","tables","appendices","citation-inventory","editorial-audit","readiness-audit","publishing-handoff","draft-export"],"direct_api":True,"authority":"python-backend-composition"},
     "unified-research-knowledge-graph": {"resources":["typed-research-object-nodes","explicit-relations","authority-lineage","deterministic-snapshot","validation","chain-audit","neighborhood","path","export"],"direct_api":True,"authority":"python-backend-composition"},
+    "library-workspace-research-integration": {"resources":["library-to-workspace-handoff","handoff-validation","workspace-result-registration-preview","project-correlation","authority-boundaries","round-trip-audit","exchange-export"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},

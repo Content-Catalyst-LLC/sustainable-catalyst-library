@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.27.0"
-BACKEND_VERSION = "3.27.0"
-WEB_VERSION = "2.27.0"
-SDK_VERSION = "1.27.0"
+LIBRARY_VERSION = "6.28.0"
+BACKEND_VERSION = "3.28.0"
+WEB_VERSION = "2.28.0"
+SDK_VERSION = "1.28.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"
@@ -73,6 +73,7 @@ def contract() -> dict[str, Any]:
         {"id": "research-package-composer-workspace", "route": "/research/package", "purpose": "research-package-composition-audit-and-handoff"},
         {"id": "research-publication-studio", "route": "/research/publication", "purpose": "publication-draft-editorial-audit-and-publishing-handoff"},
         {"id": "unified-research-knowledge-graph", "route": "/research/graph", "purpose": "cross-object-research-graph-composition-validation-and-traversal"},
+        {"id": "library-workspace-research-integration", "route": "/research/workspace", "purpose": "library-workspace-research-handoff-result-registration-preview-and-round-trip-audit"},
         {"id": "record-context", "route": "/record/{record_id}", "purpose": "research-object-provenance-citations-evidence"},
         {"id": "saved-research", "route": "/account", "purpose": "service-native-project-and-collection-handoff"},
     ]
@@ -125,8 +126,8 @@ def contract() -> dict[str, Any]:
             "required": False,
             "authoritative": False,
         },
-        "next_release": "6.28.0",
-        "next_release_name": "Library ↔ Workspace Research Integration",
+        "next_release": "6.29.0",
+        "next_release_name": "Cross-Product Research Handoff & Contract Certification",
         "guardrails": guardrails(),
     }
 

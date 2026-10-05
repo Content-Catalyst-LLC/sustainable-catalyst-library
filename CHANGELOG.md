@@ -1,3 +1,14 @@
+## 6.28.0 — Library ↔ Workspace Research Integration
+
+- Added `/research/workspace` and `/api/library/v1/workspace-integration`.
+- Added deterministic Library → Workspace research handoff packets with typed Library object references and explicit requested actions.
+- Added handoff validation, Workspace-result registration previews, project/source correlation, round-trip audits, and portable exchange export.
+- Preserves Library originating authorities and Workspace execution authority; neither product becomes the other product’s persistence authority.
+- No automatic Workspace execution/project creation, cross-product push, result import, Library persistence, claim/evidence/truth promotion, or Platform Core promotion.
+- Live cross-product transport and end-to-end execution certification are deferred to v6.29.0.
+- Synchronized Library 6.28.0 / backend 3.28.0 / web 2.28.0 / SDK 1.28.0.
+- No database migration; WordPress remains optional.
+
 ## 6.27.0 — Unified Research Knowledge Graph
 
 - Added `/research/graph` as a unified research-object graph workspace.

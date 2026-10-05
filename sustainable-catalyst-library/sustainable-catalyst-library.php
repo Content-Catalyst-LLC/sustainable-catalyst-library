@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library 6.27.0 Optional WordPress Adapter for Unified Research Knowledge Graph.
- * Version: 6.27.0
+ * Description: Sustainable Catalyst Library 6.28.0 Optional WordPress Adapter for Library ↔ Workspace Research Integration.
+ * Version: 6.28.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '6.27.0');
+define('SC_LIBRARY_VERSION', '6.28.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'optional-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);
@@ -25,11 +25,11 @@ define('SC_LIBRARY_WORDPRESS_LEGACY_COMPATIBILITY_PRESENT', true);
 define('SC_LIBRARY_INDEPENDENT_APPLICATION_CERTIFICATION_AUTHORITY', 'library-api');
 define('SC_LIBRARY_INDEPENDENT_APPLICATION_WORDPRESS_REQUIRED', false);
 define('SC_LIBRARY_APPLICATION_MODE', 'independent-primary');
-define('SC_LIBRARY_BACKEND_GENERATION', '3.27.0');
-define('SC_LIBRARY_WEB_GENERATION', '2.27.0');
-define('SC_LIBRARY_SDK_GENERATION', '1.27.0');
+define('SC_LIBRARY_BACKEND_GENERATION', '3.28.0');
+define('SC_LIBRARY_WEB_GENERATION', '2.28.0');
+define('SC_LIBRARY_SDK_GENERATION', '1.28.0');
 define('SC_LIBRARY_API_GENERATION', '1.0');
-define('SC_LIBRARY_NEXT_ARCHITECTURE_RELEASE', '6.28.0');
+define('SC_LIBRARY_NEXT_ARCHITECTURE_RELEASE', '6.29.0');
 define('SC_LIBRARY_RESEARCH_RUNTIME_AUTHORITY', 'library-api');
 define('SC_LIBRARY_RESEARCH_INTERFACE_AUTHORITY', 'library-api');
 define('SC_LIBRARY_RESEARCH_INTERFACE_WORDPRESS_REQUIRED', false);
@@ -88,6 +88,9 @@ define('SC_LIBRARY_RESEARCH_PUBLICATION_STUDIO_ROUTE', '/research/publication');
 define('SC_LIBRARY_UNIFIED_RESEARCH_KNOWLEDGE_GRAPH_AUTHORITY', 'library-api');
 define('SC_LIBRARY_UNIFIED_RESEARCH_KNOWLEDGE_GRAPH_WORDPRESS_REQUIRED', false);
 define('SC_LIBRARY_UNIFIED_RESEARCH_KNOWLEDGE_GRAPH_ROUTE', '/research/graph');
+define('SC_LIBRARY_WORKSPACE_RESEARCH_INTEGRATION_AUTHORITY', 'library-api');
+define('SC_LIBRARY_WORKSPACE_RESEARCH_INTEGRATION_WORDPRESS_REQUIRED', false);
+define('SC_LIBRARY_WORKSPACE_RESEARCH_INTEGRATION_ROUTE', '/research/workspace');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);

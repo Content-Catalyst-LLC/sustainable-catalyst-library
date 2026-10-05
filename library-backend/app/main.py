@@ -401,6 +401,16 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .library_workspace_research_integration import (
+    contract as library_workspace_research_integration_contract,
+    readiness as library_workspace_research_integration_readiness,
+    bootstrap as library_workspace_research_integration_bootstrap,
+    library_to_workspace_handoff,
+    validate_handoff as validate_library_workspace_handoff,
+    workspace_result_registration_preview,
+    round_trip_audit as library_workspace_round_trip_audit,
+    export_exchange as export_library_workspace_exchange,
+)
 from .unified_research_knowledge_graph import (
     contract as unified_research_knowledge_graph_contract,
     readiness as unified_research_knowledge_graph_readiness,
@@ -1008,6 +1018,15 @@ def health() -> dict[str, Any]:
             "unified_research_knowledge_graph_server_persistence": False,
             "unified_research_knowledge_graph_automatic_semantic_merge": False,
             "unified_research_knowledge_graph_database_migration_required": False,
+            "library_workspace_research_integration": True,
+            "library_workspace_research_integration_route": "/research/workspace",
+            "library_workspace_handoff_packets": True,
+            "workspace_result_registration_preview": True,
+            "library_workspace_round_trip_audit": True,
+            "library_workspace_live_transport_certified": False,
+            "library_workspace_automatic_execution": False,
+            "library_workspace_server_persistence": False,
+            "library_workspace_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -1022,8 +1041,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.27.0",
-            "library_sdk_version": "1.27.0",
+            "library_web_version": "2.28.0",
+            "library_sdk_version": "1.28.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5383,6 +5402,48 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/workspace-integration")
+def library_api_v1_workspace_integration_contract() -> dict[str, Any]:
+    return library_workspace_research_integration_contract()
+
+@app.get("/api/library/v1/workspace-integration/readiness")
+def library_api_v1_workspace_integration_readiness() -> dict[str, Any]:
+    return library_workspace_research_integration_readiness()
+
+@app.get("/api/library/v1/workspace-integration/bootstrap")
+def library_api_v1_workspace_integration_bootstrap() -> dict[str, Any]:
+    return library_workspace_research_integration_bootstrap()
+
+@app.post("/api/library/v1/workspace-integration/handoff/library-to-workspace")
+async def library_api_v1_workspace_integration_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return library_to_workspace_handoff(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/workspace-integration/handoff/validate")
+async def library_api_v1_workspace_integration_validate(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return validate_library_workspace_handoff(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/workspace-integration/results/registration-preview")
+async def library_api_v1_workspace_integration_result_preview(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return workspace_result_registration_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/workspace-integration/round-trip-audit")
+async def library_api_v1_workspace_integration_round_trip(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return library_workspace_round_trip_audit(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/workspace-integration/export")
+async def library_api_v1_workspace_integration_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_library_workspace_exchange(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/research-knowledge-graph")

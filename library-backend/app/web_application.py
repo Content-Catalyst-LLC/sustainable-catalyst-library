@@ -4,7 +4,7 @@ from hashlib import sha256
 import json
 from typing import Any
 
-WEB_VERSION = "2.27.0"
+WEB_VERSION = "2.28.0"
 CONTRACT = "sc-library-web-application/1.0"
 READINESS_CONTRACT = "sc-library-web-readiness/1.0"
 
@@ -26,6 +26,7 @@ SURFACES: tuple[dict[str, Any], ...] = (
     {"id":"research-package-composer-workspace","label":"Package","route":"/research/package","api":"/api/library/v1/research-package-composer","public":True,"index":False,"parent_surface":"research"},
     {"id":"research-publication-studio","label":"Publication","route":"/research/publication","api":"/api/library/v1/research-publication","public":True,"index":False,"parent_surface":"research"},
     {"id":"unified-research-knowledge-graph","label":"Graph","route":"/research/graph","api":"/api/library/v1/research-knowledge-graph","public":True,"index":False,"parent_surface":"research"},
+    {"id":"library-workspace-research-integration","label":"Workspace","route":"/research/workspace","api":"/api/library/v1/workspace-integration","public":True,"index":False,"parent_surface":"research"},
     {"id":"search","label":"Search","route":"/search","api":"/api/library/v1/search","public":True,"index":False,"alias_of":"research","navigation_mode":"search"},
     {"id":"reader","label":"Reader","route":"/record/{record_id}","api":"/api/library/v1/records/{record_id}","public":True,"index":True},
     {"id":"discover","label":"Discover","route":"/discover","api":"/api/library/v1/capabilities","public":True,"index":False,"alias_of":"research","navigation_mode":"discover"},
@@ -52,8 +53,8 @@ def application_contract() -> dict[str, Any]:
         "application_id": "sustainable-catalyst-library-web",
         "application_contract_id": "library-web-application:" + fp[:32],
         "application_fingerprint_sha256": fp,
-        "library_version": "6.27.0",
-        "backend_version": "3.27.0",
+        "library_version": "6.28.0",
+        "backend_version": "3.28.0",
         "web_version": WEB_VERSION,
         "state": "independent-primary-application",
         "deployment_model": "independent-primary-web-service",
