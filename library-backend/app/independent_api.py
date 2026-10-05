@@ -332,6 +332,15 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/research-publication/readiness-audit","name":"research-publication-readiness-audit","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-publication/publishing-handoff-preview","name":"research-publication-publishing-handoff-preview","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-publication/export","name":"research-publication-export","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-knowledge-graph","name":"unified-research-knowledge-graph","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-knowledge-graph/readiness","name":"unified-research-knowledge-graph-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-knowledge-graph/bootstrap","name":"unified-research-knowledge-graph-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-knowledge-graph/build","name":"unified-research-knowledge-graph-build","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-knowledge-graph/validate","name":"unified-research-knowledge-graph-validate","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-knowledge-graph/chain-audit","name":"unified-research-knowledge-graph-chain-audit","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-knowledge-graph/neighborhood","name":"unified-research-knowledge-graph-neighborhood","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-knowledge-graph/path","name":"unified-research-knowledge-graph-path","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-knowledge-graph/export","name":"unified-research-knowledge-graph-export","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -347,6 +356,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "geospatial-place-research": {"resources":["places","spatial-features","layers","crs","temporal-validity","relation-preview","coverage-audit","evidence-handoff","investigation-handoff"],"direct_api":True,"authority":"python-backend-composition"},
     "research-package-composer": {"resources":["typed-components","composition-manifest","completeness-audit","provenance-audit","dependency-map","publishing-handoff","reproducibility-handoff","draft-export"],"direct_api":True,"authority":"python-backend-composition"},
     "research-publication-studio": {"resources":["publication-profiles","structured-sections","contributors","figures","tables","appendices","citation-inventory","editorial-audit","readiness-audit","publishing-handoff","draft-export"],"direct_api":True,"authority":"python-backend-composition"},
+    "unified-research-knowledge-graph": {"resources":["typed-research-object-nodes","explicit-relations","authority-lineage","deterministic-snapshot","validation","chain-audit","neighborhood","path","export"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},

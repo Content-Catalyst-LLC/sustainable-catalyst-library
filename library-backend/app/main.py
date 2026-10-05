@@ -401,6 +401,17 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .unified_research_knowledge_graph import (
+    contract as unified_research_knowledge_graph_contract,
+    readiness as unified_research_knowledge_graph_readiness,
+    bootstrap as unified_research_knowledge_graph_bootstrap,
+    build_graph as build_unified_research_knowledge_graph,
+    validate_graph as validate_unified_research_knowledge_graph,
+    chain_audit as audit_unified_research_knowledge_graph_chain,
+    neighborhood as unified_research_knowledge_graph_neighborhood,
+    path as unified_research_knowledge_graph_path,
+    export_graph as export_unified_research_knowledge_graph,
+)
 from .research_publication_studio import (
     contract as research_publication_studio_contract,
     readiness as research_publication_studio_readiness,
@@ -991,6 +1002,12 @@ def health() -> dict[str, Any]:
             "research_publication_studio_existing_package_authority_preserved": True,
             "research_publication_studio_existing_publishing_authority_preserved": True,
             "research_publication_studio_database_migration_required": False,
+            "unified_research_knowledge_graph": True,
+            "unified_research_knowledge_graph_route": "/research/graph",
+            "unified_research_knowledge_graph_existing_object_authorities_preserved": True,
+            "unified_research_knowledge_graph_server_persistence": False,
+            "unified_research_knowledge_graph_automatic_semantic_merge": False,
+            "unified_research_knowledge_graph_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -1005,8 +1022,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.26.0",
-            "library_sdk_version": "1.26.0",
+            "library_web_version": "2.27.0",
+            "library_sdk_version": "1.27.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5366,6 +5383,54 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-knowledge-graph")
+def library_api_v1_unified_research_knowledge_graph_contract() -> dict[str, Any]:
+    return unified_research_knowledge_graph_contract()
+
+@app.get("/api/library/v1/research-knowledge-graph/readiness")
+def library_api_v1_unified_research_knowledge_graph_readiness() -> dict[str, Any]:
+    return unified_research_knowledge_graph_readiness()
+
+@app.get("/api/library/v1/research-knowledge-graph/bootstrap")
+def library_api_v1_unified_research_knowledge_graph_bootstrap() -> dict[str, Any]:
+    return unified_research_knowledge_graph_bootstrap()
+
+@app.post("/api/library/v1/research-knowledge-graph/build")
+async def library_api_v1_unified_research_knowledge_graph_build(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_unified_research_knowledge_graph(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-knowledge-graph/validate")
+async def library_api_v1_unified_research_knowledge_graph_validate(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return validate_unified_research_knowledge_graph(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-knowledge-graph/chain-audit")
+async def library_api_v1_unified_research_knowledge_graph_chain_audit(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return audit_unified_research_knowledge_graph_chain(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-knowledge-graph/neighborhood")
+async def library_api_v1_unified_research_knowledge_graph_neighborhood(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return unified_research_knowledge_graph_neighborhood(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-knowledge-graph/path")
+async def library_api_v1_unified_research_knowledge_graph_path(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return unified_research_knowledge_graph_path(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-knowledge-graph/export")
+async def library_api_v1_unified_research_knowledge_graph_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_unified_research_knowledge_graph(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/research-publication")

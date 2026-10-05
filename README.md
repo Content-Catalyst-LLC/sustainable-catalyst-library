@@ -143,3 +143,5 @@ Library v6.24.0 adds `/research/geospatial`, a CRS-aware geospatial and place-ba
 Library v6.25.0 adds `/research/package`, a typed Research Package Composer with composition, completeness/provenance auditing, dependency mapping, and non-executing publishing/reproducibility handoffs.
 
 Library v6.26.0 adds `/research/publication`, a Research Publication Studio that consumes v6.25 package compositions and provides structured publication sections, contributor/asset/citation inventories, editorial/readiness audits, deterministic draft export, and preview-only publishing handoff.
+
+Library v6.27.0 adds `/research/graph`, a Unified Research Knowledge Graph that composes existing research objects and explicit relations into deterministic, provenance-preserving graph snapshots with validation, canonical-chain audits, neighborhood/path traversal, and portable export while preserving every originating authority.

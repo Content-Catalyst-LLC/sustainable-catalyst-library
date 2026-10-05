@@ -1,3 +1,14 @@
+## 6.27.0 — Unified Research Knowledge Graph
+
+- Added `/research/graph` as a unified research-object graph workspace.
+- Added typed nodes spanning research question, investigation, source, claim, evidence, dataset, statistical result, place, event, annotation, citation, synthesis, research package, and publication.
+- Added explicit relation normalization, deterministic graph snapshots, graph validation, canonical research-chain audits, neighborhood traversal, path traversal, and portable JSON export.
+- Preserves originating object authorities and versions; v6.27 is graph composition/traversal authority only.
+- Graph connectivity, centrality, and paths do not imply truth, causality, evidence quality, semantic equivalence, or importance.
+- No automatic semantic merge, entity merge, claim/evidence/truth promotion, external fetch, server-side graph persistence, or Platform Core promotion.
+- Synchronized Library 6.27.0 / backend 3.27.0 / web 2.27.0 / SDK 1.27.0.
+- No database migration; WordPress remains optional.
+
 ## 6.26.0 — Research Publication Studio
 
 - Added `/research/publication` as a publication-draft workspace consuming explicit v6.25 Research Package Composer compositions.

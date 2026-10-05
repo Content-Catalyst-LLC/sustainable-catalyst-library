@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.26.0"
-BACKEND_VERSION = "3.26.0"
-WEB_VERSION = "2.26.0"
-SDK_VERSION = "1.26.0"
+LIBRARY_VERSION = "6.27.0"
+BACKEND_VERSION = "3.27.0"
+WEB_VERSION = "2.27.0"
+SDK_VERSION = "1.27.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"
@@ -72,6 +72,7 @@ def contract() -> dict[str, Any]:
         {"id": "geospatial-place-research-workspace", "route": "/research/geospatial", "purpose": "geospatial-and-place-based-research-analysis"},
         {"id": "research-package-composer-workspace", "route": "/research/package", "purpose": "research-package-composition-audit-and-handoff"},
         {"id": "research-publication-studio", "route": "/research/publication", "purpose": "publication-draft-editorial-audit-and-publishing-handoff"},
+        {"id": "unified-research-knowledge-graph", "route": "/research/graph", "purpose": "cross-object-research-graph-composition-validation-and-traversal"},
         {"id": "record-context", "route": "/record/{record_id}", "purpose": "research-object-provenance-citations-evidence"},
         {"id": "saved-research", "route": "/account", "purpose": "service-native-project-and-collection-handoff"},
     ]
@@ -124,8 +125,8 @@ def contract() -> dict[str, Any]:
             "required": False,
             "authoritative": False,
         },
-        "next_release": "6.27.0",
-        "next_release_name": "Unified Research Knowledge Graph",
+        "next_release": "6.28.0",
+        "next_release_name": "Library ↔ Workspace Research Integration",
         "guardrails": guardrails(),
     }
 
