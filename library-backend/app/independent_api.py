@@ -228,6 +228,14 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/annotations/relations/normalize","name":"annotation-relation-normalize","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/annotations/notebook","name":"scholarly-notebook-build","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/annotations/export","name":"scholarly-notes-export","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/citations/workspace","name":"citation-workspace-bibliographic-intelligence","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/citations/workspace/readiness","name":"citation-workspace-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/citations/workspace/bootstrap","name":"citation-workspace-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/citations/workspace/normalize","name":"bibliographic-item-normalize","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/citations/workspace/bibliography","name":"bibliography-build","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/citations/workspace/duplicates","name":"bibliographic-duplicate-analysis","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/citations/workspace/export","name":"bibliography-export","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/citations/workspace/handoff-preview","name":"citation-authority-handoff-preview","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {

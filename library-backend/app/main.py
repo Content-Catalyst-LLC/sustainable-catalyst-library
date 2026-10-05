@@ -379,6 +379,16 @@ from .research_annotation_notes import (
     build_notebook as build_scholarly_notebook,
     export_notes as export_scholarly_notes,
 )
+from .citation_bibliographic_workspace import (
+    contract as citation_workspace_contract,
+    readiness as citation_workspace_readiness,
+    bootstrap as citation_workspace_bootstrap,
+    normalize_bibliographic_item,
+    build_bibliography as build_research_bibliography,
+    duplicate_analysis as analyze_bibliographic_duplicates,
+    export_bibliography as export_research_bibliography,
+    citation_authority_handoff_preview,
+)
 from .language_document_service import (
     contract as library_language_contract, readiness as library_language_readiness,
     validate_capture as validate_library_language_capture, create_capture as create_library_language_capture, capture as library_language_capture,
@@ -789,6 +799,13 @@ def health() -> dict[str, Any]:
             "research_annotation_server_persistence": False,
             "research_annotation_automatic_evidence_promotion": False,
             "research_annotation_database_migration_required": False,
+            "citation_workspace_bibliographic_intelligence": True,
+            "citation_workspace_route": "/research/citations",
+            "citation_workspace_existing_durable_authority_preserved": True,
+            "citation_workspace_browser_local_collection": True,
+            "citation_workspace_automatic_persistence": False,
+            "citation_workspace_automatic_duplicate_merge": False,
+            "citation_workspace_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -803,8 +820,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.16.0",
-            "library_sdk_version": "1.16.0",
+            "library_web_version": "2.17.0",
+            "library_sdk_version": "1.17.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -4654,6 +4671,58 @@ async def library_api_v1_scholarly_notes_export(request: Request) -> dict[str, A
     payload = await _library_workspace_json(request)
     try:
         return export_scholarly_notes(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.get("/api/library/v1/citations/workspace")
+def library_api_v1_citation_workspace_contract() -> dict[str, Any]:
+    return citation_workspace_contract()
+
+@app.get("/api/library/v1/citations/workspace/readiness")
+def library_api_v1_citation_workspace_readiness() -> dict[str, Any]:
+    return citation_workspace_readiness()
+
+@app.get("/api/library/v1/citations/workspace/bootstrap")
+def library_api_v1_citation_workspace_bootstrap() -> dict[str, Any]:
+    return citation_workspace_bootstrap()
+
+@app.post("/api/library/v1/citations/workspace/normalize")
+async def library_api_v1_bibliographic_item_normalize(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return normalize_bibliographic_item(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/citations/workspace/bibliography")
+async def library_api_v1_bibliography_build(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return build_research_bibliography(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/citations/workspace/duplicates")
+async def library_api_v1_bibliographic_duplicate_analysis(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return analyze_bibliographic_duplicates(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/citations/workspace/export")
+async def library_api_v1_bibliography_export(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return export_research_bibliography(payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/library/v1/citations/workspace/handoff-preview")
+async def library_api_v1_citation_authority_handoff_preview(request: Request) -> dict[str, Any]:
+    payload = await _library_workspace_json(request)
+    try:
+        return citation_authority_handoff_preview(payload)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.16.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.17.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null, archiveBootstrap: null, archiveSources: [], archiveSearchResult: null, criticismBootstrap: null, timelineBootstrap: null, timelineEvents: [], notesBootstrap: null, researchNotes: [] };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null, archiveBootstrap: null, archiveSources: [], archiveSearchResult: null, criticismBootstrap: null, timelineBootstrap: null, timelineEvents: [], notesBootstrap: null, researchNotes: [], citationsBootstrap: null, bibliographyItems: [] };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -38,13 +38,14 @@ function resolveUnifiedResearchMode(name) {
 function route() {
   const raw=currentRoute(); const [name="research", ...rest]=raw.split("/");
   const compatibilityResearch = name === "search" || name === "discover";
+  const citationsResearch = name === "research" && rest[0] === "citations";
   const notesResearch = name === "research" && rest[0] === "notes";
   const timelineResearch = name === "research" && rest[0] === "archives" && rest[1] === "timeline";
   const criticismResearch = name === "research" && rest[0] === "archives" && rest[1] === "compare";
   const archiveResearch = name === "research" && rest[0] === "archives" && !criticismResearch && !timelineResearch;
-  const view = notesResearch ? "notes" : timelineResearch ? "timeline" : criticismResearch ? "criticism" : archiveResearch ? "archives" : compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
+  const view = citationsResearch ? "citations" : notesResearch ? "notes" : timelineResearch ? "timeline" : criticismResearch ? "criticism" : archiveResearch ? "archives" : compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
   $$(".view").forEach(el => { el.hidden = el.dataset.view !== view; });
-  const navView=["archives","criticism","timeline","notes"].includes(view) ? "research" : view;
+  const navView=["archives","criticism","timeline","notes","citations"].includes(view) ? "research" : view;
   $$('[data-nav]').forEach(a => a.setAttribute('aria-current', a.dataset.nav===navView ? 'page' : 'false'));
   updatePublicMetadata(view, rest);
   if (view === "research") loadUnifiedNavigation(resolveUnifiedResearchMode(name));
@@ -52,6 +53,7 @@ function route() {
   if (view === "criticism") loadPrimarySourceCriticismWorkspace();
   if (view === "timeline") loadHistoricalEventTimelineWorkspace();
   if (view === "notes") loadResearchNotesWorkspace();
+  if (view === "citations") loadCitationWorkspace();
   if (view === "system") loadSystem();
   if (view === "account") loadSession().then(()=>{ if(new URLSearchParams(location.search).get("section")==="workspaces") requestAnimationFrame(()=>$("#workspace-card")?.scrollIntoView({block:"start"})); });
   if (view === "record" && rest.length) loadRecord(decodeURIComponent(rest.join("/")));
@@ -68,12 +70,12 @@ function navigate(path) {
 
 function updatePublicMetadata(view, rest=[]) {
   const origin=String(config.publicOrigin || location.origin).replace(/\/$/, "");
-  let path=view === "research" ? "/research" : view === "archives" ? "/research/archives" : view === "criticism" ? "/research/archives/compare" : view === "timeline" ? "/research/archives/timeline" : view === "notes" ? "/research/notes" : `/${view}`;
+  let path=view === "research" ? "/research" : view === "archives" ? "/research/archives" : view === "criticism" ? "/research/archives/compare" : view === "timeline" ? "/research/archives/timeline" : view === "notes" ? "/research/notes" : view === "citations" ? "/research/citations" : `/${view}`;
   if (view === "record" && rest.length) path=`/record/${encodeURIComponent(decodeURIComponent(rest.join("/")))}`;
   const canonical=document.querySelector('link[rel="canonical"]') || document.head.appendChild(Object.assign(document.createElement('link'),{rel:'canonical'}));
   canonical.href=origin + (path === "/search" ? path : path);
   const robots=document.querySelector('meta[name="robots"]') || document.head.appendChild(Object.assign(document.createElement('meta'),{name:'robots'}));
-  robots.content=["research","archives","criticism","timeline","notes","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
+  robots.content=["research","archives","criticism","timeline","notes","citations","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
 }
 
 function setMeta(name, content, property=false) {
@@ -720,9 +722,21 @@ async function addResearchNote(event){event?.preventDefault();const payload={not
 async function buildResearchNotebook(){try{const payload={title:$("#notes-notebook-title")?.value.trim()||"Scholarly notes",research_question:$("#notes-research-question")?.value.trim()||null,annotations:state.researchNotes||[],relations:parseNotesRelations()};const data=await api('/annotations/notebook',{method:'POST',body:JSON.stringify(payload)});notesOutput('Scholarly notebook',data);}catch(e){notesOutput('Notebook error',{error:e.message});}}
 async function exportResearchNotes(){try{const payload={title:$("#notes-notebook-title")?.value.trim()||"Scholarly notes",research_question:$("#notes-research-question")?.value.trim()||null,annotations:state.researchNotes||[],relations:parseNotesRelations()};const data=await api('/annotations/export',{method:'POST',body:JSON.stringify(payload)});notesOutput('Scholarly notes export',data);const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sustainable-catalyst-scholarly-notes.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){notesOutput('Export error',{error:e.message});}}
 
+const BIBLIOGRAPHY_STORAGE_KEY='sc-library-bibliography-v1';
+function citationsOutput(label,data){const t=$("#citations-output");if(t)t.innerHTML=`<p class="eyebrow">${escapeHtml(label)}</p><pre>${escapeHtml(JSON.stringify(data,null,2))}</pre>`;}
+function loadBrowserBibliography(){try{const raw=localStorage.getItem(BIBLIOGRAPHY_STORAGE_KEY);const parsed=raw?JSON.parse(raw):[];state.bibliographyItems=Array.isArray(parsed)?parsed:[];}catch{state.bibliographyItems=[];}}
+function persistBrowserBibliography(){try{localStorage.setItem(BIBLIOGRAPHY_STORAGE_KEY,JSON.stringify(state.bibliographyItems||[]));}catch{}}
+function renderBibliographyItems(){const t=$("#citations-list");if(!t)return;const items=state.bibliographyItems||[];if(!items.length){t.innerHTML='<p class="empty-state">No bibliographic items yet.</p>';return;}t.innerHTML=items.map((x,i)=>`<article class="archive-source-row"><div><strong>${escapeHtml(x.title||"Untitled")}</strong><p>${escapeHtml((x.authors?.[0]?.family||x.authors?.[0]?.literal||"Anonymous"))} · ${escapeHtml(x.year??"n.d.")} · <code>${escapeHtml(x.citation_key||"")}</code></p><p>${escapeHtml(x.identifiers?.doi?`DOI ${x.identifiers.doi}`:(x.identifiers?.url||x.type||""))}</p></div><button type="button" class="text-button" data-citation-remove="${i}">Remove</button></article>`).join("");}
+async function loadCitationWorkspace(){loadBrowserBibliography();renderBibliographyItems();const status=$("#citations-readiness");try{const data=state.citationsBootstrap||await api('/citations/workspace/bootstrap');state.citationsBootstrap=data;const r=data.readiness||{};if(status)status.innerHTML=`<span><strong>${escapeHtml(r.state||"unknown")}</strong> workspace</span><span><strong>${Number(data.item_types?.length||0)}</strong> item types</span><span>Durable citation authority preserved</span><span>Web ${escapeHtml(data.web_version||config.webVersion||"")}</span>`;const select=$("#citations-type");if(select)select.innerHTML=(data.item_types||[]).map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(String(x).replaceAll('-',' '))}</option>`).join("");}catch(e){if(status)status.innerHTML=`<span class="error-state">${escapeHtml(e.message)}</span>`;}}
+function citationAuthors(){return ($("#citations-authors")?.value||"").split(';').map(x=>x.trim()).filter(Boolean);}
+async function addBibliographicItem(event){event?.preventDefault();const y=Number($("#citations-year")?.value||0);const payload={type:$("#citations-type")?.value||"other",title:$("#citations-title")?.value.trim()||"",authors:citationAuthors(),year:y||null,container_title:$("#citations-container")?.value.trim()||null,publisher:$("#citations-publisher")?.value.trim()||null,volume:$("#citations-volume")?.value.trim()||null,issue:$("#citations-issue")?.value.trim()||null,pages:$("#citations-pages")?.value.trim()||null,doi:$("#citations-doi")?.value.trim()||null,isbn:$("#citations-isbn")?.value.trim()||null,pmid:$("#citations-pmid")?.value.trim()||null,arxiv:$("#citations-arxiv")?.value.trim()||null,url:$("#citations-url")?.value.trim()||null,linked_record_id:$("#citations-record-id")?.value.trim()||null,tags:($("#citations-tags")?.value||"").split(',').map(x=>x.trim()).filter(Boolean)};if(!payload.title)return;try{const item=await api('/citations/workspace/normalize',{method:'POST',body:JSON.stringify(payload)});state.bibliographyItems.push(item);persistBrowserBibliography();renderBibliographyItems();citationsOutput('Bibliographic item added',item);$("#citations-form")?.reset();}catch(e){citationsOutput('Bibliographic normalization error',{error:e.message});}}
+async function buildCitationBibliography(){try{const data=await api('/citations/workspace/bibliography',{method:'POST',body:JSON.stringify({title:$("#citations-bibliography-title")?.value.trim()||"Research bibliography",items:state.bibliographyItems||[]})});citationsOutput('Research bibliography',data);}catch(e){citationsOutput('Bibliography error',{error:e.message});}}
+async function findBibliographicDuplicates(){try{const data=await api('/citations/workspace/duplicates',{method:'POST',body:JSON.stringify({items:state.bibliographyItems||[]})});citationsOutput('Duplicate candidates',data);}catch(e){citationsOutput('Duplicate analysis error',{error:e.message});}}
+async function exportCitationBibliography(){try{const fmt=$("#citations-export-format")?.value||'json';const data=await api('/citations/workspace/export',{method:'POST',body:JSON.stringify({title:$("#citations-bibliography-title")?.value.trim()||"Research bibliography",items:state.bibliographyItems||[],format:fmt})});citationsOutput('Bibliography export',data);const blob=new Blob([data.content||""],{type:data.media_type||'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=data.filename||'sustainable-catalyst-bibliography.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){citationsOutput('Bibliography export error',{error:e.message});}}
+
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Historical archives workspace','/historical-archives/workspace/readiness'],['Primary-source comparison & source criticism','/historical-archives/source-criticism/readiness'],['Research timeline & historical events','/historical-archives/timeline-workspace/readiness'],['Research annotation & scholarly notes','/annotations/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Historical archives workspace','/historical-archives/workspace/readiness'],['Primary-source comparison & source criticism','/historical-archives/source-criticism/readiness'],['Research timeline & historical events','/historical-archives/timeline-workspace/readiness'],['Research annotation & scholarly notes','/annotations/readiness'],['Citation workspace & bibliographic intelligence','/citations/workspace/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -738,6 +752,11 @@ async function bootstrap() {
   route();
 }
 
+$("#citations-form")?.addEventListener("submit",addBibliographicItem);
+$("#citations-clear")?.addEventListener("click",()=>{state.bibliographyItems=[];persistBrowserBibliography();renderBibliographyItems();});
+$("#citations-build")?.addEventListener("click",buildCitationBibliography);
+$("#citations-duplicates")?.addEventListener("click",findBibliographicDuplicates);
+$("#citations-export")?.addEventListener("click",exportCitationBibliography);
 $("#notes-form")?.addEventListener("submit",addResearchNote);
 $("#notes-clear")?.addEventListener("click",()=>{state.researchNotes=[];persistBrowserResearchNotes();renderResearchNotes();});
 $("#notes-build")?.addEventListener("click",buildResearchNotebook);
@@ -782,6 +801,7 @@ document.addEventListener('click',event=>{
   const brief=event.target.closest('[data-project-brief]'); if(brief){event.preventDefault();loadLivingProjectBrief(brief.dataset.projectBrief);return;}
 });
 document.addEventListener('click',event=>{
+  const citationRemove=event.target.closest('[data-citation-remove]'); if(citationRemove){event.preventDefault();state.bibliographyItems.splice(Number(citationRemove.dataset.citationRemove),1);persistBrowserBibliography();renderBibliographyItems();return;}
   const noteRemove=event.target.closest('[data-note-remove]'); if(noteRemove){event.preventDefault();state.researchNotes.splice(Number(noteRemove.dataset.noteRemove),1);persistBrowserResearchNotes();renderResearchNotes();return;}
   const timelineRemove=event.target.closest('[data-timeline-remove]'); if(timelineRemove){event.preventDefault();state.timelineEvents.splice(Number(timelineRemove.dataset.timelineRemove),1);renderTimelineEvents();return;}
   const add=event.target.closest('[data-archive-add-result]'); if(add){event.preventDefault();addArchiveSearchResult(Number(add.dataset.archiveAddResult));return;}

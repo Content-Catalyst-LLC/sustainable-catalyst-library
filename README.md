@@ -119,3 +119,7 @@ Library v6.15.0 adds `/research/archives/timeline` for source-linked historical 
 ## Research Annotation & Scholarly Notes
 
 Library v6.16.0 adds `/research/notes` for explicit target-anchored scholarly notes, browser-local working continuity, notebook composition, and JSON export without automatic evidence, citation, or truth promotion.
+
+## Citation Workspace & Bibliographic Intelligence
+
+Library v6.17.0 adds `/research/citations` for bibliographic normalization, duplicate review, bibliography composition, and portable JSON/BibTeX/RIS export while preserving the existing Python/PostgreSQL citation service as durable citation authority.

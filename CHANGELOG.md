@@ -1,3 +1,12 @@
+## 6.17.0 — Citation Workspace & Bibliographic Intelligence
+
+- Added dedicated `/research/citations` workspace for bibliographic normalization, collection composition, duplicate-candidate analysis, and portable citation exports.
+- Added CSL-compatible metadata envelopes, normalized DOI/ISBN/PMID/PMCID/arXiv/URL identifiers, deterministic local citation keys, metadata-completeness observations, and JSON/BibTeX/RIS exports.
+- Preserves the existing Python/PostgreSQL provenance citation service as durable citation-edge authority; the workspace never creates durable citation edges automatically.
+- Duplicate candidates remain human-review objects and are never auto-merged; citation presence/counts and metadata completeness are never treated as quality, evidence, or truth scores.
+- Synchronized Library 6.17.0 / backend 3.17.0 / web 2.17.0 / SDK 1.17.0.
+- No database migration; WordPress remains optional.
+
 ## 6.16.0 — Research Annotation & Scholarly Notes
 
 - Added dedicated `/research/notes` workspace for annotations across records, primary sources, historical events, timelines, datasets, publications, and other explicit research targets.

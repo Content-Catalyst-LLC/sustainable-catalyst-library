@@ -119,6 +119,7 @@
           <a href="/research/archives/compare" data-app-link>Compare & criticize</a>
           <a href="/research/archives/timeline" data-app-link>Timeline</a>
           <a href="/research/notes" data-app-link>Notes</a>
+          <a href="/research/citations" data-app-link>Citations</a>
           <a href="/account?section=workspaces" data-app-link>Projects</a>
         </nav>
         <div id="archive-readiness" class="context-strip"><span>Loading archive workspace…</span></div>
@@ -188,6 +189,7 @@
           <a href="/research/archives/compare" aria-current="page">Compare & criticize</a>
           <a href="/research/archives/timeline" data-app-link>Timeline</a>
           <a href="/research/notes" data-app-link>Notes</a>
+          <a href="/research/citations" data-app-link>Citations</a>
         </nav>
         <div id="criticism-readiness" class="context-strip"><span>Loading source-criticism workspace…</span></div>
         <div class="criticism-layout">
@@ -226,6 +228,7 @@
           <a href="/research/archives/compare" data-app-link>Compare & criticize</a>
           <a href="/research/archives/timeline" aria-current="page">Timeline</a>
           <a href="/research/notes" data-app-link>Notes</a>
+          <a href="/research/citations" data-app-link>Citations</a>
         </nav>
         <div id="timeline-readiness" class="context-strip"><span>Loading historical-event workspace…</span></div>
         <div class="timeline-layout">
@@ -283,6 +286,7 @@
           <a href="/research/archives" data-app-link>Archives</a>
           <a href="/research/archives/timeline" data-app-link>Timeline</a>
           <a href="/research/notes" aria-current="page">Notes</a>
+          <a href="/research/citations" data-app-link>Citations</a>
         </nav>
         <div id="notes-readiness" class="context-strip"><span>Loading scholarly-notes workspace…</span></div>
         <div class="notes-layout">
@@ -322,6 +326,62 @@
         <section class="info-card">
           <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Notebook analysis</h2></div></div>
           <div id="notes-output"><p class="empty-state">Normalized notes, notebook composition, and export manifests appear here.</p></div>
+        </section>
+      </section>
+
+
+      <section class="view" data-view="citations" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Bibliographic metadata · citation lineage · portable exports</p>
+          <h1>Citation Workspace & Bibliographic Intelligence</h1>
+          <p>Normalize bibliographic records, inspect identifier and metadata completeness, find duplicate candidates, compose research bibliographies, and export portable citation packages without equating citation presence or counts with evidence quality.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Citation workspace navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/notes" data-app-link>Notes</a>
+          <a href="/research/citations" aria-current="page">Citations</a>
+          <a href="/account?section=workspaces" data-app-link>Projects</a>
+        </nav>
+        <div id="citations-readiness" class="context-strip"><span>Loading citation workspace…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Bibliographic item</p><h2>Add citation source</h2></div></div>
+            <form id="citations-form" class="archive-source-form">
+              <label>Type<select id="citations-type"><option value="article-journal">Journal article</option></select></label>
+              <label>Title<input id="citations-title" required></label>
+              <label class="archive-wide">Authors<input id="citations-authors" placeholder="Doe, Jane; Smith, Alex"></label>
+              <label>Year<input id="citations-year" type="number"></label>
+              <label>Container / journal<input id="citations-container"></label>
+              <label>Publisher<input id="citations-publisher"></label>
+              <label>Volume<input id="citations-volume"></label>
+              <label>Issue<input id="citations-issue"></label>
+              <label>Pages<input id="citations-pages"></label>
+              <label>DOI<input id="citations-doi" placeholder="10.… or doi.org URL"></label>
+              <label>ISBN<input id="citations-isbn"></label>
+              <label>PMID<input id="citations-pmid"></label>
+              <label>arXiv<input id="citations-arxiv"></label>
+              <label class="archive-wide">URL<input id="citations-url" type="url"></label>
+              <label>Linked Library record ID<input id="citations-record-id"></label>
+              <label>Tags<input id="citations-tags" placeholder="comma-separated"></label>
+              <button type="submit">Normalize & add citation</button>
+            </form>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Working bibliography</p><h2>Browser-local citation set</h2></div><button id="citations-clear" class="text-button" type="button">Clear</button></div>
+            <p class="form-note">This collection is browser-local and exportable. Existing Python/PostgreSQL citation authority remains the durable citation-edge service; no durable citation is written automatically.</p>
+            <div id="citations-list"><p class="empty-state">No bibliographic items yet.</p></div>
+            <label>Bibliography title<input id="citations-bibliography-title" value="Research bibliography"></label>
+            <div class="archive-actions">
+              <button id="citations-build" type="button">Build bibliography</button>
+              <button id="citations-duplicates" type="button" class="secondary-button">Find duplicate candidates</button>
+            </div>
+            <label>Export format<select id="citations-export-format"><option value="json">CSL-compatible JSON</option><option value="bibtex">BibTeX</option><option value="ris">RIS</option></select></label>
+            <button id="citations-export" type="button" class="secondary-button">Export bibliography</button>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Bibliographic analysis</h2></div></div>
+          <div id="citations-output"><p class="empty-state">Normalized metadata, bibliography composition, duplicate candidates, and export manifests appear here.</p></div>
         </section>
       </section>
 
@@ -375,7 +435,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.16.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.17.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>
