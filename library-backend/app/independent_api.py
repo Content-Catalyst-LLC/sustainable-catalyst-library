@@ -278,6 +278,18 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/research-investigation/risk-register","name":"research-investigation-risk-register","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-investigation/export","name":"research-investigation-export","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-investigation/handoff-preview","name":"research-investigation-handoff-preview","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/evidence-matrix","name":"evidence-matrix-claim-support-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/evidence-matrix/readiness","name":"evidence-matrix-claim-support-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/evidence-matrix/bootstrap","name":"evidence-matrix-claim-support-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/evidence-matrix/matrix","name":"evidence-matrix-build","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/evidence-matrix/support-profiles","name":"evidence-matrix-support-profiles","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/evidence-matrix/contradictions","name":"evidence-matrix-contradictions","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/evidence-matrix/provenance-coverage","name":"evidence-matrix-provenance-coverage","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/evidence-matrix/source-dependencies","name":"evidence-matrix-source-dependencies","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/evidence-matrix/gaps","name":"evidence-matrix-gaps","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/evidence-matrix/export","name":"evidence-matrix-export","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/evidence-matrix/synthesis-handoff-preview","name":"evidence-matrix-synthesis-handoff-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/evidence-matrix/investigation-handoff-preview","name":"evidence-matrix-investigation-handoff-preview","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -288,6 +300,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "entity-place-resolution": {"resources":["entity-authority","multilingual-name-forms","places","historical-toponyms","temporal-resolution","candidate-matrix","explicit-decisions"],"direct_api":True,"authority":"python-backend-composition"},
     "research-synthesis": {"resources":["source-inventory","claim-inventory","evidence-matrix","contradiction-ledger","convergence-summary","source-attribution","gap-analysis","synthesis-export"],"direct_api":True,"authority":"python-backend-composition"},
     "research-investigation": {"resources":["research-question","subquestions","hypotheses","evidence-needs","source-strategy","tasks","execution-plan","decision-points","stop-conditions","risk-register","handoffs"],"direct_api":True,"authority":"python-backend-composition"},
+    "evidence-matrix-analysis": {"resources":["claim-inventory","evidence-inventory","claim-evidence-links","matrix","support-profiles","contradictions","provenance-coverage","source-dependencies","gaps","handoffs"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},

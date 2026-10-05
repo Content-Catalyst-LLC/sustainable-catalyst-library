@@ -389,6 +389,20 @@ from .citation_bibliographic_workspace import (
     export_bibliography as export_research_bibliography,
     citation_authority_handoff_preview,
 )
+from .evidence_matrix_claim_support_workspace import (
+    contract as evidence_matrix_contract,
+    readiness as evidence_matrix_readiness,
+    bootstrap as evidence_matrix_bootstrap,
+    claim_evidence_matrix,
+    support_profiles as evidence_support_profiles,
+    contradiction_analysis as evidence_contradiction_analysis,
+    provenance_coverage as evidence_provenance_coverage,
+    source_dependencies as evidence_source_dependencies,
+    gap_analysis as evidence_gap_analysis,
+    export_analysis as export_evidence_matrix_analysis,
+    synthesis_handoff_preview as evidence_synthesis_handoff_preview,
+    investigation_handoff_preview as evidence_investigation_handoff_preview,
+)
 from .research_question_investigation_workspace import (
     contract as research_investigation_contract,
     readiness as research_investigation_readiness,
@@ -885,6 +899,14 @@ def health() -> dict[str, Any]:
             "research_investigation_automatic_hypothesis_adjudication": False,
             "research_investigation_signed_handoffs_required": True,
             "research_investigation_database_migration_required": False,
+            "evidence_matrix_claim_support_workspace": True,
+            "evidence_matrix_claim_support_route": "/research/evidence",
+            "evidence_matrix_analysis_composition_only": True,
+            "evidence_matrix_server_persistence": False,
+            "evidence_matrix_automatic_truth_scoring": False,
+            "evidence_matrix_automatic_verdicts": False,
+            "evidence_matrix_source_independence_assumed": False,
+            "evidence_matrix_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -899,8 +921,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.21.0",
-            "library_sdk_version": "1.21.0",
+            "library_web_version": "2.22.0",
+            "library_sdk_version": "1.22.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5026,6 +5048,72 @@ async def library_api_v1_research_investigation_export(request: Request) -> dict
 async def library_api_v1_research_investigation_handoff(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return research_investigation_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/evidence-matrix")
+def library_api_v1_evidence_matrix_contract() -> dict[str, Any]:
+    return evidence_matrix_contract()
+
+@app.get("/api/library/v1/evidence-matrix/readiness")
+def library_api_v1_evidence_matrix_readiness() -> dict[str, Any]:
+    return evidence_matrix_readiness()
+
+@app.get("/api/library/v1/evidence-matrix/bootstrap")
+def library_api_v1_evidence_matrix_bootstrap() -> dict[str, Any]:
+    return evidence_matrix_bootstrap()
+
+@app.post("/api/library/v1/evidence-matrix/matrix")
+async def library_api_v1_evidence_matrix_build(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return claim_evidence_matrix(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/evidence-matrix/support-profiles")
+async def library_api_v1_evidence_support_profiles(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return evidence_support_profiles(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/evidence-matrix/contradictions")
+async def library_api_v1_evidence_contradictions(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return evidence_contradiction_analysis(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/evidence-matrix/provenance-coverage")
+async def library_api_v1_evidence_provenance(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return evidence_provenance_coverage(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/evidence-matrix/source-dependencies")
+async def library_api_v1_evidence_dependencies(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return evidence_source_dependencies(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/evidence-matrix/gaps")
+async def library_api_v1_evidence_gaps(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return evidence_gap_analysis(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/evidence-matrix/export")
+async def library_api_v1_evidence_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_evidence_matrix_analysis(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/evidence-matrix/synthesis-handoff-preview")
+async def library_api_v1_evidence_synthesis_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return evidence_synthesis_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/evidence-matrix/investigation-handoff-preview")
+async def library_api_v1_evidence_investigation_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return evidence_investigation_handoff_preview(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/citations/{record_id:path}")

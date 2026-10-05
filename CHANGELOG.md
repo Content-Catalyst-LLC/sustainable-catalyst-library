@@ -1,3 +1,12 @@
+## 6.22.0 — Evidence Matrix & Claim Support Analysis
+
+- Added `/research/evidence` as a claim-evidence analysis workspace over existing provenance, citation, structured-evidence, synthesis, and investigation layers.
+- Added explicit claim/evidence inventories and links, claim-evidence matrices, descriptive support profiles, contradiction/qualification analysis, provenance coverage, source-dependency and independence-group analysis, evidence-gap analysis, and reproducible JSON exports.
+- Added non-executing handoff previews to Research Synthesis and Research Investigation for downstream synthesis and evidence-gap follow-up.
+- Support counts, contradiction counts, directness, provenance completeness, and independent-source counts remain descriptive; none are truth probabilities, confidence scores, quality scores, or automatic verdicts.
+- Synchronized Library 6.22.0 / backend 3.22.0 / web 2.22.0 / SDK 1.22.0.
+- No database migration; WordPress remains optional.
+
 ## 6.21.0 — Research Question & Investigation Workspace
 
 - Added `/research/investigation` as a structured research-question and investigation-control workspace.

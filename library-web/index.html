@@ -580,6 +580,54 @@
         </section>
       </section>
 
+      <section class="view" data-view="evidence" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Claims · evidence · support · contradiction · provenance · dependence</p>
+          <h1>Evidence Matrix &amp; Claim Support Analysis</h1>
+          <p>Analyze explicit claim-to-evidence relationships while preserving contradiction, qualification, provenance, source dependence, and evidentiary gaps. Counts and matrix patterns remain descriptive and never become truth or confidence scores.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Evidence matrix navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/investigation" data-app-link>Investigation</a>
+          <a href="/research/evidence" aria-current="page">Evidence</a>
+          <a href="/research/synthesis" data-app-link>Synthesis</a>
+        </nav>
+        <div id="evidence-matrix-readiness" class="context-strip"><span>Loading evidence matrix workspace…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Research frame</p><h2>Question &amp; scope</h2></div></div>
+            <label>Title<input id="evidence-matrix-title" value="Evidence matrix"></label>
+            <label class="archive-wide">Research question<textarea id="evidence-matrix-question" rows="4" placeholder="What question is this matrix intended to illuminate?"></textarea></label>
+            <label class="archive-wide">Scope<textarea id="evidence-matrix-scope" rows="4" placeholder="Population, geography, dates, inclusion/exclusion boundaries, or methodological scope."></textarea></label>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Structured inputs</p><h2>Claims, evidence &amp; links</h2></div></div>
+            <p class="form-note">Relationships must be explicit. Supported relationships: supports, contradicts, qualifies, contextualizes, mixed, irrelevant, unknown.</p>
+            <label class="archive-wide">Claims JSON<textarea id="evidence-matrix-claims" rows="7" placeholder='[{"claim_id":"c1","text":"Claim text"}]'></textarea></label>
+            <label class="archive-wide">Evidence JSON<textarea id="evidence-matrix-evidence" rows="9" placeholder='[{"evidence_id":"e1","title":"Source A","kind":"publication","independence_group":"study-a","provenance_state":"complete"}]'></textarea></label>
+            <label class="archive-wide">Claim-evidence links JSON<textarea id="evidence-matrix-links" rows="9" placeholder='[{"claim_id":"c1","evidence_id":"e1","relationship":"supports","directness":"direct","rationale":"..."}]'></textarea></label>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Analysis</p><h2>Claim support without automatic verdicts</h2></div></div>
+          <div class="archive-actions">
+            <button id="evidence-matrix-build" type="button">Build matrix</button>
+            <button id="evidence-matrix-profiles" type="button">Support profiles</button>
+            <button id="evidence-matrix-contradictions" type="button">Contradictions</button>
+            <button id="evidence-matrix-provenance" type="button">Provenance coverage</button>
+            <button id="evidence-matrix-dependencies" type="button">Source dependencies</button>
+            <button id="evidence-matrix-gaps" type="button">Evidence gaps</button>
+            <button id="evidence-matrix-synthesis-handoff" type="button" class="secondary-button">Synthesis handoff preview</button>
+            <button id="evidence-matrix-investigation-handoff" type="button" class="secondary-button">Investigation handoff preview</button>
+            <button id="evidence-matrix-export" type="button" class="secondary-button">Export analysis JSON</button>
+          </div>
+        </section>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Evidence analysis object</h2></div></div>
+          <div id="evidence-matrix-output"><p class="empty-state">Matrices, support profiles, contradiction analysis, provenance coverage, dependency groups, gaps, and handoff previews appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="record" hidden>
         <div class="reader-toolbar"><button id="reader-back" class="text-button">← Back</button><span id="reader-id"></span></div>
         <article id="reader" class="reader"><p class="empty-state">Loading record…</p></article>
@@ -630,7 +678,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.21.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.22.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>
