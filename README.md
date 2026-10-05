@@ -137,3 +137,5 @@ Library v6.21.0 adds `/research/investigation`, a structured research-question a
 Library v6.22.0 adds `/research/evidence`, a claim-evidence matrix and support-analysis workspace with explicit provenance, source-dependency, contradiction, qualification, gap, and handoff semantics.
 
 Library v6.23.0 adds `/research/data`, a dataset-discovery and statistical-evidence workspace with explicit variable, design, uncertainty, multiple-comparison, missing-data, effect-size, and quantitative-evidence handoff semantics.
+
+Library v6.24.0 adds `/research/geospatial`, a CRS-aware geospatial and place-based research workspace with spatial relation previews, temporal validity, coverage auditing, and non-inferential evidence/investigation handoffs.

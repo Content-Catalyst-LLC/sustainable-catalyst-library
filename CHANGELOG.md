@@ -1,3 +1,12 @@
+## 6.24.0 — Geospatial & Place-Based Research Workspace
+
+- Added `/research/geospatial` as a geospatial/place-based research workspace over Entity/Place, Statistical Evidence, Structured Evidence, Federation, Investigation, and Evidence Matrix layers.
+- Added place, layer, and spatial-feature inventories; explicit CRS metadata; temporal validity; point-distance and bounding-box relation previews; spatial coverage auditing; place-linked evidence handoffs; investigation-gap handoffs; and reproducible JSON export.
+- Spatial proximity, overlap, containment, clustering, raster resolution, coordinate precision, and map appearance never become automatic causality, identity, jurisdiction, evidence-strength, or truth judgments.
+- Missing CRS is never silently assumed and coordinate transformation is not automatic.
+- Synchronized Library 6.24.0 / backend 3.24.0 / web 2.24.0 / SDK 1.24.0.
+- No database migration; WordPress remains optional.
+
 ## 6.23.0 — Dataset Discovery & Statistical Evidence Workspace
 
 - Added `/research/data` as a quantitative evidence workspace over Structured Evidence, Scientific Literature, Global Federation, Investigation, and Evidence Matrix layers.

@@ -389,6 +389,18 @@ from .citation_bibliographic_workspace import (
     export_bibliography as export_research_bibliography,
     citation_authority_handoff_preview,
 )
+from .geospatial_place_research_workspace import (
+    contract as geospatial_research_contract,
+    readiness as geospatial_research_readiness,
+    bootstrap as geospatial_research_bootstrap,
+    inventory as build_geospatial_inventory,
+    relation_preview as geospatial_relation_preview,
+    coverage_audit as geospatial_coverage_audit,
+    temporal_validity as geospatial_temporal_validity,
+    evidence_handoff_preview as geospatial_evidence_handoff_preview,
+    investigation_handoff_preview as geospatial_investigation_handoff_preview,
+    export_workspace as export_geospatial_research,
+)
 from .dataset_discovery_statistical_evidence_workspace import (
     contract as statistical_evidence_contract,
     readiness as statistical_evidence_readiness,
@@ -928,6 +940,15 @@ def health() -> dict[str, Any]:
             "statistical_evidence_automatic_significance_inference": False,
             "statistical_evidence_automatic_causality_inference": False,
             "statistical_evidence_database_migration_required": False,
+            "geospatial_place_research_workspace": True,
+            "geospatial_place_research_route": "/research/geospatial",
+            "geospatial_analysis_composition_only": True,
+            "geospatial_automatic_external_geocoding": False,
+            "geospatial_server_persistence": False,
+            "geospatial_automatic_causality_inference": False,
+            "geospatial_automatic_identity_inference": False,
+            "geospatial_missing_crs_assumed": False,
+            "geospatial_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -942,8 +963,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.23.0",
-            "library_sdk_version": "1.23.0",
+            "library_web_version": "2.24.0",
+            "library_sdk_version": "1.24.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5195,6 +5216,60 @@ async def library_api_v1_statistical_investigation_handoff(request: Request) -> 
 async def library_api_v1_statistical_evidence_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_statistical_evidence_analysis(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/geospatial-research")
+def library_api_v1_geospatial_research_contract() -> dict[str, Any]:
+    return geospatial_research_contract()
+
+@app.get("/api/library/v1/geospatial-research/readiness")
+def library_api_v1_geospatial_research_readiness() -> dict[str, Any]:
+    return geospatial_research_readiness()
+
+@app.get("/api/library/v1/geospatial-research/bootstrap")
+def library_api_v1_geospatial_research_bootstrap() -> dict[str, Any]:
+    return geospatial_research_bootstrap()
+
+@app.post("/api/library/v1/geospatial-research/inventory")
+async def library_api_v1_geospatial_inventory(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_geospatial_inventory(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/geospatial-research/relation-preview")
+async def library_api_v1_geospatial_relations(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return geospatial_relation_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/geospatial-research/coverage-audit")
+async def library_api_v1_geospatial_coverage(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return geospatial_coverage_audit(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/geospatial-research/temporal-validity")
+async def library_api_v1_geospatial_temporal(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return geospatial_temporal_validity(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/geospatial-research/evidence-handoff-preview")
+async def library_api_v1_geospatial_evidence_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return geospatial_evidence_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/geospatial-research/investigation-handoff-preview")
+async def library_api_v1_geospatial_investigation_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return geospatial_investigation_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/geospatial-research/export")
+async def library_api_v1_geospatial_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_geospatial_research(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/citations/{record_id:path}")

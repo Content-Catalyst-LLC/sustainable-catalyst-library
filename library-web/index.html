@@ -677,6 +677,54 @@
         </section>
       </section>
 
+      <section class="view" data-view="geospatial" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Places · layers · CRS · temporal validity · overlap · proximity</p>
+          <h1>Geospatial &amp; Place-Based Research Workspace</h1>
+          <p>Organize place records, spatial layers, features, coordinate systems, temporal validity, and spatial relationships while keeping proximity, overlap, containment, and map appearance separate from causation, identity, jurisdiction, and truth.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Geospatial research navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/entities" data-app-link>Entities &amp; places</a>
+          <a href="/research/data" data-app-link>Data</a>
+          <a href="/research/geospatial" aria-current="page">Geospatial</a>
+          <a href="/research/evidence" data-app-link>Evidence</a>
+        </nav>
+        <div id="geospatial-readiness" class="context-strip"><span>Loading geospatial workspace…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Research frame</p><h2>Question &amp; scope</h2></div></div>
+            <label>Title<input id="geospatial-title" value="Geospatial research"></label>
+            <label class="archive-wide">Research question<textarea id="geospatial-question" rows="4" placeholder="What place-based question is being investigated?"></textarea></label>
+            <label class="archive-wide">Scope<textarea id="geospatial-scope" rows="4" placeholder="Geography, time range, jurisdiction, population, spatial resolution, exclusions, or other boundaries."></textarea></label>
+            <label>Claim ID for evidence handoff<input id="geospatial-claim-id" placeholder="Optional claim identifier"></label>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Spatial objects</p><h2>Places, layers &amp; features</h2></div></div>
+            <label class="archive-wide">Places JSON<textarea id="geospatial-places" rows="8" placeholder='[{"place_id":"p1","name":"Study area","bbox":[-91,38,-90,39],"crs":{"authority":"EPSG","code":"4326"}}]'></textarea></label>
+            <label class="archive-wide">Layers JSON<textarea id="geospatial-layers" rows="8" placeholder='[{"layer_id":"l1","title":"Flood hazard","kind":"hazard","bbox":[-90.8,38.2,-90.2,38.8],"crs":{"authority":"EPSG","code":"4326"}}]'></textarea></label>
+            <label class="archive-wide">Features JSON<textarea id="geospatial-features" rows="8" placeholder='[{"feature_id":"f1","label":"Facility A","geometry_type":"point","point":[-90.5,38.5],"crs":{"authority":"EPSG","code":"4326"}}]'></textarea></label>
+            <label class="archive-wide">Relations JSON<textarea id="geospatial-relations" rows="6" placeholder='[{"relation_id":"r1","left_id":"p1","right_id":"l1"}]'></textarea></label>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Analysis</p><h2>Spatial context without automatic inference</h2></div></div>
+          <div class="archive-actions">
+            <button id="geospatial-inventory" type="button">Build inventory</button>
+            <button id="geospatial-relations" type="button">Relation preview</button>
+            <button id="geospatial-coverage" type="button">Coverage audit</button>
+            <button id="geospatial-temporal" type="button">Temporal validity</button>
+            <button id="geospatial-evidence-handoff" type="button" class="secondary-button">Evidence handoff preview</button>
+            <button id="geospatial-investigation-handoff" type="button" class="secondary-button">Investigation handoff preview</button>
+            <button id="geospatial-export" type="button" class="secondary-button">Export geospatial JSON</button>
+          </div>
+        </section>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Geospatial research object</h2></div></div>
+          <div id="geospatial-output"><p class="empty-state">Inventories, spatial relation previews, coverage findings, temporal validity, and handoff previews appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="record" hidden>
         <div class="reader-toolbar"><button id="reader-back" class="text-button">← Back</button><span id="reader-id"></span></div>
         <article id="reader" class="reader"><p class="empty-state">Loading record…</p></article>
@@ -727,7 +775,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.23.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.24.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

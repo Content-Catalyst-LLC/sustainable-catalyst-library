@@ -301,6 +301,16 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/statistical-evidence/evidence-handoff-preview","name":"statistical-evidence-matrix-handoff-preview","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/statistical-evidence/investigation-handoff-preview","name":"statistical-evidence-investigation-handoff-preview","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/statistical-evidence/export","name":"statistical-evidence-export","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/geospatial-research","name":"geospatial-place-research-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/geospatial-research/readiness","name":"geospatial-place-research-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/geospatial-research/bootstrap","name":"geospatial-place-research-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/geospatial-research/inventory","name":"geospatial-place-inventory","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/geospatial-research/relation-preview","name":"geospatial-relation-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/geospatial-research/coverage-audit","name":"geospatial-coverage-audit","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/geospatial-research/temporal-validity","name":"geospatial-temporal-validity","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/geospatial-research/evidence-handoff-preview","name":"geospatial-evidence-handoff-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/geospatial-research/investigation-handoff-preview","name":"geospatial-investigation-handoff-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/geospatial-research/export","name":"geospatial-research-export","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -313,6 +323,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "research-investigation": {"resources":["research-question","subquestions","hypotheses","evidence-needs","source-strategy","tasks","execution-plan","decision-points","stop-conditions","risk-register","handoffs"],"direct_api":True,"authority":"python-backend-composition"},
     "evidence-matrix-analysis": {"resources":["claim-inventory","evidence-inventory","claim-evidence-links","matrix","support-profiles","contradictions","provenance-coverage","source-dependencies","gaps","handoffs"],"direct_api":True,"authority":"python-backend-composition"},
     "dataset-statistical-evidence": {"resources":["dataset-discovery","dataset-profiles","variable-dictionaries","statistical-results","uncertainty-audits","gap-analysis","evidence-handoff","investigation-handoff"],"direct_api":True,"authority":"python-backend-composition"},
+    "geospatial-place-research": {"resources":["places","spatial-features","layers","crs","temporal-validity","relation-preview","coverage-audit","evidence-handoff","investigation-handoff"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},
