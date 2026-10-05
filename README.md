@@ -147,3 +147,5 @@ Library v6.26.0 adds `/research/publication`, a Research Publication Studio that
 Library v6.27.0 adds `/research/graph`, a Unified Research Knowledge Graph that composes existing research objects and explicit relations into deterministic, provenance-preserving graph snapshots with validation, canonical-chain audits, neighborhood/path traversal, and portable export while preserving every originating authority.
 
 Library v6.28.0 adds `/research/workspace`, a Library ↔ Workspace Research Integration surface for explicit Library-to-Workspace research handoffs, Workspace-result registration previews, authority-preserving round-trip audits, and deterministic exchange export; live cross-product transport remains deferred to v6.29 certification.
+
+Library v6.29.0 adds `/research/integration-certification`, a cross-product research handoff and contract-certification surface for Research Librarian AI, Workspace, Research Lab, Workbench, Site Intelligence, Decision Studio, and Platform Core with explicit compatibility, provenance, authority, signed-write, failure-behavior, and runtime-observation boundaries.

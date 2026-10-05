@@ -12,10 +12,10 @@ from .research_interface import (
 from .independent_api import capability_catalog
 from .web_application import application_contract as web_application_contract
 
-LIBRARY_VERSION = "6.28.0"
-BACKEND_VERSION = "3.28.0"
-WEB_VERSION = "2.28.0"
-SDK_VERSION = "1.28.0"
+LIBRARY_VERSION = "6.29.0"
+BACKEND_VERSION = "3.29.0"
+WEB_VERSION = "2.29.0"
+SDK_VERSION = "1.29.0"
 
 CONTRACT = "sc-library-unified-discovery-research-navigation/1.0"
 READINESS_CONTRACT = "sc-library-unified-discovery-research-navigation-readiness/1.0"
@@ -75,6 +75,7 @@ def navigation_model() -> dict[str, Any]:
         {"id": "research-publication", "label": "Publication", "route": "/research/publication", "mode": "research-publication"},
         {"id": "research-graph", "label": "Graph", "route": "/research/graph", "mode": "research-graph"},
         {"id": "research-workspace", "label": "Workspace", "route": "/research/workspace", "mode": "research-workspace"},
+        {"id": "research-integration-certification", "label": "Integration Certification", "route": "/research/integration-certification", "mode": "research-integration-certification"},
         {"id": "projects", "label": "Projects", "route": "/account?section=workspaces", "mode": "projects"},
     ]
     aliases = {
@@ -112,8 +113,8 @@ def contract() -> dict[str, Any]:
         "canonical_research_route": "/research",
         "navigation": nav,
         "wordpress": {"role": "optional-adapter", "required": False, "authoritative": False},
-        "next_release": "6.29.0",
-        "next_release_name": "Cross-Product Research Handoff & Contract Certification",
+        "next_release": "6.30.0",
+        "next_release_name": "Unified Research Project Workspace",
         "guardrails": guardrails(),
     }
 
@@ -179,6 +180,8 @@ def resolve_route(path: str) -> dict[str, Any]:
     alias = nav["aliases"].get(raw)
     if alias:
         resolved = {"requested_route": raw, **alias, "compatibility_alias": True}
+    elif raw == "/research/integration-certification":
+        resolved = {"requested_route": raw, "canonical_route": raw, "surface": "research", "mode": "research-integration-certification", "compatibility_alias": False}
     elif raw == "/research/workspace":
         resolved = {"requested_route": raw, "canonical_route": raw, "surface": "research", "mode": "research-workspace", "compatibility_alias": False}
     elif raw == "/research/graph":

@@ -1,3 +1,14 @@
+## 6.29.0 — Cross-Product Research Handoff & Contract Certification
+
+- Added `/research/integration-certification` and `/api/library/v1/cross-product-certification`.
+- Added explicit product contracts for Research Librarian AI, Workspace, Research Lab, Workbench, Site Intelligence, Decision Studio, and Platform Core.
+- Added provenance-preserving cross-product handoff envelopes, validation, compatibility matrices, fail-closed behavior audits, and deterministic certification export.
+- Structural contract certification remains distinct from live runtime certification; live claims require explicit runtime observations.
+- Preserves originating-product authority, Platform Core governed-meaning authority, and signed persistence boundaries.
+- No automatic remote execution, cross-product push, result import, persistence, claim/evidence/truth promotion, or Platform Core promotion.
+- Synchronized Library 6.29.0 / backend 3.29.0 / web 2.29.0 / SDK 1.29.0.
+- No database migration; WordPress remains optional.
+
 ## 6.28.0 — Library ↔ Workspace Research Integration
 
 - Added `/research/workspace` and `/api/library/v1/workspace-integration`.

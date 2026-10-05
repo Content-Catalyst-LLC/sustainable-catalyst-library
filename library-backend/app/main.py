@@ -401,6 +401,18 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .cross_product_research_handoff_certification import (
+    contract as cross_product_research_certification_contract,
+    readiness as cross_product_research_certification_readiness,
+    bootstrap as cross_product_research_certification_bootstrap,
+    product_contract as cross_product_research_product_contract,
+    build_handoff as build_cross_product_research_handoff,
+    validate_handoff as validate_cross_product_research_handoff,
+    compatibility_matrix as cross_product_research_compatibility_matrix,
+    failure_behavior_audit as cross_product_research_failure_audit,
+    certify as certify_cross_product_research_contracts,
+    export_certification as export_cross_product_research_certification,
+)
 from .library_workspace_research_integration import (
     contract as library_workspace_research_integration_contract,
     readiness as library_workspace_research_integration_readiness,
@@ -1027,6 +1039,16 @@ def health() -> dict[str, Any]:
             "library_workspace_automatic_execution": False,
             "library_workspace_server_persistence": False,
             "library_workspace_database_migration_required": False,
+            "cross_product_research_handoff_contract_certification": True,
+            "cross_product_research_handoff_contract_certification_route": "/research/integration-certification",
+            "cross_product_registered_products": 7,
+            "cross_product_structural_contract_certification": True,
+            "cross_product_failure_behavior_certification": True,
+            "cross_product_runtime_observation_framework": True,
+            "cross_product_all_live_runtimes_certified": False,
+            "cross_product_automatic_remote_execution": False,
+            "cross_product_automatic_result_import": False,
+            "cross_product_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -1041,8 +1063,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.28.0",
-            "library_sdk_version": "1.28.0",
+            "library_web_version": "2.29.0",
+            "library_sdk_version": "1.29.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5402,6 +5424,59 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/cross-product-certification")
+def library_api_v1_cross_product_certification_contract() -> dict[str, Any]:
+    return cross_product_research_certification_contract()
+
+@app.get("/api/library/v1/cross-product-certification/readiness")
+def library_api_v1_cross_product_certification_readiness() -> dict[str, Any]:
+    return cross_product_research_certification_readiness()
+
+@app.get("/api/library/v1/cross-product-certification/bootstrap")
+def library_api_v1_cross_product_certification_bootstrap() -> dict[str, Any]:
+    return cross_product_research_certification_bootstrap()
+
+@app.get("/api/library/v1/cross-product-certification/products/{product_key}")
+def library_api_v1_cross_product_certification_product(product_key: str) -> dict[str, Any]:
+    try: return cross_product_research_product_contract(product_key)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=404,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/cross-product-certification/handoff")
+async def library_api_v1_cross_product_certification_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_cross_product_research_handoff(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/cross-product-certification/handoff/validate")
+async def library_api_v1_cross_product_certification_validate_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return validate_cross_product_research_handoff(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/cross-product-certification/compatibility")
+async def library_api_v1_cross_product_certification_compatibility(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return cross_product_research_compatibility_matrix(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/cross-product-certification/failure-audit")
+async def library_api_v1_cross_product_certification_failure_audit(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return cross_product_research_failure_audit(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/cross-product-certification/certify")
+async def library_api_v1_cross_product_certification_certify(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return certify_cross_product_research_contracts(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/cross-product-certification/export")
+async def library_api_v1_cross_product_certification_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_cross_product_research_certification(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/workspace-integration")
