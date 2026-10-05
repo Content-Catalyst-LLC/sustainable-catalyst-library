@@ -257,6 +257,17 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"GET","path":"/api/library/v1/entity-place-workspace/cases/{case_id}","name":"entity-resolution-persisted-case","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/entity-place-workspace/export","name":"entity-place-research-export","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/entity-place-workspace/persistence-handoff-preview","name":"entity-place-persistence-handoff-preview","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-synthesis","name":"research-synthesis-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-synthesis/readiness","name":"research-synthesis-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-synthesis/bootstrap","name":"research-synthesis-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-synthesis/synthesize","name":"research-synthesis-build","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-synthesis/evidence-matrix","name":"research-synthesis-evidence-matrix","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-synthesis/contradictions","name":"research-synthesis-contradiction-ledger","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-synthesis/convergence","name":"research-synthesis-convergence-summary","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-synthesis/source-attribution","name":"research-synthesis-source-attribution","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-synthesis/gaps","name":"research-synthesis-gap-analysis","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-synthesis/export","name":"research-synthesis-export","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-synthesis/publishing-handoff-preview","name":"research-synthesis-publishing-handoff-preview","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -265,6 +276,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "language": {"resources":["original-language","ocr-htr-transcription","linguistic-corpus","entity-resolution","translation-alignment"],"direct_api":True},
     "computational-linguistics": {"resources":["corpus-workspace","frequency","kwic","ngrams","cooccurrence","analysis-export"],"direct_api":True,"authority":"python-backend-composition"},
     "entity-place-resolution": {"resources":["entity-authority","multilingual-name-forms","places","historical-toponyms","temporal-resolution","candidate-matrix","explicit-decisions"],"direct_api":True,"authority":"python-backend-composition"},
+    "research-synthesis": {"resources":["source-inventory","claim-inventory","evidence-matrix","contradiction-ledger","convergence-summary","source-attribution","gap-analysis","synthesis-export"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},

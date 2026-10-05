@@ -129,3 +129,5 @@ Library v6.17.0.1 repairs citation workspace route precedence so static `/citati
 Library v6.18.0 adds `/research/corpus`, a computational-linguistics workspace over the existing v5.47 durable linguistic-corpus authority, with frequency, KWIC, n-gram, co-occurrence, lineage, and export analysis.
 
 Library v6.19.0 adds `/research/entities`, an entity, place, and historical-toponym workspace over the existing v5.48 durable cross-language resolution authority.
+
+Library v6.20.0 adds `/research/synthesis`, a composition workspace for explicit cross-source synthesis, evidence matrices, contradictions, convergence, attribution, gaps, and export packages.

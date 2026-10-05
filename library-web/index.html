@@ -476,6 +476,55 @@
         <section class="info-card"><div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Entity and toponym analysis</h2></div></div><div id="entities-output"><p class="empty-state">Authority previews, historical toponym timelines, resolution candidates, matrices, decisions, and export manifests appear here.</p></div></section>
       </section>
 
+      <section class="view" data-view="synthesis" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Evidence matrices · contradictions · convergence · attribution · gaps</p>
+          <h1>Research Synthesis Workspace</h1>
+          <p>Compose sources, claims, citations, annotations, timelines, corpus observations, and entity-resolution outputs into a reproducible synthesis without collapsing disagreement into a single automated answer.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Research synthesis navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/citations" data-app-link>Citations</a>
+          <a href="/research/corpus" data-app-link>Corpus</a>
+          <a href="/research/entities" data-app-link>Entities &amp; Places</a>
+          <a href="/research/synthesis" aria-current="page">Synthesis</a>
+        </nav>
+        <div id="synthesis-readiness" class="context-strip"><span>Loading synthesis workspace…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Research frame</p><h2>Question &amp; scope</h2></div></div>
+            <label>Title<input id="synthesis-title" value="Research synthesis"></label>
+            <label class="archive-wide">Research question<textarea id="synthesis-question" rows="4" placeholder="What question is this synthesis addressing?"></textarea></label>
+            <label class="archive-wide">Scope<textarea id="synthesis-scope" rows="4" placeholder="Population, geography, time period, method, exclusions, or other scope notes."></textarea></label>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Structured inputs</p><h2>Sources, claims &amp; relationships</h2></div></div>
+            <p class="form-note">Paste JSON arrays. Relationships must explicitly name both <code>claim_id</code> and <code>source_id</code> with a stance such as supports, contradicts, contextualizes, qualifies, neutral, or unknown.</p>
+            <label class="archive-wide">Sources JSON<textarea id="synthesis-sources" rows="7" placeholder='[{"source_id":"s1","kind":"publication","title":"Study A"}]'></textarea></label>
+            <label class="archive-wide">Claims JSON<textarea id="synthesis-claims" rows="7" placeholder='[{"claim_id":"c1","text":"Claim text"}]'></textarea></label>
+            <label class="archive-wide">Relationships JSON<textarea id="synthesis-relationships" rows="7" placeholder='[{"claim_id":"c1","source_id":"s1","stance":"supports"}]'></textarea></label>
+            <label class="archive-wide">Unresolved questions JSON<textarea id="synthesis-questions" rows="5" placeholder='["What remains unknown?"]'></textarea></label>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Synthesis operations</p><h2>Compose, compare, preserve uncertainty</h2></div></div>
+          <div class="archive-actions">
+            <button id="synthesis-build" type="button">Build synthesis</button>
+            <button id="synthesis-matrix" type="button">Evidence matrix</button>
+            <button id="synthesis-contradictions" type="button">Contradiction ledger</button>
+            <button id="synthesis-convergence" type="button">Convergence summary</button>
+            <button id="synthesis-attribution" type="button">Source attribution</button>
+            <button id="synthesis-gaps" type="button">Gap analysis</button>
+            <button id="synthesis-handoff" type="button" class="secondary-button">Publishing handoff preview</button>
+            <button id="synthesis-export" type="button" class="secondary-button">Export synthesis JSON</button>
+          </div>
+        </section>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Synthesis object</h2></div></div>
+          <div id="synthesis-output"><p class="empty-state">Synthesis objects, matrices, contradictions, convergence patterns, attribution maps, gaps, and export manifests appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="record" hidden>
         <div class="reader-toolbar"><button id="reader-back" class="text-button">← Back</button><span id="reader-id"></span></div>
         <article id="reader" class="reader"><p class="empty-state">Loading record…</p></article>
@@ -526,7 +575,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.19.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.20.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

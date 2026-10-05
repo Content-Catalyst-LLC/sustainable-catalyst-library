@@ -4,7 +4,7 @@ from hashlib import sha256
 import json
 from typing import Any
 
-WEB_VERSION = "2.19.0"
+WEB_VERSION = "2.20.0"
 CONTRACT = "sc-library-web-application/1.0"
 READINESS_CONTRACT = "sc-library-web-readiness/1.0"
 
@@ -18,6 +18,7 @@ SURFACES: tuple[dict[str, Any], ...] = (
     {"id":"citation-bibliographic-workspace","label":"Citations","route":"/research/citations","api":"/api/library/v1/citations/workspace","public":True,"index":False,"parent_surface":"research"},
     {"id":"corpus-computational-linguistics-workspace","label":"Corpus","route":"/research/corpus","api":"/api/library/v1/corpus-workspace","public":True,"index":False,"parent_surface":"research"},
     {"id":"entity-place-historical-toponym-workspace","label":"Entities & Places","route":"/research/entities","api":"/api/library/v1/entity-place-workspace","public":True,"index":False,"parent_surface":"research"},
+    {"id":"research-synthesis-workspace","label":"Synthesis","route":"/research/synthesis","api":"/api/library/v1/research-synthesis","public":True,"index":False,"parent_surface":"research"},
     {"id":"search","label":"Search","route":"/search","api":"/api/library/v1/search","public":True,"index":False,"alias_of":"research","navigation_mode":"search"},
     {"id":"reader","label":"Reader","route":"/record/{record_id}","api":"/api/library/v1/records/{record_id}","public":True,"index":True},
     {"id":"discover","label":"Discover","route":"/discover","api":"/api/library/v1/capabilities","public":True,"index":False,"alias_of":"research","navigation_mode":"discover"},
@@ -44,8 +45,8 @@ def application_contract() -> dict[str, Any]:
         "application_id": "sustainable-catalyst-library-web",
         "application_contract_id": "library-web-application:" + fp[:32],
         "application_fingerprint_sha256": fp,
-        "library_version": "6.19.0",
-        "backend_version": "3.19.0",
+        "library_version": "6.20.0",
+        "backend_version": "3.20.0",
         "web_version": WEB_VERSION,
         "state": "independent-primary-application",
         "deployment_model": "independent-primary-web-service",

@@ -389,6 +389,19 @@ from .citation_bibliographic_workspace import (
     export_bibliography as export_research_bibliography,
     citation_authority_handoff_preview,
 )
+from .research_synthesis_workspace import (
+    contract as research_synthesis_contract,
+    readiness as research_synthesis_readiness,
+    bootstrap as research_synthesis_bootstrap,
+    build_synthesis as build_research_synthesis,
+    evidence_matrix as research_synthesis_evidence_matrix,
+    contradiction_ledger as research_synthesis_contradiction_ledger,
+    convergence_summary as research_synthesis_convergence_summary,
+    source_attribution as research_synthesis_source_attribution,
+    gap_analysis as research_synthesis_gap_analysis,
+    export_synthesis as export_research_synthesis,
+    publishing_handoff_preview as research_synthesis_publishing_handoff_preview,
+)
 from .entity_place_historical_toponym_workspace import (
     contract as entity_place_workspace_contract,
     readiness as entity_place_workspace_readiness,
@@ -845,6 +858,13 @@ def health() -> dict[str, Any]:
             "entity_place_workspace_ambiguity_preserved": True,
             "entity_place_workspace_automatic_resolution": False,
             "entity_place_workspace_database_migration_required": False,
+            "research_synthesis_workspace": True,
+            "research_synthesis_route": "/research/synthesis",
+            "research_synthesis_composition_only": True,
+            "research_synthesis_server_persistence": False,
+            "research_synthesis_automatic_truth_adjudication": False,
+            "research_synthesis_automatic_contradiction_resolution": False,
+            "research_synthesis_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -859,8 +879,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.19.0",
-            "library_sdk_version": "1.19.0",
+            "library_web_version": "2.20.0",
+            "library_sdk_version": "1.20.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -4872,6 +4892,66 @@ async def library_api_v1_entity_place_export(request: Request) -> dict[str, Any]
 async def library_api_v1_entity_place_handoff_preview(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return entity_place_persistence_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-synthesis")
+def library_api_v1_research_synthesis_contract() -> dict[str, Any]:
+    return research_synthesis_contract()
+
+@app.get("/api/library/v1/research-synthesis/readiness")
+def library_api_v1_research_synthesis_readiness() -> dict[str, Any]:
+    return research_synthesis_readiness()
+
+@app.get("/api/library/v1/research-synthesis/bootstrap")
+def library_api_v1_research_synthesis_bootstrap() -> dict[str, Any]:
+    return research_synthesis_bootstrap()
+
+@app.post("/api/library/v1/research-synthesis/synthesize")
+async def library_api_v1_research_synthesis_build(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_research_synthesis(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-synthesis/evidence-matrix")
+async def library_api_v1_research_synthesis_matrix(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_synthesis_evidence_matrix(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-synthesis/contradictions")
+async def library_api_v1_research_synthesis_contradictions(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_synthesis_contradiction_ledger(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-synthesis/convergence")
+async def library_api_v1_research_synthesis_convergence(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_synthesis_convergence_summary(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-synthesis/source-attribution")
+async def library_api_v1_research_synthesis_attribution(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_synthesis_source_attribution(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-synthesis/gaps")
+async def library_api_v1_research_synthesis_gaps(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_synthesis_gap_analysis(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-synthesis/export")
+async def library_api_v1_research_synthesis_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_research_synthesis(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-synthesis/publishing-handoff-preview")
+async def library_api_v1_research_synthesis_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_synthesis_publishing_handoff_preview(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/citations/{record_id:path}")

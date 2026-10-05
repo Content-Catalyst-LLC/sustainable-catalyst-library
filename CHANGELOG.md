@@ -1,3 +1,12 @@
+## 6.20.0 — Research Synthesis Workspace
+
+- Added `/research/synthesis` as a cross-source synthesis workspace over existing Library citation, provenance/evidence, annotation, timeline, corpus, entity/place, research-state, and research-package authorities.
+- Added source and claim inventories, explicit source↔claim stance relationships, evidence matrices, contradiction ledgers, convergence summaries, source-attribution maps, unresolved-question preservation, gap analysis, and reproducible JSON synthesis exports.
+- Added research-package publishing handoff previews while keeping synthesis workspace state non-authoritative and non-persistent.
+- Preserves disagreement and source attribution; support counts, source counts, citation counts, agreement, and convergence patterns are never treated as truth probability, quality scores, or automatic winner selection.
+- Synchronized Library 6.20.0 / backend 3.20.0 / web 2.20.0 / SDK 1.20.0.
+- No database migration; WordPress remains optional.
+
 ## 6.19.0 — Entity, Place & Historical Toponym Workspace
 
 - Added `/research/entities` as a researcher-facing workspace over the existing v5.48 Python/PostgreSQL cross-language entity-resolution authority.
