@@ -246,6 +246,17 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/corpus-workspace/cooccurrence","name":"computational-linguistics-cooccurrence","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/corpus-workspace/export","name":"computational-linguistics-export","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/corpus-workspace/persistence-handoff-preview","name":"linguistic-corpus-persistence-handoff-preview","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/entity-place-workspace","name":"entity-place-historical-toponym-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/entity-place-workspace/readiness","name":"entity-place-historical-toponym-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/entity-place-workspace/bootstrap","name":"entity-place-historical-toponym-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/entity-place-workspace/authority-preview","name":"entity-authority-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/entity-place-workspace/resolve-preview","name":"entity-resolution-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/entity-place-workspace/toponym-timeline","name":"historical-toponym-timeline","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/entity-place-workspace/candidate-matrix","name":"entity-resolution-candidate-matrix","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/entity-place-workspace/decision-preview","name":"entity-resolution-decision-preview","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/entity-place-workspace/cases/{case_id}","name":"entity-resolution-persisted-case","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/entity-place-workspace/export","name":"entity-place-research-export","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/entity-place-workspace/persistence-handoff-preview","name":"entity-place-persistence-handoff-preview","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -253,6 +264,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "federation": {"resources":["sources","connectors","global-knowledge-federation"],"direct_api":True,"authority":"python-backend"},
     "language": {"resources":["original-language","ocr-htr-transcription","linguistic-corpus","entity-resolution","translation-alignment"],"direct_api":True},
     "computational-linguistics": {"resources":["corpus-workspace","frequency","kwic","ngrams","cooccurrence","analysis-export"],"direct_api":True,"authority":"python-backend-composition"},
+    "entity-place-resolution": {"resources":["entity-authority","multilingual-name-forms","places","historical-toponyms","temporal-resolution","candidate-matrix","explicit-decisions"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},

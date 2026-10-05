@@ -428,6 +428,54 @@
         </section>
       </section>
 
+      <section class="view" data-view="entities" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Multilingual names · places · historical toponyms · temporal identity</p>
+          <h1>Entity, Place & Historical Toponym Workspace</h1>
+          <p>Compare multilingual entity names, endonyms, exonyms, transliterations, historical place names, temporal validity windows, and explicit resolution candidates without turning similarity or ranking into identity claims.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Entity and place workspace navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/corpus" data-app-link>Corpus</a>
+          <a href="/research/entities" aria-current="page">Entities &amp; Places</a>
+        </nav>
+        <div id="entities-readiness" class="context-strip"><span>Loading entity/place workspace…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Authority preview</p><h2>Entity and name forms</h2></div></div>
+            <p class="form-note">Paste a non-persistent authority JSON object containing <code>entities</code>. Original names and historical validity windows are preserved.</p>
+            <label class="archive-wide">Authority JSON<textarea id="entities-authority-json" rows="17" placeholder='{"title":"Historical places","entities":[...]}'></textarea></label>
+            <div class="archive-actions"><button id="entities-authority-preview" type="button">Preview authority</button><button id="entities-toponym-timeline" type="button" class="secondary-button">Toponym timeline</button><button id="entities-authority-handoff" type="button" class="secondary-button">Authority handoff preview</button></div>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Resolution query</p><h2>Candidate comparison</h2></div></div>
+            <label>Name<input id="entities-query-name" placeholder="Historical or multilingual name"></label>
+            <label>Year<input id="entities-query-year" type="number" placeholder="e.g. 1920"></label>
+            <label>Language (BCP 47)<input id="entities-query-language" placeholder="en"></label>
+            <label>Script (ISO 15924)<input id="entities-query-script" placeholder="Latn"></label>
+            <label>Entity type<select id="entities-query-type"><option value="">Any</option><option value="place">place</option><option value="jurisdiction">jurisdiction</option><option value="person">person</option><option value="organization">organization</option><option value="event">event</option><option value="work">work</option><option value="concept">concept</option><option value="group">group</option><option value="other">other</option></select></label>
+            <label>Candidate limit<input id="entities-query-limit" type="number" min="1" max="100" value="25"></label>
+            <div class="archive-actions"><button id="entities-resolve" type="button">Resolve preview</button><button id="entities-matrix" type="button">Candidate matrix</button><button id="entities-case-handoff" type="button" class="secondary-button">Case handoff preview</button></div>
+          </section>
+        </div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Decision preview</p><h2>Explicit adjudication</h2></div></div>
+            <label>Decision state<select id="entities-decision-state"><option value="unresolved">unresolved</option><option value="ambiguous">ambiguous</option><option value="accepted">accepted</option><option value="rejected">rejected</option></select></label>
+            <label>Selected candidate ID<input id="entities-selected-candidate" placeholder="Required only for accepted"></label>
+            <label>Adjudicator<input id="entities-adjudicator" placeholder="Researcher or external authority"></label>
+            <label class="archive-wide">Rationale<textarea id="entities-rationale" rows="5" placeholder="Explicit reasoning and source basis"></textarea></label>
+            <button id="entities-decision-preview" type="button">Validate decision preview</button>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Persisted case</p><h2>Inspect prior resolution</h2></div></div>
+            <label>Case ID<input id="entities-case-id" placeholder="resolution-case:…"></label>
+            <div class="archive-actions"><button id="entities-load-case" type="button">Load persisted case</button><button id="entities-decision-handoff" type="button" class="secondary-button">Decision handoff preview</button><button id="entities-export" type="button" class="secondary-button">Export research JSON</button></div>
+          </section>
+        </div>
+        <section class="info-card"><div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Entity and toponym analysis</h2></div></div><div id="entities-output"><p class="empty-state">Authority previews, historical toponym timelines, resolution candidates, matrices, decisions, and export manifests appear here.</p></div></section>
+      </section>
+
       <section class="view" data-view="record" hidden>
         <div class="reader-toolbar"><button id="reader-back" class="text-button">← Back</button><span id="reader-id"></span></div>
         <article id="reader" class="reader"><p class="empty-state">Loading record…</p></article>
@@ -478,7 +526,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.18.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.19.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

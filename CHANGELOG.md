@@ -1,3 +1,12 @@
+## 6.19.0 — Entity, Place & Historical Toponym Workspace
+
+- Added `/research/entities` as a researcher-facing workspace over the existing v5.48 Python/PostgreSQL cross-language entity-resolution authority.
+- Added non-persistent authority previews, multilingual/endonym/exonym/transliteration name forms, historical toponym timelines, temporal candidate resolution, candidate comparison matrices, explicit decision previews, persisted-case inspection, and reproducible JSON research exports.
+- Added signed persistence-handoff previews for authority registries, resolution cases, and decisions without creating a parallel entity store or silently persisting workspace previews.
+- Preserves ambiguity and source/name-form provenance; candidate scores/ranks, name similarity, coordinates, country codes, and historical validity windows never establish identity, truth, evidence strength, or winner selection.
+- Synchronized Library 6.19.0 / backend 3.19.0 / web 2.19.0 / SDK 1.19.0.
+- No database migration; WordPress remains optional.
+
 ## 6.18.0 — Corpus & Computational Linguistics Workspace
 
 - Added `/research/corpus` as a researcher-facing corpus and computational-linguistics workspace over the existing v5.47 Python/PostgreSQL linguistic-corpus authority.

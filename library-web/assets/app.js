@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.18.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.19.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null, archiveBootstrap: null, archiveSources: [], archiveSearchResult: null, criticismBootstrap: null, timelineBootstrap: null, timelineEvents: [], notesBootstrap: null, researchNotes: [], citationsBootstrap: null, bibliographyItems: [], corpusBootstrap: null };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null, archiveBootstrap: null, archiveSources: [], archiveSearchResult: null, criticismBootstrap: null, timelineBootstrap: null, timelineEvents: [], notesBootstrap: null, researchNotes: [], citationsBootstrap: null, bibliographyItems: [], corpusBootstrap: null, entitiesBootstrap: null };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -38,15 +38,16 @@ function resolveUnifiedResearchMode(name) {
 function route() {
   const raw=currentRoute(); const [name="research", ...rest]=raw.split("/");
   const compatibilityResearch = name === "search" || name === "discover";
+  const entitiesResearch = name === "research" && rest[0] === "entities";
   const corpusResearch = name === "research" && rest[0] === "corpus";
   const citationsResearch = name === "research" && rest[0] === "citations";
   const notesResearch = name === "research" && rest[0] === "notes";
   const timelineResearch = name === "research" && rest[0] === "archives" && rest[1] === "timeline";
   const criticismResearch = name === "research" && rest[0] === "archives" && rest[1] === "compare";
   const archiveResearch = name === "research" && rest[0] === "archives" && !criticismResearch && !timelineResearch;
-  const view = corpusResearch ? "corpus" : citationsResearch ? "citations" : notesResearch ? "notes" : timelineResearch ? "timeline" : criticismResearch ? "criticism" : archiveResearch ? "archives" : compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
+  const view = entitiesResearch ? "entities" : corpusResearch ? "corpus" : citationsResearch ? "citations" : notesResearch ? "notes" : timelineResearch ? "timeline" : criticismResearch ? "criticism" : archiveResearch ? "archives" : compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
   $$(".view").forEach(el => { el.hidden = el.dataset.view !== view; });
-  const navView=["archives","criticism","timeline","notes","citations","corpus"].includes(view) ? "research" : view;
+  const navView=["archives","criticism","timeline","notes","citations","corpus","entities"].includes(view) ? "research" : view;
   $$('[data-nav]').forEach(a => a.setAttribute('aria-current', a.dataset.nav===navView ? 'page' : 'false'));
   updatePublicMetadata(view, rest);
   if (view === "research") loadUnifiedNavigation(resolveUnifiedResearchMode(name));
@@ -56,6 +57,7 @@ function route() {
   if (view === "notes") loadResearchNotesWorkspace();
   if (view === "citations") loadCitationWorkspace();
   if (view === "corpus") loadCorpusWorkspace();
+  if (view === "entities") loadEntityPlaceWorkspace();
   if (view === "system") loadSystem();
   if (view === "account") loadSession().then(()=>{ if(new URLSearchParams(location.search).get("section")==="workspaces") requestAnimationFrame(()=>$("#workspace-card")?.scrollIntoView({block:"start"})); });
   if (view === "record" && rest.length) loadRecord(decodeURIComponent(rest.join("/")));
@@ -72,12 +74,12 @@ function navigate(path) {
 
 function updatePublicMetadata(view, rest=[]) {
   const origin=String(config.publicOrigin || location.origin).replace(/\/$/, "");
-  let path=view === "research" ? "/research" : view === "archives" ? "/research/archives" : view === "criticism" ? "/research/archives/compare" : view === "timeline" ? "/research/archives/timeline" : view === "notes" ? "/research/notes" : view === "citations" ? "/research/citations" : view === "corpus" ? "/research/corpus" : `/${view}`;
+  let path=view === "research" ? "/research" : view === "archives" ? "/research/archives" : view === "criticism" ? "/research/archives/compare" : view === "timeline" ? "/research/archives/timeline" : view === "notes" ? "/research/notes" : view === "citations" ? "/research/citations" : view === "corpus" ? "/research/corpus" : view === "entities" ? "/research/entities" : `/${view}`;
   if (view === "record" && rest.length) path=`/record/${encodeURIComponent(decodeURIComponent(rest.join("/")))}`;
   const canonical=document.querySelector('link[rel="canonical"]') || document.head.appendChild(Object.assign(document.createElement('link'),{rel:'canonical'}));
   canonical.href=origin + (path === "/search" ? path : path);
   const robots=document.querySelector('meta[name="robots"]') || document.head.appendChild(Object.assign(document.createElement('meta'),{name:'robots'}));
-  robots.content=["research","archives","criticism","timeline","notes","citations","corpus","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
+  robots.content=["research","archives","criticism","timeline","notes","citations","corpus","entities","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
 }
 
 function setMeta(name, content, property=false) {
@@ -745,9 +747,20 @@ async function previewCorpus(){try{const data=await api('/corpus-workspace/previ
 async function corpusHandoffPreview(){try{const payload=corpusWorkspacePayload();delete payload.corpus_id;const data=await api('/corpus-workspace/persistence-handoff-preview',{method:'POST',body:JSON.stringify(payload)});corpusOutput('Persistence handoff preview',data);}catch(e){corpusOutput('Persistence handoff error',{error:e.message});}}
 async function exportCorpusAnalysis(){try{const data=await api('/corpus-workspace/export',{method:'POST',body:JSON.stringify(corpusAnalysisPayload())});corpusOutput('Computational linguistics export',data);const blob=new Blob([data.content||""],{type:data.media_type||'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=data.filename||'sustainable-catalyst-computational-linguistics-analysis.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){corpusOutput('Export error',{error:e.message});}}
 
+function entitiesOutput(label,data){const t=$("#entities-output");if(t)t.innerHTML=`<p class="eyebrow">${escapeHtml(label)}</p><pre>${escapeHtml(JSON.stringify(data,null,2))}</pre>`;}
+function entityAuthorityPayload(){const raw=$("#entities-authority-json")?.value.trim()||"";if(!raw)throw new Error("Authority JSON is required.");let authority;try{authority=JSON.parse(raw);}catch{throw new Error("Authority JSON is invalid.");}return authority;}
+function entityQueryPayload(){const yearRaw=$("#entities-query-year")?.value.trim()||"";return {name:$("#entities-query-name")?.value.trim()||"",year:yearRaw===""?null:Number(yearRaw),language_bcp47:$("#entities-query-language")?.value.trim()||null,script_iso15924:$("#entities-query-script")?.value.trim()||null,entity_type:$("#entities-query-type")?.value||null};}
+function entityDecisionPayload(){return {state:$("#entities-decision-state")?.value||"unresolved",selected_candidate_id:$("#entities-selected-candidate")?.value.trim()||null,adjudicator:$("#entities-adjudicator")?.value.trim()||null,rationale:$("#entities-rationale")?.value.trim()||null};}
+function entityWorkspacePayload(){return {authority:entityAuthorityPayload(),query:entityQueryPayload(),limit:Number($("#entities-query-limit")?.value||25),decision:entityDecisionPayload(),year:entityQueryPayload().year};}
+async function loadEntityPlaceWorkspace(){const status=$("#entities-readiness");try{const data=state.entitiesBootstrap||await api('/entity-place-workspace/bootstrap');state.entitiesBootstrap=data;const r=data.readiness||{};if(status)status.innerHTML=`<span><strong>${escapeHtml(r.state||"unknown")}</strong> workspace</span><span>v5.48 durable resolution authority preserved</span><span>ambiguity preserved</span><span>Web ${escapeHtml(data.web_version||config.webVersion||"")}</span>`;}catch(e){if(status)status.innerHTML=`<span class="error-state">${escapeHtml(e.message)}</span>`;}}
+async function entityPost(path,label,payload=null){try{const body=payload||entityWorkspacePayload();const data=await api(`/entity-place-workspace/${path}`,{method:'POST',body:JSON.stringify(body)});entitiesOutput(label,data);return data;}catch(e){entitiesOutput(`${label} error`,{error:e.message});return null;}}
+async function loadEntityPersistedCase(){const id=$("#entities-case-id")?.value.trim()||"";if(!id){entitiesOutput("Persisted case error",{error:"Case ID is required."});return;}try{const data=await api(`/entity-place-workspace/cases/${encodeURIComponent(id)}`);entitiesOutput("Persisted resolution case",data);}catch(e){entitiesOutput("Persisted case error",{error:e.message});}}
+async function entityHandoff(type){try{let payload={handoff_type:type};if(type==="authority")payload.authority=entityAuthorityPayload();if(type==="resolution-case"){payload.query=entityQueryPayload();payload.limit=Number($("#entities-query-limit")?.value||25);}if(type==="decision"){payload.case_id=$("#entities-case-id")?.value.trim()||"";payload.decision=entityDecisionPayload();}const data=await api('/entity-place-workspace/persistence-handoff-preview',{method:'POST',body:JSON.stringify(payload)});entitiesOutput(`${type} persistence handoff preview`,data);}catch(e){entitiesOutput("Persistence handoff error",{error:e.message});}}
+async function exportEntityWorkspace(){try{const data=await api('/entity-place-workspace/export',{method:'POST',body:JSON.stringify(entityWorkspacePayload())});entitiesOutput('Entity/place research export',data);const blob=new Blob([data.content||""],{type:data.media_type||'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=data.filename||'sustainable-catalyst-entity-place-historical-toponym-research.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){entitiesOutput("Export error",{error:e.message});}}
+
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Historical archives workspace','/historical-archives/workspace/readiness'],['Primary-source comparison & source criticism','/historical-archives/source-criticism/readiness'],['Research timeline & historical events','/historical-archives/timeline-workspace/readiness'],['Research annotation & scholarly notes','/annotations/readiness'],['Citation workspace & bibliographic intelligence','/citations/workspace/readiness'],['Corpus & computational linguistics','/corpus-workspace/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Historical archives workspace','/historical-archives/workspace/readiness'],['Primary-source comparison & source criticism','/historical-archives/source-criticism/readiness'],['Research timeline & historical events','/historical-archives/timeline-workspace/readiness'],['Research annotation & scholarly notes','/annotations/readiness'],['Citation workspace & bibliographic intelligence','/citations/workspace/readiness'],['Corpus & computational linguistics','/corpus-workspace/readiness'],['Entity, place & historical toponym','/entity-place-workspace/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -763,6 +776,16 @@ async function bootstrap() {
   route();
 }
 
+$("#entities-authority-preview")?.addEventListener("click",()=>entityPost("authority-preview","Entity authority preview",{authority:entityAuthorityPayload()}));
+$("#entities-toponym-timeline")?.addEventListener("click",()=>entityPost("toponym-timeline","Historical toponym timeline",{authority:entityAuthorityPayload(),year:entityQueryPayload().year}));
+$("#entities-authority-handoff")?.addEventListener("click",()=>entityHandoff("authority"));
+$("#entities-resolve")?.addEventListener("click",()=>entityPost("resolve-preview","Entity resolution preview"));
+$("#entities-matrix")?.addEventListener("click",()=>entityPost("candidate-matrix","Candidate matrix"));
+$("#entities-case-handoff")?.addEventListener("click",()=>entityHandoff("resolution-case"));
+$("#entities-decision-preview")?.addEventListener("click",()=>entityPost("decision-preview","Decision preview"));
+$("#entities-load-case")?.addEventListener("click",loadEntityPersistedCase);
+$("#entities-decision-handoff")?.addEventListener("click",()=>entityHandoff("decision"));
+$("#entities-export")?.addEventListener("click",exportEntityWorkspace);
 $("#corpus-preview")?.addEventListener("click",previewCorpus);
 $("#corpus-handoff")?.addEventListener("click",corpusHandoffPreview);
 $("#corpus-frequency")?.addEventListener("click",()=>runCorpusAction("frequency","Frequency analysis"));

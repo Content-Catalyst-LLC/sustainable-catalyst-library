@@ -389,6 +389,19 @@ from .citation_bibliographic_workspace import (
     export_bibliography as export_research_bibliography,
     citation_authority_handoff_preview,
 )
+from .entity_place_historical_toponym_workspace import (
+    contract as entity_place_workspace_contract,
+    readiness as entity_place_workspace_readiness,
+    bootstrap as entity_place_workspace_bootstrap,
+    authority_preview as entity_authority_preview,
+    resolution_preview as entity_resolution_preview,
+    historical_toponym_timeline,
+    candidate_matrix as entity_candidate_matrix,
+    decision_preview as entity_decision_preview,
+    persisted_case as entity_persisted_case,
+    export_workspace as export_entity_place_workspace,
+    persistence_handoff_preview as entity_place_persistence_handoff_preview,
+)
 from .corpus_computational_linguistics_workspace import (
     contract as corpus_workspace_contract,
     readiness as corpus_workspace_readiness,
@@ -825,6 +838,13 @@ def health() -> dict[str, Any]:
             "corpus_workspace_frequency_kwic_ngrams_cooccurrence": True,
             "corpus_workspace_automatic_translation": False,
             "corpus_workspace_database_migration_required": False,
+            "entity_place_historical_toponym_workspace": True,
+            "entity_place_historical_toponym_route": "/research/entities",
+            "entity_place_existing_v548_durable_authority_preserved": True,
+            "entity_place_workspace_preview_persistence": False,
+            "entity_place_workspace_ambiguity_preserved": True,
+            "entity_place_workspace_automatic_resolution": False,
+            "entity_place_workspace_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -839,8 +859,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.18.0",
-            "library_sdk_version": "1.18.0",
+            "library_web_version": "2.19.0",
+            "library_sdk_version": "1.19.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -4793,6 +4813,66 @@ async def library_api_v1_corpus_workspace_persistence_handoff_preview(request: R
     payload=await _library_workspace_json(request)
     try: return computational_corpus_persistence_handoff_preview(payload)
     except (ValueError,KeyError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/entity-place-workspace")
+def library_api_v1_entity_place_workspace_contract() -> dict[str, Any]:
+    return entity_place_workspace_contract()
+
+@app.get("/api/library/v1/entity-place-workspace/readiness")
+def library_api_v1_entity_place_workspace_readiness() -> dict[str, Any]:
+    return entity_place_workspace_readiness()
+
+@app.get("/api/library/v1/entity-place-workspace/bootstrap")
+def library_api_v1_entity_place_workspace_bootstrap() -> dict[str, Any]:
+    return entity_place_workspace_bootstrap()
+
+@app.post("/api/library/v1/entity-place-workspace/authority-preview")
+async def library_api_v1_entity_place_authority_preview(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return entity_authority_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/entity-place-workspace/resolve-preview")
+async def library_api_v1_entity_place_resolution_preview(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return entity_resolution_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/entity-place-workspace/toponym-timeline")
+async def library_api_v1_entity_place_toponym_timeline(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return historical_toponym_timeline(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/entity-place-workspace/candidate-matrix")
+async def library_api_v1_entity_place_candidate_matrix(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return entity_candidate_matrix(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/entity-place-workspace/decision-preview")
+async def library_api_v1_entity_place_decision_preview(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return entity_decision_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/entity-place-workspace/cases/{case_id:path}")
+def library_api_v1_entity_place_persisted_case(case_id: str) -> dict[str, Any]:
+    try: return entity_persisted_case(case_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="resolution-case-not-found") from exc
+    except ValueError as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/entity-place-workspace/export")
+async def library_api_v1_entity_place_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_entity_place_workspace(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/entity-place-workspace/persistence-handoff-preview")
+async def library_api_v1_entity_place_handoff_preview(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return entity_place_persistence_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/citations/{record_id:path}")
 def library_api_v1_record_citations(record_id: str, direction: str="both", limit: int=100) -> dict[str, Any]:

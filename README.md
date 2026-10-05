@@ -127,3 +127,5 @@ Library v6.17.0 adds `/research/citations` for bibliographic normalization, dupl
 Library v6.17.0.1 repairs citation workspace route precedence so static `/citations/workspace/*` endpoints resolve before the legacy record-citation catch-all. Web 2.17.0 and SDK 1.17.0 are unchanged.
 
 Library v6.18.0 adds `/research/corpus`, a computational-linguistics workspace over the existing v5.47 durable linguistic-corpus authority, with frequency, KWIC, n-gram, co-occurrence, lineage, and export analysis.
+
+Library v6.19.0 adds `/research/entities`, an entity, place, and historical-toponym workspace over the existing v5.48 durable cross-language resolution authority.
