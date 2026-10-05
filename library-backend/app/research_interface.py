@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.22.0"
-BACKEND_VERSION = "3.22.0"
-WEB_VERSION = "2.22.0"
-SDK_VERSION = "1.22.0"
+LIBRARY_VERSION = "6.23.0"
+BACKEND_VERSION = "3.23.0"
+WEB_VERSION = "2.23.0"
+SDK_VERSION = "1.23.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"
@@ -68,6 +68,7 @@ def contract() -> dict[str, Any]:
         {"id": "research-synthesis-workspace", "route": "/research/synthesis", "purpose": "cross-source-research-synthesis-and-disagreement-preservation"},
         {"id": "research-question-investigation-workspace", "route": "/research/investigation", "purpose": "research-question-framing-and-investigation-control"},
         {"id": "evidence-matrix-claim-support-workspace", "route": "/research/evidence", "purpose": "claim-evidence-matrix-and-support-analysis"},
+        {"id": "dataset-discovery-statistical-evidence-workspace", "route": "/research/data", "purpose": "dataset-discovery-and-statistical-evidence-analysis"},
         {"id": "record-context", "route": "/record/{record_id}", "purpose": "research-object-provenance-citations-evidence"},
         {"id": "saved-research", "route": "/account", "purpose": "service-native-project-and-collection-handoff"},
     ]
@@ -120,8 +121,8 @@ def contract() -> dict[str, Any]:
             "required": False,
             "authoritative": False,
         },
-        "next_release": "6.23.0",
-        "next_release_name": "Dataset Discovery & Statistical Evidence Workspace",
+        "next_release": "6.24.0",
+        "next_release_name": "Geospatial & Place-Based Research Workspace",
         "guardrails": guardrails(),
     }
 

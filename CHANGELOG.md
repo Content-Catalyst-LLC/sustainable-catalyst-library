@@ -1,3 +1,12 @@
+## 6.23.0 — Dataset Discovery & Statistical Evidence Workspace
+
+- Added `/research/data` as a quantitative evidence workspace over Structured Evidence, Scientific Literature, Global Federation, Investigation, and Evidence Matrix layers.
+- Added metadata-based dataset discovery, dataset profiles, variable dictionaries, units and denominators, study-design/population context, normalized statistical-result tables, uncertainty audits, effect-size preservation, multiple-comparison and missing-data context, and dataset/statistical gap analysis.
+- Added non-executing handoff previews to the v6.22 Evidence Matrix and v6.21 Investigation workspace, plus reproducible JSON export.
+- P-values, confidence intervals, sample size, correlations, regression adjustment, model fit, and effect sizes never become automatic truth, validity, practical-significance, or causality judgments.
+- Synchronized Library 6.23.0 / backend 3.23.0 / web 2.23.0 / SDK 1.23.0.
+- No database migration; WordPress remains optional.
+
 ## 6.22.0 — Evidence Matrix & Claim Support Analysis
 
 - Added `/research/evidence` as a claim-evidence analysis workspace over existing provenance, citation, structured-evidence, synthesis, and investigation layers.

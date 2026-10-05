@@ -290,6 +290,17 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/evidence-matrix/export","name":"evidence-matrix-export","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/evidence-matrix/synthesis-handoff-preview","name":"evidence-matrix-synthesis-handoff-preview","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/evidence-matrix/investigation-handoff-preview","name":"evidence-matrix-investigation-handoff-preview","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/statistical-evidence","name":"dataset-discovery-statistical-evidence-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/statistical-evidence/readiness","name":"dataset-discovery-statistical-evidence-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/statistical-evidence/bootstrap","name":"dataset-discovery-statistical-evidence-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/statistical-evidence/discover","name":"dataset-discovery-search","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/statistical-evidence/dataset-profile","name":"statistical-evidence-dataset-profile","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/statistical-evidence/statistical-table","name":"statistical-evidence-table","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/statistical-evidence/uncertainty-audit","name":"statistical-evidence-uncertainty-audit","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/statistical-evidence/gaps","name":"statistical-evidence-gaps","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/statistical-evidence/evidence-handoff-preview","name":"statistical-evidence-matrix-handoff-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/statistical-evidence/investigation-handoff-preview","name":"statistical-evidence-investigation-handoff-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/statistical-evidence/export","name":"statistical-evidence-export","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -301,6 +312,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "research-synthesis": {"resources":["source-inventory","claim-inventory","evidence-matrix","contradiction-ledger","convergence-summary","source-attribution","gap-analysis","synthesis-export"],"direct_api":True,"authority":"python-backend-composition"},
     "research-investigation": {"resources":["research-question","subquestions","hypotheses","evidence-needs","source-strategy","tasks","execution-plan","decision-points","stop-conditions","risk-register","handoffs"],"direct_api":True,"authority":"python-backend-composition"},
     "evidence-matrix-analysis": {"resources":["claim-inventory","evidence-inventory","claim-evidence-links","matrix","support-profiles","contradictions","provenance-coverage","source-dependencies","gaps","handoffs"],"direct_api":True,"authority":"python-backend-composition"},
+    "dataset-statistical-evidence": {"resources":["dataset-discovery","dataset-profiles","variable-dictionaries","statistical-results","uncertainty-audits","gap-analysis","evidence-handoff","investigation-handoff"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},

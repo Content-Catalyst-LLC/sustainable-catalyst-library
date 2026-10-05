@@ -135,3 +135,5 @@ Library v6.20.0 adds `/research/synthesis`, a composition workspace for explicit
 Library v6.21.0 adds `/research/investigation`, a structured research-question and investigation-control workspace with explicit evidence needs, tasks, dependencies, risks, stop conditions, and signed handoff previews.
 
 Library v6.22.0 adds `/research/evidence`, a claim-evidence matrix and support-analysis workspace with explicit provenance, source-dependency, contradiction, qualification, gap, and handoff semantics.
+
+Library v6.23.0 adds `/research/data`, a dataset-discovery and statistical-evidence workspace with explicit variable, design, uncertainty, multiple-comparison, missing-data, effect-size, and quantitative-evidence handoff semantics.

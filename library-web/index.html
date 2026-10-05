@@ -628,6 +628,55 @@
         </section>
       </section>
 
+      <section class="view" data-view="data" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Datasets · variables · design · uncertainty · effect sizes · evidence</p>
+          <h1>Dataset Discovery &amp; Statistical Evidence Workspace</h1>
+          <p>Discover datasets from explicit metadata, inspect variables and study context, normalize statistical results, audit uncertainty and analytical assumptions, and hand quantitative evidence into the Evidence Matrix without turning significance or model output into automatic truth or causality.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Statistical evidence navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/investigation" data-app-link>Investigation</a>
+          <a href="/research/data" aria-current="page">Data</a>
+          <a href="/research/evidence" data-app-link>Evidence</a>
+          <a href="/research/synthesis" data-app-link>Synthesis</a>
+        </nav>
+        <div id="statistical-evidence-readiness" class="context-strip"><span>Loading dataset and statistical evidence workspace…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Discovery frame</p><h2>Question, query &amp; scope</h2></div></div>
+            <label>Title<input id="statistical-evidence-title" value="Dataset & statistical evidence"></label>
+            <label class="archive-wide">Research question<textarea id="statistical-evidence-question" rows="4"></textarea></label>
+            <label class="archive-wide">Dataset query<textarea id="statistical-evidence-query" rows="3" placeholder="carbon removal lifecycle"></textarea></label>
+            <label class="archive-wide">Scope<textarea id="statistical-evidence-scope" rows="4"></textarea></label>
+            <label class="archive-wide">Filters JSON<textarea id="statistical-evidence-filters" rows="6" placeholder='{"source_ids":[],"kinds":[],"tags":[],"geography":"","variable_terms":[]}'></textarea></label>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Quantitative inputs</p><h2>Datasets, claims &amp; results</h2></div></div>
+            <label class="archive-wide">Datasets JSON<textarea id="statistical-evidence-datasets" rows="10" placeholder='[{"dataset_id":"d1","title":"Dataset","kind":"survey","variables":[]}]'></textarea></label>
+            <label class="archive-wide">Claims JSON<textarea id="statistical-evidence-claims" rows="6" placeholder='[{"claim_id":"c1","text":"Claim text"}]'></textarea></label>
+            <label class="archive-wide">Statistical results JSON<textarea id="statistical-evidence-results" rows="10" placeholder='[{"result_id":"r1","dataset_id":"d1","claim_id":"c1","statistic_type":"difference","estimate":1.2,"p_value":0.03,"design":"randomized-trial"}]'></textarea></label>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Analysis</p><h2>Quantitative evidence without automatic inference</h2></div></div>
+          <div class="archive-actions">
+            <button id="statistical-evidence-discover" type="button">Discover datasets</button>
+            <button id="statistical-evidence-profile" type="button">Dataset profile</button>
+            <button id="statistical-evidence-table" type="button">Statistical table</button>
+            <button id="statistical-evidence-uncertainty" type="button">Uncertainty audit</button>
+            <button id="statistical-evidence-gaps" type="button">Evidence gaps</button>
+            <button id="statistical-evidence-matrix-handoff" type="button" class="secondary-button">Evidence Matrix handoff</button>
+            <button id="statistical-evidence-investigation-handoff" type="button" class="secondary-button">Investigation handoff</button>
+            <button id="statistical-evidence-export" type="button" class="secondary-button">Export JSON</button>
+          </div>
+        </section>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Dataset &amp; statistical evidence object</h2></div></div>
+          <div id="statistical-evidence-output"><p class="empty-state">Discovery results, dataset profiles, statistical tables, uncertainty audits, gaps, and handoff previews appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="record" hidden>
         <div class="reader-toolbar"><button id="reader-back" class="text-button">← Back</button><span id="reader-id"></span></div>
         <article id="reader" class="reader"><p class="empty-state">Loading record…</p></article>
@@ -678,7 +727,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.22.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.23.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

@@ -389,6 +389,19 @@ from .citation_bibliographic_workspace import (
     export_bibliography as export_research_bibliography,
     citation_authority_handoff_preview,
 )
+from .dataset_discovery_statistical_evidence_workspace import (
+    contract as statistical_evidence_contract,
+    readiness as statistical_evidence_readiness,
+    bootstrap as statistical_evidence_bootstrap,
+    discover_datasets,
+    dataset_profile as statistical_dataset_profile,
+    statistical_table as build_statistical_evidence_table,
+    uncertainty_audit as statistical_uncertainty_audit,
+    gap_analysis as statistical_evidence_gap_analysis,
+    evidence_handoff_preview as statistical_evidence_matrix_handoff_preview,
+    investigation_handoff_preview as statistical_investigation_handoff_preview,
+    export_analysis as export_statistical_evidence_analysis,
+)
 from .evidence_matrix_claim_support_workspace import (
     contract as evidence_matrix_contract,
     readiness as evidence_matrix_readiness,
@@ -907,6 +920,14 @@ def health() -> dict[str, Any]:
             "evidence_matrix_automatic_verdicts": False,
             "evidence_matrix_source_independence_assumed": False,
             "evidence_matrix_database_migration_required": False,
+            "dataset_discovery_statistical_evidence_workspace": True,
+            "dataset_discovery_statistical_evidence_route": "/research/data",
+            "statistical_evidence_analysis_composition_only": True,
+            "statistical_evidence_automatic_external_fetch": False,
+            "statistical_evidence_server_persistence": False,
+            "statistical_evidence_automatic_significance_inference": False,
+            "statistical_evidence_automatic_causality_inference": False,
+            "statistical_evidence_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -921,8 +942,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.22.0",
-            "library_sdk_version": "1.22.0",
+            "library_web_version": "2.23.0",
+            "library_sdk_version": "1.23.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5114,6 +5135,66 @@ async def library_api_v1_evidence_synthesis_handoff(request: Request) -> dict[st
 async def library_api_v1_evidence_investigation_handoff(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return evidence_investigation_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/statistical-evidence")
+def library_api_v1_statistical_evidence_contract() -> dict[str, Any]:
+    return statistical_evidence_contract()
+
+@app.get("/api/library/v1/statistical-evidence/readiness")
+def library_api_v1_statistical_evidence_readiness() -> dict[str, Any]:
+    return statistical_evidence_readiness()
+
+@app.get("/api/library/v1/statistical-evidence/bootstrap")
+def library_api_v1_statistical_evidence_bootstrap() -> dict[str, Any]:
+    return statistical_evidence_bootstrap()
+
+@app.post("/api/library/v1/statistical-evidence/discover")
+async def library_api_v1_statistical_evidence_discover(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return discover_datasets(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/statistical-evidence/dataset-profile")
+async def library_api_v1_statistical_evidence_dataset_profile(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return statistical_dataset_profile(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/statistical-evidence/statistical-table")
+async def library_api_v1_statistical_evidence_table(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_statistical_evidence_table(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/statistical-evidence/uncertainty-audit")
+async def library_api_v1_statistical_evidence_uncertainty(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return statistical_uncertainty_audit(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/statistical-evidence/gaps")
+async def library_api_v1_statistical_evidence_gaps(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return statistical_evidence_gap_analysis(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/statistical-evidence/evidence-handoff-preview")
+async def library_api_v1_statistical_evidence_matrix_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return statistical_evidence_matrix_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/statistical-evidence/investigation-handoff-preview")
+async def library_api_v1_statistical_investigation_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return statistical_investigation_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/statistical-evidence/export")
+async def library_api_v1_statistical_evidence_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_statistical_evidence_analysis(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/citations/{record_id:path}")
