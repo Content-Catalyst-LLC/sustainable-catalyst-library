@@ -268,6 +268,16 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/research-synthesis/gaps","name":"research-synthesis-gap-analysis","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-synthesis/export","name":"research-synthesis-export","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-synthesis/publishing-handoff-preview","name":"research-synthesis-publishing-handoff-preview","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-investigation","name":"research-question-investigation-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-investigation/readiness","name":"research-question-investigation-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-investigation/bootstrap","name":"research-question-investigation-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-investigation/build","name":"research-investigation-build","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-investigation/matrix","name":"research-investigation-matrix","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-investigation/coverage","name":"research-investigation-coverage","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-investigation/execution-plan","name":"research-investigation-execution-plan","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-investigation/risk-register","name":"research-investigation-risk-register","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-investigation/export","name":"research-investigation-export","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-investigation/handoff-preview","name":"research-investigation-handoff-preview","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -277,6 +287,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "computational-linguistics": {"resources":["corpus-workspace","frequency","kwic","ngrams","cooccurrence","analysis-export"],"direct_api":True,"authority":"python-backend-composition"},
     "entity-place-resolution": {"resources":["entity-authority","multilingual-name-forms","places","historical-toponyms","temporal-resolution","candidate-matrix","explicit-decisions"],"direct_api":True,"authority":"python-backend-composition"},
     "research-synthesis": {"resources":["source-inventory","claim-inventory","evidence-matrix","contradiction-ledger","convergence-summary","source-attribution","gap-analysis","synthesis-export"],"direct_api":True,"authority":"python-backend-composition"},
+    "research-investigation": {"resources":["research-question","subquestions","hypotheses","evidence-needs","source-strategy","tasks","execution-plan","decision-points","stop-conditions","risk-register","handoffs"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},

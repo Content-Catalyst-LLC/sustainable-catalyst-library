@@ -131,3 +131,5 @@ Library v6.18.0 adds `/research/corpus`, a computational-linguistics workspace o
 Library v6.19.0 adds `/research/entities`, an entity, place, and historical-toponym workspace over the existing v5.48 durable cross-language resolution authority.
 
 Library v6.20.0 adds `/research/synthesis`, a composition workspace for explicit cross-source synthesis, evidence matrices, contradictions, convergence, attribution, gaps, and export packages.
+
+Library v6.21.0 adds `/research/investigation`, a structured research-question and investigation-control workspace with explicit evidence needs, tasks, dependencies, risks, stop conditions, and signed handoff previews.

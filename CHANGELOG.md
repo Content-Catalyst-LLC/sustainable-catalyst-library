@@ -1,3 +1,12 @@
+## 6.21.0 — Research Question & Investigation Workspace
+
+- Added `/research/investigation` as a structured research-question and investigation-control workspace.
+- Added explicit subquestions, hypotheses, evidence needs, source strategy, investigation tasks, dependency-aware execution waves, decision points, stop conditions, risk/bias register, coverage analysis, and reproducible JSON exports.
+- Added preview-only signed handoffs to existing research-project, saved-search, research-queue, and retrieval-plan authorities; the workspace never submits or persists them automatically.
+- Preserves the boundary between planning and evidence: hypotheses are not truth, task completion is not evidence, search/retrieval results are not automatically promoted, and priorities or stop conditions never determine truth.
+- Synchronized Library 6.21.0 / backend 3.21.0 / web 2.21.0 / SDK 1.21.0.
+- No database migration; WordPress remains optional.
+
 ## 6.20.0 — Research Synthesis Workspace
 
 - Added `/research/synthesis` as a cross-source synthesis workspace over existing Library citation, provenance/evidence, annotation, timeline, corpus, entity/place, research-state, and research-package authorities.

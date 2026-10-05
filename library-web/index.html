@@ -525,6 +525,61 @@
         </section>
       </section>
 
+      <section class="view" data-view="investigation" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Question framing · hypotheses · evidence needs · tasks · decision points</p>
+          <h1>Research Question &amp; Investigation Workspace</h1>
+          <p>Turn a research question into an explicit investigation plan with subquestions, hypotheses, evidence requirements, source strategy, dependency-aware tasks, decision points, stop conditions, and a risk register—without automatically executing or adjudicating the research.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Research investigation navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/synthesis" data-app-link>Synthesis</a>
+          <a href="/research/investigation" aria-current="page">Investigation</a>
+        </nav>
+        <div id="investigation-readiness" class="context-strip"><span>Loading investigation workspace…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Research frame</p><h2>Question &amp; scope</h2></div></div>
+            <label>Title<input id="investigation-title" value="Research investigation"></label>
+            <label class="archive-wide">Research question<textarea id="investigation-question" rows="5" placeholder="State the question the investigation is designed to answer."></textarea></label>
+            <label class="archive-wide">Scope<textarea id="investigation-scope" rows="5" placeholder="Geography, time range, populations, disciplines, exclusions, or other scope boundaries."></textarea></label>
+            <label class="archive-wide">Source strategy JSON<textarea id="investigation-source-strategy" rows="7" placeholder='{"languages":["en"],"include":["peer-reviewed"],"exclude":[]}'></textarea></label>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Investigation structure</p><h2>Questions, hypotheses &amp; evidence</h2></div></div>
+            <label class="archive-wide">Subquestions JSON<textarea id="investigation-subquestions" rows="7" placeholder='[{"subquestion_id":"sq1","text":"What must be established?","priority":"high"}]'></textarea></label>
+            <label class="archive-wide">Hypotheses JSON<textarea id="investigation-hypotheses" rows="7" placeholder='[{"hypothesis_id":"h1","text":"Hypothesis text","subquestion_ids":["sq1"]}]'></textarea></label>
+            <label class="archive-wide">Evidence needs JSON<textarea id="investigation-evidence-needs" rows="7" placeholder='[{"evidence_need_id":"e1","description":"Required evidence","kind":"publication","subquestion_ids":["sq1"]}]'></textarea></label>
+          </section>
+        </div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Work plan</p><h2>Tasks &amp; dependencies</h2></div></div>
+            <label class="archive-wide">Tasks JSON<textarea id="investigation-tasks" rows="10" placeholder='[{"task_id":"t1","description":"Search for evidence","task_type":"search","subquestion_ids":["sq1"],"evidence_need_ids":["e1"]}]'></textarea></label>
+            <label class="archive-wide">Decision points JSON<textarea id="investigation-decisions" rows="6" placeholder='[{"decision_point_id":"d1","question":"Is coverage sufficient?","criteria":["..."]}]'></textarea></label>
+            <label class="archive-wide">Stop conditions JSON<textarea id="investigation-stops" rows="6" placeholder='[{"stop_condition_id":"stop1","description":"Pause for manual review when..."}]'></textarea></label>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Controls</p><h2>Risk, bias &amp; handoff</h2></div></div>
+            <label class="archive-wide">Risks JSON<textarea id="investigation-risks" rows="9" placeholder='[{"risk_id":"r1","risk_type":"source-coverage","description":"Potential coverage bias","mitigation":"..."}]'></textarea></label>
+            <label>Handoff type<select id="investigation-handoff-type"><option value="research-project">research project</option><option value="saved-search">saved search</option><option value="research-queue">research queue</option><option value="retrieval-plan">retrieval plan</option></select></label>
+            <div class="archive-actions">
+              <button id="investigation-build" type="button">Build investigation</button>
+              <button id="investigation-matrix" type="button">Investigation matrix</button>
+              <button id="investigation-coverage" type="button">Coverage</button>
+              <button id="investigation-execution" type="button">Execution plan</button>
+              <button id="investigation-risk-register" type="button">Risk register</button>
+              <button id="investigation-handoff" type="button" class="secondary-button">Handoff preview</button>
+              <button id="investigation-export" type="button" class="secondary-button">Export investigation JSON</button>
+            </div>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Workspace output</p><h2>Investigation object</h2></div></div>
+          <div id="investigation-output"><p class="empty-state">Investigation plans, matrices, coverage gaps, execution waves, risk registers, and handoff previews appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="record" hidden>
         <div class="reader-toolbar"><button id="reader-back" class="text-button">← Back</button><span id="reader-id"></span></div>
         <article id="reader" class="reader"><p class="empty-state">Loading record…</p></article>
@@ -575,7 +630,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.20.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.21.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

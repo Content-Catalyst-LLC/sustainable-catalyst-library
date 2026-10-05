@@ -1,6 +1,6 @@
-const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.20.0" };
+const config = window.SC_LIBRARY_WEB_CONFIG || { apiBase: "/api/library/v1", webVersion: "2.21.0" };
 const API = String(config.apiBase || "/api/library/v1").replace(/\/$/, "");
-const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null, archiveBootstrap: null, archiveSources: [], archiveSearchResult: null, criticismBootstrap: null, timelineBootstrap: null, timelineEvents: [], notesBootstrap: null, researchNotes: [], citationsBootstrap: null, bibliographyItems: [], corpusBootstrap: null, entitiesBootstrap: null, synthesisBootstrap: null };
+const state = { offset: 0, limit: 20, query: "", mode: "hybrid", total: 0, lastSearch: null, session: null, csrfToken: null, researchOffset: 0, researchTotal: 0, researchBootstrap: null, navigationBootstrap: null, researchNavigationMode: "overview", workingSet: [], workspaceSnapshot: null, activeProjectId: null, livingRefreshes: {}, projectBriefs: {}, structuredDatasetPreview: null, scientificLiteraturePreview: null, researchPackageExportPreview: null, institutionalRepositoryPreview: null, archiveBootstrap: null, archiveSources: [], archiveSearchResult: null, criticismBootstrap: null, timelineBootstrap: null, timelineEvents: [], notesBootstrap: null, researchNotes: [], citationsBootstrap: null, bibliographyItems: [], corpusBootstrap: null, entitiesBootstrap: null, synthesisBootstrap: null, investigationBootstrap: null };
 
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
@@ -38,6 +38,7 @@ function resolveUnifiedResearchMode(name) {
 function route() {
   const raw=currentRoute(); const [name="research", ...rest]=raw.split("/");
   const compatibilityResearch = name === "search" || name === "discover";
+  const investigationResearch = name === "research" && rest[0] === "investigation";
   const synthesisResearch = name === "research" && rest[0] === "synthesis";
   const entitiesResearch = name === "research" && rest[0] === "entities";
   const corpusResearch = name === "research" && rest[0] === "corpus";
@@ -46,9 +47,9 @@ function route() {
   const timelineResearch = name === "research" && rest[0] === "archives" && rest[1] === "timeline";
   const criticismResearch = name === "research" && rest[0] === "archives" && rest[1] === "compare";
   const archiveResearch = name === "research" && rest[0] === "archives" && !criticismResearch && !timelineResearch;
-  const view = synthesisResearch ? "synthesis" : entitiesResearch ? "entities" : corpusResearch ? "corpus" : citationsResearch ? "citations" : notesResearch ? "notes" : timelineResearch ? "timeline" : criticismResearch ? "criticism" : archiveResearch ? "archives" : compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
+  const view = investigationResearch ? "investigation" : synthesisResearch ? "synthesis" : entitiesResearch ? "entities" : corpusResearch ? "corpus" : citationsResearch ? "citations" : notesResearch ? "notes" : timelineResearch ? "timeline" : criticismResearch ? "criticism" : archiveResearch ? "archives" : compatibilityResearch ? "research" : ["research","system","account"].includes(name) ? name : name === "record" ? "record" : "research";
   $$(".view").forEach(el => { el.hidden = el.dataset.view !== view; });
-  const navView=["archives","criticism","timeline","notes","citations","corpus","entities","synthesis"].includes(view) ? "research" : view;
+  const navView=["archives","criticism","timeline","notes","citations","corpus","entities","synthesis","investigation"].includes(view) ? "research" : view;
   $$('[data-nav]').forEach(a => a.setAttribute('aria-current', a.dataset.nav===navView ? 'page' : 'false'));
   updatePublicMetadata(view, rest);
   if (view === "research") loadUnifiedNavigation(resolveUnifiedResearchMode(name));
@@ -60,6 +61,7 @@ function route() {
   if (view === "corpus") loadCorpusWorkspace();
   if (view === "entities") loadEntityPlaceWorkspace();
   if (view === "synthesis") loadResearchSynthesisWorkspace();
+  if (view === "investigation") loadResearchInvestigationWorkspace();
   if (view === "system") loadSystem();
   if (view === "account") loadSession().then(()=>{ if(new URLSearchParams(location.search).get("section")==="workspaces") requestAnimationFrame(()=>$("#workspace-card")?.scrollIntoView({block:"start"})); });
   if (view === "record" && rest.length) loadRecord(decodeURIComponent(rest.join("/")));
@@ -76,12 +78,12 @@ function navigate(path) {
 
 function updatePublicMetadata(view, rest=[]) {
   const origin=String(config.publicOrigin || location.origin).replace(/\/$/, "");
-  let path=view === "research" ? "/research" : view === "archives" ? "/research/archives" : view === "criticism" ? "/research/archives/compare" : view === "timeline" ? "/research/archives/timeline" : view === "notes" ? "/research/notes" : view === "citations" ? "/research/citations" : view === "corpus" ? "/research/corpus" : view === "entities" ? "/research/entities" : view === "synthesis" ? "/research/synthesis" : `/${view}`;
+  let path=view === "research" ? "/research" : view === "archives" ? "/research/archives" : view === "criticism" ? "/research/archives/compare" : view === "timeline" ? "/research/archives/timeline" : view === "notes" ? "/research/notes" : view === "citations" ? "/research/citations" : view === "corpus" ? "/research/corpus" : view === "entities" ? "/research/entities" : view === "synthesis" ? "/research/synthesis" : view === "investigation" ? "/research/investigation" : `/${view}`;
   if (view === "record" && rest.length) path=`/record/${encodeURIComponent(decodeURIComponent(rest.join("/")))}`;
   const canonical=document.querySelector('link[rel="canonical"]') || document.head.appendChild(Object.assign(document.createElement('link'),{rel:'canonical'}));
   canonical.href=origin + (path === "/search" ? path : path);
   const robots=document.querySelector('meta[name="robots"]') || document.head.appendChild(Object.assign(document.createElement('meta'),{name:'robots'}));
-  robots.content=["research","archives","criticism","timeline","notes","citations","corpus","entities","synthesis","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
+  robots.content=["research","archives","criticism","timeline","notes","citations","corpus","entities","synthesis","investigation","search","system","account"].includes(view) ? "noindex,follow" : "index,follow";
 }
 
 function setMeta(name, content, property=false) {
@@ -767,9 +769,18 @@ async function loadResearchSynthesisWorkspace(){const status=$("#synthesis-readi
 async function synthesisPost(path,label){try{const data=await api(`/research-synthesis/${path}`,{method:'POST',body:JSON.stringify(synthesisPayload())});synthesisOutput(label,data);return data;}catch(e){synthesisOutput(`${label} error`,{error:e.message});return null;}}
 async function exportResearchSynthesis(){try{const data=await api('/research-synthesis/export',{method:'POST',body:JSON.stringify(synthesisPayload())});synthesisOutput('Research synthesis export',data);const blob=new Blob([data.content||""],{type:data.media_type||'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=data.filename||'sustainable-catalyst-research-synthesis.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){synthesisOutput("Export error",{error:e.message});}}
 
+function investigationOutput(label,data){const t=$("#investigation-output");if(t)t.innerHTML=`<p class="eyebrow">${escapeHtml(label)}</p><pre>${escapeHtml(JSON.stringify(data,null,2))}</pre>`;}
+function parseInvestigationArray(selector,label){const raw=$(selector)?.value.trim()||"";if(!raw)return [];let value;try{value=JSON.parse(raw);}catch{throw new Error(`${label} JSON is invalid.`);}if(!Array.isArray(value))throw new Error(`${label} must be a JSON array.`);return value;}
+function parseInvestigationObject(selector,label){const raw=$(selector)?.value.trim()||"";if(!raw)return {};let value;try{value=JSON.parse(raw);}catch{throw new Error(`${label} JSON is invalid.`);}if(!value||Array.isArray(value)||typeof value!=="object")throw new Error(`${label} must be a JSON object.`);return value;}
+function investigationPayload(){return {title:$("#investigation-title")?.value.trim()||"Research investigation",research_question:$("#investigation-question")?.value.trim()||"",scope:$("#investigation-scope")?.value.trim()||null,source_strategy:parseInvestigationObject("#investigation-source-strategy","Source strategy"),subquestions:parseInvestigationArray("#investigation-subquestions","Subquestions"),hypotheses:parseInvestigationArray("#investigation-hypotheses","Hypotheses"),evidence_needs:parseInvestigationArray("#investigation-evidence-needs","Evidence needs"),tasks:parseInvestigationArray("#investigation-tasks","Tasks"),decision_points:parseInvestigationArray("#investigation-decisions","Decision points"),stop_conditions:parseInvestigationArray("#investigation-stops","Stop conditions"),risks:parseInvestigationArray("#investigation-risks","Risks")};}
+async function loadResearchInvestigationWorkspace(){const status=$("#investigation-readiness");try{const data=state.investigationBootstrap||await api('/research-investigation/bootstrap');state.investigationBootstrap=data;const r=data.readiness||{};if(status)status.innerHTML=`<span><strong>${escapeHtml(r.state||"unknown")}</strong> workspace</span><span>planning/control only</span><span>no automatic execution</span><span>Web ${escapeHtml(data.web_version||config.webVersion||"")}</span>`;}catch(e){if(status)status.innerHTML=`<span class="error-state">${escapeHtml(e.message)}</span>`;}}
+async function investigationPost(path,label,payload=null){try{const body=payload||investigationPayload();const data=await api(`/research-investigation/${path}`,{method:'POST',body:JSON.stringify(body)});investigationOutput(label,data);return data;}catch(e){investigationOutput(`${label} error`,{error:e.message});return null;}}
+async function investigationHandoff(){const payload={...investigationPayload(),handoff_type:$("#investigation-handoff-type")?.value||"research-project"};return investigationPost("handoff-preview","Investigation handoff preview",payload);}
+async function exportResearchInvestigation(){try{const data=await api('/research-investigation/export',{method:'POST',body:JSON.stringify(investigationPayload())});investigationOutput('Investigation export',data);const blob=new Blob([data.content||""],{type:data.media_type||'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=data.filename||'sustainable-catalyst-research-investigation.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){investigationOutput("Export error",{error:e.message});}}
+
 async function loadSystem() {
   const target=$("#system-grid"); target.innerHTML='<p class="empty-state">Checking runtime…</p>';
-  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Historical archives workspace','/historical-archives/workspace/readiness'],['Primary-source comparison & source criticism','/historical-archives/source-criticism/readiness'],['Research timeline & historical events','/historical-archives/timeline-workspace/readiness'],['Research annotation & scholarly notes','/annotations/readiness'],['Citation workspace & bibliographic intelligence','/citations/workspace/readiness'],['Corpus & computational linguistics','/corpus-workspace/readiness'],['Entity, place & historical toponym','/entity-place-workspace/readiness'],['Research synthesis','/research-synthesis/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
+  const checks=[['API','/readiness'],['Runtime authority','/runtime-authority'],['Federation','/federation/readiness'],['Global federation II','/federation/global/readiness'],['Research graph','/research-graph/readiness'],['Living research','/living-research/readiness'],['Structured evidence','/structured-evidence/readiness'],['Scientific literature','/scientific-literature/readiness'],['Research package publishing','/research-package-publishing/readiness'],['Institutional repositories','/institutional-repositories/readiness'],['Historical archives & primary sources','/historical-archives/readiness'],['Historical archives workspace','/historical-archives/workspace/readiness'],['Primary-source comparison & source criticism','/historical-archives/source-criticism/readiness'],['Research timeline & historical events','/historical-archives/timeline-workspace/readiness'],['Research annotation & scholarly notes','/annotations/readiness'],['Citation workspace & bibliographic intelligence','/citations/workspace/readiness'],['Corpus & computational linguistics','/corpus-workspace/readiness'],['Entity, place & historical toponym','/entity-place-workspace/readiness'],['Research synthesis','/research-synthesis/readiness'],['Research investigation','/research-investigation/readiness'],['Artifacts','/artifacts/readiness'],['Pipelines','/pipelines/readiness'],['Compute','/compute/readiness'],['Web application','/web-application/readiness']];
   const results=await Promise.all(checks.map(async ([label,path])=>{try{return {label,path,data:await api(path),ok:true};}catch(error){return {label,path,error:error.message,ok:false};}}));
   target.innerHTML="";
   for (const r of results) {
@@ -785,6 +796,13 @@ async function bootstrap() {
   route();
 }
 
+$("#investigation-build")?.addEventListener("click",()=>investigationPost("build","Research investigation"));
+$("#investigation-matrix")?.addEventListener("click",()=>investigationPost("matrix","Investigation matrix"));
+$("#investigation-coverage")?.addEventListener("click",()=>investigationPost("coverage","Coverage analysis"));
+$("#investigation-execution")?.addEventListener("click",()=>investigationPost("execution-plan","Execution plan"));
+$("#investigation-risk-register")?.addEventListener("click",()=>investigationPost("risk-register","Risk register"));
+$("#investigation-handoff")?.addEventListener("click",investigationHandoff);
+$("#investigation-export")?.addEventListener("click",exportResearchInvestigation);
 $("#synthesis-build")?.addEventListener("click",()=>synthesisPost("synthesize","Research synthesis"));
 $("#synthesis-matrix")?.addEventListener("click",()=>synthesisPost("evidence-matrix","Evidence matrix"));
 $("#synthesis-contradictions")?.addEventListener("click",()=>synthesisPost("contradictions","Contradiction ledger"));

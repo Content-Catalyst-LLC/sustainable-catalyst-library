@@ -389,6 +389,18 @@ from .citation_bibliographic_workspace import (
     export_bibliography as export_research_bibliography,
     citation_authority_handoff_preview,
 )
+from .research_question_investigation_workspace import (
+    contract as research_investigation_contract,
+    readiness as research_investigation_readiness,
+    bootstrap as research_investigation_bootstrap,
+    build_investigation as build_research_investigation,
+    investigation_matrix as research_investigation_matrix,
+    coverage_analysis as research_investigation_coverage,
+    execution_plan as research_investigation_execution_plan,
+    risk_register as research_investigation_risk_register,
+    export_investigation as export_research_investigation,
+    handoff_preview as research_investigation_handoff_preview,
+)
 from .research_synthesis_workspace import (
     contract as research_synthesis_contract,
     readiness as research_synthesis_readiness,
@@ -865,6 +877,14 @@ def health() -> dict[str, Any]:
             "research_synthesis_automatic_truth_adjudication": False,
             "research_synthesis_automatic_contradiction_resolution": False,
             "research_synthesis_database_migration_required": False,
+            "research_question_investigation_workspace": True,
+            "research_question_investigation_route": "/research/investigation",
+            "research_investigation_planning_control_only": True,
+            "research_investigation_server_persistence": False,
+            "research_investigation_automatic_execution": False,
+            "research_investigation_automatic_hypothesis_adjudication": False,
+            "research_investigation_signed_handoffs_required": True,
+            "research_investigation_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -879,8 +899,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.20.0",
-            "library_sdk_version": "1.20.0",
+            "library_web_version": "2.21.0",
+            "library_sdk_version": "1.21.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -4952,6 +4972,60 @@ async def library_api_v1_research_synthesis_export(request: Request) -> dict[str
 async def library_api_v1_research_synthesis_handoff(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return research_synthesis_publishing_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-investigation")
+def library_api_v1_research_investigation_contract() -> dict[str, Any]:
+    return research_investigation_contract()
+
+@app.get("/api/library/v1/research-investigation/readiness")
+def library_api_v1_research_investigation_readiness() -> dict[str, Any]:
+    return research_investigation_readiness()
+
+@app.get("/api/library/v1/research-investigation/bootstrap")
+def library_api_v1_research_investigation_bootstrap() -> dict[str, Any]:
+    return research_investigation_bootstrap()
+
+@app.post("/api/library/v1/research-investigation/build")
+async def library_api_v1_research_investigation_build(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_research_investigation(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-investigation/matrix")
+async def library_api_v1_research_investigation_matrix(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_investigation_matrix(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-investigation/coverage")
+async def library_api_v1_research_investigation_coverage(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_investigation_coverage(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-investigation/execution-plan")
+async def library_api_v1_research_investigation_execution(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_investigation_execution_plan(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-investigation/risk-register")
+async def library_api_v1_research_investigation_risks(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_investigation_risk_register(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-investigation/export")
+async def library_api_v1_research_investigation_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_research_investigation(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-investigation/handoff-preview")
+async def library_api_v1_research_investigation_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_investigation_handoff_preview(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/citations/{record_id:path}")
