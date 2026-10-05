@@ -1,3 +1,13 @@
+## 6.26.0 — Research Publication Studio
+
+- Added `/research/publication` as a publication-draft workspace consuming explicit v6.25 Research Package Composer compositions.
+- Added publication profiles, structured sections, contributors, figure/table/appendix inventories, citation inventories, editorial audits, publication-readiness audits, deterministic JSON draft export, and preview-only Research Package Publishing handoffs.
+- Preserves existing authorities: the Studio is not source, evidence, citation, package-composition, publication-persistence, reproducibility, or artifact-byte authority.
+- Publication readiness remains an editorial completeness signal and never implies truth, evidence strength, source validity, peer review, or publication acceptance.
+- No automatic research-prose generation, external publication, DOI registration, artifact persistence, claim/evidence promotion, or Platform Core promotion is introduced.
+- Synchronized Library 6.26.0 / backend 3.26.0 / web 2.26.0 / SDK 1.26.0.
+- No database migration; WordPress remains optional.
+
 ## 6.25.0 — Research Package Composer
 
 - Added `/research/package` as a draft composition workspace over investigation, synthesis, evidence, statistical, geospatial, citation, annotation, timeline, corpus, entity/place, primary-source, dataset, record, artifact, publication, and method outputs.

@@ -401,6 +401,19 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .research_publication_studio import (
+    contract as research_publication_studio_contract,
+    readiness as research_publication_studio_readiness,
+    bootstrap as research_publication_studio_bootstrap,
+    build_publication_draft as build_research_publication_draft,
+    section_inventory as research_publication_section_inventory,
+    asset_inventory as research_publication_asset_inventory,
+    citation_inventory as research_publication_citation_inventory,
+    editorial_audit as research_publication_editorial_audit,
+    readiness_audit as research_publication_readiness_audit,
+    publishing_handoff_preview as research_publication_publishing_handoff_preview,
+    export_publication_draft as export_research_publication_draft,
+)
 from .geospatial_place_research_workspace import (
     contract as geospatial_research_contract,
     readiness as geospatial_research_readiness,
@@ -969,6 +982,15 @@ def health() -> dict[str, Any]:
             "research_package_composer_signed_reproducibility_required": True,
             "research_package_composer_existing_package_authority_preserved": True,
             "research_package_composer_database_migration_required": False,
+            "research_publication_studio": True,
+            "research_publication_studio_route": "/research/publication",
+            "research_publication_studio_draft_only": True,
+            "research_publication_studio_server_persistence": False,
+            "research_publication_studio_automatic_text_generation": False,
+            "research_publication_studio_automatic_publication": False,
+            "research_publication_studio_existing_package_authority_preserved": True,
+            "research_publication_studio_existing_publishing_authority_preserved": True,
+            "research_publication_studio_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -983,8 +1005,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.25.0",
-            "library_sdk_version": "1.25.0",
+            "library_web_version": "2.26.0",
+            "library_sdk_version": "1.26.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5344,6 +5366,66 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-publication")
+def library_api_v1_research_publication_contract() -> dict[str, Any]:
+    return research_publication_studio_contract()
+
+@app.get("/api/library/v1/research-publication/readiness")
+def library_api_v1_research_publication_readiness() -> dict[str, Any]:
+    return research_publication_studio_readiness()
+
+@app.get("/api/library/v1/research-publication/bootstrap")
+def library_api_v1_research_publication_bootstrap() -> dict[str, Any]:
+    return research_publication_studio_bootstrap()
+
+@app.post("/api/library/v1/research-publication/draft")
+async def library_api_v1_research_publication_draft(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_research_publication_draft(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-publication/section-inventory")
+async def library_api_v1_research_publication_sections(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_publication_section_inventory(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-publication/asset-inventory")
+async def library_api_v1_research_publication_assets(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_publication_asset_inventory(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-publication/citation-inventory")
+async def library_api_v1_research_publication_citations(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_publication_citation_inventory(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-publication/editorial-audit")
+async def library_api_v1_research_publication_editorial_audit(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_publication_editorial_audit(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-publication/readiness-audit")
+async def library_api_v1_research_publication_readiness_audit(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_publication_readiness_audit(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-publication/publishing-handoff-preview")
+async def library_api_v1_research_publication_publishing_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_publication_publishing_handoff_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-publication/export")
+async def library_api_v1_research_publication_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_research_publication_draft(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/citations/{record_id:path}")

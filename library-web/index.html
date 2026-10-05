@@ -738,6 +738,7 @@
           <a href="/research/data" data-app-link>Data</a>
           <a href="/research/geospatial" data-app-link>Geospatial</a>
           <a href="/research/package" aria-current="page">Package</a>
+          <a href="/research/publication" data-app-link>Publication</a>
         </nav>
         <div id="package-composer-readiness" class="context-strip"><span>Loading package composer…</span></div>
         <div class="citations-layout">
@@ -772,6 +773,75 @@
         <section class="info-card">
           <div class="panel-heading"><div><p class="eyebrow">Composer output</p><h2>Research package draft</h2></div></div>
           <div id="package-composer-output"><p class="empty-state">Composition manifests, audits, dependency maps, and handoff previews appear here.</p></div>
+        </section>
+      </section>
+
+
+      <section class="view" data-view="publication" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Structure · edit · inventory · audit · publication handoff</p>
+          <h1>Research Publication Studio</h1>
+          <p>Turn an explicit Research Package Composer output into a governed publication draft with structured sections, contributor and asset inventories, citation tracking, editorial checks, and publication-readiness audits. The Studio does not publish, persist, peer-review, or adjudicate research automatically.</p>
+        </div>
+        <nav class="research-navigation" aria-label="Research publication navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/evidence" data-app-link>Evidence</a>
+          <a href="/research/data" data-app-link>Data</a>
+          <a href="/research/package" data-app-link>Package</a>
+          <a href="/research/publication" aria-current="page">Publication</a>
+        </nav>
+        <div id="publication-studio-readiness" class="context-strip"><span>Loading publication studio…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Publication frame</p><h2>Identity &amp; profile</h2></div></div>
+            <label>Title<input id="publication-title" value="Research publication"></label>
+            <label>Subtitle<input id="publication-subtitle"></label>
+            <label>Profile<select id="publication-profile"><option value="research-report">Research report</option><option value="journal-article">Journal article</option><option value="technical-report">Technical report</option><option value="policy-brief">Policy brief</option><option value="white-paper">White paper</option><option value="research-note">Research note</option></select></label>
+            <label>Project ID<input id="publication-project-id"></label>
+            <label class="archive-wide">Research question<textarea id="publication-question" rows="3"></textarea></label>
+            <label class="archive-wide">Abstract<textarea id="publication-abstract" rows="5"></textarea></label>
+            <label class="archive-wide">Executive summary<textarea id="publication-executive-summary" rows="6"></textarea></label>
+            <label>Keywords<input id="publication-keywords" placeholder="comma-separated"></label>
+            <label>License<input id="publication-license" placeholder="Optional explicit license"></label>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Package source</p><h2>Composer output</h2></div></div>
+            <p class="form-note">Paste the explicit v6.25 Research Package Composer composition. The Studio references the package; it does not rewrite component payloads.</p>
+            <label class="archive-wide">Research package composition JSON<textarea id="publication-package" rows="16" placeholder='{"schema":"sc-library-research-package-composition/1.0","composition_id":"research-package-composition:…","components":[]}'></textarea></label>
+          </section>
+        </div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Publication structure</p><h2>Sections &amp; contributors</h2></div></div>
+            <label class="archive-wide">Sections JSON<textarea id="publication-sections" rows="16" placeholder='[{"section_id":"methods","kind":"methods","title":"Methods","content":"…","source_component_ids":["investigation"]}]'></textarea></label>
+            <label class="archive-wide">Contributors JSON<textarea id="publication-contributors" rows="7" placeholder='[{"contributor_id":"author:1","name":"Researcher","roles":["writing"]}]'></textarea></label>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Research assets</p><h2>Figures, tables, citations &amp; appendices</h2></div></div>
+            <label class="archive-wide">Figures JSON<textarea id="publication-figures" rows="7" placeholder='[{"figure_id":"fig:1","title":"Figure","caption":"…","artifact_id":"artifact:…"}]'></textarea></label>
+            <label class="archive-wide">Tables JSON<textarea id="publication-tables" rows="7" placeholder='[{"table_id":"table:1","title":"Table","source_component_ids":["evidence"]}]'></textarea></label>
+            <label class="archive-wide">Citations JSON<textarea id="publication-citations" rows="8" placeholder='[{"citation_id":"cite:1","title":"Source","doi":"10.…"}]'></textarea></label>
+            <label class="archive-wide">Appendices JSON<textarea id="publication-appendices" rows="7" placeholder='[{"appendix_id":"app:1","title":"Appendix","content":"…"}]'></textarea></label>
+            <label class="archive-wide">Metadata JSON<textarea id="publication-metadata" rows="5" placeholder='{}'></textarea></label>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Editorial controls</p><h2>Audit before publishing handoff</h2></div></div>
+          <div class="archive-actions">
+            <button id="publication-draft" type="button">Build publication draft</button>
+            <button id="publication-sections-audit" type="button">Section inventory</button>
+            <button id="publication-assets-audit" type="button">Asset inventory</button>
+            <button id="publication-citations-audit" type="button">Citation inventory</button>
+            <button id="publication-editorial-audit" type="button">Editorial audit</button>
+            <button id="publication-readiness-audit" type="button">Readiness audit</button>
+            <button id="publication-publishing-handoff" type="button" class="secondary-button">Publishing handoff preview</button>
+            <button id="publication-export" type="button" class="secondary-button">Export draft JSON</button>
+          </div>
+          <p class="form-note">Readiness is an editorial completeness signal only. It is not truth, peer review, evidence strength, source validity, or publication acceptance.</p>
+        </section>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Studio output</p><h2>Publication draft &amp; audits</h2></div></div>
+          <div id="publication-studio-output"><p class="empty-state">Publication drafts, inventories, editorial findings, readiness results, and handoff previews appear here.</p></div>
         </section>
       </section>
 
@@ -825,7 +895,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.25.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.26.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

@@ -321,6 +321,17 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/research-package-composer/publishing-handoff-preview","name":"research-package-composer-publishing-handoff-preview","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-package-composer/reproducibility-handoff-preview","name":"research-package-composer-reproducibility-handoff-preview","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/research-package-composer/export","name":"research-package-composer-export","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-publication","name":"research-publication-studio","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-publication/readiness","name":"research-publication-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-publication/bootstrap","name":"research-publication-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-publication/draft","name":"research-publication-draft","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-publication/section-inventory","name":"research-publication-section-inventory","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-publication/asset-inventory","name":"research-publication-asset-inventory","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-publication/citation-inventory","name":"research-publication-citation-inventory","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-publication/editorial-audit","name":"research-publication-editorial-audit","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-publication/readiness-audit","name":"research-publication-readiness-audit","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-publication/publishing-handoff-preview","name":"research-publication-publishing-handoff-preview","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-publication/export","name":"research-publication-export","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -335,6 +346,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "dataset-statistical-evidence": {"resources":["dataset-discovery","dataset-profiles","variable-dictionaries","statistical-results","uncertainty-audits","gap-analysis","evidence-handoff","investigation-handoff"],"direct_api":True,"authority":"python-backend-composition"},
     "geospatial-place-research": {"resources":["places","spatial-features","layers","crs","temporal-validity","relation-preview","coverage-audit","evidence-handoff","investigation-handoff"],"direct_api":True,"authority":"python-backend-composition"},
     "research-package-composer": {"resources":["typed-components","composition-manifest","completeness-audit","provenance-audit","dependency-map","publishing-handoff","reproducibility-handoff","draft-export"],"direct_api":True,"authority":"python-backend-composition"},
+    "research-publication-studio": {"resources":["publication-profiles","structured-sections","contributors","figures","tables","appendices","citation-inventory","editorial-audit","readiness-audit","publishing-handoff","draft-export"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},
