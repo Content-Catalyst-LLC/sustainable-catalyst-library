@@ -1,3 +1,5 @@
+# Sustainable Catalyst Library v6.31.0 — Research Dependency & Lineage Graph
+
 # Sustainable Catalyst Knowledge Library
 
 Current release: **v6.12.0 — Historical Archive & Primary-Source Intelligence**. Backend: **v3.12.0** · Python SDK: **v1.12.0** · JS/TS Client: **v1.12.0** · Library Web: **v2.12.0** · API: **v1.0 stable**.

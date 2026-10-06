@@ -1,3 +1,10 @@
+## 6.31.0 — Research Dependency & Lineage Graph
+
+- Adds explicit project dependency and provenance lineage graph composition, validation, traversal, path, impact, provenance audit, and deterministic export.
+- Preserves v6.30 project/domain authorities and PostgreSQL research-state persistence.
+- Repairs Library Web deployment default to the established production bind port 8095.
+- No database migration and no automatic semantic/causal relationship inference.
+
 ## 6.30.0 — Unified Research Project Workspace
 
 - Added `/research/project` and `/api/library/v1/research-project-workspace`.

@@ -401,6 +401,19 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .research_dependency_lineage_graph import (
+    contract as research_dependency_lineage_graph_contract,
+    readiness as research_dependency_lineage_graph_readiness,
+    bootstrap as research_dependency_lineage_graph_bootstrap,
+    build_graph as build_research_dependency_lineage_graph,
+    validate_graph as validate_research_dependency_lineage_graph,
+    lineage as traverse_research_dependency_lineage,
+    neighborhood as research_dependency_lineage_neighborhood,
+    path as research_dependency_lineage_path,
+    impact_analysis as research_dependency_lineage_impact_analysis,
+    provenance_audit as research_dependency_lineage_provenance_audit,
+    export_graph as export_research_dependency_lineage_graph,
+)
 from .unified_research_project_workspace import (
     contract as unified_research_project_workspace_contract,
     readiness as unified_research_project_workspace_readiness,
@@ -1071,6 +1084,16 @@ def health() -> dict[str, Any]:
             "unified_research_project_existing_persistence_authority_preserved": True,
             "unified_research_project_server_persistence": False,
             "unified_research_project_database_migration_required": False,
+            "research_dependency_lineage_graph": True,
+            "research_dependency_lineage_graph_route": "/research/project/lineage",
+            "research_dependency_lineage_explicit_edges_only": True,
+            "research_dependency_lineage_cycle_detection": True,
+            "research_dependency_lineage_ancestor_descendant_traversal": True,
+            "research_dependency_lineage_path_tracing": True,
+            "research_dependency_lineage_impact_analysis": True,
+            "research_dependency_lineage_provenance_audit": True,
+            "research_dependency_lineage_server_persistence": False,
+            "research_dependency_lineage_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -1085,8 +1108,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.30.0",
-            "library_sdk_version": "1.30.0",
+            "library_web_version": "2.31.0",
+            "library_sdk_version": "1.31.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5446,6 +5469,66 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-lineage-graph")
+def library_api_v1_research_dependency_lineage_graph_contract() -> dict[str, Any]:
+    return research_dependency_lineage_graph_contract()
+
+@app.get("/api/library/v1/research-lineage-graph/readiness")
+def library_api_v1_research_dependency_lineage_graph_readiness() -> dict[str, Any]:
+    return research_dependency_lineage_graph_readiness()
+
+@app.get("/api/library/v1/research-lineage-graph/bootstrap")
+def library_api_v1_research_dependency_lineage_graph_bootstrap() -> dict[str, Any]:
+    return research_dependency_lineage_graph_bootstrap()
+
+@app.post("/api/library/v1/research-lineage-graph/build")
+async def library_api_v1_research_dependency_lineage_graph_build(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_research_dependency_lineage_graph(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-lineage-graph/validate")
+async def library_api_v1_research_dependency_lineage_graph_validate(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return validate_research_dependency_lineage_graph(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-lineage-graph/lineage")
+async def library_api_v1_research_dependency_lineage_graph_lineage(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return traverse_research_dependency_lineage(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-lineage-graph/neighborhood")
+async def library_api_v1_research_dependency_lineage_graph_neighborhood(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_dependency_lineage_neighborhood(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-lineage-graph/path")
+async def library_api_v1_research_dependency_lineage_graph_path(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_dependency_lineage_path(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-lineage-graph/impact-analysis")
+async def library_api_v1_research_dependency_lineage_graph_impact(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_dependency_lineage_impact_analysis(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-lineage-graph/provenance-audit")
+async def library_api_v1_research_dependency_lineage_graph_provenance(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return research_dependency_lineage_provenance_audit(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-lineage-graph/export")
+async def library_api_v1_research_dependency_lineage_graph_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_research_dependency_lineage_graph(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/research-project-workspace")
