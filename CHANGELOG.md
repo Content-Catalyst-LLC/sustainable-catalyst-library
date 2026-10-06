@@ -1,3 +1,11 @@
+## 6.32.0 — Research Review, Revision & Versioning System
+
+- Adds content-fingerprinted research version snapshots and deterministic field-level comparisons.
+- Adds human review packets, explicit review decisions, revision proposals, version history, and chain validation.
+- Emits explicit supersedes/version-of lineage handoff relations without automatically modifying the v6.31 lineage graph.
+- Preserves originating object authority and PostgreSQL project persistence authority; no database migration.
+- Approval/rejection are review states and never imply truth, falsity, scientific validity, or automatic publication.
+
 ## 6.31.0 — Research Dependency & Lineage Graph
 
 - Adds explicit project dependency and provenance lineage graph composition, validation, traversal, path, impact, provenance audit, and deterministic export.

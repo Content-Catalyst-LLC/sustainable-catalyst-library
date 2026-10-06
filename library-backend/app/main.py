@@ -401,6 +401,19 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .research_review_revision_versioning import (
+    contract as research_review_versioning_contract,
+    readiness as research_review_versioning_readiness,
+    bootstrap as research_review_versioning_bootstrap,
+    version_snapshot as create_research_version_snapshot,
+    compare_versions as compare_research_versions,
+    review_packet as build_research_review_packet,
+    revision_proposal as build_research_revision_proposal,
+    review_decision as record_research_review_decision,
+    version_history as build_research_version_history,
+    validate_chain as validate_research_version_chain,
+    export_bundle as export_research_review_versioning_bundle,
+)
 from .research_dependency_lineage_graph import (
     contract as research_dependency_lineage_graph_contract,
     readiness as research_dependency_lineage_graph_readiness,
@@ -1094,6 +1107,18 @@ def health() -> dict[str, Any]:
             "research_dependency_lineage_provenance_audit": True,
             "research_dependency_lineage_server_persistence": False,
             "research_dependency_lineage_database_migration_required": False,
+            "research_review_revision_versioning": True,
+            "research_review_revision_versioning_route": "/research/project/review",
+            "research_version_snapshots": True,
+            "research_version_field_level_comparison": True,
+            "research_human_review_packets": True,
+            "research_revision_proposals": True,
+            "research_explicit_review_decisions": True,
+            "research_version_chain_validation": True,
+            "research_review_automatic_decision": False,
+            "research_revision_automatic_application": False,
+            "research_review_server_persistence": False,
+            "research_review_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -1108,8 +1133,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.31.0",
-            "library_sdk_version": "1.31.0",
+            "library_web_version": "2.32.0",
+            "library_sdk_version": "1.32.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5469,6 +5494,66 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-review-versioning")
+def library_api_v1_research_review_versioning_contract() -> dict[str, Any]:
+    return research_review_versioning_contract()
+
+@app.get("/api/library/v1/research-review-versioning/readiness")
+def library_api_v1_research_review_versioning_readiness() -> dict[str, Any]:
+    return research_review_versioning_readiness()
+
+@app.get("/api/library/v1/research-review-versioning/bootstrap")
+def library_api_v1_research_review_versioning_bootstrap() -> dict[str, Any]:
+    return research_review_versioning_bootstrap()
+
+@app.post("/api/library/v1/research-review-versioning/snapshot")
+async def library_api_v1_research_review_versioning_snapshot(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return create_research_version_snapshot(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-review-versioning/compare")
+async def library_api_v1_research_review_versioning_compare(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return compare_research_versions(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-review-versioning/review-packet")
+async def library_api_v1_research_review_versioning_review_packet(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_research_review_packet(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-review-versioning/revision-proposal")
+async def library_api_v1_research_review_versioning_revision_proposal(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_research_revision_proposal(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-review-versioning/review-decision")
+async def library_api_v1_research_review_versioning_review_decision(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return record_research_review_decision(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-review-versioning/version-history")
+async def library_api_v1_research_review_versioning_version_history(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_research_version_history(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-review-versioning/validate-chain")
+async def library_api_v1_research_review_versioning_validate_chain(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return validate_research_version_chain(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-review-versioning/export")
+async def library_api_v1_research_review_versioning_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_research_review_versioning_bundle(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/research-lineage-graph")

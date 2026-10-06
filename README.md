@@ -1,3 +1,5 @@
+# Sustainable Catalyst Library v6.32.0 — Research Review, Revision & Versioning System
+
 # Sustainable Catalyst Library v6.31.0 — Research Dependency & Lineage Graph
 
 # Sustainable Catalyst Knowledge Library
