@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sustainable-catalyst-library"
-version = "1.29.0"
+version = "1.30.0"
 description = "First-party client for the Sustainable Catalyst Knowledge Library API v1"
 requires-python = ">=3.10"
 

@@ -359,6 +359,16 @@ ROUTES: tuple[dict[str, Any], ...] = (
     {"method":"POST","path":"/api/library/v1/cross-product-certification/failure-audit","name":"cross-product-research-failure-audit","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/cross-product-certification/certify","name":"cross-product-research-certify","access":"public","stability":"stable"},
     {"method":"POST","path":"/api/library/v1/cross-product-certification/export","name":"cross-product-research-certification-export","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-project-workspace","name":"unified-research-project-workspace","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-project-workspace/readiness","name":"unified-research-project-workspace-readiness","access":"public","stability":"stable"},
+    {"method":"GET","path":"/api/library/v1/research-project-workspace/bootstrap","name":"unified-research-project-workspace-bootstrap","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-project-workspace/compose","name":"unified-research-project-compose","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-project-workspace/validate","name":"unified-research-project-validate","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-project-workspace/inventory","name":"unified-research-project-inventory","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-project-workspace/authority-audit","name":"unified-research-project-authority-audit","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-project-workspace/dependency-summary","name":"unified-research-project-dependency-summary","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-project-workspace/handoff-manifest","name":"unified-research-project-handoff-manifest","access":"public","stability":"stable"},
+    {"method":"POST","path":"/api/library/v1/research-project-workspace/export","name":"unified-research-project-export","access":"public","stability":"stable"},
 )
 
 CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
@@ -377,6 +387,7 @@ CAPABILITY_FAMILIES: dict[str, dict[str, Any]] = {
     "unified-research-knowledge-graph": {"resources":["typed-research-object-nodes","explicit-relations","authority-lineage","deterministic-snapshot","validation","chain-audit","neighborhood","path","export"],"direct_api":True,"authority":"python-backend-composition"},
     "library-workspace-research-integration": {"resources":["library-to-workspace-handoff","handoff-validation","workspace-result-registration-preview","project-correlation","authority-boundaries","round-trip-audit","exchange-export"],"direct_api":True,"authority":"python-backend-composition"},
     "cross-product-research-certification": {"resources":["product-contracts","handoff-envelopes","handoff-validation","compatibility-matrix","failure-behavior-audit","runtime-observations","structural-certification","certification-export"],"direct_api":True,"authority":"library-api-contract-certification"},
+    "unified-research-project-workspace": {"resources":["project-manifest","typed-component-references","authority-lineage","component-inventory","coverage-diagnostics","dependency-summary","cross-product-handoff-manifest","portable-project-export"],"direct_api":True,"authority":"python-backend-composition"},
     "research-execution": {"resources":["research-jobs","workers","pipelines","compute"],"direct_api":True},
     "artifacts": {"resources":["research-artifacts","derivations","integrity"],"direct_api":True},
     "transparency": {"resources":["source-quality-signals","trust-policies"],"direct_api":True},

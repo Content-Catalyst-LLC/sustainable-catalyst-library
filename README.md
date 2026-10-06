@@ -149,3 +149,5 @@ Library v6.27.0 adds `/research/graph`, a Unified Research Knowledge Graph that 
 Library v6.28.0 adds `/research/workspace`, a Library ↔ Workspace Research Integration surface for explicit Library-to-Workspace research handoffs, Workspace-result registration previews, authority-preserving round-trip audits, and deterministic exchange export; live cross-product transport remains deferred to v6.29 certification.
 
 Library v6.29.0 adds `/research/integration-certification`, a cross-product research handoff and contract-certification surface for Research Librarian AI, Workspace, Research Lab, Workbench, Site Intelligence, Decision Studio, and Platform Core with explicit compatibility, provenance, authority, signed-write, failure-behavior, and runtime-observation boundaries.
+
+Library v6.30.0 adds `/research/project`, a Unified Research Project Workspace that composes existing research objects, authority lineage, dependencies, and cross-product handoff manifests without replacing existing domain or PostgreSQL research-state authorities.

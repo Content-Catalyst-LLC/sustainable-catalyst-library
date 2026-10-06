@@ -401,6 +401,18 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .unified_research_project_workspace import (
+    contract as unified_research_project_workspace_contract,
+    readiness as unified_research_project_workspace_readiness,
+    bootstrap as unified_research_project_workspace_bootstrap,
+    compose_project as compose_unified_research_project,
+    validate_project as validate_unified_research_project,
+    inventory as unified_research_project_inventory,
+    authority_audit as unified_research_project_authority_audit,
+    dependency_summary as unified_research_project_dependency_summary,
+    handoff_manifest as unified_research_project_handoff_manifest,
+    export_project as export_unified_research_project,
+)
 from .cross_product_research_handoff_certification import (
     contract as cross_product_research_certification_contract,
     readiness as cross_product_research_certification_readiness,
@@ -1049,6 +1061,16 @@ def health() -> dict[str, Any]:
             "cross_product_automatic_remote_execution": False,
             "cross_product_automatic_result_import": False,
             "cross_product_database_migration_required": False,
+            "unified_research_project_workspace": True,
+            "unified_research_project_workspace_route": "/research/project",
+            "unified_research_project_manifest": True,
+            "unified_research_project_typed_components": True,
+            "unified_research_project_authority_audit": True,
+            "unified_research_project_dependency_summary": True,
+            "unified_research_project_handoff_manifest": True,
+            "unified_research_project_existing_persistence_authority_preserved": True,
+            "unified_research_project_server_persistence": False,
+            "unified_research_project_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -1063,8 +1085,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.29.0",
-            "library_sdk_version": "1.29.0",
+            "library_web_version": "2.30.0",
+            "library_sdk_version": "1.30.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5424,6 +5446,60 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-project-workspace")
+def library_api_v1_unified_research_project_workspace_contract() -> dict[str, Any]:
+    return unified_research_project_workspace_contract()
+
+@app.get("/api/library/v1/research-project-workspace/readiness")
+def library_api_v1_unified_research_project_workspace_readiness() -> dict[str, Any]:
+    return unified_research_project_workspace_readiness()
+
+@app.get("/api/library/v1/research-project-workspace/bootstrap")
+def library_api_v1_unified_research_project_workspace_bootstrap() -> dict[str, Any]:
+    return unified_research_project_workspace_bootstrap()
+
+@app.post("/api/library/v1/research-project-workspace/compose")
+async def library_api_v1_unified_research_project_workspace_compose(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return compose_unified_research_project(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-project-workspace/validate")
+async def library_api_v1_unified_research_project_workspace_validate(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return validate_unified_research_project(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-project-workspace/inventory")
+async def library_api_v1_unified_research_project_workspace_inventory(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return unified_research_project_inventory(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-project-workspace/authority-audit")
+async def library_api_v1_unified_research_project_workspace_authority_audit(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return unified_research_project_authority_audit(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-project-workspace/dependency-summary")
+async def library_api_v1_unified_research_project_workspace_dependency_summary(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return unified_research_project_dependency_summary(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-project-workspace/handoff-manifest")
+async def library_api_v1_unified_research_project_workspace_handoff_manifest(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return unified_research_project_handoff_manifest(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-project-workspace/export")
+async def library_api_v1_unified_research_project_workspace_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_unified_research_project(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/cross-product-certification")

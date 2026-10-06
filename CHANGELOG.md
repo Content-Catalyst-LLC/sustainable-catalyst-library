@@ -1,3 +1,13 @@
+## 6.30.0 — Unified Research Project Workspace
+
+- Added `/research/project` and `/api/library/v1/research-project-workspace`.
+- Added deterministic project manifests over typed research-object references with explicit authority lineage.
+- Added component inventory, coverage diagnostics, authority audit, dependency summary, cross-product handoff manifest, and portable project export.
+- Preserves Python/PostgreSQL research-state authority and all originating domain authorities.
+- No automatic persistence, remote execution, result import, claim/evidence/truth promotion, or Platform Core promotion.
+- Synchronized Library 6.30.0 / backend 3.30.0 / web 2.30.0 / SDK 1.30.0.
+- No database migration; WordPress remains optional.
+
 ## 6.29.0 — Cross-Product Research Handoff & Contract Certification
 
 - Added `/research/integration-certification` and `/api/library/v1/cross-product-certification`.
