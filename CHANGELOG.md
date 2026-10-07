@@ -1,3 +1,9 @@
+## 6.35.0 — Collaborative Research Rooms II
+
+- Adds deterministic room manifests with explicit membership and role permissions.
+- Adds room-scoped research-object references, human-authored activity streams, review request/decision packets, role-scope access audits, portable exchange handoffs, and room export.
+- Preserves source object, project, citation, evidence, truth, publication, identity, and exchange authorities. No database migration, automatic role escalation, source mutation, review decision, persistence, import, truth promotion, or Platform Core promotion.
+
 ## 6.34.0 — Portable Research Object & Exchange Format
 
 - Adds portable research-object envelopes preserving exact payloads, original schemas, authority, provenance, lineage, citations, and content fingerprints.

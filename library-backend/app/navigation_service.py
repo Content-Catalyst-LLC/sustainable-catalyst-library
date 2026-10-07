@@ -12,10 +12,10 @@ from .research_interface import (
 from .independent_api import capability_catalog
 from .web_application import application_contract as web_application_contract
 
-LIBRARY_VERSION = "6.34.0"
-BACKEND_VERSION = "3.34.0"
-WEB_VERSION = "2.34.0"
-SDK_VERSION = "1.34.0"
+LIBRARY_VERSION = "6.35.0"
+BACKEND_VERSION = "3.35.0"
+WEB_VERSION = "2.35.0"
+SDK_VERSION = "1.35.0"
 
 CONTRACT = "sc-library-unified-discovery-research-navigation/1.0"
 READINESS_CONTRACT = "sc-library-unified-discovery-research-navigation-readiness/1.0"
@@ -81,6 +81,7 @@ def navigation_model() -> dict[str, Any]:
         {"id": "research-review-versioning", "label": "Review & Versions", "route": "/research/project/review", "mode": "research-review-versioning"},
         {"id": "research-package-readiness", "label": "Publication Readiness", "route": "/research/package/readiness", "mode": "research-package-readiness"},
         {"id": "research-object-exchange", "label": "Exchange", "route": "/research/exchange", "mode": "research-object-exchange"},
+        {"id": "collaborative-research-rooms", "label": "Rooms", "route": "/research/rooms", "mode": "collaborative-research-rooms"},
         {"id": "projects", "label": "Projects", "route": "/account?section=workspaces", "mode": "projects"},
     ]
     aliases = {
@@ -118,8 +119,8 @@ def contract() -> dict[str, Any]:
         "canonical_research_route": "/research",
         "navigation": nav,
         "wordpress": {"role": "optional-adapter", "required": False, "authoritative": False},
-        "next_release": "6.35.0",
-        "next_release_name": "Collaborative Research Rooms II",
+        "next_release": "6.36.0",
+        "next_release_name": "Library–Librarian Unified Research Intelligence",
         "guardrails": guardrails(),
     }
 
@@ -185,6 +186,8 @@ def resolve_route(path: str) -> dict[str, Any]:
     alias = nav["aliases"].get(raw)
     if alias:
         resolved = {"requested_route": raw, **alias, "compatibility_alias": True}
+    elif raw == "/research/rooms":
+        resolved = {"requested_route": raw, "canonical_route": raw, "surface": "research", "mode": "collaborative-research-rooms", "compatibility_alias": False}
     elif raw == "/research/exchange":
         resolved = {"requested_route": raw, "canonical_route": raw, "surface": "research", "mode": "research-object-exchange", "compatibility_alias": False}
     elif raw == "/research/package/readiness":

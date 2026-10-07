@@ -1,3 +1,7 @@
+## Library v6.35.0 — Collaborative Research Rooms II
+
+Adds explicit collaborative room manifests, membership/role matrices, scoped research-object references, activity streams, human review packets, access audits, portable exchange handoffs, and deterministic room exports.
+
 ## Library v6.34.0 — Portable Research Object & Exchange Format
 
 Adds lossless, deterministic, authority-preserving research-object envelopes and explicit multi-object exchange manifests with integrity verification and non-mutating import preview.

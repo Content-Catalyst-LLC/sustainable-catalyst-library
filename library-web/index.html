@@ -740,6 +740,7 @@
           <a href="/research/package" aria-current="page">Package</a>
           <a href="/research/package/readiness" data-app-link>Readiness</a>
           <a href="/research/exchange" data-app-link>Exchange</a>
+          <a href="/research/rooms" data-app-link>Rooms</a>
           <a href="/research/publication" data-app-link>Publication</a>
           <a href="/research/graph" data-app-link>Graph</a>
         </nav>
@@ -1125,6 +1126,81 @@
         </section>
       </section>
 
+      <section class="view" data-view="collaborative-research-rooms" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Invite · scope · share · review · hand off</p>
+          <h1>Collaborative Research Rooms II</h1>
+          <p>Compose explicit collaborative research rooms around existing Sustainable Catalyst projects and research objects. Room membership, roles, activity, review decisions, and access audits coordinate human work without changing the authority, evidence status, truth status, or persistence semantics of the underlying research objects.</p>
+        </div>
+        <nav class="research-subnav" aria-label="Collaborative research rooms navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/project" data-app-link>Project</a>
+          <a href="/research/project/review" data-app-link>Review &amp; Versions</a>
+          <a href="/research/exchange" data-app-link>Exchange</a>
+          <a href="/research/rooms" aria-current="page">Rooms</a>
+        </nav>
+        <div id="collaborative-research-rooms-status" class="context-strip"><span>Loading Collaborative Research Rooms II…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Room manifest</p><h2>Create explicit collaboration scope</h2></div></div>
+            <label>Title<input id="collaborative-research-room-title" value="Collaborative research room"></label>
+            <label>Project ID<input id="collaborative-research-room-project" placeholder="research-project:…"></label>
+            <label>Scope<input id="collaborative-research-room-scope" placeholder="Research scope"></label>
+            <label class="archive-wide">Description<textarea id="collaborative-research-room-description" rows="3"></textarea></label>
+            <label class="archive-wide">Owner JSON<textarea id="collaborative-research-room-owner" rows="5" placeholder='{"member_id":"user:owner","name":"Owner"}'></textarea></label>
+            <label class="archive-wide">Members JSON<textarea id="collaborative-research-room-members" rows="8" placeholder='[{"member_id":"user:reviewer","role":"reviewer"}]'></textarea></label>
+            <label class="archive-wide">Metadata JSON<textarea id="collaborative-research-room-metadata" rows="4" placeholder='{}'></textarea></label>
+            <div class="archive-actions"><button id="collaborative-research-room-create" type="button">Create room manifest</button></div>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Current room</p><h2>Inspect membership &amp; scoped objects</h2></div></div>
+            <label class="archive-wide">Room JSON<textarea id="collaborative-research-room-current" rows="17"></textarea></label>
+            <label class="archive-wide">Room object references JSON<textarea id="collaborative-research-room-objects" rows="9" placeholder='[{"object_id":"analysis:1","source_authority":"statistical-evidence","source_schema":"…"}]'></textarea></label>
+            <label class="archive-wide">Activity events JSON<textarea id="collaborative-research-room-events" rows="8" placeholder='[{"actor_id":"user:editor","kind":"comment","occurred_at":"2026-10-07T12:00:00Z","text":"Verify source provenance"}]'></textarea></label>
+            <div class="archive-actions">
+              <button id="collaborative-research-room-membership" type="button">Membership matrix</button>
+              <button id="collaborative-research-room-objects-button" type="button">Object manifest</button>
+              <button id="collaborative-research-room-activity-button" type="button">Activity stream</button>
+            </div>
+          </section>
+        </div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Human review</p><h2>Request and record explicit review</h2></div></div>
+            <label class="archive-wide">Review subject JSON<textarea id="collaborative-research-room-review-subject" rows="5" placeholder='{"object_id":"analysis:1","source_authority":"statistical-evidence"}'></textarea></label>
+            <label>Requested by<input id="collaborative-research-room-requested-by" placeholder="user:editor"></label>
+            <label class="archive-wide">Reviewers JSON<textarea id="collaborative-research-room-reviewers" rows="4" placeholder='["user:reviewer"]'></textarea></label>
+            <label class="archive-wide">Criteria JSON<textarea id="collaborative-research-room-review-criteria" rows="4" placeholder='["provenance","method clarity"]'></textarea></label>
+            <label>Due at<input id="collaborative-research-room-review-due" placeholder="Optional ISO timestamp"></label>
+            <label class="archive-wide">Instructions<textarea id="collaborative-research-room-review-instructions" rows="3"></textarea></label>
+            <button id="collaborative-research-room-review-request-button" type="button">Build review request</button>
+            <label class="archive-wide">Review request JSON<textarea id="collaborative-research-room-review-request-json" rows="8"></textarea></label>
+            <label>Decision<select id="collaborative-research-room-review-decision"><option value="abstain">Abstain</option><option value="approve">Approve</option><option value="request-changes">Request changes</option><option value="reject">Reject</option></select></label>
+            <label>Decided by<input id="collaborative-research-room-decided-by" placeholder="user:reviewer"></label>
+            <label class="archive-wide">Rationale<textarea id="collaborative-research-room-decision-rationale" rows="3"></textarea></label>
+            <button id="collaborative-research-room-review-decision-button" type="button">Record review decision</button>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Access &amp; exchange</p><h2>Audit role scope and prepare handoff</h2></div></div>
+            <label>Actor ID<input id="collaborative-research-room-actor" placeholder="user:editor"></label>
+            <label>Action<input id="collaborative-research-room-action" value="view"></label>
+            <button id="collaborative-research-room-access-button" type="button">Audit room role access</button>
+            <label class="archive-wide">Portable exchange JSON<textarea id="collaborative-research-room-exchange" rows="10" placeholder='{"schema":"sc-library-research-object-exchange/1.0","exchange_id":"research-object-exchange:…"}'></textarea></label>
+            <label class="archive-wide">Target JSON<textarea id="collaborative-research-room-target" rows="5" placeholder='{"product":"workspace","authority":"workspace-project-state"}'></textarea></label>
+            <label>Intent<input id="collaborative-research-room-intent" value="continue-collaborative-research"></label>
+            <div class="archive-actions">
+              <button id="collaborative-research-room-handoff-button" type="button">Build exchange handoff</button>
+              <button id="collaborative-research-room-export-button" type="button" class="secondary-button">Export room JSON</button>
+            </div>
+            <p class="form-note">Room role checks are collaboration-policy observations, not authentication. Review and handoff operations never mutate source objects automatically.</p>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Room output</p><h2>Membership, activity, review &amp; handoff diagnostics</h2></div></div>
+          <div id="collaborative-research-rooms-output"><p class="empty-state">Room manifests, membership matrices, object references, activity events, reviews, access audits, exchange handoffs, and portable exports appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="research-object-exchange" hidden>
         <div class="page-heading research-heading">
           <p class="eyebrow">Wrap · preserve · verify · exchange · preview</p>
@@ -1360,7 +1436,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.34.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.35.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

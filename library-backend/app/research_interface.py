@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.34.0"
-BACKEND_VERSION = "3.34.0"
-WEB_VERSION = "2.34.0"
-SDK_VERSION = "1.34.0"
+LIBRARY_VERSION = "6.35.0"
+BACKEND_VERSION = "3.35.0"
+WEB_VERSION = "2.35.0"
+SDK_VERSION = "1.35.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"
@@ -80,6 +80,7 @@ def contract() -> dict[str, Any]:
         {"id": "research-review-revision-versioning", "route": "/research/project/review", "purpose": "human-review-version-snapshots-revision-proposals-version-comparison-and-chain-validation"},
         {"id": "research-package-validation-publication-readiness", "route": "/research/package/readiness", "purpose": "package-validation-completeness-provenance-review-and-publication-handoff-readiness"},
         {"id": "portable-research-object-exchange", "route": "/research/exchange", "purpose": "lossless-authority-preserving-portable-research-object-and-explicit-exchange-manifest"},
+        {"id": "collaborative-research-rooms-ii", "route": "/research/rooms", "purpose": "explicit-room-membership-role-scoped-object-collaboration-review-and-exchange-control-plane"},
         {"id": "record-context", "route": "/record/{record_id}", "purpose": "research-object-provenance-citations-evidence"},
         {"id": "saved-research", "route": "/account", "purpose": "service-native-project-and-collection-handoff"},
     ]
@@ -132,8 +133,8 @@ def contract() -> dict[str, Any]:
             "required": False,
             "authoritative": False,
         },
-        "next_release": "6.35.0",
-        "next_release_name": "Collaborative Research Rooms II",
+        "next_release": "6.36.0",
+        "next_release_name": "Library–Librarian Unified Research Intelligence",
         "guardrails": guardrails(),
     }
 

@@ -401,6 +401,20 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .collaborative_research_rooms_ii import (
+    contract as collaborative_research_rooms_contract,
+    readiness as collaborative_research_rooms_readiness,
+    bootstrap as collaborative_research_rooms_bootstrap,
+    create_room as create_collaborative_research_room,
+    membership_matrix as collaborative_research_room_membership,
+    object_manifest as collaborative_research_room_object_manifest,
+    activity_stream as collaborative_research_room_activity_stream,
+    review_request as collaborative_research_room_review_request,
+    review_decision as collaborative_research_room_review_decision,
+    access_audit as collaborative_research_room_access_audit,
+    exchange_handoff as collaborative_research_room_exchange_handoff,
+    export_room as export_collaborative_research_room,
+)
 from .portable_research_object_exchange import (
     contract as portable_research_object_exchange_contract,
     readiness as portable_research_object_exchange_readiness,
@@ -1165,6 +1179,18 @@ def health() -> dict[str, Any]:
             "portable_research_object_exchange_automatic_import": False,
             "portable_research_object_exchange_server_persistence": False,
             "portable_research_object_exchange_database_migration_required": False,
+            "collaborative_research_rooms_ii": True,
+            "collaborative_research_rooms_route": "/research/rooms",
+            "collaborative_research_room_explicit_membership_roles": True,
+            "collaborative_research_room_scoped_object_references": True,
+            "collaborative_research_room_activity_stream": True,
+            "collaborative_research_room_human_review_packets": True,
+            "collaborative_research_room_access_audit": True,
+            "collaborative_research_room_exchange_handoff": True,
+            "collaborative_research_room_automatic_role_escalation": False,
+            "collaborative_research_room_automatic_object_mutation": False,
+            "collaborative_research_room_server_persistence": False,
+            "collaborative_research_room_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -1179,8 +1205,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.34.0",
-            "library_sdk_version": "1.34.0",
+            "library_web_version": "2.35.0",
+            "library_sdk_version": "1.35.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5540,6 +5566,72 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-rooms")
+def library_api_v1_research_rooms_contract() -> dict[str, Any]:
+    return collaborative_research_rooms_contract()
+
+@app.get("/api/library/v1/research-rooms/readiness")
+def library_api_v1_research_rooms_readiness() -> dict[str, Any]:
+    return collaborative_research_rooms_readiness()
+
+@app.get("/api/library/v1/research-rooms/bootstrap")
+def library_api_v1_research_rooms_bootstrap() -> dict[str, Any]:
+    return collaborative_research_rooms_bootstrap()
+
+@app.post("/api/library/v1/research-rooms/create-room")
+async def library_api_v1_research_rooms_create(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return create_collaborative_research_room(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-rooms/membership")
+async def library_api_v1_research_rooms_membership(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return collaborative_research_room_membership(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-rooms/object-manifest")
+async def library_api_v1_research_rooms_objects(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return collaborative_research_room_object_manifest(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-rooms/activity-stream")
+async def library_api_v1_research_rooms_activity(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return collaborative_research_room_activity_stream(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-rooms/review-request")
+async def library_api_v1_research_rooms_review_request(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return collaborative_research_room_review_request(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-rooms/review-decision")
+async def library_api_v1_research_rooms_review_decision(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return collaborative_research_room_review_decision(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-rooms/access-audit")
+async def library_api_v1_research_rooms_access_audit(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return collaborative_research_room_access_audit(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-rooms/exchange-handoff")
+async def library_api_v1_research_rooms_exchange_handoff(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return collaborative_research_room_exchange_handoff(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-rooms/export")
+async def library_api_v1_research_rooms_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_collaborative_research_room(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/research-object-exchange")
