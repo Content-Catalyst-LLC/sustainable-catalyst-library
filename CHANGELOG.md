@@ -1,3 +1,9 @@
+## 6.36.0 — Library–Librarian Unified Research Intelligence
+
+- Adds explicit Library research context packets spanning projects, rooms, working sets, research objects, citations, provenance, packages, publications, and portable exchange references.
+- Adds governed Research Librarian request envelopes, advisory intake previews, source/context grounding audits, and non-executing proposed action plans.
+- Preserves Library research-state/object/provenance authority. No automatic external transport, search execution, source inclusion, mutation, persistence, truth promotion, or Platform Core promotion.
+
 ## 6.35.0 — Collaborative Research Rooms II
 
 - Adds deterministic room manifests with explicit membership and role permissions.

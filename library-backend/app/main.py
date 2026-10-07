@@ -401,6 +401,18 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .library_librarian_unified_research_intelligence import (
+    contract as library_librarian_research_intelligence_contract,
+    readiness as library_librarian_research_intelligence_readiness,
+    bootstrap as library_librarian_research_intelligence_bootstrap,
+    build_context_packet as build_library_librarian_context_packet,
+    validate_context as validate_library_librarian_context,
+    librarian_request as build_library_librarian_request,
+    advisory_preview as preview_library_librarian_advisory,
+    grounding_audit as audit_library_librarian_grounding,
+    action_plan as build_library_librarian_action_plan,
+    export_bundle as export_library_librarian_research_intelligence,
+)
 from .collaborative_research_rooms_ii import (
     contract as collaborative_research_rooms_contract,
     readiness as collaborative_research_rooms_readiness,
@@ -1191,6 +1203,18 @@ def health() -> dict[str, Any]:
             "collaborative_research_room_automatic_object_mutation": False,
             "collaborative_research_room_server_persistence": False,
             "collaborative_research_room_database_migration_required": False,
+            "library_librarian_unified_research_intelligence": True,
+            "library_librarian_unified_research_intelligence_route": "/research/intelligence",
+            "library_librarian_context_packets": True,
+            "library_librarian_context_validation": True,
+            "library_librarian_explicit_request_envelopes": True,
+            "library_librarian_advisory_intake_preview": True,
+            "library_librarian_grounding_audit": True,
+            "library_librarian_proposed_action_plans": True,
+            "library_librarian_automatic_transport": False,
+            "library_librarian_automatic_execution": False,
+            "library_librarian_server_persistence": False,
+            "library_librarian_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -1205,8 +1229,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.35.0",
-            "library_sdk_version": "1.35.0",
+            "library_web_version": "2.36.0",
+            "library_sdk_version": "1.36.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5566,6 +5590,60 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-intelligence")
+def library_api_v1_research_intelligence_contract() -> dict[str, Any]:
+    return library_librarian_research_intelligence_contract()
+
+@app.get("/api/library/v1/research-intelligence/readiness")
+def library_api_v1_research_intelligence_readiness() -> dict[str, Any]:
+    return library_librarian_research_intelligence_readiness()
+
+@app.get("/api/library/v1/research-intelligence/bootstrap")
+def library_api_v1_research_intelligence_bootstrap() -> dict[str, Any]:
+    return library_librarian_research_intelligence_bootstrap()
+
+@app.post("/api/library/v1/research-intelligence/context-packet")
+async def library_api_v1_research_intelligence_context_packet(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_library_librarian_context_packet(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-intelligence/validate-context")
+async def library_api_v1_research_intelligence_validate_context(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return validate_library_librarian_context(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-intelligence/librarian-request")
+async def library_api_v1_research_intelligence_librarian_request(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_library_librarian_request(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-intelligence/advisory-preview")
+async def library_api_v1_research_intelligence_advisory_preview(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return preview_library_librarian_advisory(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-intelligence/grounding-audit")
+async def library_api_v1_research_intelligence_grounding_audit(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return audit_library_librarian_grounding(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-intelligence/action-plan")
+async def library_api_v1_research_intelligence_action_plan(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_library_librarian_action_plan(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-intelligence/export")
+async def library_api_v1_research_intelligence_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_library_librarian_research_intelligence(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/research-rooms")

@@ -741,6 +741,7 @@
           <a href="/research/package/readiness" data-app-link>Readiness</a>
           <a href="/research/exchange" data-app-link>Exchange</a>
           <a href="/research/rooms" data-app-link>Rooms</a>
+          <a href="/research/intelligence" data-app-link>Intelligence</a>
           <a href="/research/publication" data-app-link>Publication</a>
           <a href="/research/graph" data-app-link>Graph</a>
         </nav>
@@ -1126,6 +1127,70 @@
         </section>
       </section>
 
+      <section class="view" data-view="research-intelligence" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Context · ask · ground · review · act explicitly</p>
+          <h1>Library–Librarian Unified Research Intelligence</h1>
+          <p>Build explicit, authority-preserving Library research context packets for Research Librarian intelligence, inspect advisory responses against their declared sources, and convert suggestions into proposed actions without automatically changing projects, working sets, rooms, evidence, citations, or truth status.</p>
+        </div>
+        <nav class="research-subnav" aria-label="Library Librarian unified research intelligence navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/project" data-app-link>Project</a>
+          <a href="/research/rooms" data-app-link>Rooms</a>
+          <a href="/research/exchange" data-app-link>Exchange</a>
+          <a href="/research/intelligence" aria-current="page">Intelligence</a>
+        </nav>
+        <div id="research-intelligence-status" class="context-strip"><span>Loading Library–Librarian Unified Research Intelligence…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Library context</p><h2>Assemble explicit research context</h2></div></div>
+            <label class="archive-wide">Question<textarea id="research-intelligence-question" rows="3" placeholder="What evidence should I review next?"></textarea></label>
+            <label>Intent<input id="research-intelligence-intent" value="research-guidance"></label>
+            <label class="archive-wide">Project JSON<textarea id="research-intelligence-project" rows="5" placeholder='{}'></textarea></label>
+            <label class="archive-wide">Room JSON<textarea id="research-intelligence-room" rows="5" placeholder='{}'></textarea></label>
+            <label class="archive-wide">Working set JSON<textarea id="research-intelligence-working-set" rows="5" placeholder='{}'></textarea></label>
+            <label class="archive-wide">Research objects JSON<textarea id="research-intelligence-objects" rows="8" placeholder='[{"object_id":"analysis:1","source_authority":"statistical-evidence"}]'></textarea></label>
+            <label class="archive-wide">Citations JSON<textarea id="research-intelligence-citations" rows="6" placeholder='[]'></textarea></label>
+            <label class="archive-wide">Provenance JSON<textarea id="research-intelligence-provenance" rows="6" placeholder='[]'></textarea></label>
+            <label class="archive-wide">Package JSON<textarea id="research-intelligence-package" rows="5" placeholder='{}'></textarea></label>
+            <label class="archive-wide">Publication JSON<textarea id="research-intelligence-publication" rows="5" placeholder='{}'></textarea></label>
+            <label class="archive-wide">Exchange JSON<textarea id="research-intelligence-exchange" rows="5" placeholder='{}'></textarea></label>
+            <label class="archive-wide">Metadata JSON<textarea id="research-intelligence-metadata" rows="4" placeholder='{}'></textarea></label>
+            <div class="archive-actions"><button id="research-intelligence-build-context" type="button">Build context packet</button><button id="research-intelligence-validate-context" type="button">Validate context</button></div>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Explicit handoff</p><h2>Prepare Research Librarian request</h2></div></div>
+            <label class="archive-wide">Context JSON<textarea id="research-intelligence-context" rows="16"></textarea></label>
+            <label>Mode<input id="research-intelligence-mode" value="research-guidance"></label>
+            <label class="archive-wide">Task<textarea id="research-intelligence-task" rows="3" placeholder="Identify evidence gaps and next research paths"></textarea></label>
+            <div class="archive-actions"><button id="research-intelligence-build-request" type="button">Build Librarian request</button></div>
+            <label class="archive-wide">Request JSON<textarea id="research-intelligence-request" rows="14"></textarea></label>
+            <p class="form-note">This release builds an explicit handoff envelope. It does not make an automatic external network call.</p>
+          </section>
+        </div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Advisory intake</p><h2>Inspect Librarian output</h2></div></div>
+            <label class="archive-wide">Librarian response JSON<textarea id="research-intelligence-response" rows="12" placeholder='{"answer":"…","source_refs":["context-source:…"],"suggestions":[]}'></textarea></label>
+            <div class="archive-actions"><button id="research-intelligence-advisory-preview" type="button">Preview advisory</button></div>
+            <label class="archive-wide">Advisory JSON<textarea id="research-intelligence-advisory" rows="14"></textarea></label>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Grounding &amp; next action</p><h2>Audit before doing anything</h2></div></div>
+            <div class="archive-actions">
+              <button id="research-intelligence-grounding-audit" type="button">Grounding audit</button>
+              <button id="research-intelligence-action-plan" type="button">Build proposed action plan</button>
+              <button id="research-intelligence-export" type="button" class="secondary-button">Export intelligence JSON</button>
+            </div>
+            <p class="form-note">Grounding coverage is not truth or completeness. Proposed actions are never executed automatically and no suggested source is added automatically.</p>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Intelligence output</p><h2>Context, advisory, grounding &amp; action diagnostics</h2></div></div>
+          <div id="research-intelligence-output"><p class="empty-state">Context packets, request envelopes, advisory previews, grounding audits, proposed action plans, and exports appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="collaborative-research-rooms" hidden>
         <div class="page-heading research-heading">
           <p class="eyebrow">Invite · scope · share · review · hand off</p>
@@ -1436,7 +1501,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.35.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.36.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

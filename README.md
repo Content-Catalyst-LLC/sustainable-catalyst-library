@@ -1,3 +1,7 @@
+## Library v6.36.0 — Library–Librarian Unified Research Intelligence
+
+Adds authority-preserving Library research context packets, explicit Research Librarian request envelopes, advisory intake previews, grounding audits, proposed action plans, and deterministic intelligence export.
+
 ## Library v6.35.0 — Collaborative Research Rooms II
 
 Adds explicit collaborative room manifests, membership/role matrices, scoped research-object references, activity streams, human review packets, access audits, portable exchange handoffs, and deterministic room exports.
