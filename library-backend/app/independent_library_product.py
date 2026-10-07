@@ -13,21 +13,56 @@ from .client_framework import readiness as client_framework_readiness
 from .release_engineering import readiness as release_engineering_readiness
 from .wordpress_thin_adapter import readiness as wordpress_adapter_readiness
 
-LIBRARY_VERSION = "6.4.0"
-BACKEND_VERSION = "3.4.0"
-WEB_VERSION = "2.4.0"
-SDK_VERSION = "1.4.0"
+LIBRARY_VERSION = "6.39.0"
+BACKEND_VERSION = "3.39.0"
+WEB_VERSION = "2.39.0"
+SDK_VERSION = "1.39.0"
 API_VERSION = "1.0"
 
 CONTRACT = "sc-independent-sustainable-catalyst-knowledge-library/1.0"
 READINESS_CONTRACT = "sc-independent-sustainable-catalyst-knowledge-library-readiness/1.0"
 RELEASE_CONTRACT = "sc-independent-sustainable-catalyst-knowledge-library-release/1.0"
 
+# These are certified minimum versions of long-lived component contracts, not
+# a requirement that every component adopt the Library release number.
+PRODUCT_COMPONENT_VERSION_FLOORS_V639: dict[str, dict[str, str]] = {
+    "api-v1": {"library_version": "6.12.0", "backend_version": "3.12.0"},
+    "runtime-authority": {"library_version": "6.3.0", "backend_version": "3.3.0"},
+    "client-framework": {
+        "library_version": "6.4.0",
+        "backend_version": "3.4.0",
+        "sdk_version": "1.4.0",
+    },
+}
+
+
 def _canon(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
 
+
 def _fp(value: Any) -> str:
     return sha256(_canon(value).encode("utf-8")).hexdigest()
+
+
+def _version_tuple(value: Any) -> tuple[int, ...] | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    parts = raw.split(".")
+    try:
+        return tuple(int(part) for part in parts)
+    except ValueError:
+        return None
+
+
+def _version_at_least(actual: Any, minimum: str) -> bool:
+    a = _version_tuple(actual)
+    b = _version_tuple(minimum)
+    if a is None or b is None:
+        return False
+    width = max(len(a), len(b))
+    return a + (0,) * (width - len(a)) >= b + (0,) * (width - len(b))
+
 
 def guardrails() -> dict[str, bool]:
     return {
@@ -51,6 +86,7 @@ def guardrails() -> dict[str, bool]:
         "release_success_implies_research_truth": False,
     }
 
+
 def contract() -> dict[str, Any]:
     basis = {
         "library_version": LIBRARY_VERSION,
@@ -60,6 +96,8 @@ def contract() -> dict[str, Any]:
         "api_version": API_VERSION,
         "application_mode": "independent-primary",
         "wordpress_role": "optional-adapter",
+        "component_version_policy": "current-product-plus-explicit-certified-component-floors-v639",
+        "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V639,
         "guardrails": guardrails(),
     }
     return {
@@ -106,12 +144,15 @@ def contract() -> dict[str, Any]:
             "v5_client_contracts_remain_additively_compatible": True,
             "wordpress_adapter_remains_supported": True,
             "destructive_data_migration_required": False,
+            "component_version_policy": "current-product-plus-explicit-certified-component-floors-v639",
+            "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V639,
         },
-        "certification_basis": "v5.80.0-independent-library-application-certification",
-        "next_release": "6.5.0",
-        "next_release_name": "Global Knowledge Federation II",
+        "certification_basis": "v6.39-independent-application-certification",
+        "next_release": "7.0.0",
+        "next_release_name": "Independent Knowledge Library Platform",
         "guardrails": guardrails(),
     }
+
 
 def release_manifest() -> dict[str, Any]:
     c = contract()
@@ -139,8 +180,11 @@ def release_manifest() -> dict[str, Any]:
         "wordpress_required": False,
         "destructive_database_migration": False,
         "api_v1_breaking_change": False,
+        "component_version_policy": "current-product-plus-explicit-certified-component-floors-v639",
+        "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V639,
         "guardrails": guardrails(),
     }
+
 
 def readiness() -> dict[str, Any]:
     certification = build_certification()
@@ -155,25 +199,36 @@ def readiness() -> dict[str, Any]:
     errors: list[str] = []
 
     if certification.get("certified") is not True:
-        errors.append("v5.80-independent-application-certification-not-ready")
+        errors.append("independent-application-certification-not-ready")
+
+    api_floor = PRODUCT_COMPONENT_VERSION_FLOORS_V639["api-v1"]
     if api.get("state") != "ready":
         errors.append("api-v1-not-ready")
-    if str(api.get("library_version") or "") != LIBRARY_VERSION:
-        errors.append("api-library-version-mismatch")
-    if str(api.get("backend_version") or "") != BACKEND_VERSION:
-        errors.append("api-backend-version-mismatch")
+    if not _version_at_least(api.get("library_version"), api_floor["library_version"]):
+        errors.append("api-library-version-below-certified-baseline")
+    if not _version_at_least(api.get("backend_version"), api_floor["backend_version"]):
+        errors.append("api-backend-version-below-certified-baseline")
+    if str(api.get("api_version") or "") != API_VERSION:
+        errors.append("api-version-mismatch")
 
+    runtime_floor = PRODUCT_COMPONENT_VERSION_FLOORS_V639["runtime-authority"]
     if runtime.get("state") != "ready":
         errors.append("runtime-authority-not-ready")
-    if str(runtime.get("version") or "") != LIBRARY_VERSION:
-        errors.append("runtime-authority-library-version-mismatch")
-    if str(runtime.get("backend_version") or "") != BACKEND_VERSION:
-        errors.append("runtime-authority-backend-version-mismatch")
+    if not _version_at_least(runtime.get("version"), runtime_floor["library_version"]):
+        errors.append("runtime-authority-library-version-below-certified-baseline")
+    if not _version_at_least(runtime.get("backend_version"), runtime_floor["backend_version"]):
+        errors.append("runtime-authority-backend-version-below-certified-baseline")
     if int(runtime.get("wordpress_dependency_count") or 0) != 0:
         errors.append("runtime-authority-wordpress-dependency")
 
+    # The first-party Web is a release-generation artifact, so it must match
+    # the current Library 6.39 production generation exactly.
     if web.get("state") != "ready":
         errors.append("library-web-not-ready")
+    if str(web.get("library_version") or "") != LIBRARY_VERSION:
+        errors.append("library-web-library-version-mismatch")
+    if str(web.get("backend_version") or "") != BACKEND_VERSION:
+        errors.append("library-web-backend-version-mismatch")
     if str(web.get("web_version") or "") != WEB_VERSION:
         errors.append("library-web-version-mismatch")
     if web.get("wordpress_required") is True:
@@ -184,10 +239,15 @@ def readiness() -> dict[str, Any]:
     if identity.get("wordpress_required") is True:
         errors.append("identity-wordpress-dependency")
 
+    client_floor = PRODUCT_COMPONENT_VERSION_FLOORS_V639["client-framework"]
     if clients.get("state") != "ready":
         errors.append("client-framework-not-ready")
-    if str(clients.get("sdk_version") or "") != SDK_VERSION:
-        errors.append("sdk-version-mismatch")
+    if not _version_at_least(clients.get("library_version"), client_floor["library_version"]):
+        errors.append("client-framework-library-version-below-certified-baseline")
+    if not _version_at_least(clients.get("backend_version"), client_floor["backend_version"]):
+        errors.append("client-framework-backend-version-below-certified-baseline")
+    if not _version_at_least(clients.get("sdk_version"), client_floor["sdk_version"]):
+        errors.append("sdk-version-below-certified-baseline")
     if clients.get("wordpress_required") is True:
         errors.append("sdk-wordpress-dependency")
 
@@ -214,12 +274,33 @@ def readiness() -> dict[str, Any]:
         "wordpress_required": False,
         "wordpress_dependency_count": 0,
         "certification_basis_ready": certification.get("certified") is True,
+        "component_version_policy": "current-product-plus-explicit-certified-component-floors-v639",
+        "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V639,
         "components": {
-            "api_v1": {"state": api.get("state"), "version": api.get("api_version")},
-            "runtime_authority": {"state": runtime.get("state")},
-            "library_web": {"state": web.get("state"), "version": web.get("web_version")},
+            "api_v1": {
+                "state": api.get("state"),
+                "version": api.get("api_version"),
+                "library_version": api.get("library_version"),
+                "backend_version": api.get("backend_version"),
+            },
+            "runtime_authority": {
+                "state": runtime.get("state"),
+                "library_version": runtime.get("version"),
+                "backend_version": runtime.get("backend_version"),
+            },
+            "library_web": {
+                "state": web.get("state"),
+                "version": web.get("web_version"),
+                "library_version": web.get("library_version"),
+                "backend_version": web.get("backend_version"),
+            },
             "identity_access": {"state": identity.get("state")},
-            "client_framework": {"state": clients.get("state"), "version": clients.get("sdk_version")},
+            "client_framework": {
+                "state": clients.get("state"),
+                "version": clients.get("sdk_version"),
+                "library_version": clients.get("library_version"),
+                "backend_version": clients.get("backend_version"),
+            },
             "release_engineering": {"state": release.get("state")},
             "wordpress_adapter": {"state": adapter.get("state"), "required": False},
         },
