@@ -1,3 +1,7 @@
+## Library v6.38.0 — Research Reproducibility & Audit Console
+
+Adds an authority-preserving audit console for research integrity, reproducibility observations, lineage inspection, drift comparison, and deterministic export without automatic fetch, re-execution, persistence, or reproducibility certification.
+
 ## Library v6.37.0 — Cross-Library / Cross-Institution Research Federation
 
 Adds institutional capability manifests, explicit cross-institution query plans, authority-preserving source-result bundles, exact source-identity candidates, provenance auditing, failure containment, and deterministic federation export.

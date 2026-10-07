@@ -742,6 +742,7 @@
           <a href="/research/exchange" data-app-link>Exchange</a>
           <a href="/research/rooms" data-app-link>Rooms</a>
           <a href="/research/intelligence" data-app-link>Intelligence</a>
+          <a href="/research/audit" data-app-link>Audit</a>
           <a href="/research/federation" data-app-link>Federation</a>
           <a href="/research/publication" data-app-link>Publication</a>
           <a href="/research/graph" data-app-link>Graph</a>
@@ -1125,6 +1126,67 @@
         <section class="info-card">
           <div class="panel-heading"><div><p class="eyebrow">Lineage output</p><h2>Graph, diagnostics &amp; traversal</h2></div></div>
           <div id="research-lineage-output"><p class="empty-state">Graph snapshots, validation diagnostics, lineage traversals, impact analysis, provenance audits, and exports appear here.</p></div>
+        </section>
+      </section>
+
+      <section class="view" data-view="research-audit" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Capture · verify · inspect · compare · export</p>
+          <h1>Research Reproducibility &amp; Audit Console</h1>
+          <p>Inspect a declared research state across objects, sources, dependencies, artifacts, parameters, environments, runtimes, executions, reviews, and federation context. The console records what can be observed; it does not fetch missing material, re-run code, or certify that a result has been independently reproduced.</p>
+        </div>
+        <nav class="research-subnav" aria-label="Research reproducibility audit navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/package" data-app-link>Package</a>
+          <a href="/research/project/lineage" data-app-link>Lineage</a>
+          <a href="/research/exchange" data-app-link>Exchange</a>
+          <a href="/research/federation" data-app-link>Federation</a>
+          <a href="/research/audit" aria-current="page">Audit</a>
+        </nav>
+        <div id="research-audit-status" class="context-strip"><span>Loading Research Reproducibility &amp; Audit Console…</span></div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Declared research state</p><h2>Build an authority-preserving audit manifest</h2></div></div>
+          <label class="archive-wide">Audit input JSON<textarea id="research-audit-input" rows="20">{
+  "subject": {"id": "research:example", "title": "Example research package", "authority": "research-project-workspace"},
+  "research_objects": [],
+  "source_provenance": [],
+  "dependencies": [],
+  "artifacts": [],
+  "environment": {},
+  "runtime": {},
+  "parameters": {},
+  "executions": [],
+  "reviews": [],
+  "federation": {}
+}</textarea></label>
+          <div class="archive-actions"><button id="research-audit-manifest-button" type="button">Build audit manifest</button></div>
+          <p class="form-note">Input payloads are fingerprinted and preserved as supplied. The audit layer does not become the authority for the underlying research objects.</p>
+        </section>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Current manifest</p><h2>Inspect the current research state</h2></div></div>
+            <label class="archive-wide">Current manifest JSON<textarea id="research-audit-current-manifest" rows="18"></textarea></label>
+            <div class="archive-actions">
+              <button id="research-audit-integrity-button" type="button">Integrity audit</button>
+              <button id="research-audit-reproducibility-button" type="button">Reproducibility observations</button>
+              <button id="research-audit-lineage-button" type="button">Lineage audit</button>
+            </div>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Drift</p><h2>Compare against a declared baseline</h2></div></div>
+            <label class="archive-wide">Baseline manifest JSON<textarea id="research-audit-baseline-manifest" rows="18" placeholder="Paste an earlier audit manifest here"></textarea></label>
+            <div class="archive-actions"><button id="research-audit-drift-button" type="button">Compare baseline → current</button></div>
+            <p class="form-note">Drift is descriptive. A changed dependency, artifact, parameter, environment, or source does not automatically mean an error occurred.</p>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Audit package</p><h2>Export the reproducibility record</h2></div></div>
+          <div class="archive-actions"><button id="research-audit-export-button" type="button" class="secondary-button">Export audit JSON</button></div>
+          <p class="form-note">A complete audit observation set is not a reproducibility certificate, scientific-validity judgment, evidence-strength score, or truth determination.</p>
+        </section>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Audit output</p><h2>Integrity, reproducibility, lineage &amp; drift</h2></div></div>
+          <div id="research-audit-output"><p class="empty-state">Audit manifests and findings appear here.</p></div>
         </section>
       </section>
 
@@ -1557,7 +1619,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.37.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.38.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

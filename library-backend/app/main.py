@@ -401,6 +401,17 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .research_reproducibility_audit_console import (
+    contract as research_reproducibility_audit_contract,
+    readiness as research_reproducibility_audit_readiness,
+    bootstrap as research_reproducibility_audit_bootstrap,
+    build_audit_manifest as build_research_reproducibility_audit_manifest,
+    integrity_audit as audit_research_integrity,
+    reproducibility_audit as audit_research_reproducibility,
+    lineage_audit as audit_research_reproducibility_lineage,
+    drift_audit as audit_research_reproducibility_drift,
+    export_bundle as export_research_reproducibility_audit,
+)
 from .cross_library_cross_institution_research_federation import (
     contract as cross_institution_research_federation_contract,
     readiness as cross_institution_research_federation_readiness,
@@ -1239,6 +1250,18 @@ def health() -> dict[str, Any]:
             "cross_institution_automatic_source_merge": False,
             "cross_institution_server_persistence": False,
             "cross_institution_database_migration_required": False,
+            "research_reproducibility_audit_console": True,
+            "research_reproducibility_audit_route": "/research/audit",
+            "research_reproducibility_manifest": True,
+            "research_integrity_audit": True,
+            "research_reproducibility_observation_audit": True,
+            "research_reproducibility_lineage_audit": True,
+            "research_reproducibility_drift_audit": True,
+            "research_reproducibility_automatic_external_fetch": False,
+            "research_reproducibility_automatic_reexecution": False,
+            "research_reproducibility_automatic_certification": False,
+            "research_reproducibility_server_persistence": False,
+            "research_reproducibility_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -1253,8 +1276,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.37.0",
-            "library_sdk_version": "1.37.0",
+            "library_web_version": "2.38.0",
+            "library_sdk_version": "1.38.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5614,6 +5637,54 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-audit")
+def library_api_v1_research_audit_contract() -> dict[str, Any]:
+    return research_reproducibility_audit_contract()
+
+@app.get("/api/library/v1/research-audit/readiness")
+def library_api_v1_research_audit_readiness() -> dict[str, Any]:
+    return research_reproducibility_audit_readiness()
+
+@app.get("/api/library/v1/research-audit/bootstrap")
+def library_api_v1_research_audit_bootstrap() -> dict[str, Any]:
+    return research_reproducibility_audit_bootstrap()
+
+@app.post("/api/library/v1/research-audit/manifest")
+async def library_api_v1_research_audit_manifest(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_research_reproducibility_audit_manifest(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-audit/integrity-audit")
+async def library_api_v1_research_audit_integrity(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return audit_research_integrity(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-audit/reproducibility-audit")
+async def library_api_v1_research_audit_reproducibility(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return audit_research_reproducibility(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-audit/lineage-audit")
+async def library_api_v1_research_audit_lineage(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return audit_research_reproducibility_lineage(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-audit/drift-audit")
+async def library_api_v1_research_audit_drift(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return audit_research_reproducibility_drift(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-audit/export")
+async def library_api_v1_research_audit_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_research_reproducibility_audit(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/research-federation")

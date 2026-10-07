@@ -1,3 +1,10 @@
+## 6.38.0 — Research Reproducibility & Audit Console
+
+- Adds authority-preserving reproducibility audit manifests spanning research objects, source provenance, dependencies, artifacts, parameters, environments, runtimes, executions, reviews, and federation context.
+- Adds supplied-payload/artifact integrity checks, reproducibility observation audits, lineage audits, baseline/current drift audits, and deterministic audit export.
+- Complete observations never become automatic reproducibility certification, scientific-validity judgments, evidence-strength scores, or truth determinations.
+- No automatic external fetch, dependency installation, code execution/re-execution, environment recreation, persistence, artifact mutation, or Platform Core promotion.
+
 ## 6.37.0 — Cross-Library / Cross-Institution Research Federation
 
 - Adds institution/library capability manifests and explicit non-executing federated research query plans.
