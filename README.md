@@ -1,3 +1,7 @@
+## Library v6.34.0 — Portable Research Object & Exchange Format
+
+Adds lossless, deterministic, authority-preserving research-object envelopes and explicit multi-object exchange manifests with integrity verification and non-mutating import preview.
+
 ## Library v6.33.0 — Research Package Validation & Publication Readiness
 
 Adds transparent structural, completeness, provenance, review, and publication-handoff readiness diagnostics without automatic publication or truth promotion.

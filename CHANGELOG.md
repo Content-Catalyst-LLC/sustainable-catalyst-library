@@ -1,3 +1,9 @@
+## 6.34.0 — Portable Research Object & Exchange Format
+
+- Adds portable research-object envelopes preserving exact payloads, original schemas, authority, provenance, lineage, citations, and content fingerprints.
+- Adds deterministic multi-object exchange manifests, explicit-only relationships, integrity verification, compatibility observations, import preview, and exchange export.
+- Preserves originating product/domain authorities. No database migration, automatic import, merge, schema migration, persistence, truth promotion, or Platform Core promotion.
+
 ## 6.33.0 — Research Package Validation & Publication Readiness
 
 - Adds package validation, completeness, dependency, provenance, review, publication-profile, and explicit publishing-handoff readiness gates.

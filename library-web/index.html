@@ -739,6 +739,7 @@
           <a href="/research/geospatial" data-app-link>Geospatial</a>
           <a href="/research/package" aria-current="page">Package</a>
           <a href="/research/package/readiness" data-app-link>Readiness</a>
+          <a href="/research/exchange" data-app-link>Exchange</a>
           <a href="/research/publication" data-app-link>Publication</a>
           <a href="/research/graph" data-app-link>Graph</a>
         </nav>
@@ -1124,6 +1125,62 @@
         </section>
       </section>
 
+      <section class="view" data-view="research-object-exchange" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Wrap · preserve · verify · exchange · preview</p>
+          <h1>Portable Research Object &amp; Exchange Format</h1>
+          <p>Move Sustainable Catalyst research objects between products and environments while preserving exact payloads, original schemas, authority, provenance, lineage, citations, and deterministic fingerprints. Exchange compatibility is not semantic equivalence, and import remains explicit and non-automatic.</p>
+        </div>
+        <nav class="research-subnav" aria-label="Portable research object exchange navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/project" data-app-link>Project</a>
+          <a href="/research/package" data-app-link>Package</a>
+          <a href="/research/package/readiness" data-app-link>Readiness</a>
+          <a href="/research/exchange" aria-current="page">Exchange</a>
+        </nav>
+        <div id="research-object-exchange-status" class="context-strip"><span>Loading portable research object exchange…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Portable object envelope</p><h2>Wrap one research object</h2></div></div>
+            <label>Source object ID<input id="research-object-exchange-source-id" placeholder="Optional if present in object"></label>
+            <label>Source schema<input id="research-object-exchange-source-schema" placeholder="Optional if object has schema"></label>
+            <label>Source authority<input id="research-object-exchange-source-authority" placeholder="Optional if object records authority"></label>
+            <label class="archive-wide">Research object JSON<textarea id="research-object-exchange-object" rows="14" placeholder='{"schema":"sc-library-research-package-composition/1.0","composition_id":"research-package-composition:…","authority":"research-package-composer"}'></textarea></label>
+            <label class="archive-wide">Provenance JSON<textarea id="research-object-exchange-provenance" rows="5" placeholder='[]'></textarea></label>
+            <label class="archive-wide">Lineage JSON<textarea id="research-object-exchange-lineage" rows="5" placeholder='[]'></textarea></label>
+            <label class="archive-wide">Citations JSON<textarea id="research-object-exchange-citations" rows="5" placeholder='[]'></textarea></label>
+            <div class="archive-actions"><button id="research-object-exchange-wrap" type="button">Wrap object</button></div>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Exchange manifest</p><h2>Build portable exchange</h2></div></div>
+            <label>Title<input id="research-object-exchange-title" value="Portable research object exchange"></label>
+            <label>Description<input id="research-object-exchange-description"></label>
+            <label class="archive-wide">Objects JSON<textarea id="research-object-exchange-objects" rows="13" placeholder='[{"object":{"schema":"…","id":"…","authority":"…"}}]'></textarea></label>
+            <label class="archive-wide">Relationships JSON<textarea id="research-object-exchange-relationships" rows="7" placeholder='[{"source":"portable-research-object:…","target":"portable-research-object:…","relation":"depends-on"}]'></textarea></label>
+            <label class="archive-wide">Origin JSON<textarea id="research-object-exchange-origin" rows="4" placeholder='{"product":"library"}'></textarea></label>
+            <label class="archive-wide">Metadata JSON<textarea id="research-object-exchange-metadata" rows="4" placeholder='{}'></textarea></label>
+            <div class="archive-actions"><button id="research-object-exchange-build" type="button">Build exchange</button></div>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Receive &amp; inspect</p><h2>Validate without importing</h2></div></div>
+          <label class="archive-wide">Existing exchange JSON<textarea id="research-object-exchange-existing" rows="18" placeholder='{"schema":"sc-library-research-object-exchange/1.0","objects":[]}'></textarea></label>
+          <label class="archive-wide">Target authority JSON<textarea id="research-object-exchange-target" rows="5" placeholder='{"product":"workspace","authority":"workspace-project-state"}'></textarea></label>
+          <div class="archive-actions">
+            <button id="research-object-exchange-validate" type="button">Validate exchange</button>
+            <button id="research-object-exchange-integrity" type="button">Verify integrity</button>
+            <button id="research-object-exchange-compatibility" type="button">Compatibility</button>
+            <button id="research-object-exchange-import-preview" type="button">Import preview</button>
+            <button id="research-object-exchange-export" type="button" class="secondary-button">Export exchange JSON</button>
+          </div>
+          <p class="form-note">Import preview never writes, merges, migrates, promotes, or changes originating authority. Unknown schemas remain intact for explicit review.</p>
+        </section>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Exchange output</p><h2>Portable objects, manifests &amp; diagnostics</h2></div></div>
+          <div id="research-object-exchange-output"><p class="empty-state">Portable object envelopes, exchange manifests, integrity results, compatibility observations, import previews, and exports appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="research-package-readiness" hidden>
         <div class="page-heading research-heading">
           <p class="eyebrow">Validate · inspect · review · gate · hand off</p>
@@ -1303,7 +1360,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.33.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.34.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

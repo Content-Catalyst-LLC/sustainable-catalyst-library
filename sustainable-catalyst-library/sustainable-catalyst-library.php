@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
- * Description: Sustainable Catalyst Library 6.33.0 Optional WordPress Adapter for Research Package Validation & Publication Readiness.
- * Version: 6.33.0
+ * Description: Sustainable Catalyst Library 6.34.0 Optional WordPress Adapter for Portable Research Object & Exchange Format.
+ * Version: 6.34.0
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '6.33.0');
+define('SC_LIBRARY_VERSION', '6.34.0');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'optional-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);
@@ -25,11 +25,11 @@ define('SC_LIBRARY_WORDPRESS_LEGACY_COMPATIBILITY_PRESENT', true);
 define('SC_LIBRARY_INDEPENDENT_APPLICATION_CERTIFICATION_AUTHORITY', 'library-api');
 define('SC_LIBRARY_INDEPENDENT_APPLICATION_WORDPRESS_REQUIRED', false);
 define('SC_LIBRARY_APPLICATION_MODE', 'independent-primary');
-define('SC_LIBRARY_BACKEND_GENERATION', '3.33.0');
-define('SC_LIBRARY_WEB_GENERATION', '2.33.0');
-define('SC_LIBRARY_SDK_GENERATION', '1.33.0');
+define('SC_LIBRARY_BACKEND_GENERATION', '3.34.0');
+define('SC_LIBRARY_WEB_GENERATION', '2.34.0');
+define('SC_LIBRARY_SDK_GENERATION', '1.34.0');
 define('SC_LIBRARY_API_GENERATION', '1.0');
-define('SC_LIBRARY_NEXT_ARCHITECTURE_RELEASE', '6.34.0');
+define('SC_LIBRARY_NEXT_ARCHITECTURE_RELEASE', '6.35.0');
 define('SC_LIBRARY_RESEARCH_RUNTIME_AUTHORITY', 'library-api');
 define('SC_LIBRARY_RESEARCH_INTERFACE_AUTHORITY', 'library-api');
 define('SC_LIBRARY_RESEARCH_INTERFACE_WORDPRESS_REQUIRED', false);
@@ -106,6 +106,9 @@ define('SC_LIBRARY_RESEARCH_REVIEW_VERSIONING_ROUTE', '/research/project/review'
 define('SC_LIBRARY_RESEARCH_PACKAGE_READINESS_AUTHORITY', 'library-api');
 define('SC_LIBRARY_RESEARCH_PACKAGE_READINESS_WORDPRESS_REQUIRED', false);
 define('SC_LIBRARY_RESEARCH_PACKAGE_READINESS_ROUTE', '/research/package/readiness');
+define('SC_LIBRARY_RESEARCH_OBJECT_EXCHANGE_AUTHORITY', 'library-api');
+define('SC_LIBRARY_RESEARCH_OBJECT_EXCHANGE_WORDPRESS_REQUIRED', false);
+define('SC_LIBRARY_RESEARCH_OBJECT_EXCHANGE_ROUTE', '/research/exchange');
 define('SC_CARBON_NATURE_VERSION', '0.5.0');
 define('SC_ENERGY_SYSTEMS_VERSION', '1.5.0');
 define('SC_LIBRARY_FILE', __FILE__);

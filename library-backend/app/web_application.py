@@ -4,7 +4,7 @@ from hashlib import sha256
 import json
 from typing import Any
 
-WEB_VERSION = "2.33.0"
+WEB_VERSION = "2.34.0"
 CONTRACT = "sc-library-web-application/1.0"
 READINESS_CONTRACT = "sc-library-web-readiness/1.0"
 
@@ -32,6 +32,7 @@ SURFACES: tuple[dict[str, Any], ...] = (
     {"id":"research-dependency-lineage-graph","label":"Lineage","route":"/research/project/lineage","api":"/api/library/v1/research-lineage-graph","public":True,"index":False,"parent_surface":"research"},
     {"id":"research-review-revision-versioning","label":"Review & Versions","route":"/research/project/review","api":"/api/library/v1/research-review-versioning","public":True,"index":False,"parent_surface":"research"},
     {"id":"research-package-validation-publication-readiness","label":"Publication Readiness","route":"/research/package/readiness","api":"/api/library/v1/research-package-readiness","public":True,"index":False,"parent_surface":"research"},
+    {"id":"portable-research-object-exchange","label":"Exchange","route":"/research/exchange","api":"/api/library/v1/research-object-exchange","public":True,"index":False,"parent_surface":"research"},
     {"id":"search","label":"Search","route":"/search","api":"/api/library/v1/search","public":True,"index":False,"alias_of":"research","navigation_mode":"search"},
     {"id":"reader","label":"Reader","route":"/record/{record_id}","api":"/api/library/v1/records/{record_id}","public":True,"index":True},
     {"id":"discover","label":"Discover","route":"/discover","api":"/api/library/v1/capabilities","public":True,"index":False,"alias_of":"research","navigation_mode":"discover"},
@@ -58,8 +59,8 @@ def application_contract() -> dict[str, Any]:
         "application_id": "sustainable-catalyst-library-web",
         "application_contract_id": "library-web-application:" + fp[:32],
         "application_fingerprint_sha256": fp,
-        "library_version": "6.33.0",
-        "backend_version": "3.33.0",
+        "library_version": "6.34.0",
+        "backend_version": "3.34.0",
         "web_version": WEB_VERSION,
         "state": "independent-primary-application",
         "deployment_model": "independent-primary-web-service",

@@ -401,6 +401,18 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .portable_research_object_exchange import (
+    contract as portable_research_object_exchange_contract,
+    readiness as portable_research_object_exchange_readiness,
+    bootstrap as portable_research_object_exchange_bootstrap,
+    wrap_object as wrap_portable_research_object,
+    build_exchange as build_portable_research_object_exchange,
+    validate_exchange as validate_portable_research_object_exchange,
+    verify_integrity as verify_portable_research_object_exchange_integrity,
+    compatibility_report as portable_research_object_exchange_compatibility,
+    import_preview as portable_research_object_import_preview,
+    export_exchange as export_portable_research_object_exchange,
+)
 from .research_package_validation_readiness import (
     contract as research_package_validation_readiness_contract,
     readiness as research_package_validation_readiness_readiness,
@@ -1142,6 +1154,17 @@ def health() -> dict[str, Any]:
             "research_publication_readiness_automatic_publication": False,
             "research_publication_readiness_server_persistence": False,
             "research_publication_readiness_database_migration_required": False,
+            "portable_research_object_exchange": True,
+            "portable_research_object_exchange_route": "/research/exchange",
+            "portable_research_object_exact_payload_preservation": True,
+            "portable_research_object_authority_preservation": True,
+            "portable_research_object_content_fingerprints": True,
+            "portable_research_object_exchange_explicit_relationships_only": True,
+            "portable_research_object_exchange_integrity_verification": True,
+            "portable_research_object_exchange_import_preview": True,
+            "portable_research_object_exchange_automatic_import": False,
+            "portable_research_object_exchange_server_persistence": False,
+            "portable_research_object_exchange_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -1156,8 +1179,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.33.0",
-            "library_sdk_version": "1.33.0",
+            "library_web_version": "2.34.0",
+            "library_sdk_version": "1.34.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5517,6 +5540,60 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-object-exchange")
+def library_api_v1_research_object_exchange_contract() -> dict[str, Any]:
+    return portable_research_object_exchange_contract()
+
+@app.get("/api/library/v1/research-object-exchange/readiness")
+def library_api_v1_research_object_exchange_readiness() -> dict[str, Any]:
+    return portable_research_object_exchange_readiness()
+
+@app.get("/api/library/v1/research-object-exchange/bootstrap")
+def library_api_v1_research_object_exchange_bootstrap() -> dict[str, Any]:
+    return portable_research_object_exchange_bootstrap()
+
+@app.post("/api/library/v1/research-object-exchange/wrap-object")
+async def library_api_v1_research_object_exchange_wrap(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return wrap_portable_research_object(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-object-exchange/build-exchange")
+async def library_api_v1_research_object_exchange_build(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_portable_research_object_exchange(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-object-exchange/validate")
+async def library_api_v1_research_object_exchange_validate(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return validate_portable_research_object_exchange(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-object-exchange/verify-integrity")
+async def library_api_v1_research_object_exchange_integrity(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return verify_portable_research_object_exchange_integrity(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-object-exchange/compatibility")
+async def library_api_v1_research_object_exchange_compatibility(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return portable_research_object_exchange_compatibility(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-object-exchange/import-preview")
+async def library_api_v1_research_object_exchange_import_preview(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return portable_research_object_import_preview(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-object-exchange/export")
+async def library_api_v1_research_object_exchange_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_portable_research_object_exchange(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/research-package-readiness")
