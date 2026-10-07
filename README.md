@@ -1,3 +1,7 @@
+## Library v6.37.0 — Cross-Library / Cross-Institution Research Federation
+
+Adds institutional capability manifests, explicit cross-institution query plans, authority-preserving source-result bundles, exact source-identity candidates, provenance auditing, failure containment, and deterministic federation export.
+
 ## Library v6.36.0 — Library–Librarian Unified Research Intelligence
 
 Adds authority-preserving Library research context packets, explicit Research Librarian request envelopes, advisory intake previews, grounding audits, proposed action plans, and deterministic intelligence export.

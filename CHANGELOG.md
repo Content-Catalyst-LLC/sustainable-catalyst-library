@@ -1,3 +1,10 @@
+## 6.37.0 — Cross-Library / Cross-Institution Research Federation
+
+- Adds institution/library capability manifests and explicit non-executing federated research query plans.
+- Preserves exact institutional source payloads, schemas, identifiers, policies, and authority in cross-source result bundles.
+- Adds exact DOI/content-hash/normalized-URL identity candidates, provenance audits, per-source failure containment, and deterministic federation export.
+- No automatic external fetch, import, merge/deduplication, semantic normalization, persistence, truth promotion, or Platform Core promotion.
+
 ## 6.36.0 — Library–Librarian Unified Research Intelligence
 
 - Adds explicit Library research context packets spanning projects, rooms, working sets, research objects, citations, provenance, packages, publications, and portable exchange references.

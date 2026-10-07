@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.36.0"
-BACKEND_VERSION = "3.36.0"
-WEB_VERSION = "2.36.0"
-SDK_VERSION = "1.36.0"
+LIBRARY_VERSION = "6.37.0"
+BACKEND_VERSION = "3.37.0"
+WEB_VERSION = "2.37.0"
+SDK_VERSION = "1.37.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"
@@ -82,6 +82,7 @@ def contract() -> dict[str, Any]:
         {"id": "portable-research-object-exchange", "route": "/research/exchange", "purpose": "lossless-authority-preserving-portable-research-object-and-explicit-exchange-manifest"},
         {"id": "collaborative-research-rooms-ii", "route": "/research/rooms", "purpose": "explicit-room-membership-role-scoped-object-collaboration-review-and-exchange-control-plane"},
         {"id": "library-librarian-unified-research-intelligence", "route": "/research/intelligence", "purpose": "authority-preserving-library-context-and-research-librarian-advisory-intelligence-bridge"},
+        {"id": "cross-library-cross-institution-research-federation", "route": "/research/federation", "purpose": "authority-preserving-cross-library-and-cross-institution-research-federation"},
         {"id": "record-context", "route": "/record/{record_id}", "purpose": "research-object-provenance-citations-evidence"},
         {"id": "saved-research", "route": "/account", "purpose": "service-native-project-and-collection-handoff"},
     ]
@@ -134,8 +135,8 @@ def contract() -> dict[str, Any]:
             "required": False,
             "authoritative": False,
         },
-        "next_release": "6.37.0",
-        "next_release_name": "Cross-Library / Cross-Institution Research Federation",
+        "next_release": "6.38.0",
+        "next_release_name": "Research Reproducibility & Audit Console",
         "guardrails": guardrails(),
     }
 

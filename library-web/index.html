@@ -742,6 +742,7 @@
           <a href="/research/exchange" data-app-link>Exchange</a>
           <a href="/research/rooms" data-app-link>Rooms</a>
           <a href="/research/intelligence" data-app-link>Intelligence</a>
+          <a href="/research/federation" data-app-link>Federation</a>
           <a href="/research/publication" data-app-link>Publication</a>
           <a href="/research/graph" data-app-link>Graph</a>
         </nav>
@@ -1127,6 +1128,61 @@
         </section>
       </section>
 
+      <section class="view" data-view="research-federation" hidden>
+        <div class="page-heading research-heading">
+          <p class="eyebrow">Register · plan · preserve · compare · audit · export</p>
+          <h1>Cross-Library / Cross-Institution Research Federation</h1>
+          <p>Compose research across libraries and institutions while preserving each source's authority, original payload, identifiers, policies, and failure state. Query plans are explicit and non-executing; identity matches remain review candidates rather than automatic merges.</p>
+        </div>
+        <nav class="research-subnav" aria-label="Cross-library cross-institution research federation navigation">
+          <a href="/research" data-app-link>Research home</a>
+          <a href="/research/intelligence" data-app-link>Intelligence</a>
+          <a href="/research/exchange" data-app-link>Exchange</a>
+          <a href="/research/rooms" data-app-link>Rooms</a>
+          <a href="/research/federation" aria-current="page">Federation</a>
+        </nav>
+        <div id="research-federation-status" class="context-strip"><span>Loading Cross-Library / Cross-Institution Research Federation…</span></div>
+        <div class="citations-layout">
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Institution manifest</p><h2>Describe one participating source</h2></div></div>
+            <label class="archive-wide">Institution JSON<textarea id="research-federation-institution" rows="14" placeholder='{"institution_id":"institution:example","name":"Example University","source_authority":"example-repository","capabilities":["search","record-lookup"],"endpoints":{"search":"https://example.org/search"},"languages":["en"],"policies":{}}'></textarea></label>
+            <div class="archive-actions"><button id="research-federation-institution-button" type="button">Build institution manifest</button></div>
+            <label class="archive-wide">Institutions JSON<textarea id="research-federation-institutions" rows="12" placeholder='[]'></textarea></label>
+            <p class="form-note">A manifest records declared capabilities. It does not register, authenticate, verify, or endorse the institution automatically.</p>
+          </section>
+          <section class="info-card">
+            <div class="panel-heading"><div><p class="eyebrow">Federated query</p><h2>Plan explicit cross-institution requests</h2></div></div>
+            <label class="archive-wide">Research query<textarea id="research-federation-query" rows="3" placeholder="accelerated weathering carbon removal"></textarea></label>
+            <label>Strategy<input id="research-federation-strategy" value="parallel-explicit"></label>
+            <label class="archive-wide">Capabilities JSON<textarea id="research-federation-capabilities" rows="4">["search"]</textarea></label>
+            <label class="archive-wide">Filters JSON<textarea id="research-federation-filters" rows="5">{}</textarea></label>
+            <div class="archive-actions"><button id="research-federation-plan-button" type="button">Build query plan</button></div>
+            <label class="archive-wide">Query plan JSON<textarea id="research-federation-plan" rows="14"></textarea></label>
+            <p class="form-note">The plan never performs network requests in this release.</p>
+          </section>
+        </div>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Declared source responses</p><h2>Build an authority-preserving result bundle</h2></div></div>
+          <label class="archive-wide">Source results JSON<textarea id="research-federation-source-results" rows="16" placeholder='[{"institution_id":"institution:example","status":"ok","records":[{"record_id":"r1","title":"Study","doi":"10.x/example"}]}]'></textarea></label>
+          <div class="archive-actions"><button id="research-federation-bundle-button" type="button">Build result bundle</button></div>
+          <label class="archive-wide">Result bundle JSON<textarea id="research-federation-bundle" rows="16"></textarea></label>
+        </section>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Federation diagnostics</p><h2>Inspect identity, provenance &amp; source failures</h2></div></div>
+          <div class="archive-actions">
+            <button id="research-federation-identity-button" type="button">Identity candidates</button>
+            <button id="research-federation-provenance-button" type="button">Provenance audit</button>
+            <button id="research-federation-failure-button" type="button">Failure containment</button>
+            <button id="research-federation-export-button" type="button" class="secondary-button">Export federation JSON</button>
+          </div>
+          <p class="form-note">Exact DOI/hash/URL matches are candidates for review, not merge decisions. Source counts, availability, and agreement never become truth or evidence-strength scores automatically.</p>
+        </section>
+        <section class="info-card">
+          <div class="panel-heading"><div><p class="eyebrow">Federation output</p><h2>Plans, source bundles &amp; audits</h2></div></div>
+          <div id="research-federation-output"><p class="empty-state">Institution manifests, query plans, result bundles, identity candidates, provenance audits, failure containment, and exports appear here.</p></div>
+        </section>
+      </section>
+
       <section class="view" data-view="research-intelligence" hidden>
         <div class="page-heading research-heading">
           <p class="eyebrow">Context · ask · ground · review · act explicitly</p>
@@ -1501,7 +1557,7 @@
       </section>
     </main>
 
-    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.36.0 · API v1</span></footer>
+    <footer><span>Sustainable Catalyst Knowledge Library</span><span>Web v2.37.0 · API v1</span></footer>
   </div>
   <script src="/config.js"></script>
   <script type="module" src="/assets/app.js"></script>

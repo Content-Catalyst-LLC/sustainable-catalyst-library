@@ -401,6 +401,18 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .cross_library_cross_institution_research_federation import (
+    contract as cross_institution_research_federation_contract,
+    readiness as cross_institution_research_federation_readiness,
+    bootstrap as cross_institution_research_federation_bootstrap,
+    institution_manifest as build_federated_institution_manifest,
+    query_plan as build_cross_institution_research_query_plan,
+    result_bundle as build_cross_institution_research_result_bundle,
+    identity_candidates as detect_cross_institution_identity_candidates,
+    provenance_audit as audit_cross_institution_research_provenance,
+    failure_containment as audit_cross_institution_failure_containment,
+    export_bundle as export_cross_institution_research_federation,
+)
 from .library_librarian_unified_research_intelligence import (
     contract as library_librarian_research_intelligence_contract,
     readiness as library_librarian_research_intelligence_readiness,
@@ -1215,6 +1227,18 @@ def health() -> dict[str, Any]:
             "library_librarian_automatic_execution": False,
             "library_librarian_server_persistence": False,
             "library_librarian_database_migration_required": False,
+            "cross_library_cross_institution_research_federation": True,
+            "cross_institution_research_federation_route": "/research/federation",
+            "cross_institution_capability_manifests": True,
+            "cross_institution_explicit_query_plans": True,
+            "cross_institution_authority_preserving_result_bundles": True,
+            "cross_institution_source_identity_candidates": True,
+            "cross_institution_provenance_audit": True,
+            "cross_institution_failure_containment": True,
+            "cross_institution_automatic_external_fetch": False,
+            "cross_institution_automatic_source_merge": False,
+            "cross_institution_server_persistence": False,
+            "cross_institution_database_migration_required": False,
             "saved_workspace_authority": "python-research-state-service",
             "saved_workspace_session_auth": True,
             "saved_workspace_csrf_mutations": True,
@@ -1229,8 +1253,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.36.0",
-            "library_sdk_version": "1.36.0",
+            "library_web_version": "2.37.0",
+            "library_sdk_version": "1.37.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5590,6 +5614,60 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/research-federation")
+def library_api_v1_research_federation_contract() -> dict[str, Any]:
+    return cross_institution_research_federation_contract()
+
+@app.get("/api/library/v1/research-federation/readiness")
+def library_api_v1_research_federation_readiness() -> dict[str, Any]:
+    return cross_institution_research_federation_readiness()
+
+@app.get("/api/library/v1/research-federation/bootstrap")
+def library_api_v1_research_federation_bootstrap() -> dict[str, Any]:
+    return cross_institution_research_federation_bootstrap()
+
+@app.post("/api/library/v1/research-federation/institution-manifest")
+async def library_api_v1_research_federation_institution_manifest(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_federated_institution_manifest(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-federation/query-plan")
+async def library_api_v1_research_federation_query_plan(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_cross_institution_research_query_plan(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-federation/result-bundle")
+async def library_api_v1_research_federation_result_bundle(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return build_cross_institution_research_result_bundle(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-federation/identity-candidates")
+async def library_api_v1_research_federation_identity_candidates(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return detect_cross_institution_identity_candidates(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-federation/provenance-audit")
+async def library_api_v1_research_federation_provenance_audit(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return audit_cross_institution_research_provenance(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-federation/failure-containment")
+async def library_api_v1_research_federation_failure_containment(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return audit_cross_institution_failure_containment(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/research-federation/export")
+async def library_api_v1_research_federation_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_cross_institution_research_federation(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/research-intelligence")
