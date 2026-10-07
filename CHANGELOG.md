@@ -1,3 +1,12 @@
+## 6.39.0 — Library 7 Production Consolidation & Certification
+
+- Adds the hard Library 7 production-readiness gate over the complete 6.x independent Library runtime.
+- Certifies synchronized generations, runtime components, critical API/research surfaces, authority boundaries, bind contracts, same-origin API routing, rollback availability, and WordPress independence.
+- Preserves the v6.38 reproducibility/audit console, v6.37 cross-institution federation, and all prior research integration surfaces.
+- Requires explicit production evidence; the readiness endpoint itself never auto-certifies Library 7.
+- No automatic migration, runtime mutation, external fetch, re-execution, persistence, research-truth promotion, or Platform Core promotion.
+- Next release: Library 7.0.0 — Independent Knowledge Library Platform.
+
 ## 6.38.0 — Research Reproducibility & Audit Console
 
 - Adds authority-preserving reproducibility audit manifests spanning research objects, source provenance, dependencies, artifacts, parameters, environments, runtimes, executions, reviews, and federation context.

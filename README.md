@@ -1,3 +1,7 @@
+## Library v6.39.0 — Library 7 Production Consolidation & Certification
+
+Closes the Library 6.x line with an explicit production certification gate for the independent Python/API/Web runtime. The gate validates generations, critical surfaces, authority boundaries, deployment/rollback posture, WordPress independence, and preserved research guardrails before promotion to Library 7.0.0.
+
 ## Library v6.38.0 — Research Reproducibility & Audit Console
 
 Adds an authority-preserving audit console for research integrity, reproducibility observations, lineage inspection, drift comparison, and deterministic export without automatic fetch, re-execution, persistence, or reproducibility certification.

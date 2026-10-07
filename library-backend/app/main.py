@@ -401,6 +401,13 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .library7_production_consolidation_certification import (
+    contract as library7_production_certification_contract,
+    readiness as library7_production_certification_readiness,
+    inventory as library7_production_certification_inventory,
+    evaluate as evaluate_library7_production_certification,
+    export_certification as export_library7_production_certification,
+)
 from .research_reproducibility_audit_console import (
     contract as research_reproducibility_audit_contract,
     readiness as research_reproducibility_audit_readiness,
@@ -1250,6 +1257,15 @@ def health() -> dict[str, Any]:
             "cross_institution_automatic_source_merge": False,
             "cross_institution_server_persistence": False,
             "cross_institution_database_migration_required": False,
+            "library7_production_consolidation_certification": True,
+            "library7_certification_api_route": "/api/library/v1/library7-certification",
+            "library7_release_candidate": "7.0.0",
+            "library7_api_v1_stability_required": True,
+            "library7_wordpress_required": False,
+            "library7_wordpress_authoritative": False,
+            "library7_rollback_backup_required": True,
+            "library7_database_migration_required": False,
+            "library7_production_probe_evidence_required": True,
             "research_reproducibility_audit_console": True,
             "research_reproducibility_audit_route": "/research/audit",
             "research_reproducibility_manifest": True,
@@ -1276,8 +1292,8 @@ def health() -> dict[str, Any]:
             "library_application_mode": "independent-primary",
             "wordpress_optional_adapter": True,
             "api_v1_stable": True,
-            "library_web_version": "2.38.0",
-            "library_sdk_version": "1.38.0",
+            "library_web_version": "2.39.0",
+            "library_sdk_version": "1.39.0",
             "php_domain_retirement_governance": True,
             "weighted_full_text_search": True,
             "trigram_title_matching": True,
@@ -5637,6 +5653,30 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/library7-certification")
+def library_api_v1_library7_certification_contract() -> dict[str, Any]:
+    return library7_production_certification_contract()
+
+@app.get("/api/library/v1/library7-certification/readiness")
+def library_api_v1_library7_certification_readiness() -> dict[str, Any]:
+    return library7_production_certification_readiness()
+
+@app.get("/api/library/v1/library7-certification/inventory")
+def library_api_v1_library7_certification_inventory() -> dict[str, Any]:
+    return library7_production_certification_inventory()
+
+@app.post("/api/library/v1/library7-certification/evaluate")
+async def library_api_v1_library7_certification_evaluate(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return evaluate_library7_production_certification(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/library7-certification/export")
+async def library_api_v1_library7_certification_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_library7_production_certification(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/research-audit")

@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.38.0"
-BACKEND_VERSION = "3.38.0"
-WEB_VERSION = "2.38.0"
-SDK_VERSION = "1.38.0"
+LIBRARY_VERSION = "6.39.0"
+BACKEND_VERSION = "3.39.0"
+WEB_VERSION = "2.39.0"
+SDK_VERSION = "1.39.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"
@@ -136,8 +136,8 @@ def contract() -> dict[str, Any]:
             "required": False,
             "authoritative": False,
         },
-        "next_release": "6.39.0",
-        "next_release_name": "Library 7 Production Consolidation & Certification",
+        "next_release": "7.0.0",
+        "next_release_name": "Independent Knowledge Library Platform",
         "guardrails": guardrails(),
     }
 
