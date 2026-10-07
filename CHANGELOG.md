@@ -1,3 +1,9 @@
+## 6.33.0 — Research Package Validation & Publication Readiness
+
+- Adds package validation, completeness, dependency, provenance, review, publication-profile, and explicit publishing-handoff readiness gates.
+- Preserves package, publication, publishing, artifact, review/versioning, PostgreSQL, and WordPress authority boundaries.
+- No database migration. No automatic publication, external submission, DOI registration, claim/evidence/truth promotion, or Platform Core promotion.
+
 ## 6.32.0 — Research Review, Revision & Versioning System
 
 - Adds content-fingerprinted research version snapshots and deterministic field-level comparisons.

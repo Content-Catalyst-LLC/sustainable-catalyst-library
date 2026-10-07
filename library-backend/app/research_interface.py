@@ -14,10 +14,10 @@ from .provenance_graph_service import (
 )
 from .research_state import owner_state, readiness as research_state_readiness
 
-LIBRARY_VERSION = "6.32.0"
-BACKEND_VERSION = "3.32.0"
-WEB_VERSION = "2.32.0"
-SDK_VERSION = "1.32.0"
+LIBRARY_VERSION = "6.33.0"
+BACKEND_VERSION = "3.33.0"
+WEB_VERSION = "2.33.0"
+SDK_VERSION = "1.33.0"
 
 CONTRACT = "sc-library-independent-research-interface/1.0"
 READINESS_CONTRACT = "sc-library-independent-research-interface-readiness/1.0"
@@ -78,6 +78,7 @@ def contract() -> dict[str, Any]:
         {"id": "unified-research-project-workspace", "route": "/research/project", "purpose": "project-centered-research-object-composition-authority-audit-dependencies-handoffs-and-export"},
         {"id": "research-dependency-lineage-graph", "route": "/research/project/lineage", "purpose": "explicit-project-dependency-provenance-lineage-traversal-impact-and-audit"},
         {"id": "research-review-revision-versioning", "route": "/research/project/review", "purpose": "human-review-version-snapshots-revision-proposals-version-comparison-and-chain-validation"},
+        {"id": "research-package-validation-publication-readiness", "route": "/research/package/readiness", "purpose": "package-validation-completeness-provenance-review-and-publication-handoff-readiness"},
         {"id": "record-context", "route": "/record/{record_id}", "purpose": "research-object-provenance-citations-evidence"},
         {"id": "saved-research", "route": "/account", "purpose": "service-native-project-and-collection-handoff"},
     ]
@@ -130,8 +131,8 @@ def contract() -> dict[str, Any]:
             "required": False,
             "authoritative": False,
         },
-        "next_release": "6.33.0",
-        "next_release_name": "Research Package Validation & Publication Readiness",
+        "next_release": "6.34.0",
+        "next_release_name": "Portable Research Object & Exchange Format",
         "guardrails": guardrails(),
     }
 

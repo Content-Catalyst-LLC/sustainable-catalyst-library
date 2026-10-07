@@ -1,3 +1,7 @@
+## Library v6.33.0 — Research Package Validation & Publication Readiness
+
+Adds transparent structural, completeness, provenance, review, and publication-handoff readiness diagnostics without automatic publication or truth promotion.
+
 # Sustainable Catalyst Library v6.32.0 — Research Review, Revision & Versioning System
 
 # Sustainable Catalyst Library v6.31.0 — Research Dependency & Lineage Graph
