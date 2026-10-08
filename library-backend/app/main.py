@@ -401,6 +401,13 @@ from .research_package_composer_workspace import (
     reproducibility_handoff_preview as research_package_composer_reproducibility_handoff_preview,
     export_package_draft as export_research_package_composition,
 )
+from .independent_knowledge_library_platform import (
+    contract as independent_knowledge_library_platform_contract,
+    readiness as independent_knowledge_library_platform_readiness,
+    release_manifest as independent_knowledge_library_platform_release,
+    evaluate as evaluate_independent_knowledge_library_platform,
+    export_certification as export_independent_knowledge_library_platform,
+)
 from .library7_production_consolidation_certification import (
     contract as library7_production_certification_contract,
     readiness as library7_production_certification_readiness,
@@ -5653,6 +5660,30 @@ async def library_api_v1_research_package_composer_reproducibility(request: Requ
 async def library_api_v1_research_package_composer_export(request: Request) -> dict[str, Any]:
     payload=await _library_workspace_json(request)
     try: return export_research_package_composition(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.get("/api/library/v1/platform")
+def library_api_v1_independent_knowledge_library_platform() -> dict[str, Any]:
+    return independent_knowledge_library_platform_contract()
+
+@app.get("/api/library/v1/platform/readiness")
+def library_api_v1_independent_knowledge_library_platform_readiness() -> dict[str, Any]:
+    return independent_knowledge_library_platform_readiness()
+
+@app.get("/api/library/v1/platform/release")
+def library_api_v1_independent_knowledge_library_platform_release() -> dict[str, Any]:
+    return independent_knowledge_library_platform_release()
+
+@app.post("/api/library/v1/platform/evaluate")
+async def library_api_v1_independent_knowledge_library_platform_evaluate(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return evaluate_independent_knowledge_library_platform(payload)
+    except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+@app.post("/api/library/v1/platform/export")
+async def library_api_v1_independent_knowledge_library_platform_export(request: Request) -> dict[str, Any]:
+    payload=await _library_workspace_json(request)
+    try: return export_independent_knowledge_library_platform(payload)
     except (ValueError,KeyError,TypeError) as exc: raise HTTPException(status_code=422,detail=str(exc)) from exc
 
 @app.get("/api/library/v1/library7-certification")

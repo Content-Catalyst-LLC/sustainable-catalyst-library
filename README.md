@@ -1,3 +1,7 @@
+## Library v7.0.0 — Independent Knowledge Library Platform
+
+Promotes the production-certified Library 6.x architecture into a stable independent product baseline: Library 7.0.0, Backend 4.0.0, Web 3.0.0, SDK 2.0.0, with API v1 preserved. Python/FastAPI remains runtime authority, PostgreSQL remains structured research-state authority, Library Web remains the first-party public origin, and WordPress remains an optional non-authoritative adapter. The feature line is stabilized after certification; 7.0.x is the maintenance line.
+
 ## Library v6.39.0 — Library 7 Production Consolidation & Certification
 
 Closes the Library 6.x line with an explicit production certification gate for the independent Python/API/Web runtime. The gate validates generations, critical surfaces, authority boundaries, deployment/rollback posture, WordPress independence, and preserved research guardrails before promotion to Library 7.0.0.

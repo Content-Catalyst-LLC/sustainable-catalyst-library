@@ -29,8 +29,8 @@ from .distributed_compute_broker import broker_readiness as compute_broker_readi
 from .cross_product_integration import readiness as cross_product_readiness
 from .public_routing import readiness as public_routing_readiness
 
-LIBRARY_VERSION = "6.39.0"
-BACKEND_VERSION = "3.39.0"
+LIBRARY_VERSION = "7.0.0"
+BACKEND_VERSION = "4.0.0"
 CONTRACT = "sc-library-independent-application-certification-service/1.0"
 READINESS_CONTRACT = "sc-library-independent-application-certification-readiness/1.0"
 CERTIFICATION_CONTRACT = "sc-library-independent-application-certification/1.0"
@@ -92,7 +92,7 @@ def contract() -> dict[str, Any]:
         "critical_probes": critical,
         "advisory_probes": advisory,
         "wordpress_dependency_count_required": 0,
-        "certified_release": "6.0.0",
+        "certified_release": "7.0.0",
         "guardrails": guardrails(),
     }
     return {
@@ -116,8 +116,8 @@ def contract() -> dict[str, Any]:
             "compatibility_surface_may_remain": True,
             "mass_deletion_required_for_certification": False,
         },
-        "certified_release": "6.0.0",
-        "certified_release_name": "Independent Sustainable Catalyst Knowledge Library",
+        "certified_release": "7.0.0",
+        "certified_release_name": "Independent Knowledge Library Platform",
         "guardrails": guardrails(),
     }
 
@@ -382,7 +382,7 @@ def build_certification(payload: dict[str, Any] | None = None) -> dict[str, Any]
         "wordpress_required": False,
         "wordpress_dependency_count": 0,
         "legacy_php_domain_authority": False,
-        "certified_release": "6.0.0",
+        "certified_release": "7.0.0",
     }
     fingerprint = _fp(basis)
 
@@ -395,7 +395,7 @@ def build_certification(payload: dict[str, Any] | None = None) -> dict[str, Any]
         "certified": not errors,
         "state": "certified" if not errors else "blocked",
         "errors": errors,
-        "component_version_policy": "exact-current-or-explicit-certified-component-baseline-v639",
+        "component_version_policy": "exact-current-or-explicit-certified-component-baseline-v700",
         "critical_probe_count": len(snapshot["critical"]),
         "critical_ready_count": sum(1 for x in snapshot["critical"].values() if x.get("ready") is True),
         "advisory_probe_count": len(snapshot["advisory"]),
@@ -408,8 +408,8 @@ def build_certification(payload: dict[str, Any] | None = None) -> dict[str, Any]
         "library_api_authority": "library-api",
         "python_runtime_authority": "python-backend",
         "structured_state_authority": "postgresql",
-        "certified_release": "6.0.0",
-        "certified_release_name": "Independent Sustainable Catalyst Knowledge Library",
+        "certified_release": "7.0.0",
+        "certified_release_name": "Independent Knowledge Library Platform",
         "probes": snapshot,
         "metadata": dict(payload.get("metadata") or {}),
         "guardrails": guardrails(),
@@ -427,7 +427,7 @@ def readiness() -> dict[str, Any]:
         "critical_ready_count": certification["critical_ready_count"],
         "wordpress_required": False,
         "wordpress_dependency_count": 0,
-        "certified_release": "6.0.0",
+        "certified_release": "7.0.0",
         "certification": certification,
         "guardrails": guardrails(),
     }

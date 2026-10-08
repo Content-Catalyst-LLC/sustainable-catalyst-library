@@ -532,6 +532,12 @@ class LibraryClient:
     def audit_cross_institution_provenance(self, payload: dict[str, Any]): return self.post("/research-federation/provenance-audit", payload)
     def audit_cross_institution_failure_containment(self, payload: dict[str, Any]): return self.post("/research-federation/failure-containment", payload)
     def export_cross_institution_research_federation(self, payload: dict[str, Any]): return self.post("/research-federation/export", payload)
+    def independent_knowledge_library_platform(self): return self.get("/platform")
+    def independent_knowledge_library_platform_readiness(self): return self.get("/platform/readiness")
+    def independent_knowledge_library_platform_release(self): return self.get("/platform/release")
+    def evaluate_independent_knowledge_library_platform(self, payload: dict[str, Any]): return self.post("/platform/evaluate", payload)
+    def export_independent_knowledge_library_platform(self, payload: dict[str, Any]): return self.post("/platform/export", payload)
+
     def create_citation(self, payload: dict[str, Any]): return self.post_signed("/admin/citations", payload)
     def import_citations(self, record_id: str): return self.post_signed("/admin/citations/" + parse.quote(record_id, safe="") + "/import-metadata", {})
     def citation_core_handoff(self, payload: dict[str, Any]): return self.post_signed("/admin/citations/core-handoff", payload)

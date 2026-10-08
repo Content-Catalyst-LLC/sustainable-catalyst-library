@@ -13,10 +13,10 @@ from .client_framework import readiness as client_framework_readiness
 from .release_engineering import readiness as release_engineering_readiness
 from .wordpress_thin_adapter import readiness as wordpress_adapter_readiness
 
-LIBRARY_VERSION = "6.39.0"
-BACKEND_VERSION = "3.39.0"
-WEB_VERSION = "2.39.0"
-SDK_VERSION = "1.39.0"
+LIBRARY_VERSION = "7.0.0"
+BACKEND_VERSION = "4.0.0"
+WEB_VERSION = "3.0.0"
+SDK_VERSION = "2.0.0"
 API_VERSION = "1.0"
 
 CONTRACT = "sc-independent-sustainable-catalyst-knowledge-library/1.0"
@@ -25,7 +25,7 @@ RELEASE_CONTRACT = "sc-independent-sustainable-catalyst-knowledge-library-releas
 
 # These are certified minimum versions of long-lived component contracts, not
 # a requirement that every component adopt the Library release number.
-PRODUCT_COMPONENT_VERSION_FLOORS_V639: dict[str, dict[str, str]] = {
+PRODUCT_COMPONENT_VERSION_FLOORS_V700: dict[str, dict[str, str]] = {
     "api-v1": {"library_version": "6.12.0", "backend_version": "3.12.0"},
     "runtime-authority": {"library_version": "6.3.0", "backend_version": "3.3.0"},
     "client-framework": {
@@ -76,6 +76,7 @@ def guardrails() -> dict[str, bool]:
         "wordpress_required_for_research_execution": False,
         "wordpress_required_for_cross_product_clients": False,
         "api_v1_remains_stable_in_6_0": True,
+        "api_v1_remains_stable_in_7_0": True,
         "postgresql_is_structured_state_authority": True,
         "python_backend_is_application_runtime": True,
         "library_web_is_first_party_client": True,
@@ -96,8 +97,8 @@ def contract() -> dict[str, Any]:
         "api_version": API_VERSION,
         "application_mode": "independent-primary",
         "wordpress_role": "optional-adapter",
-        "component_version_policy": "current-product-plus-explicit-certified-component-floors-v639",
-        "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V639,
+        "component_version_policy": "current-product-plus-explicit-certified-component-floors-v700",
+        "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V700,
         "guardrails": guardrails(),
     }
     return {
@@ -112,7 +113,7 @@ def contract() -> dict[str, Any]:
         "sdk_version": SDK_VERSION,
         "api_version": API_VERSION,
         "api_base_path": "/api/library/v1",
-        "generation": 6,
+        "generation": 7,
         "application_mode": "independent-primary",
         "state": "independent-primary-application",
         "authoritative_runtime": "python-backend",
@@ -144,12 +145,15 @@ def contract() -> dict[str, Any]:
             "v5_client_contracts_remain_additively_compatible": True,
             "wordpress_adapter_remains_supported": True,
             "destructive_data_migration_required": False,
-            "component_version_policy": "current-product-plus-explicit-certified-component-floors-v639",
-            "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V639,
+            "component_version_policy": "current-product-plus-explicit-certified-component-floors-v700",
+            "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V700,
         },
-        "certification_basis": "v6.39-independent-application-certification",
-        "next_release": "7.0.0",
-        "next_release_name": "Independent Knowledge Library Platform",
+        "certification_basis": "v7.0-independent-application-certification",
+        "maintenance_line": "7.0.x",
+        "feature_line_status": "stabilized",
+        "next_feature_release": None,
+        "next_release": None,
+        "next_release_name": None,
         "guardrails": guardrails(),
     }
 
@@ -167,7 +171,7 @@ def release_manifest() -> dict[str, Any]:
     }
     return {
         "schema": RELEASE_CONTRACT,
-        "release_id": "independent-library-6:" + _fp(basis)[:32],
+        "release_id": "independent-library-7:" + _fp(basis)[:32],
         "release_fingerprint_sha256": _fp(basis),
         **basis,
         "artifacts": [
@@ -180,8 +184,8 @@ def release_manifest() -> dict[str, Any]:
         "wordpress_required": False,
         "destructive_database_migration": False,
         "api_v1_breaking_change": False,
-        "component_version_policy": "current-product-plus-explicit-certified-component-floors-v639",
-        "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V639,
+        "component_version_policy": "current-product-plus-explicit-certified-component-floors-v700",
+        "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V700,
         "guardrails": guardrails(),
     }
 
@@ -201,7 +205,7 @@ def readiness() -> dict[str, Any]:
     if certification.get("certified") is not True:
         errors.append("independent-application-certification-not-ready")
 
-    api_floor = PRODUCT_COMPONENT_VERSION_FLOORS_V639["api-v1"]
+    api_floor = PRODUCT_COMPONENT_VERSION_FLOORS_V700["api-v1"]
     if api.get("state") != "ready":
         errors.append("api-v1-not-ready")
     if not _version_at_least(api.get("library_version"), api_floor["library_version"]):
@@ -211,7 +215,7 @@ def readiness() -> dict[str, Any]:
     if str(api.get("api_version") or "") != API_VERSION:
         errors.append("api-version-mismatch")
 
-    runtime_floor = PRODUCT_COMPONENT_VERSION_FLOORS_V639["runtime-authority"]
+    runtime_floor = PRODUCT_COMPONENT_VERSION_FLOORS_V700["runtime-authority"]
     if runtime.get("state") != "ready":
         errors.append("runtime-authority-not-ready")
     if not _version_at_least(runtime.get("version"), runtime_floor["library_version"]):
@@ -222,7 +226,7 @@ def readiness() -> dict[str, Any]:
         errors.append("runtime-authority-wordpress-dependency")
 
     # The first-party Web is a release-generation artifact, so it must match
-    # the current Library 6.39 production generation exactly.
+    # the current Library 7.0 production generation exactly.
     if web.get("state") != "ready":
         errors.append("library-web-not-ready")
     if str(web.get("library_version") or "") != LIBRARY_VERSION:
@@ -239,7 +243,7 @@ def readiness() -> dict[str, Any]:
     if identity.get("wordpress_required") is True:
         errors.append("identity-wordpress-dependency")
 
-    client_floor = PRODUCT_COMPONENT_VERSION_FLOORS_V639["client-framework"]
+    client_floor = PRODUCT_COMPONENT_VERSION_FLOORS_V700["client-framework"]
     if clients.get("state") != "ready":
         errors.append("client-framework-not-ready")
     if not _version_at_least(clients.get("library_version"), client_floor["library_version"]):
@@ -274,8 +278,8 @@ def readiness() -> dict[str, Any]:
         "wordpress_required": False,
         "wordpress_dependency_count": 0,
         "certification_basis_ready": certification.get("certified") is True,
-        "component_version_policy": "current-product-plus-explicit-certified-component-floors-v639",
-        "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V639,
+        "component_version_policy": "current-product-plus-explicit-certified-component-floors-v700",
+        "component_version_floors": PRODUCT_COMPONENT_VERSION_FLOORS_V700,
         "components": {
             "api_v1": {
                 "state": api.get("state"),

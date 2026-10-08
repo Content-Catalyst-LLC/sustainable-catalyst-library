@@ -1,3 +1,13 @@
+## 7.0.0 — Independent Knowledge Library Platform
+
+- Promotes the independent Library architecture to the generation-7 stable baseline.
+- Advances Backend to 4.0.0, Web to 3.0.0, and SDK clients to 2.0.0 while preserving API v1.
+- Adds `/api/library/v1/platform` contract, readiness, release, evaluation, and deterministic certification export surfaces.
+- Preserves certified version floors for long-lived internal services rather than rewriting historical component identities.
+- Preserves Library 6.39 promotion certification, v6.38 reproducibility/audit, v6.37 cross-institution federation, and all prior research surfaces.
+- Requires no destructive database migration and keeps WordPress optional and non-authoritative.
+- Establishes 7.0.x as the maintenance line; no 7.1 feature release is implied.
+
 ## 6.39.0 — Library 7 Production Consolidation & Certification
 
 - Adds the hard Library 7 production-readiness gate over the complete 6.x independent Library runtime.
