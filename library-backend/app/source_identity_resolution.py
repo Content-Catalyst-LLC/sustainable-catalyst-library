@@ -115,6 +115,10 @@ def normalize_ror(value: Any) -> str | None:
     return None
 
 
+# Canonicalize a candidate scholarly URL for deduplication, including DOI
+# links, host case/default ports and path/query normalization. A normalized
+# URL is an identity key, not source authenticity, license permission or a
+# safe target for arbitrary server-side fetching.
 def normalize_url(value: Any) -> str | None:
     raw = _text(value, limit=4000)
     if not raw:

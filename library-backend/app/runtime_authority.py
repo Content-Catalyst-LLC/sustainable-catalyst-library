@@ -126,6 +126,10 @@ def dependency_graph() -> dict[str, Any]:
     }
 
 
+# Normalize claimed component readiness against Library's authority graph.
+# WordPress remains an optional client and automatic Core promotion is
+# rejected; a valid payload records a declared certification, not observed
+# end-to-end scientific execution or production health.
 def validate_certification_payload(payload: dict[str, Any]) -> dict[str, Any]:
     errors: list[str] = []
     if not isinstance(payload, dict):
