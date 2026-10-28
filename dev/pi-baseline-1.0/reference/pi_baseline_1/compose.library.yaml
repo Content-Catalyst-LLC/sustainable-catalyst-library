@@ -1,0 +1,81 @@
+name: sc-library-pi-dev
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: sc-library-pi-db
+    restart: unless-stopped
+    env_file: [.env]
+    networks: [library-private]
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
+  library-backend:
+    build:
+      context: /mnt/catalyst-ssd/repositories/sustainable-catalyst-library/library-backend
+      dockerfile: Dockerfile
+    image: sc-library-pi-backend:baseline-1.0
+    container_name: sc-library-pi-backend
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Missing DATABASE_URL}
+      SC_LIBRARY_BACKEND_API_KEY: ${SC_LIBRARY_BACKEND_API_KEY:?Missing SC_LIBRARY_BACKEND_API_KEY}
+      SC_LIBRARY_ENVIRONMENT: pi-development
+      SC_LIBRARY_ALLOWED_ORIGINS: ""
+      SC_LIBRARY_ENABLE_DOCS: "false"
+      SC_LIBRARY_DB_POOL_MIN: "1"
+      SC_LIBRARY_DB_POOL_MAX: "2"
+      SC_LIBRARY_STATEMENT_TIMEOUT_MS: "60000"
+      SC_LIBRARY_EMBEDDING_PROVIDER: disabled
+      SC_LIBRARY_EMBEDDING_WORKER_ENABLED: "false"
+      SC_LIBRARY_RERANK_PROVIDER: disabled
+      SC_LIBRARY_JOB_DISPATCH_ENABLED: "false"
+      SC_LIBRARY_PLATFORM_CORE_WRITE_API_KEY: ""
+      SC_LIBRARY_PLATFORM_CORE_URL: http://127.0.0.1:9
+      SC_LIBRARY_ARTIFACT_STORE_BACKEND: filesystem
+      SC_LIBRARY_ARTIFACT_FILESYSTEM_ROOT: /data/artifacts
+      SC_LIBRARY_SESSION_COOKIE_SECURE: "true"
+    volumes:
+      - ./artifacts:/data/artifacts
+    depends_on:
+      db: {condition: service_healthy}
+    networks: [library-private]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=4)"]
+      interval: 15s
+      timeout: 7s
+      retries: 12
+      start_period: 120s
+    security_opt: ["no-new-privileges:true"]
+  adapter:
+    image: python:3.13-slim
+    container_name: sc-library-pi-adapter
+    restart: unless-stopped
+    command: ["python", "/srv/adapter.py"]
+    volumes:
+      - ./adapter.py:/srv/adapter.py:ro
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      LIBRARY_INTERNAL_URL: http://library-backend:8080
+    depends_on:
+      library-backend: {condition: service_healthy}
+    networks: [library-private, sc-internal]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8097/health', timeout=4)"]
+      interval: 15s
+      timeout: 6s
+      retries: 8
+      start_period: 15s
+networks:
+  library-private:
+    internal: true
+  sc-internal:
+    external: true
+    name: sc-internal

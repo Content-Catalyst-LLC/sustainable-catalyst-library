@@ -1,0 +1,16 @@
+{
+  "services": {
+    "wordpress": {
+      "networks": {
+        "private": null,
+        "sc-internal": {}
+      }
+    }
+  },
+  "networks": {
+    "sc-internal": {
+      "name": "sc-internal",
+      "external": true
+    }
+  }
+}

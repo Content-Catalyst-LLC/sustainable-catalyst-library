@@ -1,0 +1,20 @@
+{
+  "name": "Sustainable Catalyst Pi Development Baseline",
+  "version": "1.0.0",
+  "scope": "Raspberry Pi local-only development",
+  "status": "prepared_not_executed",
+  "milestones": [
+    "preflight_exact_pi_ownership_and_dev_safety",
+    "workbench_compose_force_recreation_and_ssd_data_persistence",
+    "isolated_library_postgres_and_backend_startup",
+    "read_only_library_adapter_wordpress_connection",
+    "library_search_and_workbench_health",
+    "human_browser_graph_and_library_search_acceptance"
+  ],
+  "production_changed": false,
+  "production_credentials_required": false,
+  "secrets_in_package": false,
+  "existing_service_recreated_if_executed": "Workbench only",
+  "library_connectivity_scope": "read_only_health_and_lexical_search",
+  "not_in_scope": ["live_data_import", "publisher_data_ingestion", "full_library_web", "federation", "production_promotion", "outbound_communications", "automatic_github_push"]
+}

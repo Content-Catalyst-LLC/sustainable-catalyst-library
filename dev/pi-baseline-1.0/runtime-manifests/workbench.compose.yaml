@@ -1,0 +1,32 @@
+name: sc-workbench-pi-dev
+services:
+  workbench:
+    image: catalyst-workbench-repair:v540-optimized-20261027
+    container_name: catalyst-workbench-repair-7y
+    working_dir: /app
+    command: ["./start.sh"]
+    environment:
+      PORT: "8088"
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /mnt/catalyst-ssd/workbench-dev/optimized-standalone/data
+        target: /data
+    ports:
+      - "127.0.0.1:8088:8088"
+    networks:
+      - sc-internal
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import json,urllib.request; r=json.load(urllib.request.urlopen('http://127.0.0.1:8088/v540/status',timeout=6)); assert r.get('ok') is True"
+      interval: 15s
+      timeout: 8s
+      retries: 4
+      start_period: 20s
+networks:
+  sc-internal:
+    external: true
+    name: sc-internal

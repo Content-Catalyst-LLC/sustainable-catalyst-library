@@ -1,0 +1,116 @@
+# Isolated Library API for an existing WordPress development installation.
+# Never point this stack at production credentials or databases.
+name: sc-library-dev
+services:
+  postgres:
+    restart: unless-stopped
+    image: postgres:16
+    environment:
+      POSTGRES_DB: sc_library_dev
+      POSTGRES_USER: sc_library_dev
+      POSTGRES_PASSWORD: ${SC_LIBRARY_DEV_DB_PASSWORD:?Set a new development password}
+    volumes:
+      - library-dev-db:/var/lib/postgresql/data
+    networks: [private]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U sc_library_dev -d sc_library_dev']
+      interval: 5s
+      retries: 20
+  library-backend:
+    restart: unless-stopped
+    build: .
+    image: sc-library-dev-library-backend:local
+    mem_limit: 1024m
+    environment:
+      DATABASE_URL: postgresql://sc_library_dev:${SC_LIBRARY_DEV_DB_PASSWORD:?Set a new development password}@postgres:5432/sc_library_dev
+      SC_LIBRARY_BACKEND_API_KEY: ${SC_LIBRARY_DEV_API_KEY:?Set a new development signing key}
+      SC_LIBRARY_ENVIRONMENT: development
+      SC_LIBRARY_EMBEDDING_PROVIDER: disabled
+      SC_LIBRARY_EMBEDDING_WORKER_ENABLED: 'false'
+      SC_LIBRARY_PLATFORM_CORE_URL: http://sc-core:8090
+      SC_LIBRARY_PLATFORM_CORE_WRITE_API_KEY: ${SC_LIBRARY_DEV_CORE_KEY:?Set the development Core key}
+      SC_LIBRARY_JOB_REDIS_URL: redis://redis:6379/0
+      SC_LIBRARY_GO_INGESTION_URL: http://ingestion:8090
+      SC_LIBRARY_ARTIFACT_FILESYSTEM_ROOT: /data/artifacts
+    volumes: [library-dev-artifacts:/data/artifacts]
+    networks:
+      private: {}
+      sc-internal:
+        aliases: [sc-library-backend]
+      wordpress:
+        aliases: [sc-library-dev-api]
+    depends_on:
+      redis:
+        condition: service_healthy
+      ingestion:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=4)"]
+      interval: 15s
+      retries: 10
+  redis:
+    restart: unless-stopped
+    image: redis:7.4-alpine
+    command: [redis-server, --appendonly, 'yes', --maxmemory, 96mb, --maxmemory-policy, noeviction]
+    mem_limit: 160m
+    volumes: [library-dev-redis:/data]
+    networks: [private]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 10s
+      retries: 10
+  ingestion:
+    restart: unless-stopped
+    build: ./go-ingestion-runtime
+    mem_limit: 192m
+    environment:
+      SC_LIBRARY_GO_PORT: '8090'
+      SC_LIBRARY_GO_STATE_FILE: /data/jobs.json
+      SC_LIBRARY_GO_MAX_IN_FLIGHT: '2'
+    volumes: [library-dev-ingestion:/data]
+    networks: [private]
+    healthcheck:
+      test: [CMD, /sc-library-ingestion-runtime, status]
+      interval: 15s
+      retries: 10
+  worker-python: &worker
+    restart: unless-stopped
+    image: sc-library-dev-library-backend:local
+    mem_limit: 256m
+    environment:
+      DATABASE_URL: postgresql://sc_library_dev:${SC_LIBRARY_DEV_DB_PASSWORD:?}@postgres:5432/sc_library_dev
+      SC_LIBRARY_BACKEND_API_KEY: ${SC_LIBRARY_DEV_API_KEY:?}
+      SC_LIBRARY_ENVIRONMENT: development
+      SC_LIBRARY_JOB_REDIS_URL: redis://redis:6379/0
+      SC_LIBRARY_GO_INGESTION_URL: http://ingestion:8090
+      SC_LIBRARY_ARTIFACT_FILESYSTEM_ROOT: /data/artifacts
+      SC_LIBRARY_EMBEDDING_PROVIDER: disabled
+    command: [python, -m, app.worker_agent, --profile, python.research]
+    volumes: [library-dev-artifacts:/data/artifacts]
+    networks: [private]
+    depends_on:
+      library-backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  worker-go:
+    <<: *worker
+    command: [python, -m, app.worker_agent, --profile, go.ingestion]
+  worker-rust:
+    <<: *worker
+    command: [python, -m, app.worker_agent, --profile, rust.graph]
+networks:
+  sc-internal:
+    external: true
+  private:
+    internal: true
+  wordpress:
+    external: true
+    name: ${SC_LIBRARY_DEV_WP_NETWORK:?Set the existing private WordPress network name}
+volumes:
+  library-dev-db:
+  library-dev-artifacts:
+  library-dev-redis:
+  library-dev-ingestion:

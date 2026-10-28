@@ -28,3 +28,6 @@ library-backend/go-ingestion-runtime/sc-library-ingestion-runtime
 /*_v[0-9]*.md
 /*.sh
 /*.py
+
+# Private development activation settings
+library-backend/.env.dev
