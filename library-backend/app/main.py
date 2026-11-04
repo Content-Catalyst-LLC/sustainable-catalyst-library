@@ -870,19 +870,22 @@ async def request_context(request: Request, call_next):
     return response
 
 
+def require_admin_bearer(authorization: str | None) -> None:
+    """Authenticate admin reads without weakening signed mutation requests."""
+    if not settings.api_key:
+        raise HTTPException(status_code=503, detail="SC_LIBRARY_BACKEND_API_KEY is not configured")
+    token = authorization[7:].strip() if authorization and authorization.lower().startswith("bearer ") else ""
+    if not token or not constant_time_equal(token, settings.api_key):
+        raise HTTPException(status_code=401, detail="invalid server credential")
+
+
 async def authorize_write(
     request: Request,
     authorization: str | None,
     timestamp: str | None,
     signature: str | None,
 ) -> bytes:
-    if not settings.api_key:
-        raise HTTPException(status_code=503, detail="SC_LIBRARY_BACKEND_API_KEY is not configured")
-    token = ""
-    if authorization and authorization.lower().startswith("bearer "):
-        token = authorization[7:].strip()
-    if not token or not constant_time_equal(token, settings.api_key):
-        raise HTTPException(status_code=401, detail="invalid server credential")
+    require_admin_bearer(authorization)
     if not timestamp or not valid_timestamp(timestamp, settings.request_skew_seconds):
         raise HTTPException(status_code=401, detail="invalid or expired request timestamp")
     body = await request.body()
@@ -6831,12 +6834,6 @@ def artifact_storage_manifest_endpoint(payload:dict[str,Any]) -> dict[str,Any]:
     try: return build_artifact_manifest(payload)
     except ValueError as exc: raise HTTPException(status_code=400,detail=str(exc)) from exc
 
-@app.get("/v1/admin/artifacts/{artifact_id:path}")
-def artifact_get_endpoint(artifact_id:str,authorization:str|None=Header(default=None)) -> dict[str,Any]:
-    require_admin_bearer(authorization)
-    try: return get_artifact(artifact_id)
-    except KeyError as exc: raise HTTPException(status_code=404,detail="artifact not found") from exc
-
 @app.get("/v1/admin/artifacts/{artifact_id:path}/content")
 def artifact_content_endpoint(artifact_id:str,authorization:str|None=Header(default=None)) -> Response:
     require_admin_bearer(authorization)
@@ -6844,6 +6841,12 @@ def artifact_content_endpoint(artifact_id:str,authorization:str|None=Header(defa
     except KeyError as exc: raise HTTPException(status_code=404,detail="artifact not found") from exc
     except FileNotFoundError as exc: raise HTTPException(status_code=404,detail="artifact bytes not found") from exc
     return Response(content=data,media_type=str(artifact.get("media_type") or "application/octet-stream"),headers={"X-Content-SHA256":str(artifact.get("content_sha256") or ""),"X-SC-Artifact-ID":artifact_id})
+
+@app.get("/v1/admin/artifacts/{artifact_id:path}")
+def artifact_get_endpoint(artifact_id:str,authorization:str|None=Header(default=None)) -> dict[str,Any]:
+    require_admin_bearer(authorization)
+    try: return get_artifact(artifact_id)
+    except KeyError as exc: raise HTTPException(status_code=404,detail="artifact not found") from exc
 
 @app.post("/v1/admin/artifacts")
 async def artifact_persist_endpoint(request:Request,authorization:str|None=Header(default=None),x_sc_timestamp:str|None=Header(default=None),x_sc_signature:str|None=Header(default=None)) -> dict[str,Any]:

@@ -1,0 +1,26 @@
+name: SC RVF artifact read and Core bridge
+on:
+  pull_request:
+    paths:
+      - 'library-backend/app/main.py'
+      - 'library-backend/tests/test_sc_rvf_artifact_read_routes.py'
+      - '.github/workflows/sc-rvf-artifact-read.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  artifact-read-regression:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r library-backend/requirements.txt pytest
+      - run: >-
+          PYTHONPATH=library-backend python -m pytest -q
+          library-backend/tests/test_sc_rvf_artifact_read_routes.py
+          library-backend/tests/test_artifact_storage_v2620.py
+          library-backend/tests/test_platform_core_bridge_v2230.py
