@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'library-backend/app/main.py'
+      - 'library-backend/app/platform_core.py'
+      - 'library-backend/tests/test_platform_core_bridge_v2230.py'
       - 'library-backend/tests/test_sc_rvf_artifact_read_routes.py'
       - '.github/workflows/sc-rvf-artifact-read.yml'
   workflow_dispatch:
