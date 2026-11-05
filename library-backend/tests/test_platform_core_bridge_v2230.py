@@ -150,3 +150,14 @@ def test_v2230_bridge_schema_tables_remain_preserved():
     assert "CREATE TABLE IF NOT EXISTS library_core_sync_outbox" in schema
     assert "UNIQUE(library_record_id, core_object_id)" in schema
     assert "idempotency_key varchar(128) NOT NULL UNIQUE" in schema
+
+def test_private_core_get_uses_configured_service_key():
+    import httpx
+    from app.platform_core import PlatformCoreClient
+    observed=[]
+    def handler(request):
+        observed.append(request.headers.get('X-SC-API-Key'))
+        return httpx.Response(200,json={'ok':True})
+    client=PlatformCoreClient(base_url='http://core.test',write_api_key='synthetic-private-key',transport=httpx.MockTransport(handler))
+    assert client.get('/v1/research-objects/readiness').status_code==200
+    assert observed==['synthetic-private-key']
