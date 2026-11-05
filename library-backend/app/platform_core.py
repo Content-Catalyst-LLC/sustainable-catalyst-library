@@ -109,11 +109,13 @@ class PlatformCoreClient:
         if method != "GET":
             if not self.write_api_key:
                 raise RuntimeError("SC_LIBRARY_PLATFORM_CORE_WRITE_API_KEY is not configured")
+        if self.write_api_key:
             headers["X-SC-API-Key"] = self.write_api_key
         with httpx.Client(
             base_url=self.base_url,
             timeout=self.timeout_seconds,
             follow_redirects=False,
+            trust_env=False,
             transport=self.transport,
         ) as client:
             response = client.request(method, path, json=payload if method != "GET" else None, headers=headers)
