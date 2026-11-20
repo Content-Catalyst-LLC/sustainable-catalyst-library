@@ -33,6 +33,10 @@ foreach ( $field_list as $candidate_field ) {
         </nav>
     </section>
 
+    <?php if ( ! empty( $publications_directory ) ) {
+        include SC_LIBRARY_DIR . 'templates/publications-directory.php';
+    } ?>
+
     <div class="sc-field-stack__fields">
         <?php foreach ( $field_list as $index => $stack_field ) : ?>
             <?php
