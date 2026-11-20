@@ -703,6 +703,13 @@ final class SC_Library_Field_Spotlights {
         $stack_mode = ! $only_field && count( $fields ) > 1;
         ob_start();
         if ( $stack_mode ) {
+            $publications_directory = array();
+            if ( $this->is_canonical_publications_page() ) {
+                require_once SC_LIBRARY_DIR . 'includes/class-sc-library-publications-directory.php';
+                if ( SC_Library_Publications_Directory::enabled() ) {
+                    $publications_directory = ( new SC_Library_Publications_Directory() )->groups( $fields );
+                }
+            }
             include SC_LIBRARY_DIR . 'templates/field-spotlights.php';
         } else {
             include SC_LIBRARY_DIR . 'templates/field-spotlight-single.php';

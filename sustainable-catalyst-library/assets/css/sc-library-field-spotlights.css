@@ -406,3 +406,12 @@
 @media(max-width:520px){.sc-field-stack__jump-grid{grid-template-columns:1fr}.sc-field-stack__jump{border-right:0}}
 
 .sc-field-spotlight__research-graph{display:inline-flex;margin-top:10px;font-size:.75rem;font-weight:700;letter-spacing:.045em;text-transform:uppercase;color:inherit;text-decoration:underline;text-underline-offset:3px}.sc-field-spotlight__research-graph:focus-visible{outline:3px solid currentColor;outline-offset:3px}
+
+.sc-field-stack__directory {
+    padding: clamp(1rem, 3vw, 2rem);
+    overflow-wrap: anywhere;
+}
+.sc-field-stack__directory a {
+    text-decoration: underline;
+    text-underline-offset: .15em;
+}
