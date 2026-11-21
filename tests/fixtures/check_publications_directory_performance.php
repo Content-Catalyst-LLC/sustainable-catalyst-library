@@ -11,7 +11,7 @@ function check_directory( bool $condition, string $message ): void {
     if ( ! $condition ) { throw new RuntimeException( $message ); }
 }
 
-global $wpdb;
+global $wpdb, $wp;
 $spotlights = new SC_Library_Field_Spotlights();
 $fields = $spotlights->public_model();
 $routes = 0;
@@ -31,6 +31,16 @@ try {
     check_directory( $routes >= 170 && $reference === $rows, 'Custom resolver fallback or result parity regressed.' );
 } finally {
     remove_filter( 'url_to_postid', $slow );
+}
+$original_query_vars = $wp->public_query_vars;
+register_post_type( 'seo034_route', array( 'public' => true, 'query_var' => 'pagename' ) );
+try {
+    $routes = 0;
+    $directory->classify( $fields );
+    check_directory( $routes >= 170, 'Post-type query-variable override bypassed the core resolver.' );
+} finally {
+    unregister_post_type( 'seo034_route' );
+    $wp->public_query_vars = $original_query_vars;
 }
 $by_key = static fn( array $result ) => array_column( $result, null, 'map_key' );
 $key = 'international-law';
@@ -58,4 +68,4 @@ try {
         'post_password' => $map->post_password, 'post_name' => $map->post_name ), true );
     update_option( $settings_name, $settings );
 }
-WP_CLI::success( 'Four checks passed: query budget, resolver parity, live visibility/permalink checks, and curation invalidation.' );
+WP_CLI::success( 'Five checks passed: query budget, resolver parity, custom post-type fallback, live visibility/permalink checks, and curation invalidation.' );

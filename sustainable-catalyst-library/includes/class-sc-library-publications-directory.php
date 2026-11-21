@@ -23,6 +23,13 @@ final class SC_Library_Publications_Directory {
             || array_diff( array( 'pagename', 'name', 'page' ), $wp->public_query_vars ) ) {
             return;
         }
+        // Core maps registered post-type query variables before WP_Query.
+        foreach ( get_post_types( array(), 'objects' ) as $type ) {
+            if ( in_array( $type->query_var, array( 'name', 'pagename', 'page' ), true ) ) {
+                return;
+            }
+        }
+
         // A route or query callback can change which record a request resolves.
         // Core's old-post comments callback does not change the result set.
         $hooks = array( 'url_to_postid', 'parse_query', 'pre_get_posts', 'split_the_query', 'the_posts', 'query_vars' );

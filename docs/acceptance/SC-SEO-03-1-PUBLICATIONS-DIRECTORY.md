@@ -46,3 +46,9 @@ wp --path=/private/disposable-fixture/wp eval-file tests/fixtures/check_publicat
 In the benchmark, flag-on warm median full response improved from 686.0 ms to 132.0 ms, p95 from 1,280.9 ms to 163.1 ms, and SQL queries from 575 to 17. The after flag-off warm median was 41.7 ms. Keep production disabled until a production-equivalent run resolves this remaining gap and the 170-map eligibility evidence is available.
 
 For an approved inventory run, use a dedicated `wp-config.php` and define the credentials of a SELECT-only account. Before the config loads `wp-settings.php`, require `tools/publication-inventory-prebootstrap.php`. It checks grants on that account, rejects elevated grants, and records the identity for validation by the exporter. The approved output stays private. A WordPress bootstrap may attempt cache writes. SELECT-only grants deny those writes, as observed on the disposable fixture. Use an approved isolated copy with outbound effects blocked. The owner must review the config, credentials and access before running the exporter.
+
+## SC-SEO-03.4 review hardening
+
+Core may remap the flat rewrite's query variables to custom post types. The directory now defers to `url_to_postid()` if a registered post type claims a flat-route query variable. The fixture tests this separately from the resolver-filter fallback. The exporter checks both the connected database name and account and rejects a configured `db.php` drop-in before bootstrap. Use a dedicated stock WordPress connection for a future approved inventory.
+
+The original 7.025-second sample did not record query durations. In the phase-instrumented fixture repeat, flag-off cold requests also exceeded nine seconds and spent most of their time in SQL during the existing public-model rebuild. Keep the directory and cold public-model work separate in SC-SEO-03.4. Production eligibility remains blocked.
