@@ -1,0 +1,54 @@
+name: Library WordPress plugin checks
+
+on:
+  pull_request:
+    paths:
+      - 'sustainable-catalyst-library/**'
+      - 'tools/fix09-reindex-equations.php'
+      - 'tests/*fix09*'
+      - 'tests/test_independent_knowledge_library_platform_v700.py'
+      - 'tests/run_v700_validation.sh'
+      - '.github/workflows/library-plugin-checks.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'sustainable-catalyst-library/**'
+      - 'tools/fix09-reindex-equations.php'
+      - 'tests/*fix09*'
+
+permissions:
+  contents: read
+
+jobs:
+  plugin:
+    name: PHP lint, equation detection (#9), reindex tool, 7.0 release validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: PHP lint (every plugin file and the reindex tool)
+        run: |
+          find sustainable-catalyst-library tools -name '*.php' -print0 | xargs -0 -n1 php -l > /tmp/lint.txt || { grep -v '^No syntax errors' /tmp/lint.txt; exit 1; }
+          echo "linted $(wc -l < /tmp/lint.txt) files"
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check pytest==8.3.4 -r library-backend/requirements.txt
+      - name: Issue #9 regression tests
+        run: |
+          php -d display_errors=stderr tests/fixture_fix09_equation_detection.php
+          python -m pytest -q tests/test_library_fix09_equation_detection.py tests/test_library_fix09_reindex_tool.py
+      - name: Library 7.0 release validation
+        env:
+          SC_LIBRARY_V700_TEST_PYTHON: python
+        run: bash tests/run_v700_validation.sh

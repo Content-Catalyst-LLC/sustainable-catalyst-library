@@ -36,7 +36,7 @@ grep -q '__version__ = "4.0.0"' library-backend/app/__init__.py
 grep -q 'webVersion: "3.0.0"' library-web/config.js
 grep -q '__version__ = "2.0.0"' clients/python/sustainable_catalyst_library/__init__.py
 grep -q '"version": "2.0.0"' clients/javascript/package.json
-grep -q "define('SC_LIBRARY_VERSION', '7.0.0');" sustainable-catalyst-library/sustainable-catalyst-library.php
+grep -Eq "define\('SC_LIBRARY_VERSION', '7\.0\.[0-9]+'\);" sustainable-catalyst-library/sustainable-catalyst-library.php  # 7.0.x maintenance line
 echo "PASS: generation markers synchronized"
 
 echo

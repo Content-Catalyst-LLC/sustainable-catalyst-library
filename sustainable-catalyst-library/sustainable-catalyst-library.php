@@ -3,7 +3,7 @@
  * Plugin Name: Sustainable Catalyst Library
  * Plugin URI: https://sustainablecatalyst.com/knowledge-libraries/
  * Description: Sustainable Catalyst Library 7.0.0 Optional WordPress Adapter for the Independent Knowledge Library Platform.
- * Version: 7.0.0
+ * Version: 7.0.1
  * Author: Content Catalyst LLC
  * Author URI: https://sustainablecatalyst.com/
  * Text Domain: sustainable-catalyst-library
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SC_LIBRARY_VERSION', '7.0.0');
+define('SC_LIBRARY_VERSION', '7.0.1');
 define('SC_LIBRARY_WORDPRESS_ROLE', 'optional-adapter');
 define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);
 define('SC_LIBRARY_LEGACY_LOCAL_RESEARCH_AUTHORITY', false);

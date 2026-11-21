@@ -351,7 +351,7 @@ final class SC_Library_Indexer {
 
         return [
             'code' => $github !== '' || stripos($raw_content, 'github.com') !== false || preg_match('/<(pre|code)\b/i', $raw_content) === 1,
-            'equations' => preg_match('/(\\\(|\\\[|\$\$|latex|mathjax)/i', $raw_content) === 1,
+            'equations' => self::contains_equation_markup($raw_content),
             'video' => !empty($video_urls) || preg_match('/(youtube\.com|youtu\.be|vimeo\.com|<video\b|wp:video)/i', $raw_content) === 1,
             'dataset' => !empty($dataset_urls),
             'workbench' => !empty($workbench_tools),
@@ -359,6 +359,16 @@ final class SC_Library_Indexer {
             'site_intelligence' => !empty($site_context),
             'pdf' => class_exists('SC_Library_Foundation_Documents') && get_post_type($post_id) === SC_Library_Foundation_Documents::POST_TYPE && absint(get_post_meta($post_id, '_sc_foundation_pdf_attachment_id', true)) > 0,
         ];
+    }
+
+    /**
+     * Issue #9: TeX inline \( … \) or display \[ … \] delimiters, $$ … $$, or a LaTeX/MathJax marker.
+     * In a single-quoted PHP string each literal backslash in the regex is written as \\\\.
+     */
+    public const EQUATION_PATTERN = '/(\\\\\(|\\\\\[|\$\$|latex|mathjax)/i';
+
+    public static function contains_equation_markup(string $raw_content): bool {
+        return preg_match(self::EQUATION_PATTERN, $raw_content) === 1;
     }
 
     private function line_values(string $raw): array {
