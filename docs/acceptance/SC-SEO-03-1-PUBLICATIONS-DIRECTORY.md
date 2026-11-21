@@ -34,3 +34,15 @@ bash tests/fixtures/benchmark_publications_directory.sh /private/disposable-fixt
 ```
 
 The benchmark invalidates Library model transients before each cold sample. Warm samples reuse the model transients. Compare on/off medians for both TTFB and full body time with the same runtime and representative load. Verify visible focus and contrast using the real theme. Confirm flag-off returns the baseline response and rehearse the staging page-cache purge. The synthetic fixture warm full-body median rose from 28.8 ms to 977.4 ms. This is a release blocker until the per-request lookup cost is addressed and the representative benchmark passes. Production eligibility and production-equivalent clone acceptance remain blocked.
+
+## SC-SEO-03.3 directory and exporter hardening
+
+The directory batches only recognized flat core WordPress routes without custom query hooks. Other routes retain core resolution. Eligibility is request-scoped, and post publication and permalink checks run against the resolved object. Run the regression budget and mutation checks on the disposable fixture:
+
+```bash
+wp --path=/private/disposable-fixture/wp eval-file tests/fixtures/check_publications_directory_performance.php
+```
+
+In the benchmark, flag-on warm median full response improved from 686.0 ms to 132.0 ms, p95 from 1,280.9 ms to 163.1 ms, and SQL queries from 575 to 17. The after flag-off warm median was 41.7 ms. Keep production disabled until a production-equivalent run resolves this remaining gap and the 170-map eligibility evidence is available.
+
+For an approved inventory run, use a dedicated `wp-config.php` and define the credentials of a SELECT-only account. Before the config loads `wp-settings.php`, require `tools/publication-inventory-prebootstrap.php`. It checks grants on that account, rejects elevated grants, and records the identity for validation by the exporter. The approved output stays private. A WordPress bootstrap may attempt cache writes. SELECT-only grants deny those writes, as observed on the disposable fixture. Use an approved isolated copy with outbound effects blocked. The owner must review the config, credentials and access before running the exporter.

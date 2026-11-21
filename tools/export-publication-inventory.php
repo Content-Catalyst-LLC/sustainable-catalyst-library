@@ -4,7 +4,7 @@
  * destination. Nothing from this script is intended for a public repository.
  */
 if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) { exit( 2 ); }
-if ( '1' !== getenv( 'SC_SEO_INVENTORY_APPROVED' ) ) {
+if ( '1' !== getenv( 'SC_SEO_INVENTORY_APPROVED' ) || ! defined( 'SC_SEO_INVENTORY_VERIFIED_ACCOUNT' ) ) {
     WP_CLI::error( 'Owner approval and a read-only WordPress database account are required.' );
 }
 if ( ! class_exists( 'SC_Library_Field_Spotlights' ) ) {
@@ -12,6 +12,9 @@ if ( ! class_exists( 'SC_Library_Field_Spotlights' ) ) {
 }
 
 global $wpdb;
+if ( $wpdb->get_var( 'SELECT CURRENT_USER()' ) !== SC_SEO_INVENTORY_VERIFIED_ACCOUNT ) {
+    WP_CLI::error( 'WordPress database account differs from the pre-bootstrap SELECT-only account.' );
+}
 if ( false === $wpdb->query( 'START TRANSACTION READ ONLY' ) ) {
     WP_CLI::error( 'Could not start a read-only inventory transaction.' );
 }
