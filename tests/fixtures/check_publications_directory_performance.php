@@ -32,6 +32,14 @@ try {
 } finally {
     remove_filter( 'url_to_postid', $slow );
 }
+register_post_type( 'seo034_route', array( 'public' => true, 'query_var' => 'pagename' ) );
+try {
+    $routes = 0;
+    $directory->classify( $fields );
+    check_directory( $routes >= 170, 'Post-type query-variable override bypassed the core resolver.' );
+} finally {
+    unregister_post_type( 'seo034_route' );
+}
 $by_key = static fn( array $result ) => array_column( $result, null, 'map_key' );
 $key = 'international-law';
 $map = get_page_by_path( $key );
@@ -58,4 +66,4 @@ try {
         'post_password' => $map->post_password, 'post_name' => $map->post_name ), true );
     update_option( $settings_name, $settings );
 }
-WP_CLI::success( 'Four checks passed: query budget, resolver parity, live visibility/permalink checks, and curation invalidation.' );
+WP_CLI::success( 'Five checks passed: query budget, resolver parity, custom post-type fallback, live visibility/permalink checks, and curation invalidation.' );

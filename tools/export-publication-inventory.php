@@ -12,7 +12,8 @@ if ( ! class_exists( 'SC_Library_Field_Spotlights' ) ) {
 }
 
 global $wpdb;
-if ( $wpdb->get_var( 'SELECT CURRENT_USER()' ) !== SC_SEO_INVENTORY_VERIFIED_ACCOUNT ) {
+if ( $wpdb->get_var( 'SELECT CURRENT_USER()' ) !== SC_SEO_INVENTORY_VERIFIED_ACCOUNT
+    || $wpdb->get_var( 'SELECT DATABASE()' ) !== DB_NAME ) {
     WP_CLI::error( 'WordPress database account differs from the pre-bootstrap SELECT-only account.' );
 }
 if ( false === $wpdb->query( 'START TRANSACTION READ ONLY' ) ) {

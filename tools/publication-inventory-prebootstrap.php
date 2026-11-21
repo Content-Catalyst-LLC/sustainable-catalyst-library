@@ -13,6 +13,12 @@ if ( ! defined( 'DB_HOST' ) || ! defined( 'DB_USER' ) || ! defined( 'DB_PASSWORD
     || ! preg_match( '/^([A-Za-z0-9.-]+)(?::([0-9]+))?$/D', DB_HOST, $endpoint ) ) {
     throw new RuntimeException( 'Use dedicated database constants and a plain TCP host for this inventory.' );
 }
+$inventory_content_dir = defined( 'WP_CONTENT_DIR' )
+    ? WP_CONTENT_DIR
+    : ( defined( 'ABSPATH' ) ? ABSPATH . 'wp-content' : null );
+if ( ! $inventory_content_dir || file_exists( $inventory_content_dir . '/db.php' ) ) {
+    throw new RuntimeException( 'Use an explicit WordPress root and the stock database connection for inventory export.' );
+}
 $database = mysqli_init();
 try {
     $database->real_connect( $endpoint[1], DB_USER, DB_PASSWORD, DB_NAME, (int) ( $endpoint[2] ?? 3306 ) );
@@ -35,4 +41,4 @@ try {
     $database->close();
 }
 define( 'SC_SEO_INVENTORY_VERIFIED_ACCOUNT', $account );
-unset( $database, $grants, $schema_grant, $select, $account, $endpoint, $record, $grant );
+unset( $inventory_content_dir, $database, $grants, $schema_grant, $select, $account, $endpoint, $record, $grant );
