@@ -52,3 +52,15 @@ For an approved inventory run, use a dedicated `wp-config.php` and define the cr
 Core may remap the flat rewrite's query variables to custom post types. The directory now defers to `url_to_postid()` if a registered post type claims a flat-route query variable. The fixture tests this separately from the resolver-filter fallback. The exporter checks both the connected database name and account and rejects a configured `db.php` drop-in before bootstrap. Use a dedicated stock WordPress connection for a future approved inventory.
 
 The original 7.025-second sample did not record query durations. In the phase-instrumented fixture repeat, flag-off cold requests also exceeded nine seconds and spent most of their time in SQL during the existing public-model rebuild. Keep the directory and cold public-model work separate in SC-SEO-03.4. Production eligibility remains blocked.
+
+## SC-SEO-03.5 cold spotlight model
+
+The spotlight cold rebuild shares the bounded flat-route resolver with the directory. Only visible heroes are planned. Curated post and metadata buckets are primed in chunks, while existing excerpt, image and taxonomy precedence remains in place. Unknown routing, custom rewrite/query callbacks and ambiguous targets retain core resolution. No route eligibility is stored across requests. Protected source text or thumbnails are excluded from the shared public model, including when WordPress has a password cookie. A new public transient key prevents reuse of previously generated hero payloads. Published records, permalink settings, and creation, update or deletion of editorial-slot options invalidate the applicable model cache.
+
+Run the cold model regression against the established disposable fixture:
+
+```bash
+wp --path=/private/disposable-fixture/wp eval-file tests/fixtures/check_publications_cold_model.php
+```
+
+Any future owner-approved inventory must use a dedicated offline copy or authorized read replica, pre-bootstrap SELECT-only credential verification, a stock connection, a private output path, and a consistent source timestamp. Preserve 170 registry identities, exact canonical permalink matching, status, public visibility, password flag and curated relationship evidence. Exclude post bodies, secrets, user data, and raw plugin configuration from the deliverable inventory. For a production-equivalent benchmark restore the matching WordPress, PHP, database, Astra/child theme, active and must-use plugins, Library and UI versions, SEO/redirect rules and page/object-cache settings. Restore the authorized Publications page/template, registry and curated source records under access and outbound isolation. Verify exact anonymous routes and compare cold/warm performance with custom route hooks enabled before asking for a separate activation decision.
