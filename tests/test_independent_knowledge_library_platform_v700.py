@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,8 +25,9 @@ def test_web_system_surface_present():
 
 def test_wordpress_is_optional_adapter():
     php = (ROOT/"sustainable-catalyst-library/sustainable-catalyst-library.php").read_text()
-    assert "Version: 7.0.0" in php
-    assert "define('SC_LIBRARY_VERSION', '7.0.0');" in php
+    # 7.0.x is the maintenance line; WordPress plugin patch releases (7.0.1: issue #9) keep the 7.0 platform contract.
+    assert re.search(r"Version: 7\.0\.\d+\n", php)
+    assert re.search(r"define\('SC_LIBRARY_VERSION', '7\.0\.\d+'\);", php)
     assert "define('SC_LIBRARY_WORDPRESS_AUTHORITATIVE', false);" in php
     assert "define('SC_LIBRARY_PLATFORM_WORDPRESS_REQUIRED', false);" in php
 

@@ -1,3 +1,11 @@
+## 7.0.1 — Equation detection repair (maintenance)
+
+- Fixes issue #9: the indexer's equation pattern had an unescaped `[` (`'/(\\\(|\\\[|…)/i'`), so `preg_match()` failed to compile, logged a warning on every indexed save, and recorded `equations: false` for every record.
+- The pattern now matches TeX inline `\( … \)` and display `\[ … \]` delimiters, `$$ … $$`, and `latex` / `mathjax` markers (`SC_Library_Indexer::EQUATION_PATTERN`, `contains_equation_markup()`).
+- Adds `tests/fixture_fix09_equation_detection.php` (+ pytest wrapper): real `resource_flags()` over inline, display, dollar, keyword and ordinary-text cases, 50 repeated rounds, zero warnings; fails against 7.0.0.
+- WordPress plugin only. Library backend 4.0.0, web 3.0.0 and SDK 2.0.0 are unchanged. No schema change.
+- Existing index rows keep their values until re-indexed; `tools/fix09-reindex-equations.php` corrects only the `equations` flag in place (no row deleted or added); the daily reconcile would also correct it.
+
 ## 7.0.0 — Independent Knowledge Library Platform
 
 - Promotes the independent Library architecture to the generation-7 stable baseline.
