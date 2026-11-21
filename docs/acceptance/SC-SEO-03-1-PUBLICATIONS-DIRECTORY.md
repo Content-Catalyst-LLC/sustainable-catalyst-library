@@ -19,3 +19,18 @@ SEO031_STAGE=/private/stage NODE_PATH=/private/node_modules node --test tests/te
 The Node checks require local jsdom and axe-core. The capture script writes original server responses with the flag off and on, and separately records the 170 staging classifications. Use the SEO Intelligence `--publication-baseline` option on the paired hub captures with the loopback property. Keep that comparison separate from the SC-SEO-03 production capture, which used a different article cohort.
 
 Staging classified 28 populated, 14 empty, 14 unavailable and 114 unresolved entries. The directory emitted 28 unique map links and 28 unique article links. Total initial HTML coverage increased from 14 to 28 for each class. The fixture verified independent field stacks, playback, parameter selection, canonical and HTTP behavior, and scoped accessibility rules. Production must remain gated on an authorized publication inventory, route/metadata acceptance with the real theme and plugins, performance review, and separate release approval.
+
+## SC-SEO-03.2 production-equivalent acceptance
+
+Use an isolated, access-controlled clone with outbound traffic blocked. Record WordPress, PHP, database, active Astra theme and child-theme revisions, active and must-use plugins, Library and UI builds, SEO and redirect plugins, permalink rules, and page/object cache configuration. Compare those identifiers with production before calling the clone equivalent. Import the approved Publications page and template assignments, registry and field/slot options, Article Map and curated article records, and route/SEO metadata. Exclude production credentials, unrelated private records, live webhooks and mail delivery. Preserve routes on the staging origin and verify why each intentional difference exists.
+
+The inventory tool is for owner review. Use an approved read replica or offline copy, a database principal restricted to SELECT, and a private file. The database grant must be in effect **before** WordPress and plugin bootstrap. The script adds a read-only transaction with rollback, resolves exact same-origin permalinks, and emits only route, status, protection and coarse content/curation facts. It performs no HTTP fetches. Treat unresolved records as unknown. Verify the full directory against actual anonymous staging responses separately.
+
+```bash
+umask 077
+SC_SEO_INVENTORY_APPROVED=1 wp --path=/private/approved-wp \
+  eval-file tools/export-publication-inventory.php > /private/publications-inventory.json
+bash tests/fixtures/benchmark_publications_directory.sh /private/disposable-fixture
+```
+
+The benchmark invalidates Library model transients before each cold sample. Warm samples reuse the model transients. Compare on/off medians for both TTFB and full body time with the same runtime and representative load. Verify visible focus and contrast using the real theme. Confirm flag-off returns the baseline response and rehearse the staging page-cache purge. The synthetic fixture warm full-body median rose from 28.8 ms to 977.4 ms. This is a release blocker until the per-request lookup cost is addressed and the representative benchmark passes. Production eligibility and production-equivalent clone acceptance remain blocked.

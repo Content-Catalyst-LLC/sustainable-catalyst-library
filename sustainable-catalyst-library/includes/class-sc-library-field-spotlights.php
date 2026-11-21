@@ -394,8 +394,8 @@ final class SC_Library_Field_Spotlights {
             $saved_field = is_array( $settings['fields'][ $field_slug ] ?? null ) ? $settings['fields'][ $field_slug ] : array();
             $fields[ $field_slug ] = array(
                 'key' => $field_slug,
-                'title' => (string) ( $saved_field['title'] ?: $definition['title'] ?? $field_slug ),
-                'description' => (string) ( $saved_field['description'] ?: $definition['description'] ?? '' ),
+                'title' => (string) ( ($saved_field['title'] ?? '') ?: $definition['title'] ?? $field_slug ),
+                'description' => (string) ( ($saved_field['description'] ?? '') ?: $definition['description'] ?? '' ),
                 'browse_url' => (string) ( $definition['browse_url'] ?? '' ),
                 'order' => absint( $saved_field['order'] ?? $definition['order'] ?? 99 ),
                 'visible' => array_key_exists( 'visible', $saved_field ) ? ! empty( $saved_field['visible'] ) : true,
@@ -420,7 +420,7 @@ final class SC_Library_Field_Spotlights {
             $readiness = 0 === $configured_count ? 'empty' : ( $configured_count >= $slot_count ? 'ready' : 'partial' );
             $fields[ $field_slug ]['panels'][] = array(
                 'key' => $panel_key,
-                'title' => (string) ( $saved_panel['title'] ?: $canonical['title'] ),
+                'title' => (string) ( ($saved_panel['title'] ?? '') ?: $canonical['title'] ),
                 'canonical_title' => (string) $canonical['title'],
                 'canonical_url' => (string) $canonical['canonical_url'],
                 'source_group' => (string) $canonical['source_group'],
@@ -430,9 +430,9 @@ final class SC_Library_Field_Spotlights {
                 'hero' => array(
                     'role' => 'article_map',
                     'canonical_url' => (string) $canonical['canonical_url'],
-                    'title' => (string) ( $saved_panel['hero_title'] ?: $canonical['title'] ),
+                    'title' => (string) ( ($saved_panel['hero_title'] ?? '') ?: $canonical['title'] ),
                     'description' => (string) ( $saved_panel['hero_description'] ?? '' ),
-                    'cta' => (string) ( $saved_panel['hero_cta'] ?: $settings['general']['hero_cta'] ),
+                    'cta' => (string) ( ($saved_panel['hero_cta'] ?? '') ?: $settings['general']['hero_cta'] ),
                 ),
                 'slot_count' => $slot_count,
                 'configured_article_count' => $configured_count,
@@ -560,7 +560,7 @@ final class SC_Library_Field_Spotlights {
             if ( 'publish' !== $post->post_status || post_password_required( $post ) ) { return null; }
             return array(
                 'source_id' => $post->ID,
-                'title' => sanitize_text_field( (string) ( $article['title'] ?: get_the_title( $post ) ) ),
+                'title' => sanitize_text_field( (string) ( ($article['title'] ?? '') ?: get_the_title( $post ) ) ),
                 'url' => esc_url_raw( $url ?: get_permalink( $post ) ),
                 'summary' => $this->source_summary( $post, 25 ),
                 'metadata' => $this->source_metadata( $post ),
@@ -570,7 +570,7 @@ final class SC_Library_Field_Spotlights {
         if ( ! $url ) { return null; }
         return array(
             'source_id' => 0,
-            'title' => sanitize_text_field( (string) ( $article['title'] ?: __( 'Selected article', 'sustainable-catalyst-library' ) ) ),
+            'title' => sanitize_text_field( (string) ( ($article['title'] ?? '') ?: __( 'Selected article', 'sustainable-catalyst-library' ) ) ),
             'url' => $url,
             'summary' => '',
             'metadata' => __( 'Knowledge Library', 'sustainable-catalyst-library' ),
