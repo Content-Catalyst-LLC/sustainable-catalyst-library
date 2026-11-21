@@ -31,7 +31,7 @@ final class SC_Library_Field_Spotlights {
     public const MAX_SLOT_COUNT = 8;
     public const SHORTCODE_STACK = 'sc_field_spotlights';
     public const SHORTCODE_SINGLE = 'sc_field_spotlight';
-    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v4313';
+    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_sec036';
 
     public function register_hooks(): void {
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 41 );
@@ -532,13 +532,18 @@ final class SC_Library_Field_Spotlights {
         return $fields;
     }
 
+    private function is_public_spotlight_source( WP_Post $post ): bool {
+        return 'publish' === $post->post_status && '' === (string) $post->post_password
+            && is_post_publicly_viewable( $post );
+    }
+
     /** @param array<string,mixed> $hero @return array<string,mixed> */
     private function enrich_hero( array $hero ): array {
         $url = (string) ( $hero['canonical_url'] ?? '' );
         $absolute = $url && 0 !== strpos( $url, 'http' ) ? home_url( $url ) : $url;
         $post_id = $absolute ? absint( url_to_postid( $absolute ) ) : 0;
         $post = $post_id ? get_post( $post_id ) : null;
-        if ( $post instanceof WP_Post && 'publish' === $post->post_status ) {
+        if ( $post instanceof WP_Post && $this->is_public_spotlight_source( $post ) ) {
             if ( empty( $hero['description'] ) ) { $hero['description'] = $this->source_summary( $post, 42 ); }
             $hero['thumbnail'] = $this->resolve_source_thumbnail( $post );
             $hero['metadata'] = $this->source_metadata( $post );
@@ -557,7 +562,7 @@ final class SC_Library_Field_Spotlights {
         $source_id = $this->resolve_article_source_id( $source_id, $url );
         $post = $source_id ? get_post( $source_id ) : null;
         if ( $post instanceof WP_Post ) {
-            if ( 'publish' !== $post->post_status || post_password_required( $post ) ) { return null; }
+            if ( ! $this->is_public_spotlight_source( $post ) ) { return null; }
             return array(
                 'source_id' => $post->ID,
                 'title' => sanitize_text_field( (string) ( ($article['title'] ?? '') ?: get_the_title( $post ) ) ),
