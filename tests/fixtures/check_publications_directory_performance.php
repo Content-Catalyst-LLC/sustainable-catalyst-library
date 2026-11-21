@@ -11,7 +11,7 @@ function check_directory( bool $condition, string $message ): void {
     if ( ! $condition ) { throw new RuntimeException( $message ); }
 }
 
-global $wpdb;
+global $wpdb, $wp;
 $spotlights = new SC_Library_Field_Spotlights();
 $fields = $spotlights->public_model();
 $routes = 0;
@@ -32,6 +32,7 @@ try {
 } finally {
     remove_filter( 'url_to_postid', $slow );
 }
+$original_query_vars = $wp->public_query_vars;
 register_post_type( 'seo034_route', array( 'public' => true, 'query_var' => 'pagename' ) );
 try {
     $routes = 0;
@@ -39,6 +40,7 @@ try {
     check_directory( $routes >= 170, 'Post-type query-variable override bypassed the core resolver.' );
 } finally {
     unregister_post_type( 'seo034_route' );
+    $wp->public_query_vars = $original_query_vars;
 }
 $by_key = static fn( array $result ) => array_column( $result, null, 'map_key' );
 $key = 'international-law';
