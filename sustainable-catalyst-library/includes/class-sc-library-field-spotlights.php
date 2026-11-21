@@ -31,7 +31,7 @@ final class SC_Library_Field_Spotlights {
     public const MAX_SLOT_COUNT = 8;
     public const SHORTCODE_STACK = 'sc_field_spotlights';
     public const SHORTCODE_SINGLE = 'sc_field_spotlight';
-    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v4313';
+    public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v435';
 
     public function register_hooks(): void {
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 41 );
@@ -39,8 +39,14 @@ final class SC_Library_Field_Spotlights {
         add_action( 'admin_post_sc_library_save_field_spotlights', array( $this, 'save_settings_transaction' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue' ) );
         add_action( 'wp_ajax_sc_library_field_spotlight_search_sources', array( $this, 'ajax_search_sources' ) );
-        add_action( 'update_option_' . self::SETTINGS_OPTION, array( $this, 'invalidate_model' ), 10, 2 );
-        add_action( 'update_option_' . self::PANEL_CONTENT_OPTION, array( $this, 'invalidate_model' ), 10, 2 );
+        foreach ( array( self::SETTINGS_OPTION, self::PANEL_CONTENT_OPTION ) as $option ) {
+            foreach ( array( 'add_option_', 'update_option_', 'delete_option_' ) as $event ) {
+                add_action( $event . $option, array( $this, 'invalidate_model' ), 10, 0 );
+            }
+        }
+        foreach ( array( 'permalink_structure', 'home', 'siteurl' ) as $option ) {
+            add_action( 'update_option_' . $option, array( $this, 'invalidate_model' ), 10, 0 );
+        }
         add_action( 'save_post', array( $this, 'invalidate_for_saved_post' ), 999, 3 );
         add_action( 'transition_post_status', array( $this, 'invalidate_for_status_change' ), 999, 3 );
         add_action( 'before_delete_post', array( $this, 'invalidate_model' ) );
@@ -508,11 +514,32 @@ final class SC_Library_Field_Spotlights {
     public function public_model(): array {
         $cached = get_transient( self::PUBLIC_CACHE_KEY );
         if ( is_array( $cached ) ) { return $cached; }
-        $fields = $this->model();
+        require_once __DIR__ . '/class-sc-library-publication-routes.php';
+        $fields = array_filter( $this->model(), static fn( $field ) => ! empty( $field['visible'] ) );
+        $hero_urls = array();
+        $article_ids = array();
         foreach ( $fields as &$field ) {
             $field['panels'] = array_values( array_filter( $field['panels'], static fn( $panel ) => ! empty( $panel['visible'] ) ) );
+            foreach ( $field['panels'] as $panel ) {
+                $hero_urls[] = $this->hero_url( $panel['hero'] );
+                foreach ( array_slice( $panel['articles'], 0, absint( $panel['slot_count'] ) ) as $article ) {
+                    if ( ! empty( $article['source_id'] ) ) {
+                        $article_ids[] = absint( $article['source_id'] );
+                    }
+                }
+            }
+        }
+        unset( $field );
+        $routes = new SC_Library_Publication_Routes( $hero_urls );
+        // Prime only curated post objects/meta, in bounded batches. The helpers
+        // below still determine visibility, thumbnail precedence and metadata.
+        foreach ( array_chunk( array_unique( array_merge( $article_ids, $routes->primed_ids() ) ), 200 ) as $ids ) {
+            _prime_post_caches( $ids, false, true );
+        }
+
+        foreach ( $fields as &$field ) {
             foreach ( $field['panels'] as &$panel ) {
-                $panel['hero'] = $this->enrich_hero( $panel['hero'] );
+                $panel['hero'] = $this->enrich_hero( $panel['hero'], $routes );
                 $public_articles = array();
                 foreach ( array_slice( $panel['articles'], 0, absint( $panel['slot_count'] ) ) as $article ) {
                     if ( empty( $article['source_id'] ) && empty( $article['url'] ) ) { continue; }
@@ -527,18 +554,27 @@ final class SC_Library_Field_Spotlights {
             $field['additional_panel_count'] = max( 0, $field['panel_count'] - absint( $field['panel_limit'] ) );
         }
         unset( $field );
-        $fields = array_filter( $fields, static fn( $field ) => ! empty( $field['visible'] ) && ! empty( $field['panels'] ) );
+        $fields = array_filter( $fields, static fn( $field ) => ! empty( $field['panels'] ) );
         set_transient( self::PUBLIC_CACHE_KEY, $fields, self::MODEL_CACHE_TTL );
         return $fields;
     }
 
-    /** @param array<string,mixed> $hero @return array<string,mixed> */
-    private function enrich_hero( array $hero ): array {
+    private function hero_url( array $hero ): string {
         $url = (string) ( $hero['canonical_url'] ?? '' );
-        $absolute = $url && 0 !== strpos( $url, 'http' ) ? home_url( $url ) : $url;
-        $post_id = $absolute ? absint( url_to_postid( $absolute ) ) : 0;
+        return $url && 0 !== strpos( $url, 'http' ) ? home_url( $url ) : $url;
+    }
+
+    private function is_public_spotlight_source( WP_Post $post ): bool {
+        return 'publish' === $post->post_status && '' === (string) $post->post_password
+            && is_post_publicly_viewable( $post );
+    }
+
+    /** @param array<string,mixed> $hero @return array<string,mixed> */
+    private function enrich_hero( array $hero, SC_Library_Publication_Routes $routes ): array {
+        $absolute = $this->hero_url( $hero );
+        $post_id = $absolute ? $routes->resolve( $absolute ) : 0;
         $post = $post_id ? get_post( $post_id ) : null;
-        if ( $post instanceof WP_Post && 'publish' === $post->post_status ) {
+        if ( $post instanceof WP_Post && $this->is_public_spotlight_source( $post ) ) {
             if ( empty( $hero['description'] ) ) { $hero['description'] = $this->source_summary( $post, 42 ); }
             $hero['thumbnail'] = $this->resolve_source_thumbnail( $post );
             $hero['metadata'] = $this->source_metadata( $post );
@@ -557,7 +593,7 @@ final class SC_Library_Field_Spotlights {
         $source_id = $this->resolve_article_source_id( $source_id, $url );
         $post = $source_id ? get_post( $source_id ) : null;
         if ( $post instanceof WP_Post ) {
-            if ( 'publish' !== $post->post_status || post_password_required( $post ) ) { return null; }
+            if ( ! $this->is_public_spotlight_source( $post ) ) { return null; }
             return array(
                 'source_id' => $post->ID,
                 'title' => sanitize_text_field( (string) ( ($article['title'] ?? '') ?: get_the_title( $post ) ) ),
