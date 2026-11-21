@@ -6,7 +6,12 @@ define('ARRAY_A', 'ARRAY_A');
 function wp_json_encode($v) { return json_encode($v); }
 $stateFile = $argv[1];
 $GLOBALS['S'] = json_decode(file_get_contents($stateFile), true);
-function get_post_field($field, $id) { return $GLOBALS['S']['posts'][(string) $id] ?? ''; }
+function get_post_field($field, $id, $context = 'display') {
+    if ($context !== 'raw') {
+        throw new LogicException('Correction must use the same raw post content as indexing');
+    }
+    return $GLOBALS['S']['posts'][(string) $id] ?? '';
+}
 final class FakeWpdb {
     public $prefix = 'wp_';
     public function get_results($sql, $out) { return array_values($GLOBALS['S']['rows']); }

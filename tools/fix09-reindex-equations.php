@@ -34,7 +34,7 @@ $state = static function () use ($wpdb, $table): array {
     foreach ($rows as $row) {
         $flags = json_decode((string) $row['resource_flags'], true);
         if (!is_array($flags)) { $out['unreadable']++; continue; }
-        $expected = SC_Library_Indexer::contains_equation_markup((string) get_post_field('post_content', (int) $row['post_id']));
+        $expected = SC_Library_Indexer::contains_equation_markup((string) get_post_field('post_content', (int) $row['post_id'], 'raw'));
         $out['true'] += $expected ? 1 : 0;
         $out['all'][(int) $row['id']] = $row;
         if (($flags['equations'] ?? null) !== $expected) {
