@@ -29,6 +29,20 @@ final class SC_Library_Python_Backend {
     private const MAX_ERROR_DETAILS = 20;
 
     public function register_hooks(): void {
+        // SC-PUB-SEO-03B2: the state outbox is opt-in local/staging only.
+        // In production, the existing indexing and deletion hooks are intact.
+        if ( defined( 'SC_LIBRARY_PUBLICATIONS_MANIFEST_SYNC' )
+            && SC_LIBRARY_PUBLICATIONS_MANIFEST_SYNC
+            && function_exists( 'wp_get_environment_type' )
+            && in_array( wp_get_environment_type(), array( 'local', 'staging' ), true ) ) {
+            if ( ! class_exists( 'SC_Library_Publications_Discovery_Manifest', false ) ) {
+                require_once __DIR__ . '/class-sc-library-publications-discovery-manifest.php';
+            }
+            if ( ! class_exists( 'SC_Library_Publications_State_Outbox', false ) ) {
+                require_once __DIR__ . '/class-sc-library-publications-state-outbox.php';
+            }
+            ( new SC_Library_Publications_State_Outbox() )->register_hooks();
+        }
         add_action('admin_init', [$this, 'register_settings']);
         add_action('admin_menu', [$this, 'admin_menu']);
         add_action('rest_api_init', [$this, 'register_routes']);
@@ -2067,7 +2081,10 @@ final class SC_Library_Python_Backend {
     public static function signed_request(string $method, string $path, string $body) {
         $timestamp = (string) time();
         $key = (string) get_option('sc_library_backend_api_key', '');
-        $base = strtoupper($method) . "\n" . $path . "\n" . $timestamp . "\n" . hash('sha256', $body);
+        // Signature covers only the URL *path*, as FastAPI's signed writer
+        // does. Query arguments are accepted only on the authenticated GET.
+        $signature_path = (string) wp_parse_url( $path, PHP_URL_PATH );
+        $base = strtoupper($method) . "\n" . $signature_path . "\n" . $timestamp . "\n" . hash('sha256', $body);
         $signature = hash_hmac('sha256', $base, $key);
         $args = [
             'method' => strtoupper($method),
