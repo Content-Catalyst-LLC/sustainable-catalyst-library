@@ -27,6 +27,7 @@
     let ready = false;
     let userPaused = reduced.matches;
     let timer = null;
+    let automaticChange = false;
 
     const current = () => Math.max(0, nav.findIndex(button => button.classList.contains('is-active')));
     const syncYear = () => {
@@ -50,7 +51,10 @@
     const step = delta => {
       if (!ready || !nav.length) return;
       const index = (current() + delta + nav.length) % nav.length;
-      if (!nav[index].disabled) nav[index].click();
+      if (!nav[index].disabled) {
+        automaticChange = true;
+        try { nav[index].click(); } finally { automaticChange = false; }
+      }
       sync();
     };
     const startTimer = () => {
@@ -71,7 +75,7 @@
       sync();
     });
     nav.forEach(button => button.addEventListener('click', () => {
-      if (ready) { interact(); sync(); }
+      if (ready && !automaticChange) { interact(); sync(); }
     }));
     search?.addEventListener('input', () => {
       interact();
