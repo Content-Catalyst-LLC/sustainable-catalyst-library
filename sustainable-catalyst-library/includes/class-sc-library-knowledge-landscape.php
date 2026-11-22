@@ -132,7 +132,7 @@ final class SC_Library_Knowledge_Landscape {
             <header class="sc-kl__header">
                 <div>
                     <p class="sc-kl__eyebrow"><?php echo 'corpus' === $scope ? esc_html__('Publication Corpus Analysis', 'sustainable-catalyst-library') : esc_html__('Publication Knowledge Analysis', 'sustainable-catalyst-library'); ?></p>
-                    <h2 data-sc-kl-title><?php echo esc_html((string) ($payload['title'] ?? __('Scientific Knowledge Landscape', 'sustainable-catalyst-library'))); ?></h2>
+                    <h2 data-sc-kl-title><?php echo $showcase ? esc_html__('Publication Knowledge Landscape', 'sustainable-catalyst-library') : esc_html((string) ($payload['title'] ?? __('Scientific Knowledge Landscape', 'sustainable-catalyst-library'))); ?></h2>
                     <p><?php if ($showcase) { esc_html_e('Explore linked publications, topics, and measured research relationships in the Research Library.', 'sustainable-catalyst-library'); } else { esc_html_e('Linked scientific knowledge environment connecting publications, reviewed evidence, source identity/version families, research-graph paths, and source-grounded scientific objects across the Research Library corpus.', 'sustainable-catalyst-library'); } ?></p>
                 </div>
                 <div class="sc-kl__status-row">
