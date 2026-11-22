@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager, suppress
 import asyncio
 from datetime import datetime, timezone
 import json
+import os
 from time import perf_counter
 from typing import Any
 
@@ -219,6 +220,7 @@ from .saved_workspaces import (
     save_collection_item as save_workspace_collection_item,
 )
 from .public_routing import contract as public_routing_contract, readiness as public_routing_readiness, record_seo_descriptor, record_embed_descriptor
+from .publication_discovery_service import discover_publications as publication_discovery_candidates
 from .cross_product_integration import (
     registry_contract as cross_product_registry_contract, readiness as cross_product_integration_readiness,
     product_contract as cross_product_product_contract, validate_exchange as validate_cross_product_exchange,
@@ -4530,6 +4532,21 @@ async def library_api_v1_state_migration_certify(run_id: str, request: Request, 
         return certify_wordpress_state_migration(run_id,payload)
     except KeyError as exc: raise HTTPException(status_code=404, detail=library_api_error_envelope("migration-run-not-found","Migration run not found",status=404)) from exc
     except (ValueError,json.JSONDecodeError) as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+# SC-PUB-SEO-02 — opt-in, read-only editorial discovery candidates.
+# Public endpoints stay disabled unless the separately reviewed source-sync
+# and WordPress re-verification workflow is ready.
+@app.get("/api/library/v1/publications/discovery")
+def library_api_v1_publications_discovery(
+    field: str = Query(default="", max_length=100),
+    topic: str = Query(default="", max_length=100),
+    q: str = Query(default="", max_length=120),
+    interests: str = Query(default="", max_length=400),
+    limit: int = Query(default=12, ge=1, le=24),
+) -> dict[str, Any]:
+    if os.environ.get("SC_PUBLICATIONS_DISCOVERY_API_ENABLED") != "1":
+        raise HTTPException(status_code=404, detail="publication-discovery-not-enabled")
+    return publication_discovery_candidates(field=field, topic=topic, query=q, interests=interests, limit=limit)
 
 @app.get("/api/library/v1/public-routing")
 def library_api_v1_public_routing() -> dict[str, Any]: return public_routing_contract()
