@@ -35,6 +35,11 @@ MAX_BYTES = 2_800_000
 def staging_base(value: str) -> str:
     parsed = urlsplit(value.strip())
     host = (parsed.hostname or "").lower()
+    # Reject documentation placeholders before any network request. These
+    # often include the word "staging" and otherwise pass the host heuristic.
+    placeholder_tokens = ("your-", "replace-", "placeholder", "staging-host", "stage-host")
+    if any(token in host for token in placeholder_tokens) or any(ch in value for ch in "<>{}"):
+        raise ValueError("placeholder host: provide an actual isolated staging address")
     if parsed.scheme not in {"https", "http"} or not host:
         raise ValueError("expected absolute HTTP(S) staging URL")
     if parsed.username or parsed.password or parsed.query or parsed.fragment:
