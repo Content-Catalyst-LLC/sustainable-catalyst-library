@@ -47,6 +47,16 @@ The Python endpoint now returns HTTP 404 on any production runtime even if `SC_P
 8. Compare cold/warm page timing to the PUB-00 baseline; avoid doubling a page already about 1.9 MB of uncompressed HTML. Reduce payload only without losing useful crawlable links.
 9. Review the three broken registry routes and 13 alias redirects in issue #13 before presenting each affected map as a recommended link. Do not guess their destinations.
 
+## Cross-cutting GEO / AEO / LLM discoverability
+
+**[SC-PUB-GEO-01 — AI Search Discovery & Citation Readiness](https://github.com/Content-Catalyst-LLC/sustainable-catalyst-library/issues/18)** is a formal workstream alongside traditional SEO, not a replacement for it. It is not a dependency for the safe repair of existing dead links.
+
+- **GEO-00 (parallel with PUB-01):** inspect crawlable/canonical public URLs, title/description/H1, public-only JSON-LD, sitemaps, robots/CDN permissions for search crawlers, and no accidental leakage of private records. Keep AI-search crawler policies distinct from model-training consent.
+- **GEO-01/02 (during navigation/template work):** author-reviewed, source-grounded answers/findings, explicit methods/limitations, publication authorship/date and Library citation provenance; validate visible content and appropriate Article/BreadcrumbList metadata under existing Rank Math authority. Never invent scientific evidence or auto-publish material to target AI answers.
+- **GEO-03/04 (after public data synchronization):** Python public-only citation/relationship audits, repeatable question-intent tests, and measurements from Google Search Console generative AI reports, Bing AI Performance, and attributed referral analytics when access is available.
+- Avoid assuming `llms.txt`, fake third-party mentions, keyword stuffing, or LLM-specific markup provide a ranking benefit. Google's July 2026 Search guidance specifically prioritizes ordinary SEO, original useful content, and good site experience.
+- We may evaluate AirOps-style GEO metrics (mentions vs actual citations, sources, prompt/topic clusters and measured change) without adopting AirOps as a site dependency. No unverified citation/ranking claims.
+
 ## Release ordering and fastest SEO path
 
 1. **PUB-01 navigation integrity:** prioritize broken links and canonical source links, retaining valid map content and current working redirects.
