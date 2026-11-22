@@ -57,11 +57,14 @@ foreach ( $field_list as $entry_field ) {
         ? $publications_directory[ $entry_key ]['maps'][0] : null;
     $interest_cards[ $entry_title ] = $entry;
 }
-$interest_cards = array_replace(
-    array_intersect_key( $interest_prompts, $interest_cards ),
-    $interest_cards
-);
-$interest_cards = array_filter( $interest_cards, static fn( $entry ) => isset( $entry['field'] ) );
+// Keep the editorial question order, irrespective of WordPress field order.
+$ordered_interest_cards = array();
+foreach ( $interest_prompts as $title => $prompt ) {
+    if ( isset( $interest_cards[ $title ] ) ) {
+        $ordered_interest_cards[ $title ] = $interest_cards[ $title ];
+    }
+}
+$interest_cards = $ordered_interest_cards;
 ?>
 <div id="<?php echo esc_attr( $instance_id ); ?>" class="sc-field-stack" data-sc-field-stack="v4.3.22.4" data-sc-field-stack-mode="all-fields" aria-label="<?php esc_attr_e( 'Publications by major field', 'sustainable-catalyst-library' ); ?>">
     <section class="sc-pubintent" aria-labelledby="<?php echo esc_attr( $instance_id . '-interests' ); ?>" data-sc-publications-interest-entry>
@@ -128,7 +131,7 @@ $interest_cards = array_filter( $interest_cards, static fn( $entry ) => isset( $
     <details class="sc-pubintent__full-collection" <?php echo $requested_field ? 'open' : ''; ?> data-sc-publications-full-collection>
         <summary>
             <span><?php esc_html_e( 'Explore the complete field collection', 'sustainable-catalyst-library' ); ?></span>
-            <small><?php esc_html_e( '14 fields · guided Article Map spotlights', 'sustainable-catalyst-library' ); ?></small>
+            <small><?php echo esc_html( sprintf( __( '%d fields · guided Article Map spotlights', 'sustainable-catalyst-library' ), count( $field_list ) ) ); ?></small>
             <span aria-hidden="true">+</span>
         </summary>
     <div class="sc-field-stack__fields">
