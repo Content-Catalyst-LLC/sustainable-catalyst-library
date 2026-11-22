@@ -148,6 +148,10 @@ def role_scopes(roles: list[str] | tuple[str, ...]) -> list[str]:
     return sorted(out)
 
 
+# Resolve a scope from supplied roles and resource-matching grants, with an
+# explicit deny overriding role/public-read/allow decisions. The caller must
+# supply roles/grants from a verified Library session; identity_id is reported
+# in the decision but is not authenticated by this pure policy function.
 def access_decision(*, identity_id: str | None, roles: list[str], required_scope: str, grants: list[dict[str, Any]] | None = None, resource_type: str | None = None, resource_id: str | None = None, public_read: bool = False) -> dict[str, Any]:
     required_scope = str(required_scope or "").strip()
     scopes = role_scopes(roles)
