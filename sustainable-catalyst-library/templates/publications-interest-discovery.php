@@ -14,11 +14,11 @@ if ( ! defined( 'SC_LIBRARY_PUBLICATIONS_INTEREST_PREVIEW' ) || ! SC_LIBRARY_PUB
 
 $sc_interest_id = wp_unique_id( 'sc-pub-interest-' );
 $sc_interest_q = isset( $_GET['sc_pub_q'] ) && is_scalar( $_GET['sc_pub_q'] )
-    ? mb_substr( sanitize_text_field( wp_unslash( (string) $_GET['sc_pub_q'] ) ), 0, 120 ) : '';
+    ? substr( sanitize_text_field( wp_unslash( (string) $_GET['sc_pub_q'] ) ), 0, 120 ) : '';
 $sc_interest_field = isset( $_GET['sc_pub_field'] ) && is_scalar( $_GET['sc_pub_field'] )
     ? sanitize_key( wp_unslash( (string) $_GET['sc_pub_field'] ) ) : '';
 $sc_interest_topics = isset( $_GET['sc_pub_interests'] ) && is_scalar( $_GET['sc_pub_interests'] )
-    ? mb_substr( sanitize_text_field( wp_unslash( (string) $_GET['sc_pub_interests'] ) ), 0, 400 ) : '';
+    ? substr( sanitize_text_field( wp_unslash( (string) $_GET['sc_pub_interests'] ) ), 0, 400 ) : '';
 $sc_allowed_fields = array();
 foreach ( $field_list as $sc_field_item ) {
     $sc_field_key = sanitize_key( (string) ( $sc_field_item['key'] ?? '' ) );
