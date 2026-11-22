@@ -221,6 +221,7 @@ from .saved_workspaces import (
 )
 from .public_routing import contract as public_routing_contract, readiness as public_routing_readiness, record_seo_descriptor, record_embed_descriptor
 from .publication_discovery_service import discover_publications as publication_discovery_candidates
+from .publication_state_sync import apply_publication_event, PublicationStateError
 from .cross_product_integration import (
     registry_contract as cross_product_registry_contract, readiness as cross_product_integration_readiness,
     product_contract as cross_product_product_contract, validate_exchange as validate_cross_product_exchange,
@@ -4536,8 +4537,33 @@ async def library_api_v1_state_migration_certify(run_id: str, request: Request, 
 # SC-PUB-SEO-02 — opt-in, read-only editorial discovery candidates.
 # Public endpoints stay disabled unless the separately reviewed source-sync
 # and WordPress re-verification workflow is ready.
+# SC-PUB-SEO-03B2: only the WordPress server can retrieve discovery
+# candidates; anonymous browsers see WordPress-verified HTML, never the API.
+@app.post("/v1/publications/manifest/events")
+async def publication_manifest_event(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
+) -> dict[str, Any]:
+    if (os.environ.get("SC_PUBLICATIONS_DISCOVERY_API_ENABLED") != "1"
+        or settings.environment.strip().lower() not in {"staging", "local", "development", "test"}):
+        raise HTTPException(status_code=404, detail="publication-manifest-not-enabled")
+    body = await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
+    try:
+        return apply_publication_event(json.loads(body))
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=422, detail="invalid-event-json") from exc
+    except PublicationStateError as exc:
+        code = 409 if str(exc) in {"conflicting-sequence", "index-not-current-or-unapproved"} else 422
+        raise HTTPException(status_code=code, detail=str(exc)) from exc
+
 @app.get("/api/library/v1/publications/discovery")
-def library_api_v1_publications_discovery(
+async def library_api_v1_publications_discovery(
+    request: Request,
+    authorization: str | None = Header(default=None),
+    x_sc_timestamp: str | None = Header(default=None),
+    x_sc_signature: str | None = Header(default=None),
     field: str = Query(default="", max_length=100),
     topic: str = Query(default="", max_length=100),
     q: str = Query(default="", max_length=120),
@@ -4550,6 +4576,10 @@ def library_api_v1_publications_discovery(
     if (os.environ.get("SC_PUBLICATIONS_DISCOVERY_API_ENABLED") != "1"
         or settings.environment.strip().lower() not in {"staging", "local", "development", "test"}):
         raise HTTPException(status_code=404, detail="publication-discovery-not-enabled")
+    # Never expose stale candidates via an anonymous public endpoint. HMAC
+    # authenticates the trusted WordPress server, which independently checks
+    # each current WordPress record before it renders any public links.
+    await authorize_write(request, authorization, x_sc_timestamp, x_sc_signature)
     return publication_discovery_candidates(field=field, topic=topic, query=q, interests=interests, limit=limit)
 
 @app.get("/api/library/v1/public-routing")
