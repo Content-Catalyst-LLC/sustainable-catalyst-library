@@ -108,6 +108,17 @@ class PublicationsDiscoveryTests(unittest.TestCase):
         self.assertFalse(out["auto_publish"])
 
 
+    def test_editor_assigned_map_key_is_identity_not_link(self):
+        metadata = dict(record()["metadata"])
+        metadata["publication_map_key"] = "international-law"
+        candidate = public_candidate(record(metadata=metadata))
+        self.assertEqual(candidate["article_map_key"], "international-law")
+        self.assertNotIn("article_map_url", candidate)
+
+        metadata["publication_map_key"] = "https://evil.test/redirect"
+        untrusted = public_candidate(record(metadata=metadata))
+        self.assertEqual(untrusted["article_map_key"], "")
+
     def test_opt_in_interests_prioritize_relevance(self):
         carbon = record()
         other = record(

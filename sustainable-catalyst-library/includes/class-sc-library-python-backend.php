@@ -1901,6 +1901,22 @@ final class SC_Library_Python_Backend {
         return $chunks;
     }
 
+    /**
+     * Optional, staging-only Publications manifest attributes.
+     * Existing WordPress indexing behavior is unchanged with the flag off.
+     */
+    private static function publication_discovery_packet_metadata(WP_Post $post): array {
+        if ( ! defined( 'SC_LIBRARY_PUBLICATIONS_MANIFEST_SYNC' )
+            || ! SC_LIBRARY_PUBLICATIONS_MANIFEST_SYNC
+            || ! in_array( wp_get_environment_type(), array( 'local', 'staging' ), true ) ) {
+            return array();
+        }
+        if ( ! class_exists( 'SC_Library_Publications_Discovery_Manifest', false ) ) {
+            require_once __DIR__ . '/class-sc-library-publications-discovery-manifest.php';
+        }
+        return SC_Library_Publications_Discovery_Manifest::metadata_for_post( $post );
+    }
+
     private static function packet(WP_Post $post, bool $compact = false): array {
         $body = trim(wp_strip_all_tags(strip_shortcodes((string) $post->post_content), true));
         $excerpt = trim(wp_strip_all_tags((string) $post->post_excerpt, true));
@@ -1922,10 +1938,10 @@ final class SC_Library_Python_Backend {
             'topics' => self::term_names((int) $post->ID, 'category'),
             'tags' => self::term_names((int) $post->ID, 'post_tag'),
             'identifiers' => ['wordpress_post_id' => (string) $post->ID],
-            'metadata' => [
+            'metadata' => array_merge( [
                 'wordpress_post_type' => $post->post_type,
                 'wordpress_status' => $post->post_status,
-            ],
+            ], self::publication_discovery_packet_metadata( $post ) ),
             'chunks' => $compact ? [] : self::chunks($body),
         ];
     }
