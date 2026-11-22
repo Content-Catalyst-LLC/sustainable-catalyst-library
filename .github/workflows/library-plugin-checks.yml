@@ -6,6 +6,7 @@ on:
       - 'sustainable-catalyst-library/**'
       - 'tools/fix09-reindex-equations.php'
       - 'tests/*fix09*'
+      - 'tests/test_publications_directory_canary_gate.*'
       - 'tests/test_independent_knowledge_library_platform_v700.py'
       - 'tests/run_v700_validation.sh'
       - '.github/workflows/library-plugin-checks.yml'
@@ -48,6 +49,8 @@ jobs:
         run: |
           php -d display_errors=stderr tests/fixture_fix09_equation_detection.php
           python -m pytest -q tests/test_library_fix09_equation_detection.py tests/test_library_fix09_reindex_tool.py
+      - name: PUB-RELEASE-01 production canary safety matrix
+        run: bash tests/test_publications_directory_canary_gate.sh
       - name: Library 7.0 release validation
         env:
           SC_LIBRARY_V700_TEST_PYTHON: python
