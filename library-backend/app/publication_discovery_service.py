@@ -23,11 +23,14 @@ ALLOWED_HOSTS = frozenset({"sustainablecatalyst.com", "www.sustainablecatalyst.c
 def canonical_publication_url(value: Any) -> str | None:
     if not isinstance(value, str) or not value:
         return None
-    parsed = urlsplit(value.strip())
+    try:
+        parsed = urlsplit(value.strip())
+        safe_host = parsed.hostname in ALLOWED_HOSTS and parsed.port is None
+    except ValueError:  # malformed IPv6, netloc, or port: fail closed
+        return None
     if (
         parsed.scheme != "https"
-        or parsed.hostname not in ALLOWED_HOSTS
-        or parsed.port is not None
+        or not safe_host
         or parsed.username is not None
         or parsed.password is not None
         or parsed.query
@@ -119,7 +122,7 @@ def build_discovery(
     candidates.sort(
         key=lambda item: (
             not item["topic_match"],
-            -(int(item["updated_at"][:4]) if item["updated_at"][:4].isdigit() else 0),
+            -int("".join(c for c in item["updated_at"][:19] if c.isdigit()).ljust(14, "0")[:14]),
             item["title"].casefold(),
             item["url"],
         )
