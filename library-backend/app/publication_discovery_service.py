@@ -254,7 +254,14 @@ def _candidate_query(
         "SELECT r.record_id, r.object_type, r.title, r.canonical_url, "
         "r.visibility, r.publication_status, r.published_at, "
         "r.source_updated_at, r.topics, r.tags, r.metadata "
-        "FROM library_records r WHERE " + " AND ".join(conditions)
+        "FROM library_records r "
+        "JOIN publication_discovery_states d ON d.record_id = r.record_id "
+        "AND d.approved IS TRUE AND d.expires_at > now() "
+        "AND d.canonical_url = r.canonical_url "
+        "AND d.fingerprint = r.metadata->>'publication_fingerprint' "
+        "AND d.field_key = r.metadata->>'publication_field' "
+        "AND d.map_key = r.metadata->>'publication_map_key' "
+        "WHERE " + " AND ".join(conditions)
         + " ORDER BY r.source_updated_at DESC NULLS LAST, r.record_id "
         + "LIMIT %s"
     )

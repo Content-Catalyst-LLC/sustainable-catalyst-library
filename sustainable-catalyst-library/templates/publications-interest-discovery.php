@@ -39,21 +39,13 @@ if ( class_exists( 'SC_Library_Python_Backend' ) && SC_Library_Python_Backend::c
             'interests' => $sc_interest_topics,
             'limit' => 12,
         ),
-        $sc_backend . '/api/library/v1/publications/discovery'
+        '/api/library/v1/publications/discovery'
     );
-    $sc_response = wp_remote_get(
-        $sc_endpoint,
-        array(
-            'timeout' => 2,
-            'redirection' => 0,
-            'reject_unsafe_urls' => true,
-            'sslverify' => true,
-            'limit_response_size' => 262144,
-            'headers' => array( 'Accept' => 'application/json' ),
-        )
-    );
-    if ( ! is_wp_error( $sc_response ) && 200 === (int) wp_remote_retrieve_response_code( $sc_response ) ) {
-        $sc_payload = json_decode( (string) wp_remote_retrieve_body( $sc_response ), true );
+    // Server-to-server authenticated request. Never expose Library API
+    // bearer keys or unverified candidate metadata to anonymous visitors.
+    $sc_response = SC_Library_Python_Backend::signed_request( 'GET', $sc_endpoint, '' );
+    if ( ! is_wp_error( $sc_response ) && is_array( $sc_response ) ) {
+        $sc_payload = $sc_response;
         if ( is_array( $sc_payload ) && 'candidates-only' === ( $sc_payload['state'] ?? null )
             && is_array( $sc_payload['results'] ?? null ) ) {
             $sc_discovery_ready = true;
