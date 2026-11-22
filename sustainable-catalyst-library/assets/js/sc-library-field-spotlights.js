@@ -535,7 +535,7 @@ const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key 
           initializeOpenRoots(disclosure);
         }
       };
-      document.querySelectorAll('.sc-pubintent__field[href^="#"]').forEach((link) => {
+      document.querySelectorAll('.sc-pubintent__field[href^="#"], .sc-field-stack__jump[href^="#"]').forEach((link) => {
         link.addEventListener('click', () => {
           revealTarget(link.hash);
         });
