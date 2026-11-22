@@ -129,6 +129,12 @@ if ( class_exists( 'SC_Library_Python_Backend' ) && SC_Library_Python_Backend::c
         <p class="sc-publications-interest__empty"><?php esc_html_e( 'No verified suggestions are available for this selection yet. Browse a field below or try another topic.', 'sustainable-catalyst-library' ); ?></p>
     <?php endif; ?>
 
+    <aside class="sc-publications-interest__feedback" aria-label="<?php esc_attr_e( 'Suggest a topic for future coverage', 'sustainable-catalyst-library' ); ?>">
+        <h4><?php esc_html_e( "Can't find the subject you're looking for?", 'sustainable-catalyst-library' ); ?></h4>
+        <p><?php esc_html_e( 'Request a topic through Sustainable Catalyst Feedback. Suggestions are reviewed by the editorial team; publication is not guaranteed.', 'sustainable-catalyst-library' ); ?></p>
+        <a href="<?php echo esc_url( home_url( '/feature-suggestions/' ) ); ?>"><?php esc_html_e( 'Request a Topic', 'sustainable-catalyst-library' ); ?> <span aria-hidden="true">&rarr;</span></a>
+    </aside>
+
     <nav aria-label="<?php esc_attr_e( 'Browse all Publications fields', 'sustainable-catalyst-library' ); ?>">
         <h4><?php esc_html_e( 'Browse by field', 'sustainable-catalyst-library' ); ?></h4>
         <ul class="sc-publications-interest__fields">

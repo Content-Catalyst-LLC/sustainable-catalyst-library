@@ -435,3 +435,11 @@
 .sc-publications-interest__empty{color:#514b45;font-size:.86rem}
 @media(max-width:950px){.sc-publications-interest__form{grid-template-columns:1fr 1fr}.sc-publications-interest__form>div:first-child{grid-column:1/-1}.sc-publications-interest__fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.sc-publications-interest__form,.sc-publications-interest__fields{grid-template-columns:1fr}.sc-publications-interest__form>div:first-child{grid-column:auto}}
+
+
+/* SC-PUB-TOPIC-01: reuse the existing Feedback system, never duplicate intake. */
+.sc-publications-interest__feedback{border-top:1px solid #d9d2c9;padding-top:1rem}
+.sc-publications-interest__feedback h4{margin:0 0 .4rem;font-size:1rem}
+.sc-publications-interest__feedback p{max-width:68ch;color:#514b45;font-size:.85rem;line-height:1.6}
+.sc-publications-interest__feedback a{display:inline-block;color:#b00020;text-decoration:underline;text-underline-offset:.2em;font-weight:700;min-height:36px;padding:.4rem 0}
+.sc-publications-interest__feedback a:focus-visible{outline:3px solid #b00020;outline-offset:3px}
