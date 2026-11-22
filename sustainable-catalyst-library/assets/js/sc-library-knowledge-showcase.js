@@ -42,8 +42,9 @@
     };
     const sync = () => {
       if (toggle) {
-        toggle.textContent = userPaused ? 'Resume rotation' : 'Pause rotation';
-        toggle.setAttribute('aria-pressed', String(userPaused));
+        toggle.textContent = reduced.matches ? 'Rotation off' : (userPaused ? 'Resume rotation' : 'Pause rotation');
+        toggle.disabled = reduced.matches;
+        toggle.setAttribute('aria-pressed', String(userPaused || reduced.matches));
       }
       nav.forEach(button => button.setAttribute('aria-current', button.classList.contains('is-active') ? 'true' : 'false'));
       syncYear();
