@@ -34,7 +34,8 @@ const showcaseSlice=data=>{
  const boundedNodes=nodes.filter(n=>chosen.has(String(n.id)));
  const boundedEdges=edges.filter(e=>chosen.has(String(e.source))&&chosen.has(String(e.target)));
  const regions=(Array.isArray(data.topic_regions)?data.topic_regions:[]).filter(r=>(r.topic_ids||[]).some(id=>chosen.has(String(id)))).slice(0,8);
- return {...data,nodes:boundedNodes,edges:boundedEdges,topic_regions:regions,showcase_focus_id:pickedTopics[0]?.id||null};
+ const publicationRelationships=Array.isArray(data.publication_relationships)?data.publication_relationships.filter(r=>chosen.has(String(r.source))&&chosen.has(String(r.target))).slice(0,100):[];
+ return {...data,nodes:boundedNodes,edges:boundedEdges,topic_regions:regions,publication_relationships:publicationRelationships,showcase_focus_id:pickedTopics[0]?.id||null};
 };
 class Landscape{
  constructor(root){
