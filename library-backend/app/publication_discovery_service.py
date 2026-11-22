@@ -84,6 +84,11 @@ def public_candidate(row: dict[str, Any]) -> dict[str, Any] | None:
         "title": title,
         "url": url,
         "field": str(metadata.get("publication_field") or "").strip(),
+        # A source-declared map identity, not a link. WordPress must resolve
+        # its registry target to a current public canonical WP object.
+        "article_map_key": str(metadata.get("publication_map_key") or "").strip()
+            if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", str(metadata.get("publication_map_key") or ""))
+            else "",
         "topics": sorted(_terms(row.get("topics"))),
         "tags": sorted(_terms(row.get("tags"))),
         "published_at": _published_date(row.get("published_at")),
