@@ -34,13 +34,6 @@ final class SC_Library_Field_Spotlights {
     public const PUBLIC_CACHE_KEY = 'sc_library_field_spotlights_public_v4313';
 
     public function register_hooks(): void {
-        // Topic-request intake is a private editorial queue. Local/staging
-        // only until accessibility, spam, retention and privacy checks pass.
-        if ( defined( 'SC_LIBRARY_PUBLICATIONS_TOPIC_REQUEST' ) && SC_LIBRARY_PUBLICATIONS_TOPIC_REQUEST
-            && in_array( wp_get_environment_type(), array( 'local', 'staging' ), true ) ) {
-            require_once __DIR__ . '/class-sc-library-publications-topic-request.php';
-            ( new SC_Library_Publications_Topic_Request() )->register_hooks();
-        }
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 41 );
         add_action( 'admin_init', array( $this, 'register_settings' ) );
         add_action( 'admin_post_sc_library_save_field_spotlights', array( $this, 'save_settings_transaction' ) );
