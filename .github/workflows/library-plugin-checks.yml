@@ -50,6 +50,10 @@ jobs:
           python -m pytest -q tests/test_library_fix09_equation_detection.py tests/test_library_fix09_reindex_tool.py
       - name: Publications editorial manifest privacy and route tests
         run: php -d display_errors=stderr tests/test_publications_editorial_manifest.php
+      - name: Durable Publications state and withdrawal replay tests
+        run: |
+          php -d display_errors=stderr tests/test_publications_state_outbox.php
+          python -m unittest discover -s tests -p 'test_publication_state_sync.py' -v
       - name: Publications interest discovery privacy and ranking tests
         run: python -m unittest discover -s tests -p 'test_publication_discovery_service.py' -v
       - name: Library 7.0 release validation
