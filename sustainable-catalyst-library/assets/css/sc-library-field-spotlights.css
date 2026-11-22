@@ -437,16 +437,9 @@
 @media(max-width:600px){.sc-publications-interest__form,.sc-publications-interest__fields{grid-template-columns:1fr}.sc-publications-interest__form>div:first-child{grid-column:auto}}
 
 
-/* SC-PUB-TOPIC-01: small, private editorial suggestion surface. */
-.sc-publications-interest__topic-request{border-top:1px solid #d9d2c9;padding-top:1.25rem}
-.sc-publications-interest__topic-request details{border:1px solid #d9d2c9;background:#faf8f5;padding:1rem}
-.sc-publications-interest__topic-request summary{cursor:pointer;font-weight:700;color:#b00020;line-height:1.45}
-.sc-publications-interest__topic-request summary:focus-visible{outline:3px solid #b00020;outline-offset:4px}
-.sc-publications-interest__topic-request p{color:#49433e;font-size:.85rem;line-height:1.6}
-.sc-publications-interest__topic-form{margin-top:.8rem;display:grid;gap:.8rem;max-width:48rem}
-.sc-publications-interest__topic-form label{display:block;font-size:.8rem;font-weight:650;margin-bottom:.35rem}
-.sc-publications-interest__topic-form input:not([type=hidden]),.sc-publications-interest__topic-form textarea{display:block;width:100%;border:1px solid #897f73;border-radius:0;background:#fff;color:#111;font:inherit;font-size:.9rem;padding:.6rem;min-height:44px}
-.sc-publications-interest__topic-form :is(input,textarea,button):focus-visible{outline:3px solid #b00020;outline-offset:3px}
-.sc-publications-interest__topic-form button{justify-self:start;min-height:44px;background:#0b0b0c;color:#fff;border:2px solid #0b0b0c;padding:.6rem 1rem;font-weight:700}
-.sc-publications-interest__topic-form button:hover{background:#b00020;border-color:#b00020;color:#fff}
-.sc-publications-interest__honeypot{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important}
+/* SC-PUB-TOPIC-01: reuse the existing Feedback system, never duplicate intake. */
+.sc-publications-interest__feedback{border-top:1px solid #d9d2c9;padding-top:1rem}
+.sc-publications-interest__feedback h4{margin:0 0 .4rem;font-size:1rem}
+.sc-publications-interest__feedback p{max-width:68ch;color:#514b45;font-size:.85rem;line-height:1.6}
+.sc-publications-interest__feedback a{display:inline-block;color:#b00020;text-decoration:underline;text-underline-offset:.2em;font-weight:700;min-height:36px;padding:.4rem 0}
+.sc-publications-interest__feedback a:focus-visible{outline:3px solid #b00020;outline-offset:3px}
