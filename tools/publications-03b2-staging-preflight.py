@@ -78,14 +78,16 @@ def fetch(opener: OpenerDirector, url: str) -> dict:
             status = response.status
             headers = response.headers
     except HTTPError as exc:
-        # Preserve error status without automatically following redirects.
+        # Preserve status and inspect bounded error payload without ever
+        # publishing its contents to the JSON evidence report.
+        error_body = exc.read(4096)
         return {
             "url": url,
             "status": exc.code,
             "location": exc.headers.get("Location", ""),
-            "bytes": 0,
+            "bytes": len(error_body),
             "truncated": False,
-            "content": "",
+            "content": error_body.decode("utf-8", errors="replace"),
             "robots_header": exc.headers.get("X-Robots-Tag", ""),
         }
     except (URLError, OSError) as exc:
@@ -142,7 +144,10 @@ def preflight(wp_base: str, api_base: str) -> dict:
     page_pass = page["status"] == 200 and not page["truncated"] and bool(hrefs) and has_field_navigation
     # Without a signed server request, a staging endpoint may intentionally be
     # disabled (404) or enabled but reject anonymous access (401/403).
-    api_pass = api["status"] in {401, 403, 404} and not api.get("content")
+    api_text = api.get("content", "")
+    api_pass = (api["status"] in {401, 403, 404}
+        and '"results"' not in api_text and '"record_id"' not in api_text
+        and '"canonical_url"' not in api_text)
     checks = {
         "wordpress_anonymous_html_and_field_navigation": page_pass,
         "discovery_api_rejects_anonymous_requests": api_pass,
