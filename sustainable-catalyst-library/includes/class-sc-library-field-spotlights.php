@@ -693,7 +693,11 @@ final class SC_Library_Field_Spotlights {
             $fields = array( $only_field => $fields[ $only_field ] );
         }
         if ( ! $fields ) { return ''; }
-        wp_enqueue_style( 'sc-library-field-spotlights', SC_LIBRARY_URL . 'assets/css/sc-library-field-spotlights.css', array(), self::VERSION );
+        // A canonical-page-only version bump keeps the interest-first CSS fresh
+        // without altering cache keys for other Library embeds.
+        $publication_style_version = ! $only_field && $this->is_canonical_publications_page()
+            ? self::VERSION . '-pub-interest-02' : self::VERSION;
+        wp_enqueue_style( 'sc-library-field-spotlights', SC_LIBRARY_URL . 'assets/css/sc-library-field-spotlights.css', array(), $publication_style_version );
         wp_enqueue_script( 'sc-library-field-spotlights', SC_LIBRARY_URL . 'assets/js/sc-library-field-spotlights.js', array(), self::VERSION, true );
         $settings = $this->settings();
         $labels = $settings['general'];
