@@ -17,6 +17,8 @@ final class SC_Library_Knowledge_Landscape {
     }
 
     private function enqueue_assets(): void {
+        $renderer_file = SC_LIBRARY_DIR . 'assets/js/sc-library-knowledge-landscape-v5270.js';
+        $renderer_version = is_file($renderer_file) ? (string) filemtime($renderer_file) : self::VERSION;
         wp_enqueue_style(
             'sc-library-knowledge-landscape-v5270',
             SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5270.css',
@@ -27,7 +29,7 @@ final class SC_Library_Knowledge_Landscape {
             'sc-library-knowledge-landscape-v5270',
             SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5270.js',
             [],
-            self::VERSION,
+            $renderer_version,
             true
         );
     }
@@ -44,6 +46,7 @@ final class SC_Library_Knowledge_Landscape {
             'max_topics' => '36',
             'height' => '680',
             'empty' => 'show',
+            'showcase' => '0',
         ], is_array($atts) ? $atts : [], self::SHORTCODE);
 
         if (!class_exists('SC_Library_Python_Backend')) {
@@ -52,6 +55,7 @@ final class SC_Library_Knowledge_Landscape {
 
         $scope = sanitize_key((string) $atts['scope']);
         if (!in_array($scope, ['corpus', 'publication'], true)) { $scope = 'corpus'; }
+        $showcase = 'corpus' === $scope && in_array(strtolower(trim((string) $atts['showcase'])), ['1', 'yes', 'true', 'on'], true);
         $threshold = max(0.0, min(1.0, (float) $atts['semantic_threshold']));
         $topics = min(100, max(1, (int) $atts['max_topics']));
         $height = min(960, max(480, (int) $atts['height']));
@@ -115,6 +119,12 @@ final class SC_Library_Knowledge_Landscape {
         }
 
         $this->enqueue_assets();
+        if ($showcase) {
+            $showcase_css_file = SC_LIBRARY_DIR . 'assets/css/sc-library-knowledge-showcase.css';
+            $showcase_js_file = SC_LIBRARY_DIR . 'assets/js/sc-library-knowledge-showcase.js';
+            wp_enqueue_style('sc-library-knowledge-showcase', SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-showcase.css', ['sc-library-knowledge-landscape-v5270'], is_file($showcase_css_file) ? (string) filemtime($showcase_css_file) : self::VERSION);
+            wp_enqueue_script('sc-library-knowledge-showcase', SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-showcase.js', ['sc-library-knowledge-landscape-v5270'], is_file($showcase_js_file) ? (string) filemtime($showcase_js_file) : self::VERSION, true);
+        }
         $id = 'sc-kl-' . wp_generate_uuid4();
         $metrics = isset($payload['metrics']) && is_array($payload['metrics']) ? $payload['metrics'] : [];
         $semantic = isset($payload['semantic_analysis']) && is_array($payload['semantic_analysis']) ? $payload['semantic_analysis'] : [];
@@ -122,12 +132,12 @@ final class SC_Library_Knowledge_Landscape {
 
         ob_start();
         ?>
-        <section id="<?php echo esc_attr($id); ?>" class="sc-kl" data-sc-kl-async="<?php echo $async_corpus ? '1' : '0'; ?>" style="--sc-kl-height:<?php echo esc_attr((string) $height); ?>px" data-sc-kl-root>
+        <section id="<?php echo esc_attr($id); ?>" class="sc-kl<?php echo $showcase ? ' sc-kl--showcase' : ''; ?>" data-sc-kl-showcase="<?php echo $showcase ? '1' : '0'; ?>" data-sc-kl-async="<?php echo $async_corpus ? '1' : '0'; ?>" style="--sc-kl-height:<?php echo esc_attr((string) $height); ?>px" data-sc-kl-root>
             <header class="sc-kl__header">
                 <div>
                     <p class="sc-kl__eyebrow"><?php echo 'corpus' === $scope ? esc_html__('Publication Corpus Analysis', 'sustainable-catalyst-library') : esc_html__('Publication Knowledge Analysis', 'sustainable-catalyst-library'); ?></p>
-                    <h2 data-sc-kl-title><?php echo esc_html((string) ($payload['title'] ?? __('Scientific Knowledge Landscape', 'sustainable-catalyst-library'))); ?></h2>
-                    <p><?php esc_html_e('Linked scientific knowledge environment connecting publications, reviewed evidence, source identity/version families, research-graph paths, and source-grounded scientific objects across the Research Library corpus.', 'sustainable-catalyst-library'); ?></p>
+                    <h2 data-sc-kl-title><?php echo $showcase ? esc_html__('Publication Knowledge Landscape', 'sustainable-catalyst-library') : esc_html((string) ($payload['title'] ?? __('Scientific Knowledge Landscape', 'sustainable-catalyst-library'))); ?></h2>
+                    <p><?php if ($showcase) { esc_html_e('Explore linked publications, topics, and measured research relationships in the Research Library.', 'sustainable-catalyst-library'); } else { esc_html_e('Linked scientific knowledge environment connecting publications, reviewed evidence, source identity/version families, research-graph paths, and source-grounded scientific objects across the Research Library corpus.', 'sustainable-catalyst-library'); } ?></p>
                 </div>
                 <div class="sc-kl__status-row">
                     <?php if ('corpus' === $scope) : ?><span class="sc-kl__status is-good"><?php esc_html_e('Publication Library manifest', 'sustainable-catalyst-library'); ?></span><?php endif; ?>
@@ -156,6 +166,20 @@ final class SC_Library_Knowledge_Landscape {
                 <button type="button" data-sc-kl-view="scientific-objects"><?php esc_html_e('Scientific Objects', 'sustainable-catalyst-library'); ?></button>
                 <button type="button" data-sc-kl-view="source-identity"><?php esc_html_e('Source Identity', 'sustainable-catalyst-library'); ?></button>
             </nav>
+            <?php if ($showcase) : ?>
+            <div class="sc-kl__showcase-controls">
+                <label for="<?php echo esc_attr($id); ?>-showcase-search"><?php esc_html_e('Explore a topic or publication', 'sustainable-catalyst-library'); ?></label>
+                <input id="<?php echo esc_attr($id); ?>-showcase-search" type="search" data-sc-kl-showcase-query placeholder="<?php esc_attr_e('Search the visible graph', 'sustainable-catalyst-library'); ?>">
+                <button type="button" data-sc-kl-showcase-clear><?php esc_html_e('Clear', 'sustainable-catalyst-library'); ?></button>
+                <label class="sc-kl__showcase-year-label" for="<?php echo esc_attr($id); ?>-showcase-year" hidden><?php esc_html_e('Publication year', 'sustainable-catalyst-library'); ?></label>
+                <input id="<?php echo esc_attr($id); ?>-showcase-year" class="sc-kl__showcase-year" type="range" min="0" max="0" value="0" data-sc-kl-showcase-year hidden>
+                <div class="sc-kl__showcase-transport" role="group" aria-label="<?php esc_attr_e('Publication graph views', 'sustainable-catalyst-library'); ?>">
+                    <button type="button" data-sc-kl-showcase-prev aria-label="<?php esc_attr_e('Previous graph view', 'sustainable-catalyst-library'); ?>">&#x2039;</button>
+                    <button type="button" data-sc-kl-showcase-pause aria-pressed="false"><?php esc_html_e('Pause', 'sustainable-catalyst-library'); ?></button>
+                    <button type="button" data-sc-kl-showcase-next aria-label="<?php esc_attr_e('Next graph view', 'sustainable-catalyst-library'); ?>">&#x203A;</button>
+                </div>
+            </div>
+            <?php endif; ?>
             <div id="<?php echo esc_attr($id); ?>-semantic-notice" class="sc-kl__semantic-notice" data-sc-kl-semantic-notice aria-live="polite" <?php echo !empty($semantic['available']) ? 'hidden' : ''; ?>>
                 <?php esc_html_e('Semantic Overlay is available for inspection, but similarity links require at least two current publication embeddings. Structural views remain available.', 'sustainable-catalyst-library'); ?>
             </div>
@@ -387,6 +411,13 @@ final class SC_Library_Knowledge_Landscape {
                     </div>
                 </aside>
             </div>
+            <?php if ($showcase) : ?>
+            <div class="sc-kl__showcase-footer">
+                <span><?php esc_html_e('Recorded graph links describe associations, not causality or scientific consensus.', 'sustainable-catalyst-library'); ?></span>
+                <div><a href="<?php echo esc_url(home_url('/knowledge-libraries/')); ?>"><?php esc_html_e('Explore full Library graph', 'sustainable-catalyst-library'); ?> &#x2197;</a>
+                <a href="<?php echo esc_url(home_url('/publications/')); ?>"><?php esc_html_e('Browse Publications', 'sustainable-catalyst-library'); ?> &#x2197;</a></div>
+            </div>
+            <?php endif; ?>
             <details class="sc-kl__accessible">
                 <summary><?php esc_html_e('Accessible graph data', 'sustainable-catalyst-library'); ?></summary>
                 <p data-sc-kl-accessible-summary><?php echo esc_html(sprintf(__('This view contains %1$d nodes and %2$d typed relationships.', 'sustainable-catalyst-library'), (int) ($metrics['node_count'] ?? 0), (int) ($metrics['edge_count'] ?? 0))); ?></p>
