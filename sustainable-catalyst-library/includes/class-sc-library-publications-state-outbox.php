@@ -18,8 +18,9 @@ final class SC_Library_Publications_State_Outbox {
     private const OFFSET_OPTION = 'sc_pub_discovery_reconcile_offset';
     private const EVENT_API = '/v1/publications/manifest/events';
     private const MAX_BATCH = 40;
-    // The 15-minute approval lease supports up to 600 records at
-    // 40 records/minute in ideal conditions. Staging must verify cadence,
+    // The 15-minute approval lease supports ~300 approved records at
+    // 40 records / 2 minutes in ideal conditions. The separate outbox
+    // worker runs every minute, leaving headroom for delayed events. Staging must verify cadence,
     // batch completion, and total eligible record count before activation.
     private const MAX_SCAN = 800;
 
@@ -42,7 +43,7 @@ final class SC_Library_Publications_State_Outbox {
     }
 
     public function schedules( array $schedules ): array {
-        $schedules['sc_pub_one_minute'] = array( 'interval' => 60, 'display' => 'Publications state reconcile' );
+        $schedules['sc_pub_two_minutes'] = array( 'interval' => 120, 'display' => 'Publications state reconcile' );
         return $schedules;
     }
 
@@ -212,7 +213,7 @@ final class SC_Library_Publications_State_Outbox {
 
     /**
      * Lease renewal. Cursor walks *all* published mapped posts over successive
-     * five-minute ticks; no one-time recent-post window is treated as complete.
+     * two-minute ticks; no one-time recent-post window is treated as complete.
      * Scheduled event and outbox retry require system cron in production.
      */
     public function reconcile(): void {
