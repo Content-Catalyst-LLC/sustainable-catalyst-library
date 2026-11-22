@@ -129,45 +129,11 @@ if ( class_exists( 'SC_Library_Python_Backend' ) && SC_Library_Python_Backend::c
         <p class="sc-publications-interest__empty"><?php esc_html_e( 'No verified suggestions are available for this selection yet. Browse a field below or try another topic.', 'sustainable-catalyst-library' ); ?></p>
     <?php endif; ?>
 
-    <?php if ( class_exists( 'SC_Library_Publications_Topic_Request', false )
-        && SC_Library_Publications_Topic_Request::enabled() ) : ?>
-    <section class="sc-publications-interest__topic-request" aria-label="<?php esc_attr_e( 'Suggest a publication topic', 'sustainable-catalyst-library' ); ?>">
-        <?php
-        $sc_topic_response = isset( $_GET['sc_pub_topic_request'] ) && is_scalar( $_GET['sc_pub_topic_request'] )
-            ? sanitize_key( wp_unslash( (string) $_GET['sc_pub_topic_request'] ) ) : '';
-        $sc_topic_messages = array(
-            'received' => __( 'Your topic suggestion was received for editorial review. Submission does not guarantee an article or a reply.', 'sustainable-catalyst-library' ),
-            'invalid' => __( 'Please review the topic and try again.', 'sustainable-catalyst-library' ),
-            'rate_limited' => __( 'You have reached the current suggestion limit. Please try again later.', 'sustainable-catalyst-library' ),
-            'unavailable' => __( 'Topic requests are temporarily unavailable.', 'sustainable-catalyst-library' ),
-        );
-        if ( isset( $sc_topic_messages[ $sc_topic_response ] ) ) :
-        ?>
-            <p role="status"><?php echo esc_html( $sc_topic_messages[ $sc_topic_response ] ); ?></p>
-        <?php endif; ?>
-        <details <?php echo ( ( $sc_interest_q || $sc_interest_field || $sc_interest_topics ) && empty( $sc_results ) ) ? 'open' : ''; ?>>
-            <summary><?php esc_html_e( "Can't find what you're looking for? Request a topic", 'sustainable-catalyst-library' ); ?></summary>
-            <p><?php esc_html_e( 'Suggest a subject for future editorial coverage. No account or email address is required. Suggestions are private and reviewed before any content is planned.', 'sustainable-catalyst-library' ); ?></p>
-            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sc-publications-interest__topic-form">
-                <input type="hidden" name="action" value="<?php echo esc_attr( SC_Library_Publications_Topic_Request::ACTION ); ?>">
-                <?php wp_nonce_field( SC_Library_Publications_Topic_Request::ACTION, 'sc_pub_topic_nonce' ); ?>
-                <div class="sc-publications-interest__honeypot" aria-hidden="true">
-                    <label for="<?php echo esc_attr( $sc_interest_id . '-website' ); ?>"><?php esc_html_e( 'Website', 'sustainable-catalyst-library' ); ?></label>
-                    <input id="<?php echo esc_attr( $sc_interest_id . '-website' ); ?>" name="sc_pub_topic_website" type="text" tabindex="-1" autocomplete="off">
-                </div>
-                <div>
-                    <label for="<?php echo esc_attr( $sc_interest_id . '-suggest' ); ?>"><?php esc_html_e( 'Topic you would like covered', 'sustainable-catalyst-library' ); ?></label>
-                    <input id="<?php echo esc_attr( $sc_interest_id . '-suggest' ); ?>" type="text" name="sc_pub_topic_title" required minlength="3" maxlength="160" placeholder="<?php esc_attr_e( 'e.g., carbon removal measurement', 'sustainable-catalyst-library' ); ?>">
-                </div>
-                <div>
-                    <label for="<?php echo esc_attr( $sc_interest_id . '-context' ); ?>"><?php esc_html_e( 'What would you like to learn? (optional)', 'sustainable-catalyst-library' ); ?></label>
-                    <textarea id="<?php echo esc_attr( $sc_interest_id . '-context' ); ?>" name="sc_pub_topic_context" rows="3" maxlength="600"></textarea>
-                </div>
-                <button type="submit"><?php esc_html_e( 'Submit topic suggestion', 'sustainable-catalyst-library' ); ?></button>
-            </form>
-        </details>
-    </section>
-    <?php endif; ?>
+    <aside class="sc-publications-interest__feedback" aria-label="<?php esc_attr_e( 'Suggest a topic for future coverage', 'sustainable-catalyst-library' ); ?>">
+        <h4><?php esc_html_e( "Can't find the subject you're looking for?", 'sustainable-catalyst-library' ); ?></h4>
+        <p><?php esc_html_e( 'Request a topic through Sustainable Catalyst Feedback. Suggestions are reviewed by the editorial team; publication is not guaranteed.', 'sustainable-catalyst-library' ); ?></p>
+        <a href="<?php echo esc_url( home_url( '/feature-suggestions/' ) ); ?>"><?php esc_html_e( 'Request a Topic', 'sustainable-catalyst-library' ); ?> <span aria-hidden="true">&rarr;</span></a>
+    </aside>
 
     <nav aria-label="<?php esc_attr_e( 'Browse all Publications fields', 'sustainable-catalyst-library' ); ?>">
         <h4><?php esc_html_e( 'Browse by field', 'sustainable-catalyst-library' ); ?></h4>
