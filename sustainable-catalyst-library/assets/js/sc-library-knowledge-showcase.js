@@ -81,6 +81,8 @@
     search?.addEventListener('input', () => {
       interact();
       if (sourceQuery) {
+        // Remove the initial preview focus before applying a new text query.
+        root.querySelector('[data-sc-kl-query-clear]')?.click();
         sourceQuery.value = search.value;
         sourceQuery.dispatchEvent(new Event('input', { bubbles: true }));
       }
