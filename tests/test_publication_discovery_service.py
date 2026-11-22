@@ -3,6 +3,7 @@
 import sys
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "library-backend"))
 
@@ -12,6 +13,8 @@ from app.publication_discovery_service import (
     build_discovery,
     canonical_publication_url,
     public_candidate,
+    _candidate_query,
+    discover_publications,
 )
 
 
@@ -39,6 +42,70 @@ def record(**updates):
 
 
 class PublicationsDiscoveryTests(unittest.TestCase):
+    def test_sql_filters_corpus_by_interest_before_limit(self):
+        sql, params = _candidate_query(
+            field="sustainable-systems",
+            terms=["carbon removal", "rock weathering"],
+            matched_only=True,
+        )
+        self.assertIn("FROM library_records r WHERE", sql)
+        self.assertIn("lower(r.topics::text) LIKE %s", sql)
+        self.assertIn("publication_manifest_schema", sql)
+        self.assertIn("publication_discovery_approved", sql)
+        self.assertIn("wordpress_password_protected", sql)
+        self.assertIn("ORDER BY r.source_updated_at", sql)
+        self.assertTrue(sql.rstrip().endswith("LIMIT %s"))
+        self.assertIn("%carbon removal%", params)
+        self.assertIn("%rock weathering%", params)
+        self.assertEqual(params[0], "sustainable-systems")
+        self.assertNotIn("carbon removal", sql)
+        self.assertNotIn("rock weathering", sql)
+
+    def test_sql_query_does_not_interpolate_search_attacks(self):
+        sql, params = _candidate_query(
+            field="", terms=["%'; DROP TABLE library_records; --"], matched_only=True,
+        )
+        self.assertNotIn("DROP TABLE", sql)
+        self.assertNotIn("DROP TABLE", " ".join(str(p) for p in params))
+        self.assertNotIn("ILIKE '%", sql)
+
+    def test_discovery_queries_filtered_corpus_not_latest_only(self):
+        class FakeCursor:
+            def __init__(self):
+                self.calls = []
+            def execute(self, sql, params):
+                self.calls.append((sql, params))
+            def fetchall(self):
+                return [record(metadata={
+                    **record()["metadata"],
+                    "publication_manifest_schema": "sc-publications-editorial-manifest/0.1",
+                })]
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                return False
+        class FakeConnection:
+            def __init__(self, cursor):
+                self._cursor = cursor
+            def cursor(self):
+                return self._cursor
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                return False
+        class FakePool:
+            def __init__(self, cursor):
+                self._connection = FakeConnection(cursor)
+            def connection(self):
+                return self._connection
+        cursor = FakeCursor()
+        with patch("app.publication_discovery_service.get_pool", return_value=FakePool(cursor)):
+            result = discover_publications(query="carbon removal", limit=8)
+        self.assertEqual(result["results"][0]["title"], "Enhanced Rock Weathering")
+        self.assertEqual(result["retrieval"]["scope"], "full-eligible-catalog-before-limit")
+        self.assertEqual(len(cursor.calls), 1)
+        self.assertIn("lower(r.title) LIKE %s", cursor.calls[0][0])
+
     def test_approved_public_record_is_candidate(self):
         result = public_candidate(record())
         self.assertEqual(result["url"], "https://sustainablecatalyst.com/enhanced-rock-weathering/")

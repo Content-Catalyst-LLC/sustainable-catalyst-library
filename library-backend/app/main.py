@@ -4544,7 +4544,11 @@ def library_api_v1_publications_discovery(
     interests: str = Query(default="", max_length=400),
     limit: int = Query(default=12, ge=1, le=24),
 ) -> dict[str, Any]:
-    if os.environ.get("SC_PUBLICATIONS_DISCOVERY_API_ENABLED") != "1":
+    # Fail closed even if an operator mistakenly sets the enable flag on
+    # production. Read-only public candidates can still be stale until
+    # withdrawal/tombstone reconciliation is proven end to end.
+    if (os.environ.get("SC_PUBLICATIONS_DISCOVERY_API_ENABLED") != "1"
+        or settings.environment.strip().lower() not in {"staging", "local", "development", "test"}):
         raise HTTPException(status_code=404, detail="publication-discovery-not-enabled")
     return publication_discovery_candidates(field=field, topic=topic, query=q, interests=interests, limit=limit)
 

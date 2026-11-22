@@ -201,6 +201,67 @@ def build_discovery(
     }
 
 
+def _match_term(value: str) -> str:
+    """Normalize a visitor-supplied subject into a bounded literal SQL search term."""
+    return re.sub(r"[^a-z0-9 -]", "", str(value or "").casefold())[:80].strip()
+
+
+def _candidate_query(
+    *,
+    field: str,
+    terms: list[str],
+    matched_only: bool,
+) -> tuple[str, list[Any]]:
+    """Search the *entire eligible catalog* before applying the bounded LIMIT.
+
+    The WHERE clause combines stable editorial gates with visitor-intent
+    filtering. No publication ranking or hidden data can bypass these gates.
+    Existing title-trigram and public record indexes may aid these predicates;
+    real query plans and latency require verification in staging.
+    """
+    conditions = [
+        "r.visibility = 'public'",
+        "r.publication_status = 'published'",
+        "r.object_type IN ('post', 'article', 'publication')",
+        "r.record_id LIKE 'wordpress:%'",
+        "r.metadata->>'publication_manifest_schema' = 'sc-publications-editorial-manifest/0.1'",
+        "r.metadata->>'publication_discovery_approved' = 'true'",
+        "r.metadata->>'wordpress_public_verified' = 'true'",
+        "r.metadata->>'wordpress_password_protected' = 'false'",
+    ]
+    params: list[Any] = []
+    if field:
+        conditions.append("lower(r.metadata->>'publication_field') = %s")
+        params.append(field)
+
+    if matched_only:
+        term_groups: list[str] = []
+        for term in list(dict.fromkeys(_match_term(t) for t in terms))[:14]:
+            if not term:
+                continue
+            # All user-derived strings are SQL parameters, never identifiers.
+            pattern = f"%{term}%"
+            term_groups.append(
+                "(lower(r.title) LIKE %s OR lower(r.topics::text) LIKE %s "
+                "OR lower(r.tags::text) LIKE %s OR "
+                "lower(r.metadata->>'publication_field') LIKE %s)"
+            )
+            params.extend([pattern] * 4)
+        if term_groups:
+            conditions.append("(" + " OR ".join(term_groups) + ")")
+
+    sql = (
+        "SELECT r.record_id, r.object_type, r.title, r.canonical_url, "
+        "r.visibility, r.publication_status, r.published_at, "
+        "r.source_updated_at, r.topics, r.tags, r.metadata "
+        "FROM library_records r WHERE " + " AND ".join(conditions)
+        + " ORDER BY r.source_updated_at DESC NULLS LAST, r.record_id "
+        + "LIMIT %s"
+    )
+    params.append(MAX_SCAN)
+    return sql, params
+
+
 def discover_publications(
     *,
     field: str = "",
@@ -209,26 +270,44 @@ def discover_publications(
     interests: str = "",
     limit: int = 12,
 ) -> dict[str, Any]:
-    """One bounded SELECT from existing Library catalog; no schema writes."""
+    """Corpus-wide filtered retrieval, plus bounded fallback for browsing.
+
+    This remains a staging-only candidate interface. It does not expose a
+    production-safe view without a durable withdrawal/reconciliation protocol.
+    """
+    limit = max(1, min(int(limit), MAX_RESULTS))
+    field = str(field or "").strip().casefold()[:100]
+    topic = str(topic or "").strip().casefold()[:100]
+    terms = list(dict.fromkeys(
+        [*_tokens(query), topic, *_interest_terms(interests)]
+    ))
+    matched = bool(any(_match_term(t) for t in terms))
+    sql, params = _candidate_query(field=field, terms=terms, matched_only=matched)
     pool = get_pool()
     with pool.connection() as conn, conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT r.record_id, r.object_type, r.title, r.canonical_url,
-                   r.visibility, r.publication_status, r.published_at,
-                   r.source_updated_at, r.topics, r.tags, r.metadata
-            FROM library_records r
-            WHERE r.visibility = 'public'
-              AND r.publication_status = 'published'
-              AND r.object_type IN ('post', 'article', 'publication')
-              AND r.record_id LIKE 'wordpress:%'
-              AND r.metadata->>'publication_discovery_approved' = 'true'
-              AND r.metadata->>'wordpress_public_verified' = 'true'
-              AND r.metadata->>'wordpress_password_protected' = 'false'
-            ORDER BY r.source_updated_at DESC NULLS LAST, r.record_id
-            LIMIT %s
-            """,
-            (MAX_SCAN,),
-        )
+        cur.execute(sql, params)
         rows = list(cur.fetchall())
-    return build_discovery(rows, field=field, topic=topic, query=query, interests=interests, limit=limit)
+        # Fill an interest-only display from recent approved content when very
+        # few strong matches exist. Explicit text search does not fall back to
+        # unrelated records.
+        if matched and not _tokens(query) and len(rows) < limit:
+            fallback_sql, fallback_params = _candidate_query(
+                field=field, terms=[], matched_only=False
+            )
+            cur.execute(fallback_sql, fallback_params)
+            seen_ids = {row["record_id"] for row in rows}
+            rows.extend(
+                item for item in cur.fetchall()
+                if item["record_id"] not in seen_ids
+            )
+    result = build_discovery(
+        rows, field=field, topic=topic, query=query, interests=interests, limit=limit,
+    )
+    result["retrieval"] = {
+        "scope": "full-eligible-catalog-before-limit",
+        "strategy": "sql-interest-filter-then-deterministic-rerank",
+        "candidate_ceiling": MAX_SCAN,
+        "complete_ranking_of_all_matches": False,
+        "production_released": False,
+    }
+    return result
