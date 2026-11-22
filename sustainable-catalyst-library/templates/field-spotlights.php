@@ -8,6 +8,20 @@ foreach ( $field_list as $candidate_field ) {
     $total_panels += is_array( $candidate_field['panels'] ?? null ) ? count( $candidate_field['panels'] ) : 0;
 }
 
+// Some production Library 7.0.1 installs received the directory through a
+// narrow template canary rather than a full plugin update. Preserve it when
+// a caller has already populated the classified directory; otherwise resolve
+// it only on the canonical Publications page using the same production gate.
+if ( ! isset( $publications_directory ) ) {
+    $publications_directory = array();
+    if ( function_exists( 'is_page' ) && is_page( 'publications' ) ) {
+        require_once SC_LIBRARY_DIR . 'includes/class-sc-library-publications-directory.php';
+        if ( SC_Library_Publications_Directory::enabled() ) {
+            $publications_directory = ( new SC_Library_Publications_Directory() )->groups( $fields );
+        }
+    }
+}
+
 // Interest paths are editorial entry points to the *existing* public field
 // model. Direct article links are taken only from the verified directory.
 $interest_prompts = array(
