@@ -45,6 +45,27 @@ CREATE INDEX IF NOT EXISTS library_records_type_idx ON library_records(object_ty
 CREATE INDEX IF NOT EXISTS library_records_source_idx ON library_records(source_key, indexed_at DESC);
 CREATE INDEX IF NOT EXISTS library_records_published_idx ON library_records(published_at DESC NULLS LAST);
 
+-- SC-PUB-SEO-03B2: versioned, expiring editorial approval ledger.
+-- A missing or expired row is always INELIGIBLE for public discovery.
+-- Tombstones preserve the largest accepted source sequence across withdrawals.
+CREATE TABLE IF NOT EXISTS publication_discovery_states (
+    record_id text PRIMARY KEY,
+    sequence bigint NOT NULL CHECK (sequence > 0),
+    event_digest char(64) NOT NULL,
+    approved boolean NOT NULL DEFAULT false,
+    canonical_url text NOT NULL DEFAULT '',
+    fingerprint char(64) NOT NULL,
+    field_key text NOT NULL DEFAULT '',
+    map_key text NOT NULL DEFAULT '',
+    expires_at timestamptz,
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (NOT approved OR (canonical_url <> '' AND field_key <> '' AND map_key <> '' AND expires_at IS NOT NULL)),
+    CHECK (approved OR expires_at IS NULL)
+);
+CREATE INDEX IF NOT EXISTS publication_discovery_active_idx
+    ON publication_discovery_states(expires_at DESC)
+    WHERE approved;
+
 CREATE TABLE IF NOT EXISTS library_record_chunks (
     chunk_id bigserial PRIMARY KEY,
     record_id text NOT NULL REFERENCES library_records(record_id) ON DELETE CASCADE,
