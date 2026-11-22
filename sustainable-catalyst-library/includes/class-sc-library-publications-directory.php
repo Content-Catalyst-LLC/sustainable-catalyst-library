@@ -109,9 +109,28 @@ final class SC_Library_Publications_Directory {
         }
     }
 
+    /**
+     * Phase PUB-RELEASE-01: preserve the existing local/staging preview and
+     * require TWO explicit, independent config flags for any production render.
+     *
+     * This has no data writes and does not alter the WordPress publication,
+     * permalink, or SEO records. Removing either constant immediately
+     * restores the established shortcode HTML on the next uncached request.
+     */
     public static function enabled(): bool {
-        return defined( 'SC_LIBRARY_PUBLICATIONS_DIRECTORY' ) && SC_LIBRARY_PUBLICATIONS_DIRECTORY
-            && in_array( wp_get_environment_type(), array( 'local', 'staging' ), true );
+        if ( ! defined( 'SC_LIBRARY_PUBLICATIONS_DIRECTORY' )
+            || true !== SC_LIBRARY_PUBLICATIONS_DIRECTORY ) {
+            return false;
+        }
+
+        $environment = wp_get_environment_type();
+        if ( in_array( $environment, array( 'local', 'staging' ), true ) ) {
+            return true;
+        }
+
+        return 'production' === $environment
+            && defined( 'SC_LIBRARY_PUBLICATIONS_DIRECTORY_PRODUCTION_RELEASE' )
+            && true === SC_LIBRARY_PUBLICATIONS_DIRECTORY_PRODUCTION_RELEASE;
     }
 
     private function destination( string $url ): array {
