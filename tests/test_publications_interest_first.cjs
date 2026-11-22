@@ -12,6 +12,7 @@ const root = path.join(__dirname, '..', 'sustainable-catalyst-library');
 const page = fs.readFileSync(path.join(root, 'templates/field-spotlights.php'), 'utf8');
 const directory = fs.readFileSync(path.join(root, 'templates/publications-directory.php'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'assets/css/sc-library-field-spotlights.css'), 'utf8');
+const js = fs.readFileSync(path.join(root, 'assets/js/sc-library-field-spotlights.js'), 'utf8');
 
 test('interest-led page leads with real questions and concise answers', () => {
   assert.match(page, /What would you like to understand\?/);
@@ -54,4 +55,12 @@ test('responsive readable layout, keyboard focus and reduced motion', () => {
   assert.match(css, /@media\(max-width:680px\)/);
   assert.match(css, /:focus-visible/);
   assert.match(css, /prefers-reduced-motion:reduce/);
+});
+
+test('native field disclosure reveals fragment targets and avoids hidden autoplay', () => {
+  assert.match(js, /const initializedRoots = new WeakSet\(\)/);
+  assert.match(js, /if \(disclosure && !disclosure\.open\) return/);
+  assert.match(js, /disclosure\.addEventListener\('toggle'/);
+  assert.match(js, /revealTarget\(link\.hash\)/);
+  assert.match(js, /revealTarget\(window\.location\.hash\)/);
 });
