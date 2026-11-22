@@ -20,7 +20,7 @@ Make the visitor-interest discovery candidate service fail closed when an editor
 
 A standalone Python tool at `tools/publications-03b2-staging-preflight.py` refuses ordinary production hostnames, follows no redirects, and performs **anonymous GETs only**. It checks for an HTML Publications page with crawlable field links and an API endpoint that rejects anonymous access.
 
-From a checked-out copy of this branch, and only after staging hosts are supplied:
+From a checked-out copy of this branch, **only after both isolated staging hosts are configured and independently verified**. The repository's `.env.example` refers to production origins and cannot provide staging URLs. The examples below are placeholders and the preflight now rejects them *before making network requests*:
 
 ```bash
 python3 tools/publications-03b2-staging-preflight.py \
