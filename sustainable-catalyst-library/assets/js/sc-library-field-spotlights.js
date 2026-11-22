@@ -503,13 +503,47 @@ const requestedFieldKey = String(root.dataset.initialFieldKey || fields[0]?.key 
     markRuntime(root, 'ready');
   };
 
-  // v4.3.22.4: [sc_field_spotlights] now emits 14 independent single-field roots.
-  // initializeMaster remains for backward-compatible markup only; the canonical stack never uses it.
-  const boot = () => {
-    document.querySelectorAll('[data-sc-field-spotlights="v4.3.22.4"]').forEach((root) => {
-      if (root.dataset.scFieldSpotlightsMode === 'master') initializeMaster(root);
-      else initializeSingle(root);
+  // v4.3.22.4: [sc_field_spotlights] emits independent single-field roots.
+  // Publications Release 02 keeps the long catalog closed by default. Only
+  // initialize its stage controls when a visitor opens the native disclosure.
+  // Other Field Spotlight embeddings continue to initialize as before.
+  const initializedRoots = new WeakSet();
+  const initializeOnce = (root) => {
+    if (initializedRoots.has(root)) return;
+    initializedRoots.add(root);
+    if (root.dataset.scFieldSpotlightsMode === 'master') initializeMaster(root);
+    else initializeSingle(root);
+  };
+  const initializeOpenRoots = (scope) => {
+    scope.querySelectorAll('[data-sc-field-spotlights="v4.3.22.4"]').forEach((root) => {
+      const disclosure = root.closest('[data-sc-publications-full-collection]');
+      if (disclosure && !disclosure.open) return;
+      initializeOnce(root);
     });
+  };
+  const boot = () => {
+    const disclosure = document.querySelector('[data-sc-publications-full-collection]');
+    if (disclosure) {
+      disclosure.addEventListener('toggle', () => {
+        if (disclosure.open) initializeOpenRoots(disclosure);
+      });
+      const revealTarget = (fragment) => {
+        if (!fragment || fragment.length > 180) return;
+        const target = document.getElementById(fragment.replace(/^#/, ''));
+        if (target && disclosure.contains(target)) {
+          disclosure.open = true;
+          initializeOpenRoots(disclosure);
+        }
+      };
+      document.querySelectorAll('.sc-pubintent__field[href^="#"]').forEach((link) => {
+        link.addEventListener('click', () => {
+          revealTarget(link.hash);
+        });
+      });
+      revealTarget(window.location.hash);
+      window.addEventListener('hashchange', () => revealTarget(window.location.hash));
+    }
+    initializeOpenRoots(document);
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
