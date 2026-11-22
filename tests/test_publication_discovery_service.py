@@ -103,7 +103,7 @@ class PublicationsDiscoveryTests(unittest.TestCase):
         self.assertEqual([r["title"] for r in out["results"]], [
             "Enhanced Rock Weathering", "Solar Energy Basics"
         ])
-        self.assertEqual(out["results"][0]["discovery_reason"], "topic-overlap")
+        self.assertEqual(out["results"][0]["discovery_reason"], "related-topic")
         self.assertTrue(out["editorial_reverification_required"])
         self.assertFalse(out["auto_publish"])
 
