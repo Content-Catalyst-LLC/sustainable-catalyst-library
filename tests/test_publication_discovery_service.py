@@ -48,7 +48,9 @@ class PublicationsDiscoveryTests(unittest.TestCase):
             terms=["carbon removal", "rock weathering"],
             matched_only=True,
         )
-        self.assertIn("FROM library_records r WHERE", sql)
+        self.assertIn("FROM library_records r", sql)
+        self.assertIn("JOIN publication_discovery_states d", sql)
+        self.assertIn("d.expires_at > now()", sql)
         self.assertIn("lower(r.topics::text) LIKE %s", sql)
         self.assertIn("publication_manifest_schema", sql)
         self.assertIn("publication_discovery_approved", sql)
