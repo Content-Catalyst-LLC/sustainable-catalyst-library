@@ -1,8 +1,11 @@
+# syntax=docker/dockerfile:1
 FROM golang:1.23-bookworm AS builder
 WORKDIR /src
 COPY go.mod ./
 COPY main.go main_test.go ./
-RUN go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/sc-library-ingestion-runtime . \
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/sc-library-ingestion-runtime . \
     && mkdir -p /out/data && touch /out/data/.keep
 
 FROM gcr.io/distroless/static-debian12:nonroot
