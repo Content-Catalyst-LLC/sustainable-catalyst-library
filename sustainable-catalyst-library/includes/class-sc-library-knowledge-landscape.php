@@ -17,6 +17,8 @@ final class SC_Library_Knowledge_Landscape {
     }
 
     private function enqueue_assets(): void {
+        $renderer_file = SC_LIBRARY_DIR . 'assets/js/sc-library-knowledge-landscape-v5270.js';
+        $renderer_version = is_file($renderer_file) ? (string) filemtime($renderer_file) : self::VERSION;
         wp_enqueue_style(
             'sc-library-knowledge-landscape-v5270',
             SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-landscape-v5270.css',
@@ -27,7 +29,7 @@ final class SC_Library_Knowledge_Landscape {
             'sc-library-knowledge-landscape-v5270',
             SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-landscape-v5270.js',
             [],
-            self::VERSION,
+            $renderer_version,
             true
         );
     }
@@ -118,8 +120,10 @@ final class SC_Library_Knowledge_Landscape {
 
         $this->enqueue_assets();
         if ($showcase) {
-            wp_enqueue_style('sc-library-knowledge-showcase', SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-showcase.css', ['sc-library-knowledge-landscape-v5270'], self::VERSION);
-            wp_enqueue_script('sc-library-knowledge-showcase', SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-showcase.js', ['sc-library-knowledge-landscape-v5270'], self::VERSION, true);
+            $showcase_css_file = SC_LIBRARY_DIR . 'assets/css/sc-library-knowledge-showcase.css';
+            $showcase_js_file = SC_LIBRARY_DIR . 'assets/js/sc-library-knowledge-showcase.js';
+            wp_enqueue_style('sc-library-knowledge-showcase', SC_LIBRARY_URL . 'assets/css/sc-library-knowledge-showcase.css', ['sc-library-knowledge-landscape-v5270'], is_file($showcase_css_file) ? (string) filemtime($showcase_css_file) : self::VERSION);
+            wp_enqueue_script('sc-library-knowledge-showcase', SC_LIBRARY_URL . 'assets/js/sc-library-knowledge-showcase.js', ['sc-library-knowledge-landscape-v5270'], is_file($showcase_js_file) ? (string) filemtime($showcase_js_file) : self::VERSION, true);
         }
         $id = 'sc-kl-' . wp_generate_uuid4();
         $metrics = isset($payload['metrics']) && is_array($payload['metrics']) ? $payload['metrics'] : [];
