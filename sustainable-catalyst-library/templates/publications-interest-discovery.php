@@ -58,6 +58,8 @@ if ( class_exists( 'SC_Library_Python_Backend' ) && SC_Library_Python_Backend::c
             && is_array( $sc_payload['results'] ?? null ) ) {
             $sc_discovery_ready = true;
             $sc_seen_urls = array();
+            $sc_map_registry = class_exists( 'SC_Library_Field_Spotlights', false )
+                ? SC_Library_Field_Spotlights::series_registry() : array();
             foreach ( array_slice( $sc_payload['results'], 0, 12 ) as $sc_entry ) {
                 if ( ! is_array( $sc_entry ) ) { continue; }
                 $sc_record_id = (string) ( $sc_entry['record_id'] ?? '' );
@@ -78,10 +80,31 @@ if ( class_exists( 'SC_Library_Python_Backend' ) && SC_Library_Python_Backend::c
                     || isset( $sc_seen_urls[ $sc_url ] ) ) {
                     continue;
                 }
+                // Source-declared map key is a hint, never a trusted href:
+                // independently resolve and verify the current WordPress page.
+                $sc_map_url = '';
+                $sc_map_title = '';
+                $sc_map_key = sanitize_title( (string) ( $sc_entry['article_map_key'] ?? '' ) );
+                $sc_map = $sc_map_registry[ $sc_map_key ] ?? null;
+                if ( is_array( $sc_map ) && ! empty( $sc_map['canonical_url'] ) ) {
+                    $sc_map_candidate = home_url( (string) $sc_map['canonical_url'] );
+                    $sc_map_id = absint( url_to_postid( $sc_map_candidate ) );
+                    $sc_map_post = $sc_map_id ? get_post( $sc_map_id ) : null;
+                    if ( $sc_map_post instanceof WP_Post
+                        && 'publish' === $sc_map_post->post_status
+                        && '' === (string) $sc_map_post->post_password
+                        && is_post_publicly_viewable( $sc_map_post )
+                        && get_permalink( $sc_map_post ) === $sc_map_candidate ) {
+                        $sc_map_url = $sc_map_candidate;
+                        $sc_map_title = get_the_title( $sc_map_post );
+                    }
+                }
                 $sc_seen_urls[ $sc_url ] = true;
                 $sc_results[] = array(
                     'url' => $sc_url,
                     'title' => get_the_title( $sc_post ),
+                    'map_url' => $sc_map_url,
+                    'map_title' => $sc_map_title,
                     'reason' => sanitize_key( (string) ( $sc_entry['discovery_reason'] ?? '' ) ),
                 );
             }
@@ -121,7 +144,15 @@ if ( class_exists( 'SC_Library_Python_Backend' ) && SC_Library_Python_Backend::c
         <h4><?php esc_html_e( 'Related publications', 'sustainable-catalyst-library' ); ?></h4>
         <ul>
             <?php foreach ( $sc_results as $sc_result ) : ?>
-                <li><a href="<?php echo esc_url( $sc_result['url'] ); ?>"><?php echo esc_html( $sc_result['title'] ); ?></a></li>
+                <li>
+                    <a href="<?php echo esc_url( $sc_result['url'] ); ?>"><?php echo esc_html( $sc_result['title'] ); ?></a>
+                    <?php if ( $sc_result['map_url'] ) : ?>
+                        <span class="sc-publications-interest__map">
+                            <?php esc_html_e( 'Article Map:', 'sustainable-catalyst-library' ); ?>
+                            <a href="<?php echo esc_url( $sc_result['map_url'] ); ?>"><?php echo esc_html( $sc_result['map_title'] ); ?></a>
+                        </span>
+                    <?php endif; ?>
+                </li>
             <?php endforeach; ?>
         </ul>
     </div>
