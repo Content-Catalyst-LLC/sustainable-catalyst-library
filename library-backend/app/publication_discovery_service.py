@@ -1,23 +1,26 @@
-"""Read-only, opt-in public editorial discovery candidates for Publications.
+"""Read-only, interest-driven discovery candidates for public editorial Publications.
 
-This module does not publish, index, verify WordPress routes, or replace the
-WordPress editorial state. It provides deterministic candidates from the
-existing Library catalog, subject to explicit WordPress visibility evidence.
+The catalog supplies candidates, not publishing authority. WordPress must
+revalidate live editorial state, passwords, and canonical permalinks before
+rendering any public HTML links. Nothing in this module records a visitor.
 """
 
 from __future__ import annotations
 
 from datetime import date, datetime
+import re
 from typing import Any
 from urllib.parse import urlsplit
 
 from .db import get_pool
 
-CONTRACT = "sc-publications-discovery-candidates/0.1"
+CONTRACT = "sc-publications-discovery-candidates/0.2"
 MAX_SCAN = 200
 MAX_RESULTS = 24
+MAX_INTERESTS = 5
 ALLOWED_TYPES = frozenset({"post", "article", "publication"})
 ALLOWED_HOSTS = frozenset({"sustainablecatalyst.com", "www.sustainablecatalyst.com"})
+STOPWORDS = frozenset({"a", "an", "and", "in", "of", "on", "or", "the", "to", "with"})
 
 
 def canonical_publication_url(value: Any) -> str | None:
@@ -26,7 +29,7 @@ def canonical_publication_url(value: Any) -> str | None:
     try:
         parsed = urlsplit(value.strip())
         safe_host = parsed.hostname in ALLOWED_HOSTS and parsed.port is None
-    except ValueError:  # malformed IPv6, netloc, or port: fail closed
+    except ValueError:
         return None
     if (
         parsed.scheme != "https"
@@ -58,7 +61,7 @@ def _published_date(value: Any) -> str:
 
 
 def public_candidate(row: dict[str, Any]) -> dict[str, Any] | None:
-    """Apply both Library and editorial-public gates; fail closed on absent metadata."""
+    """Two-stage publish gate: Library status plus explicit editorial approval."""
     metadata = row.get("metadata")
     if not isinstance(metadata, dict):
         return None
@@ -89,65 +92,119 @@ def public_candidate(row: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def _tokens(value: str) -> list[str]:
+    """Deterministic lexical intent, not generated or inferred visitor profiling."""
+    raw = re.findall(r"[a-z0-9]+", str(value or "").casefold()[:120])
+    return [token for token in dict.fromkeys(raw) if token not in STOPWORDS][:8]
+
+
+def _interest_terms(value: str) -> list[str]:
+    """Comma-separated explicit interests from an opt-in interface, never tracked."""
+    values = [part.strip().casefold()[:80] for part in str(value or "")[:400].split(",")]
+    return list(dict.fromkeys(item for item in values if item))[:MAX_INTERESTS]
+
+
+def _update_order(item: dict[str, Any]) -> int:
+    return int("".join(c for c in item["updated_at"][:19] if c.isdigit()).ljust(14, "0")[:14])
+
+
 def build_discovery(
     rows: list[dict[str, Any]],
     *,
     field: str = "",
     topic: str = "",
+    query: str = "",
+    interests: str = "",
     limit: int = 12,
 ) -> dict[str, Any]:
-    """Rank verified candidates by topic affinity, then stable publication identity.
+    """Rank by explicit interests, field, and search terms; then recent updates.
 
-    Suggestions do not change WordPress editorial choices. The WordPress
-    renderer must recheck current post visibility and canonical permalink.
+    This is an editorial candidate set, *not* a verified WordPress public
+    directory. No user IDs, cookies, searches, or interests are persisted.
     """
     limit = max(1, min(int(limit), MAX_RESULTS))
     field = str(field or "").strip().casefold()
     topic = str(topic or "").strip().casefold()
+    query_tokens = _tokens(query)
+    chosen_interests = _interest_terms(interests)
     candidates: list[dict[str, Any]] = []
     seen: set[str] = set()
+
     for row in rows[:MAX_SCAN]:
         candidate = public_candidate(row)
-        if not candidate:
+        if candidate is None:
             continue
         if field and candidate["field"].casefold() != field:
             continue
         if candidate["url"] in seen:
             continue
         seen.add(candidate["url"])
-        terms = set(candidate["topics"]) | set(candidate["tags"])
-        candidate["topic_match"] = bool(topic and topic in terms)
-        candidate["discovery_reason"] = "topic-overlap" if candidate["topic_match"] else "recent-publication"
+
+        title = candidate["title"].casefold()
+        field_text = candidate["field"].casefold()
+        topics = set(candidate["topics"])
+        tags = set(candidate["tags"])
+        terms = topics | tags
+        haystack = " ".join([title, field_text, *sorted(terms)])
+        search_hits = sum(token in haystack for token in query_tokens)
+        if query_tokens and search_hits == 0:
+            continue
+        topic_match = bool(topic and (topic in terms or topic in title))
+        interest_hits = sum(
+            item in terms or item in title or item == field_text for item in chosen_interests
+        )
+        score = (
+            5 * interest_hits
+            + 4 * search_hits
+            + 3 * int(topic_match)
+            + 2 * int(bool(query_tokens and all(token in title for token in query_tokens)))
+        )
+        reason = (
+            "selected-interest" if interest_hits
+            else "search-match" if search_hits
+            else "related-topic" if topic_match
+            else "recent-publication"
+        )
+        candidate["discovery_score"] = score
+        candidate["discovery_reason"] = reason
         candidates.append(candidate)
+
     candidates.sort(
         key=lambda item: (
-            not item["topic_match"],
-            -int("".join(c for c in item["updated_at"][:19] if c.isdigit()).ljust(14, "0")[:14]),
+            -item["discovery_score"],
+            -_update_order(item),
             item["title"].casefold(),
             item["url"],
         )
     )
-    results = []
-    for item in candidates[:limit]:
-        # Never expose raw catalog metadata, visibility predicates, or source bodies.
-        results.append(item)
+    results = candidates[:limit]
     return {
         "schema": CONTRACT,
         "state": "candidates-only",
         "editorial_reverification_required": True,
         "auto_publish": False,
+        "visitor_tracking": False,
         "seo_authority": "wordpress-rank-math",
         "field": field,
         "topic": topic,
+        "query": " ".join(query_tokens),
+        "interests": chosen_interests,
         "limit": limit,
         "count": len(results),
+        "scan_ceiling": MAX_SCAN,
         "results": results,
     }
 
 
-def discover_publications(*, field: str = "", topic: str = "", limit: int = 12) -> dict[str, Any]:
-    """Single bounded SELECT from existing PostgreSQL catalog; no schema writes."""
-    limit = max(1, min(int(limit), MAX_RESULTS))
+def discover_publications(
+    *,
+    field: str = "",
+    topic: str = "",
+    query: str = "",
+    interests: str = "",
+    limit: int = 12,
+) -> dict[str, Any]:
+    """One bounded SELECT from existing Library catalog; no schema writes."""
     pool = get_pool()
     with pool.connection() as conn, conn.cursor() as cur:
         cur.execute(
@@ -169,4 +226,4 @@ def discover_publications(*, field: str = "", topic: str = "", limit: int = 12) 
             (MAX_SCAN,),
         )
         rows = list(cur.fetchall())
-    return build_discovery(rows, field=field, topic=topic, limit=limit)
+    return build_discovery(rows, field=field, topic=topic, query=query, interests=interests, limit=limit)
