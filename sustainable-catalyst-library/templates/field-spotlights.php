@@ -33,6 +33,14 @@ foreach ( $field_list as $candidate_field ) {
         </nav>
     </section>
 
+    <?php
+    // SC-PUB-SEO-02 preview: staged interest-led navigation, never active in production.
+    if ( defined( 'SC_LIBRARY_PUBLICATIONS_INTEREST_PREVIEW' ) && SC_LIBRARY_PUBLICATIONS_INTEREST_PREVIEW
+        && in_array( wp_get_environment_type(), array( 'local', 'staging' ), true ) ) {
+        include SC_LIBRARY_DIR . 'templates/publications-interest-discovery.php';
+    }
+    ?>
+
     <?php if ( ! empty( $publications_directory ) ) {
         include SC_LIBRARY_DIR . 'templates/publications-directory.php';
     } ?>
