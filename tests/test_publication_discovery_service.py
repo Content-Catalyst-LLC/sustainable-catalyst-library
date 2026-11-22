@@ -107,6 +107,42 @@ class PublicationsDiscoveryTests(unittest.TestCase):
         self.assertTrue(out["editorial_reverification_required"])
         self.assertFalse(out["auto_publish"])
 
+
+    def test_opt_in_interests_prioritize_relevance(self):
+        carbon = record()
+        other = record(
+            record_id="wordpress:1:post:789",
+            title="A Brief History of Philosophy",
+            canonical_url="https://sustainablecatalyst.com/history-of-philosophy/",
+            topics=["Philosophy"],
+            tags=[],
+            source_updated_at="2026-11-22T18:00:00",
+        )
+        result = build_discovery([other, carbon], interests="carbon removal")
+        self.assertEqual(result["results"][0]["title"], "Enhanced Rock Weathering")
+        self.assertEqual(result["results"][0]["discovery_reason"], "selected-interest")
+        self.assertFalse(result["visitor_tracking"])
+
+    def test_search_query_filters_unrelated_records(self):
+        carbon = record()
+        philosophy = record(
+            record_id="wordpress:1:post:789",
+            title="A Brief History of Philosophy",
+            canonical_url="https://sustainablecatalyst.com/history-of-philosophy/",
+            topics=["Philosophy"],
+            tags=[],
+        )
+        result = build_discovery([carbon, philosophy], query="carbon removal")
+        self.assertEqual(result["count"], 1)
+        self.assertEqual(result["results"][0]["title"], "Enhanced Rock Weathering")
+        self.assertEqual(result["results"][0]["discovery_reason"], "search-match")
+
+    def test_missing_editorial_metadata_never_included_from_interest(self):
+        result = build_discovery([
+            record(metadata={"publication_field": "sustainable-systems"}),
+        ], query="rock weathering", interests="carbon removal")
+        self.assertEqual(result["results"], [])
+
     def test_limit_is_bounded_and_no_metadata_leak(self):
         out = build_discovery([record()], limit=1000)
         self.assertEqual(out["limit"], MAX_RESULTS)
