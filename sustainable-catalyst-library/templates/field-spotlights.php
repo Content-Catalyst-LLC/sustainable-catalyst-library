@@ -31,6 +31,19 @@ foreach ( $field_list as $candidate_field ) {
                 </a>
             <?php endforeach; ?>
         </nav>
+        <?php if ( $this->is_canonical_publications_page() ) : ?>
+        <aside class="sc-field-stack__discovery-paths" aria-label="<?php esc_attr_e( 'Other ways to explore publications', 'sustainable-catalyst-library' ); ?>">
+            <div class="sc-field-stack__discovery-copy">
+                <p class="sc-field-stack__discovery-kicker"><?php esc_html_e( 'PUBLICATIONS / EXPLORE', 'sustainable-catalyst-library' ); ?></p>
+                <h4><?php esc_html_e( 'Looking for a specific subject?', 'sustainable-catalyst-library' ); ?></h4>
+                <p><?php esc_html_e( 'Browse the fields and Article Maps below. For formal research projects and their evidence, visit Research. If a topic is missing, suggest it through the existing Feedback system.', 'sustainable-catalyst-library' ); ?></p>
+            </div>
+            <div class="sc-field-stack__discovery-actions">
+                <a class="sc-field-stack__discovery-research" href="<?php echo esc_url( home_url( '/research-hub/' ) ); ?>"><?php esc_html_e( 'Explore research', 'sustainable-catalyst-library' ); ?> <span aria-hidden="true">&nearr;</span></a>
+                <a class="sc-field-stack__discovery-feedback" href="<?php echo esc_url( home_url( '/feature-suggestions/' ) ); ?>"><?php esc_html_e( 'Request a topic', 'sustainable-catalyst-library' ); ?> <span aria-hidden="true">&nearr;</span></a>
+            </div>
+        </aside>
+        <?php endif; ?>
     </section>
 
     <?php if ( ! empty( $publications_directory ) ) {

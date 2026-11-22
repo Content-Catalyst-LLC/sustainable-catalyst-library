@@ -693,7 +693,12 @@ final class SC_Library_Field_Spotlights {
             $fields = array( $only_field => $fields[ $only_field ] );
         }
         if ( ! $fields ) { return ''; }
-        wp_enqueue_style( 'sc-library-field-spotlights', SC_LIBRARY_URL . 'assets/css/sc-library-field-spotlights.css', array(), self::VERSION );
+        // SC-PUB-RELEASE-01: bust only the canonical Publications stylesheet
+        // cache after the narrow editorial entryway rollout. Other embeds
+        // keep their existing asset version and interaction surface.
+        $style_version = ! $only_field && $this->is_canonical_publications_page()
+            ? self::VERSION . '-pub-entry-01' : self::VERSION;
+        wp_enqueue_style( 'sc-library-field-spotlights', SC_LIBRARY_URL . 'assets/css/sc-library-field-spotlights.css', array(), $style_version );
         wp_enqueue_script( 'sc-library-field-spotlights', SC_LIBRARY_URL . 'assets/js/sc-library-field-spotlights.js', array(), self::VERSION, true );
         $settings = $this->settings();
         $labels = $settings['general'];
