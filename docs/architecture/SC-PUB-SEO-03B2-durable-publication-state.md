@@ -16,6 +16,23 @@ Make the visitor-interest discovery candidate service fail closed when an editor
 5. **Server-to-server reader**: `GET /api/library/v1/publications/discovery` now also requires the existing signed bearer/HMAC protocol and rejects production runtimes. WordPress’s staging preview uses `SC_Library_Python_Backend::signed_request` instead of an anonymous GET, and then re-verifies the current actual WordPress post and map before generating any public HTML links.
 6. **Tests**: Python schema/sequence/idempotency/withdrawal/privacy matching; PHP editorial manifest fingerprint and outbox event serialization; Library baseline CI.
 
+## Read-only staging preflight
+
+A standalone Python tool at `tools/publications-03b2-staging-preflight.py` refuses ordinary production hostnames, follows no redirects, and performs **anonymous GETs only**. It checks for an HTML Publications page with crawlable field links and an API endpoint that rejects anonymous access.
+
+From a checked-out copy of this branch, and only after staging hosts are supplied:
+
+```bash
+python3 tools/publications-03b2-staging-preflight.py \
+  --wp-base "https://YOUR-WP-STAGING-HOST" \
+  --api-base "https://YOUR-API-STAGING-HOST" \
+  --report /tmp/SC-PUB-SEO-03B2-anonymous-preflight.json
+```
+
+The script **does not** enable discovery, modify content, or certify the signed lifecycle. Every `not_covered` item in its evidence report remains a separate acceptance obligation.
+
+**Outbox throughput:** up to 40 state renewals are enqueued every 2 minutes; the retry worker handles up to 40 events per minute. A matching signed approval is renewed without re-indexing the full WordPress article. Staging must confirm the total eligible count and actual processing cadence against the 15-minute lease. A backlog reaching the 800-row scan ceiling is a hard NO-GO. With missing cron triggers or exhausted lease capacity, discovery fails closed by expiry.
+
 ## Source flow
 
 ```
@@ -35,7 +52,7 @@ No event can be used as an authorization to expose a nonpublic WordPress record.
 
 - **Source sync/WordPress environment:** staging run with a production-equivalent WordPress clone, real PostgreSQL migration and signed credentials. Verify publish → update → protect → unprotect → change permalink → withdraw → republish → delete, with deliberate API outages/reorder/retries. Test 410/404 and cache behavior. No live production attempts yet.
 - **Index delivery and freshness:** confirm that every current approved post is properly indexed before the ledger is approved, and that the PHP outbox continues retrying after a network interruption. Test WordPress cron under the actual hosting scheduler, including event option persistence and MySQL concurrency.
-- **Lease/cardinality:** the current 15-minute lease and 40-record/5-minute reconciliation batches may not cover the eligible corpus or fit Bluehost cron execution budgets. Measure content count, request timings, job throughput and expiry failures. **Do not enable the public UI** until these are tuned and soak-tested.
+- **Lease/cardinality:** the current 15-minute lease and 40-record/2-minute reconciliation batches can renew approximately 300 distinct records per 15 minutes in ideal conditions, but repeated events, transient failures, and Bluehost cron execution budgets reduce actual capacity. Measure content count, request timings, job throughput and expiry failures. **Do not enable the public UI** until these are tuned and soak-tested.
 - **Actual HTTP visibility:** verify a direct anonymous GET to Python candidates returns 401/404 and no public metadata, while authenticated WordPress can read only accepted candidates and the public page still checks WordPress status. Review WAF and proxy logs to avoid logging bearer keys/visitor search terms.
 - **SEO and route quality:** preserve all valid published canonical pages; do not use a stale map redirect or guess the three known 404 aliases; reconcile Issue #13 before creating those links. No automatically Private maps.
 - **Query performance:** run `EXPLAIN (ANALYZE, BUFFERS)` and concurrency simulations against realistic staging data; the interest OR predicates may need more suitable indexed search before production.
