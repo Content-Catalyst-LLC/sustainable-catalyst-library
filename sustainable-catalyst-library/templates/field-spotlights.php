@@ -13,32 +13,32 @@ foreach ( $field_list as $candidate_field ) {
 $interest_prompts = array(
     'Sustainable Systems' => array(
         'question' => 'How can societies live within environmental limits?',
-        'lead' => 'Explore sustainability, planetary boundaries, climate risk, and the systems connecting them.',
+        'lead' => 'Environmental limits arise from interacting ecological systems. This collection examines planetary boundaries, risks, resilience, and sustainability choices.',
         'theme' => 'SUSTAINABILITY',
     ),
     'Technology & Systems Intelligence' => array(
         'question' => 'How are AI, data, and infrastructure changing decisions?',
-        'lead' => 'Understand artificial intelligence, data systems, monitoring, and connected infrastructure.',
+        'lead' => 'AI and data systems can support decisions, but their value depends on data quality, evaluation, and governance. Explore the underlying technologies and their limits.',
         'theme' => 'TECHNOLOGY',
     ),
     'Natural Science' => array(
         'question' => 'What does science tell us about the natural world?',
-        'lead' => 'Follow research foundations across physics, biology, chemistry, Earth systems, and more.',
+        'lead' => 'Natural science builds and tests explanations using observation, experiments, and models. Explore physical, biological, chemical, and Earth-system foundations.',
         'theme' => 'SCIENCE',
     ),
     'Global Governance' => array(
         'question' => 'How do law and institutions shape global cooperation?',
-        'lead' => 'Examine international law, governance, legal traditions, and shared institutions.',
+        'lead' => 'Law and institutions establish rules and coordinate collective action. These works examine global governance, legal traditions, and accountability.',
         'theme' => 'GOVERNANCE',
     ),
     'Psychology' => array(
         'question' => 'Why do people think, decide, and behave as they do?',
-        'lead' => 'Explore cognition, social behavior, development, well-being, and organizational life.',
+        'lead' => 'Human decisions reflect cognition, learning, development, and social context. Explore research on individual and collective behavior.',
         'theme' => 'HUMAN BEHAVIOR',
     ),
     'Problem Solving' => array(
         'question' => 'How can we understand and solve complex problems?',
-        'lead' => 'Work through decisions, modeling, strategy, systems methods, and practical tools.',
+        'lead' => 'Complex problems require clear framing, explicit trade-offs, and testing assumptions against evidence. Explore methods for analysis and action.',
         'theme' => 'METHODS',
     ),
 );
