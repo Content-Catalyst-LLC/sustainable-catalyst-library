@@ -18,6 +18,10 @@ final class SC_Library_Publications_State_Outbox {
     private const OFFSET_OPTION = 'sc_pub_discovery_reconcile_offset';
     private const EVENT_API = '/v1/publications/manifest/events';
     private const MAX_BATCH = 40;
+    // The 15-minute approval lease supports up to 600 records at
+    // 40 records/minute in ideal conditions. Staging must verify cadence,
+    // batch completion, and total eligible record count before activation.
+    private const MAX_SCAN = 800;
 
     public static function enabled(): bool {
         return class_exists( 'SC_Library_Publications_Discovery_Manifest', false )
@@ -38,7 +42,7 @@ final class SC_Library_Publications_State_Outbox {
     }
 
     public function schedules( array $schedules ): array {
-        $schedules['sc_pub_five_minutes'] = array( 'interval' => 300, 'display' => 'Publications state reconcile' );
+        $schedules['sc_pub_one_minute'] = array( 'interval' => 60, 'display' => 'Publications state reconcile' );
         return $schedules;
     }
 
@@ -145,26 +149,48 @@ final class SC_Library_Publications_State_Outbox {
         if ( ! self::enabled() ) { return; }
         global $wpdb;
         $prefix = self::EVENT_PREFIX;
+        // Scan beyond delayed/retrying rows so they do not starve newly
+        // eligible events. Never process more than MAX_BATCH network events
+        // per invocation. Queue growth beyond MAX_SCAN is a staging NO-GO.
         $names = $wpdb->get_col( $wpdb->prepare(
             "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_name DESC LIMIT %d",
-            $wpdb->esc_like( $prefix ) . '%', self::MAX_BATCH
+            $wpdb->esc_like( $prefix ) . '%', self::MAX_SCAN
         ) );
+        if ( count( (array) $names ) >= self::MAX_SCAN ) {
+            error_log( '[SC Publications] Outbox scan ceiling reached; staging release must remain disabled' );
+        }
+        $processed = 0;
         foreach ( (array) $names as $key ) {
+            if ( $processed >= self::MAX_BATCH ) { break; }
             $queued = get_option( (string) $key );
             if ( ! is_array( $queued ) ) { continue; }
             if ( absint( $queued['retry_after'] ?? 0 ) > time() ) { continue; }
+            $processed++;
             $event = self::event_for( $queued );
-            if ( 'approve' === $event['action'] ) {
-                // The server will reject approval until the signed Library
-                // indexing packet with the same snapshot fingerprint commits.
-                $post = get_post( (int) $queued['post_id'] );
-                if ( $post instanceof WP_Post ) {
-                    ( new SC_Library_Python_Backend() )->sync_post( (int) $post->ID );
+            $event_body = (string) wp_json_encode( $event, JSON_UNESCAPED_SLASHES );
+            // Renew an unchanged, already-indexed signed approval without
+            // resending the whole WordPress article on every reconciliation.
+            $result = SC_Library_Python_Backend::signed_request(
+                'POST', self::EVENT_API, $event_body
+            );
+            // On a genuinely new or changed editorial snapshot, the backend
+            // denies approval until the matching signed catalog ingest lands.
+            // Reindex only on that exact rejection, then retry the same event.
+            if ( 'approve' === $event['action'] && is_wp_error( $result ) ) {
+                $error_data = $result->get_error_data();
+                $body = is_array( $error_data ) ? ( $error_data['body'] ?? null ) : null;
+                if ( is_array( $error_data ) && (int) ( $error_data['status'] ?? 0 ) === 409
+                    && is_array( $body )
+                    && (string) ( $body['detail'] ?? '' ) === 'index-not-current-or-unapproved' ) {
+                    $post = get_post( (int) $queued['post_id'] );
+                    if ( $post instanceof WP_Post ) {
+                        ( new SC_Library_Python_Backend() )->sync_post( (int) $post->ID );
+                        $result = SC_Library_Python_Backend::signed_request(
+                            'POST', self::EVENT_API, $event_body
+                        );
+                    }
                 }
             }
-            $result = SC_Library_Python_Backend::signed_request(
-                'POST', self::EVENT_API, (string) wp_json_encode( $event, JSON_UNESCAPED_SLASHES )
-            );
             if ( ! is_wp_error( $result )
                 && (string) ( $result['record_id'] ?? '' ) === $event['record_id']
                 && absint( $result['sequence'] ?? 0 ) >= (int) $event['sequence']
