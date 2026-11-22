@@ -53,6 +53,7 @@ final class SC_Library_Publications_Discovery_Manifest {
             'wordpress_password_protected' => '' !== (string) $post->post_password,
             'publication_field' => '',
             'publication_map_key' => '',
+            'publication_fingerprint' => '',
         );
 
         // This first slice covers WordPress editorial posts. Article Map pages
@@ -105,6 +106,16 @@ final class SC_Library_Publications_Discovery_Manifest {
         $result['wordpress_public_verified'] = true;
         $result['publication_field'] = $field;
         $result['publication_map_key'] = $map_key;
+        // Bind the server-signed approval event to the *indexed* publication
+        // snapshot. No password, private text, or user identity enters hash.
+        $result['publication_fingerprint'] = hash( 'sha256', implode( '|', array(
+            (string) $post->ID,
+            (string) $post->post_modified_gmt,
+            (string) $post->post_status,
+            $url,
+            $field,
+            $map_key,
+        ) ) );
         return $result;
     }
 }
