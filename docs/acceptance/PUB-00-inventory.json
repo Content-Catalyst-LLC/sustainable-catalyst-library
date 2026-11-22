@@ -1,0 +1,4302 @@
+{
+  "hub": {
+    "http_chain": [
+      "HTTP/1.1 200 OK"
+    ],
+    "invalid_json_scripts": 0,
+    "html_bytes": 1868404,
+    "canonical": [
+      "https://sustainablecatalyst.com/publications/"
+    ],
+    "meta": [
+      [
+        "description",
+        "Blog - Essays and analysis at the intersection of development, governance, finance, and narrative. These pieces explore how measurement, systems design, and storytelling shape long-term outcomes. The goal is clarity over noise — ideas that can inform strategy, policy, and institutional decision-making."
+      ],
+      [
+        "robots",
+        "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large"
+      ],
+      [
+        "og:type",
+        "article"
+      ],
+      [
+        "og:title",
+        "Publications - Sustainable Catalyst | Computational Research Platform"
+      ],
+      [
+        "og:description",
+        "Blog - Essays and analysis at the intersection of development, governance, finance, and narrative. These pieces explore how measurement, systems design, and storytelling shape long-term outcomes. The goal is clarity over noise — ideas that can inform strategy, policy, and institutional decision-making."
+      ],
+      [
+        "og:url",
+        "https://sustainablecatalyst.com/publications/"
+      ]
+    ],
+    "schema_types": [
+      [
+        "Person",
+        "Organization"
+      ],
+      "WebSite",
+      "ImageObject",
+      "BreadcrumbList",
+      "WebPage",
+      "Person",
+      "Article"
+    ],
+    "script_tags": 65,
+    "external_script_tags": 36,
+    "image_tags": 48,
+    "eager_image_tags": 14,
+    "duplicate_ids": [],
+    "links_to_publications": true,
+    "directory_markup": false,
+    "in_captured_sitemaps": true,
+    "sitemap_files": [
+      "page-sitemap.xml.body",
+      "post-sitemap1.xml.body",
+      "post-sitemap10.xml.body",
+      "post-sitemap11.xml.body",
+      "post-sitemap2.xml.body",
+      "post-sitemap3.xml.body",
+      "post-sitemap4.xml.body",
+      "post-sitemap5.xml.body",
+      "post-sitemap6.xml.body",
+      "post-sitemap7.xml.body",
+      "post-sitemap8.xml.body",
+      "post-sitemap9.xml.body",
+      "sitemap.xml.body",
+      "sitemap_index.xml.body",
+      "wp-sitemap.xml.body"
+    ],
+    "registry_fields": 14,
+    "registry_maps": 170,
+    "hub_model_fields": 14,
+    "hub_model_panels": 170,
+    "hub_model_panel_keys_outside_registry": [],
+    "field_model_json_bytes": 408717,
+    "map_anchors": 14,
+    "map_sitemap_urls": 154,
+    "panel_selection_urls": 170,
+    "curated_links_total": 180,
+    "unique_curated_urls": 179,
+    "curated_anchors": 32,
+    "curated_sitemap_urls": 179
+  },
+  "fields": {
+    "global-governance": {
+      "title": "Global Governance",
+      "order": 1,
+      "browse_url": "/category/global-governance/",
+      "description": "Law, institutions, governance, geopolitical order, and international cooperation."
+    },
+    "sustainable-systems": {
+      "title": "Sustainable Systems",
+      "order": 2,
+      "browse_url": "/category/sustainable-systems/",
+      "description": "Sustainable development, planetary boundaries, resilience, stewardship, and economic systems."
+    },
+    "technology-systems-intelligence": {
+      "title": "Technology & Systems Intelligence",
+      "order": 3,
+      "browse_url": "/category/technology-systems-intelligence/",
+      "description": "Artificial intelligence, data, embedded systems, monitoring, infrastructure, and energy systems."
+    },
+    "natural-science": {
+      "title": "Natural Science",
+      "order": 4,
+      "browse_url": "/category/natural-science/",
+      "description": "Physics, biology, chemistry, materials, Earth science, astronomy, and environmental science."
+    },
+    "cultural-anthropology": {
+      "title": "Cultural Anthropology",
+      "order": 5,
+      "browse_url": "/category/cultural-anthropology/",
+      "description": "Culture, kinship, power, development, ecological knowledge, and everyday systems."
+    },
+    "literature-cultural-memory": {
+      "title": "Literature & Cultural Memory",
+      "order": 6,
+      "browse_url": "/category/literature-cultural-memory/",
+      "description": "Literary traditions, poetic memory, civilizational inheritance, and collective imagination."
+    },
+    "mythology": {
+      "title": "Mythology",
+      "order": 7,
+      "browse_url": "/category/mythology/",
+      "description": "Myth, folklore, epic, sacred narrative, legend, and inherited symbolic worlds."
+    },
+    "religious-studies": {
+      "title": "Religious Studies",
+      "order": 8,
+      "browse_url": "/category/religious-studies/",
+      "description": "Religious traditions, mysticism, law, society, ecology, and comparative sacred themes."
+    },
+    "healing-traditions": {
+      "title": "Healing Traditions",
+      "order": 9,
+      "browse_url": "/category/healing-traditions/",
+      "description": "Historical healing systems, medicine, nourishment, herbal knowledge, and ritual practice."
+    },
+    "psychology": {
+      "title": "Psychology",
+      "order": 10,
+      "browse_url": "/category/psychology/",
+      "description": "Cognition, behavior, development, personality, organizations, morality, and depth psychology."
+    },
+    "philosophy": {
+      "title": "Philosophy",
+      "order": 11,
+      "browse_url": "/category/philosophy/",
+      "description": "Ethics, political philosophy, metaphysics, civilizational thought, selfhood, and meaning."
+    },
+    "thinking": {
+      "title": "Thinking",
+      "order": 12,
+      "browse_url": "/category/thinking/",
+      "description": "Knowledge architecture, design, mathematical, systems, computational, resilience, and futures thinking."
+    },
+    "meaning": {
+      "title": "Meaning",
+      "order": 13,
+      "browse_url": "/category/meaning/",
+      "description": "Aesthetics, art, music, pattern, symbolism, creative form, story, and interpretation."
+    },
+    "problem-solving": {
+      "title": "Problem Solving",
+      "order": 14,
+      "browse_url": "/category/problem-solving/",
+      "description": "Strategy, storytelling, decisions, mathematical modeling, systems modeling, and applied builds."
+    }
+  },
+  "maps": [
+    {
+      "key": "international-law",
+      "title": "International Law",
+      "url": "https://sustainablecatalyst.com/international-law/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "",
+      "order": 1,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Jus Cogens, Erga Omnes, and Peremptory Norms in International Law",
+          "url": "https://sustainablecatalyst.com/jus-cogens-erga-omnes-and-peremptory-norms-in-international-law/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Universal Jurisdiction and Accountability for Atrocity Crimes",
+          "url": "https://sustainablecatalyst.com/universal-jurisdiction-and-accountability-for-atrocity-crimes/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Refugee Law, Asylum, and the Principle of Non-Refoulement",
+          "url": "https://sustainablecatalyst.com/refugee-law-asylum-non-refoulement/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "The High Seas, Deep Seabed Governance, and the Global Commons",
+          "url": "https://sustainablecatalyst.com/high-seas-deep-seabed-global-commons/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "ancient-near-eastern-law-early-legal-codes",
+      "title": "Ancient Near Eastern Law and Early Legal Codes",
+      "url": "https://sustainablecatalyst.com/ancient-near-eastern-law-early-legal-codes/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "Legal Traditions",
+      "order": 2,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "roman-law-civil-law-tradition",
+      "title": "Roman Law and the Civil Law Tradition",
+      "url": "https://sustainablecatalyst.com/roman-law-civil-law-tradition/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "Legal Traditions",
+      "order": 3,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "common-law-precedent",
+      "title": "Common Law and Precedent",
+      "url": "https://sustainablecatalyst.com/common-law-precedent/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "Legal Traditions",
+      "order": 4,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "islamic-law-governance",
+      "title": "Islamic Law and Governance",
+      "url": "https://sustainablecatalyst.com/islamic-law-governance/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "Legal Traditions",
+      "order": 5,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "customary-indigenous-legal-orders",
+      "title": "Customary and Indigenous Legal Orders",
+      "url": "https://sustainablecatalyst.com/customary-indigenous-legal-orders/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "Legal Traditions",
+      "order": 6,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "religious-legal-traditions",
+      "title": "Religious Legal Traditions",
+      "url": "https://sustainablecatalyst.com/religious-legal-traditions/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "Legal Traditions",
+      "order": 7,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "chinese-east-asian-legal-traditions",
+      "title": "Chinese and East Asian Legal Traditions",
+      "url": "https://sustainablecatalyst.com/chinese-east-asian-legal-traditions/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "Legal Traditions",
+      "order": 8,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "socialist-post-socialist-legal-traditions",
+      "title": "Socialist and Post-Socialist Legal Traditions",
+      "url": "https://sustainablecatalyst.com/socialist-post-socialist-legal-traditions/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "Legal Traditions",
+      "order": 9,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "mixed-legal-systems-legal-pluralism",
+      "title": "Mixed Legal Systems and Legal Pluralism",
+      "url": "https://sustainablecatalyst.com/mixed-legal-systems-legal-pluralism/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "Legal Traditions",
+      "order": 10,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "institutions-governance",
+      "title": "Institutions & Governance",
+      "url": "https://sustainablecatalyst.com/institutions-governance/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "",
+      "order": 11,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "geopolitics-global-order",
+      "title": "Geopolitical & Global Order",
+      "url": "https://sustainablecatalyst.com/geopolitics-global-order/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "",
+      "order": 12,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "international-organizations",
+      "title": "International Organizations",
+      "url": "https://sustainablecatalyst.com/international-organizations/",
+      "field": "Global Governance",
+      "field_order": 1,
+      "group": "",
+      "order": 13,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "sustainable-development",
+      "title": "Sustainable Development",
+      "url": "https://sustainablecatalyst.com/sustainable-development/",
+      "field": "Sustainable Systems",
+      "field_order": 2,
+      "group": "",
+      "order": 14,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Nutrient Cycles, Agriculture, and Ecological Stress",
+          "url": "https://sustainablecatalyst.com/nutrient-cycles-agriculture-and-ecological-stress/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Ecological Thresholds, Nonlinearity, and Systemic Risk",
+          "url": "https://sustainablecatalyst.com/ecological-thresholds-nonlinearity-and-systemic-risk/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Water, Sanitation, and Public Infrastructure Systems",
+          "url": "https://sustainablecatalyst.com/water-sanitation-and-public-infrastructure-systems/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Sustainable Finance and Development Investment",
+          "url": "https://sustainablecatalyst.com/sustainable-finance-and-development-investment/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "planetary-boundaries",
+      "title": "Planetary Boundaries",
+      "url": "https://sustainablecatalyst.com/planetary-boundaries/",
+      "field": "Sustainable Systems",
+      "field_order": 2,
+      "group": "",
+      "order": 15,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "The Great Acceleration: How Human Activity Reshaped the Earth System",
+          "url": "https://sustainablecatalyst.com/great-acceleration/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Safe Operating Space and the Logic of Thresholds",
+          "url": "https://sustainablecatalyst.com/safe-operating-space-and-the-logic-of-thresholds/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Atmospheric Aerosol Loading and Regional Planetary Risk",
+          "url": "https://sustainablecatalyst.com/atmospheric-aerosol-loading-and-regional-planetary-risk/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Tipping Points, Feedback Loops, and Cascading Ecological Change",
+          "url": "https://sustainablecatalyst.com/tipping-points-feedback-loops-and-cascading-ecological-change/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "risk-resilience",
+      "title": "Risk & Resilience",
+      "url": "https://sustainablecatalyst.com/risk-resilience/",
+      "field": "Sustainable Systems",
+      "field_order": 2,
+      "group": "",
+      "order": 16,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Risk, Uncertainty, and Complexity",
+          "url": "https://sustainablecatalyst.com/risk-uncertainty-and-complexity/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Adaptive Cycles and Panarchy in Social-Ecological Systems",
+          "url": "https://sustainablecatalyst.com/adaptive-cycles-and-panarchy-in-social-ecological-systems/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Water Security, Drought, Flood, and Resilience",
+          "url": "https://sustainablecatalyst.com/water-security-drought-flood-and-resilience/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Debt, Austerity, and the Erosion of Public Resilience",
+          "url": "https://sustainablecatalyst.com/debt-austerity-and-the-erosion-of-public-resilience/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "stewardship-ethics",
+      "title": "Stewardship & Ethics",
+      "url": "https://sustainablecatalyst.com/stewardship-ethics/",
+      "field": "Sustainable Systems",
+      "field_order": 2,
+      "group": "",
+      "order": 17,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Justice, Equity, and the Distribution of Environmental Burdens",
+          "url": "https://sustainablecatalyst.com/justice-equity-and-the-distribution-of-environmental-burdens/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Scientific Integrity and Ethical Decision-Making",
+          "url": "https://sustainablecatalyst.com/scientific-integrity-and-ethical-decision-making/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Planetary Stewardship and Civilizational Responsibility",
+          "url": "https://sustainablecatalyst.com/planetary-stewardship-and-civilizational-responsibility/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Development, Stewardship, and the Ethics of Global Inequality",
+          "url": "https://sustainablecatalyst.com/development-stewardship-and-the-ethics-of-global-inequality/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "economic-systems",
+      "title": "Economic Systems",
+      "url": "https://sustainablecatalyst.com/economic-systems/",
+      "field": "Sustainable Systems",
+      "field_order": 2,
+      "group": "",
+      "order": 18,
+      "aliases": [
+        "economics"
+      ],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Consumer Choice, Household Welfare, and Everyday Economic Life",
+          "url": "https://sustainablecatalyst.com/consumer-choice-household-welfare-and-everyday-economic-life/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Information, Uncertainty, and Imperfect Markets",
+          "url": "https://sustainablecatalyst.com/information-uncertainty-and-imperfect-markets/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Macroeconomic Stability, Business Cycles, and Crisis",
+          "url": "https://sustainablecatalyst.com/macroeconomic-stability-business-cycles-and-crisis/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "The IS–LM Model: Fiscal Policy, Monetary Policy, and Macroeconomic Equilibrium",
+          "url": "https://sustainablecatalyst.com/is-lm-model-fiscal-monetary-policy/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "artificial-intelligence-systems",
+      "title": "Artificial Intelligence Systems",
+      "url": "https://sustainablecatalyst.com/artificial-intelligence-systems/",
+      "field": "Technology & Systems Intelligence",
+      "field_order": 3,
+      "group": "",
+      "order": 19,
+      "aliases": [
+        "artificial-intelligence"
+      ],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Transfer Learning, Fine-Tuning, and Model Adaptation",
+          "url": "https://sustainablecatalyst.com/transfer-learning-fine-tuning-and-model-adaptation/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Deep Learning Systems: Representation, Scale, and Generalization",
+          "url": "https://sustainablecatalyst.com/deep-learning-systems-representation-scale-generalization/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Natural Language Processing and Computational Language Systems",
+          "url": "https://sustainablecatalyst.com/natural-language-processing-and-computational-language-systems/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Speech Recognition and Multimodal AI Systems",
+          "url": "https://sustainablecatalyst.com/speech-recognition-and-multimodal-ai-systems/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "data-systems-analytics",
+      "title": "Data Systems & Analytics",
+      "url": "https://sustainablecatalyst.com/data-systems-analytics/",
+      "field": "Technology & Systems Intelligence",
+      "field_order": 3,
+      "group": "",
+      "order": 20,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Database Systems and Data Architecture",
+          "url": "https://sustainablecatalyst.com/database-systems-and-data-architecture/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Data Quality Metrics and Observability in Modern Data Systems",
+          "url": "https://sustainablecatalyst.com/data-quality-metrics-and-observability/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Data Cleaning and Data Quality Management: Quality, Governance, and Trust",
+          "url": "https://sustainablecatalyst.com/data-cleaning-and-data-quality-management/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Streaming Data and Real-Time Analytics: Event Time, State, and Continuous Insight",
+          "url": "https://sustainablecatalyst.com/streaming-data-and-real-time-analytics/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "embedded-and-edge-systems",
+      "title": "Embedded & Edge Systems",
+      "url": "https://sustainablecatalyst.com/embedded-and-edge-systems/",
+      "field": "Technology & Systems Intelligence",
+      "field_order": 3,
+      "group": "",
+      "order": 21,
+      "aliases": [
+        "embedded-edge-systems"
+      ],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Firmware, Hardware Abstraction, and Device Control in Embedded Systems",
+          "url": "https://sustainablecatalyst.com/firmware-hardware-abstraction-and-device-control-in-embedded-systems/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Environmental Sensor Networks for Embedded and Edge Systems",
+          "url": "https://sustainablecatalyst.com/environmental-sensor-networks/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Data Acquisition and Embedded Sensor Interfaces for Embedded Systems",
+          "url": "https://sustainablecatalyst.com/data-acquisition-and-embedded-sensor-interfaces/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Edge AI and On-Device Machine Learning for Embedded Systems",
+          "url": "https://sustainablecatalyst.com/edge-ai-and-on-device-machine-learning/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "environmental-monitoring-systems",
+      "title": "Environmental Monitoring Systems",
+      "url": "https://sustainablecatalyst.com/environmental-monitoring-systems/",
+      "field": "Technology & Systems Intelligence",
+      "field_order": 3,
+      "group": "",
+      "order": 22,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Air Quality Monitoring Systems: Sensors, Networks, and Atmospheric Governance",
+          "url": "https://sustainablecatalyst.com/air-quality-monitoring-systems/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Land Use Monitoring and Environmental Change Detection: Landscape Change, Classification, and Environmental Accountability",
+          "url": "https://sustainablecatalyst.com/land-use-monitoring-and-environmental-change-detection/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Biodiversity Monitoring Systems: Ecological Observation, Indicators, and Conservation Accountability",
+          "url": "https://sustainablecatalyst.com/biodiversity-monitoring-systems/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Flood Monitoring Systems and Hydrological Risk Detection",
+          "url": "https://sustainablecatalyst.com/flood-monitoring-systems-and-hydrological-risk-detection/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "intelligent-infrastructure-systems",
+      "title": "Intelligent Infrastructure Systems",
+      "url": "https://sustainablecatalyst.com/intelligent-infrastructure-systems/",
+      "field": "Technology & Systems Intelligence",
+      "field_order": 3,
+      "group": "",
+      "order": 23,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Infrastructure Monitoring and Sensor Integration: Observability and Resilience",
+          "url": "https://sustainablecatalyst.com/infrastructure-monitoring-and-sensor-integration/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Infrastructure Systems for Climate Adaptation: Risk, Resilient Development and Implementation",
+          "url": "https://sustainablecatalyst.com/infrastructure-systems-for-climate-adaptation/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Intelligent Transportation Networks: Mobility, Data and Network Coordination",
+          "url": "https://sustainablecatalyst.com/intelligent-transportation-networks/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Smart City Infrastructure Systems: Urban Intelligence, Governance and Resilience",
+          "url": "https://sustainablecatalyst.com/smart-city-infrastructure-systems/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "energy-systems",
+      "title": "Energy Systems",
+      "url": "https://sustainablecatalyst.com/energy-systems/",
+      "field": "Technology & Systems Intelligence",
+      "field_order": 3,
+      "group": "",
+      "order": 24,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Smart Grids: Digital Infrastructure, Automation, and Flexible Energy Systems",
+          "url": "https://sustainablecatalyst.com/smart-grids/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Electricity Grids: How Modern Power Systems Operate",
+          "url": "https://sustainablecatalyst.com/electricity-grids/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Energy, Power, and Work: Foundations of Energy Systems",
+          "url": "https://sustainablecatalyst.com/energy-power-and-work/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Energy Systems: Infrastructure, Transition, Resilience, and Decarbonization",
+          "url": "https://sustainablecatalyst.com/energy-systems/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "physics",
+      "title": "Physics",
+      "url": "https://sustainablecatalyst.com/physics/",
+      "field": "Natural Science",
+      "field_order": 4,
+      "group": "",
+      "order": 25,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Relativity and the Reconstruction of Space and Time",
+          "url": "https://sustainablecatalyst.com/relativity-and-the-reconstruction-of-space-and-time/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Atomic, Molecular, and Optical Physics",
+          "url": "https://sustainablecatalyst.com/atomic-molecular-and-optical-physics/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Quantum Fields, Particles, and the Standard Model",
+          "url": "https://sustainablecatalyst.com/quantum-fields-particles-and-the-standard-model/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Nuclear Physics and the Energetics of the Atomic Nucleus",
+          "url": "https://sustainablecatalyst.com/nuclear-physics-and-the-energetics-of-the-atomic-nucleus/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "biology",
+      "title": "Biology",
+      "url": "https://sustainablecatalyst.com/biology/",
+      "field": "Natural Science",
+      "field_order": 4,
+      "group": "",
+      "order": 26,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Classification, Taxonomy, and the Ordering of Life",
+          "url": "https://sustainablecatalyst.com/classification-taxonomy-and-the-ordering-of-life/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Biomolecules and the Chemical Basis of Life",
+          "url": "https://sustainablecatalyst.com/biomolecules-and-the-chemical-basis-of-life/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Enzymes, Regulation, and Biochemical Pathways",
+          "url": "https://sustainablecatalyst.com/enzymes-regulation-biochemical-pathways/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "DNA, RNA, and the Molecular Logic of Life",
+          "url": "https://sustainablecatalyst.com/dna-rna-molecular-logic-of-life/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "chemistry",
+      "title": "Chemistry",
+      "url": "https://sustainablecatalyst.com/chemistry/",
+      "field": "Natural Science",
+      "field_order": 4,
+      "group": "",
+      "order": 27,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Chemical Bonding and Molecular Structure",
+          "url": "https://sustainablecatalyst.com/chemical-bonding-molecular-structure/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Spectroscopy and the Measurement of Molecular Structure",
+          "url": "https://sustainablecatalyst.com/spectroscopy-measurement-molecular-structure/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Biochemistry and the Molecular Basis of Life",
+          "url": "https://sustainablecatalyst.com/biochemistry-molecular-basis-life/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Electrochemistry, Batteries, and Energy Storage",
+          "url": "https://sustainablecatalyst.com/electrochemistry-batteries-energy-storage/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "materials-science",
+      "title": "Materials Science",
+      "url": "https://sustainablecatalyst.com/materials-science/",
+      "field": "Natural Science",
+      "field_order": 4,
+      "group": "",
+      "order": 28,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "earth-science",
+      "title": "Earth Science",
+      "url": "https://sustainablecatalyst.com/earth-science/",
+      "field": "Natural Science",
+      "field_order": 4,
+      "group": "",
+      "order": 29,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "astronomy",
+      "title": "Astronomy",
+      "url": "https://sustainablecatalyst.com/astronomy/",
+      "field": "Natural Science",
+      "field_order": 4,
+      "group": "",
+      "order": 30,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "environmental-science",
+      "title": "Environmental Science",
+      "url": "https://sustainablecatalyst.com/environmental-science/",
+      "field": "Natural Science",
+      "field_order": 4,
+      "group": "",
+      "order": 31,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "culture-ritual-and-symbolism",
+      "title": "Culture, Ritual, & Symbolism",
+      "url": "https://sustainablecatalyst.com/culture-ritual-and-symbolism/",
+      "field": "Cultural Anthropology",
+      "field_order": 5,
+      "group": "",
+      "order": 32,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "kinship-reciprocity-and-social-organization",
+      "title": "Kinship, Reciprocity, and Social Organization",
+      "url": "https://sustainablecatalyst.com/kinship-reciprocity-and-social-organization/",
+      "field": "Cultural Anthropology",
+      "field_order": 5,
+      "group": "",
+      "order": 33,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "power-norms-and-institutions",
+      "title": "Power, Norms, and Institutions",
+      "url": "https://sustainablecatalyst.com/power-norms-and-institutions/",
+      "field": "Cultural Anthropology",
+      "field_order": 5,
+      "group": "",
+      "order": 34,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "development-modernity-and-global-change",
+      "title": "Development, Modernity, and Global Change",
+      "url": "https://sustainablecatalyst.com/development-modernity-and-global-change/",
+      "field": "Cultural Anthropology",
+      "field_order": 5,
+      "group": "",
+      "order": 35,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "environment-place-and-ecological-knowledge",
+      "title": "Environment, Place, and Ecological Knowledge",
+      "url": "https://sustainablecatalyst.com/environment-place-and-ecological-knowledge/",
+      "field": "Cultural Anthropology",
+      "field_order": 5,
+      "group": "",
+      "order": 36,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "technology-infrastructure-and-everyday-systems",
+      "title": "Technology, Infrastructure, and Everyday Systems",
+      "url": "https://sustainablecatalyst.com/technology-infrastructure-and-everyday-systems/",
+      "field": "Cultural Anthropology",
+      "field_order": 5,
+      "group": "",
+      "order": 37,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "classical-literature-and-civilizational-memory",
+      "title": "Classical Literature and Civilizational Memory",
+      "url": "https://sustainablecatalyst.com/classical-literature-and-civilizational-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 38,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "arabic-literature-and-adab",
+      "title": "Arabic Literature and Adab",
+      "url": "https://sustainablecatalyst.com/arabic-literature-and-adab/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 39,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "persian-poetry-and-cultural-memory",
+      "title": "Persian Poetry and Cultural Memory",
+      "url": "https://sustainablecatalyst.com/persian-poetry-and-cultural-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 40,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "maghrebi-and-andalusi-literature-and-cultural-memory",
+      "title": "Maghrebi and Andalusi Literature and Cultural Memory",
+      "url": "https://sustainablecatalyst.com/maghrebi-and-andalusi-literature-and-cultural-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 41,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "south-asian-literature-and-sacred-memory",
+      "title": "South Asian Literature and Sacred Memory",
+      "url": "https://sustainablecatalyst.com/south-asian-literature-and-sacred-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 42,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "russian-literature-and-philosophical-intensity",
+      "title": "Russian Literature and Philosophical Intensity",
+      "url": "https://sustainablecatalyst.com/russian-literature-and-philosophical-intensity/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 43,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "chinese-literature-and-classical-memory",
+      "title": "Chinese Literature and Classical Memory",
+      "url": "https://sustainablecatalyst.com/chinese-literature-and-classical-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 44,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "japanese-literature-and-poetic-memory",
+      "title": "Japanese Literature and Poetic Memory",
+      "url": "https://sustainablecatalyst.com/japanese-literature-and-poetic-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 45,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "african-and-diasporic-literature-and-cultural-memory",
+      "title": "African and Diasporic Literature and Cultural Memory",
+      "url": "https://sustainablecatalyst.com/african-and-diasporic-literature-and-cultural-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 46,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "shakespeare-and-early-modern-literature",
+      "title": "Shakespeare and Early Modern Literature",
+      "url": "https://sustainablecatalyst.com/shakespeare-and-early-modern-literature/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 47,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "korean-literature-and-historical-memory",
+      "title": "Korean Literature and Historical Memory",
+      "url": "https://sustainablecatalyst.com/korean-literature-and-historical-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 48,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "latin-american-literature-and-magical-realism",
+      "title": "Latin American Literature and Magical Realism",
+      "url": "https://sustainablecatalyst.com/latin-american-literature-and-magical-realism/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 49,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "dante-epic-and-medieval-memory",
+      "title": "Dante, Epic, and Medieval Memory",
+      "url": "https://sustainablecatalyst.com/dante-epic-and-medieval-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 50,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "british-literature-and-cultural-memory",
+      "title": "British Literature and Cultural Memory",
+      "url": "https://sustainablecatalyst.com/british-literature-and-cultural-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 51,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "transcendentalism-and-american-moral-imagination",
+      "title": "Transcendentalism and American Moral Imagination",
+      "url": "https://sustainablecatalyst.com/transcendentalism-and-american-moral-imagination/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 52,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "yiddish-literature-and-cultural-memory",
+      "title": "Yiddish Literature and Cultural Memory",
+      "url": "https://sustainablecatalyst.com/yiddish-literature-and-cultural-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 53,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "poetry-memory-and-imagination",
+      "title": "Poetry, Memory, and Imagination",
+      "url": "https://sustainablecatalyst.com/poetry-memory-and-imagination/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 54,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "tragedy-drama-and-collective-memory",
+      "title": "Tragedy, Drama, and Collective Memory",
+      "url": "https://sustainablecatalyst.com/tragedy-drama-and-collective-memory/",
+      "field": "Literature & Cultural Memory",
+      "field_order": 6,
+      "group": "",
+      "order": 55,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "chinese-myth-folklore-legend",
+      "title": "Chinese Myth, Folklore & Legend",
+      "url": "https://sustainablecatalyst.com/chinese-myth-folklore-legend/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 56,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Yu the Great, Flood Control, and the Birth of Political Order",
+          "url": "https://sustainablecatalyst.com/yu-the-great-flood-control-and-the-birth-of-political-order/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Shennong and the Invention of Agriculture, Medicine, and Rule",
+          "url": "https://sustainablecatalyst.com/shennong-and-the-invention-of-agriculture-medicine-and-rule/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "The White Snake Tradition and the Legend of Love, Transgression, and Cultivation",
+          "url": "https://sustainablecatalyst.com/the-white-snake-tradition-and-the-legend-of-love-transgression-and-cultivation/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Fox Spirits, Transformation, and Ambiguity in Chinese Folklore",
+          "url": "https://sustainablecatalyst.com/fox-spirits-transformation-and-ambiguity-in-chinese-folklore/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "japanese-myth-folklore-legend",
+      "title": "Japanese Myth, Folklore & Legend",
+      "url": "https://sustainablecatalyst.com/japanese-myth-folklore-legend/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 57,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "greek-roman-mythology",
+      "title": "Greek & Roman Mythology",
+      "url": "https://sustainablecatalyst.com/greek-roman-mythology/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 58,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "egyptian-mythology",
+      "title": "Egyptian Mythology",
+      "url": "https://sustainablecatalyst.com/egyptian-mythology/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 59,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "mesopotamian-mythology",
+      "title": "Mesopotamian Mythology",
+      "url": "https://sustainablecatalyst.com/mesopotamian-mythology/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 60,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "persian-myth-folklore-epic-tradition",
+      "title": "Persian Myth, Folklore & Epic Tradition",
+      "url": "https://sustainablecatalyst.com/persian-myth-folklore-epic-tradition/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 61,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "arabian-levantine-myth-folklore-sacred-narrative",
+      "title": "Arabian & Levantine Myth, Folklore & Sacred Narrative",
+      "url": "https://sustainablecatalyst.com/arabian-levantine-myth-folklore-sacred-narrative/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 62,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "maghrebi-and-andalusi-legend-folklore-and-sacred-imagination",
+      "title": "Maghrebi and Andalusi Legend, Folklore, and Sacred Imagination",
+      "url": "https://sustainablecatalyst.com/maghrebi-and-andalusi-legend-folklore-and-sacred-imagination/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 63,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "african-myth-folklore-sacred-narrative",
+      "title": "African Myth, Folklore & Sacred Narrative",
+      "url": "https://sustainablecatalyst.com/african-myth-folklore-sacred-narrative/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 64,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "indus-region-myth-folklore-sacred-narrative",
+      "title": "Indus Region Myth, Folklore & Sacred Narrative",
+      "url": "https://sustainablecatalyst.com/indus-region-myth-folklore-sacred-narrative/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 65,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "celtic-mythology",
+      "title": "Celtic Mythology",
+      "url": "https://sustainablecatalyst.com/celtic-mythology/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 66,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "norse-mythology",
+      "title": "Norse Mythology",
+      "url": "https://sustainablecatalyst.com/norse-mythology/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 67,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "native-american-myth-folklore-legend",
+      "title": "Native American Myth, Folklore & Legend",
+      "url": "https://sustainablecatalyst.com/native-american-myth-folklore-legend/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 68,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "south-slavic-myth-epic-and-folklore",
+      "title": "South Slavic Myth, Epic, and Folklore",
+      "url": "https://sustainablecatalyst.com/south-slavic-myth-epic-and-folklore/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 69,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "turkic-and-ottoman-myth-epic-and-folklore",
+      "title": "Turkic and Ottoman Myth, Epic, and Folklore",
+      "url": "https://sustainablecatalyst.com/turkic-and-ottoman-myth-epic-and-folklore/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 70,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "yiddish-legend-folklore-and-sacred-imagination",
+      "title": "Yiddish Legend, Folklore, and Sacred Imagination",
+      "url": "https://sustainablecatalyst.com/yiddish-legend-folklore-and-sacred-imagination/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 71,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "russian-myth-epic-and-folklore",
+      "title": "Russian Myth, Epic, and Folklore",
+      "url": "https://sustainablecatalyst.com/russian-myth-epic-and-folklore/",
+      "field": "Mythology",
+      "field_order": 7,
+      "group": "",
+      "order": 72,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "foundations-of-religion",
+      "title": "Foundations of Religion",
+      "url": "https://sustainablecatalyst.com/foundations-of-religion/",
+      "field": "Religious Studies",
+      "field_order": 8,
+      "group": "",
+      "order": 73,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "abrahamic-traditions",
+      "title": "Abrahamic Traditions",
+      "url": "https://sustainablecatalyst.com/abrahamic-traditions/",
+      "field": "Religious Studies",
+      "field_order": 8,
+      "group": "",
+      "order": 74,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Passover, Easter, Ramadan, and the Memory of Deliverance",
+          "url": "https://sustainablecatalyst.com/passover-easter-ramadan-memory-of-deliverance/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Arabic as a Shared Language of Jewish, Christian, and Muslim Knowledge",
+          "url": "https://sustainablecatalyst.com/arabic-shared-language-jewish-christian-muslim-knowledge/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Covenant, Commandment, and Conscience in Abrahamic Ethics",
+          "url": "https://sustainablecatalyst.com/covenant-commandment-conscience-abrahamic-ethics/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Charity, Almsgiving, and the Moral Economy of Abrahamic Faith",
+          "url": "https://sustainablecatalyst.com/charity-almsgiving-moral-economy-abrahamic-faith/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "persian-traditions",
+      "title": "Persian Traditions",
+      "url": "https://sustainablecatalyst.com/persian-traditions/",
+      "field": "Religious Studies",
+      "field_order": 8,
+      "group": "",
+      "order": 75,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "south-asian-traditions",
+      "title": "South Asian Traditions",
+      "url": "https://sustainablecatalyst.com/south-asian-traditions/",
+      "field": "Religious Studies",
+      "field_order": 8,
+      "group": "",
+      "order": 76,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "east-asian-traditions",
+      "title": "East Asian Traditions",
+      "url": "https://sustainablecatalyst.com/east-asian-traditions/",
+      "field": "Religious Studies",
+      "field_order": 8,
+      "group": "",
+      "order": 77,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "indigenous-and-oral-traditions",
+      "title": "Indigenous and Oral Traditions",
+      "url": "https://sustainablecatalyst.com/religious-studies/indigenous-and-oral-traditions/",
+      "field": "Religious Studies",
+      "field_order": 8,
+      "group": "",
+      "order": 78,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "mysticism-and-contemplative-traditions",
+      "title": "Mysticism and Contemplative Traditions",
+      "url": "https://sustainablecatalyst.com/mysticism-and-contemplative-traditions/",
+      "field": "Religious Studies",
+      "field_order": 8,
+      "group": "",
+      "order": 79,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "religion-and-law",
+      "title": "Religion and Law",
+      "url": "https://sustainablecatalyst.com/religion-and-law/",
+      "field": "Religious Studies",
+      "field_order": 8,
+      "group": "",
+      "order": 80,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "religion-and-society",
+      "title": "Religion and Society",
+      "url": "https://sustainablecatalyst.com/religion-and-society/",
+      "field": "Religious Studies",
+      "field_order": 8,
+      "group": "",
+      "order": 81,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "religion-and-ecology",
+      "title": "Religion and Ecology",
+      "url": "https://sustainablecatalyst.com/religion-and-ecology/",
+      "field": "Religious Studies",
+      "field_order": 8,
+      "group": "",
+      "order": 82,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "comparative-sacred-themes",
+      "title": "Comparative Sacred Themes",
+      "url": "https://sustainablecatalyst.com/comparative-sacred-themes/",
+      "field": "Religious Studies",
+      "field_order": 8,
+      "group": "",
+      "order": 83,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "ancient-near-eastern-and-mediterranean-healing-traditions",
+      "title": "Ancient Near Eastern and Mediterranean Healing Traditions",
+      "url": "https://sustainablecatalyst.com/ancient-near-eastern-and-mediterranean-healing-traditions/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 84,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "greek-roman-medicine",
+      "title": "Greek & Roman Medicine",
+      "url": "https://sustainablecatalyst.com/greek-roman-medicine/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 85,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "ayurveda-and-south-asian-healing-traditions",
+      "title": "Ayurveda and South Asian Healing Traditions",
+      "url": "https://sustainablecatalyst.com/ayurveda-and-south-asian-healing-traditions/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 86,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "chinese-medicine",
+      "title": "Chinese Medicine",
+      "url": "https://sustainablecatalyst.com/chinese-medicine/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 87,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "islamic-medicine",
+      "title": "Islamic Medicine",
+      "url": "https://sustainablecatalyst.com/islamic-medicine/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 88,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "african-healing-traditions",
+      "title": "African Healing Traditions",
+      "url": "https://sustainablecatalyst.com/african-healing-traditions/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 89,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "herbalism-traditional-knowledge",
+      "title": "Herbalism & Traditional Knowledge",
+      "url": "https://sustainablecatalyst.com/herbalism-traditional-knowledge/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 90,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "diet-nourishment-food-as-medicine",
+      "title": "Diet, Nourishment & Food as Medicine",
+      "url": "https://sustainablecatalyst.com/healing-traditions/diet-nourishment-food-as-medicine/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 91,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "vital-energy-healing-traditions",
+      "title": "Vital Energy & Healing Traditions",
+      "url": "https://sustainablecatalyst.com/vital-energy-healing-traditions/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 92,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "healing-spaces-baths-sacred-environments",
+      "title": "Healing Spaces, Baths & Sacred Environments",
+      "url": "https://sustainablecatalyst.com/healing-spaces-baths-sacred-environments/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 93,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "shamanism-ritual-spiritual-healing",
+      "title": "Shamanism, Ritual & Spiritual Healing",
+      "url": "https://sustainablecatalyst.com/shamanism-ritual-spiritual-healing/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 94,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "tea-ritual-everyday-philosophy",
+      "title": "Tea, Ritual & Everyday Philosophy",
+      "url": "https://sustainablecatalyst.com/tea-ritual-everyday-philosophy/",
+      "field": "Healing Traditions",
+      "field_order": 9,
+      "group": "",
+      "order": 95,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "cognitive-psychology",
+      "title": "Cognitive Psychology",
+      "url": "https://sustainablecatalyst.com/cognitive-psychology/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "",
+      "order": 96,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Skill Acquisition and Expertise Development",
+          "url": "https://sustainablecatalyst.com/skill-acquisition-expertise-development/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Analogical Reasoning and Knowledge Transfer",
+          "url": "https://sustainablecatalyst.com/analogical-reasoning-and-knowledge-transfer/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Cognitive Load and Information Processing: Limits of Human Working Memory",
+          "url": "https://sustainablecatalyst.com/cognitive-load-information-processing/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Risk Perception and Uncertainty in Human Decision Making",
+          "url": "https://sustainablecatalyst.com/risk-perception-uncertainty/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "social-psychology",
+      "title": "Social Psychology",
+      "url": "https://sustainablecatalyst.com/social-psychology/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "",
+      "order": 97,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Conformity and Social Influence: Foundations of Collective Behavior in Social Psychology",
+          "url": "https://sustainablecatalyst.com/conformity-social-influence-social-psychology/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Social Norms in Social Psychology: How Groups Shape Behavior",
+          "url": "https://sustainablecatalyst.com/social-norms-social-psychology/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Social Loafing in Social Psychology: Group Effort, Responsibility, and Collective Performance",
+          "url": "https://sustainablecatalyst.com/social-loafing-social-psychology/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Contact Hypothesis: How Intergroup Contact Reduces Prejudice",
+          "url": "https://sustainablecatalyst.com/contact-hypothesis-social-psychology/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "developmental-psychology",
+      "title": "Developmental Psychology",
+      "url": "https://sustainablecatalyst.com/developmental-psychology/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "",
+      "order": 98,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Genes, Environment, and Developmental Plasticity",
+          "url": "https://sustainablecatalyst.com/genes-environment-and-developmental-plasticity/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Trauma, Adversity, and the Life Course",
+          "url": "https://sustainablecatalyst.com/trauma-adversity-and-the-life-course/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Brain Development, Plasticity, and the Developing Nervous System",
+          "url": "https://sustainablecatalyst.com/brain-development-plasticity-and-the-developing-nervous-system/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Language Development and the Social Formation of Speech",
+          "url": "https://sustainablecatalyst.com/language-development-and-the-social-formation-of-speech/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "personality-psychology",
+      "title": "Personality Psychology",
+      "url": "https://sustainablecatalyst.com/personality-psychology/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "",
+      "order": 99,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Personality, Culture, and the Problem of Universality",
+          "url": "https://sustainablecatalyst.com/personality-culture-and-the-problem-of-universality/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Narrative Identity and the Storied Self",
+          "url": "https://sustainablecatalyst.com/narrative-identity-and-the-storied-self/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Self-Concept, Self-Esteem, and Self-Knowledge",
+          "url": "https://sustainablecatalyst.com/self-concept-self-esteem-and-self-knowledge/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Maladaptive Personality and the Border Between Normal and Clinical Structure",
+          "url": "https://sustainablecatalyst.com/maladaptive-personality-and-the-border-between-normal-and-clinical-structure/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "positive-psychology",
+      "title": "Positive Psychology",
+      "url": "https://sustainablecatalyst.com/positive-psychology/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "Positive Psychology",
+      "order": 100,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Learned Helplessness and Depression: The Psychological Roots of Positive Psychology",
+          "url": "https://sustainablecatalyst.com/learned-helplessness-depression/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Post-Traumatic Growth in Positive Psychology",
+          "url": "https://sustainablecatalyst.com/post-traumatic-growth-positive-psychology/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Hedonic vs Eudaimonic Well-Being: Two Traditions in the Science of Human Flourishing",
+          "url": "https://sustainablecatalyst.com/hedonic-vs-eudaimonic-well-being/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "The Economics of Well-Being: Rethinking Growth, Happiness, and Human Flourishing",
+          "url": "https://sustainablecatalyst.com/economics-of-well-being/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "grit",
+      "title": "Grit: The Science of Sustained Effort",
+      "url": "https://sustainablecatalyst.com/grit/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "Positive Psychology",
+      "order": 101,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Grit, Burnout, and the Risks of Overpersistence",
+          "url": "https://sustainablecatalyst.com/grit-burnout-and-the-risks-of-overpersistence/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Angela Duckworth and the Modern Science of Grit",
+          "url": "https://sustainablecatalyst.com/angela-duckworth-and-the-modern-science-of-grit/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Perseverance of Effort Versus Consistency of Interests",
+          "url": "https://sustainablecatalyst.com/perseverance-of-effort-versus-consistency-of-interests/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Grit, Setbacks, and Recovery",
+          "url": "https://sustainablecatalyst.com/grit-setbacks-and-recovery/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "organizational-psychology",
+      "title": "Organizational Psychology",
+      "url": "https://sustainablecatalyst.com/organizational-psychology/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "",
+      "order": 102,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Resistance to Organizational Change",
+          "url": "https://sustainablecatalyst.com/psychological-institutional-resistance-organizational-change/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Job Satisfaction and Organizational Commitment: Psychological Foundations of Employee Retention",
+          "url": "https://sustainablecatalyst.com/job-satisfaction-and-organizational-commitment-psychological-foundations-of-employee-retention/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Incentives and Workplace Behavior: How Rewards Shape Organizational Performance",
+          "url": "https://sustainablecatalyst.com/incentives-workplace-behavior/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Transformational Leadership and Organizational Change: How Visionary Leaders Drive Institutional Transformation",
+          "url": "https://sustainablecatalyst.com/transformational-leadership-organizational-change/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "institutional-psychology",
+      "title": "Institutional Psychology",
+      "url": "https://sustainablecatalyst.com/institutional-psychology/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "",
+      "order": 103,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Compliance and Rule-Following Behavior",
+          "url": "https://sustainablecatalyst.com/compliance-and-rule-following-behavior/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Cognitive Bias in Institutional Decision-Making",
+          "url": "https://sustainablecatalyst.com/cognitive-bias-in-institutional-decision-making/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Institutional Memory: Knowledge Retention and Organizational Continuity",
+          "url": "https://sustainablecatalyst.com/institutional-memory-knowledge-retention-and-organizational-continuity/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Institutional Resilience in Complex Systems",
+          "url": "https://sustainablecatalyst.com/institutional-resilience-complex-systems/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "analytical-psychology-symbolism-depth-mind",
+      "title": "Analytical Psychology, Symbolism & the Depth Mind",
+      "url": "https://sustainablecatalyst.com/analytical-psychology-symbolism-depth-mind/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "",
+      "order": 104,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Dreams, Compensation, and the Prospective Function",
+          "url": "https://sustainablecatalyst.com/dreams-compensation-and-the-prospective-function/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Myth, Symbol, and the Archetypal Imagination",
+          "url": "https://sustainablecatalyst.com/myth-symbol-and-the-archetypal-imagination/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Individuation and the Development of the Depth Self",
+          "url": "https://sustainablecatalyst.com/individuation-and-the-development-of-the-depth-self/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Numinous Experience, Spiritual Emergency, and Symbolic Crisis",
+          "url": "https://sustainablecatalyst.com/numinous-experience-spiritual-emergency-and-symbolic-crisis/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "behavioral-science-behavioral-psychology",
+      "title": "Behavioral Science & Psychology",
+      "url": "https://sustainablecatalyst.com/behavioral-science-behavioral-psychology/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "Behavioral Science & Psychology",
+      "order": 105,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "behavioral-economics",
+      "title": "Behavioral Economics",
+      "url": "https://sustainablecatalyst.com/behavioral-economics/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "Behavioral Science & Psychology",
+      "order": 106,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Herd Behavior in Financial Markets",
+          "url": "https://sustainablecatalyst.com/herd-behavior-financial-markets/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Choice Architecture and Decision Environments",
+          "url": "https://sustainablecatalyst.com/choice-architecture-decision-environments/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Prospect Theory: How Humans Evaluate Risk and Uncertainty",
+          "url": "https://sustainablecatalyst.com/prospect-theory-psychology-of-risk/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Framing Effects in Consumer Choice",
+          "url": "https://sustainablecatalyst.com/framing-effects-consumer-choice/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "behavior-change-and-habit-formation",
+      "title": "Behavior Change and Habit Formation",
+      "url": "https://sustainablecatalyst.com/behavior-change-and-habit-formation/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "Behavioral Science & Psychology",
+      "order": 107,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "motivation-reinforcement-and-learning",
+      "title": "Motivation, Reinforcement, and Learning",
+      "url": "https://sustainablecatalyst.com/motivation-reinforcement-and-learning/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "Behavioral Science & Psychology",
+      "order": 108,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "choice-architecture-and-nudging",
+      "title": "Choice Architecture and Nudging",
+      "url": "https://sustainablecatalyst.com/choice-architecture-and-nudging/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "Behavioral Science & Psychology",
+      "order": 109,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "social-norms-and-behavioral-influence",
+      "title": "Social Norms and Behavioral Influence",
+      "url": "https://sustainablecatalyst.com/social-norms-and-behavioral-influence/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "Behavioral Science & Psychology",
+      "order": 110,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "behavioral-public-policy",
+      "title": "Behavioral Public Policy",
+      "url": "https://sustainablecatalyst.com/behavioral-public-policy/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "Behavioral Science & Psychology",
+      "order": 111,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "behavioral-research-methods",
+      "title": "Behavioral Research Methods",
+      "url": "https://sustainablecatalyst.com/behavioral-research-methods/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "Behavioral Science & Psychology",
+      "order": 112,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "ethics-of-behavioral-intervention",
+      "title": "Ethics of Behavioral Intervention",
+      "url": "https://sustainablecatalyst.com/ethics-of-behavioral-intervention/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "Behavioral Science & Psychology",
+      "order": 113,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "moral-psychology",
+      "title": "Moral Psychology",
+      "url": "https://sustainablecatalyst.com/moral-psychology/",
+      "field": "Psychology",
+      "field_order": 10,
+      "group": "",
+      "order": 114,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Conscience, Guilt, Shame, and Moral Self-Evaluation",
+          "url": "https://sustainablecatalyst.com/conscience-guilt-shame-and-moral-self-evaluation/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Prosocial Behavior, Altruism, and Care for Others",
+          "url": "https://sustainablecatalyst.com/prosocial-behavior-altruism-and-care-for-others/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Responsibility, Blame, and Moral Accountability",
+          "url": "https://sustainablecatalyst.com/responsibility-blame-and-moral-accountability/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Moral Psychology, Propaganda, and Political Polarization",
+          "url": "https://sustainablecatalyst.com/moral-psychology-propaganda-and-political-polarization/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "ethics-moral-philosophy",
+      "title": "Ethics & Moral Philosophy",
+      "url": "https://sustainablecatalyst.com/ethics-moral-philosophy/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 115,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "political-philosophy-and-justice",
+      "title": "Political Philosophy and Justice",
+      "url": "https://sustainablecatalyst.com/political-philosophy-and-justice/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Political Philosophy and Justice",
+      "order": 116,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "liberalism-and-its-traditions",
+      "title": "Liberalism and Its Traditions",
+      "url": "https://sustainablecatalyst.com/liberalism-and-its-traditions/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Political Philosophy and Justice",
+      "order": 117,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "socialism-and-socialist-thought",
+      "title": "Socialism and Socialist Thought",
+      "url": "https://sustainablecatalyst.com/socialism-and-socialist-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Political Philosophy and Justice",
+      "order": 118,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "pan-african-and-black-political-thought",
+      "title": "Pan-African and Black Political Thought",
+      "url": "https://sustainablecatalyst.com/pan-african-and-black-political-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Political Philosophy and Justice",
+      "order": 119,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "liberation-anti-colonial-and-decolonial-thought",
+      "title": "Liberation, Anti-Colonial, and Decolonial Thought",
+      "url": "https://sustainablecatalyst.com/liberation-anti-colonial-and-decolonial-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Political Philosophy and Justice",
+      "order": 120,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "liberation-theology",
+      "title": "Liberation Theology",
+      "url": "https://sustainablecatalyst.com/liberation-theology/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Political Philosophy and Justice",
+      "order": 121,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "metaphysics",
+      "title": "Metaphysics",
+      "url": "https://sustainablecatalyst.com/metaphysics/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Metaphysics",
+      "order": 122,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "ontology",
+      "title": "Ontology",
+      "url": "https://sustainablecatalyst.com/ontology/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Metaphysics",
+      "order": 123,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "time-change-and-causation",
+      "title": "Time, Change, and Causation",
+      "url": "https://sustainablecatalyst.com/time-change-and-causation/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Metaphysics",
+      "order": 124,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "mind-matter-and-consciousness",
+      "title": "Mind, Matter, and Consciousness",
+      "url": "https://sustainablecatalyst.com/mind-matter-and-consciousness/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Metaphysics",
+      "order": 125,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "freedom-agency-and-determinism",
+      "title": "Freedom, Agency, and Determinism",
+      "url": "https://sustainablecatalyst.com/freedom-agency-and-determinism/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Metaphysics",
+      "order": 126,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "selfhood-and-personal-identity",
+      "title": "Selfhood and Personal Identity",
+      "url": "https://sustainablecatalyst.com/selfhood-and-personal-identity/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "Metaphysics",
+      "order": 127,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "greek-and-roman-thought",
+      "title": "Greek & Roman Thought",
+      "url": "https://sustainablecatalyst.com/greek-and-roman-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 128,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "chinese-thought",
+      "title": "Chinese Thought",
+      "url": "https://sustainablecatalyst.com/chinese-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 129,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "persian-thought",
+      "title": "Persian Thought",
+      "url": "https://sustainablecatalyst.com/persian-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 130,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "islamic-mystical-thought",
+      "title": "Islamic & Mystical Thought",
+      "url": "https://sustainablecatalyst.com/islamic-mystical-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 131,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "existential-thought",
+      "title": "Existential Thought",
+      "url": "https://sustainablecatalyst.com/existential-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 132,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "russian-thought",
+      "title": "Russian Thought",
+      "url": "https://sustainablecatalyst.com/russian-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 133,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "lakota-thought-memory-and-living-tradition",
+      "title": "Lakota Thought, Memory, and Living Tradition",
+      "url": "https://sustainablecatalyst.com/lakota-thought-memory-and-living-tradition/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 134,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "enlightenment-modernity-and-postmodern-thought",
+      "title": "Enlightenment, Modernity, and Postmodern Thought",
+      "url": "https://sustainablecatalyst.com/enlightenment-modernity-and-postmodern-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 135,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "south-slavic-thought",
+      "title": "South Slavic Thought",
+      "url": "https://sustainablecatalyst.com/south-slavic-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 136,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "ottoman-and-turkish-thought",
+      "title": "Ottoman and Turkish Thought",
+      "url": "https://sustainablecatalyst.com/ottoman-and-turkish-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 137,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "maghrebi-and-andalusi-thought",
+      "title": "Maghrebi and Andalusi Thought",
+      "url": "https://sustainablecatalyst.com/maghrebi-and-andalusi-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 138,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "arabian-and-levantine-thought",
+      "title": "Arabian and Levantine Thought",
+      "url": "https://sustainablecatalyst.com/arabian-and-levantine-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 139,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "indus-region-thought",
+      "title": "Indus Region Thought",
+      "url": "https://sustainablecatalyst.com/indus-region-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 140,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "yiddish-thought",
+      "title": "Yiddish Thought",
+      "url": "https://sustainablecatalyst.com/yiddish-thought/",
+      "field": "Philosophy",
+      "field_order": 11,
+      "group": "",
+      "order": 141,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "knowledge-architecture",
+      "title": "Knowledge Architecture",
+      "url": "https://sustainablecatalyst.com/knowledge-architecture/",
+      "field": "Thinking",
+      "field_order": 12,
+      "group": "",
+      "order": 142,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Research Frameworks and Analytical Models",
+          "url": "https://sustainablecatalyst.com/research-frameworks-and-analytical-models/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Knowledge Graphs and Semantic Relationships",
+          "url": "https://sustainablecatalyst.com/knowledge-graphs-and-semantic-relationships/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Ontologies and Semantic Networks",
+          "url": "https://sustainablecatalyst.com/ontologies-and-semantic-networks/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Knowledge Mapping and Conceptual Models",
+          "url": "https://sustainablecatalyst.com/knowledge-mapping-and-conceptual-models/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "design-thinking",
+      "title": "Design Thinking",
+      "url": "https://sustainablecatalyst.com/design-thinking/",
+      "field": "Thinking",
+      "field_order": 12,
+      "group": "",
+      "order": 143,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Human-Centered Problem Solving",
+          "url": "https://sustainablecatalyst.com/human-centered-problem-solving/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Co-Design and Participatory Design",
+          "url": "https://sustainablecatalyst.com/co-design-and-participatory-design/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Prototyping in Design Thinking",
+          "url": "https://sustainablecatalyst.com/prototyping-in-design-thinking/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Insight Generation in Design Thinking",
+          "url": "https://sustainablecatalyst.com/insight-generation-design-thinking/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "mathematical-thinking",
+      "title": "Mathematical Thinking",
+      "url": "https://sustainablecatalyst.com/mathematical-thinking/",
+      "field": "Thinking",
+      "field_order": 12,
+      "group": "",
+      "order": 144,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Discrete Mathematics and the Logic of Structure",
+          "url": "https://sustainablecatalyst.com/discrete-mathematics-logic-of-structure/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Algorithms, Proof, and Formal Reasoning",
+          "url": "https://sustainablecatalyst.com/algorithms-proof-formal-reasoning/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Recursion and Recursive Thinking",
+          "url": "https://sustainablecatalyst.com/recursion-recursive-thinking/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Mathematical Thinking in an Age of Automation",
+          "url": "https://sustainablecatalyst.com/mathematical-thinking-age-of-automation/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "systems-thinking",
+      "title": "Systems Thinking",
+      "url": "https://sustainablecatalyst.com/systems-thinking/",
+      "field": "Thinking",
+      "field_order": 12,
+      "group": "",
+      "order": 145,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Mental Models and the Limits of Linear Reasoning",
+          "url": "https://sustainablecatalyst.com/mental-models-and-the-limits-of-linear-reasoning/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Resilience, Thresholds, and Regime Shifts",
+          "url": "https://sustainablecatalyst.com/resilience-thresholds-and-regime-shifts/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Food-Water-Energy Systems Thinking",
+          "url": "https://sustainablecatalyst.com/food-water-energy-systems-thinking/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Paradigms, Goals, and Deep System Change",
+          "url": "https://sustainablecatalyst.com/paradigms-goals-and-deep-system-change/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "algorithms-computational-reasoning",
+      "title": "Algorithms & Computational Reasoning",
+      "url": "https://sustainablecatalyst.com/algorithms-computational-reasoning/",
+      "field": "Thinking",
+      "field_order": 12,
+      "group": "",
+      "order": 146,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Greedy Algorithms and Local Decision Rules: When Local Choice Works",
+          "url": "https://sustainablecatalyst.com/greedy-algorithms-and-local-decision-rules/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Iteration, Recursion, and Control Flow: How Algorithms Move Through Time",
+          "url": "https://sustainablecatalyst.com/iteration-recursion-and-control-flow/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Parallelism, Distribution, and Computational Scale",
+          "url": "https://sustainablecatalyst.com/parallelism-distribution-and-computational-scale/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Monte Carlo Methods and Computational Uncertainty: How Algorithms Reason Through Randomness",
+          "url": "https://sustainablecatalyst.com/monte-carlo-methods-and-computational-uncertainty/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "resilience-thinking",
+      "title": "Resilience Thinking",
+      "url": "https://sustainablecatalyst.com/resilience-thinking/",
+      "field": "Thinking",
+      "field_order": 12,
+      "group": "",
+      "order": 147,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Learning, Memory, and Adaptive Management",
+          "url": "https://sustainablecatalyst.com/learning-memory-and-adaptive-management/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Disaster Risk Reduction and Resilience: Anticipation, Preparedness, and Systemic Adaptation",
+          "url": "https://sustainablecatalyst.com/disaster-risk-reduction-and-resilience/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Resilience in Food and Water Systems: Security, Adaptation, and System Stability Under Stress",
+          "url": "https://sustainablecatalyst.com/resilience-in-food-and-water-systems/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Local Knowledge and Resilience Practice",
+          "url": "https://sustainablecatalyst.com/local-knowledge-and-resilience-practice/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "futures-thinking",
+      "title": "Futures Thinking",
+      "url": "https://sustainablecatalyst.com/futures-thinking/",
+      "field": "Thinking",
+      "field_order": 12,
+      "group": "",
+      "order": 148,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Uncertainty Matrices and Driver Mapping: How to Rank Drivers, Risks, and Critical Futures",
+          "url": "https://sustainablecatalyst.com/uncertainty-matrices-and-driver-mapping/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Energy Transition Futures: Clean Power, Grids, Justice, and Climate Resilience",
+          "url": "https://sustainablecatalyst.com/energy-transition-futures/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Food, Water, and Land-Use Futures: Climate, Food Security, Water Stress, and Land Governance",
+          "url": "https://sustainablecatalyst.com/food-water-and-land-use-futures/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Futures Thinking and Risk Analysis: Uncertainty, Scenario Design, and the Limits of Prediction",
+          "url": "https://sustainablecatalyst.com/futures-thinking-risk-analysis/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "beauty-aesthetics-and-meaning",
+      "title": "Beauty, Aesthetics, and Meaning",
+      "url": "https://sustainablecatalyst.com/beauty-aesthetics-and-meaning/",
+      "field": "Meaning",
+      "field_order": 13,
+      "group": "",
+      "order": 149,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "aesthetics-and-the-philosophy-of-art",
+      "title": "Aesthetics and the Philosophy of Art",
+      "url": "https://sustainablecatalyst.com/aesthetics-and-the-philosophy-of-art/",
+      "field": "Meaning",
+      "field_order": 13,
+      "group": "",
+      "order": 150,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "color-theory-typography-and-design",
+      "title": "Color Theory, Typography, and Design",
+      "url": "https://sustainablecatalyst.com/color-theory-typography-and-design/",
+      "field": "Meaning",
+      "field_order": 13,
+      "group": "",
+      "order": 151,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "music-theory-form-and-meaning",
+      "title": "Music Theory, Form, and Meaning",
+      "url": "https://sustainablecatalyst.com/music-theory-form-and-meaning/",
+      "field": "Meaning",
+      "field_order": 13,
+      "group": "",
+      "order": 152,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "mathematics-art-music-and-pattern",
+      "title": "Mathematics, Art, Music, and Pattern",
+      "url": "https://sustainablecatalyst.com/mathematics-art-music-and-pattern/",
+      "field": "Meaning",
+      "field_order": 13,
+      "group": "",
+      "order": 153,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "symbolism-style-cultural-meaning",
+      "title": "Symbolism, Style, and Cultural Meaning",
+      "url": "https://sustainablecatalyst.com/symbolism-style-cultural-meaning/",
+      "field": "Meaning",
+      "field_order": 13,
+      "group": "",
+      "order": 154,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "creative-form-composition-interpretation",
+      "title": "Creative Form, Composition, and Interpretation",
+      "url": "https://sustainablecatalyst.com/creative-form-composition-interpretation/",
+      "field": "Meaning",
+      "field_order": 13,
+      "group": "",
+      "order": 155,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": false,
+      "curated": []
+    },
+    {
+      "key": "story-myth-and-meaning",
+      "title": "Story, Myth, and Meaning",
+      "url": "https://sustainablecatalyst.com/story-myth-and-meaning/",
+      "field": "Meaning",
+      "field_order": 13,
+      "group": "",
+      "order": 156,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "strategic-ideation",
+      "title": "Strategic Ideation",
+      "url": "https://sustainablecatalyst.com/strategic-ideation/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "",
+      "order": 157,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": true,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Problem Framing and Problem Definition",
+          "url": "https://sustainablecatalyst.com/problem-framing-and-problem-definition/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Leverage Points in Systems Change: Strategic Ideation for Systemic Impact",
+          "url": "https://sustainablecatalyst.com/leverage-points-in-systems-change/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Empathy and User-Centered Ideation: How Lived Experience Improves Strategy",
+          "url": "https://sustainablecatalyst.com/empathy-user-centered-ideation/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Prototyping and Rapid Experimentation: Turning Strategic Ideas Into Evidence",
+          "url": "https://sustainablecatalyst.com/prototyping-and-rapid-experimentation/",
+          "anchor_on_hub": true,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "content-frameworks",
+      "title": "Content Frameworks",
+      "url": "https://sustainablecatalyst.com/content-frameworks/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "",
+      "order": 158,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "AIDA and the Logic of Persuasive Sequence: Attention, Interest, Desire, and Action",
+          "url": "https://sustainablecatalyst.com/aida-and-the-logic-of-persuasive-sequence/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "5W1H and the Architecture of Explanatory Completeness: Who, What, When, Where, Why, and How",
+          "url": "https://sustainablecatalyst.com/5w1h-and-the-architecture-of-explanatory-completeness/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Jobs to Be Done and the Problem of Audience Need: Understanding What Readers Are Trying to Accomplish",
+          "url": "https://sustainablecatalyst.com/jobs-to-be-done-and-the-problem-of-audience-need/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "PESTLE Analysis: External Environment, Strategy, Risk, and Governance",
+          "url": "https://sustainablecatalyst.com/pestle-and-the-analysis-of-external-environment/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "storytelling",
+      "title": "Storytelling",
+      "url": "https://sustainablecatalyst.com/storytelling/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "",
+      "order": 159,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "The Hero’s Journey: Departure, Initiation, and Return",
+          "url": "https://sustainablecatalyst.com/the-heros-journey-departure-initiation-and-return/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Thresholds, Trials, and Transformative Ordeals",
+          "url": "https://sustainablecatalyst.com/thresholds-trials-and-transformative-ordeals/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Tragedy, Cyclical Story, and Non-Heroic Narrative: Story Forms Beyond Heroic Victory",
+          "url": "https://sustainablecatalyst.com/tragedy-cyclical-story-and-non-heroic-narrative/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Performance, Memory, and Variation in Oral Storytelling: How Living Stories Change",
+          "url": "https://sustainablecatalyst.com/performance-memory-and-variation-in-oral-storytelling/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "decision-science",
+      "title": "Decision Science",
+      "url": "https://sustainablecatalyst.com/decision-science/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "",
+      "order": 160,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Risk Analysis and Probabilistic Reasoning: How to Evaluate Uncertainty, Consequences, and Tail Risk",
+          "url": "https://sustainablecatalyst.com/risk-analysis-and-probabilistic-reasoning/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Overconfidence and Decision Failure: How Certainty Hides Risk, Bias, and Weak Assumptions",
+          "url": "https://sustainablecatalyst.com/overconfidence-and-decision-failure/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Scenario Evaluation and Strategic Choice: How to Compare Strategies Across Futures",
+          "url": "https://sustainablecatalyst.com/scenario-evaluation-and-strategic-choice/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Multi-Criteria Decision Analysis: How to Weigh Options, Values, and Trade-Offs",
+          "url": "https://sustainablecatalyst.com/multi-criteria-decision-analysis/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "mathematical-modeling",
+      "title": "Mathematical Modeling",
+      "url": "https://sustainablecatalyst.com/mathematical-modeling/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "Mathematical Modeling",
+      "order": 161,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Sensitivity Analysis and Robustness: How to Test Whether Model Conclusions Hold",
+          "url": "https://sustainablecatalyst.com/sensitivity-analysis-and-robustness/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Simulation and Computational Modeling: How Mathematical Models Become Executable",
+          "url": "https://sustainablecatalyst.com/simulation-and-computational-modeling/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Model Repositories, Data, and Reproducible Research",
+          "url": "https://sustainablecatalyst.com/model-repositories-data-and-reproducible-research/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Overfitting, Underfitting, and Model Generalization: Why Models Fail on New Data",
+          "url": "https://sustainablecatalyst.com/overfitting-underfitting-and-model-generalization/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "calculus-for-systems-modeling",
+      "title": "Calculus for Systems Modeling",
+      "url": "https://sustainablecatalyst.com/calculus-for-systems-modeling/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "Mathematical Modeling",
+      "order": 162,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Second Derivatives, Curvature, and Acceleration: How Calculus Reveals Changing System Behavior",
+          "url": "https://sustainablecatalyst.com/second-derivatives-curvature-and-acceleration/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Partial Derivatives and Interaction Effects: How Calculus Measures Local System Sensitivity",
+          "url": "https://sustainablecatalyst.com/partial-derivatives-and-interaction-effects/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Vectors, Fields, and Continuous Space",
+          "url": "https://sustainablecatalyst.com/vectors-fields-and-continuous-space/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Economic Growth and Adjustment Models",
+          "url": "https://sustainablecatalyst.com/economic-growth-and-adjustment-models/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "linear-algebra-for-systems-modeling",
+      "title": "Linear Algebra for Systems Modeling",
+      "url": "https://sustainablecatalyst.com/linear-algebra-for-systems-modeling/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "Mathematical Modeling",
+      "order": 163,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Matrices and the Organization of Multivariable Systems: How Linear Algebra Structures Complex Relationships",
+          "url": "https://sustainablecatalyst.com/matrices-and-the-organization-of-multivariable-systems/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Gaussian Elimination and Row Reduction: How Linear Algebra Simplifies Constraint Systems",
+          "url": "https://sustainablecatalyst.com/gaussian-elimination-and-row-reduction/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Eigenvalues, Eigenvectors, and System Modes: How Linear Algebra Reveals System Behavior",
+          "url": "https://sustainablecatalyst.com/eigenvalues-eigenvectors-and-system-modes/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "PageRank and Network Influence Models: How Linear Algebra Ranks Directed Networks",
+          "url": "https://sustainablecatalyst.com/pagerank-and-network-influence-models/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "probability-for-systems-modeling",
+      "title": "Probability for Systems Modeling",
+      "url": "https://sustainablecatalyst.com/probability-for-systems-modeling/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "Mathematical Modeling",
+      "order": 164,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "statistics-for-systems-modeling",
+      "title": "Statistics for Systems Modeling",
+      "url": "https://sustainablecatalyst.com/statistics-for-systems-modeling/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "Mathematical Modeling",
+      "order": 165,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "scientific-computing-for-systems-modeling",
+      "title": "Scientific Computing for Systems Modeling",
+      "url": "https://sustainablecatalyst.com/scientific-computing-for-systems-modeling/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "Mathematical Modeling",
+      "order": 166,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "differential-equations-for-systems-modeling",
+      "title": "Differential Equations for Systems Modeling",
+      "url": "https://sustainablecatalyst.com/differential-equations-for-systems-modeling/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "Mathematical Modeling",
+      "order": 167,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": []
+    },
+    {
+      "key": "systems-modeling",
+      "title": "Systems Modeling",
+      "url": "https://sustainablecatalyst.com/systems-modeling/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "",
+      "order": 168,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Digital Twins and Simulation Platforms: Real-Time Modeling of Complex Systems",
+          "url": "https://sustainablecatalyst.com/digital-twins-simulation-platforms/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Geospatial Systems Modeling: Location, Risk, Infrastructure, and Spatial Analysis",
+          "url": "https://sustainablecatalyst.com/geospatial-systems-modeling/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Agent-Based Modeling: Simulating Complex Systems with Individual Agents",
+          "url": "https://sustainablecatalyst.com/agent-based-modeling/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Stocks, Flows, and Accumulation: How Systems Build Pressure Over Time",
+          "url": "https://sustainablecatalyst.com/stocks-flows-and-accumulation/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "arduino-projects-sustainable-development",
+      "title": "Arduino Projects",
+      "url": "https://sustainablecatalyst.com/arduino-projects-sustainable-development/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "Applied Builds",
+      "order": 169,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Building an Arduino Smart Irrigation Controller (SDG 6: Clean Water and Sanitation)",
+          "url": "https://sustainablecatalyst.com/smart-irrigation-controller-with-arduino/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Building an Arduino Home Energy Monitoring System (SDG 7: Affordable and Clean Energy)",
+          "url": "https://sustainablecatalyst.com/arduino-energy-monitoring-system/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Building a Low-Power Arduino Wildlife Tracking Device (SDG 15: Life on Land)",
+          "url": "https://sustainablecatalyst.com/arduino-wildlife-tracking-device/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Building an Arduino Home Energy Monitoring System (SDG 7: Affordable and Clean Energy)",
+          "url": "https://sustainablecatalyst.com/arduino-energy-monitoring-system/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    },
+    {
+      "key": "raspberry-pi-environmental-monitoring-projects",
+      "title": "Raspberry Pi Projects",
+      "url": "https://sustainablecatalyst.com/raspberry-pi-environmental-monitoring-projects/",
+      "field": "Problem Solving",
+      "field_order": 14,
+      "group": "Applied Builds",
+      "order": 170,
+      "aliases": [],
+      "in_hub_model": true,
+      "anchor_on_hub": false,
+      "in_captured_sitemaps": true,
+      "curated": [
+        {
+          "title": "Building a Raspberry Pi Environmental Data Hub for Climate Monitoring (SDG 13: Climate Action)",
+          "url": "https://sustainablecatalyst.com/raspberry-pi-environmental-data-hub-climate-monitoring/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Urban Air Quality and Heat Island Monitor (SDG 11 / SDG 13)",
+          "url": "https://sustainablecatalyst.com/raspberry-pi-urban-air-quality-monitor/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Raspberry Pi Climate Early Warning System (SDG 13 – Climate Action)",
+          "url": "https://sustainablecatalyst.com/raspberry-pi-climate-early-warning-system/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        },
+        {
+          "title": "Biodiversity Camera Trap with Edge AI (SDG 15 – Life on Land)",
+          "url": "https://sustainablecatalyst.com/raspberry-pi-biodiversity-camera-trap-edge-ai/",
+          "anchor_on_hub": false,
+          "in_captured_sitemaps": true
+        }
+      ]
+    }
+  ],
+  "samples": {
+    "panel": {
+      "http_chain": [
+        "HTTP/1.1 200 OK"
+      ],
+      "invalid_json_scripts": 0,
+      "html_bytes": 1863036,
+      "canonical": [
+        "https://sustainablecatalyst.com/publications/"
+      ],
+      "meta": [
+        [
+          "description",
+          "Blog - Essays and analysis at the intersection of development, governance, finance, and narrative. These pieces explore how measurement, systems design, and storytelling shape long-term outcomes. The goal is clarity over noise — ideas that can inform strategy, policy, and institutional decision-making."
+        ],
+        [
+          "robots",
+          "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large"
+        ],
+        [
+          "og:type",
+          "article"
+        ],
+        [
+          "og:title",
+          "Publications - Sustainable Catalyst | Computational Research Platform"
+        ],
+        [
+          "og:description",
+          "Blog - Essays and analysis at the intersection of development, governance, finance, and narrative. These pieces explore how measurement, systems design, and storytelling shape long-term outcomes. The goal is clarity over noise — ideas that can inform strategy, policy, and institutional decision-making."
+        ],
+        [
+          "og:url",
+          "https://sustainablecatalyst.com/publications/"
+        ]
+      ],
+      "schema_types": [
+        [
+          "Person",
+          "Organization"
+        ],
+        "WebSite",
+        "ImageObject",
+        "BreadcrumbList",
+        "WebPage",
+        "Person",
+        "Article"
+      ],
+      "script_tags": 65,
+      "external_script_tags": 36,
+      "image_tags": 44,
+      "eager_image_tags": 14,
+      "duplicate_ids": [],
+      "links_to_publications": true
+    },
+    "panel-invalid": {
+      "http_chain": [
+        "HTTP/1.1 200 OK"
+      ],
+      "invalid_json_scripts": 0,
+      "html_bytes": 1868404,
+      "canonical": [
+        "https://sustainablecatalyst.com/publications/"
+      ],
+      "meta": [
+        [
+          "description",
+          "Blog - Essays and analysis at the intersection of development, governance, finance, and narrative. These pieces explore how measurement, systems design, and storytelling shape long-term outcomes. The goal is clarity over noise — ideas that can inform strategy, policy, and institutional decision-making."
+        ],
+        [
+          "robots",
+          "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large"
+        ],
+        [
+          "og:type",
+          "article"
+        ],
+        [
+          "og:title",
+          "Publications - Sustainable Catalyst | Computational Research Platform"
+        ],
+        [
+          "og:description",
+          "Blog - Essays and analysis at the intersection of development, governance, finance, and narrative. These pieces explore how measurement, systems design, and storytelling shape long-term outcomes. The goal is clarity over noise — ideas that can inform strategy, policy, and institutional decision-making."
+        ],
+        [
+          "og:url",
+          "https://sustainablecatalyst.com/publications/"
+        ]
+      ],
+      "schema_types": [
+        [
+          "Person",
+          "Organization"
+        ],
+        "WebSite",
+        "ImageObject",
+        "BreadcrumbList",
+        "WebPage",
+        "Person",
+        "Article"
+      ],
+      "script_tags": 65,
+      "external_script_tags": 36,
+      "image_tags": 48,
+      "eager_image_tags": 14,
+      "duplicate_ids": [],
+      "links_to_publications": true
+    },
+    "hub-page2": {
+      "http_chain": [
+        "HTTP/1.1 200 OK"
+      ],
+      "invalid_json_scripts": 0,
+      "html_bytes": 1869735,
+      "canonical": [
+        "https://sustainablecatalyst.com/publications/"
+      ],
+      "meta": [
+        [
+          "description",
+          "Blog - Essays and analysis at the intersection of development, governance, finance, and narrative. These pieces explore how measurement, systems design, and storytelling shape long-term outcomes. The goal is clarity over noise — ideas that can inform strategy, policy, and institutional decision-making."
+        ],
+        [
+          "robots",
+          "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large"
+        ],
+        [
+          "og:type",
+          "article"
+        ],
+        [
+          "og:title",
+          "Publications - Sustainable Catalyst | Computational Research Platform"
+        ],
+        [
+          "og:description",
+          "Blog - Essays and analysis at the intersection of development, governance, finance, and narrative. These pieces explore how measurement, systems design, and storytelling shape long-term outcomes. The goal is clarity over noise — ideas that can inform strategy, policy, and institutional decision-making."
+        ],
+        [
+          "og:url",
+          "https://sustainablecatalyst.com/publications/"
+        ]
+      ],
+      "schema_types": [
+        [
+          "Person",
+          "Organization"
+        ],
+        "WebSite",
+        "ImageObject",
+        "BreadcrumbList",
+        "WebPage",
+        "Person",
+        "Article"
+      ],
+      "script_tags": 65,
+      "external_script_tags": 36,
+      "image_tags": 48,
+      "eager_image_tags": 14,
+      "duplicate_ids": [],
+      "links_to_publications": true
+    },
+    "field": {
+      "http_chain": [
+        "HTTP/1.1 200 OK"
+      ],
+      "invalid_json_scripts": 0,
+      "html_bytes": 1332115,
+      "canonical": [
+        "https://sustainablecatalyst.com/category/global-governance/"
+      ],
+      "meta": [
+        [
+          "robots",
+          "index, follow, max-snippet:-1, max-video-preview:-1, max-image-preview:large"
+        ],
+        [
+          "og:type",
+          "article"
+        ],
+        [
+          "og:title",
+          "Global Governance Archives - Sustainable Catalyst | Computational Research Platform"
+        ],
+        [
+          "og:description",
+          "<p data-start=\"1316\" data-end=\"1654\">Global governance refers to the institutions, norms, and cooperative arrangements through which international actors manage collective problems at the global scale. Unlike traditional government structures, global governance operates through networks of states, international organizations, private actors, and civil society institutions.</p>\n<p data-start=\"1656\" data-end=\"1989\">Institutions such as the United Nations, World Bank, International Monetary Fund, and World Trade Organization play central roles in coordinating economic policy, humanitarian assistance, environmental protection, and conflict resolution. Informal networks and multilateral agreements also contribute to global governance structures.</p>\n<p data-start=\"1991\" data-end=\"2413\">The effectiveness of global governance systems depends on institutional legitimacy, coordination capacity, and the ability of actors to negotiate shared solutions to transnational challenges. As issues such as climate change, financial stability, and technological regulation increasingly require global cooperation, the study of global governance has become central to international relations and sustainable development.</p>"
+        ],
+        [
+          "og:url",
+          "https://sustainablecatalyst.com/category/global-governance/"
+        ]
+      ],
+      "schema_types": [
+        "Person",
+        "WebSite",
+        "BreadcrumbList",
+        "CollectionPage"
+      ],
+      "script_tags": 51,
+      "external_script_tags": 35,
+      "image_tags": 11,
+      "eager_image_tags": 0,
+      "duplicate_ids": [],
+      "links_to_publications": true
+    },
+    "field-page2": {
+      "http_chain": [
+        "HTTP/1.1 200 OK"
+      ],
+      "invalid_json_scripts": 0,
+      "html_bytes": 1332617,
+      "canonical": [
+        "https://sustainablecatalyst.com/category/global-governance/page/2/"
+      ],
+      "meta": [
+        [
+          "robots",
+          "index, follow, max-snippet:-1, max-video-preview:-1, max-image-preview:large"
+        ],
+        [
+          "og:type",
+          "article"
+        ],
+        [
+          "og:title",
+          "Global Governance Archives - Page 2 of 10 - Sustainable Catalyst | Computational Research Platform"
+        ],
+        [
+          "og:description",
+          "<p data-start=\"1316\" data-end=\"1654\">Global governance refers to the institutions, norms, and cooperative arrangements through which international actors manage collective problems at the global scale. Unlike traditional government structures, global governance operates through networks of states, international organizations, private actors, and civil society institutions.</p>\n<p data-start=\"1656\" data-end=\"1989\">Institutions such as the United Nations, World Bank, International Monetary Fund, and World Trade Organization play central roles in coordinating economic policy, humanitarian assistance, environmental protection, and conflict resolution. Informal networks and multilateral agreements also contribute to global governance structures.</p>\n<p data-start=\"1991\" data-end=\"2413\">The effectiveness of global governance systems depends on institutional legitimacy, coordination capacity, and the ability of actors to negotiate shared solutions to transnational challenges. As issues such as climate change, financial stability, and technological regulation increasingly require global cooperation, the study of global governance has become central to international relations and sustainable development.</p>"
+        ],
+        [
+          "og:url",
+          "https://sustainablecatalyst.com/category/global-governance/page/2/"
+        ]
+      ],
+      "schema_types": [
+        "Person",
+        "WebSite",
+        "BreadcrumbList",
+        "CollectionPage"
+      ],
+      "script_tags": 51,
+      "external_script_tags": 35,
+      "image_tags": 11,
+      "eager_image_tags": 0,
+      "duplicate_ids": [],
+      "links_to_publications": true
+    },
+    "map": {
+      "http_chain": [
+        "HTTP/1.1 200 OK"
+      ],
+      "invalid_json_scripts": 0,
+      "html_bytes": 1332059,
+      "canonical": [
+        "https://sustainablecatalyst.com/international-law/"
+      ],
+      "meta": [
+        [
+          "description",
+          "International law establishes the legal framework governing relations between states, global institutions, treaties, human rights, and international dispute resolution."
+        ],
+        [
+          "robots",
+          "index, follow, max-snippet:-1, max-video-preview:-1, max-image-preview:large"
+        ],
+        [
+          "og:type",
+          "article"
+        ],
+        [
+          "og:title",
+          "International Law: Sources, Treaties, Human Rights, and Global Governance"
+        ],
+        [
+          "og:description",
+          "International law establishes the legal framework governing relations between states, global institutions, treaties, human rights, and international dispute resolution."
+        ],
+        [
+          "og:url",
+          "https://sustainablecatalyst.com/international-law/"
+        ]
+      ],
+      "schema_types": [
+        [
+          "Person",
+          "Organization"
+        ],
+        "WebSite",
+        "ImageObject",
+        "BreadcrumbList",
+        "WebPage",
+        "Person",
+        "BlogPosting"
+      ],
+      "script_tags": 50,
+      "external_script_tags": 35,
+      "image_tags": 3,
+      "eager_image_tags": 0,
+      "duplicate_ids": [],
+      "links_to_publications": true
+    },
+    "article": {
+      "http_chain": [
+        "HTTP/1.1 200 OK"
+      ],
+      "invalid_json_scripts": 0,
+      "html_bytes": 1345919,
+      "canonical": [
+        "https://sustainablecatalyst.com/jus-cogens-erga-omnes-and-peremptory-norms-in-international-law/"
+      ],
+      "meta": [
+        [
+          "description",
+          "Jus cogens and obligations erga omnes occupy a distinctive place in international law because they mark the point at which the legal order recognizes certain norms as fundamental, non-derogable, and binding in the name of the international community as a whole. This article examines the distinction and relationship between peremptory norms and community-wide obligations through the Vienna Convention on the Law of Treaties, Barcelona Traction, Belgium v. Senegal, the International Law Commission’s 2022 jus cogens conclusions, and the legal consequences of treaty invalidity, non-recognition, non-assistance, and collective legal interest. It also explores how apartheid, colonial domination, Palestine, and the unequal enforcement of foundational norms reveal both the anti-imperial promise and the practical limits of international law’s highest normative claims."
+        ],
+        [
+          "robots",
+          "index, follow, max-snippet:-1, max-video-preview:-1, max-image-preview:large"
+        ],
+        [
+          "og:type",
+          "article"
+        ],
+        [
+          "og:title",
+          "Jus Cogens, Erga Omnes, and Peremptory Norms in International Law - Sustainable Catalyst | Computational Research Platform"
+        ],
+        [
+          "og:description",
+          "Jus cogens and obligations erga omnes occupy a distinctive place in international law because they mark the point at which the legal order recognizes certain norms as fundamental, non-derogable, and binding in the name of the international community as a whole. This article examines the distinction and relationship between peremptory norms and community-wide obligations through the Vienna Convention on the Law of Treaties, Barcelona Traction, Belgium v. Senegal, the International Law Commission’s 2022 jus cogens conclusions, and the legal consequences of treaty invalidity, non-recognition, non-assistance, and collective legal interest. It also explores how apartheid, colonial domination, Palestine, and the unequal enforcement of foundational norms reveal both the anti-imperial promise and the practical limits of international law’s highest normative claims."
+        ],
+        [
+          "og:url",
+          "https://sustainablecatalyst.com/jus-cogens-erga-omnes-and-peremptory-norms-in-international-law/"
+        ]
+      ],
+      "schema_types": [
+        [
+          "Person",
+          "Organization"
+        ],
+        "WebSite",
+        "ImageObject",
+        "BreadcrumbList",
+        "WebPage",
+        "Person",
+        "BlogPosting"
+      ],
+      "script_tags": 50,
+      "external_script_tags": 35,
+      "image_tags": 3,
+      "eager_image_tags": 0,
+      "duplicate_ids": [],
+      "links_to_publications": true
+    },
+    "research": {
+      "http_chain": [
+        "HTTP/1.1 301 Moved Permanently",
+        "Location: https://sustainablecatalyst.com/research-frameworks-and-analytical-models/",
+        "HTTP/1.1 200 OK"
+      ],
+      "invalid_json_scripts": 0,
+      "html_bytes": 1314100,
+      "canonical": [
+        "https://sustainablecatalyst.com/research-frameworks-and-analytical-models/"
+      ],
+      "meta": [
+        [
+          "description",
+          "Research frameworks and analytical models give inquiry its working structure by clarifying how a research problem is organized, which dimensions matter, what relationships should be examined, and how evidence should be interpreted. This article explains how frameworks, models, methods, evidence, and interpretation work together to move research from broad questions to structured analysis. It distinguishes conceptual, theoretical, analytical, methodological, causal, evaluative, and systems-oriented frameworks, while showing how models can take the form of diagrams, matrices, graphs, schemas, statistical structures, computational workflows, and evidence maps. Within knowledge architecture, research frameworks and analytical models help transform accumulated information into coherent inquiry. They support article maps, metadata schemas, repositories, reproducible code, interdisciplinary synthesis, AI-assisted retrieval, and transparent reasoning. The article frames frameworks and models as tools for making research visible, testable, revisable, and accountable across growing knowledge systems and institutional research platforms."
+        ],
+        [
+          "robots",
+          "index, follow, max-snippet:-1, max-video-preview:-1, max-image-preview:large"
+        ],
+        [
+          "og:type",
+          "article"
+        ],
+        [
+          "og:title",
+          "Research Frameworks and Analytical Models - Sustainable Catalyst | Computational Research Platform"
+        ],
+        [
+          "og:description",
+          "Research frameworks and analytical models give inquiry its working structure by clarifying how a research problem is organized, which dimensions matter, what relationships should be examined, and how evidence should be interpreted. This article explains how frameworks, models, methods, evidence, and interpretation work together to move research from broad questions to structured analysis. It distinguishes conceptual, theoretical, analytical, methodological, causal, evaluative, and systems-oriented frameworks, while showing how models can take the form of diagrams, matrices, graphs, schemas, statistical structures, computational workflows, and evidence maps. Within knowledge architecture, research frameworks and analytical models help transform accumulated information into coherent inquiry. They support article maps, metadata schemas, repositories, reproducible code, interdisciplinary synthesis, AI-assisted retrieval, and transparent reasoning. The article frames frameworks and models as tools for making research visible, testable, revisable, and accountable across growing knowledge systems and institutional research platforms."
+        ],
+        [
+          "og:url",
+          "https://sustainablecatalyst.com/research-frameworks-and-analytical-models/"
+        ]
+      ],
+      "schema_types": [
+        [
+          "Person",
+          "Organization"
+        ],
+        "WebSite",
+        "ImageObject",
+        "BreadcrumbList",
+        "WebPage",
+        "Person",
+        "BlogPosting"
+      ],
+      "script_tags": 50,
+      "external_script_tags": 35,
+      "image_tags": 3,
+      "eager_image_tags": 0,
+      "duplicate_ids": [],
+      "links_to_publications": true
+    },
+    "library": {
+      "http_chain": [
+        "HTTP/1.1 301 Moved Permanently",
+        "Location: https://sustainablecatalyst.com/knowledge-libraries/",
+        "HTTP/1.1 200 OK"
+      ],
+      "invalid_json_scripts": 0,
+      "html_bytes": 1532767,
+      "canonical": [
+        "https://sustainablecatalyst.com/knowledge-libraries/"
+      ],
+      "meta": [
+        [
+          "description",
+          "Explore the Sustainable Catalyst Research Library and discover sources across scholarly indexes, university and public libraries, and archives."
+        ],
+        [
+          "robots",
+          "index, follow, max-snippet:-1, max-video-preview:-1, max-image-preview:large"
+        ],
+        [
+          "og:type",
+          "article"
+        ],
+        [
+          "og:title",
+          "Research Library - Sustainable Catalyst | Computational Research Platform"
+        ],
+        [
+          "og:description",
+          "Explore the Sustainable Catalyst Research Library and discover sources across scholarly indexes, university and public libraries, and archives."
+        ],
+        [
+          "og:url",
+          "https://sustainablecatalyst.com/knowledge-libraries/"
+        ]
+      ],
+      "schema_types": [
+        [
+          "Person",
+          "Organization"
+        ],
+        "WebSite",
+        "ImageObject",
+        "BreadcrumbList",
+        "WebPage",
+        "Person",
+        "Article"
+      ],
+      "script_tags": 75,
+      "external_script_tags": 49,
+      "image_tags": 2,
+      "eager_image_tags": 0,
+      "duplicate_ids": [
+        "carbon-nature-intelligence"
+      ],
+      "links_to_publications": true
+    }
+  },
+  "robots": "User-agent: *\nDisallow: /wp-admin/\nAllow: /wp-admin/admin-ajax.php\n\nSitemap: https://sustainablecatalyst.com/sitemap_index.xml\n",
+  "off_sitemap_map_probes": [
+    {
+      "registry_url": "https://sustainablecatalyst.com/arabic-literature-and-adab/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/arabic-literature-and-adab-poetry-prose-eloquence-and-cultivated-memory/",
+      "canonical": [
+        "https://sustainablecatalyst.com/arabic-literature-and-adab-poetry-prose-eloquence-and-cultivated-memory/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/comparative-sacred-themes/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/comparative-sacred-themes-creation-sacrifice-justice-death-and-sacred-order/",
+      "canonical": [
+        "https://sustainablecatalyst.com/comparative-sacred-themes-creation-sacrifice-justice-death-and-sacred-order/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/creative-form-composition-interpretation/",
+      "status": 404,
+      "final_url": "https://sustainablecatalyst.com/creative-form-composition-interpretation/",
+      "canonical": [],
+      "final_url_in_captured_sitemaps": false
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/customary-indigenous-legal-orders/",
+      "status": 404,
+      "final_url": "https://sustainablecatalyst.com/customary-indigenous-legal-orders/",
+      "canonical": [],
+      "final_url_in_captured_sitemaps": false
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/east-asian-traditions/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/east-asian-traditions-harmony-ritual-emptiness-and-civilizational-order/",
+      "canonical": [
+        "https://sustainablecatalyst.com/east-asian-traditions-harmony-ritual-emptiness-and-civilizational-order/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/greek-roman-medicine/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/greek-roman-medicine-healing-balance-and-the-classical-traditions-of-care/",
+      "canonical": [
+        "https://sustainablecatalyst.com/greek-roman-medicine-healing-balance-and-the-classical-traditions-of-care/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/healing-traditions/diet-nourishment-food-as-medicine/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/diet-nourishment-food-as-medicine-eating-balance-and-the-civilizational-practices-of-health/",
+      "canonical": [
+        "https://sustainablecatalyst.com/diet-nourishment-food-as-medicine-eating-balance-and-the-civilizational-practices-of-health/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/japanese-myth-folklore-legend/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/japanese-myth-folklore-and-legend/",
+      "canonical": [
+        "https://sustainablecatalyst.com/japanese-myth-folklore-and-legend/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/mesopotamian-mythology/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/mesopotamian-mythology-gods-cities-and-the-fragile-order-of-civilization/",
+      "canonical": [
+        "https://sustainablecatalyst.com/mesopotamian-mythology-gods-cities-and-the-fragile-order-of-civilization/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/religion-and-society/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/religion-and-society-power-identity-pluralism-and-social-order/",
+      "canonical": [
+        "https://sustainablecatalyst.com/religion-and-society-power-identity-pluralism-and-social-order/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/religious-studies/indigenous-and-oral-traditions/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/indigenous-and-oral-traditions/",
+      "canonical": [
+        "https://sustainablecatalyst.com/indigenous-and-oral-traditions/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/russian-myth-epic-and-folklore/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/russian-myth-epic-folklore/",
+      "canonical": [
+        "https://sustainablecatalyst.com/russian-myth-epic-folklore/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/social-norms-and-behavioral-influence/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/social-norms-and-behavioral-influence-peer-effects-norm-change-and-social-behavior/",
+      "canonical": [
+        "https://sustainablecatalyst.com/social-norms-and-behavioral-influence-peer-effects-norm-change-and-social-behavior/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/symbolism-style-cultural-meaning/",
+      "status": 404,
+      "final_url": "https://sustainablecatalyst.com/symbolism-style-cultural-meaning/",
+      "canonical": [],
+      "final_url_in_captured_sitemaps": false
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/time-change-and-causation/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/time-change-and-causation-temporality-becoming-and-the-order-of-events/",
+      "canonical": [
+        "https://sustainablecatalyst.com/time-change-and-causation-temporality-becoming-and-the-order-of-events/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    },
+    {
+      "registry_url": "https://sustainablecatalyst.com/vital-energy-healing-traditions/",
+      "status": 200,
+      "final_url": "https://sustainablecatalyst.com/vital-energy-healing-traditions-life-force-breath-balance-and-the-invisible-dimensions-of-health/",
+      "canonical": [
+        "https://sustainablecatalyst.com/vital-energy-healing-traditions-life-force-breath-balance-and-the-invisible-dimensions-of-health/"
+      ],
+      "final_url_in_captured_sitemaps": true
+    }
+  ]
+}
