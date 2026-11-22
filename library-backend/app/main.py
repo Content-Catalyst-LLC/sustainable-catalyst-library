@@ -4540,11 +4540,13 @@ async def library_api_v1_state_migration_certify(run_id: str, request: Request, 
 def library_api_v1_publications_discovery(
     field: str = Query(default="", max_length=100),
     topic: str = Query(default="", max_length=100),
+    q: str = Query(default="", max_length=120),
+    interests: str = Query(default="", max_length=400),
     limit: int = Query(default=12, ge=1, le=24),
 ) -> dict[str, Any]:
     if os.environ.get("SC_PUBLICATIONS_DISCOVERY_API_ENABLED") != "1":
         raise HTTPException(status_code=404, detail="publication-discovery-not-enabled")
-    return publication_discovery_candidates(field=field, topic=topic, limit=limit)
+    return publication_discovery_candidates(field=field, topic=topic, query=q, interests=interests, limit=limit)
 
 @app.get("/api/library/v1/public-routing")
 def library_api_v1_public_routing() -> dict[str, Any]: return public_routing_contract()
