@@ -11,6 +11,7 @@ class WP_Post {
     public string $post_password;
     public bool $publicly_viewable;
     public string $url;
+    public string $post_modified_gmt = '2026-11-22 10:00:00';
     public function __construct( int $id, string $type, string $status, string $url, string $password = '', bool $viewable = true ) {
         $this->ID = $id;
         $this->post_type = $type;
@@ -86,7 +87,9 @@ check( $m['publication_discovery_approved'] === true
     && $m['wordpress_public_verified'] === true
     && $m['wordpress_password_protected'] === false
     && $m['publication_field'] === 'global-governance'
-    && $m['publication_map_key'] === 'international-law', 'valid public article + exact map approval' );
+    && $m['publication_map_key'] === 'international-law'
+    && preg_match( '/^[a-f0-9]{64}$/', $m['publication_fingerprint'] ) === 1,
+    'valid public article + exact map approval with fingerprint' );
 
 $GLOBALS['environment'] = 'production';
 check( SC_Library_Publications_Discovery_Manifest::metadata_for_post( $a ) === array(), 'flag cannot activate in production' );
