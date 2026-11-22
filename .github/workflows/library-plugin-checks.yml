@@ -53,7 +53,9 @@ jobs:
       - name: PUB-RELEASE-01 production canary safety matrix
         run: bash tests/test_publications_directory_canary_gate.sh
       - name: PUB-RELEASE-02 interest-first navigation and link contract
-        run: node --test tests/test_publications_interest_first.cjs
+        run: |
+          node --check sustainable-catalyst-library/assets/js/sc-library-field-spotlights.js
+          node --test tests/test_publications_interest_first.cjs
       - name: Library 7.0 release validation
         env:
           SC_LIBRARY_V700_TEST_PYTHON: python
