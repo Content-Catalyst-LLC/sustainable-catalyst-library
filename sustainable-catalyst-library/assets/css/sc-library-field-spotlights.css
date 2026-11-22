@@ -415,3 +415,39 @@
     text-decoration: underline;
     text-underline-offset: .15em;
 }
+
+
+/* SC-PUB-RELEASE-01: accessible, server-rendered editorial navigation.
+   No separate search engine, post data, JavaScript or intake form. */
+.sc-field-stack__discovery-paths{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:clamp(1rem,3vw,2.25rem);
+    padding:clamp(1rem,2.8vw,1.7rem);
+    background:#faf8f5;
+    border-top:1px solid var(--scfs-line,#d9d2c9);
+    border-left:3px solid var(--scfs-red,#b00020);
+    color:#171615;
+}
+.sc-field-stack__discovery-copy{flex:1;min-width:0;max-width:70ch}
+.sc-field-stack__discovery-kicker{margin:0 0 .38rem;font-size:.68rem;letter-spacing:.12em;font-weight:700;color:#8b1230}
+.sc-field-stack__discovery-copy h4{font:inherit;font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.25;font-weight:750;letter-spacing:-.012em;margin:0 0 .4rem;color:#131313}
+.sc-field-stack__discovery-copy p:not(.sc-field-stack__discovery-kicker){margin:0;font-size:.86rem;line-height:1.65;color:#4a4641}
+.sc-field-stack__discovery-actions{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;justify-content:flex-end}
+.sc-field-stack__discovery-actions a{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;min-height:44px;padding:.6rem .85rem;font-size:.75rem;line-height:1.35;font-weight:700;text-decoration:none;border:1px solid #2a2929;color:#151515;background:transparent;white-space:nowrap}
+.sc-field-stack__discovery-actions a:hover{background:#fff;color:#b00020;border-color:#b00020}
+.sc-field-stack__discovery-actions .sc-field-stack__discovery-feedback{background:#141414;border-color:#141414;color:#fff}
+.sc-field-stack__discovery-actions .sc-field-stack__discovery-feedback:hover{background:#b00020;border-color:#b00020;color:#fff}
+.sc-field-stack__discovery-actions a:focus-visible{outline:3px solid #b00020;outline-offset:3px}
+@media(max-width:800px){
+    .sc-field-stack__discovery-paths{flex-direction:column;align-items:stretch}
+    .sc-field-stack__discovery-actions{justify-content:flex-start}
+}
+@media(max-width:520px){
+    .sc-field-stack__discovery-actions{flex-direction:column;align-items:stretch}
+    .sc-field-stack__discovery-actions a{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+    .sc-field-stack__discovery-actions a{transition:none}
+}
